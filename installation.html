@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; SolarWindPy 0.1.dev1+gc319e2a75 documentation</title>
+  <title>Installation &mdash; SolarWindPy 0.1.dev1+gc3f2ce920 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=74f40109"></script>
+      <script src="_static/documentation_options.js?v=edd8fbef"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -310,59 +310,52 @@
 </nav>
 <section id="requirements">
 <h2><a class="toc-backref" href="#id1" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
-<p>SolarWindPy requires Python 3.11 or later and has the following core
-dependencies:</p>
-<ul class="simple">
-<li><p>NumPy ≥ 1.22</p></li>
-<li><p>Pandas ≥ 1.5</p></li>
-<li><p>SciPy ≥ 1.10</p></li>
-<li><p>Matplotlib ≥ 3.5</p></li>
-<li><p>Astropy ≥ 5.0</p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> is the single declaration of what SolarWindPy needs:
+<code class="docutils literal notranslate"><span class="pre">requires-python</span></code> gives the supported Python versions and <code class="docutils literal notranslate"><span class="pre">dependencies</span></code>
+gives the supported range of each required package. The
+<a class="reference external" href="https://pypi.org/project/solarwindpy/">PyPI page</a> shows the same metadata for
+each published release. <strong class="command">pip</strong> and <strong class="command">conda</strong> enforce these
+ranges when they install the package, so you do not need to install the
+dependencies yourself.</p>
+<p>A published release and the development version can declare different ranges.
+Read the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> of the version you install.</p>
 </section>
 <section id="installation-from-pypi">
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">Installation from PyPI</a><a class="headerlink" href="#installation-from-pypi" title="Link to this heading"></a></h2>
-<p>The recommended way to install SolarWindPy is from PyPI using <strong class="command">pip</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>solarwindpy
 </pre></div>
 </div>
-<p>This will install the latest stable release along with all required
-dependencies.</p>
+<p>This installs the latest published release and its required dependencies.</p>
 </section>
 <section id="installation-from-conda-forge">
 <h2><a class="toc-backref" href="#id3" role="doc-backlink">Installation from conda-forge</a><a class="headerlink" href="#installation-from-conda-forge" title="Link to this heading"></a></h2>
-<p>SolarWindPy is also available through conda-forge:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>solarwindpy
 </pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The conda-forge package for v0.1.5 is temporarily unavailable due to
-CI infrastructure issues (see <a class="reference external" href="https://github.com/conda-forge/solarwindpy-feedstock/issues/8">issue #8</a>).
-Install from PyPI to get the latest version. The conda-forge package will be
-updated once the issue is resolved.</p>
 </div>
 </section>
 <section id="development-installation">
 <h2><a class="toc-backref" href="#id4" role="doc-backlink">Development Installation</a><a class="headerlink" href="#development-installation" title="Link to this heading"></a></h2>
-<p>To work with the latest development version, clone the repository and install
-in development mode:</p>
+<p>To work with the development version, clone the repository and install it in
+editable mode:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/blalterman/SolarWindPy.git
 <span class="nb">cd</span><span class="w"> </span>SolarWindPy
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
-<p>For contributors, install the additional development tools:</p>
+<p>Contributors can install the testing, documentation, and linting tools
+declared in the <code class="docutils literal notranslate"><span class="pre">dev</span></code> extra instead:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[dev]"</span>
 </pre></div>
 </div>
 </section>
 <section id="conda-environment-setup">
 <h2><a class="toc-backref" href="#id5" role="doc-backlink">Conda Environment Setup</a><a class="headerlink" href="#conda-environment-setup" title="Link to this heading"></a></h2>
-<p>For a complete scientific Python environment, use the provided conda
-environment file:</p>
+<p>The repository’s <code class="docutils literal notranslate"><span class="pre">solarwindpy.yml</span></code> creates a conda environment with the
+dependencies and development tools, but not SolarWindPy itself. Install the
+package into the environment afterwards:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>solarwindpy.yml
 conda<span class="w"> </span>activate<span class="w"> </span>solarwindpy
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 </section>
@@ -378,10 +371,12 @@ conda<span class="w"> </span>activate<span class="w"> </span>solarwindpy
 <h2><a class="toc-backref" href="#id7" role="doc-backlink">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <p>If you encounter installation issues:</p>
 <ol class="arabic simple">
-<li><p>Ensure you have Python 3.11 or later</p></li>
+<li><p>Check that your Python version satisfies <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> for the
+version you are installing (see <a class="reference internal" href="#requirements">Requirements</a>)</p></li>
 <li><p>Update pip: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">pip</span></code></p></li>
 <li><p>Consider using a virtual environment</p></li>
-<li><p>Check the <a class="reference external" href="https://github.com/blalterman/SolarWindPy/issues">GitHub Issues</a> for known problems</p></li>
+<li><p>Check the <a class="reference external" href="https://github.com/blalterman/SolarWindPy/issues">GitHub Issues</a>
+for known problems</p></li>
 </ol>
 </section>
 </section>
