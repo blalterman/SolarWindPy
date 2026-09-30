@@ -64,7 +64,7 @@ class TestTimedelta:
             "1h",
             "2h",
             "30min",
-            "1d",
+            "1D",
             "5s",
             "10ms",
             "1ME",
@@ -96,7 +96,7 @@ class TestTimedelta:
     def test_timedelta_path_generation(self):
         """Test path generation for different offsets."""
         td_hour = datetime_labels.Timedelta("1h")
-        td_day = datetime_labels.Timedelta("1d")
+        td_day = datetime_labels.Timedelta("1D")
 
         # Paths should be different
         assert td_hour.path != td_day.path
@@ -112,7 +112,7 @@ class TestTimedelta:
 
     def test_timedelta_string_representation(self):
         """Test string representation."""
-        td = datetime_labels.Timedelta("1d")
+        td = datetime_labels.Timedelta("1D")
         str_repr = str(td)
         assert str_repr.startswith("$")
         assert str_repr.endswith("$")
@@ -132,7 +132,7 @@ class TestTimedelta:
         original_offset = td.offset
 
         # Test setting new offset
-        td.set_offset("2d")
+        td.set_offset("2D")
         assert td.offset != original_offset
 
 
@@ -293,7 +293,7 @@ class TestFrequency:
 
     def test_frequency_with_timedelta_object(self):
         """Test Frequency with Timedelta object."""
-        td = datetime_labels.Timedelta("2d")
+        td = datetime_labels.Timedelta("2D")
         freq = datetime_labels.Frequency(td)
         assert freq.other == td
 
@@ -324,7 +324,7 @@ class TestFrequency:
 
     def test_frequency_string_representation(self):
         """Test string representation."""
-        freq = datetime_labels.Frequency("1d")
+        freq = datetime_labels.Frequency("1D")
         str_repr = str(freq)
         assert str_repr.startswith("$")
         assert str_repr.endswith("$")
@@ -337,7 +337,7 @@ class TestFrequency:
         freq = datetime_labels.Frequency("1h")
         original_other = freq.other
 
-        freq.set_other("2d")
+        freq.set_other("2D")
         assert freq.other != original_other
 
 

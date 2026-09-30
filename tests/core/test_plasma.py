@@ -1742,7 +1742,7 @@ class PlasmaTestBase(ABC):
         bat = self.object_testing.build_alfvenic_turbulence
         AlfvenicTurbulence = alfvenic_turbulence.AlfvenicTurbulence
 
-        test_window = "365d"
+        test_window = "365D"
         test_periods = 1
         if ns == 1:
             v = v.xs(species, axis=1, level="S")
