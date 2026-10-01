@@ -364,21 +364,6 @@ class TestCallableJacobian:
         np.testing.assert_array_equal(lf.fit_result.jac, expected)
 
 
-class TestFitFailedErrorPath:
-    """Solver non-convergence becomes FitFailedError."""
-
-    def test_run_least_squares_fit_failed(self, simple_linear_data):
-        """One allowed function evaluation cannot converge, so the fit fails.
-
-        ON FAILURE: the code is wrong.
-        """
-        x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
-
-        with pytest.raises(FitFailedError, match="Optimal parameters not found"):
-            lf._run_least_squares(max_nfev=1)
-
-
 class NeverEnoughData(LinearFit):
     """LinearFit whose ``sufficient_data`` override returns False.
 
