@@ -16,7 +16,6 @@ import pytest
 # Import core classes
 from solarwindpy.core import base, ions, plasma, spacecraft, tensor, vector
 
-
 # ==============================================================================
 # Fixtures
 # ==============================================================================
@@ -38,7 +37,7 @@ def sample_ion_data() -> pd.DataFrame:
         names=["M", "C"],
     )
     epoch = pd.date_range("2023-01-01", periods=5, freq="1min")
-    data = np.abs(np.random.rand(5, 7)) + 0.1  # Positive values
+    data = np.random.default_rng(41).random((5, 7)) + 0.1  # Positive values
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 
@@ -60,7 +59,7 @@ def sample_plasma_data() -> pd.DataFrame:
         names=["M", "C", "S"],
     )
     epoch = pd.date_range("2023-01-01", periods=5, freq="1min")
-    data = np.abs(np.random.rand(5, len(columns))) + 0.1
+    data = np.random.default_rng(63).random((5, len(columns))) + 0.1
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 
@@ -69,7 +68,7 @@ def sample_vector_data() -> pd.DataFrame:
     """Create minimal valid Vector data."""
     columns = ["x", "y", "z"]
     epoch = pd.date_range("2023-01-01", periods=5, freq="1min")
-    data = np.random.rand(5, 3)
+    data = np.random.default_rng(72).random((5, 3))
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 
@@ -78,7 +77,7 @@ def sample_tensor_data() -> pd.DataFrame:
     """Create minimal valid Tensor data."""
     columns = ["par", "per", "scalar"]
     epoch = pd.date_range("2023-01-01", periods=5, freq="1min")
-    data = np.abs(np.random.rand(5, 3)) + 0.1
+    data = np.random.default_rng(81).random((5, 3)) + 0.1
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 

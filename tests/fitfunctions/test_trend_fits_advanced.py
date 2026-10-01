@@ -63,7 +63,8 @@ class TestResidualsEnhancement:
         """Test percentage residuals calculation."""
         # Use Line fit for more predictable results
         x = np.linspace(1, 10, 50)
-        y = 2 * x + 1 + np.random.normal(0, 0.1, 50)
+        rng = np.random.default_rng(66)
+        y = 2 * x + 1 + rng.normal(0, 0.1, 50)
 
         ff = Line(x, y)
         ff.make_fit()
@@ -138,8 +139,9 @@ class TestInPlaceOperations:
 
     def test_mask_operations_still_work(self):
         """Verify optimized mask operations produce correct results."""
-        x = np.random.randn(1000)
-        y = x**2 + np.random.normal(0, 0.1, 1000)
+        rng = np.random.default_rng(141)
+        x = rng.standard_normal(1000)
+        y = x**2 + rng.normal(0, 0.1, 1000)
 
         # Create fitfunction with constraints (triggers mask building)
         ff = Line(x, y, xmin=-1, xmax=1, ymin=0)
@@ -163,7 +165,8 @@ class TestInPlaceOperations:
     def test_outside_mask_operations(self):
         """Test outside mask functionality."""
         x = np.linspace(-5, 5, 100)
-        y = x**2 + np.random.normal(0, 0.1, 100)
+        rng = np.random.default_rng(166)
+        y = x**2 + rng.normal(0, 0.1, 100)
 
         # Use xoutside to exclude central region
         ff = Line(x, y, xoutside=(-1, 1))

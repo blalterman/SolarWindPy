@@ -32,7 +32,7 @@ class TestExtremaCalculator:
 
         # Base solar cycle with some noise
         base_cycle = 50 + 100 * np.sin(2 * np.pi * t / cycle_period)
-        noise = np.random.normal(0, 10, len(t))
+        noise = np.random.default_rng(35).normal(0, 10, len(t))
         activity_values = base_cycle + noise
 
         return pd.Series(activity_values, index=dates, name="test_index")
