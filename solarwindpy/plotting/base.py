@@ -234,26 +234,6 @@ class Base(ABC):
         pass
 
 
-class _DataLimFormatter(ABC):
-    r"""Mixin that limits the axes to the range of the x and y data."""
-
-    def _format_axis(self, ax, collection, **kwargs):
-        super()._format_axis(ax, **kwargs)
-
-        x = self.data.loc[:, "x"]
-        minx, maxx = x.min(), x.max()
-
-        y = self.data.loc[:, "y"]
-        miny, maxy = y.min(), y.max()
-
-        # `pulled from the end of `ax.pcolormesh`.
-        collection.sticky_edges.x[:] = [minx, maxx]
-        collection.sticky_edges.y[:] = [miny, maxy]
-        corners = (minx, miny), (maxx, maxy)
-        ax.update_datalim(corners)
-        ax.autoscale_view()
-
-
 class _CbarMaker(ABC):
     r"""Mixin that draws a colorbar labelled with ``labels.z``."""
 

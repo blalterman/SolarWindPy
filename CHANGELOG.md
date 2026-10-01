@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.fitfunctions.core.FitBounds` | `solarwindpy.fitfunctions.core._FitBounds` (private) |
   | `solarwindpy.plotting.labels.base.MCS` | `solarwindpy.plotting.labels.base._MCS` (private) |
   | `solarwindpy.plotting.base.CbarMaker` | `solarwindpy.plotting.base._CbarMaker` (private) |
-  | `solarwindpy.plotting.base.DataLimFormatter` | `solarwindpy.plotting.base._DataLimFormatter` (private) |
+  | `solarwindpy.plotting.base.DataLimFormatter` | none (removed; nothing used it) |
   | `solarwindpy.plotting.tools.calculate_nrows_ncols` | none (removed; it had no callers) |
   | `solarwindpy.plotting.tools.use_style` | `solarwindpy.plotting.tools._use_style` (private; importing solarwindpy.plotting applies the style) |
   | `solarwindpy.fitfunctions.hinge.XIntercepts` | `solarwindpy.fitfunctions.hinge._XIntercepts` (private) |
@@ -190,6 +190,8 @@ These change computed values; rerun any analysis that used them.
 - The `"Q"` plot label key. It was commented as a heating rate, carried a heat flux
   unit, and nothing in the package computes a heating rate. Heat flux is labelled
   `"q"`.
+- `Hist2D`: removed the undocumented, unreachable tuple `axnorm` branch; `set_axnorm`
+  already rejected tuples and still does.
 
 ## [0.3.0] - 2025-12-24
 

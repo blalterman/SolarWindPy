@@ -183,17 +183,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
 
-        elif hasattr(axnorm, "__iter__"):
-            # TODO: This is an undocumented feature. I do not know if it is
-            #       tested nor how it interacts with colorbar labels, etc.
-            #       We need to investigate this issue (20250804).
-            kind, fcn = axnorm
-            if kind == "c":
-                agg = agg.divide(agg.groupby(level="x").agg(fcn), level="x")
-            elif kind == "r":
-                agg = agg.divide(agg.groupby(level="y").agg(fcn), level="y")
-            else:
-                raise ValueError(f"Unrecognized axnorm with function ({kind}, {fcn})")
         else:
             raise ValueError(f"Unrecognized axnorm ({axnorm})")
 
