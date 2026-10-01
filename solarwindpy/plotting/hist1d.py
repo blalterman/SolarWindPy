@@ -115,9 +115,7 @@ class Hist1D(AggPlot):
          d     Density normalize
          t     Divide by the maximum (peak equals 1)
         ===== ============================================================="""
-        if new is not None:
-            new = new.lower()[0]
-            assert new in ("d", "t"), f"Unrecognized axnorm `{new}`"
+        new = self._validate_axnorm(new, ("d", "t"))
 
         ylbl = self.labels.y
         if isinstance(ylbl, labels.special.Count):
