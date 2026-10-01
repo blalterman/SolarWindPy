@@ -162,6 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   maximum, so the peak equals 1, as `Hist2D` does. It previously raised `AssertionError`.
 - `CITATION.cff` gives the Zenodo concept DOI and the author's ORCID in Citation File
   Format, so GitHub and Zenodo can read the citation.
+- Python 3.14 is supported and declared; the full suite passes on it.
 
 ### Fixed
 
