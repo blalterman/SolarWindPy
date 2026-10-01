@@ -195,6 +195,8 @@ These change computed values; rerun any analysis that used them.
 - `solarwindpy.solar_activity.lisird` (`LISIRD`, `ExtremaCalculator`) and
   `solarwindpy.solar_activity.get_all_indices` removed (unused); last available at
   commit beb10945.
+- The `"Lalpha"`, `"f10.7"`, `"CaK"`, and `"MgII"` plot label keys, which existed only
+  for the removed LISIRD indices.
 
 ## [0.3.0] - 2025-12-24
 

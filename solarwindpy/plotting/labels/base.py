@@ -194,11 +194,6 @@ _trans_units = {
     "kvec": _inU["dimless"],
     "k": _inU["dimless"],
     "insta_power": _inU["unknown"],
-    # Solar Activity
-    "Lalpha": r"\mathrm{W/m^2}",
-    "f10.7": r"\mathrm{Solar \, Flux \, Unit \, (SFU)}",
-    "CaK": r"Unknown \, Need \, to \, Read \, MetaData",
-    "MgII": _inU["dimless"],
     # MISC
     "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
     # Spectral things
@@ -297,11 +292,6 @@ _templates = {
     "kvec": r"\mathbf{k}_{$C}\rho_{$S}",
     "k": r"k_{$C}\rho_{$S}",
     "insta_power": r"\mathcal{P}_{{$S}}",
-    # Solar Activity
-    "Lalpha": r"\mathrm{L}\alpha",
-    "f10.7": r"\mathrm{F}10.7",
-    "CaK": r"\mathrm{CaK}",
-    "MgII": r"\mathrm{MgII}",
     # Flux
     "flux": r"\mathrm{Flux}_{$C}({$S})",
     # Spectral Exponents
