@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -311,6 +311,15 @@
 <span class="sd">the functional form and an initial parameter guess.</span>
 <span class="sd">"""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"FitFunctionError"</span><span class="p">,</span>
+    <span class="s2">"InsufficientDataError"</span><span class="p">,</span>
+    <span class="s2">"FitFailedError"</span><span class="p">,</span>
+    <span class="s2">"InvalidParameterError"</span><span class="p">,</span>
+    <span class="s2">"FitFunctionMeta"</span><span class="p">,</span>
+    <span class="s2">"FitFunction"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
@@ -342,11 +351,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tex_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">TeXinfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">FFPlot</span>
 
-<span class="n">Observations</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"Observations"</span><span class="p">,</span> <span class="s2">"x,y,w"</span><span class="p">)</span>
-<span class="n">UsedRawObs</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"UsedRawObs"</span><span class="p">,</span> <span class="s2">"used,raw,tk_observed"</span><span class="p">)</span>
-<span class="n">InitialGuessInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"InitialGuessInfo"</span><span class="p">,</span> <span class="s2">"p0,bounds"</span><span class="p">)</span>
-<span class="n">ChisqPerDegreeOfFreedom</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"ChisqPerDegreeOfFreedom"</span><span class="p">,</span> <span class="s2">"linear,robust"</span><span class="p">)</span>
-<span class="n">FitBounds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"FitBounds"</span><span class="p">,</span> <span class="s2">"lower,upper"</span><span class="p">)</span>
+<span class="n">_Observations</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_Observations"</span><span class="p">,</span> <span class="s2">"x,y,w"</span><span class="p">)</span>
+<span class="n">_UsedRawObs</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_UsedRawObs"</span><span class="p">,</span> <span class="s2">"used,raw,tk_observed"</span><span class="p">)</span>
+<span class="n">_InitialGuessInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_InitialGuessInfo"</span><span class="p">,</span> <span class="s2">"p0,bounds"</span><span class="p">)</span>
+<span class="n">_ChisqPerDegreeOfFreedom</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_ChisqPerDegreeOfFreedom"</span><span class="p">,</span> <span class="s2">"linear,robust"</span><span class="p">)</span>
+<span class="n">_FitBounds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_FitBounds"</span><span class="p">,</span> <span class="s2">"lower,upper"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="FitFunctionError">
@@ -475,7 +484,7 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions import Gaussian  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions.gaussians import Gaussian  # doctest: +SKIP</span>
 <span class="sd">        &gt;&gt;&gt; x = np.linspace(-5, 5, 100)  # doctest: +SKIP</span>
 <span class="sd">        &gt;&gt;&gt; y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP</span>
 <span class="sd">        &gt;&gt;&gt; fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP</span>
@@ -607,7 +616,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict or None</span>
-<span class="sd">            ``{name: InitialGuessInfo(p0, bounds)}``, or None when no initial</span>
+<span class="sd">            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial</span>
 <span class="sd">            guess was made (``p0`` is None) or no fit has set the bounds.</span>
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
@@ -620,7 +629,7 @@
 
         <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span>
         <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">name</span><span class="p">:</span> <span class="n">InitialGuessInfo</span><span class="p">(</span><span class="n">guess</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">_InitialGuessInfo</span><span class="p">(</span><span class="n">guess</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">guess</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">p0</span><span class="p">)</span>
         <span class="p">}</span>
 
@@ -819,7 +828,7 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions import Gaussian</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions.gaussians import Gaussian</span>
 <span class="sd">        &gt;&gt;&gt; x = np.linspace(0, 10, 101)</span>
 <span class="sd">        &gt;&gt;&gt; y = 4 * np.exp(-0.5 * ((x - 5) / 1) ** 2)</span>
 <span class="sd">        &gt;&gt;&gt; # Create FitFunction with constraints</span>
@@ -920,9 +929,9 @@
         <span class="k">if</span> <span class="n">weights_raw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">weights_raw</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
-        <span class="n">used</span> <span class="o">=</span> <span class="n">Observations</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
-        <span class="n">raw</span> <span class="o">=</span> <span class="n">Observations</span><span class="p">(</span><span class="n">xobs_raw</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">weights_raw</span><span class="p">)</span>
-        <span class="n">usedrawobs</span> <span class="o">=</span> <span class="n">UsedRawObs</span><span class="p">(</span><span class="n">used</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="n">used</span> <span class="o">=</span> <span class="n">_Observations</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">_Observations</span><span class="p">(</span><span class="n">xobs_raw</span><span class="p">,</span> <span class="n">yobs_raw</span><span class="p">,</span> <span class="n">weights_raw</span><span class="p">)</span>
+        <span class="n">usedrawobs</span> <span class="o">=</span> <span class="n">_UsedRawObs</span><span class="p">(</span><span class="n">used</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="n">usedrawobs</span></div>
 
 
@@ -1010,7 +1019,7 @@
             <span class="k">raise</span> <span class="n">FitFailedError</span><span class="p">(</span><span class="s2">"Optimal parameters not found: "</span> <span class="o">+</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 
         <span class="n">fit_bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">fit_bounds</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">FitBounds</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">fit_bounds</span><span class="p">)}</span>
+        <span class="n">fit_bounds</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_FitBounds</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">fit_bounds</span><span class="p">)}</span>
         <span class="n">fit_bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fit_bounds</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_bounds</span> <span class="o">=</span> <span class="n">fit_bounds</span>
 
@@ -1066,7 +1075,7 @@
         <span class="c1"># Based on `curve_fit`'s `absolute_sigma` documentation and reading</span>
         <span class="c1"># `least_square`, `s_sq` should be chisq_nu based on robust residuals</span>
         <span class="c1"># that account for `f_scale`(20200527).</span>
-        <span class="n">all_chisq</span> <span class="o">=</span> <span class="n">ChisqPerDegreeOfFreedom</span><span class="p">(</span><span class="n">chisq_dof</span><span class="p">,</span> <span class="n">s_sq</span><span class="p">)</span>
+        <span class="n">all_chisq</span> <span class="o">=</span> <span class="n">_ChisqPerDegreeOfFreedom</span><span class="p">(</span><span class="n">chisq_dof</span><span class="p">,</span> <span class="n">s_sq</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span><span class="p">,</span> <span class="n">psigma</span><span class="p">,</span> <span class="n">all_chisq</span>
 

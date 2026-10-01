@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -311,6 +311,13 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sd">"""Access sunspot-number data from the SIDC."""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"SIDC_ID"</span><span class="p">,</span>
+    <span class="s2">"SIDCLoader"</span><span class="p">,</span>
+    <span class="s2">"SIDC"</span><span class="p">,</span>
+    <span class="s2">"SSNExtrema"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
@@ -318,14 +325,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
-
-<span class="n">Base</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span>
-<span class="n">ID</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">ID</span>
-<span class="n">DataLoader</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">DataLoader</span>
-<span class="n">IndicatorExtrema</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">IndicatorExtrema</span>
-<span class="n">_Loader_Dtypes_Columns</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">_Loader_Dtypes_Columns</span>
-<span class="n">ActivityIndicator</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">ActivityIndicator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ActivityIndicator</span><span class="p">,</span>
+    <span class="n">DataLoader</span><span class="p">,</span>
+    <span class="n">ID</span><span class="p">,</span>
+    <span class="n">IndicatorExtrema</span><span class="p">,</span>
+    <span class="n">_Loader_Dtypes_Columns</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"mode.chained_assignment"</span><span class="p">,</span> <span class="s2">"raise"</span><span class="p">)</span>
 

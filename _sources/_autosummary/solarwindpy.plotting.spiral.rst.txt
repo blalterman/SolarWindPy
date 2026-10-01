@@ -14,14 +14,6 @@ solarwindpy.plotting.spiral
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      calculate_bin_number_with_numba
-      get_counts_per_bin
-   
    
 
    
@@ -32,10 +24,7 @@ solarwindpy.plotting.spiral
       :toctree:
       :template: class.rst
    
-      InitialSpiralEdges
-      SpiralFilterThresholds
       SpiralMesh
-      SpiralMeshBinID
       SpiralPlot2D
    
    

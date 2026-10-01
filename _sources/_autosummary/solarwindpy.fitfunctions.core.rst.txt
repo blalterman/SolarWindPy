@@ -24,13 +24,8 @@ solarwindpy.fitfunctions.core
       :toctree:
       :template: class.rst
    
-      ChisqPerDegreeOfFreedom
-      FitBounds
       FitFunction
       FitFunctionMeta
-      InitialGuessInfo
-      Observations
-      UsedRawObs
    
    
 

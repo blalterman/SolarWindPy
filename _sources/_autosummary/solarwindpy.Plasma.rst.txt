@@ -1,6 +1,0 @@
-﻿solarwindpy.Plasma
-==================
-
-.. currentmodule:: solarwindpy
-
-.. autoclass:: Plasma

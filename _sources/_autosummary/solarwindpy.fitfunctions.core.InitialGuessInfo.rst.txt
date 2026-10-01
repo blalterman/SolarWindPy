@@ -1,6 +1,0 @@
-solarwindpy.fitfunctions.core.InitialGuessInfo
-==============================================
-
-.. currentmodule:: solarwindpy.fitfunctions.core
-
-.. autoclass:: InitialGuessInfo

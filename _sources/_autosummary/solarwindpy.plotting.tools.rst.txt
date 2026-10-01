@@ -20,12 +20,10 @@ solarwindpy.plotting.tools
       :toctree:
    
       build_ax_array_with_common_colorbar
-      calculate_nrows_ncols
       joint_legend
       nan_gaussian_filter
       save
       subplots
-      use_style
    
    
 

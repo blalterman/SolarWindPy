@@ -1,6 +1,6 @@
-solarwindpy.plotting.labels.special.ComparisonLable
+solarwindpy.plotting.labels.special.ComparisonLabel
 ===================================================
 
 .. currentmodule:: solarwindpy.plotting.labels.special
 
-.. autoclass:: ComparisonLable
+.. autoclass:: ComparisonLabel

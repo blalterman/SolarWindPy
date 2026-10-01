@@ -1,6 +1,0 @@
-﻿solarwindpy.TeXlabel
-====================
-
-.. currentmodule:: solarwindpy
-
-.. autoclass:: TeXlabel

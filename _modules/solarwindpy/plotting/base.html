@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.base &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -310,11 +310,19 @@
 <span class="sd">implement specific visualizations.</span>
 <span class="sd">"""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"LogAxes"</span><span class="p">,</span>
+    <span class="s2">"AxesLabels"</span><span class="p">,</span>
+    <span class="s2">"RangeLimits"</span><span class="p">,</span>
+    <span class="s2">"Base"</span><span class="p">,</span>
+    <span class="s2">"PlotWithZdata"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
@@ -551,32 +559,7 @@
 
 
 
-<div class="viewcode-block" id="DataLimFormatter">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.DataLimFormatter.html#solarwindpy.plotting.base.DataLimFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DataLimFormatter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Mixin that limits the axes to the range of the x and y data."""</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_format_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span>
-        <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span>
-        <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
-        <span class="c1"># `pulled from the end of `ax.pcolormesh`.</span>
-        <span class="n">collection</span><span class="o">.</span><span class="n">sticky_edges</span><span class="o">.</span><span class="n">x</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">]</span>
-        <span class="n">collection</span><span class="o">.</span><span class="n">sticky_edges</span><span class="o">.</span><span class="n">y</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">]</span>
-        <span class="n">corners</span> <span class="o">=</span> <span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">),</span> <span class="p">(</span><span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">update_datalim</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span></div>
-
-
-
-<div class="viewcode-block" id="CbarMaker">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.CbarMaker.html#solarwindpy.plotting.base.CbarMaker">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CbarMaker</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_CbarMaker</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Mixin that draws a colorbar labelled with ``labels.z``."""</span>
 
     <span class="nd">@staticmethod</span>
@@ -657,14 +640,113 @@
         <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"label"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
         <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">cbar</span></div>
-
+        <span class="k">return</span> <span class="n">cbar</span>
 
 
 <div class="viewcode-block" id="PlotWithZdata">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.PlotWithZdata.html#solarwindpy.plotting.base.PlotWithZdata">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlotWithZdata</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Base for plots of x, y data with an optional z value per point."""</span>
+
+    <span class="n">_alim</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">_alim_kind</span> <span class="o">=</span> <span class="s2">"value"</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``(lower, upper)`` limits on the aggregated value; see ``set_alim``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">alim_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""``"value"`` or ``"quantile"``: how ``alim`` is read; see ``set_alim``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alim_kind</span>
+
+<div class="viewcode-block" id="PlotWithZdata.set_alim">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.PlotWithZdata.html#solarwindpy.plotting.base.PlotWithZdata.set_alim">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_alim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"value"</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the minimum (lower) and maximum (upper) allowed aggregated value.</span>
+
+<span class="sd">        Unlike ``clim``, which limits the number of points in a bin, ``alim``</span>
+<span class="sd">        limits the value a bin aggregates to, after ``axnorm``, ``clim`` and</span>
+<span class="sd">        any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are</span>
+<span class="sd">        inclusive and None leaves that side open. A ``Scatter`` applies</span>
+<span class="sd">        ``alim`` to the z of each point and does not draw the points outside.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lower, upper : float or None</span>
+<span class="sd">            The limits.</span>
+<span class="sd">        kind : {"value", "quantile"}</span>
+<span class="sd">            ``"value"``: the limits are aggregated values. ``"quantile"``: the</span>
+<span class="sd">            limits are quantiles in [0, 1] of the final aggregated values,</span>
+<span class="sd">            computed with :func:`numpy.nanquantile` over the finite values</span>
+<span class="sd">            (NaN and inf excluded) each time the plot aggregates. The</span>
+<span class="sd">            quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``</span>
+<span class="sd">            or ``"r"`` they are taken over the whole grid, not per column or</span>
+<span class="sd">            row.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``kind`` is not ``"value"`` or ``"quantile"``, if ``lower`` is</span>
+<span class="sd">            not less than ``upper``, or, for ``"quantile"``, if a limit is</span>
+<span class="sd">            outside [0, 1].</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"value"</span><span class="p">,</span> <span class="s2">"quantile"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"alim kind must be 'value' or 'quantile', not </span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"quantile"</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"lower"</span><span class="p">,</span> <span class="n">lower</span><span class="p">),</span> <span class="p">(</span><span class="s2">"upper"</span><span class="p">,</span> <span class="n">upper</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">q</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"quantile alim </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2"> must be between 0 and 1"</span>
+                    <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lower</span> <span class="o">&lt;</span> <span class="n">upper</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> alim lower=</span><span class="si">{</span><span class="n">lower</span><span class="si">}</span><span class="s2"> must be less than upper=</span><span class="si">{</span><span class="n">upper</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alim</span> <span class="o">=</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alim_kind</span> <span class="o">=</span> <span class="n">kind</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_alim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        agg : pd.Series</span>
+<span class="sd">            The final aggregated values, one per bin or cell, or for a</span>
+<span class="sd">            ``Scatter`` the z of each plotted point. With</span>
+<span class="sd">            ``alim_kind == "quantile"`` the thresholds are quantiles of all</span>
+<span class="sd">            of its finite entries.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.Series</span>
+<span class="sd">            ``agg`` with every entry outside ``alim`` replaced by NaN.</span>
+<span class="sd">        """</span>
+        <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alim</span>
+        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">agg</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alim_kind</span> <span class="o">==</span> <span class="s2">"quantile"</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">agg</span>
+            <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">lower</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span>
+
+        <span class="n">keep</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">agg</span> <span class="o">&gt;=</span> <span class="n">lower</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">agg</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">agg</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PlotWithZdata.set_data">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.PlotWithZdata.html#solarwindpy.plotting.base.PlotWithZdata.set_data">[docs]</a>
@@ -700,45 +782,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clip</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">clip_data</span><span class="p">)</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_limit_color_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Limit ``norm`` to the 1st and 99th percentiles of the plotted values.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        norm : matplotlib.colors.Normalize or None</span>
-<span class="sd">            The colour normalisation to limit. Limits already set are kept.</span>
-<span class="sd">            If None, a linear :class:`matplotlib.colors.Normalize` is built,</span>
-<span class="sd">            the norm matplotlib would otherwise use.</span>
-<span class="sd">        values : array-like</span>
-<span class="sd">            The values handed to matplotlib to colour. NaN, infinite and</span>
-<span class="sd">            masked entries are ignored.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        matplotlib.colors.Normalize or None</span>
-<span class="sd">            The limited norm, with ``clip`` set. Column- and row-normalised</span>
-<span class="sd">            plots (``axnorm`` of ``"c"`` or ``"r"``) are already bounded, so</span>
-<span class="sd">            for them ``norm`` is returned unchanged.</span>
-<span class="sd">        """</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"axnorm"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
-            <span class="c1"># Don't limit us to (1%, 99%) interval.</span>
-            <span class="k">return</span> <span class="n">norm</span>
-
-        <span class="k">if</span> <span class="n">norm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()</span>
-
-        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">compressed</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">norm</span>
-
-        <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">v0</span>
-        <span class="k">if</span> <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">norm</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">v1</span>
-        <span class="n">norm</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="n">norm</span>
 
 <div class="viewcode-block" id="PlotWithZdata.set_path">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.base.PlotWithZdata.html#solarwindpy.plotting.base.PlotWithZdata.set_path">[docs]</a>

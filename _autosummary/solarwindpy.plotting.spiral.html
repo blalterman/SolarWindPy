@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,13 +16,13 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba" href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html" />
+    <link rel="next" title="solarwindpy.plotting.spiral.SpiralMesh" href="solarwindpy.plotting.spiral.SpiralMesh.html" />
     <link rel="prev" title="solarwindpy.plotting.scatter.Scatter" href="solarwindpy.plotting.scatter.Scatter.html" />
    
   <style>
@@ -77,7 +77,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.plotting.html">solarwindpy.plotting</a><ul class="current">
@@ -85,9 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.base.html">solarwindpy.plotting.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist1d.html">solarwindpy.plotting.hist1d</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist2d.html">solarwindpy.plotting.hist2d</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">solarwindpy.plotting.spiral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
@@ -320,33 +318,13 @@
   <section id="module-solarwindpy.plotting.spiral">
 <span id="solarwindpy-plotting-spiral"></span><h1>solarwindpy.plotting.spiral<a class="headerlink" href="#module-solarwindpy.plotting.spiral" title="Link to this heading"></a></h1>
 <p>Spiral mesh plots and associated binning utilities.</p>
-<p class="rubric">Functions</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html#solarwindpy.plotting.spiral.calculate_bin_number_with_numba" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_bin_number_with_numba</span></code></a>(mesh, x, y)</p></td>
-<td><p>Assign each point the index of the mesh cell that contains it.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.get_counts_per_bin.html#solarwindpy.plotting.spiral.get_counts_per_bin" title="solarwindpy.plotting.spiral.get_counts_per_bin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_counts_per_bin</span></code></a>(bins, x, y)</p></td>
-<td><p>Count the points in each rectangular bin.</p></td>
-</tr>
-</tbody>
-</table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.InitialSpiralEdges.html#solarwindpy.plotting.spiral.InitialSpiralEdges" title="solarwindpy.plotting.spiral.InitialSpiralEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InitialSpiralEdges</span></code></a>(x, y)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralFilterThresholds.html#solarwindpy.plotting.spiral.SpiralFilterThresholds" title="solarwindpy.plotting.spiral.SpiralFilterThresholds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralFilterThresholds</span></code></a>(density, size)</p></td>
-<td><p></p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMesh.html#solarwindpy.plotting.spiral.SpiralMesh" title="solarwindpy.plotting.spiral.SpiralMesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralMesh</span></code></a>(x, y, initial_xedges, initial_yedges)</p></td>
 <td><p>Adaptive rectangular mesh that splits crowded cells into quarters.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralMeshBinID.html#solarwindpy.plotting.spiral.SpiralMeshBinID" title="solarwindpy.plotting.spiral.SpiralMeshBinID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralMeshBinID</span></code></a>(id, fill, visited)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D" title="solarwindpy.plotting.spiral.SpiralPlot2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralPlot2D</span></code></a>(x, y[, z, logx, logy, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.plotting.spiral.SpiralPlot2D.html#solarwindpy.plotting.spiral.SpiralPlot2D" title="solarwindpy.plotting.spiral.SpiralPlot2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpiralPlot2D</span></code></a>(x, y[, z, logx, logy, ...])</p></td>
 <td><p>2D spiral plotting with adaptive mesh refinement.</p></td>
 </tr>
 </tbody>
@@ -358,7 +336,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="solarwindpy.plotting.scatter.Scatter.html" class="btn btn-neutral float-left" title="solarwindpy.plotting.scatter.Scatter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.plotting.spiral.calculate_bin_number_with_numba.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.spiral.calculate_bin_number_with_numba" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.plotting.spiral.SpiralMesh.html" class="btn btn-neutral float-right" title="solarwindpy.plotting.spiral.SpiralMesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

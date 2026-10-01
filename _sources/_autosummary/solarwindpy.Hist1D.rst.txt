@@ -1,6 +1,0 @@
-﻿solarwindpy.Hist1D
-==================
-
-.. currentmodule:: solarwindpy
-
-.. autoclass:: Hist1D

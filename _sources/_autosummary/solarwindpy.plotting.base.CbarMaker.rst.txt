@@ -1,6 +1,0 @@
-solarwindpy.plotting.base.CbarMaker
-===================================
-
-.. currentmodule:: solarwindpy.plotting.base
-
-.. autoclass:: CbarMaker

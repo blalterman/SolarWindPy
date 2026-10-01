@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.labels &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -306,32 +306,24 @@
 <span class="sa">r</span><span class="sd">"""Tools for creating physical quantity plot labels."""</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"TeXlabel"</span><span class="p">,</span>
-    <span class="s2">"Vsw"</span><span class="p">,</span>
-    <span class="s2">"Count"</span><span class="p">,</span>
-    <span class="s2">"base"</span><span class="p">,</span>
-    <span class="s2">"special"</span><span class="p">,</span>
     <span class="s2">"available"</span><span class="p">,</span>
-    <span class="s2">"species_translation"</span><span class="p">,</span>
+    <span class="s2">"base"</span><span class="p">,</span>
+    <span class="s2">"chemistry"</span><span class="p">,</span>
+    <span class="s2">"composition"</span><span class="p">,</span>
+    <span class="s2">"datetime"</span><span class="p">,</span>
+    <span class="s2">"elemental_abundance"</span><span class="p">,</span>
+    <span class="s2">"special"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isclass</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">special</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">chemistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">composition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">elemental_abundance</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>  <span class="c1"># noqa: F401</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">chemistry</span>  <span class="c1"># noqa: F401</span>
-
-<span class="n">TeXlabel</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">TeXlabel</span>
-<span class="n">species_translation</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">_run_species_substitution</span>
-<span class="n">Vsw</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">Vsw</span>
-<span class="n">Count</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">Count</span>
-<span class="n">Ion</span> <span class="o">=</span> <span class="n">composition</span><span class="o">.</span><span class="n">Ion</span>
-<span class="n">ChargeStateRatio</span> <span class="o">=</span> <span class="n">composition</span><span class="o">.</span><span class="n">ChargeStateRatio</span>
-<span class="n">ElementalAbundance</span> <span class="o">=</span> <span class="n">elemental_abundance</span><span class="o">.</span><span class="n">ElementalAbundance</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">special</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_clean_str_list_for_printing</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>

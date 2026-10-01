@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.lisird.lisird &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,14 +16,14 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.solar_activity.lisird.lisird.LISIRD" href="solarwindpy.solar_activity.lisird.lisird.LISIRD.html" />
-    <link rel="prev" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator" href="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html" />
+    <link rel="next" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence" href="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.html" />
+    <link rel="prev" title="solarwindpy.core.alfvenic_turbulence" href="solarwindpy.core.alfvenic_turbulence.html" />
    
   <style>
     .sidebar-custom-info {
@@ -77,22 +77,25 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.core.html">solarwindpy.core</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.abundances.html">solarwindpy.core.abundances</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.core.alfvenic_turbulence.html">solarwindpy.core.alfvenic_turbulence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.base.html">solarwindpy.core.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.ions.html">solarwindpy.core.ions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.plasma.html">solarwindpy.core.plasma</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.spacecraft.html">solarwindpy.core.spacecraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.tensor.html">solarwindpy.core.tensor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.units_constants.html">solarwindpy.core.units_constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.core.vector.html">solarwindpy.core.vector</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.solar_activity.html">solarwindpy.solar_activity</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.get_all_indices.html">solarwindpy.solar_activity.get_all_indices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.base.html">solarwindpy.solar_activity.base</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.icme.html">solarwindpy.solar_activity.icme</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.solar_activity.lisird.html">solarwindpy.solar_activity.lisird</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.plots.html">solarwindpy.solar_activity.plots</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.solar_activity.sunspot_number.html">solarwindpy.solar_activity.sunspot_number</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
@@ -138,7 +141,7 @@
         
         
         <li class="breadcrumb-item active" aria-current="page">
-          <span>solarwindpy.solar_activity.lisird.lisird</span>
+          <span>solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging</span>
         </li>
       </ol>
     </nav>
@@ -313,36 +316,47 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-solarwindpy.solar_activity.lisird.lisird">
-<span id="solarwindpy-solar-activity-lisird-lisird"></span><h1>solarwindpy.solar_activity.lisird.lisird<a class="headerlink" href="#module-solarwindpy.solar_activity.lisird.lisird" title="Link to this heading"></a></h1>
-<p>Interfaces for the LASP Interactive Solar Irradiance Data Center (LISIRD).</p>
-<p>The submodule provides classes for downloading and working with data hosted at
-<a class="reference external" href="http://lasp.colorado.edu/lisird/">LASP</a>.</p>
-<p class="rubric">Classes</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.lisird.LISIRD.html#solarwindpy.solar_activity.lisird.lisird.LISIRD" title="solarwindpy.solar_activity.lisird.lisird.LISIRD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LISIRD</span></code></a>(key)</p></td>
-<td><p>Wrapper around LISIRD data sets.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.lisird.LISIRDExtrema.html#solarwindpy.solar_activity.lisird.lisird.LISIRDExtrema" title="solarwindpy.solar_activity.lisird.lisird.LISIRDExtrema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LISIRDExtrema</span></code></a>(*args, **kwargs)</p></td>
-<td><p>Solar-cycle extrema of a LISIRD index, found by <a class="reference internal" href="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html#solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtremaCalculator</span></code></a>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.lisird.LISIRDLoader.html#solarwindpy.solar_activity.lisird.lisird.LISIRDLoader" title="solarwindpy.solar_activity.lisird.lisird.LISIRDLoader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LISIRDLoader</span></code></a>(key, url)</p></td>
-<td><p>Download, cache, and load one LISIRD data set.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.solar_activity.lisird.lisird.LISIRD_ID.html#solarwindpy.solar_activity.lisird.lisird.LISIRD_ID" title="solarwindpy.solar_activity.lisird.lisird.LISIRD_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LISIRD_ID</span></code></a>(key)</p></td>
-<td><p>Identifier mapping a LISIRD data set name to its download URL.</p></td>
-</tr>
-</tbody>
-</table>
+  <section id="solarwindpy-core-alfvenic-turbulence-alfvenicturbaveraging">
+<h1>solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging<a class="headerlink" href="#solarwindpy-core-alfvenic-turbulence-alfvenicturbaveraging" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">AlfvenicTurbAveraging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_periods</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.count" title="Link to this definition"></a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.maxsize</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.index" title="Link to this definition"></a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.min_periods">
+<span class="sig-name descname"><span class="pre">min_periods</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.min_periods" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.window">
+<span class="sig-name descname"><span class="pre">window</span></span><a class="headerlink" href="#solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging.window" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator.html" class="btn btn-neutral float-left" title="solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.solar_activity.lisird.lisird.LISIRD.html" class="btn btn-neutral float-right" title="solarwindpy.solar_activity.lisird.lisird.LISIRD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.core.alfvenic_turbulence.html" class="btn btn-neutral float-left" title="solarwindpy.core.alfvenic_turbulence" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.html" class="btn btn-neutral float-right" title="solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

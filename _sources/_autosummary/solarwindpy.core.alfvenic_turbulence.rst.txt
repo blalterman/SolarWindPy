@@ -24,8 +24,8 @@ solarwindpy.core.alfvenic\_turbulence
       :toctree:
       :template: class.rst
    
+      AlfvenicTurbAveraging
       AlfvenicTurbulence
-      AlvenicTurbAveraging
    
    
 

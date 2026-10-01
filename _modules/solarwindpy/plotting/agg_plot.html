@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.agg_plot &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,6 +309,10 @@
 <span class="sd">common functionality used by :mod:`solarwindpy` histogram plots.</span>
 <span class="sd">"""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"AggPlot"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
@@ -361,10 +365,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">clim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clim</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">alim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alim</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg_axes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -472,6 +472,24 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_divide_by_max</span><span class="p">(</span><span class="n">agg</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Divide ``agg`` by its maximum, so the peak equals 1.</span>
+
+<span class="sd">        This is the ``"t"`` axis normalization shared by the histograms.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        agg : pd.Series</span>
+<span class="sd">            Aggregated values, one per bin.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.Series</span>
+<span class="sd">            ``agg / agg.max()``.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
 <div class="viewcode-block" id="AggPlot.set_clim">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.agg_plot.AggPlot.html#solarwindpy.plotting.agg_plot.AggPlot.set_clim">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_clim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -482,19 +500,6 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_clim</span> <span class="o">=</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="AggPlot.set_alim">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.agg_plot.AggPlot.html#solarwindpy.plotting.agg_plot.AggPlot.set_alim">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_alim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the minimum (lower) and maximum (upper) allowed value when.</span>
-
-<span class="sd">        aggregating. This is different from `clim` because it uses the</span>
-<span class="sd">        `agg_fcn`. So behavior will change based on `axnorm`, etc.</span>
-<span class="sd">        """</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="ow">or</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_alim</span> <span class="o">=</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AggPlot.calc_bins_intervals">
@@ -628,36 +633,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cut</span> <span class="o">=</span> <span class="n">cut</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_agg_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Refactored out the aggregation.</span>
-
-<span class="sd">        This enables compatibility with :py:class:`OrbitPlot` aggregation of</span>
-<span class="sd">        different orbit legs (Inbound, Outbound, and Both).</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"aggregating </span><span class="si">{</span><span class="n">tko</span><span class="si">}</span><span class="s2"> data along </span><span class="si">{</span><span class="n">cut</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">fcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">tko</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"count"</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"mean"</span>
-
-        <span class="n">agg</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># .loc[:, tko]</span>
-
-        <span class="n">c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clim</span>
-        <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cnt</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span>  <span class="c1"># .loc[:, tko]</span>
-            <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&gt;=</span> <span class="n">c0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&lt;=</span> <span class="n">c1</span><span class="p">)</span>
-
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tk</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">agg</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_agg_reindexer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
         <span class="c1"># `self.grouped` uses `observed=True`: `observed=False` raised a TypeError</span>
         <span class="c1"># with mixed Categoricals and NaNs. (20200229)</span>
@@ -693,7 +668,25 @@
 
         <span class="n">gb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouped</span>
 
-        <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agg_runner</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">tko</span><span class="p">,</span> <span class="n">gb</span><span class="p">,</span> <span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fcn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">tko</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"count"</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fcn</span> <span class="o">=</span> <span class="s2">"mean"</span>
+
+        <span class="n">agg</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># .loc[:, tko]</span>
+
+        <span class="n">c0</span><span class="p">,</span> <span class="n">c1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clim</span>
+        <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)</span>  <span class="c1"># .loc[:, tko]</span>
+            <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">c0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&gt;=</span> <span class="n">c0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&lt;=</span> <span class="n">c1</span><span class="p">)</span>
+
+            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tk</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">agg</span></div>
 
@@ -782,7 +775,43 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The method by which the gridded data is normalized."""</span>
         <span class="k">pass</span></div>
-</div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_axnorm</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">allowed</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Check an ``axnorm`` key and return it in its normalized form.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new : str or None</span>
+<span class="sd">            The requested key. Matching is case-insensitive and exact.</span>
+<span class="sd">        allowed : tuple of str</span>
+<span class="sd">            The lowercase keys the calling class supports.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or None</span>
+<span class="sd">            ``None`` unchanged, otherwise the lowercase key.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If `new` is neither a string nor None.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If `new` is not one of `allowed`.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"axnorm must be a string or None; got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Unrecognized axnorm '</span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">'; expected one of: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">key</span></div>
 
 </pre></div>
 

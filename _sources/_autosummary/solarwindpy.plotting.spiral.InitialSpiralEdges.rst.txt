@@ -1,6 +1,0 @@
-solarwindpy.plotting.spiral.InitialSpiralEdges
-==============================================
-
-.. currentmodule:: solarwindpy.plotting.spiral
-
-.. autoclass:: InitialSpiralEdges

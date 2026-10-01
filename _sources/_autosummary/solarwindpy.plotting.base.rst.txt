@@ -26,8 +26,6 @@ solarwindpy.plotting.base
    
       AxesLabels
       Base
-      CbarMaker
-      DataLimFormatter
       LogAxes
       PlotWithZdata
       RangeLimits

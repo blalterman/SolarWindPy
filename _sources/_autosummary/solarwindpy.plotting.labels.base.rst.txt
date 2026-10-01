@@ -25,7 +25,6 @@ solarwindpy.plotting.labels.base
       :template: class.rst
    
       Base
-      MCS
       TeXlabel
    
    

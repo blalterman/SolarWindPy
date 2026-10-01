@@ -1,6 +1,0 @@
-solarwindpy.fitfunctions.core.UsedRawObs
-========================================
-
-.. currentmodule:: solarwindpy.fitfunctions.core
-
-.. autoclass:: UsedRawObs

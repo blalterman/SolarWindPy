@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.labels.special &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.labels.special &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -311,11 +311,61 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">"""Labels that :class:`~solarwindpy.plotting.labels.base.TeXlabel` does not build."""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"ArbitraryLabel"</span><span class="p">,</span>
+    <span class="s2">"ManualLabel"</span><span class="p">,</span>
+    <span class="s2">"Vsw"</span><span class="p">,</span>
+    <span class="s2">"CarringtonRotation"</span><span class="p">,</span>
+    <span class="s2">"Count"</span><span class="p">,</span>
+    <span class="s2">"Power"</span><span class="p">,</span>
+    <span class="s2">"Probability"</span><span class="p">,</span>
+    <span class="s2">"CountOther"</span><span class="p">,</span>
+    <span class="s2">"MathFcn"</span><span class="p">,</span>
+    <span class="s2">"AbsoluteValue"</span><span class="p">,</span>
+    <span class="s2">"Distance2Sun"</span><span class="p">,</span>
+    <span class="s2">"SSN"</span><span class="p">,</span>
+    <span class="s2">"ComparisonLabel"</span><span class="p">,</span>
+    <span class="s2">"Xcorr"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span> <span class="k">as</span> <span class="n">StringTemplate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Formatter</span> <span class="k">as</span> <span class="n">StringFormatter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Formatter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_other_label</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return ``other`` if it is a label object, else raise.</span>
+
+<span class="sd">    Shared by every label that wraps another label (``Probability``,</span>
+<span class="sd">    ``CountOther``, ``MathFcn``, ``AbsoluteValue``). They read ``tex``,</span>
+<span class="sd">    ``units`` and ``path`` from ``other``, so a plain string would only fail</span>
+<span class="sd">    later with an ``AttributeError``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    other : solarwindpy.plotting.labels.base.Base</span>
+<span class="sd">        The wrapped label.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    solarwindpy.plotting.labels.base.Base</span>
+<span class="sd">        ``other``, unchanged.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``other`` is not a :class:`~solarwindpy.plotting.labels.base.Base`.</span>
+<span class="sd">        Wrap a raw TeX string in ``ManualLabel`` first.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">"other_label must be a solarwindpy.plotting.labels.base.Base "</span>
+            <span class="s2">"(e.g. TeXlabel or ManualLabel), "</span>
+            <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">other</span><span class="si">!r}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">other</span>
 
 
 <div class="viewcode-block" id="ArbitraryLabel">
@@ -663,8 +713,7 @@
 <a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.Probability.html#solarwindpy.plotting.labels.special.Probability.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the label of the quantity being compared."""</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">_check_other_label</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Probability.set_comparison">
@@ -785,8 +834,7 @@
 <a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.CountOther.html#solarwindpy.plotting.labels.special.CountOther.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the label of the quantity being compared."""</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">_check_other_label</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CountOther.set_comparison">
@@ -916,8 +964,7 @@
 <a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.MathFcn.html#solarwindpy.plotting.labels.special.MathFcn.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the label the function is applied to."""</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">_check_other_label</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MathFcn.set_function">
@@ -983,7 +1030,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        other_label : solarwindpy.plotting.labels.base.Base or str</span>
+<span class="sd">        other_label : solarwindpy.plotting.labels.base.Base</span>
 <span class="sd">            The label to wrap with absolute value bars.</span>
 <span class="sd">        new_line_for_units : bool, default False</span>
 <span class="sd">            If True, place units on a new line.</span>
@@ -1045,8 +1092,7 @@
 <a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.AbsoluteValue.html#solarwindpy.plotting.labels.special.AbsoluteValue.set_other_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_other_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the label the function is applied to."""</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Base</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">other</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_other_label</span> <span class="o">=</span> <span class="n">_check_other_label</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_tex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1210,13 +1256,13 @@
 
 
 
-<div class="viewcode-block" id="ComparisonLable">
-<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLable.html#solarwindpy.plotting.labels.special.ComparisonLable">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ComparisonLable</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
+<div class="viewcode-block" id="ComparisonLabel">
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLabel.html#solarwindpy.plotting.labels.special.ComparisonLabel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ComparisonLabel</span><span class="p">(</span><span class="n">ArbitraryLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Label comparing two other labels via a function."""</span>
 
-<div class="viewcode-block" id="ComparisonLable.__init__">
-<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLable.html#solarwindpy.plotting.labels.special.ComparisonLable.__init__">[docs]</a>
+<div class="viewcode-block" id="ComparisonLabel.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLabel.html#solarwindpy.plotting.labels.special.ComparisonLabel.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">,</span> <span class="n">fcn_name</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Instantiate the label."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -1265,8 +1311,8 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Basically for use with building :py:meth:`path`."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function_name</span>
 
-<div class="viewcode-block" id="ComparisonLable.set_constituents">
-<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLable.html#solarwindpy.plotting.labels.special.ComparisonLable.set_constituents">[docs]</a>
+<div class="viewcode-block" id="ComparisonLabel.set_constituents">
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLabel.html#solarwindpy.plotting.labels.special.ComparisonLabel.set_constituents">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_constituents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labelA</span><span class="p">,</span> <span class="n">labelB</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the two labels and their shared units.</span>
 
@@ -1304,8 +1350,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_units</span> <span class="o">=</span> <span class="n">units</span></div>
 
 
-<div class="viewcode-block" id="ComparisonLable.set_function">
-<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLable.html#solarwindpy.plotting.labels.special.ComparisonLable.set_function">[docs]</a>
+<div class="viewcode-block" id="ComparisonLabel.set_function">
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLabel.html#solarwindpy.plotting.labels.special.ComparisonLabel.set_function">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn_name</span><span class="p">,</span> <span class="n">fcn</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the function combining the two labels.</span>
 
@@ -1331,7 +1377,7 @@
             <span class="p">}</span>
             <span class="n">fcn</span> <span class="o">=</span> <span class="n">translate</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">get_fcn</span><span class="p">)</span>
 
-        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">StringFormatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fcn</span><span class="p">)]</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Formatter</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fcn</span><span class="p">)]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="s2">"$labelA"</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">"$labelB"</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">rf</span><span class="s2">"""</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">'s function must have the keys "$labelA" and "$labelB".</span>
@@ -1357,7 +1403,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="n">texB</span> <span class="o">=</span> <span class="n">labelB</span>
 
-        <span class="n">template</span> <span class="o">=</span> <span class="n">StringTemplate</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
         <span class="n">tex</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">labelA</span><span class="o">=</span><span class="n">texA</span><span class="p">,</span> <span class="n">labelB</span><span class="o">=</span><span class="n">texB</span><span class="p">)</span>
 
         <span class="k">while</span> <span class="n">tex</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\,\,"</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -1387,8 +1433,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
 
-<div class="viewcode-block" id="ComparisonLable.build_label">
-<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLable.html#solarwindpy.plotting.labels.special.ComparisonLable.build_label">[docs]</a>
+<div class="viewcode-block" id="ComparisonLabel.build_label">
+<a class="viewcode-back" href="../../../../_autosummary/solarwindpy.plotting.labels.special.ComparisonLabel.html#solarwindpy.plotting.labels.special.ComparisonLabel.build_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Rebuild ``tex`` and ``path`` from the two labels."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_tex</span><span class="p">()</span>

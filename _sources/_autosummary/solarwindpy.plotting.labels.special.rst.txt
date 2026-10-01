@@ -27,7 +27,7 @@ solarwindpy.plotting.labels.special
       AbsoluteValue
       ArbitraryLabel
       CarringtonRotation
-      ComparisonLable
+      ComparisonLabel
       Count
       CountOther
       Distance2Sun

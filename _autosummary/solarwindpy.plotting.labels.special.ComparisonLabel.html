@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.labels.special.ComparisonLable &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.labels.special.ComparisonLabel &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -77,7 +77,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.plotting.html">solarwindpy.plotting</a><ul class="current">
@@ -85,9 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.base.html">solarwindpy.plotting.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist1d.html">solarwindpy.plotting.hist1d</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist2d.html">solarwindpy.plotting.hist2d</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
@@ -142,7 +140,7 @@
         
         
         <li class="breadcrumb-item active" aria-current="page">
-          <span>solarwindpy.plotting.labels.special.ComparisonLable</span>
+          <span>solarwindpy.plotting.labels.special.ComparisonLabel</span>
         </li>
       </ol>
     </nav>
@@ -317,64 +315,64 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-plotting-labels-special-comparisonlable">
-<h1>solarwindpy.plotting.labels.special.ComparisonLable<a class="headerlink" href="#solarwindpy-plotting-labels-special-comparisonlable" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-plotting-labels-special-comparisonlabel">
+<h1>solarwindpy.plotting.labels.special.ComparisonLabel<a class="headerlink" href="#solarwindpy-plotting-labels-special-comparisonlabel" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ComparisonLable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ComparisonLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLabel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.plotting.labels.special.ArbitraryLabel.html#solarwindpy.plotting.labels.special.ArbitraryLabel" title="solarwindpy.plotting.labels.special.ArbitraryLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArbitraryLabel</span></code></a></p>
 <p>Label comparing two other labels via a function.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLabel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.__init__" title="Link to this definition"></a></dt>
 <dd><p>Instantiate the label.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.tex">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.tex" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.tex">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">tex</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.tex" title="Link to this definition"></a></dt>
 <dd><p>TeX of the label, set by <code class="docutils literal notranslate"><span class="pre">build_label</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.units">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.units" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.units" title="Link to this definition"></a></dt>
 <dd><p>Shared units of the two labels, or <code class="docutils literal notranslate"><span class="pre">???</span></code> if either has none.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.path">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.path" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.path">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.path" title="Link to this definition"></a></dt>
 <dd><p>Save path, set by <code class="docutils literal notranslate"><span class="pre">build_label</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.labelA">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labelA</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.labelA" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.labelA">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labelA</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.labelA" title="Link to this definition"></a></dt>
 <dd><p>First label compared.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.labelB">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labelB</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.labelB" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.labelB">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">labelB</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.labelB" title="Link to this definition"></a></dt>
 <dd><p>Second label compared.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.function">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.function" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.function">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.function" title="Link to this definition"></a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">string.Template</span></code> combining <code class="docutils literal notranslate"><span class="pre">$labelA</span></code> and <code class="docutils literal notranslate"><span class="pre">$labelB</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.function_name">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_name</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.function_name" title="Link to this definition"></a></dt>
-<dd><p>Basically for use with building <a class="reference internal" href="#solarwindpy.plotting.labels.special.ComparisonLable.path" title="solarwindpy.plotting.labels.special.ComparisonLable.path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">path()</span></code></a>.</p>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.function_name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function_name</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.function_name" title="Link to this definition"></a></dt>
+<dd><p>Basically for use with building <a class="reference internal" href="#solarwindpy.plotting.labels.special.ComparisonLabel.path" title="solarwindpy.plotting.labels.special.ComparisonLabel.path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">path()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.set_constituents">
-<span class="sig-name descname"><span class="pre">set_constituents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.set_constituents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.set_constituents" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.set_constituents">
+<span class="sig-name descname"><span class="pre">set_constituents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelB</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLabel.set_constituents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.set_constituents" title="Link to this definition"></a></dt>
 <dd><p>Store the two labels and their shared units.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -389,8 +387,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.set_function">
-<span class="sig-name descname"><span class="pre">set_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.set_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.set_function" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.set_function">
+<span class="sig-name descname"><span class="pre">set_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcn_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLabel.set_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.set_function" title="Link to this definition"></a></dt>
 <dd><p>Set the function combining the two labels.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -412,26 +410,26 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.build_label">
-<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLable.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.build_label" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.build_label">
+<span class="sig-name descname"><span class="pre">build_label</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/labels/special.html#ComparisonLabel.build_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.build_label" title="Link to this definition"></a></dt>
 <dd><p>Rebuild <code class="docutils literal notranslate"><span class="pre">tex</span></code> and <code class="docutils literal notranslate"><span class="pre">path</span></code> from the two labels.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.description">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.description" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.description">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.description" title="Link to this definition"></a></dt>
 <dd><p>Optional human-readable description shown above the label.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.logger">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.logger" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.logger">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.logger" title="Link to this definition"></a></dt>
 <dd><p>Logger named <code class="docutils literal notranslate"><span class="pre">&lt;module&gt;.&lt;class</span> <span class="pre">name&gt;</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.set_description">
-<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.set_description" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.set_description">
+<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.set_description" title="Link to this definition"></a></dt>
 <dd><p>Set the description string.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -444,8 +442,8 @@
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLable.with_units">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLable.with_units" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.plotting.labels.special.ComparisonLabel.with_units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">with_units</span></span><a class="headerlink" href="#solarwindpy.plotting.labels.special.ComparisonLabel.with_units" title="Link to this definition"></a></dt>
 <dd><p>Label with units, as a TeX math string.</p>
 </dd></dl>
 

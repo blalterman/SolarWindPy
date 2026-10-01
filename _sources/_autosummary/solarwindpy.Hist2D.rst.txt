@@ -1,6 +1,0 @@
-﻿solarwindpy.Hist2D
-==================
-
-.. currentmodule:: solarwindpy
-
-.. autoclass:: Hist2D

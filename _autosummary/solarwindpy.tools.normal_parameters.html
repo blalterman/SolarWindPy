@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.tools.normal_parameters &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.tools.normal_parameters &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -79,7 +79,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
@@ -315,36 +315,68 @@
 <h1>solarwindpy.tools.normal_parameters<a class="headerlink" href="#solarwindpy-tools-normal-parameters" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="solarwindpy.tools.normal_parameters">
-<span class="sig-name descname"><span class="pre">normal_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/tools.html#normal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.tools.normal_parameters" title="Link to this definition"></a></dt>
-<dd><p>Convert log-normal parameters to normal distribution parameters.</p>
+<span class="sig-name descname"><span class="pre">normal_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.718281828459045</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/tools.html#normal_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.tools.normal_parameters" title="Link to this definition"></a></dt>
+<dd><p>Mean and standard deviation of a log-normal variable.</p>
+<p>Given <span class="math notranslate nohighlight">\(\log_b X \sim \mathcal{N}(m, s^2)\)</span>, return the mean and the
+standard deviation of <span class="math notranslate nohighlight">\(X\)</span> itself.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>m</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Mean of the log-normal distribution.</p>
+<dt><strong>m</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Mean of <span class="math notranslate nohighlight">\(\log_b X\)</span>.</p>
 </dd>
-<dt><strong>s</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Standard deviation of the log-normal distribution.</p>
+<dt><strong>s</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>Standard deviation of <span class="math notranslate nohighlight">\(\log_b X\)</span>.</p>
+</dd>
+<dt><strong>base</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, default <code class="docutils literal notranslate"><span class="pre">np.e</span></code></span></dt><dd><p>Base <span class="math notranslate nohighlight">\(b\)</span> of the logarithm in which <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">s</span></code> are given,
+e.g. <code class="docutils literal notranslate"><span class="pre">10</span></code> for a base-10 log-normal. Must be positive, finite, and
+not 1.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></dt><dd><p>Data frame with columns <code class="docutils literal notranslate"><span class="pre">mu</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">mu</span></code> (mean of <span class="math notranslate nohighlight">\(X\)</span>) and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> (standard deviation of
+<span class="math notranslate nohighlight">\(X\)</span>): DataFrame columns for Series input, Series entries for
+scalar input, so <code class="docutils literal notranslate"><span class="pre">mu,</span> <span class="pre">sigma</span> <span class="pre">=</span> <span class="pre">normal_parameters(m,</span> <span class="pre">s)</span></code> unpacks.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">base</span></code> is not positive, finite, and different from 1.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The conversion uses</p>
+<p>Since <span class="math notranslate nohighlight">\(\ln X = \ln(b)\,\log_b X\)</span>, <span class="math notranslate nohighlight">\(\ln X \sim
+\mathcal{N}(\mu_e, \sigma_e^2)\)</span> with <span class="math notranslate nohighlight">\(\mu_e = m \ln b\)</span> and
+<span class="math notranslate nohighlight">\(\sigma_e = s \ln b\)</span>. The log-normal moments are then
+<a class="reference internal" href="#rf2ee2f192ad1-1" id="id1">[1]</a> (eq. 8)</p>
 <div class="math notranslate nohighlight">
-\[\mu = \exp[m + s^2/2]\]</div>
+\[\mu = \exp[\mu_e + \sigma_e^2/2]\]</div>
 <div class="math notranslate nohighlight">
-\[\sigma = \sqrt{\exp[s^2 + 2m]\,(\exp[s^2] - 1)}\]</div>
-<p>These expressions apply to both natural logarithms and base-10 logarithms.</p>
+\[\sigma = \sqrt{\exp[2\mu_e + \sigma_e^2]\,(\exp[\sigma_e^2] - 1)}\]</div>
+<p>and the median is <span class="math notranslate nohighlight">\(\exp(\mu_e) = b^m\)</span>. The rescaling by
+<span class="math notranslate nohighlight">\(\ln b\)</span> is the decibel-to-natural-unit conversion of <a class="reference internal" href="#rf2ee2f192ad1-1" id="id2">[1]</a> (eq. 9).
+Base-<code class="docutils literal notranslate"><span class="pre">b</span></code> parameters must be rescaled, not substituted into these
+formulas as <span class="math notranslate nohighlight">\(b^{m + s^2/2}\)</span>.</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="rf2ee2f192ad1-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Fenton, L. F. (1960). The sum of log-normal probability
+distributions in scatter transmission systems. IRE Transactions on
+Communications Systems, 8(1), 57-67. doi:10.1109/TCOM.1960.1097606</p>
+</div>
+</div>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span>  <span class="c1"># log-normal parameters</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span>  <span class="c1"># mean and std of ln(X)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="n">normal_parameters</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">&gt;</span> <span class="mf">1.0</span>  <span class="c1"># Normal mean should be &gt; 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">mu</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>  <span class="c1"># the mean exceeds the median e^m</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu10</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">normal_parameters</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># log10(X) ~ N(0, 0.1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">mu10</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
 </div>

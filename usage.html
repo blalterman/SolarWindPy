@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage Guide &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>Usage Guide &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=456b923b"></script>
+      <script src="_static/documentation_options.js?v=50bd4445"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -322,7 +322,7 @@ for thermal speeds, empty for scalars.</p></li>
 magnetic field.</p></li>
 </ul>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.core.plasma</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plasma</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s2">"2023-01-01"</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">"1h"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[</span>
@@ -345,7 +345,7 @@ magnetic field.</p></li>
 <span class="gp">... </span>    <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">species</span>
 <span class="go">('a', 'p1')</span>
 </pre></div>
@@ -384,7 +384,7 @@ under the <span class="math notranslate nohighlight">\(m w^2 = 2 k_B T\)</span> 
 <p>Every fit function takes observed <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> arrays. Fitting a Gaussian
 to a noise-free Gaussian recovers the parameters that generated it:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.gaussians</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mi">420</span><span class="p">)</span> <span class="o">/</span> <span class="mi">40</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -397,7 +397,10 @@ to a noise-free Gaussian recovers the parameters that generated it:</p>
 formula:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ff</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ff</span><span class="o">.</span><span class="n">available</span><span class="p">()</span>
-<span class="go">Fit function...Gaussian...</span>
+<span class="go">Fit function  Module  LaTeX</span>
+<span class="go">...</span>
+<span class="go">Gaussian  gaussians  f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}</span>
+<span class="go">...</span>
 </pre></div>
 </div>
 </section>

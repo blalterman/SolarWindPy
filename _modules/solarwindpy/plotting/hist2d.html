@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -305,6 +305,10 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sa">r</span><span class="sd">"""Two-dimensional histogram and heatmap plotting utilities."""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"Hist2D"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
@@ -315,19 +319,16 @@
 
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">base</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">labels</span> <span class="k">as</span> <span class="n">labels_module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">labels</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">nan_gaussian_filter</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">agg_plot</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hist1d</span>
-
-<span class="n">AggPlot</span> <span class="o">=</span> <span class="n">agg_plot</span><span class="o">.</span><span class="n">AggPlot</span>
-<span class="n">Hist1D</span> <span class="o">=</span> <span class="n">hist1d</span><span class="o">.</span><span class="n">Hist1D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.agg_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">AggPlot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.hist1d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hist1D</span>
 
 
 <div class="viewcode-block" id="Hist2D">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Hist2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">CbarMaker</span><span class="p">,</span> <span class="n">AggPlot</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Hist2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">PlotWithZdata</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">_CbarMaker</span><span class="p">,</span> <span class="n">AggPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""2D histogram of (x, y), optionally aggregating a z-value in each bin.</span>
 
 <span class="sd">    Parameters</span>
@@ -358,7 +359,7 @@
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="Hist2D.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x</span><span class="p">,</span>
@@ -376,14 +377,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">set_log</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip_data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span>
-            <span class="n">x</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">axnorm</span><span class="p">)</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"z"</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">"x"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">labels</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">Count</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">axnorm</span><span class="p">)</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"z"</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="n">axnorm</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc_bins_intervals</span><span class="p">(</span><span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">bin_precision</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_cut</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_alim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
@@ -399,11 +399,11 @@
         <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
 
 <div class="viewcode-block" id="Hist2D.set_labels">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"z"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">z</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -415,7 +415,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.set_data">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_data">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Store the data, taking ``log10(abs())`` of each axis flagged in ``self.log``."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">clip</span><span class="p">)</span>
@@ -428,7 +428,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.set_axnorm">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.set_axnorm">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.set_axnorm">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The method by which the gridded data is normalized.</span>
 
@@ -438,23 +438,14 @@
 <span class="sd">         c     Column normalize</span>
 <span class="sd">         d     Density normalize</span>
 <span class="sd">         r     Row normalize</span>
-<span class="sd">         t     Total normalize</span>
+<span class="sd">         t     Divide by the maximum (peak equals 1)</span>
 <span class="sd">         cd    PDFs in each column</span>
 <span class="sd">         rd    PDFs in each row</span>
 <span class="sd">        ===== ============================================================="""</span>
-        <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="k">assert</span> <span class="n">new</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="s2">"c"</span><span class="p">,</span>
-                <span class="s2">"r"</span><span class="p">,</span>
-                <span class="s2">"t"</span><span class="p">,</span>
-                <span class="s2">"d"</span><span class="p">,</span>
-                <span class="s2">"cd"</span><span class="p">,</span>
-                <span class="s2">"rd"</span><span class="p">,</span>
-            <span class="p">),</span> <span class="sa">f</span><span class="s2">"Unrecgonized axnorm `</span><span class="si">{</span><span class="n">new</span><span class="si">}</span><span class="s2">`"</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_axnorm</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="s2">"t"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">))</span>
 
         <span class="n">zlbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">z</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zlbl</span><span class="p">,</span> <span class="n">labels_module</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zlbl</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">Count</span><span class="p">):</span>
             <span class="n">zlbl</span><span class="o">.</span><span class="n">set_axnorm</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
             <span class="n">zlbl</span><span class="o">.</span><span class="n">build_label</span><span class="p">()</span>
 
@@ -463,10 +454,6 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_axis_normalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Takes care of row, column, total, and density normaliation.</span>
-
-<span class="sd">        Written basically as `staticmethod` so that can be called in `OrbitHist2D`, but</span>
-<span class="sd">        as actual method with `self` passed so we have access to `self.log` for density</span>
-<span class="sd">        normalization.</span>
 
 <span class="sd">        On a log axis the densities ("d", "cd", "rd") are normalised over</span>
 <span class="sd">        ``log10`` of that axis: the bins are log-space intervals, so cell areas</span>
@@ -481,7 +468,7 @@
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"r"</span><span class="p">:</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"t"</span><span class="p">:</span>
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_divide_by_max</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">axnorm</span> <span class="o">==</span> <span class="s2">"d"</span><span class="p">:</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="c1"># Widths are in the binned variable, log10 on a log axis.</span>
@@ -505,24 +492,13 @@
             <span class="c1"># Divide by total in each column and each row's width</span>
             <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">axnorm</span><span class="p">,</span> <span class="s2">"__iter__"</span><span class="p">):</span>
-            <span class="c1"># TODO: This is an undocumented feature. I do not know if it is</span>
-            <span class="c1">#       tested nor how it interacts with colorbar labels, etc.</span>
-            <span class="c1">#       We need to investigate this issue (20250804).</span>
-            <span class="n">kind</span><span class="p">,</span> <span class="n">fcn</span> <span class="o">=</span> <span class="n">axnorm</span>
-            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"c"</span><span class="p">:</span>
-                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"r"</span><span class="p">:</span>
-                <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unrecognized axnorm with function (</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fcn</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unrecognized axnorm (</span><span class="si">{</span><span class="n">axnorm</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">agg</span>
 
 <div class="viewcode-block" id="Hist2D.agg">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.agg">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.agg">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.</span>
 
@@ -532,18 +508,7 @@
         <span class="n">agg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_normalizer</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
         <span class="n">agg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agg_reindexer</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
-
-        <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alim</span>
-        <span class="k">if</span> <span class="n">a0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">a1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">tk</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">agg</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">a0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">agg</span> <span class="o">&gt;=</span> <span class="n">a0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">a1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tk</span> <span class="o">=</span> <span class="n">tk</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">agg</span> <span class="o">&lt;=</span> <span class="n">a1</span><span class="p">)</span>
-
-            <span class="n">agg</span> <span class="o">=</span> <span class="n">agg</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tk</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">agg</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_alim</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_cbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -552,6 +517,30 @@
             <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_cbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_default_norm</span><span class="p">(</span><span class="n">axnorm</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The colour normalisation a plot uses when the caller passes no ``norm``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        axnorm : str or None</span>
+<span class="sd">            The histogram's ``axnorm``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.colors.Normalize or None</span>
+<span class="sd">            Column- and row-normalised values lie in [0, 1], so ``"c"`` and</span>
+<span class="sd">            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,</span>
+<span class="sd">            ``"cd"``, ``"rd"``) span decades, so they get a clipped</span>
+<span class="sd">            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the</span>
+<span class="sd">            choice to matplotlib.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_prep_agg_for_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mask_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Prepare aggregated data and coordinates for plotting.</span>
@@ -606,12 +595,11 @@
         <span class="k">return</span> <span class="n">nan_gaussian_filter</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Hist2D.make_plot">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.make_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.make_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">limit_color_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">alpha_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -625,9 +613,6 @@
 <span class="sd">            If None, create an `Axes` instance from `plt.subplots`.</span>
 <span class="sd">        cbar: bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
-<span class="sd">        limit_color_norm: bool</span>
-<span class="sd">            If True, limit the color range to the 1st and 99th percentiles of</span>
-<span class="sd">            the plotted values, count or otherwise.</span>
 <span class="sd">        cbar_kwargs: dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
 <span class="sd">        fcn: FunctionType, None</span>
@@ -636,8 +621,9 @@
 <span class="sd">            If not None, the function used to aggregate the data for setting alpha</span>
 <span class="sd">            value.</span>
 <span class="sd">        kwargs:</span>
-<span class="sd">            Passed to `ax.pcolormesh`.</span>
-<span class="sd">            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.</span>
+<span class="sd">            Passed to `ax.pcolormesh`. `norm` defaults to ten colour bands on</span>
+<span class="sd">            [0, 1] for row or column normalized data and to a `LogNorm` for</span>
+<span class="sd">            densities ("d", "cd", "rd").</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -662,18 +648,7 @@
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_convert_to_log_scale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-        <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
-        <span class="n">default_norm</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
-            <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">):</span>
-            <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">agg</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="p">))</span>
 
         <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_invalid</span><span class="p">(</span><span class="n">agg</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">XX</span><span class="p">,</span> <span class="n">YY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -719,12 +694,11 @@
 
 
 <div class="viewcode-block" id="Hist2D.plot_hist_with_contours">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_hist_with_contours">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.plot_hist_with_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_hist_with_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">limit_color_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="c1"># Contour-specific parameters</span>
@@ -750,9 +724,6 @@
 <span class="sd">            If None, create an `Axes` instance from `plt.subplots`.</span>
 <span class="sd">        cbar : bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
-<span class="sd">        limit_color_norm : bool</span>
-<span class="sd">            If True, limit the color range to the 1st and 99th percentiles of</span>
-<span class="sd">            the plotted values.</span>
 <span class="sd">        cbar_kwargs : dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
 <span class="sd">        fcn : FunctionType, None</span>
@@ -777,7 +748,8 @@
 <span class="sd">            If True and gaussian_filter_std &gt; 0, use NaN-aware filtering via</span>
 <span class="sd">            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.</span>
 <span class="sd">        kwargs :</span>
-<span class="sd">            Passed to `ax.pcolormesh`.</span>
+<span class="sd">            Passed to `ax.pcolormesh`. `norm` defaults as in `make_plot` and</span>
+<span class="sd">            is shared by the mesh and the contours.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -794,24 +766,13 @@
         <span class="k">if</span> <span class="n">contour_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">contour_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Determine normalization</span>
-        <span class="n">axnorm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span>
-        <span class="n">default_norm</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">):</span>
-            <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"cd"</span><span class="p">,</span> <span class="s2">"rd"</span><span class="p">):</span>
-            <span class="n">default_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LogNorm</span><span class="p">(</span><span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="n">default_norm</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="p">))</span>
 
         <span class="c1"># Get cmap from kwargs (shared between pcolormesh and contour)</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># --- 1. Plot pcolormesh background ---</span>
         <span class="n">C_edges</span><span class="p">,</span> <span class="n">x_edges</span><span class="p">,</span> <span class="n">y_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prep_agg_for_plot</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">,</span> <span class="n">use_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">limit_color_norm</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit_color_norm</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">C_edges</span><span class="p">)</span>
 
         <span class="n">XX_edges</span><span class="p">,</span> <span class="n">YY_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x_edges</span><span class="p">,</span> <span class="n">y_edges</span><span class="p">)</span>
         <span class="n">pc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">XX_edges</span><span class="p">,</span> <span class="n">YY_edges</span><span class="p">,</span> <span class="n">C_edges</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -916,7 +877,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.get_border">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.get_border">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.get_border">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_border</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Get the top and bottom edges of the plot.</span>
 
@@ -999,7 +960,7 @@
         <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Hist2D.plot_edges">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_edges">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.plot_edges">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sg_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Overplot the edges.</span>
 
@@ -1069,13 +1030,12 @@
         <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
 
 <div class="viewcode-block" id="Hist2D.plot_contours">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.plot_contours">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.plot_contours">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_contours</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">label_levels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">limit_color_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">plot_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1086,6 +1046,7 @@
         <span class="n">gaussian_filter_std</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">gaussian_filter_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">nan_aware_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Make a contour plot on `ax` using `ax.contour`.</span>
@@ -1098,9 +1059,6 @@
 <span class="sd">            If True, add labels to contours with `ax.clabel`.</span>
 <span class="sd">        cbar: bool</span>
 <span class="sd">            If True, create color bar with `labels.z`.</span>
-<span class="sd">        limit_color_norm: bool</span>
-<span class="sd">            If True, limit the color range to the 1st and 99th percentiles</span>
-<span class="sd">            of the z-value, count or otherwise.</span>
 <span class="sd">        cbar_kwargs: dict, None</span>
 <span class="sd">            If not None, kwargs passed to `self._make_cbar`.</span>
 <span class="sd">        fcn: FunctionType, None</span>
@@ -1114,8 +1072,6 @@
 <span class="sd">        skip_max_clbl: bool</span>
 <span class="sd">            If True, don't label the maximum contour. Primarily used when the maximum</span>
 <span class="sd">            contour is, effectively, a point.</span>
-<span class="sd">        maximum_color:</span>
-<span class="sd">            The color for the maximum of the PDF.</span>
 <span class="sd">        use_contourf: bool</span>
 <span class="sd">            If True, use `ax.contourf`. Else use `ax.contour`.</span>
 <span class="sd">        gaussian_filter_std: int</span>
@@ -1126,20 +1082,18 @@
 <span class="sd">        nan_aware_filter: bool</span>
 <span class="sd">            If True and gaussian_filter_std &gt; 0, use NaN-aware filtering via</span>
 <span class="sd">            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.</span>
+<span class="sd">        levels: array-like, int, None</span>
+<span class="sd">            Contour levels. If None, the default for the ``axnorm``, or</span>
+<span class="sd">            matplotlib's choice when there is none.</span>
 <span class="sd">        kwargs:</span>
-<span class="sd">            Passed to :meth:`matplotlib.axes.Axes.pcolormesh`.</span>
-<span class="sd">            If row or column normalized data, `norm` defaults to `mpl.colors.Normalize(0, 1)`.</span>
+<span class="sd">            Passed to :meth:`matplotlib.axes.Axes.contour` or</span>
+<span class="sd">            :meth:`matplotlib.axes.Axes.contourf`. `norm` defaults to ten</span>
+<span class="sd">            colour bands on [0, 1] for row or column normalized data and to a</span>
+<span class="sd">            `LogNorm` for densities ("d", "cd", "rd"); otherwise, with at</span>
+<span class="sd">            least two levels, to a `BoundaryNorm` on the levels.</span>
 <span class="sd">        """</span>
-        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"levels"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">cmap</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cmap"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="s2">"norm"</span><span class="p">,</span>
-            <span class="p">(</span>
-                <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="mi">256</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
-                <span class="k">else</span> <span class="kc">None</span>
-            <span class="p">),</span>
-        <span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"norm"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axnorm</span><span class="p">))</span>
         <span class="n">linestyles</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
             <span class="s2">"linestyles"</span><span class="p">,</span>
             <span class="p">[</span>
@@ -1259,7 +1213,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.project_1d">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.project_1d">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.project_1d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">project_1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">only_plotted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Make a ``Hist1D`` from the data stored in this ``Hist2D``.</span>
 
@@ -1334,7 +1288,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.make_joint_h2_h1_plot">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.make_joint_h2_h1_plot">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_joint_h2_h1_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">project_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kwargs_1d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
@@ -1425,7 +1379,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.id_data_above_contour">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.id_data_above_contour">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.id_data_above_contour">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">id_data_above_contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Gets data above the `level`.</span>
 
@@ -1465,7 +1419,7 @@
 
 
 <div class="viewcode-block" id="Hist2D.take_data_in_yrange_across_x">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.Hist2D.take_data_in_yrange_across_x">[docs]</a>
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.plotting.hist2d.Hist2D.html#solarwindpy.plotting.hist2d.Hist2D.take_data_in_yrange_across_x">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">take_data_in_yrange_across_x</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ranges_by_x</span><span class="p">,</span>

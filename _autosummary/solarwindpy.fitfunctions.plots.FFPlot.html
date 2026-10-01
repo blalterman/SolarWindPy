@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.plots.FFPlot &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions.plots.FFPlot &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -79,7 +79,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a><ul class="current">
@@ -329,6 +329,10 @@
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FFPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_fit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitfunction_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Plot of a fit function’s observations, fit, and residuals.</p>
+<p>Instances are created by a fit function’s
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.plotter" title="solarwindpy.fitfunctions.core.FitFunction.plotter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plotter</span></code></a>, not
+constructed directly.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.plots.FFPlot.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_fit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TeX_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitfunction_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/plots.html#FFPlot.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.plots.FFPlot.__init__" title="Link to this definition"></a></dt>
@@ -336,7 +340,8 @@
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>observations</strong><span class="classifier"><a class="reference internal" href="solarwindpy.fitfunctions.core.Observations.html#solarwindpy.fitfunctions.core.Observations" title="solarwindpy.fitfunctions.core.Observations"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observations</span></code></a></span></dt><dd><p>Observed data used in the fit.</p>
+<dt><strong>observations</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.namedtuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">collections.namedtuple()</span></code></a></span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">(used,</span> <span class="pre">raw,</span> <span class="pre">tk_observed)</span></code> observations of the fit, as
+returned by <code class="docutils literal notranslate"><span class="pre">FitFunction.observations</span></code>.</p>
 </dd>
 <dt><strong>y_fit</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Model evaluated at the observed <code class="docutils literal notranslate"><span class="pre">x</span></code> values.</p>
 </dd>

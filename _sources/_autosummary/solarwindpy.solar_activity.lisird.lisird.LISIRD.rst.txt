@@ -1,6 +1,0 @@
-solarwindpy.solar\_activity.lisird.lisird.LISIRD
-================================================
-
-.. currentmodule:: solarwindpy.solar_activity.lisird.lisird
-
-.. autoclass:: LISIRD

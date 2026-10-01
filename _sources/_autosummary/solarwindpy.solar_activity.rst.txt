@@ -14,13 +14,6 @@
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-      :toctree:
-   
-      get_all_indices
-   
    
 
    
@@ -42,7 +35,6 @@
 
    base
    icme
-   lisird
    plots
    sunspot_number
 

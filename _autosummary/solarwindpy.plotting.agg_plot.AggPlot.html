@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -77,7 +77,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solarwindpy.plotting.html">solarwindpy.plotting</a><ul class="current">
@@ -85,9 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.base.html">solarwindpy.plotting.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist1d.html">solarwindpy.plotting.hist1d</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.hist2d.html">solarwindpy.plotting.hist2d</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.histograms.html">solarwindpy.plotting.histograms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.labels.html">solarwindpy.plotting.labels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.orbits.html">solarwindpy.plotting.orbits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.scatter.html">solarwindpy.plotting.scatter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.spiral.html">solarwindpy.plotting.spiral</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.plotting.tools.html">solarwindpy.plotting.tools</a></li>
@@ -372,11 +370,6 @@
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.alim">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.alim" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.agg_axes">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">agg_axes</span></span><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.agg_axes" title="Link to this definition"></a></dt>
 <dd><p>The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap.</p>
@@ -436,14 +429,6 @@ tail only; any other value clips both tails.</p>
 <span class="sig-name descname"><span class="pre">set_clim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_clim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_clim" title="Link to this definition"></a></dt>
 <dd><p>Set the minimum (lower) and maximum (upper) allowed number of.</p>
 <p>counts per bin to return after calling <a class="reference internal" href="#solarwindpy.plotting.agg_plot.AggPlot.agg" title="solarwindpy.plotting.agg_plot.AggPlot.agg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">agg()</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.plotting.agg_plot.AggPlot.set_alim">
-<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/plotting/agg_plot.html#AggPlot.set_alim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.plotting.agg_plot.AggPlot.set_alim" title="Link to this definition"></a></dt>
-<dd><p>Set the minimum (lower) and maximum (upper) allowed value when.</p>
-<p>aggregating. This is different from <cite>clim</cite> because it uses the
-<cite>agg_fcn</cite>. So behavior will change based on <cite>axnorm</cite>, etc.</p>
 </dd></dl>
 
 <dl class="py method">

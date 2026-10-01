@@ -37,9 +37,7 @@
    base
    hist1d
    hist2d
-   histograms
    labels
-   orbits
    scatter
    spiral
    tools

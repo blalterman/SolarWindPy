@@ -30,7 +30,6 @@ solarwindpy.fitfunctions.hinge
       HingeSaturation
       Saturation
       TwoLine
-      XIntercepts
    
    
 

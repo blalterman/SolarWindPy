@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -77,7 +77,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
@@ -314,15 +314,15 @@
 <p>Utility functions for manipulating solar wind data.</p>
 <p>This module contains helper functions that are not yet organized into
 their own submodules. The functions are primarily used for handling
-proton data and for converting log-normal parameters to their normal
-form.</p>
+proton data and for the mean and standard deviation of a log-normal
+variable.</p>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>swap_protons</dt><dd><p>Swap beam and core proton labels when the beam density exceeds the
 core density.</p>
 </dd>
-<dt>normal_parameters</dt><dd><p>Convert log-normal distribution parameters to normal parameters.</p>
+<dt>normal_parameters</dt><dd><p>Mean and standard deviation of a log-normal variable.</p>
 </dd>
 </dl>
 </section>
@@ -342,8 +342,8 @@ core density.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.tools.normal_parameters.html#solarwindpy.tools.normal_parameters" title="solarwindpy.tools.normal_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normal_parameters</span></code></a>(m, s)</p></td>
-<td><p>Convert log-normal parameters to normal distribution parameters.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.tools.normal_parameters.html#solarwindpy.tools.normal_parameters" title="solarwindpy.tools.normal_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normal_parameters</span></code></a>(m, s[, base])</p></td>
+<td><p>Mean and standard deviation of a log-normal variable.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.tools.swap_protons.html#solarwindpy.tools.swap_protons" title="solarwindpy.tools.swap_protons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_protons</span></code></a>(data[, logger])</p></td>
 <td><p>Swap beam and core proton labels when the beam density dominates.</p></td>

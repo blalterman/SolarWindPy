@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions.trend_fits &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,13 +309,18 @@
 <span class="sd">those 1D fits along the 2nd dimension of the aggregated data.</span>
 <span class="sd">"""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"Popt1DKeys"</span><span class="p">,</span>
+    <span class="s2">"TrendFit"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">subplots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..plotting.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">subplots</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussians</span>
 
@@ -364,7 +369,7 @@
 <span class="sd">            The keys to select y-values and weights from the 1D `FitFunction`s for</span>
 <span class="sd">            passing to the `FitFunction` for fitting the trend.</span>
 <span class="sd">        ffunc1d: fitfunctoins.FitFunction or None</span>
-<span class="sd">            Applied in each x-bin. If None, `fitfunctions.Gaussian`.</span>
+<span class="sd">            Applied in each x-bin. If None, `fitfunctions.gaussians.Gaussian`.</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_agged</span><span class="p">(</span><span class="n">agged</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_fitfunctions</span><span class="p">(</span><span class="n">ffunc1d</span><span class="p">,</span> <span class="n">trendfunc</span><span class="p">)</span>

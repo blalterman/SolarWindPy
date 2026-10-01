@@ -1,6 +1,0 @@
-solarwindpy.plotting.orbits.OrbitHist2D
-=======================================
-
-.. currentmodule:: solarwindpy.plotting.orbits
-
-.. autoclass:: OrbitHist2D

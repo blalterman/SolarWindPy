@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.beta_ani.BetaRPlot &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.instabilities.beta_ani.BetaRPlot &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -79,7 +79,7 @@
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#top-level-api">Top-Level API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#key-classes">Key Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#core-module">Core Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#plotting-module">Plotting Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#fit-functions-module">Fit Functions Module</a></li>
@@ -398,7 +398,14 @@ x- and y-axes use logarithmic scaling.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.alim">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alim</span></span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.alim" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(lower,</span> <span class="pre">upper)</span></code> limits on the aggregated value; see <code class="docutils literal notranslate"><span class="pre">set_alim</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.alim_kind">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alim_kind</span></span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.alim_kind" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>: how <code class="docutils literal notranslate"><span class="pre">alim</span></code> is read; see <code class="docutils literal notranslate"><span class="pre">set_alim</span></code>.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.axnorm">
@@ -626,7 +633,7 @@ passed to <code class="docutils literal notranslate"><span class="pre">make_plot
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.plot_contours">
-<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_aware_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.plot_contours" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_aware_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.plot_contours" title="Link to this definition"></a></dt>
 <dd><p>Make a contour plot on <cite>ax</cite> using <cite>ax.contour</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -636,9 +643,6 @@ passed to <code class="docutils literal notranslate"><span class="pre">make_plot
 <dt><strong>label_levels: bool</strong></dt><dd><p>If True, add labels to contours with <cite>ax.clabel</cite>.</p>
 </dd>
 <dt><strong>cbar: bool</strong></dt><dd><p>If True, create color bar with <cite>labels.z</cite>.</p>
-</dd>
-<dt><strong>limit_color_norm: bool</strong></dt><dd><p>If True, limit the color range to the 1st and 99th percentiles
-of the z-value, count or otherwise.</p>
 </dd>
 <dt><strong>cbar_kwargs: dict, None</strong></dt><dd><p>If not None, kwargs passed to <cite>self._make_cbar</cite>.</p>
 </dd>
@@ -653,8 +657,6 @@ of the z-value, count or otherwise.</p>
 <dt><strong>skip_max_clbl: bool</strong></dt><dd><p>If True, don’t label the maximum contour. Primarily used when the maximum
 contour is, effectively, a point.</p>
 </dd>
-<dt><strong>maximum_color:</strong></dt><dd><p>The color for the maximum of the PDF.</p>
-</dd>
 <dt><strong>use_contourf: bool</strong></dt><dd><p>If True, use <cite>ax.contourf</cite>. Else use <cite>ax.contour</cite>.</p>
 </dd>
 <dt><strong>gaussian_filter_std: int</strong></dt><dd><p>If &gt; 0, apply <cite>scipy.ndimage.gaussian_filter</cite> to the z-values using the
@@ -665,8 +667,14 @@ standard deviation specified by <cite>gaussian_filter_std</cite>.</p>
 <dt><strong>nan_aware_filter: bool</strong></dt><dd><p>If True and gaussian_filter_std &gt; 0, use NaN-aware filtering via
 normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.</p>
 </dd>
-<dt><strong>kwargs:</strong></dt><dd><p>Passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.pcolormesh.html#matplotlib.axes.Axes.pcolormesh" title="(in Matplotlib v3.11.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.pcolormesh()</span></code></a>.
-If row or column normalized data, <cite>norm</cite> defaults to <cite>mpl.colors.Normalize(0, 1)</cite>.</p>
+<dt><strong>levels: array-like, int, None</strong></dt><dd><p>Contour levels. If None, the default for the <code class="docutils literal notranslate"><span class="pre">axnorm</span></code>, or
+matplotlib’s choice when there is none.</p>
+</dd>
+<dt><strong>kwargs:</strong></dt><dd><p>Passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.contour.html#matplotlib.axes.Axes.contour" title="(in Matplotlib v3.11.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.contour()</span></code></a> or
+<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.contourf.html#matplotlib.axes.Axes.contourf" title="(in Matplotlib v3.11.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.contourf()</span></code></a>. <cite>norm</cite> defaults to ten
+colour bands on [0, 1] for row or column normalized data and to a
+<cite>LogNorm</cite> for densities (“d”, “cd”, “rd”); otherwise, with at
+least two levels, to a <cite>BoundaryNorm</cite> on the levels.</p>
 </dd>
 </dl>
 </dd>
@@ -700,7 +708,7 @@ take 1-window_length.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.plot_hist_with_contours">
-<span class="sig-name descname"><span class="pre">plot_hist_with_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contour_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_aware_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.plot_hist_with_contours" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_hist_with_contours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_contourf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contour_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clabel_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_max_clbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaussian_filter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_aware_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.plot_hist_with_contours" title="Link to this definition"></a></dt>
 <dd><p>Make a 2D pcolormesh plot with contour overlay.</p>
 <p>Combines <cite>make_plot</cite> (pcolormesh background) with <cite>plot_contours</cite>
 (contour/contourf overlay) in a single call.</p>
@@ -710,9 +718,6 @@ take 1-window_length.</p>
 <dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mpl.axes.Axes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>If None, create an <cite>Axes</cite> instance from <cite>plt.subplots</cite>.</p>
 </dd>
 <dt><strong>cbar</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, create color bar with <cite>labels.z</cite>.</p>
-</dd>
-<dt><strong>limit_color_norm</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, limit the color range to the 1st and 99th percentiles of
-the plotted values.</p>
 </dd>
 <dt><strong>cbar_kwargs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>If not None, kwargs passed to <cite>self._make_cbar</cite>.</p>
 </dd>
@@ -737,7 +742,8 @@ the plotted values.</p>
 <dt><strong>nan_aware_filter</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True and gaussian_filter_std &gt; 0, use NaN-aware filtering via
 normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.</p>
 </dd>
-<dt><strong>kwargs</strong></dt><dd><p>Passed to <cite>ax.pcolormesh</cite>.</p>
+<dt><strong>kwargs</strong></dt><dd><p>Passed to <cite>ax.pcolormesh</cite>. <cite>norm</cite> defaults as in <cite>make_plot</cite> and
+is shared by the mesh and the contours.</p>
 </dd>
 </dl>
 </dd>
@@ -784,10 +790,37 @@ Otherwise, send both axes (but not z-values).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.instabilities.beta_ani.BetaRPlot.set_alim">
-<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.set_alim" title="Link to this definition"></a></dt>
-<dd><p>Set the minimum (lower) and maximum (upper) allowed value when.</p>
-<p>aggregating. This is different from <cite>clim</cite> because it uses the
-<cite>agg_fcn</cite>. So behavior will change based on <cite>axnorm</cite>, etc.</p>
+<span class="sig-name descname"><span class="pre">set_alim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'value'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.instabilities.beta_ani.BetaRPlot.set_alim" title="Link to this definition"></a></dt>
+<dd><p>Set the minimum (lower) and maximum (upper) allowed aggregated value.</p>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">clim</span></code>, which limits the number of points in a bin, <code class="docutils literal notranslate"><span class="pre">alim</span></code>
+limits the value a bin aggregates to, after <code class="docutils literal notranslate"><span class="pre">axnorm</span></code>, <code class="docutils literal notranslate"><span class="pre">clim</span></code> and
+any cell filter. Bins outside <code class="docutils literal notranslate"><span class="pre">[lower,</span> <span class="pre">upper]</span></code> become NaN; bounds are
+inclusive and None leaves that side open. A <code class="docutils literal notranslate"><span class="pre">Scatter</span></code> applies
+<code class="docutils literal notranslate"><span class="pre">alim</span></code> to the z of each point and does not draw the points outside.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>lower, upper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The limits.</p>
+</dd>
+<dt><strong>kind</strong><span class="classifier">{“value”, “quantile”}</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code>: the limits are aggregated values. <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>: the
+limits are quantiles in [0, 1] of the final aggregated values,
+computed with <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nanquantile.html#numpy.nanquantile" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.nanquantile()</span></code></a> over the finite values
+(NaN and inf excluded) each time the plot aggregates. The
+quantiles pool every bin of the plot: with <code class="docutils literal notranslate"><span class="pre">axnorm</span></code> of <code class="docutils literal notranslate"><span class="pre">&quot;c&quot;</span></code>
+or <code class="docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code> they are taken over the whole grid, not per column or
+row.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">kind</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if <code class="docutils literal notranslate"><span class="pre">lower</span></code> is
+not less than <code class="docutils literal notranslate"><span class="pre">upper</span></code>, or, for <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if a limit is
+outside [0, 1].</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -811,7 +844,7 @@ Otherwise, send both axes (but not z-values).</p>
 <td><p>Row normalize</p></td>
 </tr>
 <tr class="row-odd"><td><p>t</p></td>
-<td><p>Total normalize</p></td>
+<td><p>Divide by the maximum (peak equals 1)</p></td>
 </tr>
 <tr class="row-even"><td><p>cd</p></td>
 <td><p>PDFs in each column</p></td>

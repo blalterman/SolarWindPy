@@ -1,6 +1,0 @@
-solarwindpy.solar\_activity.lisird.lisird.LISIRDExtrema
-=======================================================
-
-.. currentmodule:: solarwindpy.solar_activity.lisird.lisird
-
-.. autoclass:: LISIRDExtrema

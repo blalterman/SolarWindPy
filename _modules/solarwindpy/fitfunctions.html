@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -299,8 +299,9 @@
 <span></span><span class="sa">r</span><span class="sd">"""Fit parametric models to observations with robust least squares.</span>
 
 <span class="sd">Each fit function is a subclass of</span>
-<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFunction` and is importable as</span>
-<span class="sd">``solarwindpy.fitfunctions.&lt;Name&gt;``. :func:`available` prints every one with</span>
+<span class="sd">:class:`~solarwindpy.fitfunctions.core.FitFunction` and is imported from the</span>
+<span class="sd">module that defines it, for example</span>
+<span class="sd">``solarwindpy.fitfunctions.gaussians.Gaussian``. :func:`available` prints every one with</span>
 <span class="sd">its module and LaTeX formula.</span>
 
 <span class="sd">Using a fit function</span>
@@ -308,7 +309,7 @@
 <span class="sd">Construct it from the observations, then call ``make_fit``:</span>
 
 <span class="sd">&gt;&gt;&gt; import numpy as np</span>
-<span class="sd">&gt;&gt;&gt; from solarwindpy.fitfunctions import Line</span>
+<span class="sd">&gt;&gt;&gt; from solarwindpy.fitfunctions.lines import Line</span>
 <span class="sd">&gt;&gt;&gt; x = np.arange(10.0)</span>
 <span class="sd">&gt;&gt;&gt; fit = Line(x, 2.0 * x + 1.0)</span>
 <span class="sd">&gt;&gt;&gt; fit.make_fit()</span>
@@ -364,81 +365,33 @@
 <span class="sd">"""</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"FitFunction"</span><span class="p">,</span>
-    <span class="s2">"TrendFit"</span><span class="p">,</span>
     <span class="s2">"available"</span><span class="p">,</span>
-    <span class="c1"># Fit functions</span>
-    <span class="s2">"Exponential"</span><span class="p">,</span>
-    <span class="s2">"ExponentialCDF"</span><span class="p">,</span>
-    <span class="s2">"ExponentialPlusC"</span><span class="p">,</span>
-    <span class="s2">"Gaussian"</span><span class="p">,</span>
-    <span class="s2">"GaussianLn"</span><span class="p">,</span>
-    <span class="s2">"GaussianNormalized"</span><span class="p">,</span>
-    <span class="s2">"GaussianPlusHeavySide"</span><span class="p">,</span>
-    <span class="s2">"GaussianTimesHeavySide"</span><span class="p">,</span>
-    <span class="s2">"GaussianTimesHeavySidePlusHeavySide"</span><span class="p">,</span>
-    <span class="s2">"HeavySide"</span><span class="p">,</span>
-    <span class="s2">"HingeAtPoint"</span><span class="p">,</span>
-    <span class="s2">"HingeMax"</span><span class="p">,</span>
-    <span class="s2">"HingeMin"</span><span class="p">,</span>
-    <span class="s2">"HingeSaturation"</span><span class="p">,</span>
-    <span class="s2">"Line"</span><span class="p">,</span>
-    <span class="s2">"LineXintercept"</span><span class="p">,</span>
-    <span class="s2">"PowerLaw"</span><span class="p">,</span>
-    <span class="s2">"PowerLawOffCenter"</span><span class="p">,</span>
-    <span class="s2">"PowerLawPlusC"</span><span class="p">,</span>
-    <span class="s2">"Saturation"</span><span class="p">,</span>
-    <span class="s2">"TwoLine"</span><span class="p">,</span>
-    <span class="c1"># Exceptions</span>
-    <span class="s2">"FitFunctionError"</span><span class="p">,</span>
-    <span class="s2">"InsufficientDataError"</span><span class="p">,</span>
-    <span class="s2">"FitFailedError"</span><span class="p">,</span>
-    <span class="s2">"InvalidParameterError"</span><span class="p">,</span>
+    <span class="s2">"composite"</span><span class="p">,</span>
+    <span class="s2">"core"</span><span class="p">,</span>
+    <span class="s2">"exponentials"</span><span class="p">,</span>
+    <span class="s2">"gaussians"</span><span class="p">,</span>
+    <span class="s2">"heaviside"</span><span class="p">,</span>
+    <span class="s2">"hinge"</span><span class="p">,</span>
+    <span class="s2">"lines"</span><span class="p">,</span>
+    <span class="s2">"plots"</span><span class="p">,</span>
+    <span class="s2">"power_laws"</span><span class="p">,</span>
+    <span class="s2">"tex_info"</span><span class="p">,</span>
+    <span class="s2">"trend_fits"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">isabstract</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lines</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussians</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">exponentials</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_laws</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hinge</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">heaviside</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">trend_fits</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">composite</span>
-
-<span class="n">FitFunction</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunction</span>
-<span class="n">TrendFit</span> <span class="o">=</span> <span class="n">trend_fits</span><span class="o">.</span><span class="n">TrendFit</span>
-
-<span class="n">Exponential</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">Exponential</span>
-<span class="n">ExponentialCDF</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">ExponentialCDF</span>
-<span class="n">ExponentialPlusC</span> <span class="o">=</span> <span class="n">exponentials</span><span class="o">.</span><span class="n">ExponentialPlusC</span>
-<span class="n">Gaussian</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">Gaussian</span>
-<span class="n">GaussianLn</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">GaussianLn</span>
-<span class="n">GaussianNormalized</span> <span class="o">=</span> <span class="n">gaussians</span><span class="o">.</span><span class="n">GaussianNormalized</span>
-<span class="n">GaussianPlusHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianPlusHeavySide</span>
-<span class="n">GaussianTimesHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianTimesHeavySide</span>
-<span class="n">GaussianTimesHeavySidePlusHeavySide</span> <span class="o">=</span> <span class="n">composite</span><span class="o">.</span><span class="n">GaussianTimesHeavySidePlusHeavySide</span>
-<span class="n">HeavySide</span> <span class="o">=</span> <span class="n">heaviside</span><span class="o">.</span><span class="n">HeavySide</span>
-<span class="n">HingeAtPoint</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeAtPoint</span>
-<span class="n">HingeMax</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeMax</span>
-<span class="n">HingeMin</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeMin</span>
-<span class="n">HingeSaturation</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">HingeSaturation</span>
-<span class="n">Line</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">Line</span>
-<span class="n">LineXintercept</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">LineXintercept</span>
-<span class="n">PowerLaw</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLaw</span>
-<span class="n">PowerLawOffCenter</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLawOffCenter</span>
-<span class="n">PowerLawPlusC</span> <span class="o">=</span> <span class="n">power_laws</span><span class="o">.</span><span class="n">PowerLawPlusC</span>
-<span class="n">Saturation</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">Saturation</span>
-<span class="n">TwoLine</span> <span class="o">=</span> <span class="n">hinge</span><span class="o">.</span><span class="n">TwoLine</span>
-
-<span class="c1"># Exception classes for better error handling</span>
-<span class="n">FitFunctionError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFunctionError</span>
-<span class="n">InsufficientDataError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">InsufficientDataError</span>
-<span class="n">FitFailedError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">FitFailedError</span>
-<span class="n">InvalidParameterError</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">InvalidParameterError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">exponentials</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussians</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">heaviside</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">hinge</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">plots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">power_laws</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">tex_info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">trend_fits</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fit_function_classes</span><span class="p">():</span>

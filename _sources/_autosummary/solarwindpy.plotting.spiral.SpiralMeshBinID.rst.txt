@@ -1,6 +1,0 @@
-solarwindpy.plotting.spiral.SpiralMeshBinID
-===========================================
-
-.. currentmodule:: solarwindpy.plotting.spiral
-
-.. autoclass:: SpiralMeshBinID

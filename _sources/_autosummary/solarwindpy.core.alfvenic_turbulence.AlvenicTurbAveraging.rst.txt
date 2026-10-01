@@ -1,6 +1,0 @@
-solarwindpy.core.alfvenic\_turbulence.AlvenicTurbAveraging
-==========================================================
-
-.. currentmodule:: solarwindpy.core.alfvenic_turbulence
-
-.. autoclass:: AlvenicTurbAveraging

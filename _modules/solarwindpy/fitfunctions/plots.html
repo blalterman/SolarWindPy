@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions.plots &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,6 +309,12 @@
 <span class="sd">models, residuals and associated annotations.</span>
 <span class="sd">"""</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"AxesLabels"</span><span class="p">,</span>
+    <span class="s2">"LogAxes"</span><span class="p">,</span>
+    <span class="s2">"FFPlot"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>  <span class="c1"># noqa: F401</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -325,6 +331,13 @@
 <div class="viewcode-block" id="FFPlot">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.plots.FFPlot.html#solarwindpy.fitfunctions.plots.FFPlot">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FFPlot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Plot of a fit function's observations, fit, and residuals.</span>
+
+<span class="sd">    Instances are created by a fit function's</span>
+<span class="sd">    :attr:`~solarwindpy.fitfunctions.core.FitFunction.plotter`, not</span>
+<span class="sd">    constructed directly.</span>
+<span class="sd">    """</span>
+
 <div class="viewcode-block" id="FFPlot.__init__">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.plots.FFPlot.html#solarwindpy.fitfunctions.plots.FFPlot.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">TeX_info</span><span class="p">,</span> <span class="n">fit_result</span><span class="p">,</span> <span class="n">fitfunction_name</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
@@ -332,8 +345,9 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        observations : :class:`~solarwindpy.fitfunctions.core.Observations`</span>
-<span class="sd">            Observed data used in the fit.</span>
+<span class="sd">        observations : namedtuple</span>
+<span class="sd">            The ``(used, raw, tk_observed)`` observations of the fit, as</span>
+<span class="sd">            returned by ``FitFunction.observations``.</span>
 <span class="sd">        y_fit : array-like</span>
 <span class="sd">            Model evaluated at the observed ``x`` values.</span>
 <span class="sd">        TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`</span>

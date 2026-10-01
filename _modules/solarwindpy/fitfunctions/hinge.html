@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g8afd0a629 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+gfd6107671 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=456b923b"></script>
+      <script src="../../../_static/documentation_options.js?v=50bd4445"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -310,6 +310,15 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"HingeSaturation"</span><span class="p">,</span>
+    <span class="s2">"TwoLine"</span><span class="p">,</span>
+    <span class="s2">"Saturation"</span><span class="p">,</span>
+    <span class="s2">"HingeMin"</span><span class="p">,</span>
+    <span class="s2">"HingeMax"</span><span class="p">,</span>
+    <span class="s2">"HingeAtPoint"</span><span class="p">,</span>
+<span class="p">]</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -317,7 +326,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span>
 
 <span class="c1"># Named tuple for x-intercepts used by HingeAtPoint</span>
-<span class="n">XIntercepts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"XIntercepts"</span><span class="p">,</span> <span class="s2">"x1,x2"</span><span class="p">)</span>
+<span class="n">_XIntercepts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_XIntercepts"</span><span class="p">,</span> <span class="s2">"x1,x2"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="HingeSaturation">
@@ -362,7 +371,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import HingeSaturation</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import HingeSaturation</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.where(x &lt; 5, 2*x, 10)  # Saturation at y=10 for x&gt;=5</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeSaturation(x, y, guess_xh=5, guess_yh=10)</span>
@@ -557,7 +566,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import TwoLine</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import TwoLine</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))  # Two lines intersecting at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = TwoLine(x, y, guess_xs=5.0)</span>
@@ -795,7 +804,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import Saturation</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import Saturation</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))</span>
 <span class="sd">    &gt;&gt;&gt; fit = Saturation(x, y, guess_xs=5.0, guess_s=10.0)</span>
@@ -1037,7 +1046,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import HingeMin</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import HingeMin</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -2*(x-10))  # Two lines meeting at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeMin(x, y, guess_h=5.0)</span>
@@ -1261,7 +1270,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import HingeMax</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import HingeMax</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.maximum(-2*(x-0), 2*(x-10))  # V-shape with vertex at (5, -10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeMax(x, y, guess_h=5.0)</span>
@@ -1470,13 +1479,13 @@
 <span class="sd">        Slope of first line (fitted parameter).</span>
 <span class="sd">    m2 : float</span>
 <span class="sd">        Slope of second line (fitted parameter).</span>
-<span class="sd">    x_intercepts : XIntercepts</span>
+<span class="sd">    x_intercepts : tuple</span>
 <span class="sd">        Named tuple with x1 and x2 attributes (derived property).</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions import HingeAtPoint</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import HingeAtPoint</span>
 <span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
 <span class="sd">    &gt;&gt;&gt; y = np.minimum(2*(x-0), -1*(x-15))  # Hinge at (5, 10)</span>
 <span class="sd">    &gt;&gt;&gt; fit = HingeAtPoint(x, y, guess_xh=5.0, guess_yh=10.0)</span>
@@ -1547,7 +1556,7 @@
         <span class="k">return</span> <span class="n">hinge_at_point</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">x_intercepts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XIntercepts</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">x_intercepts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""x-intercepts of the two lines.</span>
 
 <span class="sd">        Returns a named tuple with:</span>
@@ -1562,7 +1571,7 @@
         <span class="n">m2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]</span>
         <span class="n">x1</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m1</span><span class="p">)</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">XIntercepts</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_XIntercepts</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
