@@ -17,6 +17,7 @@ checked without editing this file. Label wording is not asserted;
 ``tests/plotting/labels`` covers it.
 """
 
+import itertools
 import re
 
 import matplotlib
@@ -25,6 +26,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 import pytest  # noqa: E402
+from matplotlib import cbook  # noqa: E402
 
 from solarwindpy.plotting import labels  # noqa: E402
 from solarwindpy.plotting.labels import (  # noqa: E402
@@ -62,21 +64,27 @@ def _listing_sections():
 _LISTING = _listing_sections()
 
 
-def _unescaped_dollar_count(text):
-    return text.count("$") - text.count(r"\$")
+def _listed(heading):
+    """Names under ``heading``, or none, so an unparsed listing fails one test.
+
+    A missing heading would otherwise raise ``KeyError`` while pytest collects
+    the module; with an empty list the parametrized sweeps collect no cases and
+    ``test_available_lists_...`` reports the parser failure.
+    """
+    return _LISTING.get(heading, [])
 
 
 def _assert_renders_as_math_axis_label(label):
     """Draw ``label`` as an x-axis label the way ``base.py`` sets it.
 
-    matplotlib typesets a string as mathtext only when it holds an even,
-    nonzero number of unescaped ``$`` (``matplotlib.text.Text`` math
-    detection); otherwise it draws the characters literally. The draw raises
-    ``ValueError`` when mathtext cannot parse the math.
+    matplotlib typesets a string as mathtext only when
+    ``matplotlib.cbook.is_math_text`` says so (an even, nonzero count of
+    unescaped ``$``; ``matplotlib.text.Text`` asks it); otherwise it draws the
+    characters literally. The draw raises ``ValueError`` when mathtext cannot
+    parse the math.
     """
     text = str(label)
-    n_dollars = _unescaped_dollar_count(text)
-    assert n_dollars > 0 and n_dollars % 2 == 0, f"not typeset as math: {text!r}"
+    assert cbook.is_math_text(text), f"not typeset as math: {text!r}"
 
     fig, ax = plt.subplots()
     try:
@@ -98,13 +106,13 @@ def test_available_lists_measurements_components_species_and_special_labels():
     ON FAILURE: the fixture no longer separates the listing into sections;
     fix ``_listing_sections`` for the current ``available()`` layout.
     """
-    assert "n" in _LISTING["Measurements"]
-    assert "x" in _LISTING["Components"]
-    assert "p1" in _LISTING["Species"]
-    assert "Count" in _LISTING["Special"]
+    assert "n" in _listed("Measurements")
+    assert "x" in _listed("Components")
+    assert "p1" in _listed("Species")
+    assert "Count" in _listed("Special")
 
 
-@pytest.mark.parametrize("measurement", _LISTING["Measurements"])
+@pytest.mark.parametrize("measurement", _listed("Measurements"))
 def test_every_listed_measurement_renders_as_a_math_axis_label(measurement):
     """``TeXlabel((m, "", ""))`` draws as math for each listed measurement.
 
@@ -115,7 +123,7 @@ def test_every_listed_measurement_renders_as_a_math_axis_label(measurement):
     _assert_renders_as_math_axis_label(TeXlabel((measurement, "", "")))
 
 
-@pytest.mark.parametrize("component", _LISTING["Components"])
+@pytest.mark.parametrize("component", _listed("Components"))
 def test_every_listed_component_renders_as_a_math_axis_label(component):
     """``TeXlabel(("v", c, "p1"))`` draws as math for each listed component.
 
@@ -126,7 +134,7 @@ def test_every_listed_component_renders_as_a_math_axis_label(component):
     _assert_renders_as_math_axis_label(TeXlabel(("v", component, "p1")))
 
 
-@pytest.mark.parametrize("species", _LISTING["Species"])
+@pytest.mark.parametrize("species", _listed("Species"))
 def test_every_listed_species_renders_as_a_math_axis_label(species):
     """``TeXlabel(("n", "", s))`` draws as math for each listed species.
 
@@ -221,4 +229,57 @@ def test_every_special_label_class_available_lists_has_a_rendering_case():
     instance of it to ``_STRUCTURED_LABELS``.
     """
     built = {type(factory()).__name__ for factory in _STRUCTURED_LABELS.values()}
-    assert set(_LISTING["Special"]) - built == set()
+    assert set(_listed("Special")) - built == set()
+
+
+# Each pair of M/C/S axes crossed in full, the third axis held at the data
+# model's example (n, x, p1 in CLAUDE.md; "v" for C x S, since "n" is a
+# scalar): the single-axis sweeps above miss strings assembled from two
+# listed entries, such as a component and a species sharing one subscript.
+_PAIRS = {
+    "measurement-x-component": lambda: [
+        (m, c, "p1")
+        for m, c in itertools.product(_listed("Measurements"), _listed("Components"))
+    ],
+    "measurement-x-species": lambda: [
+        (m, "x", sp)
+        for m, sp in itertools.product(_listed("Measurements"), _listed("Species"))
+    ],
+    "component-x-species": lambda: [
+        ("v", c, sp)
+        for c, sp in itertools.product(_listed("Components"), _listed("Species"))
+    ],
+}
+
+
+@pytest.mark.parametrize("pair", sorted(_PAIRS))
+def test_every_pair_of_listed_axes_renders_as_math(pair):
+    """Every ``TeXlabel`` from a full cross of two listed axes is typeset as math.
+
+    Each distinct label string is laid out once on a shared Agg figure (the
+    layout runs mathtext and raises ``ValueError`` on invalid math); all
+    failures are collected so one run names every bad combination.
+
+    ON FAILURE: the code is wrong; the listed combinations are not valid
+    mathtext, unless the installed matplotlib dropped a mathtext command the
+    labels use.
+    """
+    texts = {str(TeXlabel(mcs)): mcs for mcs in _PAIRS[pair]()}
+    assert texts, "the listing parser found no names; see test_available_lists_..."
+
+    fig, ax = plt.subplots()
+    renderer = fig.canvas.get_renderer()
+    failures = []
+    try:
+        for text, mcs in texts.items():
+            if not cbook.is_math_text(text):
+                failures.append((mcs, "not typeset as math", text))
+                continue
+            ax.set_xlabel(text)
+            try:
+                ax.xaxis.label.get_window_extent(renderer)
+            except ValueError as err:
+                failures.append((mcs, str(err).splitlines()[0], text))
+    finally:
+        plt.close(fig)
+    assert failures == []
