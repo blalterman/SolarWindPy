@@ -95,6 +95,88 @@ def test_gaussian_plus_heavyside_returns_insufficient_data_error():
     assert isinstance(fit.make_fit(return_exception=True), InsufficientDataError)
 
 
+def _x0_bounds(lo, hi):
+    """Bounds dict that limits only ``x0`` (and keeps ``sigma`` positive)."""
+    free = (-np.inf, np.inf)
+    return {
+        "x0": (lo, hi),
+        "y0": free,
+        "y1": free,
+        "mu": free,
+        "sigma": (0.0, np.inf),
+        "A": free,
+    }
+
+
+@pytest.mark.parametrize(
+    "lo,hi,expect_lo,expect_hi",
+    [
+        # Bounds hold the true step (x0 = 2) but exclude p0's x0 (about 3.05):
+        # the fit lands in the true step's bracket on the sample grid.
+        (1.5, 2.5, *_bracket(np.linspace(0, 10, 200), 2.0)),
+        # Bounds far from the step: every gap outside them is infeasible, so
+        # the fitted x0 is the best feasible gap, inside the caller's bounds.
+        (8.0, 9.0, 8.0, 9.0),
+    ],
+    ids=["bounds-hold-step", "bounds-exclude-step"],
+)
+def test_gaussian_plus_heavyside_scan_respects_caller_x0_bounds(
+    lo, hi, expect_lo, expect_hi
+):
+    """A caller's ``x0`` bounds confine the gap scan, so the refit stays feasible.
+
+    Gap midpoints outside the bounds must be skipped by the scan; if one were
+    chosen, the final refit would start outside the bounds and fail.
+
+    ON FAILURE: the code is wrong.
+    """
+    true = PARAMS[0]
+    x = np.linspace(0, 10, 200)
+    y = _model(x, **true)
+
+    fit = GaussianPlusHeavySide(x, y)
+    assert fit.make_fit(return_exception=True, bounds=_x0_bounds(lo, hi)) is None
+    assert expect_lo < fit.popt["x0"] < expect_hi
+
+
+def test_gaussian_plus_heavyside_replaces_the_x0_of_a_caller_p0():
+    """A caller's ``p0`` seeds the other parameters; its ``x0`` is replaced by the scan.
+
+    The supplied ``x0 = 9.5`` sits far from the true step at 2. The optimizer
+    cannot move ``x0`` (zero gradient between samples), so a fit that kept it
+    would report 9.5; the documented scan puts it in the true bracket.
+
+    ON FAILURE: the code is wrong.
+    """
+    true = PARAMS[0]
+    x = np.linspace(0, 10, 200)
+    y = _model(x, **true)
+
+    fit = GaussianPlusHeavySide(x, y)
+    fit.make_fit(p0=[9.5, 1.0, 3.0, 5.0, 1.0, 4.0])
+
+    lo, hi = _bracket(x, true["x0"])
+    assert lo < fit.popt["x0"] < hi
+
+
+def test_gaussian_plus_heavyside_with_a_single_x_returns_the_fit_error():
+    """All samples at one ``x``: no gap to scan, and the fit error is returned.
+
+    With one unique ``x`` there are no gaps, so the scan has no candidate and
+    the base fit runs on the default ``p0``. Its zero-width Gaussian gives
+    non-finite residuals, which ``least_squares`` reports as ``ValueError``;
+    ``return_exception=True`` returns it instead of raising.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.full(20, 3.0)
+    fit = GaussianPlusHeavySide(x, np.linspace(1.0, 2.0, x.size))
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        result = fit.make_fit(return_exception=True)
+    assert isinstance(result, ValueError)
+
+
 # y = 2x + 1 on integer x: slope 2, intercept 1, x-intercept -1/2, all exact
 # in floating point, so the initial guesses are compared exactly.
 LINE_X = np.arange(10.0)
