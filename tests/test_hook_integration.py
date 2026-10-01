@@ -10,6 +10,7 @@ implemented through the hook chain in .claude/hooks/.
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
@@ -259,6 +260,30 @@ class TestHookScriptsExist:
         """Verify create-compaction.py exists."""
         script = hook_scripts_dir / "create-compaction.py"
         assert script.exists(), "create-compaction.py not found"
+
+
+def test_compaction_with_no_context_files_reports_zero_reduction(
+    hook_scripts_dir: Path, mock_git_repo: Path
+) -> None:
+    """A repository with none of the context files compacts with 0.0% reduction.
+
+    ``mock_git_repo`` holds only ``README.md``, which the token estimate does
+    not read, so the estimate is 0. The hook used to divide by it and exit with
+    ``ZeroDivisionError``; the expected report is no reduction (0 tokens to 0).
+
+    ON FAILURE: the code is wrong.
+    """
+    (mock_git_repo / ".claude").mkdir()
+    result = subprocess.run(
+        [sys.executable, str(hook_scripts_dir / "create-compaction.py")],
+        cwd=mock_git_repo,
+        env=_isolated_git_env(),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    state = (mock_git_repo / ".claude" / "compacted_state.md").read_text()
+    assert "**Context Reduction**: 0.0% (0 → 0 tokens)" in state
 
 
 # ==============================================================================
