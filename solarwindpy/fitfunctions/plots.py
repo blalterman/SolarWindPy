@@ -25,6 +25,13 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
 
 class FFPlot(object):
+    """Plot of a fit function's observations, fit, and residuals.
+
+    Instances are created by a fit function's
+    :attr:`~solarwindpy.fitfunctions.core.FitFunction.plotter`, not
+    constructed directly.
+    """
+
     def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
         """Container for plotting a :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
