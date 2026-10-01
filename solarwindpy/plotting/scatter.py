@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 r"""Scatter plot utilities with optional color mapping."""
 
+__all__ = [
+    "Scatter",
+]
+
 from matplotlib import pyplot as plt
 
 from . import base

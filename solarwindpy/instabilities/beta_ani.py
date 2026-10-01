@@ -3,8 +3,8 @@
 __all__ = ["BetaRPlot"]
 
 
-from ..plotting.histograms import Hist2D
-from ..plotting import labels
+from ..plotting.hist2d import Hist2D
+from ..plotting.labels.base import TeXlabel
 
 
 class BetaRPlot(Hist2D):
@@ -52,8 +52,8 @@ class BetaRPlot(Hist2D):
 
         super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, **kwargs)
         self.set_labels(
-            x=labels.TeXlabel(("beta", "par", species.replace("_bimax", ""))),
-            y=labels.TeXlabel(
+            x=TeXlabel(("beta", "par", species.replace("_bimax", ""))),
+            y=TeXlabel(
                 ("R", "P" if "+" in species else "T", species.replace("_bimax", ""))
             ),
         )

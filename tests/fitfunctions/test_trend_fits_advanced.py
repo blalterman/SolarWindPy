@@ -9,7 +9,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from solarwindpy.fitfunctions import Gaussian, Line, PowerLaw
+from solarwindpy.fitfunctions.gaussians import Gaussian
+from solarwindpy.fitfunctions.lines import Line
+from solarwindpy.fitfunctions.power_laws import PowerLaw
 from solarwindpy.fitfunctions.trend_fits import TrendFit
 
 matplotlib.use("Agg")  # Non-interactive backend for testing

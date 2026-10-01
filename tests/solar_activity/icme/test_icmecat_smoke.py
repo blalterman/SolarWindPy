@@ -16,13 +16,13 @@ class TestModuleImports:
 
     def test_icmecat_class_exists(self):
         """ICMECAT class is importable."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert ICMECAT is not None
 
     def test_url_constant_defined(self):
         """ICMECAT_URL constant is defined."""
-        from solarwindpy.solar_activity.icme import ICMECAT_URL
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL
 
         assert isinstance(ICMECAT_URL, str)
         assert ICMECAT_URL.startswith("https://")
@@ -30,7 +30,7 @@ class TestModuleImports:
 
     def test_spacecraft_names_defined(self):
         """SPACECRAFT_NAMES constant is defined."""
-        from solarwindpy.solar_activity.icme import SPACECRAFT_NAMES
+        from solarwindpy.solar_activity.icme.icmecat import SPACECRAFT_NAMES
 
         assert "ULYSSES" in SPACECRAFT_NAMES
         assert "SolarOrbiter" in SPACECRAFT_NAMES
@@ -69,13 +69,13 @@ class TestDocstrings:
 
     def test_icmecat_class_docstring(self):
         """ICMECAT class has a docstring."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert ICMECAT.__doc__ is not None
 
     def test_icmecat_methods_have_docstrings(self):
         """ICMECAT public methods have docstrings."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         methods = ["filter", "contains", "summary", "get_events_in_range"]
         for method_name in methods:
@@ -88,42 +88,42 @@ class TestClassStructure:
 
     def test_icmecat_has_data_property(self):
         """ICMECAT has data property."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert hasattr(ICMECAT, "data")
 
     def test_icmecat_has_intervals_property(self):
         """ICMECAT has intervals property."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert hasattr(ICMECAT, "intervals")
 
     def test_icmecat_has_strict_intervals_property(self):
         """ICMECAT has strict_intervals property."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert hasattr(ICMECAT, "strict_intervals")
 
     def test_icmecat_has_spacecraft_property(self):
         """ICMECAT has spacecraft property."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert hasattr(ICMECAT, "spacecraft")
 
     def test_icmecat_has_filter_method(self):
         """ICMECAT has filter method."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert callable(getattr(ICMECAT, "filter", None))
 
     def test_icmecat_has_contains_method(self):
         """ICMECAT has contains method."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert callable(getattr(ICMECAT, "contains", None))
 
     def test_icmecat_has_summary_method(self):
         """ICMECAT has summary method."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         assert callable(getattr(ICMECAT, "summary", None))

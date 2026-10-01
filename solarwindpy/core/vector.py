@@ -5,6 +5,11 @@ This module provides a Vector class and its subclass BField for handling vector
 operations and magnetic field calculations.
 """
 
+__all__ = [
+    "Vector",
+    "BField",
+]
+
 import numpy as np
 import pandas as pd
 

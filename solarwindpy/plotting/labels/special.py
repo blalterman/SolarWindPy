@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 r"""Labels that :class:`~solarwindpy.plotting.labels.base.TeXlabel` does not build."""
 
+__all__ = [
+    "ArbitraryLabel",
+    "ManualLabel",
+    "Vsw",
+    "CarringtonRotation",
+    "Count",
+    "Power",
+    "Probability",
+    "CountOther",
+    "MathFcn",
+    "AbsoluteValue",
+    "Distance2Sun",
+    "SSN",
+    "ComparisonLabel",
+    "Xcorr",
+]
+
 from pathlib import Path
 from string import Template as StringTemplate
 from string import Formatter as StringFormatter

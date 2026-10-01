@@ -4,6 +4,10 @@ r"""Contais :py:class:`~solarwindpy.core.spacecraft.Spacecraft` class.
 Class inherets from :py:class:`~solarwindpy.core.base.Base` and contains :py:class:`~solarwindpy.core.vector.Vector` objects.
 """
 
+__all__ = [
+    "Spacecraft",
+]
+
 import pandas as pd
 import numpy as np
 

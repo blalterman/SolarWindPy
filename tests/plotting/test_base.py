@@ -35,7 +35,7 @@ from solarwindpy.plotting.base import (  # noqa: E402
     RangeLimits,
 )
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
-from solarwindpy.plotting.labels import TeXlabel  # noqa: E402
+from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
 # ---------------------------------------------------------------------------

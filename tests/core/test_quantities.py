@@ -11,8 +11,8 @@ from scipy import constants
 
 from . import test_base as base
 
-from solarwindpy import vector
-from solarwindpy import tensor
+from solarwindpy.core import vector
+from solarwindpy.core import tensor
 
 pd.set_option("mode.chained_assignment", "raise")
 

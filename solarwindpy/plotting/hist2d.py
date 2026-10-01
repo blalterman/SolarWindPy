@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 r"""Two-dimensional histogram and heatmap plotting utilities."""
 
+__all__ = [
+    "Hist2D",
+]
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -14,11 +18,8 @@ from . import base
 from . import labels
 from .tools import nan_gaussian_filter
 
-from . import agg_plot
-from . import hist1d
-
-AggPlot = agg_plot.AggPlot
-Hist1D = hist1d.Hist1D
+from .agg_plot import AggPlot
+from .hist1d import Hist1D
 
 
 class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):

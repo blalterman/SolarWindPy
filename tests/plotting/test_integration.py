@@ -34,6 +34,7 @@ from solarwindpy.plotting.labels import (  # noqa: E402
     special,
 )
 from solarwindpy.plotting.labels import datetime as dt_labels  # noqa: E402
+from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 
 
 def _listing_sections():
@@ -111,7 +112,7 @@ def test_every_listed_measurement_renders_as_a_math_axis_label(measurement):
     valid mathtext, unless the installed matplotlib dropped a mathtext command
     the label uses.
     """
-    _assert_renders_as_math_axis_label(labels.TeXlabel((measurement, "", "")))
+    _assert_renders_as_math_axis_label(TeXlabel((measurement, "", "")))
 
 
 @pytest.mark.parametrize("component", _LISTING["Components"])
@@ -122,7 +123,7 @@ def test_every_listed_component_renders_as_a_math_axis_label(component):
     inside a subscript, unless the installed matplotlib dropped a mathtext
     command the label uses.
     """
-    _assert_renders_as_math_axis_label(labels.TeXlabel(("v", component, "p1")))
+    _assert_renders_as_math_axis_label(TeXlabel(("v", component, "p1")))
 
 
 @pytest.mark.parametrize("species", _LISTING["Species"])
@@ -133,7 +134,7 @@ def test_every_listed_species_renders_as_a_math_axis_label(species):
     inside a subscript, unless the installed matplotlib dropped a mathtext
     command the label uses.
     """
-    _assert_renders_as_math_axis_label(labels.TeXlabel(("n", "", species)))
+    _assert_renders_as_math_axis_label(TeXlabel(("n", "", species)))
 
 
 _N_P1 = ("n", "", "p1")
@@ -144,15 +145,11 @@ _V_X_A = ("v", "x", "a")
 # class the listing names but ``TeXlabel`` does not build. Each factory is
 # called inside the test so a constructor error is reported against its case.
 _STRUCTURED_LABELS = {
-    "TeXlabel-ratio": lambda: labels.TeXlabel(_N_A, _N_P1),
-    "TeXlabel-new-line-for-units": lambda: labels.TeXlabel(
-        _N_P1, new_line_for_units=True
-    ),
-    "TeXlabel-description": lambda: labels.TeXlabel(_N_P1, description="Protons"),
+    "TeXlabel-ratio": lambda: TeXlabel(_N_A, _N_P1),
+    "TeXlabel-new-line-for-units": lambda: TeXlabel(_N_P1, new_line_for_units=True),
+    "TeXlabel-description": lambda: TeXlabel(_N_P1, description="Protons"),
     **{
-        f"TeXlabel-axnorm-{norm}": (
-            lambda norm=norm: labels.TeXlabel(_N_P1, axnorm=norm)
-        )
+        f"TeXlabel-axnorm-{norm}": (lambda norm=norm: TeXlabel(_N_P1, axnorm=norm))
         for norm in ("c", "r", "t", "d")
     },
     **{
@@ -163,18 +160,18 @@ _STRUCTURED_LABELS = {
     "CarringtonRotation-short": lambda: special.CarringtonRotation(True),
     "CarringtonRotation-long": lambda: special.CarringtonRotation(False),
     "Power": lambda: special.Power(),
-    "Probability": lambda: special.Probability(labels.TeXlabel(_N_P1), "> 5"),
-    "CountOther": lambda: special.CountOther(labels.TeXlabel(_N_P1), "> 5"),
+    "Probability": lambda: special.Probability(TeXlabel(_N_P1), "> 5"),
+    "CountOther": lambda: special.CountOther(TeXlabel(_N_P1), "> 5"),
     "CountOther-new-line": lambda: special.CountOther(
-        labels.TeXlabel(_N_P1), "> 5", new_line_for_units=True
+        TeXlabel(_N_P1), "> 5", new_line_for_units=True
     ),
-    "MathFcn": lambda: special.MathFcn("log10", labels.TeXlabel(_N_P1)),
+    "MathFcn": lambda: special.MathFcn("log10", TeXlabel(_N_P1)),
     "MathFcn-dimensional-new-line": lambda: special.MathFcn(
-        "log10", labels.TeXlabel(_N_P1), dimensionless=False, new_line_for_units=True
+        "log10", TeXlabel(_N_P1), dimensionless=False, new_line_for_units=True
     ),
-    "AbsoluteValue": lambda: special.AbsoluteValue(labels.TeXlabel(_V_X_A)),
+    "AbsoluteValue": lambda: special.AbsoluteValue(TeXlabel(_V_X_A)),
     "AbsoluteValue-new-line": lambda: special.AbsoluteValue(
-        labels.TeXlabel(_V_X_A), new_line_for_units=True
+        TeXlabel(_V_X_A), new_line_for_units=True
     ),
     **{
         f"Distance2Sun-{units}": (lambda units=units: special.Distance2Sun(units))
@@ -185,13 +182,11 @@ _STRUCTURED_LABELS = {
         for key in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
     },
     "ComparisonLabel": lambda: special.ComparisonLabel(
-        labels.TeXlabel(_N_A), labels.TeXlabel(_N_P1), "subtract"
+        TeXlabel(_N_A), TeXlabel(_N_P1), "subtract"
     ),
-    "Xcorr": lambda: special.Xcorr(
-        labels.TeXlabel(_N_P1), labels.TeXlabel(_V_X_A), "pearson"
-    ),
+    "Xcorr": lambda: special.Xcorr(TeXlabel(_N_P1), TeXlabel(_V_X_A), "pearson"),
     "Xcorr-short": lambda: special.Xcorr(
-        labels.TeXlabel(_N_P1), labels.TeXlabel(_V_X_A), "pearson", short_tex=True
+        TeXlabel(_N_P1), TeXlabel(_V_X_A), "pearson", short_tex=True
     ),
     "ManualLabel": lambda: chemistry.mass_per_charge,
     "Ion": lambda: composition.Ion("O", "6"),

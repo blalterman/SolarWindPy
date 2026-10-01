@@ -115,7 +115,7 @@ class TestDocstringInheritance:
 
     def test_inherited_method_docstrings(self):
         """Verify method docstrings are inherited."""
-        from solarwindpy.fitfunctions import Gaussian
+        from solarwindpy.fitfunctions.gaussians import Gaussian
 
         # Gaussian should have inherited __init__ docstring from FitFunction
         init_doc = Gaussian.__init__.__doc__
@@ -130,13 +130,11 @@ class TestAllFitFunctionsInstantiate:
     def test_import_all_fitfunctions(self):
         """Verify all fitfunction classes can be imported without MRO errors."""
         # If there's an MRO issue, the import will fail with TypeError
-        from solarwindpy.fitfunctions import (
-            Exponential,
-            Gaussian,
-            PowerLaw,
-            Line,
-            TrendFit,
-        )
+        from solarwindpy.fitfunctions.exponentials import Exponential
+        from solarwindpy.fitfunctions.gaussians import Gaussian
+        from solarwindpy.fitfunctions.power_laws import PowerLaw
+        from solarwindpy.fitfunctions.lines import Line
+        from solarwindpy.fitfunctions.trend_fits import TrendFit
 
         # All imports successful - verify they are proper FitFunction subclasses
         assert issubclass(Exponential, FitFunction)
@@ -148,12 +146,10 @@ class TestAllFitFunctionsInstantiate:
 
     def test_instantiate_all_fitfunctions(self):
         """Verify all fitfunction classes can be instantiated."""
-        from solarwindpy.fitfunctions import (
-            Exponential,
-            Gaussian,
-            PowerLaw,
-            Line,
-        )
+        from solarwindpy.fitfunctions.exponentials import Exponential
+        from solarwindpy.fitfunctions.gaussians import Gaussian
+        from solarwindpy.fitfunctions.power_laws import PowerLaw
+        from solarwindpy.fitfunctions.lines import Line
 
         x = [0, 1, 2, 3, 4]
         y = [1, 2, 3, 4, 5]

@@ -6,6 +6,12 @@ using the :class:`~solarwindpy.fitfunctions.core.FitFunction` API.
 Each defines the model, an initial guess, and its LaTeX form.
 """
 
+__all__ = [
+    "Exponential",
+    "ExponentialPlusC",
+    "ExponentialCDF",
+]
+
 import numpy as np
 
 from numbers import Number

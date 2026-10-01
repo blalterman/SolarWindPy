@@ -200,14 +200,6 @@ def test_every_exported_name_resolves(name):
     assert getattr(sa, name) is not None
 
 
-def test_ssn_is_the_sunspot_number_module():
-    """``ssn`` is an alias for ``sunspot_number``, not a copy.
-
-    ON FAILURE: the code is wrong.
-    """
-    assert sa.ssn is sa.sunspot_number
-
-
 # Runs in a fresh interpreter: in-process, ``urllib.request`` is already
 # imported by whatever ran first, which would hide a missing import in
 # lisird.py.

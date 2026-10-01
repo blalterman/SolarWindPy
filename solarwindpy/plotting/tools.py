@@ -5,6 +5,14 @@ These helpers provide shortcuts for creating figures, saving output, building gr
 of axes with shared colorbars, and NaN-aware image filtering.
 """
 
+__all__ = [
+    "subplots",
+    "save",
+    "joint_legend",
+    "build_ax_array_with_common_colorbar",
+    "nan_gaussian_filter",
+]
+
 import logging
 import numpy as np
 import matplotlib as mpl

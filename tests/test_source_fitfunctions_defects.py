@@ -16,12 +16,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from solarwindpy.fitfunctions import (
-    GaussianPlusHeavySide,
-    InsufficientDataError,
-    Line,
-    LineXintercept,
-)
+from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
+from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.lines import Line, LineXintercept
 
 
 def _model(x, x0, y0, y1, mu, sigma, A):
@@ -138,7 +135,8 @@ def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
     """
     # Resolve at call time: tests/test_circular_imports.py drops and re-imports
     # every solarwindpy module, and pickle requires the class in sys.modules.
-    from solarwindpy.fitfunctions import Line, TrendFit
+    from solarwindpy.fitfunctions.lines import Line
+    from solarwindpy.fitfunctions.trend_fits import TrendFit
 
     agged = pd.DataFrame(
         {0: [1.0, 2.0, 3.0], 1: [2.0, 3.0, 4.0]},

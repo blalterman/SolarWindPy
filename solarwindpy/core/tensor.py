@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 """Tensor class for storing quantities like thermal speed, pressure, and temperature."""
 
+__all__ = [
+    "Tensor",
+]
+
 import pandas as pd
 
 from . import base

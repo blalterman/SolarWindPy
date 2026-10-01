@@ -16,6 +16,12 @@ GaussianTimesHeavySidePlusHeavySide
 
 from __future__ import annotations
 
+__all__ = [
+    "GaussianPlusHeavySide",
+    "GaussianTimesHeavySide",
+    "GaussianTimesHeavySidePlusHeavySide",
+]
+
 import numpy as np
 
 from .core import FitFailedError, FitFunction, InsufficientDataError
@@ -61,7 +67,7 @@ class GaussianPlusHeavySide(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import GaussianPlusHeavySide
+    >>> from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
     >>> x = np.linspace(0, 10, 100)
     >>> # Gaussian peak at mu=5 with step down at x0=2
     >>> y = 4*np.exp(-0.5*((x-5)/1)**2) + 3*np.heaviside(2-x, 0.5) + 1
@@ -311,7 +317,7 @@ class GaussianTimesHeavySide(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import GaussianTimesHeavySide
+    >>> from solarwindpy.fitfunctions.composite import GaussianTimesHeavySide
     >>> x = np.linspace(0, 10, 100)
     >>> # Truncated Gaussian: zero for x < 3
     >>> y = 4*np.exp(-0.5*((x-5)/1)**2) * np.heaviside(x-3, 1.0)
@@ -488,7 +494,7 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import GaussianTimesHeavySidePlusHeavySide
+    >>> from solarwindpy.fitfunctions.composite import GaussianTimesHeavySidePlusHeavySide
     >>> x = np.linspace(0, 10, 100)
     >>> # Plateau at y=2 for x<3, then Gaussian peak
     >>> y = 4*np.exp(-0.5*((x-5)/1)**2)*np.heaviside(x-3, 0.5) + 2*np.heaviside(3-x, 0.5)

@@ -84,9 +84,9 @@ numpydoc_xref_param_type = True
 
 # Docstring type specs are written with the names the source imports: numpy,
 # pandas and matplotlib under their conventional short names, and package
-# modules under their import aliases (``from pandas import MultiIndex as MI``
-# and ``from . import units_constants as uc`` in ``core/base.py``). Map each
-# spelling to the fully qualified name that intersphinx or this build indexes.
+# modules under the names the source imports them by (``from pandas import
+# MultiIndex as MI`` and ``from . import units_constants`` in
+# ``core/base.py``). Map each spelling to the fully qualified name that intersphinx or this build indexes.
 # A spelling that is not an import the source uses belongs in the docstring.
 numpydoc_xref_aliases = {
     "np.ndarray": "numpy.ndarray",
@@ -114,8 +114,8 @@ numpydoc_xref_aliases = {
     "Colorbar": "matplotlib.colorbar.Colorbar",
     "FunctionType": "types.FunctionType",
     "Path": "pathlib.Path",
-    "uc.Units": "solarwindpy.core.units_constants.Units",
-    "uc.Constants": "solarwindpy.core.units_constants.Constants",
+    "units_constants.Units": "solarwindpy.core.units_constants.Units",
+    "units_constants.Constants": "solarwindpy.core.units_constants.Constants",
     "vector.Vector": "solarwindpy.core.vector.Vector",
     "Ion": "solarwindpy.core.ions.Ion",
     "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
@@ -167,6 +167,10 @@ nitpick_ignore = [
     # Base of fitfunctions.core.FitFunctionMeta. docstring-inheritance publishes
     # no Sphinx inventory: its documentation site returns 404 for objects.inv.
     ("py:class", "docstring_inheritance.NumpyDocstringInheritanceMeta"),
+    # Private mixin base of plotting.hist2d.Hist2D, scatter.Scatter and
+    # spiral.SpiralPlot2D. Private names are not documented, so the
+    # show-inheritance line cannot link it.
+    ("py:class", "solarwindpy.plotting.base._CbarMaker"),
 ]
 
 # -- HTML output configuration -----------------------------------------------

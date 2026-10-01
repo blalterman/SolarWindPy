@@ -6,6 +6,14 @@ system paths for saving figures.  Concrete plot classes derive from these mixins
 implement specific visualizations.
 """
 
+__all__ = [
+    "LogAxes",
+    "AxesLabels",
+    "RangeLimits",
+    "Base",
+    "PlotWithZdata",
+]
+
 import logging
 import numpy as np
 import pandas as pd

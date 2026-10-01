@@ -29,6 +29,10 @@ Propoded Updates
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
 """
 
+__all__ = [
+    "Plasma",
+]
+
 import numpy as np
 import pandas as pd
 import itertools

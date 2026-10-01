@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 r"""Tools for creating physical quantity plot labels."""
 
+__all__ = [
+    "Base",
+    "TeXlabel",
+]
+
 import logging
 import re
 from abc import ABC

@@ -7,6 +7,12 @@ optional additive constant or a shifted origin. Their initial guesses are
 fixed values, not estimated from the data.
 """
 
+__all__ = [
+    "PowerLaw",
+    "PowerLawPlusC",
+    "PowerLawOffCenter",
+]
+
 from .core import FitFunction
 
 

@@ -5,6 +5,12 @@ This module contains :class:`FFPlot`, a helper for visualizing fitted
 models, residuals and associated annotations.
 """
 
+__all__ = [
+    "AxesLabels",
+    "LogAxes",
+    "FFPlot",
+]
+
 import logging  # noqa: F401
 
 import numpy as np

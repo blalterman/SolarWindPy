@@ -420,7 +420,8 @@ df.loc[df['Np'] > 5, 'new_col'] = 0
 ```python
 import pytest
 import numpy as np
-from solarwindpy.core import Plasma, Ion
+from solarwindpy.core.plasma import Plasma
+from solarwindpy.core.ions import Ion
 
 class TestClassName:
     """Test suite for ClassName functionality."""

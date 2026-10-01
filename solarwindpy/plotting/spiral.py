@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 r"""Spiral mesh plots and associated binning utilities."""
 
+__all__ = [
+    "InitialSpiralEdges",
+    "SpiralMeshBinID",
+    "SpiralFilterThresholds",
+    "get_counts_per_bin",
+    "calculate_bin_number_with_numba",
+    "SpiralMesh",
+    "SpiralPlot2D",
+]
+
 import logging
 
 import numpy as np

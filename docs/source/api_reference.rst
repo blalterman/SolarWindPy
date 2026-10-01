@@ -12,19 +12,20 @@ so every module it contains is documented without being listed here by hand.
    module itself is documented last on the page for the same reason, because
    automodule sets the current module for everything after it.
 
-Top-Level API
--------------
+Key Classes
+-----------
 
-Core classes and functions available at the package level.
+The classes most analyses start from. Every public object has one import path,
+the module that defines it, and is documented at that path.
 
 .. autosummary::
    :toctree: _autosummary
    :template: class.rst
 
-   ~solarwindpy.Plasma
-   ~solarwindpy.Hist1D
-   ~solarwindpy.Hist2D
-   ~solarwindpy.TeXlabel
+   ~solarwindpy.core.plasma.Plasma
+   ~solarwindpy.plotting.hist1d.Hist1D
+   ~solarwindpy.plotting.hist2d.Hist2D
+   ~solarwindpy.plotting.labels.base.TeXlabel
 
 Core Module
 -----------
@@ -104,8 +105,8 @@ General utility functions and helper tools for data manipulation and analysis.
 Package
 -------
 
-The ``solarwindpy`` package namespace. Its members are the subpackages and
-classes documented above.
+The ``solarwindpy`` package namespace. Its members are the subpackages
+documented above.
 
 .. automodule:: solarwindpy
    :no-members:

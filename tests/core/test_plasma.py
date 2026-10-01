@@ -13,11 +13,11 @@ from scipy.constants import physical_constants
 
 from . import test_base as base
 
-from solarwindpy import vector
-from solarwindpy import ions
-from solarwindpy import plasma
-from solarwindpy import spacecraft
-from solarwindpy import alfvenic_turbulence
+from solarwindpy.core import vector
+from solarwindpy.core import ions
+from solarwindpy.core import plasma
+from solarwindpy.core import spacecraft
+from solarwindpy.core import alfvenic_turbulence
 
 pd.set_option("mode.chained_assignment", "raise")
 

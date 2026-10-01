@@ -1,4 +1,4 @@
-from solarwindpy import plasma
+from solarwindpy.core import plasma
 from . import test_base
 
 

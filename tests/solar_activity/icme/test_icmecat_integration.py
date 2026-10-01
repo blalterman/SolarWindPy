@@ -15,7 +15,7 @@ class TestLiveDownload:
 
     def test_instantiate_downloads_data(self):
         """ICMECAT() downloads real data."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT()
 
@@ -23,7 +23,7 @@ class TestLiveDownload:
 
     def test_ulysses_events_exist(self):
         """Real catalog contains Ulysses events."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT(spacecraft="Ulysses")
 
@@ -36,7 +36,7 @@ class TestLiveDownload:
 
     def test_data_types_correct(self):
         """Real data has correct dtypes."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT()
 
@@ -46,7 +46,7 @@ class TestLiveDownload:
 
     def test_filter_then_contains(self):
         """End-to-end: filter to Ulysses, check containment."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT(spacecraft="Ulysses")
 
@@ -66,7 +66,7 @@ class TestLiveDownload:
 
     def test_summary_on_real_data(self):
         """summary() works on real data."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT(spacecraft="Ulysses")
 
@@ -83,7 +83,7 @@ class TestMultipleSpacecraft:
     @pytest.mark.parametrize("spacecraft", ["Ulysses", "Wind", "STEREO-A"])
     def test_filter_to_spacecraft(self, spacecraft):
         """Can filter to various spacecraft."""
-        from solarwindpy.solar_activity.icme import ICMECAT
+        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
         cat = ICMECAT()
         filtered = cat.filter(spacecraft)

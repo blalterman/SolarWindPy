@@ -5,13 +5,18 @@ Apply a fit along one dimention of a 2D aggregated data and then fit the results
 those 1D fits along the 2nd dimension of the aggregated data.
 """
 
+__all__ = [
+    "Popt1DKeys",
+    "TrendFit",
+]
+
 import logging  # noqa: F401
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from collections import namedtuple
 
-from ..plotting import subplots
+from ..plotting.tools import subplots
 from . import core
 from . import gaussians
 
@@ -56,7 +61,7 @@ class TrendFit(object):
             The keys to select y-values and weights from the 1D `FitFunction`s for
             passing to the `FitFunction` for fitting the trend.
         ffunc1d: fitfunctoins.FitFunction or None
-            Applied in each x-bin. If None, `fitfunctions.Gaussian`.
+            Applied in each x-bin. If None, `fitfunctions.gaussians.Gaussian`.
         """
         self.set_agged(agged)
         self.set_fitfunctions(ffunc1d, trendfunc)

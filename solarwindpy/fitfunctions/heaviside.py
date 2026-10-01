@@ -6,6 +6,10 @@ commonly used for modeling abrupt transitions in data.
 
 from __future__ import annotations
 
+__all__ = [
+    "HeavySide",
+]
+
 import numpy as np
 
 from .core import FitFunction
@@ -56,7 +60,7 @@ class HeavySide(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import HeavySide
+    >>> from solarwindpy.fitfunctions.heaviside import HeavySide
     >>> x = np.linspace(0, 10, 100)
     >>> y = np.where(x < 5, 5, 2)  # Step down at x=5
     >>> fit = HeavySide(x, y, guess_x0=5, guess_y0=2, guess_y1=3)

@@ -7,6 +7,12 @@ variations used throughout the package.  Each class inherits from
 target function, initial parameter estimates, and LaTeX output helpers.
 """
 
+__all__ = [
+    "Gaussian",
+    "GaussianNormalized",
+    "GaussianLn",
+]
+
 import numpy as np
 
 from .core import FitFunction

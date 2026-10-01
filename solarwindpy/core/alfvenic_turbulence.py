@@ -21,6 +21,11 @@ https://doi.org/10.1093/mnrasl/slw135
 *Astrophys. J.*, 856, 49.
 """
 
+__all__ = [
+    "AlfvenicTurbAveraging",
+    "AlfvenicTurbulence",
+]
+
 import numpy as np
 import pandas as pd
 

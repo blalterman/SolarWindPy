@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib as mpl
 import numpy as np
 
-from ...plotting import subplots
+from ...plotting.tools import subplots
 
 
 class ExtremaCalculator(object):

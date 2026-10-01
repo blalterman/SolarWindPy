@@ -7,6 +7,15 @@ providing convenient plotting helpers.  Subclasses need only define
 the functional form and an initial parameter guess.
 """
 
+__all__ = [
+    "FitFunctionError",
+    "InsufficientDataError",
+    "FitFailedError",
+    "InvalidParameterError",
+    "FitFunctionMeta",
+    "FitFunction",
+]
+
 import logging  # noqa: F401
 import warnings
 
@@ -152,7 +161,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Examples
         --------
         >>> import numpy as np  # doctest: +SKIP
-        >>> from solarwindpy.fitfunctions import Gaussian  # doctest: +SKIP
+        >>> from solarwindpy.fitfunctions.gaussians import Gaussian  # doctest: +SKIP
         >>> x = np.linspace(-5, 5, 100)  # doctest: +SKIP
         >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP
         >>> fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP
@@ -487,7 +496,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         Examples
         --------
         >>> import numpy as np
-        >>> from solarwindpy.fitfunctions import Gaussian
+        >>> from solarwindpy.fitfunctions.gaussians import Gaussian
         >>> x = np.linspace(0, 10, 101)
         >>> y = 4 * np.exp(-0.5 * ((x - 5) / 1) ** 2)
         >>> # Create FitFunction with constraints

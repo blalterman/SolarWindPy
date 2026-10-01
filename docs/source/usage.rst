@@ -23,7 +23,7 @@ three-level MultiIndex named ``M``, ``C``, ``S``:
   magnetic field.
 
 >>> import pandas as pd
->>> import solarwindpy as swp
+>>> from solarwindpy.core.plasma import Plasma
 >>> epoch = pd.date_range("2023-01-01", periods=3, freq="1h")
 >>> columns = pd.MultiIndex.from_tuples(
 ...     [
@@ -46,7 +46,7 @@ three-level MultiIndex named ``M``, ``C``, ``S``:
 ...     index=epoch,
 ...     columns=columns,
 ... )
->>> plasma = swp.Plasma(data, "p1", "a")
+>>> plasma = Plasma(data, "p1", "a")
 >>> plasma.species
 ('a', 'p1')
 
@@ -85,7 +85,7 @@ Every fit function takes observed ``x`` and ``y`` arrays. Fitting a Gaussian
 to a noise-free Gaussian recovers the parameters that generated it:
 
 >>> import numpy as np
->>> from solarwindpy.fitfunctions import Gaussian
+>>> from solarwindpy.fitfunctions.gaussians import Gaussian
 >>> x = np.linspace(300, 600, 61)
 >>> y = 50 * np.exp(-0.5 * ((x - 420) / 40) ** 2)
 >>> fit = Gaussian(x, y)

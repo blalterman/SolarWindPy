@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 r"""One-dimensional histogram plotting utilities."""
 
+__all__ = [
+    "Hist1D",
+]
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl

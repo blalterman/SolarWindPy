@@ -790,7 +790,7 @@ def test_abundance_namedtuple_structure():
 
 def test_can_import_from_core():
     """Can import ReferenceAbundances from solarwindpy.core."""
-    from solarwindpy.core import ReferenceAbundances as RA
+    from solarwindpy.core.abundances import ReferenceAbundances as RA
 
     assert RA is ReferenceAbundances, "Import should resolve to same class"
 

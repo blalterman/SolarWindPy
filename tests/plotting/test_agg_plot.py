@@ -20,7 +20,9 @@ import pandas as pd
 import pytest
 from scipy.stats import binned_statistic_2d
 
-from solarwindpy.plotting.histograms import AggPlot, Hist1D, Hist2D
+from solarwindpy.plotting.agg_plot import AggPlot
+from solarwindpy.plotting.hist1d import Hist1D
+from solarwindpy.plotting.hist2d import Hist2D
 
 # Non-square grid (4 x-bins, 3 y-bins) so a transposed result cannot pass.
 X_EDGES = np.array([0.0, 1.0, 2.0, 3.0, 4.0])

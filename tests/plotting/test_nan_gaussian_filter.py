@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 from scipy.ndimage import gaussian_filter
 
-from solarwindpy.plotting import nan_gaussian_filter
+from solarwindpy.plotting.tools import nan_gaussian_filter
 
 
 def _brute_force_normalized_convolution(array, sigma, truncate=4.0):

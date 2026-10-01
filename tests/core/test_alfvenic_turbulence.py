@@ -15,7 +15,7 @@ from scipy.constants import physical_constants
 
 from . import test_base as base
 
-from solarwindpy import alfvenic_turbulence as turb
+from solarwindpy.core import alfvenic_turbulence as turb
 
 pd.set_option("mode.chained_assignment", "raise")
 

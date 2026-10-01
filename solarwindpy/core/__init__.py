@@ -1,26 +1,29 @@
-"""Core classes and utilities for :mod:`solarwindpy`."""
+"""Core classes and utilities for :mod:`solarwindpy`.
 
-from .base import Base, Core
-from .vector import Vector
-from .tensor import Tensor
-from .ions import Ion
-from .plasma import Plasma
-from .spacecraft import Spacecraft
-from .units_constants import Units, Constants
-from .alfvenic_turbulence import AlfvenicTurbulence
-from .abundances import ReferenceAbundances, Abundance
+Each class is imported from the module that defines it, for example
+:class:`solarwindpy.core.plasma.Plasma`.
+"""
+
+from . import (
+    abundances,
+    alfvenic_turbulence,
+    base,
+    ions,
+    plasma,
+    spacecraft,
+    tensor,
+    units_constants,
+    vector,
+)
 
 __all__ = [
-    "Base",
-    "Core",
-    "Vector",
-    "Tensor",
-    "Ion",
-    "Plasma",
-    "Spacecraft",
-    "Units",
-    "Constants",
-    "AlfvenicTurbulence",
-    "ReferenceAbundances",
-    "Abundance",
+    "abundances",
+    "alfvenic_turbulence",
+    "base",
+    "ions",
+    "plasma",
+    "spacecraft",
+    "tensor",
+    "units_constants",
+    "vector",
 ]
