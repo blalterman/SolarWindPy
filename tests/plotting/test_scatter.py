@@ -199,12 +199,16 @@ def test_set_log_makes_the_plotted_axis_logarithmic(ax, axis, expected):
 def test_list_inputs_plot_the_same_points_as_series(ax):
     """Plain lists are accepted and plotted as the equivalent Series.
 
+    The lists are ``ROWS``, so they carry a NaN in y and a NaN in z; as with
+    Series, both rows are dropped and the offsets are the complete rows.
+
     ON FAILURE: the code is wrong.
     """
-    Scatter([1.0, 2.0, 3.0], [6.0, 4.0, 5.0], [0.1, 0.2, 0.3]).make_plot(ax=ax)
+    Scatter(list(X), list(Y), list(Z)).make_plot(ax=ax)
     np.testing.assert_array_equal(
-        ax.collections[0].get_offsets(), [[1.0, 6.0], [2.0, 4.0], [3.0, 5.0]]
+        ax.collections[0].get_offsets(), np.c_[_col(KEPT, 1), _col(KEPT, 2)]
     )
+    np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
 
 
 class CbarKwargsMutated(AssertionError):

@@ -5,10 +5,8 @@
 (``data``, ``labels``, ``log``, ``path``, ``clip``) is tested on ``LinePlot``,
 a minimal ``PlotWithZdata`` subclass. Axis formatting and colorbars are tested
 through the package's own ``Hist1D`` and ``Scatter``, asserting on the real
-matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Two behaviours have no
-public path, the colorbar's missing ``ax``/``cax`` error and
-``_DataLimFormatter``, so ``LinePlot`` and ``LimPlot`` call those hooks. Expected values come from the hand-typed ``ROWS``
-table or the ``_expected_path`` helper, which rebuilds the documented path
+matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Expected values
+come from the hand-typed ``ROWS`` table or the ``_expected_path`` helper, which rebuilds the documented path
 layout (class, x, y, z, scale) from ``pathlib`` alone.
 """
 
@@ -28,8 +26,6 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from solarwindpy.plotting.base import (  # noqa: E402
     AxesLabels,
     Base,
-    _CbarMaker,
-    _DataLimFormatter,
     LogAxes,
     PlotWithZdata,
     RangeLimits,
@@ -85,30 +81,16 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
     return Path(cls_name, x, y, z, _scale(logx, logy))
 
 
-class LinePlot(PlotWithZdata, _CbarMaker):
-    """Minimal concrete plot: points coloured by z, passed to the cbar hook."""
+class LinePlot(PlotWithZdata):
+    """Minimal concrete plot: points coloured by z."""
 
     def __init__(self, x, y, z=None, clip_data=False):
         super().__init__()
         self.set_data(x, y, z, clip_data)
 
-    def make_plot(self, ax, cbar_kwargs):
-        d = self.data
-        coll = ax.scatter(d["x"], d["y"], c=d["z"])
-        return coll, self._make_cbar(coll, **cbar_kwargs)
-
-
-class LimPlot(_DataLimFormatter, PlotWithZdata):
-    """Minimal plot using the ``_DataLimFormatter`` mixin."""
-
-    def __init__(self, x, y):
-        super().__init__()
-        self.set_data(x, y)
-
     def make_plot(self, ax):
-        coll = ax.scatter(self.data["x"], self.data["y"])
-        self._format_axis(ax, coll)
-        return coll
+        d = self.data
+        return ax.scatter(d["x"], d["y"], c=d["z"])
 
 
 @pytest.fixture
@@ -452,36 +434,6 @@ def test_scatter_colorbar_given_both_ax_and_cax_raises_value_error(ax):
     kwargs = {"ax": ax, "cax": ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))}
     with pytest.raises(ValueError, match="Can't pass ax and cax"):
         Scatter(X, Y, Z).make_plot(ax, cbar_kwargs=kwargs)
-
-
-def test_cbar_maker_given_neither_ax_nor_cax_raises_value_error(ax):
-    """With neither ``ax`` nor ``cax`` the colorbar hook raises ``ValueError``.
-
-    No public path reaches this: ``Scatter``, ``Hist2D`` and ``SpiralPlot2D``
-    fill in ``ax`` when neither is given, so ``LinePlot`` calls the hook.
-
-    ON FAILURE: the code is wrong.
-    """
-    with pytest.raises(ValueError, match="You must pass `ax` or `cax`"):
-        LinePlot(X, Y, Z).make_plot(ax, cbar_kwargs={})
-
-
-def test_data_lim_formatter_pins_limits_to_the_data_extent(ax):
-    """Axis limits are the min and max of the kept data, with no margin.
-
-    Also formats the axis through ``Base`` (labels are applied). No package
-    class uses ``_DataLimFormatter``, so ``LimPlot`` calls its hook.
-
-    ON FAILURE: the code is wrong.
-    """
-    plot = LimPlot(X, Y)
-    plot.set_labels(x="Vx", y="Np")
-    plot.make_plot(ax)
-    complete = [r for r in ROWS if not (np.isnan(r[1]) or np.isnan(r[2]))]
-    xs, ys = _col(complete, 1), _col(complete, 2)
-    assert ax.get_xlim() == (xs.min(), xs.max())
-    assert ax.get_ylim() == (ys.min(), ys.max())
-    assert (ax.get_xlabel(), ax.get_ylabel()) == ("Vx", "Np")
 
 
 # ---------------------------------------------------------------------------

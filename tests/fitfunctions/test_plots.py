@@ -1,19 +1,29 @@
 import logging
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_hex
 import numpy as np
 import pytest
 from pathlib import Path
 
 from scipy.optimize import OptimizeResult
 
+from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.plots import FFPlot, AxesLabels, LogAxes
-from solarwindpy.fitfunctions.core import (
-    _ChisqPerDegreeOfFreedom,
-    _Observations,
-    _UsedRawObs,
-)
 from solarwindpy.fitfunctions.tex_info import TeXinfo
+
+
+def _exact_line_fit(n, include_weights=True):
+    """A ``Line`` on ``y = 2x + 1``, x = 0..n-1, fitting the first ceil(n/2) points.
+
+    ``xmax`` drops the upper half, so used and raw observations differ.
+    """
+    x = np.arange(float(n))
+    y = 2.0 * x + 1.0
+    w = np.ones_like(x) if include_weights else None
+    fit = Line(x, y, weights=w, xmax=(n - 1) // 2)
+    fit.make_fit()
+    return fit
 
 
 def make_texinfo(m=2.0, b=1.0):
@@ -22,7 +32,7 @@ def make_texinfo(m=2.0, b=1.0):
         {"m": m, "b": b},
         {"m": 0.1, "b": 0.1},
         "m x + b",
-        _ChisqPerDegreeOfFreedom(0.0, 0.0),
+        _exact_line_fit(5).chisq_dof,
         1.0,
     )
 
@@ -49,7 +59,7 @@ class Label:
 
 
 def make_observations(n, include_weights=True):
-    """Build ``_UsedRawObs`` with ``n`` raw points and every other point used.
+    """``FitFunction.observations`` of ``n`` raw points, the first ceil(n/2) used.
 
     Parameters
     ----------
@@ -58,17 +68,8 @@ def make_observations(n, include_weights=True):
     include_weights : bool
         If True, include weights. If False, weights are None.
     """
-    x = np.arange(float(n))
-    y = 2.0 * x + 1.0
-    w = np.ones_like(x) if include_weights else None
-    mask = np.zeros_like(x, dtype=bool)
-    mask[::2] = True
-    raw = _Observations(x, y, w)
-    if include_weights:
-        used = _Observations(x[mask], y[mask], w[mask])
-    else:
-        used = _Observations(x[mask], y[mask], None)
-    return _UsedRawObs(used, raw, mask), y
+    fit = _exact_line_fit(n, include_weights=include_weights)
+    return fit.observations, fit.observations.raw.y
 
 
 def make_ffplot(n=5, include_weights=True):
@@ -136,41 +137,58 @@ def test_set_observations_short_y_fit():
         plot.set_observations(obs, bad_y_fit)
 
 
-def test_estimate_markevery():
-    plot, *_ = make_ffplot(n=5)
-    assert plot._estimate_markevery() is None
-    plot_big, *_ = make_ffplot(n=1000)
-    assert plot_big._estimate_markevery() == 10
+@pytest.mark.parametrize("n, expected", [(5, None), (1000, 10)])
+def test_plot_used_marks_every_tenth_of_the_used_points_decade(n, expected):
+    """``plot_used`` marks every 10**(floor(log10 N) - 1)-th of N used points.
+
+    Hand-computed: N = 3 gives 10**-1, truncated to 0, so every point
+    (``None``); N = 500 gives 10**1 = 10.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot, *_ = make_ffplot(n=n)
+    fig, ax = plt.subplots()
+    plot.plot_used(ax, plot_window=False)
+    (line,) = ax.get_lines()
+    assert line.get_markevery() == expected
+    plt.close(fig)
 
 
-def test_format_helpers():
+def test_plot_and_residual_axes_carry_labels_and_scales():
+    """Plotting formats the axes with the set labels and log scales.
+
+    ``plot_raw`` labels both axes and applies ``set_log``; ``plot_residuals``
+    labels the residual axis by ``pct`` and uses symlog within +-100 %.
+
+    ON FAILURE: the code is wrong, unless the author reworded the residual labels.
+    """
     plot, *_ = make_ffplot()
     plot.set_labels(x="time", y="value")
     plot.set_log(x=True, y=False)
 
     fig, ax = plt.subplots()
-    plot._format_hax(ax)
+    plot.plot_raw(ax, plot_window=False)
     assert ax.get_xlabel() == "time"
     assert ax.get_ylabel() == "value"
     assert ax.get_xscale() == "log"
     assert ax.get_yscale() == "linear"
 
     fig2, rax = plt.subplots()
-    plot._format_rax(rax, pct=True)
+    plot.plot_residuals(rax, pct=True)
     assert rax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
     assert rax.get_xscale() == "log"
     assert rax.get_yscale() == "symlog"
     assert rax.get_ylim() == (-100, 100)
 
     fig3, rax2 = plt.subplots()
-    plot._format_rax(rax2, pct=False)
+    plot.plot_residuals(rax2, pct=False)
     assert rax2.get_ylabel() == r"$\mathrm{Residual} \; [\#]$"
 
 
 def test_plot_methods_draw_their_data_and_annotate():
     """Each plot method draws its own observations and annotates on request.
 
-    raw draws every point, used draws the every-other subset make_observations
+    raw draws every point, used draws the lower-half subset make_observations
     keeps, fit draws ``y_fit`` over raw x, and annotate toggles the TeXinfo
     text. Without ``ax`` each call makes a fresh figure.
 
@@ -288,15 +306,18 @@ def test_plot_residuals_missing_fun_no_exception():
 
 
 class TestFormatHaxLogY:
-    """Test log y-scale in _format_hax (line 163)."""
+    """``set_log(y=True)`` makes the observation plot's y-axis logarithmic."""
 
     def test_format_hax_with_log_y(self):
-        """Verify _format_hax sets y-axis to log scale when log.y is True."""
+        """``plot_raw`` after ``set_log(y=True)`` leaves a log y-axis.
+
+        ON FAILURE: the code is wrong.
+        """
         plot, *_ = make_ffplot()
         plot.set_log(y=True)
 
         fig, ax = plt.subplots()
-        plot._format_hax(ax)
+        plot.plot_raw(ax, plot_window=False)
 
         assert ax.get_yscale() == "log"
         plt.close(fig)
@@ -464,20 +485,19 @@ class TestPathWithLabelZ:
 
 
 class TestGetDefaultPlotStyle:
-    """Test _get_default_plot_style method."""
+    """Default style of the raw-observation plot."""
 
-    def test_get_default_plot_style_raw(self):
-        """Verify default style for raw plots."""
-        plot, *_ = make_ffplot()
-        style = plot._get_default_plot_style("raw")
-        assert style["color"] == "k"
-        assert style["label"] == r"$\mathrm{Obs}$"
+    def test_plot_raw_defaults_to_black_obs(self):
+        """``plot_raw`` without style keywords draws black and labels it Obs.
 
-    def test_get_default_plot_style_unknown(self):
-        """Verify empty dict for unknown plot type."""
+        ON FAILURE: the code is wrong, unless the author changed the default style.
+        """
         plot, *_ = make_ffplot()
-        style = plot._get_default_plot_style("unknown")
-        assert style == {}
+        fig, ax = plt.subplots()
+        _, container = plot.plot_raw(ax, plot_window=False)
+        assert container.get_label() == r"$\mathrm{Obs}$"
+        assert to_hex(container.lines[0].get_color()) == to_hex("k")
+        plt.close(fig)
 
 
 class TestPlotResidualsSubplotsKwargs:

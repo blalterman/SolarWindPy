@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.plotting.labels.base.MCS` | `solarwindpy.plotting.labels.base._MCS` (private) |
   | `solarwindpy.plotting.base.CbarMaker` | `solarwindpy.plotting.base._CbarMaker` (private) |
   | `solarwindpy.plotting.base.DataLimFormatter` | `solarwindpy.plotting.base._DataLimFormatter` (private) |
-  | `solarwindpy.plotting.tools.calculate_nrows_ncols` | `solarwindpy.plotting.tools._calculate_nrows_ncols` (private) |
+  | `solarwindpy.plotting.tools.calculate_nrows_ncols` | none (removed; it had no callers) |
   | `solarwindpy.plotting.tools.use_style` | `solarwindpy.plotting.tools._use_style` (private; importing solarwindpy.plotting applies the style) |
   | `solarwindpy.fitfunctions.hinge.XIntercepts` | `solarwindpy.fitfunctions.hinge._XIntercepts` (private) |
   | `solarwindpy.plotting.spiral.InitialSpiralEdges` | `solarwindpy.plotting.spiral._InitialSpiralEdges` (private) |

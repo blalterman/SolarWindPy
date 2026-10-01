@@ -32,7 +32,7 @@ class TestExtremaCalculator:
 
         # Base solar cycle with some noise
         base_cycle = 50 + 100 * np.sin(2 * np.pi * t / cycle_period)
-        noise = np.random.normal(0, 10, len(t))
+        noise = np.random.default_rng(35).normal(0, 10, len(t))
         activity_values = base_cycle + noise
 
         return pd.Series(activity_values, index=dates, name="test_index")
@@ -154,7 +154,7 @@ class TestExtremaCalculator:
     def test_set_data_window_smoothing(self, simple_test_data):
         """Test set_data handles window smoothing correctly."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
 
         # Test with window
         calculator.set_data(simple_test_data, window=90)
@@ -179,21 +179,23 @@ class TestExtremaCalculator:
 
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
 
-        # Test with CaK index names
-        cak_names = ["delk1", "delk2", "delwb", "emdx", "k2vk3", "k3", "viored"]
-
-        for name in cak_names:
-            calculator._name = name
+        # The CaK names set_name accepts; the other five are rejected below.
+        for name in ["emdx", "k3"]:
+            calculator.set_name(name)
             calculator.set_data(test_data, window=None)
 
             # Should filter to 1977 and later
             assert calculator.raw.index[0] >= pd.Timestamp("1977-01-01")
             assert len(calculator.raw) < len(test_data)
 
+        for name in ["delk1", "delk2", "delwb", "k2vk3", "viored"]:
+            with pytest.raises(ValueError, match="Unable to determine threshold"):
+                calculator.set_name(name)
+
     def test_set_threshold_scalar(self, simple_test_data):
         """Test set_threshold with scalar threshold."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
 
         # Test scalar threshold
@@ -204,7 +206,7 @@ class TestExtremaCalculator:
     def test_set_threshold_callable(self, simple_test_data):
         """Test set_threshold with callable threshold."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
 
         # Test with a Python function (FunctionType)
@@ -224,7 +226,7 @@ class TestExtremaCalculator:
         """Test automatic threshold lookup."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
         # Need to set name first since set_data checks it
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
 
         # Test known automatic thresholds
@@ -236,12 +238,12 @@ class TestExtremaCalculator:
         }
 
         for name, expected_threshold in known_thresholds.items():
-            calculator._name = name
+            calculator.set_name(name)
             calculator.set_threshold(None)
             assert calculator.threshold.unique()[0] == expected_threshold
 
         # Test unknown name falls back to np.nanmedian of the data
-        calculator._name = "unknown_index"
+        calculator.set_name("unknown_index")
         calculator.set_threshold(None)
         expected_threshold = np.nanmedian(simple_test_data)  # documented default
         assert calculator.threshold.unique()[0] == expected_threshold
@@ -249,7 +251,7 @@ class TestExtremaCalculator:
     def test_find_threshold_crossings(self, simple_test_data):
         """Test find_threshold_crossings detects crossing points."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
         calculator.set_threshold(50.0)
 
@@ -267,7 +269,7 @@ class TestExtremaCalculator:
     def test_cut_data_into_extrema_finding_intervals(self, simple_test_data):
         """Test cut_data_into_extrema_finding_intervals creates proper intervals."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
         calculator.set_threshold(50.0)
         calculator.find_threshold_crossings()
@@ -281,50 +283,61 @@ class TestExtremaCalculator:
         # Check that cut contains interval objects
         assert cut.dtype.name == "category"
 
-    def test_find_extrema_static_method(self, simple_test_data):
-        """Test _find_extrema static method logic."""
-        # Use a subset of the simple_test_data to avoid complex grouping issues
-        data = simple_test_data.iloc[:10].copy()  # Use first 10 points
-        threshold = pd.Series(50.0, index=data.index)
+    @staticmethod
+    def _sinusoid(period_days, n_periods):
+        """``2 - cos`` sampled daily from a trough, and its analytic maxima.
 
-        # Create cut intervals that split the data into two groups
-        n_half = len(data) // 2
-        cut_values = ["interval1"] * n_half + ["interval2"] * (len(data) - n_half)
-        cut = pd.Series(cut_values, index=data.index)
+        Starting at a trough keeps the first sample well away from the median
+        threshold. Maxima of ``2 - cos(2 pi t / P)`` fall at ``t = P/2 + nP``.
+        """
+        period = pd.Timedelta(days=period_days)
+        t0 = pd.Timestamp("1980-01-01")
+        epoch = pd.date_range(t0, t0 + n_periods * period, freq="D")
+        series = pd.Series(2.0 - np.cos(2 * np.pi * ((epoch - t0) / period)), epoch)
+        maxima = t0 + (0.5 + np.arange(n_periods)) * period
+        return series, maxima
 
-        try:
-            maxima, minima = ExtremaCalculator._find_extrema(threshold, cut, data)
+    def test_named_index_drops_its_known_spurious_first_maximum(self):
+        """For ``LymanAlpha`` the first maximum is removed; an unlisted name keeps it.
 
-            assert isinstance(maxima, pd.Series)
-            assert isinstance(minima, pd.Series)
+        Both use the series median as threshold (the documented default for an
+        unlisted name), so only the name differs.
 
-            # Should find some extrema (may be zero if data is problematic)
-            assert len(maxima) >= 0
-            assert len(minima) >= 0
-        except Exception:
-            # If the static method fails due to complex logic, just verify it exists
-            assert hasattr(ExtremaCalculator, "_find_extrema")
-            assert callable(ExtremaCalculator._find_extrema)
+        The 11-year sinusoid has three maxima about 4018 days apart (> 1000),
+        so the separation rule keeps all three; only the name rule differs.
 
-    def test_validate_extrema(self, simple_test_data):
-        """Test _validate_extrema applies proper filtering."""
-        calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        ON FAILURE: the code is wrong.
+        """
+        series, maxima = self._sinusoid(11 * 365.25, 3)
 
-        # Create test extrema
-        dates = pd.date_range("2010-01-01", periods=10, freq="365D")
-        maxima = pd.Series("Max", index=dates[::2])
-        minima = pd.Series("Min", index=dates[1::2])
+        def found_maxima(name):
+            calc = ExtremaCalculator(name, series, threshold=np.nanmedian, window=None)
+            return calc.extrema.index[calc.extrema == "Max"]
 
-        # Test validation for known indices
-        validated_max, validated_min = calculator._validate_extrema(maxima, minima)
+        unlisted, lyman = found_maxima("unlisted_index"), found_maxima("LymanAlpha")
+        assert unlisted.size == 3
+        assert lyman.tolist() == unlisted[1:].tolist()
+        # One day: the sampling interval of the input.
+        assert (abs(unlisted - maxima) <= pd.Timedelta(days=1)).all()
 
-        assert isinstance(validated_max, pd.Series)
-        assert isinstance(validated_min, pd.Series)
+    def test_extrema_closer_than_1000_days_are_dropped(self):
+        """Of maxima 548 days apart only the first survives; likewise minima.
 
-        # Test minimum separation enforcement
-        assert len(validated_max) <= len(maxima)
-        assert len(validated_min) <= len(minima)
+        A 548-day sinusoid over six periods has six maxima and six minima,
+        each 548 days after the previous one, inside the 1000-day minimum
+        separation.
+
+        ON FAILURE: the code is wrong.
+        """
+        series, maxima = self._sinusoid(548, 6)
+        calc = ExtremaCalculator(
+            "unlisted_index", series, threshold=np.nanmedian, window=None
+        )
+        found_max = calc.extrema.index[calc.extrema == "Max"]
+        found_min = calc.extrema.index[calc.extrema == "Min"]
+        assert found_max.size == 1 and found_min.size == 1
+        # One day: the sampling interval of the input.
+        assert abs(found_max[0] - maxima[0]) <= pd.Timedelta(days=1)
 
     def test_format_extrema_static_method(self):
         """Test format_extrema static method."""
@@ -343,7 +356,7 @@ class TestExtremaCalculator:
     def test_find_extrema_full_workflow(self, simple_test_data):
         """Test find_extrema complete workflow."""
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "test_index"
+        calculator.set_name("test_index")
         calculator.set_data(simple_test_data, window=None)
         calculator.set_threshold(50.0)
         calculator.find_threshold_crossings()
@@ -533,7 +546,7 @@ class TestExtremaCalculatorEdgeCases:
         )
 
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "edge_test"
+        calculator.set_name("edge_test")
         calculator.set_data(data, window=None)
 
         # Test with threshold at exact data boundary
@@ -555,7 +568,7 @@ class TestExtremaCalculatorEdgeCases:
         )
 
         calculator = ExtremaCalculator.__new__(ExtremaCalculator)
-        calculator._name = "window_test"
+        calculator.set_name("window_test")
 
         # Test with window larger than data
         calculator.set_data(data, window=1000)

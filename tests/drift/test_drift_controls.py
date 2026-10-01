@@ -75,7 +75,14 @@ def test_assert_skiprows_parses_raises_on_wrong_header(tmp_path):
 
 
 def _write_declaring_repo(root, rtd_python):
-    """Write the files ``test_declared_versions`` reads, floor 3.11 throughout."""
+    """Write the files ``test_declared_versions`` reads, floor 3.11 throughout.
+
+    This must mirror every file that module reads under ``REPO_ROOT``:
+    ``pyproject.toml``, ``tox.ini`` and ``.readthedocs.yaml`` (the
+    ``.github/workflows/*.yml`` glob may match nothing). When it starts reading
+    another file, write it here too, or the "good" repository fails on the
+    missing file instead of passing.
+    """
     (root / "pyproject.toml").write_text(
         "[project]\n"
         'requires-python = ">=3.11,<4"\n'

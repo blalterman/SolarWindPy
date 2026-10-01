@@ -360,47 +360,6 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
     return fig, axes, cax
 
 
-def _calculate_nrows_ncols(n):
-    r"""Determine a sensible ``(nrows, ncols)`` pair for ``n`` axes.
-
-    The heuristic attempts to generate a nearly square layout while also taking
-    typical display aspect ratios into account.
-
-    Parameters
-    ----------
-    n : int
-        Total number of axes required.
-
-    Returns
-    -------
-    nrows : int
-    ncols : int
-
-    Examples
-    --------
-    >>> _calculate_nrows_ncols(5)  # doctest: +ELLIPSIS
-    (...2..., ...3...)
-    """
-    root = int(np.fix(np.sqrt(n)))
-    while n % root:
-        root -= 1
-    other = int(n / root)
-
-    if ((other == 1) or (root == 1)) and (n > 4):
-        n += 1
-        root = int(np.fix(np.sqrt(n)))
-        while n % root:
-            root -= 1
-    other = int(n / root)
-
-    nrows = np.max([root, other])
-    ncols = np.min([root, other])
-    if nrows < 4:
-        nrows, ncols = ncols, nrows
-
-    return nrows, ncols
-
-
 def nan_gaussian_filter(array, sigma, **kwargs):
     r"""Apply Gaussian filter with proper NaN handling via normalized convolution.
 

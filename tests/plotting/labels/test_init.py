@@ -1,59 +1,24 @@
-import importlib.util
-import sys
-import types
-from pathlib import Path
+"""``solarwindpy.plotting.labels.available`` prints what ``TeXlabel`` knows."""
+
+import re
+
+from solarwindpy.plotting import labels
 
 
-def _load_labels_module():
-    """Load the labels module without importing the full package."""
-    pkg_root = (
-        Path(__file__).resolve().parents[3] / "solarwindpy" / "plotting" / "labels"
-    )
-    root_pkg = types.ModuleType("swlabels")
-    root_pkg.__path__ = [str(pkg_root)]
-    sys.modules["swlabels"] = root_pkg
-
-    for name in (
-        "base",
-        "composition",
-        "chemistry",
-        "datetime",
-        "elemental_abundance",
-        "special",
-    ):
-        spec = importlib.util.spec_from_file_location(
-            f"swlabels.{name}", pkg_root / f"{name}.py"
-        )
-        module = importlib.util.module_from_spec(spec)
-        module.__package__ = "swlabels"
-        sys.modules[f"swlabels.{name}"] = module
-        spec.loader.exec_module(module)
-
-    spec = importlib.util.spec_from_file_location("swlabels", pkg_root / "__init__.py")
-    labels = importlib.util.module_from_spec(spec)
-    labels.__package__ = "swlabels"
-    sys.modules["swlabels"] = labels
-    spec.loader.exec_module(labels)
-    return labels
-
-
-def test_clean_str_list_for_printing():
-    """Test grouping produced by ``_clean_str_list_for_printing``."""
-    labels = _load_labels_module()
-    data = ["beta", "alpha", "gamma", "Charlie"]
-    result = labels._clean_str_list_for_printing(data)
-    assert result.splitlines() == ["Charlie", "alpha", "beta", "gamma"]
+def _measurement_lines(capsys):
+    """The comma-separated lines of the Measurements section of ``available()``."""
+    labels.available()
+    text = capsys.readouterr().out
+    block = re.search(r"^Measurements\n-+\n(.*?)\n\s*\n", text, re.M | re.S)
+    assert block, "available() printed no Measurements section"
+    return [line.split(", ") for line in block.group(1).splitlines()]
 
 
 def test_available_output(capsys):
-    """Check that ``available`` prints all major sections.
+    """``available()`` prints the heading and all four sections.
 
-    Parameters
-    ----------
-    capsys : pytest.CaptureFixture
-        Pytest fixture used to capture standard output.
+    ON FAILURE: the code is wrong.
     """
-    labels = _load_labels_module()
     labels.available()
     captured = capsys.readouterr().out
     for section in (
@@ -64,3 +29,26 @@ def test_available_output(capsys):
         "Special",
     ):
         assert section in captured
+
+
+def test_measurements_are_grouped_by_first_character(capsys):
+    """Measurements print sorted, capitalised names first, then one line per letter.
+
+    The first line holds every name starting with an upper-case letter. Each
+    later line holds the lower-case names sharing one first character, and
+    the lines run in order of that character. Names are sorted within a line.
+
+    ON FAILURE: the code is wrong.
+    """
+    lines = _measurement_lines(capsys)
+    upper, rest = lines[0], lines[1:]
+    assert all(name[0].isupper() for name in upper)
+    assert rest, "the fixture: some measurement starts with a lower-case letter"
+    firsts = []
+    for line in [upper] + rest:
+        assert line == sorted(line)
+    for line in rest:
+        assert len({name[0] for name in line}) == 1
+        assert not line[0][0].isupper()
+        firsts.append(line[0][0])
+    assert firsts == sorted(set(firsts))

@@ -1273,7 +1273,7 @@ species: {}
             contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
-        pydnamic: bool, str
+        pdynamic: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 
@@ -1334,7 +1334,7 @@ species: {}
             a pd.Series is returned. This addresses complications from the
             `stuple = self._chk_species(*species)` mass densities in Ca and AFSQ,
             the latter via :py:meth:`pth`.
-        pydnamic: bool, str
+        pdynamic: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 

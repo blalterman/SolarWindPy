@@ -125,30 +125,6 @@ class AlfvenicTrubulenceTestBase(ABC):
     def test_species(self):
         self.assertEqual(self.species, self.object_testing.species)
 
-    def test__clean_species_for_setting(self):
-        test_fcn = self.object_testing._clean_species_for_setting
-        for stest in (
-            "a",
-            "p1",
-            "p2",
-            "a,p1",
-            "a,p2",
-            "p2,p1",
-            "p1,p2",
-            "a,p1+p2",
-            "p2,a+p2",
-            "p1,a+p2",
-            "a,a+p1+p2",
-            "p1,a+p1+p2",
-            "p2,a+p1+p2",
-        ):
-            self.assertEqual(stest, test_fcn(stest))
-
-        with self.assertRaises(ValueError):
-            test_fcn("a,p1,p2")
-        with self.assertRaises(TypeError):
-            test_fcn("a", "p1", "p2")
-
     def test_data(self):
         data = self.data.drop("r", axis=1, level="M")
         ot = self.object_testing
@@ -437,3 +413,58 @@ def test_set_data_warns_on_mismatched_index(caplog):
     with caplog.at_level(logging.WARNING):
         turb.AlfvenicTurbulence(v, b, rho, "p1")
     assert "v and b have unequal indices" in caplog.text
+
+
+def _small_turbulence(species):
+    """An ``AlfvenicTurbulence`` on three hourly samples, for ``species``."""
+    idx = pd.date_range("2020-01-01", periods=3, freq="h")
+    v = pd.DataFrame(np.arange(9.0).reshape(3, 3), index=idx, columns=["x", "y", "z"])
+    b = pd.DataFrame(
+        np.arange(9.0).reshape(3, 3) / 10.0, index=idx, columns=["x", "y", "z"]
+    )
+    rho = pd.Series([1.0, 2.0, 3.0], index=idx)
+    return turb.AlfvenicTurbulence(v, b, rho, species)
+
+
+@pytest.mark.parametrize(
+    "species",
+    [
+        "a",
+        "p1",
+        "p2",
+        "a,p1",
+        "a,p2",
+        "p2,p1",
+        "p1,p2",
+        "a,p1+p2",
+        "p2,a+p2",
+        "p1,a+p2",
+        "a,a+p1+p2",
+        "p1,a+p1+p2",
+        "p2,a+p1+p2",
+    ],
+)
+def test_species_with_at_most_one_comma_is_kept(species):
+    """A species string with at most one ``,`` is stored as given.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert _small_turbulence(species).species == species
+
+
+def test_species_with_two_commas_raises_value_error():
+    """More than one ``,`` in the species raises ``ValueError``.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(ValueError, match="at most one `,`"):
+        _small_turbulence("a,p1,p2")
+
+
+def test_species_that_is_not_a_string_raises_type_error():
+    """A species given as a tuple rather than one string raises ``TypeError``.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match="must be a single species"):
+        _small_turbulence(("a", "p1", "p2"))

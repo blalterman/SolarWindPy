@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-
 # ==============================================================================
 # Fixtures
 # ==============================================================================
@@ -33,7 +32,7 @@ def sample_plasma_df() -> pd.DataFrame:
         names=["M", "C", "S"],
     )
     epoch = pd.date_range("2023-01-01", periods=10, freq="1min")
-    data = np.random.rand(10, len(columns))
+    data = np.random.default_rng(36).random((10, len(columns)))
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 
@@ -52,7 +51,7 @@ def sample_ion_df() -> pd.DataFrame:
         names=["M", "C"],
     )
     epoch = pd.date_range("2023-01-01", periods=5, freq="1min")
-    data = np.random.rand(5, len(columns))
+    data = np.random.default_rng(55).random((5, len(columns)))
     return pd.DataFrame(data, index=epoch, columns=columns)
 
 

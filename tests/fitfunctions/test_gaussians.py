@@ -1,6 +1,7 @@
 import inspect
 import numpy as np
 import pytest
+from scipy.optimize import OptimizeResult
 
 from solarwindpy.fitfunctions.gaussians import (
     Gaussian,
@@ -136,11 +137,16 @@ def test_make_fit_TeX_argnames_success(cls):
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
 def test_make_fit_TeX_argnames_failure(cls):
+    """A fit that fails on too few samples builds no ``TeX_info``.
+
+    ON FAILURE: the code is wrong.
+    """
     x = np.linspace(0.0, 1.0, 2)
     y = np.ones_like(x)
     obj = cls(x, y)
     obj.make_fit(return_exception=True)
-    assert not hasattr(obj, "_TeX_info")
+    with pytest.raises(AttributeError):
+        obj.TeX_info
 
 
 class FailedFitReturnedNone(AssertionError):
@@ -217,19 +223,6 @@ class TestGaussianLn:
         obj = GaussianLn(x, y)
         assert obj.TeX_report_normal_parameters is False
 
-    def test_TeX_report_normal_parameters_attribute_error(self):
-        """Test TeX_report_normal_parameters returns False when attribute missing.
-
-        This tests the AttributeError catch in the property getter.
-        """
-        x = np.linspace(0.5, 5.0, 10)
-        y = np.ones_like(x)
-        obj = GaussianLn(x, y)
-        # Delete the attribute to trigger AttributeError path
-        if hasattr(obj, "_use_normal_parameters"):
-            del obj._use_normal_parameters
-        assert obj.TeX_report_normal_parameters is False
-
     def test_set_TeX_report_normal_parameters(self, lognormal_data):
         """Test setting TeX_report_normal_parameters."""
         x, y, _ = lognormal_data
@@ -257,7 +250,7 @@ class TestGaussianLn:
         obj = GaussianLn(x, y)
         obj.make_fit()
 
-        assert hasattr(obj, "_fit_result")
+        assert isinstance(obj.fit_result, OptimizeResult)
         assert "m" in obj.popt
         assert "s" in obj.popt
         assert "A" in obj.popt

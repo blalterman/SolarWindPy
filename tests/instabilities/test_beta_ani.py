@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
+from matplotlib.collections import QuadMesh  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
@@ -35,7 +36,8 @@ def _close_figures():
 
 
 def _mesh(ax):
-    (mesh,) = ax.collections
+    """The one pcolormesh on ``ax``, ignoring any other collection drawn."""
+    (mesh,) = [c for c in ax.collections if isinstance(c, QuadMesh)]
     return mesh
 
 

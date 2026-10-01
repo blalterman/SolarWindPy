@@ -237,6 +237,24 @@ class TestIonSpecificsOptions(TestCase):
                     else:
                         self.assertNotEqual(i0, i1)
 
+    def test_eq_across_frames(self):
+        """Same-species Ions from different frames are equal iff the data match.
+
+        A copy of the frame holds identical data, so its Ion is equal. A frame
+        whose first density is doubled holds different data, so its Ion is not.
+
+        ON FAILURE: the code is wrong.
+        """
+        for species in self.species:
+            with self.subTest(species=species):
+                original = ions.Ion(self.data, species)
+                same = ions.Ion(self.data.copy(deep=True), species)
+                changed_frame = self.data.copy(deep=True)
+                changed_frame.loc[changed_frame.index[0], ("n", "", species)] *= 2.0
+                changed = ions.Ion(changed_frame, species)
+                self.assertEqual(original, same)
+                self.assertNotEqual(original, changed)
+
 
 def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     """5 cm^-3 protons at 400 km/s carry rho v^3 / 2 = 267.6 uW m^-2.

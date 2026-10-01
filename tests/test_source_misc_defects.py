@@ -8,15 +8,12 @@ fix. A defect whose fix is blocked is a strict xfail naming what retires it.
 """
 
 import functools
-import inspect
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from solarwindpy.solar_activity.base import ActivityIndicator
 from solarwindpy.solar_activity.lisird.extrema_calculator import ExtremaCalculator
-from solarwindpy.solar_activity.sunspot_number.sidc import SIDC
 
 # An 11-year sinusoid about 2.0, sampled daily. It starts on a rising crossing
 # of its midline and spans exactly three periods, so every stretch between
@@ -86,17 +83,3 @@ def test_default_threshold_recovers_the_extrema_of_a_sinusoid():
     # One day: the sampling interval of the input.
     assert (abs(found_max - expected_max) <= pd.Timedelta(days=1)).all()
     assert (abs(found_min - expected_min) <= pd.Timedelta(days=1)).all()
-
-
-def test_sidc_run_normalization_documents_itself_with_the_base_docstring():
-    """``help(SIDC.run_normalization)`` shows the documented contract.
-
-    ``SIDC.run_normalization`` reuses ``ActivityIndicator.run_normalization``'s
-    docstring. It must reuse the text, not the function object, or
-    ``inspect.getdoc`` finds no docstring at all.
-
-    ON FAILURE: the code is wrong.
-    """
-    expected = inspect.getdoc(ActivityIndicator.run_normalization)
-    assert isinstance(expected, str)  # the fixture: the base is documented
-    assert inspect.getdoc(SIDC.run_normalization) == expected

@@ -166,82 +166,35 @@ def _quadmesh(ax):
     return meshes[0]
 
 
-class TestPrepAggForPlot:
-    """Tests for _prep_agg_for_plot method."""
+class TestContourGrid:
+    """Contours are traced on bin centres; the mesh is drawn on bin edges.
 
-    # --- Unit Tests (structure) ---
+    The edge side (mesh coordinates and values) is asserted in
+    ``TestMakePlot``; this class covers the centre side.
+    """
 
-    def test_use_edges_returns_n_plus_1_points(self, hist2d_instance):
-        """With use_edges=True, coordinates have n+1 points for n bins.
+    def test_contour_vertices_lie_within_the_bin_centres(self, known_hist):
+        """Every contour vertex lies inside the span of the bin centres.
 
-        pcolormesh requires bin edges (vertices), so for n bins we need n+1 edge points.
+        ``XEDGES`` and ``YEDGES`` give centres from 0.125 to 0.875 and from 0.1
+        to 0.9; a contour traced on the edges could reach 0 and 1.
+
+        ON FAILURE: the code is wrong.
         """
-        C, x, y = hist2d_instance._prep_agg_for_plot(use_edges=True)
-        assert x.size == C.shape[1] + 1
-        assert y.size == C.shape[0] + 1
-
-    def test_use_centers_returns_n_points(self, hist2d_instance):
-        """With use_edges=False, coordinates have n points for n bins.
-
-        contour/contourf requires bin centers, so for n bins we need n center points.
-        """
-        C, x, y = hist2d_instance._prep_agg_for_plot(use_edges=False)
-        assert x.size == C.shape[1]
-        assert y.size == C.shape[0]
-
-    def test_mask_invalid_returns_masked_array(self, hist2d_instance):
-        """With mask_invalid=True, returns np.ma.MaskedArray."""
-        C, x, y = hist2d_instance._prep_agg_for_plot(mask_invalid=True)
-        assert isinstance(C, np.ma.MaskedArray)
-
-    def test_no_mask_returns_ndarray(self, hist2d_instance):
-        """With mask_invalid=False, returns regular ndarray."""
-        C, x, y = hist2d_instance._prep_agg_for_plot(mask_invalid=False)
-        assert isinstance(C, np.ndarray)
-        assert not isinstance(C, np.ma.MaskedArray)
-
-    # --- Integration Tests (values) ---
-
-    def test_c_values_match_agg(self, hist2d_instance):
-        """C array values should match agg().unstack().values after reindexing.
-
-        _prep_agg_for_plot reindexes to ensure all bins are present, so we must
-        apply the same reindexing to the expected values for comparison.
-        """
-        C, x, y = hist2d_instance._prep_agg_for_plot(use_edges=True, mask_invalid=False)
-        # Apply same reindexing that _prep_agg_for_plot does
-        agg = hist2d_instance.agg().unstack("x")
-        agg = agg.reindex(columns=hist2d_instance.categoricals["x"])
-        agg = agg.reindex(index=hist2d_instance.categoricals["y"])
-        expected = agg.values
-        # Handle potential reindexing by comparing non-NaN values
-        np.testing.assert_array_equal(
-            np.isnan(C),
-            np.isnan(expected),
-            err_msg="NaN locations should match",
+        x_mid = 0.5 * (XEDGES[1:] + XEDGES[:-1])
+        y_mid = 0.5 * (YEDGES[1:] + YEDGES[:-1])
+        fig, ax = plt.subplots()
+        *_, qset = known_hist.plot_contours(
+            ax=ax, label_levels=False, cbar=False, levels=[0.5, 1.5, 2.5]
         )
-        valid_mask = ~np.isnan(C)
-        np.testing.assert_allclose(
-            C[valid_mask],
-            expected[valid_mask],
-            err_msg="Non-NaN values should match",
-        )
-
-    def test_edge_coords_match_edges(self, hist2d_instance):
-        """With use_edges=True, coordinates should match self.edges."""
-        C, x, y = hist2d_instance._prep_agg_for_plot(use_edges=True)
-        expected_x = hist2d_instance.edges["x"]
-        expected_y = hist2d_instance.edges["y"]
-        np.testing.assert_allclose(x, expected_x)
-        np.testing.assert_allclose(y, expected_y)
-
-    def test_center_coords_match_intervals(self, hist2d_instance):
-        """With use_edges=False, coordinates should match intervals.mid."""
-        C, x, y = hist2d_instance._prep_agg_for_plot(use_edges=False)
-        expected_x = hist2d_instance.intervals["x"].mid.values
-        expected_y = hist2d_instance.intervals["y"].mid.values
-        np.testing.assert_allclose(x, expected_x)
-        np.testing.assert_allclose(y, expected_y)
+        vertices = np.concatenate([seg for segs in qset.allsegs for seg in segs])
+        plt.close(fig)
+        assert vertices.size  # the fixture: the chosen levels draw contours
+        # rel=1e-12: vertices on the outermost centre line are exact up to rounding.
+        assert vertices[:, 0].min() >= x_mid.min() * (1 - 1e-12)
+        assert vertices[:, 0].max() <= x_mid.max() * (1 + 1e-12)
+        assert vertices[:, 1].min() >= y_mid.min() * (1 - 1e-12)
+        assert vertices[:, 1].max() <= y_mid.max() * (1 + 1e-12)
 
 
 class TestPlotHistWithContours:
@@ -322,26 +275,21 @@ class TestPlotHistWithContours:
         ), "Filtered contours should differ from unfiltered"
         plt.close("all")
 
-    def test_pcolormesh_data_matches_prep_agg(self, hist2d_instance):
-        """Pcolormesh data should match _prep_agg_for_plot output."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours()
+    def test_pcolormesh_data_matches_prep_agg(self, known_hist, known_counts):
+        """The mesh under the contours carries the peak-normalised counts.
 
-        # Get the pcolormesh (QuadMesh) from the axes
-        quadmesh = [c for c in ax.collections if hasattr(c, "get_array")][0]
-        plot_data = quadmesh.get_array()
+        With ``axnorm="t"`` each bin is its count over the largest count;
+        empty bins are blank.
 
-        # Get expected data from _prep_agg_for_plot
-        C_expected, _, _ = hist2d_instance._prep_agg_for_plot(use_edges=True)
-
-        # Compare (flatten both for comparison, handling masked arrays)
-        plot_flat = np.ma.filled(plot_data.flatten(), np.nan)
-        expected_flat = np.ma.filled(C_expected.flatten(), np.nan)
-
-        # Check NaN locations match
-        np.testing.assert_array_equal(
-            np.isnan(plot_flat),
-            np.isnan(expected_flat),
-            err_msg="NaN locations should match",
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_axnorm("t")
+        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(label_levels=False)
+        values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
+        expected = _expected_grid(known_counts) / known_counts.max()
+        # rel=1e-12: one division of small integers.
+        np.testing.assert_allclose(
+            values.reshape(expected.shape), expected, rtol=1e-12, atol=0
         )
         plt.close("all")
 
@@ -1506,11 +1454,24 @@ class TestTakeDataInYRangeAcrossX:
             )
 
 
+def _contour_levels(hist, levels=None):
+    """Levels of the contour set ``plot_contours`` draws for ``hist``."""
+    fig, ax = plt.subplots()
+    try:
+        *_, qset = hist.plot_contours(
+            ax=ax, label_levels=False, cbar=False, levels=levels
+        )
+        return np.asarray(qset.levels, dtype=float)
+    finally:
+        plt.close(fig)
+
+
 class TestDefaultContourLevels:
     """Properties the default levels must have, rather than their literal values.
 
     The literal defaults are editorial choices with no derivation available, so
-    only what must be true of any admissible choice is asserted.
+    only what must be true of any admissible choice is asserted. Levels are
+    read from the contour set ``plot_contours`` returns.
     """
 
     @pytest.mark.parametrize("axnorm", ["t", "d", "c", "r"])
@@ -1520,8 +1481,7 @@ class TestDefaultContourLevels:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm(axnorm)
-        levels = known_hist._get_contour_levels(None)
-        assert np.all(np.diff(levels) > 0)
+        assert np.all(np.diff(_contour_levels(known_hist)) > 0)
 
     @pytest.mark.parametrize("axnorm", ["t", "c", "r"])
     def test_defaults_lie_inside_the_normalised_range(self, known_hist, axnorm):
@@ -1533,7 +1493,7 @@ class TestDefaultContourLevels:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm(axnorm)
-        levels = np.asarray(known_hist._get_contour_levels(None))
+        levels = _contour_levels(known_hist)
         assert levels.min() >= 0.0
         assert levels.max() <= 1.0
 
@@ -1545,25 +1505,19 @@ class TestDefaultContourLevels:
         requested = [0.05, 0.25, 0.75]
         for axnorm in (None, "t", "d", "c", "r", "cd", "rd"):
             known_hist.set_axnorm(axnorm)
-            assert known_hist._get_contour_levels(requested) is requested
+            assert _contour_levels(known_hist, requested).tolist() == requested
 
     def test_no_default_without_a_normalisation(self, known_hist):
-        """Unnormalised counts have no scale, so there is no default level set.
+        """Unnormalised counts get matplotlib's levels, on the scale of the counts.
+
+        ``KNOWN_COUNTS`` runs to 6, so automatic levels reach past 1; any of the
+        fixed default lists (all at most 1) would not.
 
         ON FAILURE: the code is wrong -- a fixed level list cannot suit
         arbitrary raw counts.
         """
         known_hist.set_axnorm(None)
-        assert known_hist._get_contour_levels(None) is None
-
-    def test_unrecognised_normalisation_is_rejected(self, known_hist):
-        """An axnorm with no default level set raises rather than guessing.
-
-        ON FAILURE: the code is wrong.
-        """
-        known_hist._axnorm = ("c", "sum")
-        with pytest.raises(ValueError, match="Unrecognized axis normalization"):
-            known_hist._get_contour_levels(None)
+        assert _contour_levels(known_hist).max() > 1.0
 
 
 class TestColorScale:

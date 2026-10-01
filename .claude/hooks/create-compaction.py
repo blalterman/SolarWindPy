@@ -435,6 +435,9 @@ def create_compaction():
 
     # Calculate target tokens based on strategy
     target_tokens = int(tokens * (1 - compression_strategy["target_reduction"]))
+    # No context files gives a zero estimate; report no reduction, as
+    # create_compaction_filename does, rather than divide by zero.
+    reduction = (tokens - target_tokens) / tokens if tokens > 0 else 0.0
     target_description = f"{compression_strategy['level']} ({compression_strategy['target_reduction'] * 100:.0f}% reduction)"
 
     compaction_content = f"""# Compacted Context State - {timestamp}
@@ -588,8 +591,8 @@ def create_compaction():
 - [ ] **Changes**: {"Review uncommitted changes" if status else "No uncommitted changes to review"}
 
 ### 📊 Efficiency Metrics
-- **Context Reduction**: {((tokens - target_tokens) / tokens * 100):.1f}% ({tokens:,} → {target_tokens:,} tokens)
-- **Estimated Session Extension**: {int(((tokens - target_tokens) / tokens) * 60)} additional minutes of productive work
+- **Context Reduction**: {reduction * 100:.1f}% ({tokens:,} → {target_tokens:,} tokens)
+- **Estimated Session Extension**: {int(reduction * 60)} additional minutes of productive work
 - **Compaction Strategy**: {compression_strategy['level']} compression focused on {'code' if compression_strategy['preserve_code'] else 'prose'} optimization
 
 ---
@@ -626,7 +629,7 @@ No git tags created - using file-based state preservation
     print(f"✅ Compaction created: {compaction_file}")
     print(f"✅ Timestamped compaction: {unique_compaction}")
     print(
-        f"📊 Token reduction: {tokens:,} → {target_tokens:,} ({((tokens - target_tokens) / tokens * 100):.1f}% savings)"
+        f"📊 Token reduction: {tokens:,} → {target_tokens:,} ({reduction * 100:.1f}% savings)"
     )
 
 

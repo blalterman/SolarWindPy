@@ -1,23 +1,14 @@
-import importlib.util
 from pathlib import Path
 import pytest
 import logging
 
+from solarwindpy.plotting.labels import base
+
 
 @pytest.fixture(scope="module")
 def labels_base():
-    """Load :mod:`solarwindpy.plotting.labels.base` without side effects."""
-    path = (
-        Path(__file__).resolve().parents[3]
-        / "solarwindpy"
-        / "plotting"
-        / "labels"
-        / "base.py"
-    )
-    spec = importlib.util.spec_from_file_location("swp_labels_base", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    """The public :mod:`solarwindpy.plotting.labels.base` module."""
+    return base
 
 
 @pytest.fixture()
@@ -50,16 +41,19 @@ def texlabel_newline_units(labels_base):
     return labels_base.TeXlabel(("T", "", "p"), new_line_for_units=True)
 
 
-def test_run_species_substitution(labels_base):
-    """Verify direct species substitution helper."""
+def test_run_species_substitution(texlabel_basic):
+    """``make_species`` translates each species code in a pattern to TeX.
+
+    ON FAILURE: the code is wrong.
+    """
     cases = {
-        "p": ("p", 1),
-        "p1+p2": ("p_1+p_2", 2),
-        "a+p1": ("\\alpha+p_1", 2),
-        "Fe": ("\\mathrm{Fe}", 1),
+        "p": "p",
+        "p1+p2": "p_1+p_2",
+        "a+p1": "\\alpha+p_1",
+        "Fe": "\\mathrm{Fe}",
     }
     for pattern, expected in cases.items():
-        assert labels_base._run_species_substitution(pattern) == expected
+        assert texlabel_basic.make_species(pattern) == expected
 
 
 def test_texlabel_attributes(texlabel_basic):
@@ -139,25 +133,29 @@ def test_texlabel_newline_units(texlabel_newline_units):
 
 
 def test_species_substitution_comprehensive(labels_base):
-    """Test comprehensive species substitution patterns."""
+    """Each species code, isotope and "+"-sum translates to its TeX form.
+
+    ON FAILURE: the code is wrong.
+    """
     test_cases = {
-        "p": ("p", 1),
-        "p1": ("p_1", 1),
-        "p2": ("p_2", 1),
-        "a": ("\\alpha", 1),
-        "a1": ("\\alpha_1", 1),
-        "a2": ("\\alpha_2", 1),
-        "e": ("e^-", 1),
-        "he": ("\\mathrm{He}", 1),
-        "Fe": ("\\mathrm{Fe}", 1),
-        "3He": ("^{3}\\mathrm{He}", 1),
-        "16O": ("^{16}\\mathrm{O}", 1),
-        "p1+p2": ("p_1+p_2", 2),
-        "a+Fe": ("\\alpha+\\mathrm{Fe}", 2),
+        "p": "p",
+        "p1": "p_1",
+        "p2": "p_2",
+        "a": "\\alpha",
+        "a1": "\\alpha_1",
+        "a2": "\\alpha_2",
+        "e": "e^-",
+        "he": "\\mathrm{He}",
+        "Fe": "\\mathrm{Fe}",
+        "3He": "^{3}\\mathrm{He}",
+        "16O": "^{16}\\mathrm{O}",
+        "p1+p2": "p_1+p_2",
+        "a+Fe": "\\alpha+\\mathrm{Fe}",
     }
 
+    label = labels_base.TeXlabel(("n", "", "p"))
     for pattern, expected in test_cases.items():
-        result = labels_base._run_species_substitution(pattern)
+        result = label.make_species(pattern)
         assert result == expected, f"Failed for pattern '{pattern}'"
 
 
@@ -273,11 +271,14 @@ def test_base_class_properties(labels_base):
 
 
 def test_mcs_namedtuple(labels_base):
-    """Test _MCS namedtuple functionality."""
-    mcs = labels_base._MCS("v", "x", "p")
-    assert mcs.m == "v"
-    assert mcs.c == "x"
-    assert mcs.s == "p"
+    """``mcs0`` and ``mcs1`` expose numerator and denominator as m, c, s.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("v", "x", "p"), ("n", "", "a"))
+    assert (label.mcs0.m, label.mcs0.c, label.mcs0.s) == ("v", "x", "p")
+    assert (label.mcs1.m, label.mcs1.c, label.mcs1.s) == ("n", "", "a")
+    assert labels_base.TeXlabel(("v", "x", "p")).mcs1 is None
 
 
 def test_texlabel_set_methods(labels_base):
@@ -401,20 +402,29 @@ class TestDescriptionFeature:
         assert lines[0] == "temperature"
 
     def test_format_with_description_none_unchanged(self, labels_base):
-        """_format_with_description returns unchanged when description is None."""
+        """Without a description, ``with_units`` is the bare TeX label.
+
+        ON FAILURE: the code is wrong.
+        """
         label = labels_base.TeXlabel(("v", "x", "p"))
         assert label.description is None
-        test_string = "$test \\; [units]$"
-        result = label._format_with_description(test_string)
-        assert result == test_string
+        assert label.with_units == (
+            "${v}_{{X};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
+        )
 
     def test_format_with_description_adds_prefix(self, labels_base):
-        """_format_with_description prepends description."""
+        """A description set and built prepends itself and a newline to ``with_units``.
+
+        ``with_units`` is documented as set by ``build_label``, so the label is
+        rebuilt after ``set_description``.
+
+        ON FAILURE: the code is wrong.
+        """
         label = labels_base.TeXlabel(("v", "x", "p"))
+        bare = label.with_units
         label.set_description("info")
-        test_string = "$test \\; [units]$"
-        result = label._format_with_description(test_string)
-        assert result == "info\n$test \\; [units]$"
+        label.build_label()
+        assert label.with_units == "info\n" + bare
 
     def test_description_with_axnorm(self, labels_base):
         """Description works correctly with axis normalization."""

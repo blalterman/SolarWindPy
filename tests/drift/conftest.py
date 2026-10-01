@@ -7,7 +7,7 @@ import urllib.request
 
 import pytest
 
-from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL, _DATETIME_COLUMNS
+from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL
 
 
 @pytest.fixture(scope="session")
@@ -52,7 +52,12 @@ def head_status():
 
 @pytest.fixture(scope="session")
 def live_catalog():
-    """Download the pinned ICMECAT catalog once per session."""
+    """Download the pinned ICMECAT catalog once per session, unparsed.
+
+    No column is parsed as a date: the drift tests check the schema, and a
+    date column that disappeared must be reported by
+    ``test_required_columns_present`` rather than raise here.
+    """
     import pandas as pd
 
-    return pd.read_csv(ICMECAT_URL, parse_dates=_DATETIME_COLUMNS)
+    return pd.read_csv(ICMECAT_URL)
