@@ -21,7 +21,7 @@ AggPlot = agg_plot.AggPlot
 Hist1D = hist1d.Hist1D
 
 
-class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
+class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
     Parameters

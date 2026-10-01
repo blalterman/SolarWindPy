@@ -17,7 +17,7 @@ from scipy.ndimage import gaussian_filter
 _STYLE_PATH = Path(__file__).parent / "solarwindpy.mplstyle"
 
 
-def use_style():
+def _use_style():
     r"""Apply the SolarWindPy matplotlib style.
 
     This sets publication-ready defaults including:
@@ -25,11 +25,6 @@ def use_style():
     - 12pt base font size
     - Spectral_r colormap
     - 300 DPI PDF output
-
-    Examples
-    --------
-    >>> import solarwindpy.plotting as swp_pp
-    >>> swp_pp.use_style()  # doctest: +SKIP
     """
     plt.style.use(_STYLE_PATH)
 
@@ -357,7 +352,7 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
     return fig, axes, cax
 
 
-def calculate_nrows_ncols(n):
+def _calculate_nrows_ncols(n):
     r"""Determine a sensible ``(nrows, ncols)`` pair for ``n`` axes.
 
     The heuristic attempts to generate a nearly square layout while also taking
@@ -375,7 +370,7 @@ def calculate_nrows_ncols(n):
 
     Examples
     --------
-    >>> calculate_nrows_ncols(5)  # doctest: +ELLIPSIS
+    >>> _calculate_nrows_ncols(5)  # doctest: +ELLIPSIS
     (...2..., ...3...)
     """
     root = int(np.fix(np.sqrt(n)))

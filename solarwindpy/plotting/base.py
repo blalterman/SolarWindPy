@@ -226,7 +226,7 @@ class Base(ABC):
         pass
 
 
-class DataLimFormatter(ABC):
+class _DataLimFormatter(ABC):
     r"""Mixin that limits the axes to the range of the x and y data."""
 
     def _format_axis(self, ax, collection, **kwargs):
@@ -246,7 +246,7 @@ class DataLimFormatter(ABC):
         ax.autoscale_view()
 
 
-class CbarMaker(ABC):
+class _CbarMaker(ABC):
     r"""Mixin that draws a colorbar labelled with ``labels.z``."""
 
     @staticmethod

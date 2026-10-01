@@ -7,9 +7,7 @@ from scipy.optimize import OptimizeResult, least_squares
 
 from solarwindpy.fitfunctions.core import (
     FitFunction,
-    ChisqPerDegreeOfFreedom,
     FitFailedError,
-    InitialGuessInfo,
     InvalidParameterError,
     InsufficientDataError,
 )
@@ -199,7 +197,7 @@ def test_make_fit_success_failure(simple_linear_data, small_n):
     assert set(lf.popt) == {"m", "b"}
     assert set(lf.psigma) == {"m", "b"}
     assert lf.pcov.shape == (2, 2)
-    assert isinstance(lf.chisq_dof, ChisqPerDegreeOfFreedom)
+    assert lf.chisq_dof._fields == ("linear", "robust")
     assert isinstance(lf.plotter, FFPlot) and isinstance(lf.TeX_info, TeXinfo)
 
     x, y, w = small_n
@@ -233,10 +231,10 @@ def test_str_call_and_properties(fitted_linear):
     assert np.allclose(ypred, lf.popt["m"] * xnew + lf.popt["b"], rtol=1e-2, atol=1e-2)
     assert lf.argnames == ["m", "b"]
     assert isinstance(lf.fit_bounds, dict)
-    assert isinstance(lf.chisq_dof, ChisqPerDegreeOfFreedom)
+    assert lf.chisq_dof._fields == ("linear", "robust")
     assert lf.dof == lf.observations.used.y.size - len(lf.p0)
     assert isinstance(lf.fit_result, OptimizeResult)
-    assert isinstance(lf.initial_guess_info["m"], InitialGuessInfo)
+    assert lf.initial_guess_info["m"]._fields == ("p0", "bounds")
     assert lf.nobs == lf.observations.used.x.size
     assert isinstance(lf.plotter, FFPlot)
     assert set(lf.popt) == {"m", "b"}

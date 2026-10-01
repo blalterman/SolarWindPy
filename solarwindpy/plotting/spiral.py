@@ -518,7 +518,7 @@ They will be replaced by NaNs and excluded from the aggregation.
         self._cat = cat
 
 
-class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
+class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
     r"""2D spiral plotting with adaptive mesh refinement.
 
     Examples

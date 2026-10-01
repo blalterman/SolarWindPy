@@ -24,8 +24,9 @@ class FFPlot(object):
 
         Parameters
         ----------
-        observations : :class:`~solarwindpy.fitfunctions.core.Observations`
-            Observed data used in the fit.
+        observations : namedtuple
+            The ``(used, raw, tk_observed)`` observations of the fit, as
+            returned by ``FitFunction.observations``.
         y_fit : array-like
             Model evaluated at the observed ``x`` values.
         TeX_info : :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo`

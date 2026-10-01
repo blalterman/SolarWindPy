@@ -11,7 +11,7 @@ from solarwindpy.fitfunctions.exponentials import (
 )
 from scipy.optimize import OptimizeResult
 
-from solarwindpy.fitfunctions.core import ChisqPerDegreeOfFreedom, InsufficientDataError
+from solarwindpy.fitfunctions.core import InsufficientDataError
 
 
 @pytest.mark.parametrize(
@@ -137,7 +137,7 @@ def test_make_fit_success_regular(exponential_data):
         # Test fit results are available with correct types
         assert isinstance(obj.popt, dict)
         assert isinstance(obj.pcov, np.ndarray)
-        assert isinstance(obj.chisq_dof, ChisqPerDegreeOfFreedom)
+        assert obj.chisq_dof._fields == ("linear", "robust")
         assert isinstance(obj.fit_result, OptimizeResult)
 
         # Test output shapes
@@ -159,7 +159,7 @@ def test_make_fit_success_cdf(exponential_data):
     # Test fit results are available with correct types
     assert isinstance(obj.popt, dict)
     assert isinstance(obj.pcov, np.ndarray)
-    assert isinstance(obj.chisq_dof, ChisqPerDegreeOfFreedom)
+    assert obj.chisq_dof._fields == ("linear", "robust")
     assert isinstance(obj.fit_result, OptimizeResult)
 
     # Test output shapes

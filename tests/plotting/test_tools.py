@@ -548,7 +548,7 @@ class TestBuildAxArrayWithCommonColorbar:
 
 
 # ---------------------------------------------------------------------------
-# calculate_nrows_ncols
+# _calculate_nrows_ncols
 # ---------------------------------------------------------------------------
 
 
@@ -584,7 +584,7 @@ class TestCalculateNrowsNcols:
         side reaches 4 are stood upright (4 rows, 3 columns).
         ON FAILURE: the code is wrong.
         """
-        assert tuple(plotting_tools.calculate_nrows_ncols(n)) == expected
+        assert tuple(plotting_tools._calculate_nrows_ncols(n)) == expected
 
     @pytest.mark.parametrize("n", range(1, 41))
     def test_layout_is_the_most_square_grid_holding_n(self, n):
@@ -598,7 +598,7 @@ class TestCalculateNrowsNcols:
         if small == 1 and n > 4:
             small, large = _most_square_factor_pair(n + 1)
         expected = (small, large) if large < 4 else (large, small)
-        assert tuple(plotting_tools.calculate_nrows_ncols(n)) == expected
+        assert tuple(plotting_tools._calculate_nrows_ncols(n)) == expected
 
 
 # ---------------------------------------------------------------------------

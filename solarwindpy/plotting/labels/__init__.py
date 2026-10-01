@@ -8,7 +8,6 @@ __all__ = [
     "base",
     "special",
     "available",
-    "species_translation",
 ]
 
 from inspect import isclass
@@ -22,7 +21,6 @@ from . import datetime  # noqa: F401
 from . import chemistry  # noqa: F401
 
 TeXlabel = base.TeXlabel
-species_translation = base._run_species_substitution
 Vsw = special.Vsw
 Count = special.Count
 Ion = composition.Ion

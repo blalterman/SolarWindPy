@@ -38,11 +38,11 @@ from scipy.linalg import svd, cholesky, LinAlgError
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
-Observations = namedtuple("Observations", "x,y,w")
-UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
-InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
-ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
-FitBounds = namedtuple("FitBounds", "lower,upper")
+_Observations = namedtuple("_Observations", "x,y,w")
+_UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
+_InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
+_ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
+_FitBounds = namedtuple("_FitBounds", "lower,upper")
 
 
 class FitFunctionError(Exception):
@@ -283,7 +283,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Returns
         -------
         dict or None
-            ``{name: InitialGuessInfo(p0, bounds)}``, or None when no initial
+            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial
             guess was made (``p0`` is None) or no fit has set the bounds.
         """
         try:
@@ -296,7 +296,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         names = self.argnames
         info = {
-            name: InitialGuessInfo(guess, tuple(bounds[name]))
+            name: _InitialGuessInfo(guess, tuple(bounds[name]))
             for name, guess in zip(names, p0)
         }
 
@@ -585,9 +585,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         if weights_raw is not None:
             weights = weights_raw[mask]
 
-        used = Observations(xobs, yobs, weights)
-        raw = Observations(xobs_raw, yobs_raw, weights_raw)
-        usedrawobs = UsedRawObs(used, raw, mask)
+        used = _Observations(xobs, yobs, weights)
+        raw = _Observations(xobs_raw, yobs_raw, weights_raw)
+        usedrawobs = _UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
 
     def _run_least_squares(self, **kwargs):
@@ -674,7 +674,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             raise FitFailedError("Optimal parameters not found: " + res.message)
 
         fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
-        fit_bounds = {k: FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
+        fit_bounds = {k: _FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
         fit_bounds = tuple(fit_bounds.items())
         self._fit_bounds = fit_bounds
 
@@ -730,7 +730,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         # Based on `curve_fit`'s `absolute_sigma` documentation and reading
         # `least_square`, `s_sq` should be chisq_nu based on robust residuals
         # that account for `f_scale`(20200527).
-        all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
+        all_chisq = _ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
 
         return popt, pcov, psigma, all_chisq
 
