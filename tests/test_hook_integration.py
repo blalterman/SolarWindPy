@@ -9,6 +9,7 @@ implemented through the hook chain in .claude/hooks/.
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -352,15 +353,23 @@ class TestDefinitionOfDonePattern:
     """Test the Definition of Done validation pattern."""
 
     def test_coverage_requirement_in_pre_commit(self, hook_scripts_dir: Path) -> None:
-        """Test that 95% coverage requirement is configured."""
+        """The hook enforces one coverage threshold, and CLAUDE.md states the same one.
+
+        ON FAILURE: the hook and CLAUDE.md disagree on --cov-fail-under; make them match.
+        """
         pre_commit_script = hook_scripts_dir / "pre-commit-tests.sh"
         if not pre_commit_script.exists():
             pytest.skip("Script not found")
 
-        content = pre_commit_script.read_text()
+        thresholds = set(
+            re.findall(r"--cov-fail-under=(\d+)", pre_commit_script.read_text())
+        )
+        assert len(thresholds) == 1, f"expected one threshold, found {thresholds}"
+        (threshold,) = thresholds
+        assert 0 < int(threshold) <= 100
 
-        # Should contain coverage threshold reference
-        assert "95" in content, "95% coverage threshold not in pre-commit"
+        claude_md = hook_scripts_dir.parent.parent / "CLAUDE.md"
+        assert f"--cov-fail-under={threshold}" in claude_md.read_text()
 
     def test_physics_validation_available(self, hook_scripts_dir: Path) -> None:
         """Test physics validation mode is available."""
