@@ -5,6 +5,8 @@
 Each test failed before its fix landed and passes after it.
 """
 
+import operator
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -105,6 +107,24 @@ def test_label_less_equal_agrees_with_string_order():
     assert a <= a
     assert (a <= b) == (str(a) <= str(b))
     assert (b <= a) == (str(b) <= str(a))
+
+
+@pytest.mark.parametrize(
+    "op", [operator.lt, operator.le, operator.gt, operator.ge], ids=lambda f: f.__name__
+)
+def test_label_ordering_agrees_with_string_order(op):
+    """Every rich comparison on labels agrees with comparing their strings.
+
+    ``Base`` defines ``__gt__`` and ``__le__``; ``<`` and ``>=`` reach them by
+    Python's reflection. The expected value is the same operator applied to
+    ``str`` of each label (identity), over a pair and a label with itself.
+
+    ON FAILURE: the code is wrong.
+    """
+    a = TeXlabel(("n", "", "a"))
+    b = TeXlabel(("v", "x", "p1"))
+    for left, right in [(a, b), (b, a), (a, a)]:
+        assert op(left, right) == op(str(left), str(right))  # identity
 
 
 def test_ion_path_is_the_same_for_int_and_str_charge():
