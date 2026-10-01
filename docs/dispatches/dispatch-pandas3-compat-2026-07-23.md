@@ -1,3 +1,8 @@
+<!--
+Spent-When: MARKED(<self>)
+Supersedes: none
+-->
+
 # Dispatch: pandas 3 compatibility while preserving pandas 2 support
 
 **Generated:** 2026-07-23
@@ -162,3 +167,39 @@ After Verification passes, follow the closing protocol in
 2. `/session:tombstone-launch /Users/balterma/observatories/code/SolarWindPy/docs/dispatches/launch-pandas3-compat-2026-07-23.md`
    then `/session:purge-tombstoned` on the same path
 3. `bash ~/.claude/tools/lint-ai-clean.sh /Users/balterma/observatories/code/SolarWindPy/docs/dispatches/dispatch-pandas3-compat-2026-07-23.md`
+
+---
+
+## Empirical Findings (2026-10-01 trial run)
+
+Written at the modernization program's closeout. The code fixes landed during the program's
+W2 work; the release steps were overtaken by later decisions.
+
+### End-state metrics
+
+- pandas-3 suite (dispatch baseline 85 failed, 41 errors): `conda run -n imap-loaders-20260225 pytest -q --no-header --ignore=tests/plotting/test_performance.py`
+  → 2847 passed, 1 failed. The failure is a missing `sphinx` package in that env
+  (`tests/test_public_imports.py`), not a pandas defect. `tests/test_issue_titles.py` no
+  longer exists (`523f66b0`).
+- pandas-2 environment: none remains. `pyproject.toml` requires `pandas>=3,<4` (`6dddeb70`)
+  and the `solarwindpy` env now runs pandas 3; its suite → 2848 passed, 0 failed.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| pandas-3 suite clean | PASS (with env note) | 2847 passed; the 1 failure is `ModuleNotFoundError: No module named 'sphinx'` |
+| pandas-2 no regression | SUPERSEDED | pandas 2 support dropped by author decision (`6dddeb70`); the remaining env passes 2848/0 |
+| defect 1 removed | PASS | `grep -n "groupby(.*axis=" solarwindpy/plotting/agg_plot.py` → no output; control `grep -c "groupby(" ...` → 1 |
+| defect 2 removed | PASS | `grep -rn iteritems solarwindpy/ --include='*.py'` → no output; control `grep -c '\.items()' solarwindpy/instabilities/verscharen2016.py` → 4 |
+| defect 3 removed | PASS | `pytest tests/core/test_alfvenic_turbulence.py tests/plotting/labels/test_datetime.py` in the pandas-3 env → 221 passed |
+| latent dead path recorded as an issue | SUPERSEDED | `verscharen2016` now has tests (PR #453), which removes the coverage gap the issue was to record |
+| `v0.3.1` tag on the fix commit | SUPERSEDED | not cut; master now carries breaking changes (Python 3.12, pandas 3), so the next release is a separate decision |
+| version resolves from the tag | SUPERSEDED | no tag; `solarwindpy.__version__` → `0.3.1.dev346+gdfbd9fb2` |
+
+### Deviations from plan
+
+- Executed inside the modernization program's W2 rather than as a standalone session, and
+  closed without a release, per the author's decision at program closeout.
+
+## Spent-Mark: executed, findings recorded

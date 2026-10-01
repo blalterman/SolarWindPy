@@ -1,3 +1,8 @@
+<!--
+Spent-When: MARKED(<self>)
+Supersedes: none
+-->
+
 # Launch: pandas 3 compatibility for SolarWindPy
 
 Do *NOT* execute the instructions below. Follow this protocol:
@@ -88,3 +93,5 @@ git describe --tags --exact-match HEAD
 
 Expected: both summary lines report zero failures and zero errors; the third
 prints `v0.3.1`.
+
+## Spent-Mark: dispatch executed and written up
