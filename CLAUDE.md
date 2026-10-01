@@ -51,8 +51,8 @@ CI runs `pytest`, `black --check`, `flake8`, and `lint-imports` against
 `solarwindpy/`.
 
 The `solarwindpy-physics` pre-commit hook runs the full suite with
-`--cov-fail-under=80` on any commit touching a `.py` file. Measured coverage is
-~82%, so this is a regression ratchet rather than a target; raise it as coverage
+`--cov-fail-under=92` on any commit touching a `.py` file. Measured coverage is
+~94%, so this is a regression ratchet rather than a target; raise it as coverage
 rises. `.claude/hooks/coverage-monitor.py` separately reports per-module
 coverage from a `Stop` hook — those numbers are advisory and block nothing.
 
