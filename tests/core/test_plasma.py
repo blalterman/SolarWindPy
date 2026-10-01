@@ -122,32 +122,14 @@ class PlasmaTestBase(ABC):
                 "Unequal data for ion: %s" % k,
             )
 
-    def test_conform_species(self):
-        r"""Just test that the species is a valid input.
+    def test_comma_joined_species_are_rejected_as_invalid(self):
+        r"""A comma inside a species string raises "Invalid species".
 
-        ON FAILURE: the code is wrong; `_conform_species` must accept "+"-joined
-        species and reject comma-joined ones.
+        Species are passed as separate arguments or summed with "+"; "a,p1" is
+        neither, whether or not the plasma holds the species named.
+
+        ON FAILURE: the code is wrong; `Plasma` accepted a comma-joined species.
         """
-        slist = (
-            "a",
-            "e",
-            "p1",
-            "p2",
-            "a+p1",
-            "p1+p2",
-            "a+p2",
-            "a+p1+p2",
-            "a+p1+e",
-            "p1+p2+e",
-            "a+p2+e",
-            "a+p1+p2+e",
-        )
-        # Check that the exception isn't raised.
-        for s in slist:
-            self.assertEqual(
-                self.object_testing._conform_species(s), tuple(sorted(s.split("+")))
-            )
-
         slist = (
             "a,p1",
             "p1,p2",
@@ -163,47 +145,41 @@ class PlasmaTestBase(ABC):
         )
         for s in slist:
             with self.assertRaisesRegex(ValueError, "Invalid species"):
-                self.object_testing._conform_species(s)
+                self.object_testing.number_density(s)
 
             if "+" in s:
                 # A species list for which one species contains "+" is not
                 # uniformly parsable.
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    self.object_testing._conform_species(*s.split(","))
+                    self.object_testing.number_density(*s.split(","))
 
-    def test_chk_species_success(self):
-        r"""`_chk_species` accepts every species, subset, and "+"-sum this plasma holds.
+    def test_held_species_are_accepted_in_any_order_and_sum(self):
+        r"""Every held species, subset, and "+"-sum is accepted; sum order is irrelevant.
 
-        ON FAILURE: the code is wrong; `_chk_species` is rejecting a species the
-        plasma actually contains.
+        The total of a "+"-sum is the same whichever order its terms are
+        written in (identity: addition commutes).
+
+        ON FAILURE: the code is wrong; `Plasma` is rejecting a species it holds
+        or treating "+"-sums as ordered.
         """
-        self.assertEqual(self.stuple, self.object_testing._chk_species(*self.stuple))
-
-        # Ensure exception isn't raised for plasma's individual species.
+        ot = self.object_testing
         for s in self.stuple:
-            # Automatically passes if no exception raised.
-            self.object_testing._chk_species(s)
-
-        # Check that any subset of the species and "s0+s1+..." pass,
-        # but "s0,s1" don't.
-        bad_species_msg = "Invalid species:"
+            self.assertEqual(ot.number_density(s).name, s)
         for combo in self.species_combinations:
-            self.object_testing._chk_species(*combo)
-            self.object_testing._chk_species("+".join(combo))
-            bad_species = ",".join(combo)
-            if "," in bad_species:
-                with self.assertRaisesRegex(ValueError, bad_species_msg):
-                    self.object_testing._chk_species(bad_species)
+            ot.number_density(*combo)
+            forward = ot.number_density("+".join(combo))
+            backward = ot.number_density("+".join(reversed(combo)))
+            pdt.assert_series_equal(forward, backward, check_names=False)
 
     @abstractmethod
-    def test_chk_species_fail(self):
-        r"""Subclass this to test the species that fail `_chk_species`.
+    def test_unheld_species_are_unavailable(self):
+        r"""Subclass this to test species the plasma does not hold.
 
         The code will look something like:
             for s in bad_species:
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
-                    self.object_testing._chk_species(*s)
+                    self.object_testing.number_density(*s)
         """
         pass
 
@@ -2102,11 +2078,11 @@ class PlasmaTestBase(ABC):
 # Tests
 #####
 class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             "a+p1",
@@ -2122,15 +2098,15 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             "a+p1",
@@ -2146,15 +2122,15 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             "a+p1",
@@ -2170,15 +2146,15 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             ("a", "p2"),
@@ -2195,15 +2171,15 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             ("a", "p1"),
@@ -2220,15 +2196,15 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             "a",
@@ -2244,15 +2220,15 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
 
 
 class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
-    def test_chk_species_fail(self):
+    def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
-        ON FAILURE: the code is wrong; `_chk_species` accepted a species this
-        plasma does not hold.
+        ON FAILURE: the code is wrong; `Plasma` accepted a species it does not
+        hold.
         """
         bad_species = [
             "a+e",
@@ -2268,4 +2244,4 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing._chk_species(*s)
+                self.object_testing.number_density(*s)
