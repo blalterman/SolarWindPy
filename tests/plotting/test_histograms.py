@@ -135,11 +135,11 @@ class TestHist1DAxisNormalization:
         # The exact label depends on implementation
         assert hasattr(hist, "labels")
 
-    def test_set_axnorm_invalid_raises_assertion_error(self):
-        """Test that set_axnorm('x') raises AssertionError."""
+    def test_set_axnorm_invalid_raises_value_error(self):
+        """Test that set_axnorm('x') raises ValueError."""
         hist = Hist1D(self.x_data)
 
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'x'"):
             hist.set_axnorm("x")
 
     def test_axis_normalizer_none(self):
@@ -451,7 +451,7 @@ class TestHist2DAxisNormalization:
         self.y_data = pd.Series(np.random.normal(10, 3, self.n), name="y")
 
     def test_set_axnorm_valid_options(self):
-        """Test that set_axnorm('c'), 'r', 't', 'd' work; invalid → AssertionError."""
+        """Test that set_axnorm('c'), 'r', 't', 'd' work; invalid → ValueError."""
         hist = Hist2D(self.x_data, self.y_data)
 
         # Valid options should work
@@ -460,8 +460,8 @@ class TestHist2DAxisNormalization:
             hist.set_axnorm(option)
             assert hist.axnorm == option
 
-        # Invalid option should raise AssertionError
-        with pytest.raises(AssertionError):
+        # Invalid option should raise ValueError
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'invalid'"):
             hist.set_axnorm("invalid")
 
     @pytest.mark.parametrize(
@@ -522,9 +522,8 @@ class TestHist2DAxisNormalization:
     def test_axis_normalizer_invalid_raises_value_error(self):
         """Test that _axis_normalizer('bad') raises ValueError."""
         hist = Hist2D(self.x_data, self.y_data)
-        # Hist2D raises AssertionError in set_axnorm, not ValueError
-        # So we test AssertionError instead
-        with pytest.raises(AssertionError, match="Unrecgonized axnorm"):
+        # Hist2D refuses an unknown key in set_axnorm, before _axis_normalizer.
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'bad'"):
             hist.set_axnorm("bad")
 
 

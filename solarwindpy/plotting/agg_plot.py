@@ -446,3 +446,39 @@ class AggPlot(base.Base):
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized."""
         pass
+
+    @staticmethod
+    def _validate_axnorm(new, allowed):
+        r"""Check an ``axnorm`` key and return it in its normalized form.
+
+        Parameters
+        ----------
+        new : str or None
+            The requested key. Matching is case-insensitive and exact.
+        allowed : tuple of str
+            The lowercase keys the calling class supports.
+
+        Returns
+        -------
+        str or None
+            ``None`` unchanged, otherwise the lowercase key.
+
+        Raises
+        ------
+        TypeError
+            If `new` is neither a string nor None.
+        ValueError
+            If `new` is not one of `allowed`.
+        """
+        if new is None:
+            return None
+        if not isinstance(new, str):
+            raise TypeError(
+                f"axnorm must be a string or None; got {type(new).__name__}"
+            )
+        key = new.lower()
+        if key not in allowed:
+            raise ValueError(
+                f"Unrecognized axnorm '{new}'; expected one of: {', '.join(allowed)}"
+            )
+        return key

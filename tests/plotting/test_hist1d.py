@@ -279,16 +279,42 @@ class TestPeakNormalization:
         np.testing.assert_allclose(line_y, counts / counts.max(), rtol=1e-12, atol=0)
         assert line_y.max() == 1.0
 
-    @pytest.mark.parametrize("bad", ["c", "r", "x"])
+    @pytest.mark.parametrize("bad", ["c", "r", "x", "density", "tx", "dog"])
     def test_unrecognized_axnorm_is_rejected(self, bad):
         """``set_axnorm`` rejects any key other than "d", "t" or None.
+
+        The match is exact, so a word that merely starts with "d" or "t"
+        ("density", "tx") is refused rather than truncated to its first letter.
 
         ON FAILURE: the code is wrong.
         """
         hist = Hist1D(pd.Series([0.5, 1.5, 3.0]), nbins=np.array([0.0, 1.0, 2.0, 4.0]))
 
-        with pytest.raises(AssertionError, match="Unrecognized axnorm"):
+        with pytest.raises(
+            ValueError,
+            match=f"Unrecognized axnorm '{bad}'; expected one of: d, t",
+        ):
             hist.set_axnorm(bad)
+
+    def test_axnorm_match_is_case_insensitive(self):
+        """``set_axnorm("D")`` is stored as the lowercase key "d".
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist1D(pd.Series([0.5, 1.5, 3.0]), nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+
+        hist.set_axnorm("D")
+        assert hist.axnorm == "d"
+
+    def test_non_string_axnorm_is_a_type_error(self):
+        """A non-string, non-None axnorm raises ``TypeError`` naming its type.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist1D(pd.Series([0.5, 1.5, 3.0]), nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+
+        with pytest.raises(TypeError, match="axnorm must be a string or None; got int"):
+            hist.set_axnorm(1)
 
 
 class TestMakePlot:

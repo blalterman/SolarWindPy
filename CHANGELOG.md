@@ -153,6 +153,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `solarwindpy.plotting.labels.special` raise `TypeError` at construction when
   `other_label` is a plain `str`. A string was never usable (it failed later with
   `AttributeError`); wrap raw TeX in `ManualLabel`.
+- `Hist1D` no longer accepts `axnorm` words beyond `"d"`/`"t"` (e.g. `"density"`, which
+  was truncated to `"d"`). An invalid `axnorm` on `Hist1D` or `Hist2D` raises `TypeError`
+  (not a string or None) or `ValueError` (unknown key) instead of `AssertionError`.
 
 ### Added
 

@@ -125,16 +125,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
          cd    PDFs in each column
          rd    PDFs in each row
         ===== ============================================================="""
-        if new is not None:
-            new = new.lower()
-            assert new in (
-                "c",
-                "r",
-                "t",
-                "d",
-                "cd",
-                "rd",
-            ), f"Unrecgonized axnorm `{new}`"
+        new = self._validate_axnorm(new, ("c", "r", "t", "d", "cd", "rd"))
 
         zlbl = self.labels.z
         if isinstance(zlbl, labels.special.Count):

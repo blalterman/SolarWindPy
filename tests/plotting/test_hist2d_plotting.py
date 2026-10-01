@@ -13,6 +13,9 @@ edge lines. Those are the numbers the science depends on; the rendering is not.
 """
 
 import inspect
+import subprocess
+import sys
+import textwrap
 
 import pytest
 import numpy as np
@@ -1716,16 +1719,74 @@ class TestAxnormKeys:
     def test_set_axnorm_rejects_a_tuple(self, known_hist):
         """A ``(kind, fcn)`` tuple is not an axnorm key and is refused.
 
-        ``set_axnorm`` lower-cases its argument before checking it, so a tuple
-        fails there with ``AttributeError``.
+        The refusal is a deliberate ``TypeError`` naming the type, not an
+        accident of calling a string method on a tuple.
 
         ON FAILURE: the code is wrong, unless the author has made tuple axnorm
         a feature.
         """
         with pytest.raises(
-            AttributeError, match="'tuple' object has no attribute 'lower'"
+            TypeError, match="axnorm must be a string or None; got tuple"
         ):
             known_hist.set_axnorm(("c", "max"))
+
+    @pytest.mark.parametrize("bad", ["x", "total", "column", "cdx"])
+    def test_unknown_axnorm_is_a_value_error(self, known_hist, bad):
+        """An unknown key raises ``ValueError`` listing every accepted key.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(
+            ValueError,
+            match=(f"Unrecognized axnorm '{bad}'; expected one of: c, r, t, d, cd, rd"),
+        ):
+            known_hist.set_axnorm(bad)
+
+    def test_axnorm_match_is_case_insensitive(self, known_hist):
+        """``set_axnorm("CD")`` is stored as the lowercase key "cd".
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_axnorm("CD")
+        assert known_hist.axnorm == "cd"
+
+    def test_validation_survives_python_optimize(self):
+        """Invalid axnorm is refused under ``python -O``, which strips asserts.
+
+        A subprocess run with ``-O`` passes unknown keys to Hist1D and Hist2D;
+        each must raise set_axnorm's own ``ValueError``. Hist1D gets "c" and
+        "density", keys the ``Count`` label accepts (after truncation, for
+        "density"), so a missing check cannot hide behind the label rejecting
+        the key further downstream.
+
+        ON FAILURE: the code is wrong -- validation relies on ``assert``.
+        """
+        # The bare ``assert False`` proves -O is in effect: without -O it fires
+        # and the script exits non-zero before reaching set_axnorm.
+        script = textwrap.dedent("""
+            import matplotlib
+            matplotlib.use("Agg")
+            import pandas as pd
+            from solarwindpy.plotting.hist1d import Hist1D
+            from solarwindpy.plotting.hist2d import Hist2D
+
+            assert False, "python -O did not strip asserts"
+            x = pd.Series([0.5, 1.5, 3.0])
+            y = pd.Series([1.5, 2.5, 0.5])
+            cases = [(Hist1D(x), "c"), (Hist1D(x), "density"), (Hist2D(x, y), "bogus")]
+            for hist, key in cases:
+                try:
+                    hist.set_axnorm(key)
+                except ValueError as err:
+                    if str(err).startswith(f"Unrecognized axnorm '{key}'"):
+                        continue
+                    raise
+                raise SystemExit(f"{type(hist).__name__} accepted {key!r}")
+            """)
+        result = subprocess.run(
+            [sys.executable, "-O", "-c", script], capture_output=True, text=True
+        )
+        assert result.returncode == 0, result.stderr + result.stdout
 
 
 if __name__ == "__main__":
