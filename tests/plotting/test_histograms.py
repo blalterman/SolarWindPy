@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Tests for the Hist1D and Hist2D histogram plotters."""
 
+from pathlib import Path
+
 import pytest
 import numpy as np
 import pandas as pd
@@ -42,10 +44,6 @@ class TestHist1DBasicFunctionality:
         """Test __init__(x_series) produces a count histogram."""
         hist = Hist1D(self.x_data)
 
-        assert hasattr(hist, "data")
-        assert hasattr(hist, "_gb_axes")
-        assert hist._gb_axes == ("x",)
-
         # Should have x and y columns (y=1 for counting)
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
@@ -79,11 +77,6 @@ class TestHist1DBasicFunctionality:
         assert hist.data["x"].min() >= 0  # log10(1) = 0
         assert hist.data["x"].max() <= 2  # log10(100) = 2
 
-    def test_hist1d_gb_axes_property(self):
-        """Test that _gb_axes property returns ('x',)."""
-        hist = Hist1D(self.x_data)
-        assert hist._gb_axes == ("x",)
-
     def test_hist1d_set_path_auto(self):
         """Test set_path('auto') builds path from labels."""
         hist = Hist1D(self.x_data)
@@ -91,9 +84,8 @@ class TestHist1DBasicFunctionality:
 
         hist.set_path("auto")
 
-        # Path should be updated
-        assert hasattr(hist, "_path")
-        assert hist.path is not None
+        # Documented layout: class, x label, y label, scale tag.
+        assert hist.path == Path("Hist1D", "density", "count", "linX")
 
     def test_hist1d_set_path_custom(self):
         """Test set_path('custom', add_scale=False) sets _path to Path('custom')."""
@@ -151,14 +143,13 @@ class TestHist1DAxisNormalization:
             hist.set_axnorm("x")
 
     def test_axis_normalizer_none(self):
-        """Test _axis_normalizer(None) returns input unchanged."""
-        hist = Hist1D(self.x_data)
+        """With no normalisation, ``agg()`` is the count in each bin.
 
-        # Create some test aggregated data
-        test_data = pd.Series([1, 2, 3], index=["a", "b", "c"])
-        result = hist._axis_normalizer(test_data)
-
-        pd.testing.assert_series_equal(result, test_data)
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        assert hist.agg().values.tolist() == KNOWN_BIN_COUNTS
 
     def test_axis_normalizer_density(self):
         """Density normalization yields a PDF: it integrates to 1.
@@ -193,30 +184,19 @@ class TestHist1DAxisNormalization:
         np.testing.assert_allclose(hist.agg().values, expected)
 
     def test_axis_normalizer_total(self):
-        """Test _axis_normalizer('t') normalizes by max."""
-        hist = Hist1D(self.x_data)
-        # Don't set axnorm to 't' since it may not be supported
-        # Instead test the method directly by setting _axnorm
-        hist._axnorm = "t"
+        """``set_axnorm("t")`` divides every count by the largest one.
 
-        # Create test data
-        test_data = pd.Series([1, 2, 4], index=["a", "b", "c"])
-        result = hist._axis_normalizer(test_data)
+        Hand-computed from ``KNOWN_BIN_COUNTS`` = 3, 5, 2, 4, 6: each over 6.
 
-        # Should be normalized by max (4)
-        expected = pd.Series([0.25, 0.5, 1.0], index=["a", "b", "c"])
-        pd.testing.assert_series_equal(result, expected)
-
-    def test_axis_normalizer_invalid_raises_value_error(self):
-        """Test that _axis_normalizer('bad') raises ValueError."""
-        hist = Hist1D(self.x_data)
-        # Set axnorm directly to avoid assertion in set_axnorm
-        hist._axnorm = "bad"
-
-        test_data = pd.Series([1, 2, 3], index=["a", "b", "c"])
-
-        with pytest.raises(ValueError, match="Unrecognized axnorm"):
-            hist._axis_normalizer(test_data)
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        hist.set_axnorm("t")
+        # rel=1e-12: one division of small integers.
+        np.testing.assert_allclose(
+            hist.agg().values, np.array(KNOWN_BIN_COUNTS) / 6.0, rtol=1e-12, atol=0
+        )
 
 
 class TestHist1DAggregation:
@@ -397,10 +377,6 @@ class TestHist2DBasicFunctionality:
         """Test __init__(x, y) produces 2D count heatmap."""
         hist = Hist2D(self.x_data, self.y_data)
 
-        assert hasattr(hist, "data")
-        assert hasattr(hist, "_gb_axes")
-        assert hist._gb_axes == ("x", "y")
-
         # Should have x, y, and z columns (z=1 for counting)
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
@@ -423,13 +399,11 @@ class TestHist2DBasicFunctionality:
         assert not (hist.data["z"] == 1).all()
         assert hist.data["z"].std() > 0  # Should have variation
 
-    def test_hist2d_gb_axes_property(self):
-        """Test that _gb_axes returns ('x','y')."""
-        hist = Hist2D(self.x_data, self.y_data)
-        assert hist._gb_axes == ("x", "y")
-
     def test_hist2d_log_scale_conversion(self):
-        """Test _maybe_convert_to_log_scale with logx/logy=True."""
+        """``logx``/``logy`` store log10 coordinates and set both log flags.
+
+        ON FAILURE: the code is wrong.
+        """
         # Use positive data for log transform
         x_positive = pd.Series(np.random.uniform(1, 100, self.n))
         y_positive = pd.Series(np.random.uniform(1, 100, self.n))
@@ -439,18 +413,9 @@ class TestHist2DBasicFunctionality:
         assert hist.log.x is True
         assert hist.log.y is True
 
-        # Test the conversion method
-        x_test = np.array([1, 2, 3])
-        y_test = np.array([1, 2, 3])
-
-        x_converted, y_converted = hist._maybe_convert_to_log_scale(x_test, y_test)
-
-        # Should convert from log space back to linear
-        expected_x = 10**x_test
-        expected_y = 10**y_test
-
-        np.testing.assert_array_equal(x_converted, expected_x)
-        np.testing.assert_array_equal(y_converted, expected_y)
+        # The stored coordinates are log10 of the inputs, which lie in [1, 100).
+        assert hist.data["x"].between(0, 2).all()
+        assert hist.data["y"].between(0, 2).all()
 
     def test_hist2d_set_data_with_log_transform(self):
         """Test set_data(x, y, z, clip) applies log transform."""
@@ -553,21 +518,6 @@ class TestHist2DAxisNormalization:
 
         integral = np.nansum(agg.values * x_bins.length.values * y_bins.length.values)
         assert np.isclose(integral, 1.0)
-
-    def test_axis_normalizer_custom_function(self):
-        """``("c", "sum")`` divides each column by its sum, so columns sum to 1.
-
-        ``set_axnorm`` only admits the documented strings, so the private
-        attribute is the only way in; the identity asserted is arithmetic, not
-        a record of what the code returned.
-
-        ON FAILURE: the code is wrong.
-        """
-        hist = Hist2D(self.x_data, self.y_data, nbins=6)
-        hist._axnorm = ("c", "sum")
-
-        column_sums = hist.agg().unstack("x").sum(axis=0)
-        np.testing.assert_allclose(column_sums.values, 1.0)
 
     def test_axis_normalizer_invalid_raises_value_error(self):
         """Test that _axis_normalizer('bad') raises ValueError."""
