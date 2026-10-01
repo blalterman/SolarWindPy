@@ -212,11 +212,8 @@ def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
     Its namedtuple was created with typename ``"Popt1Dkeys"`` but bound to
     ``Popt1DKeys``, so pickle's lookup of the class by name failed.
 
-    ON FAILURE: the code is wrong, unless a test earlier in the run deleted
-    ``solarwindpy`` modules from ``sys.modules`` after this import resolved.
+    ON FAILURE: the code is wrong.
     """
-    # Resolve at call time: tests/test_circular_imports.py drops and re-imports
-    # every solarwindpy module, and pickle requires the class in sys.modules.
     from solarwindpy.fitfunctions.lines import Line
     from solarwindpy.fitfunctions.trend_fits import TrendFit
 

@@ -103,8 +103,8 @@ def test_declared_versions_check_raises_on_readthedocs_below_floor(
     is attributable to ``.readthedocs.yaml`` and nothing else.
 
     ON FAILURE: tests/test_declared_versions.py no longer reads or checks
-    .readthedocs.yaml build.tools.python; the retired
-    tests/drift/test_drift_readthedocs.py assertion is uncovered.
+    .readthedocs.yaml build.tools.python, so nothing enforces that Read the
+    Docs builds on a Python at or above the requires-python floor.
     """
     check = test_declared_versions.test_declared_versions_satisfy_requires_python
     good, bad = tmp_path / "good", tmp_path / "bad"
