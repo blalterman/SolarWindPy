@@ -30,11 +30,6 @@ the module that defines it, and is documented at that path.
 Core Module
 -----------
 
-Main data structures, physics calculations, and fundamental classes for solar wind analysis.
-The core module provides the :class:`~solarwindpy.core.plasma.Plasma` container class and
-:class:`~solarwindpy.core.ions.Ion` species class, along with vector/tensor operations
-and physical constants.
-
 .. autosummary::
    :toctree: _autosummary
    :recursive:
@@ -43,10 +38,6 @@ and physical constants.
 
 Plotting Module
 ---------------
-
-Visualization tools for creating publication-quality scientific figures. Includes histogram
-classes with aggregation, scatter plots, scientific labels with automatic units, and helper
-functions for figure management.
 
 .. autosummary::
    :toctree: _autosummary
@@ -57,10 +48,6 @@ functions for figure management.
 Fit Functions Module
 --------------------
 
-Statistical analysis and curve fitting tools for solar wind data. Provides parametric
-fit functions (Gaussian, exponential, power law) with automatic parameter
-estimation, plotting utilities, and trend analysis.
-
 .. autosummary::
    :toctree: _autosummary
    :recursive:
@@ -69,9 +56,6 @@ estimation, plotting utilities, and trend analysis.
 
 Solar Activity Module
 ---------------------
-
-Tools for accessing and analyzing solar activity indices. Includes sunspot number data,
-the ICME catalog, and solar cycle analysis.
 
 .. autosummary::
    :toctree: _autosummary
@@ -82,9 +66,6 @@ the ICME catalog, and solar cycle analysis.
 Instabilities Module
 --------------------
 
-Plasma instability analysis and threshold calculations. Includes temperature anisotropy
-instability thresholds based on Verscharen et al. (2016) and related analyses.
-
 .. autosummary::
    :toctree: _autosummary
    :recursive:
@@ -93,8 +74,6 @@ instability thresholds based on Verscharen et al. (2016) and related analyses.
 
 Tools Module
 ------------
-
-General utility functions and helper tools for data manipulation and analysis.
 
 .. autosummary::
    :toctree: _autosummary

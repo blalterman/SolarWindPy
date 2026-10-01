@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""Helper functions for solar activity data.
+"""Solar activity indicators and event catalogs.
 
-This package consolidates the different solar activity indicators available in
-:mod:`solarwindpy`.
+The SIDC sunspot number, with each observation labeled by its solar cycle and
+normalized within that cycle, and the HELIO4CAST ICME catalog.
 """
 
 __all__ = [
