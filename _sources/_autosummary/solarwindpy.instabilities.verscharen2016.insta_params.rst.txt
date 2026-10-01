@@ -1,0 +1,6 @@
+solarwindpy.instabilities.verscharen2016.insta\_params
+======================================================
+
+.. currentmodule:: solarwindpy.instabilities.verscharen2016
+
+.. autodata:: insta_params

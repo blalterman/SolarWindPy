@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.chemistry.mass
+==========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.chemistry
+
+.. autodata:: mass

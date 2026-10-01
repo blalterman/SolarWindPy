@@ -10,6 +10,16 @@ solarwindpy.plotting.labels.chemistry
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      mass_per_charge
+      fip
+      charge
+      mass
+   
    
 
    

@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.chemistry.fip
+=========================================
+
+.. currentmodule:: solarwindpy.plotting.labels.chemistry
+
+.. autodata:: fip

@@ -1,0 +1,6 @@
+solarwindpy.solar\_activity.icme.icmecat.SPACECRAFT\_NAMES
+==========================================================
+
+.. currentmodule:: solarwindpy.solar_activity.icme.icmecat
+
+.. autodata:: SPACECRAFT_NAMES

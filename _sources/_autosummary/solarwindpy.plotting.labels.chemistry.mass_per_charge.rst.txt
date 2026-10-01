@@ -1,0 +1,6 @@
+solarwindpy.plotting.labels.chemistry.mass\_per\_charge
+=======================================================
+
+.. currentmodule:: solarwindpy.plotting.labels.chemistry
+
+.. autodata:: mass_per_charge

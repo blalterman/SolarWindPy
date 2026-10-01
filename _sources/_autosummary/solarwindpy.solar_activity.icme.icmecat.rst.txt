@@ -10,6 +10,14 @@ solarwindpy.solar\_activity.icme.icmecat
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      ICMECAT_URL
+      SPACECRAFT_NAMES
+   
    
 
    

@@ -10,6 +10,13 @@ solarwindpy.instabilities.verscharen2016
 
    
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      insta_params
+   
    
 
    
