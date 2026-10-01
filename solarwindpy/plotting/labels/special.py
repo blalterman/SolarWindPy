@@ -794,7 +794,7 @@ class SSN(ArbitraryLabel):
         self._path = Path(f"""{new.upper()!s}ssn""")
 
 
-class ComparisonLable(ArbitraryLabel):
+class ComparisonLabel(ArbitraryLabel):
     """Label comparing two other labels via a function."""
 
     def __init__(self, labelA, labelB, fcn_name, fcn=None, description=None):

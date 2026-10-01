@@ -382,14 +382,14 @@ class TestSSN:
         assert str(ssn.path) == "M13ssn"
 
 
-class TestComparisonLable:
-    """Test ComparisonLable class (note: intentional misspelling in original)."""
+class TestComparisonLabel:
+    """Test ComparisonLabel class."""
 
     def test_basic_comparison(self, basic_texlabel):
         """Test basic comparison label."""
         # Use same units to avoid ValueError
         label_b = labels_base.TeXlabel(("v", "y", "p"))  # Same units as basic_texlabel
-        comp = labels_special.ComparisonLable(basic_texlabel, label_b, "subtract")
+        comp = labels_special.ComparisonLabel(basic_texlabel, label_b, "subtract")
         assert comp.labelA == basic_texlabel
         assert comp.labelB == label_b
 
@@ -400,7 +400,7 @@ class TestComparisonLable:
         functions = ["subtract", "add", "multiply"]
 
         for fcn in functions:
-            comp = labels_special.ComparisonLable(basic_texlabel, label_b, fcn)
+            comp = labels_special.ComparisonLabel(basic_texlabel, label_b, fcn)
             assert comp.function_name == fcn
 
     def test_custom_function(self, basic_texlabel):
@@ -408,7 +408,7 @@ class TestComparisonLable:
         # Use same units to avoid ValueError
         label_b = labels_base.TeXlabel(("v", "y", "p"))  # Same units as basic_texlabel
         custom_fcn = r"{$labelA} / {$labelB}"
-        comp = labels_special.ComparisonLable(
+        comp = labels_special.ComparisonLabel(
             basic_texlabel, label_b, "divide", custom_fcn
         )
         assert "$labelA" in comp.function
@@ -419,7 +419,7 @@ class TestComparisonLable:
         label_b = labels_base.TeXlabel(("n", "", "p"))
         invalid_fcn = r"{$invalid} + {$keys}"
         with pytest.raises(ValueError):
-            labels_special.ComparisonLable(
+            labels_special.ComparisonLabel(
                 basic_texlabel, label_b, "invalid", invalid_fcn
             )
 
@@ -427,28 +427,28 @@ class TestComparisonLable:
         """Test unit validation for comparison labels."""
         # Same units should work
         label_b = labels_base.TeXlabel(("v", "y", "p"))  # Same units as basic_texlabel
-        comp = labels_special.ComparisonLable(basic_texlabel, label_b, "subtract")
+        comp = labels_special.ComparisonLabel(basic_texlabel, label_b, "subtract")
         assert comp.units == basic_texlabel.units
 
     def test_different_units_error(self, basic_texlabel):
         """Test different units raise ValueError."""
         label_b = labels_base.TeXlabel(("n", "", "p"))  # Different units
         with pytest.raises(ValueError):
-            labels_special.ComparisonLable(basic_texlabel, label_b, "subtract")
+            labels_special.ComparisonLabel(basic_texlabel, label_b, "subtract")
 
     def test_string_labels(self):
         """Test comparison with string labels."""
-        comp = labels_special.ComparisonLable("labelA", "labelB", "add")
+        comp = labels_special.ComparisonLabel("labelA", "labelB", "add")
         assert comp.labelA == "labelA"
         assert comp.labelB == "labelB"
 
     def test_type_validation(self):
         """Test type validation for labels."""
         with pytest.raises(TypeError):
-            labels_special.ComparisonLable(123, "labelB", "add")
+            labels_special.ComparisonLabel(123, "labelB", "add")
 
         with pytest.raises(TypeError):
-            labels_special.ComparisonLable("labelA", 456, "add")
+            labels_special.ComparisonLabel("labelA", 456, "add")
 
 
 class TestXcorr:
@@ -535,7 +535,7 @@ class TestLabelIntegration:
         """Test comparison using mixed label types."""
         manual = labels_special.ManualLabel("Custom", "units")
         # Verify construction succeeds (result intentionally unused)
-        labels_special.ComparisonLable(basic_texlabel, manual, "add")
+        labels_special.ComparisonLabel(basic_texlabel, manual, "add")
 
     def test_probability_with_manual_label(self):
         """Test probability with manual label."""

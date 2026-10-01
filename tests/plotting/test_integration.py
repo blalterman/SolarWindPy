@@ -184,7 +184,7 @@ _STRUCTURED_LABELS = {
         f"SSN-{key}": (lambda key=key: special.SSN(key))
         for key in ("M", "M13", "D", "Y", "NM", "NM13", "ND", "NY")
     },
-    "ComparisonLable": lambda: special.ComparisonLable(
+    "ComparisonLabel": lambda: special.ComparisonLabel(
         labels.TeXlabel(_N_A), labels.TeXlabel(_N_P1), "subtract"
     ),
     "Xcorr": lambda: special.Xcorr(

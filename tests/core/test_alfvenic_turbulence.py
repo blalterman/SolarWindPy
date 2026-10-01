@@ -163,7 +163,7 @@ class AlfvenicTrubulenceTestBase(ABC):
     def test_averaging_info(self):
         ot = self.object_testing
         avg = ot.averaging_info
-        expected = turb.AlvenicTurbAveraging(self.test_window, self.test_periods)
+        expected = turb.AlfvenicTurbAveraging(self.test_window, self.test_periods)
         self.assertEqual(expected, avg)
 
     def test_bfield(self):
