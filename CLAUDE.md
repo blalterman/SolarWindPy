@@ -56,31 +56,6 @@ The `solarwindpy-physics` pre-commit hook runs the full suite with
 rises. `.claude/hooks/coverage-monitor.py` separately reports per-module
 coverage from a `Stop` hook — those numbers are advisory and block nothing.
 
-## Planning workflow
-
-Plans are GitHub Issues, created by scripts that must be **executed**, not
-described. The flag syntax is not guessable, so it is recorded here:
-
-```bash
-# Overview issue
-.claude/scripts/gh-plan-create.sh -p <priority> -d <domain> "Plan Title"
-#   priority: critical|high|medium|low
-#   domain:   physics|data|plotting|testing|infrastructure|docs
-
-# Phase issues, batch mode
-mkdir -p tmp
-cat > tmp/phases.conf <<'EOF'
-Phase Name|Estimated Duration|Dependencies
-Foundation Setup|2-3 hours|None
-Core Implementation|4-5 hours|Phase 1
-EOF
-.claude/scripts/gh-plan-phases.sh -b tmp/phases.conf <issue_number>
-
-.claude/scripts/gh-plan-status.sh            # review open plans
-```
-
-If the result is prose instead of a created GitHub Issue, the step did not run.
-
 ## Conventions
 
 - NumPy-style docstrings.
@@ -98,5 +73,5 @@ If the result is prose instead of a created GitHub Issue, the step did not run.
 ## Further documentation
 
 `.claude/docs/` holds the detail beyond this file: `DEVELOPMENT.md`,
-`HOOKS.md`, `PLANNING.md`, `TEST_PATTERNS.md`, `MAINTENANCE.md`,
+`HOOKS.md`, `TEST_PATTERNS.md`, `MAINTENANCE.md`,
 `RELEASING.md`, `ATTRIBUTION.md`.

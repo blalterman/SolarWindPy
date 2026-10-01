@@ -137,8 +137,6 @@ python .claude/hooks/physics-validation.py --report
 # Create manual compaction for token management
 python .claude/hooks/create-compaction.py
 
-# Validate plan completeness
-python .claude/hooks/plan-value-validator.py --plan-file plans/active-plan/0-Overview.md
 ```
 
 ## Directory Structure Maintenance
@@ -276,11 +274,6 @@ Consider quarterly audits if:
 - Use `.claude/hooks/test-runner.sh --changed` for focused testing
 - Check coverage requirements: must be ≥95%
 - Review physics validation output for constraint violations
-
-### Plan Creation Issues
-- Verify GitHub CLI authentication: `gh auth status`
-- Check required labels exist in repository
-- Use interactive mode: `.claude/scripts/gh-plan-create.sh -i`
 
 ### Compaction Problems
 - Check available disk space for .claude/ directory

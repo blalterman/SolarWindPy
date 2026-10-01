@@ -16,7 +16,6 @@ SolarWindPy uses a highly automated release pipeline:
 **Related Documentation**:
 - [MAINTENANCE.md](./MAINTENANCE.md) - Conda feedstock scripts, troubleshooting
 - [DEVELOPMENT.md](./DEVELOPMENT.md) - Code quality standards, testing requirements
-- [PLANNING.md](./PLANNING.md) - GitHub Issues workflow for development planning
 
 ## Semantic Versioning
 
