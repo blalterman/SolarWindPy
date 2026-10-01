@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from types import SimpleNamespace
 
 from scipy.optimize import OptimizeResult, least_squares
 
@@ -40,34 +39,58 @@ class LinearFit(FitFunction):
         return "m x + b"
 
 
-def test_clean_raw_obs():
-    lf = LinearFit([0, 1], [1, 2])
-    with pytest.raises(InvalidParameterError):
-        lf._clean_raw_obs([0, 1], [1], None)
-    x, y, w = lf._clean_raw_obs([0, 1], [1, 2], [1, 1])
-    assert np.array_equal(x, np.array([0, 1]))
-    assert np.array_equal(y, np.array([1, 2]))
-    assert np.array_equal(w, np.array([1, 1]))
+def test_mismatched_observation_lengths_raise_invalid_parameter_error():
+    """``y`` or ``weights`` of a different length than ``x`` is rejected.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(InvalidParameterError, match="xobs and yobs"):
+        LinearFit([0, 1], [1])
+    with pytest.raises(InvalidParameterError, match="weights and xobs"):
+        LinearFit([0, 1], [1, 2], weights=[1])
 
 
-def test_build_one_obs_mask():
-    lf = LinearFit([0, 1], [1, 2])
+def test_raw_observations_are_the_inputs_as_arrays():
+    """The raw observations are the given x, y and weights, unchanged.
+
+    ON FAILURE: the code is wrong.
+    """
+    raw = LinearFit([0, 1], [1, 2], weights=[1, 1]).observations.raw
+    assert np.array_equal(raw.x, np.array([0, 1]))
+    assert np.array_equal(raw.y, np.array([1, 2]))
+    assert np.array_equal(raw.w, np.array([1, 1]))
+
+
+@pytest.mark.parametrize(
+    "limits, expected",
+    [
+        ({"xmin": 0.5, "xmax": 1.5}, [1.0]),
+        ({"xmax": 1.5}, [0.0, 1.0]),
+        ({"xmin": 0.5}, [1.0, 2.0]),
+    ],
+    ids=["both", "xmax-only", "xmin-only"],
+)
+def test_x_limits_select_the_used_observations(limits, expected):
+    """``xmin``/``xmax`` keep ``xmin <= x <= xmax``; a NaN ``x`` is never used.
+
+    The input x = [0, 1, 2, NaN] is chosen so each limit drops a known sample.
+
+    ON FAILURE: the code is wrong.
+    """
     x = np.array([0.0, 1.0, 2.0, np.nan])
-    mask = lf._build_one_obs_mask("xobs", x, 0.5, 1.5)
-    assert np.array_equal(mask, np.array([False, True, False, False]))
-    mask = lf._build_one_obs_mask("xobs", x, None, 1.5)
-    assert np.array_equal(mask, np.array([True, True, False, False]))
-    mask = lf._build_one_obs_mask("xobs", x, 0.5, None)
-    assert np.array_equal(mask, np.array([False, True, True, False]))
+    lf = LinearFit(x, np.array([1.0, 2.0, 3.0, 4.0]), **limits)
+    assert np.array_equal(lf.observations.used.x, np.array(expected))
 
 
-def test_build_outside_mask():
-    lf = LinearFit([0, 1], [1, 2])
-    x = np.arange(5)
-    mask = lf._build_outside_mask("x", x, None)
-    assert np.array_equal(mask, np.ones_like(x, dtype=bool))
-    mask = lf._build_outside_mask("x", x, (1, 3))
-    assert np.array_equal(mask, np.array([True, True, False, True, True]))
+def test_xoutside_excludes_the_open_interval():
+    """``xoutside=(1, 3)`` drops only x = 2 from x = 0..4; the endpoints stay.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    assert np.array_equal(LinearFit(x, x).observations.used.x, x)
+    lf = LinearFit(x, x, xoutside=(1, 3))
+    assert np.array_equal(lf.observations.used.x, np.array([0.0, 1.0, 3.0, 4.0]))
 
 
 def test_set_fit_obs_combined_masks():
@@ -150,36 +173,35 @@ def test_make_fit_defaults_match_documented_least_squares_call(line_with_outlier
     assert popt != pytest.approx(plain, rel=1e-2, abs=0)
 
 
-def test_run_least_squares_returns_initial_guess_and_rejects_args(simple_linear_data):
-    """_run_least_squares hands back ``p0`` and refuses curve_fit's ``args``.
+def test_make_fit_records_the_initial_guess_and_rejects_args(simple_linear_data):
+    """After a fit ``initial_guess_info`` holds ``p0``; curve_fit's ``args`` is refused.
 
     ON FAILURE: the code is wrong.
     """
     x, y, w = simple_linear_data
     lf = LinearFit(x, y, weights=w)
-    res, p0 = lf._run_least_squares()
-    assert np.array_equal(p0, np.array(lf.p0))
-    assert res.success
+    lf.make_fit()
+    guess = lf.initial_guess_info
+    assert [guess["m"].p0, guess["b"].p0] == list(lf.p0)
 
     with pytest.raises(ValueError, match="'args' is not a supported keyword"):
-        lf._run_least_squares(args=(1,))
+        lf.make_fit(args=(1,))
 
 
-def test_calc_popt_pcov_psigma_chisq():
+def test_exact_line_fits_with_zero_uncertainty_and_chisq():
+    """Three samples exactly on y = 2x + 1: popt is (2, 1); psigma and chi^2 vanish.
+
+    ON FAILURE: the code is wrong.
+    """
     x = np.array([0.0, 1.0, 2.0])
-    y = 2.0 * x + 1.0
-    lf = LinearFit(x, y)
-    jac = np.array([[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]])
-    res = SimpleNamespace(
-        x=np.array([2.0, 1.0]), cost=0.0, fun=np.zeros_like(x), jac=jac
-    )
-    popt, pcov, psigma, chisq = lf._calc_popt_pcov_psigma_chisq(
-        res, p0=np.array([0.0, 0.0])
-    )
-    assert np.allclose(popt, np.array([2.0, 1.0]))
-    assert np.array_equal(pcov, np.zeros((2, 2)))
-    assert np.array_equal(psigma, np.zeros(2))
-    assert chisq.linear == 0.0 and chisq.robust == 0.0
+    lf = LinearFit(x, 2.0 * x + 1.0)
+    lf.make_fit()
+    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
+    assert lf.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+    # abs=1e-10: residuals of an exact fit are rounding error, so these are ~0.
+    assert [lf.psigma["m"], lf.psigma["b"]] == pytest.approx([0, 0], abs=1e-10)
+    assert lf.chisq_dof.linear == pytest.approx(0, abs=1e-10)
+    assert lf.chisq_dof.robust == pytest.approx(0, abs=1e-10)
 
 
 def test_make_fit_success_failure(simple_linear_data, small_n):
