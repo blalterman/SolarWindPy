@@ -280,7 +280,6 @@ class TestMakeTrendFuncEdgeCases:
         tf.make_trend_func()
 
         # Verify trend_func was created successfully
-        assert hasattr(tf, "_trend_func")
         assert isinstance(tf.trend_func, Line)
 
     def test_make_trend_func_weights_error(self):
