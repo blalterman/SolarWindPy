@@ -6,11 +6,9 @@ on:
   pull_request:
     branches:
       - master
-      - 'plan/**'
       - 'feature/**'
   push:
     branches:
-      - 'plan/**'
       - 'feature/**'
       # Exclude master to avoid duplicate runs with release-pipeline
 

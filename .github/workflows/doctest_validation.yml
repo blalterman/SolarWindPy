@@ -2,7 +2,7 @@ name: Doctest Validation
 
 on:
   push:
-    branches: [ master, plan/* ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   schedule:
