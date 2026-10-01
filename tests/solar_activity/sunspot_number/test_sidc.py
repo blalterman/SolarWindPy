@@ -21,6 +21,7 @@ loader at a local file in SILSO's wire format; whether the live endpoint still
 serves that format is a drift question, not a unit-test question.
 """
 
+import inspect
 import re
 
 import matplotlib
@@ -716,3 +717,17 @@ def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(fake_home, seeded_index
         assert _value_axis_labels(axes) == ["0", "100", "200"]
     finally:
         plt.close(figure)
+
+
+def test_sidc_run_normalization_documents_itself_with_the_base_docstring():
+    """``help(SIDC.run_normalization)`` shows the documented contract.
+
+    ``SIDC.run_normalization`` reuses ``ActivityIndicator.run_normalization``'s
+    docstring. It must reuse the text, not the function object, or
+    ``inspect.getdoc`` finds no docstring at all.
+
+    ON FAILURE: the code is wrong.
+    """
+    expected = inspect.getdoc(ActivityIndicator.run_normalization)
+    assert isinstance(expected, str)  # the fixture: the base is documented
+    assert inspect.getdoc(SIDC.run_normalization) == expected
