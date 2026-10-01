@@ -93,8 +93,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.solar_activity.ssn` | `solarwindpy.solar_activity.sunspot_number` |
   | `solarwindpy.solar_activity.icme.ICMECAT` | `solarwindpy.solar_activity.icme.icmecat.ICMECAT` |
   | `solarwindpy.solar_activity.icme.ICMECATDownloadError` | `solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError` |
-  | `solarwindpy.solar_activity.lisird.LISIRD` | `solarwindpy.solar_activity.lisird.lisird.LISIRD` |
-  | `solarwindpy.solar_activity.lisird.ExtremaCalculator` | `solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator` |
+  | `solarwindpy.solar_activity.lisird.LISIRD` | none (removed; see Removed) |
+  | `solarwindpy.solar_activity.lisird.ExtremaCalculator` | none (removed; see Removed) |
   | `solarwindpy.solar_activity.icme.ICMECAT_URL` | `solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL` |
   | `solarwindpy.solar_activity.icme.SPACECRAFT_NAMES` | `solarwindpy.solar_activity.icme.icmecat.SPACECRAFT_NAMES` |
   | `solarwindpy.solar_activity.icme.RULES_OF_THE_ROAD` | `solarwindpy.solar_activity.icme.icmecat.RULES_OF_THE_ROAD` |
@@ -192,6 +192,9 @@ These change computed values; rerun any analysis that used them.
   `"q"`.
 - `Hist2D`: removed the undocumented, unreachable tuple `axnorm` branch; `set_axnorm`
   already rejected tuples and still does.
+- `solarwindpy.solar_activity.lisird` (`LISIRD`, `ExtremaCalculator`) and
+  `solarwindpy.solar_activity.get_all_indices` removed (unused); last available at
+  commit beb10945.
 
 ## [0.3.0] - 2025-12-24
 
