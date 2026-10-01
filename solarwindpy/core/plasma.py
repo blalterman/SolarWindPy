@@ -41,7 +41,7 @@ from . import base
 from . import vector
 from . import ions
 from . import spacecraft
-from . import alfvenic_turbulence as alf_turb
+from . import alfvenic_turbulence
 
 
 class Plasma(base.Base):
@@ -1819,7 +1819,7 @@ species: {}
 
         v = v.cartesian
 
-        turb = alf_turb.AlfvenicTurbulence(v, b, r, species, **kwargs)
+        turb = alfvenic_turbulence.AlfvenicTurbulence(v, b, r, species, **kwargs)
 
         return turb
 
