@@ -21,11 +21,9 @@ Development guidelines and standards for SolarWindPy scientific software.
 - **Quality Patterns**: See [TEST_PATTERNS.md](./TEST_PATTERNS.md) for the test standard
 - **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
 
-## Git Workflow (Automated via Hooks)
-- **Branches**: `feature/<name>` for implementation directly from GitHub Issues
+## Git Workflow
+- **Branches**: `feature/<name>` for implementation
 - **PR Workflow**: PRs created directly from feature/* branches to master
-  - GitHub Issues provide planning structure
-  - Workflow: GitHub Issues → feature → PR → master
 - **Commits**: Conventional format with physics validation
 - **Quality**: Tests pass before commits (automated)
 - **Releases**: Automated via GitHub Actions, see [RELEASING.md](./RELEASING.md)

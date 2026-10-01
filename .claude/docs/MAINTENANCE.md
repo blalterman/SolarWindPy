@@ -126,9 +126,6 @@ python .claude/hooks/coverage-monitor.py
 # Validate session state manually
 bash .claude/hooks/validate-session-state.sh
 
-# Check git workflow compliance  
-bash .claude/hooks/git-workflow-validator.sh
-
 # Run physics validation on specific files
 python .claude/hooks/physics-validation.py solarwindpy/core/plasma.py
 python .claude/hooks/physics-validation.py --strict

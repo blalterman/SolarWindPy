@@ -14,7 +14,6 @@ from typing import Any, Dict
 
 import pytest
 
-
 # ==============================================================================
 # Fixtures
 # ==============================================================================
@@ -120,21 +119,6 @@ class TestHookExecutionOrder:
         # Stop must be last
         assert lifecycle_order[-1] == "Stop"
 
-    def test_pre_tool_use_runs_before_tool_execution(self) -> None:
-        """Verify PreToolUse hooks block tool execution."""
-        pre_tool_config = {
-            "matcher": "Bash",
-            "hooks": [
-                {
-                    "type": "command",
-                    "command": "bash .claude/hooks/git-workflow-validator.sh",
-                    "blocking": True,
-                }
-            ],
-        }
-
-        assert pre_tool_config["hooks"][0]["blocking"] is True
-
     def test_post_tool_use_matchers(self) -> None:
         """Verify PostToolUse hooks trigger after Edit/Write tools."""
         post_tool_matchers = ["Edit", "MultiEdit", "Write"]
@@ -200,11 +184,6 @@ class TestHookScriptsExist:
         """Verify test-runner.sh exists."""
         script = hook_scripts_dir / "test-runner.sh"
         assert script.exists(), "test-runner.sh not found"
-
-    def test_git_workflow_validator_exists(self, hook_scripts_dir: Path) -> None:
-        """Verify git-workflow-validator.sh exists."""
-        script = hook_scripts_dir / "git-workflow-validator.sh"
-        assert script.exists(), "git-workflow-validator.sh not found"
 
     def test_coverage_monitor_exists(self, hook_scripts_dir: Path) -> None:
         """Verify coverage-monitor.py exists."""
@@ -312,29 +291,6 @@ class TestDefinitionOfDonePattern:
 
         # Should contain coverage threshold reference
         assert "95" in content, "95% coverage threshold not in pre-commit"
-
-    def test_conventional_commit_validation(self, hook_scripts_dir: Path) -> None:
-        """Test conventional commit format is validated."""
-        git_validator = hook_scripts_dir / "git-workflow-validator.sh"
-        if not git_validator.exists():
-            pytest.skip("Script not found")
-
-        content = git_validator.read_text()
-
-        # Should validate conventional commit patterns
-        assert "feat" in content, "feat not in commit validation"
-        assert "fix" in content, "fix not in commit validation"
-
-    def test_branch_protection_enforced(self, hook_scripts_dir: Path) -> None:
-        """Test master branch protection is enforced."""
-        git_validator = hook_scripts_dir / "git-workflow-validator.sh"
-        if not git_validator.exists():
-            pytest.skip("Script not found")
-
-        content = git_validator.read_text()
-
-        # Should prevent master commits
-        assert "master" in content, "master branch check not in validator"
 
     def test_physics_validation_available(self, hook_scripts_dir: Path) -> None:
         """Test physics validation mode is available."""

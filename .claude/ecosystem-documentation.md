@@ -127,14 +127,13 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 
 ## Hook Integration
 
-### All 6 Hooks Active
+### All 5 Hooks Active
 
 1. **validate-session-state.sh** - Session startup validation
-2. **git-workflow-validator.sh** - Branch protection and commit standards
-3. **test-runner.sh** - Smart test execution with contextual arguments
-4. **coverage-monitor.py** - Coverage analysis on session end
-5. **create-compaction.py** - Session state preservation before compaction
-6. **pre-commit-tests.sh** - Quality gates on bash operations
+2. **test-runner.sh** - Smart test execution with contextual arguments
+3. **coverage-monitor.py** - Coverage analysis on session end
+4. **create-compaction.py** - Session state preservation before compaction
+5. **pre-commit-tests.sh** - Quality gates on bash operations
 
 ### Intelligent Triggering
 

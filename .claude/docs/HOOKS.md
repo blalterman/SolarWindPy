@@ -10,16 +10,6 @@ Comprehensive automation system for SolarWindPy development workflow.
 - **Purpose**: Branch validation, context loading, plan status
 - **Timeout**: 30 seconds
 
-### UserPromptSubmit Hooks  
-- **Trigger**: Prompts containing "*plan*"
-- **Script**: `.claude/hooks/git-workflow-validator.sh --enforce-branch`
-- **Purpose**: Workflow enforcement on plan-related activities
-- **Timeout**: 15 seconds
-
-### PreToolUse Hooks
-- **Bash Tool**: Git workflow validation for git/gh commands
-- **Timeout**: 15 seconds
-
 ### PostToolUse Hooks
 - **Trigger**: After Edit/MultiEdit/Write operations
 - **Script**: `.claude/hooks/test-runner.sh --changed`
@@ -42,7 +32,6 @@ Comprehensive automation system for SolarWindPy development workflow.
 
 ### Session Management
 - `validate-session-state.sh` - Branch validation and context loading
-- `git-workflow-validator.sh` - Branch protection and workflow enforcement
 - `create-compaction.py` - Token limit management with state preservation
 
 ### Quality Assurance  
