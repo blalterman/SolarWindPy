@@ -8,9 +8,12 @@ This module tests the LISIRD_ID class from solar_activity.lisird.lisird:
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from solarwindpy.solar_activity.lisird.lisird import LISIRD_ID
+
+# The LATIS data-access base every LISIRD URL in test_url_construction_valid_keys
+# starts with.
+LISIRD_BASE = "http://lasp.colorado.edu/lisird/latis/dap/"
 
 
 class TestLISIRD_ID:
@@ -23,28 +26,6 @@ class TestLISIRD_ID:
         for key in valid_keys:
             lisird_id = LISIRD_ID(key)
             assert lisird_id.key == key
-
-    def test_url_base_property(self):
-        """Test that _url_base returns the correct LISIRD base URL."""
-        lisird_id = LISIRD_ID("Lalpha")
-        expected_url_base = "http://lasp.colorado.edu/lisird/latis/dap/"
-        assert lisird_id._url_base == expected_url_base
-
-    def test_trans_url_mapping(self):
-        """Test the _trans_url property provides correct URL mappings."""
-        lisird_id = LISIRD_ID("Lalpha")
-        trans_url_dict = lisird_id._trans_url
-
-        expected_mappings = {
-            "Lalpha": "composite_lyman_alpha.jsond",
-            "CaK": "cak.jsond",
-            "f107-penticton": "penticton_radio_flux.jsond",
-            "f107-noaa": "noaa_radio_flux.jsond",
-            "MgII": "composite_mg_index.jsond",
-        }
-
-        for key, expected_filename in expected_mappings.items():
-            assert trans_url_dict[key] == expected_filename
 
     def test_url_construction_valid_keys(self):
         """Test URL construction for valid LISIRD keys."""
@@ -74,7 +55,7 @@ class TestLISIRD_ID:
 
     def test_invalid_key_error_handling(self):
         """Test that invalid keys raise appropriate errors."""
-        # Test behavior with key not in _trans_url mapping
+        # Test behavior with a key that is not supported
         invalid_key = "invalid_key_not_in_mapping"
 
         # LISIRD_ID raises NotImplementedError during initialization for invalid keys
@@ -118,20 +99,19 @@ class TestLISIRD_ID:
         assert url1.startswith("http://")
 
     def test_all_mapped_keys_produce_valid_urls(self):
-        """Test that all keys in the mapping produce valid URL strings."""
-        # Get all mapped keys by creating an instance and accessing _trans_url
-        sample_id = LISIRD_ID("Lalpha")
-        all_mapped_keys = sample_id._trans_url.keys()
+        """Every supported key yields an absolute .jsond URL under the LISIRD base.
 
-        for key in all_mapped_keys:
+        ON FAILURE: the code is wrong.
+        """
+        for key in ["Lalpha", "CaK", "f107-noaa", "f107-penticton", "MgII"]:
             lisird_id = LISIRD_ID(key)
             url = lisird_id.url
 
             # Basic URL validation
             assert isinstance(url, str)
-            assert url.startswith("http://lasp.colorado.edu/lisird/latis/dap/")
+            assert url.startswith(LISIRD_BASE)
             assert url.endswith(".jsond")
-            assert len(url) > len(lisird_id._url_base)
+            assert len(url) > len(LISIRD_BASE)
 
 
 class TestLISIRD_IDEdgeCases:
@@ -183,5 +163,4 @@ class TestLISIRD_IDEdgeCases:
         assert id1.url == id2.url
 
         # URL should match expected pattern
-        expected = id1._url_base + id1._trans_url[key]
-        assert id1.url == expected
+        assert id1.url == LISIRD_BASE + "composite_mg_index.jsond"

@@ -171,15 +171,15 @@ def test_extrema_is_the_real_shipped_table(sidc, extrema):
 def test_id_is_a_real_sidc_id_for_the_requested_series(sidc):
     """The identifier carries the requested key and its SILSO URL.
 
-    Identity, composed from the parts: the URL is the base joined to the
-    fragment the key maps to.
+    The expected URL is the documented base ``http://www.sidc.be/silso/INFO/``
+    joined to the file the ``SIDC_ID`` docstring table lists for m13.
 
     ON FAILURE: SIDC would download a different series than it was asked for.
     The code is wrong.
     """
     assert isinstance(sidc.id, SIDC_ID)
     assert sidc.id.key == "m13"
-    assert sidc.id.url == sidc.id._url_base + sidc.id._trans_url["m13"]
+    assert sidc.id.url == "http://www.sidc.be/silso/INFO/snmstotcsv.php"
 
 
 def test_loader_is_a_real_sidc_loader_for_the_same_identifier(sidc):
