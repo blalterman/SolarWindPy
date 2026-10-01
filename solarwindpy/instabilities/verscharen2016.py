@@ -32,6 +32,9 @@ from collections import namedtuple
 _inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
 _param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
+#: Fit parameters ``a``, ``b`` and ``c`` of each instability threshold
+#: (AIC, FMW, MM, OFI), indexed by growth rate as the exponent of
+#: gamma / Omega_p = 10^-4, 10^-3 and 10^-2.
 insta_params = pd.concat(
     {
         -4: pd.DataFrame(

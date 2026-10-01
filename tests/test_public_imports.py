@@ -24,9 +24,8 @@ import pytest
 
 import solarwindpy
 
-API_REFERENCE = (
-    Path(__file__).resolve().parents[1] / "docs" / "source" / "api_reference.rst"
-)
+DOCS_SOURCE = Path(__file__).resolve().parents[1] / "docs" / "source"
+API_REFERENCE = DOCS_SOURCE / "api_reference.rst"
 
 # The one temporary nickname the ruling allows, pending migration of the
 # author's analysis code to ``solarwindpy.plotting``.
@@ -73,22 +72,48 @@ def _is_own_submodule(obj, name, module):
     )
 
 
-def _documented_names():
-    """Dotted names listed under every autosummary directive in the API page."""
-    names = []
-    in_block = False
+def _autosummary_entries():
+    """``(dotted name, recursive)`` for each autosummary entry in the API page."""
+    entries = []
+    in_block = recursive = False
     for line in API_REFERENCE.read_text().splitlines():
         if line.startswith(".. autosummary::"):
-            in_block = True
+            in_block, recursive = True, False
             continue
         if not in_block:
             continue
         stripped = line.strip()
         if line and not line[0].isspace():
             in_block = False
+        elif stripped == ":recursive:":
+            recursive = True
         elif stripped and not stripped.startswith(":"):
-            names.append(stripped.lstrip("~"))
-    return names
+            entries.append((stripped.lstrip("~"), recursive))
+    return entries
+
+
+def _documented_names():
+    """Dotted names listed under every autosummary directive in the API page."""
+    return [name for name, _ in _autosummary_entries()]
+
+
+def _sphinx_lists(module, name):
+    """Autosummary's module template lists ``<module>.<name>`` on its page.
+
+    Mirrors ``sphinx.ext.autosummary.generate`` under this repo's conf.py:
+    classes, functions and exceptions are listed when the module defines them
+    and the name is not private; any other attribute only when Sphinx finds a
+    doc comment for it (``#:`` before the assignment, or a string after it).
+    """
+    from sphinx.pycode import ModuleAnalyzer
+
+    if name.startswith("_"):
+        return False
+    obj = getattr(module, name)
+    if inspect.isclass(obj) or inspect.isroutine(obj):
+        return obj.__module__ == module.__name__
+    attr_docs = ModuleAnalyzer.for_module(module.__name__).find_attr_docs()
+    return ("", name) in attr_docs
 
 
 MODULES = _module_names()
@@ -237,6 +262,61 @@ def test_every_documented_name_is_documented_at_its_one_path(dotted):
     else:
         assert leaf in parent_mod.__all__
         assert _is_defined_in(obj, leaf, parent_mod)
+
+
+def test_every_public_object_is_documented_on_the_api_reference():
+    """Every name in any ``__all__`` is on a page the docs build generates.
+
+    The documented set is derived without building Sphinx. Each top-level
+    subpackage has a ``:recursive:`` autosummary entry on the API page;
+    recursion reaches every module whose path below that entry has no
+    private component; and the module template lists the object (see
+    ``_sphinx_lists``). conf.py must not change what autosummary generates:
+    no event hooks (``setup``), no mocked imports, no ``exclude_patterns``.
+
+    ON FAILURE: the docs or the code are wrong; add the subpackage's
+    recursive entry to api_reference.rst, give the attribute a ``#:`` doc
+    comment, or make the module path public. If conf.py gained a setting
+    named in the assertion, extend this test to model it.
+    """
+    conf = set()
+    for node in ast.parse((DOCS_SOURCE / "conf.py").read_text()).body:
+        if isinstance(node, ast.FunctionDef):
+            conf.add(node.name)
+        elif isinstance(node, ast.Assign):
+            conf.update(t.id for t in node.targets if isinstance(t, ast.Name))
+    unmodeled = {
+        "setup",
+        "autodoc_mock_imports",
+        "autosummary_mock_imports",
+        "exclude_patterns",
+        "autosummary_ignore_module_all",
+    }
+    assert not conf & unmodeled, conf & unmodeled
+
+    roots = {name for name, recursive in _autosummary_entries() if recursive}
+    subpackages = {f"solarwindpy.{n}" for n in solarwindpy.__all__}
+    assert subpackages, "no subpackages found; the scan is broken"
+    assert subpackages <= roots, sorted(subpackages - roots)
+
+    def reachable(module):
+        for root in roots:
+            if module == root or module.startswith(root + "."):
+                below = module.removeprefix(root).split(".")[1:]
+                return not any(part.startswith("_") for part in below)
+        return False
+
+    checked = []
+    missing = []
+    for module, name in PUBLIC:
+        mod = importlib.import_module(module)
+        if inspect.ismodule(getattr(mod, name)):
+            continue
+        checked.append(f"{module}.{name}")
+        if not (reachable(module) and _sphinx_lists(mod, name)):
+            missing.append(f"{module}.{name}")
+    assert len(checked) > len(MODULES), "too few public objects checked"
+    assert not missing, missing
 
 
 def test_docs_parse_finds_the_documented_api():

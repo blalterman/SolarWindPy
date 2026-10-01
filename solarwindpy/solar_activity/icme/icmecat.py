@@ -15,6 +15,7 @@ import numpy as np
 from pathlib import Path
 from typing import Optional
 
+#: Download URL of the pinned HELIO4CAST ICMECAT release, v23.
 ICMECAT_URL = (
     "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v23.csv"
 )
@@ -27,6 +28,7 @@ _CACHE_MAX_AGE_DAYS = 30
 # events in the catalog. "SolarOrbiter" (no space) and "ULYSSES" (all caps)
 # are the catalog's actual spellings; the old "Solar Orbiter" spelling broke
 # `_filter_by_spacecraft`, which lowercases before comparing.
+#: The ``sc_insitu`` spacecraft names present in HELIO4CAST ICMECAT v23.
 SPACECRAFT_NAMES = frozenset(
     [
         "BepiColombo",
