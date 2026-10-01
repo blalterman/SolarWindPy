@@ -71,7 +71,7 @@ Solar Activity Module
 ---------------------
 
 Tools for accessing and analyzing solar activity indices. Includes sunspot number data,
-LISIRD (LASP Interactive Solar Irradiance Data Center) access, and solar cycle analysis.
+the ICME catalog, and solar cycle analysis.
 
 .. autosummary::
    :toctree: _autosummary
