@@ -8,12 +8,12 @@ implemented through the hook chain in .claude/hooks/.
 """
 
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any, Dict
 
 import pytest
-
 
 # ==============================================================================
 # Fixtures
@@ -32,35 +32,79 @@ def settings_path() -> Path:
     return Path(__file__).parent.parent / ".claude" / "settings.json"
 
 
+def _isolated_git_env() -> Dict[str, str]:
+    """The current environment with every ``GIT_*`` variable removed.
+
+    Inside a git hook (pre-commit runs the suite from one), git exports
+    ``GIT_DIR``, ``GIT_INDEX_FILE`` and similar variables. A git command run in
+    ``tmp_path`` that inherits them acts on the caller's repository instead:
+    ``git init`` and ``git config`` rewrite its ``.git/config`` and ``git add``
+    rewrites its index. Every git subprocess in this file uses this env.
+    """
+    return {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+
+
+def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess:
+    """Run ``git`` in ``cwd``, isolated from the caller's git environment.
+
+    The identity is passed with ``-c`` so no config file is ever written.
+    """
+    identity = ["-c", "user.name=Test", "-c", "user.email=test@test.com"]
+    return subprocess.run(
+        ["git", *identity, *args],
+        cwd=cwd,
+        env=_isolated_git_env(),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+
+def _make_mock_git_repo(path: Path) -> Path:
+    """Initialise a git repository at ``path`` with one commit of ``README.md``."""
+    _git("init", "-q", cwd=path)
+    (path / "README.md").write_text("# Test")
+    _git("add", "README.md", cwd=path)
+    _git("commit", "-q", "-m", "Initial commit", cwd=path)
+    return path
+
+
 @pytest.fixture
 def mock_git_repo(tmp_path: Path) -> Path:
-    """Create a mock git repository structure."""
-    # Initialize git repo
-    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=tmp_path,
-        capture_output=True,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=tmp_path,
-        capture_output=True,
-        check=True,
-    )
+    """A one-commit git repository in ``tmp_path``, isolated from any outer repo."""
+    return _make_mock_git_repo(tmp_path)
 
-    # Create initial commit
-    (tmp_path / "README.md").write_text("# Test")
-    subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True, check=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=tmp_path,
-        capture_output=True,
-        check=True,
-    )
 
-    return tmp_path
+def test_mock_git_repo_leaves_the_callers_repository_untouched(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With ``GIT_DIR`` and ``GIT_INDEX_FILE`` aimed at a decoy, the decoy is unchanged.
+
+    This is the environment a git hook gives the suite. The decoy is a real
+    repository with one commit, so it has both a config and an index; their
+    bytes before and after building the mock repository must match, and the
+    mock repository must hold its own commit.
+
+    ON FAILURE: the fixture no longer isolates its git calls from the caller's
+    repository; fix ``_isolated_git_env`` or ``_git`` before running the suite
+    from a hook again.
+    """
+    decoy = tmp_path / "decoy"
+    decoy.mkdir()
+    _make_mock_git_repo(decoy)
+    config, index = decoy / ".git" / "config", decoy / ".git" / "index"
+    before = (config.read_bytes(), index.read_bytes())
+
+    monkeypatch.setenv("GIT_DIR", str(decoy / ".git"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(index))
+    monkeypatch.setenv("GIT_WORK_TREE", str(decoy))
+    target = tmp_path / "mock"
+    target.mkdir()
+    _make_mock_git_repo(target)
+
+    assert (config.read_bytes(), index.read_bytes()) == before
+    log = _git("log", "--format=%s", cwd=target).stdout.split()
+    assert log == ["Initial", "commit"]
 
 
 @pytest.fixture
