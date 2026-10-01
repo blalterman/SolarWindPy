@@ -781,7 +781,6 @@ def test_module_exports_abundance_namedtuple():
 
 def test_abundance_namedtuple_structure():
     """Abundance namedtuple has correct fields."""
-    assert hasattr(Abundance, "_fields"), "Abundance should be a namedtuple"
     assert Abundance._fields == (
         "measurement",
         "uncertainty",
@@ -796,7 +795,7 @@ def test_can_import_from_core():
 
 
 # =============================================================================
-# Consistency: shipped CSVs vs. _VALID_YEARS
+# Consistency: shipped CSVs vs. the years ReferenceAbundances accepts
 # =============================================================================
 
 
@@ -820,19 +819,31 @@ def shipped_asplund_years(data_dir):
     return years
 
 
-def test_shipped_asplund_csvs_agree_with_valid_years():
-    """The shipped asplund*.csv files and _VALID_YEARS agree in both directions.
+def test_shipped_asplund_csvs_are_exactly_the_accepted_years():
+    """``ReferenceAbundances(year)`` builds for exactly the shipped CSV years.
 
-    This is an internal consistency fact (not a claim about whether a
-    successor Asplund compilation exists -- that judgment stays with the
-    author), so it runs unmarked in the fast suite.
+    Every year from 1980 to 2050 is tried: an unsupported year raises
+    ``ValueError``; a supported one must load its CSV (an accepted year with no
+    CSV raises ``FileNotFoundError`` and errors the test). The set that builds
+    must equal the ``asplund<year>.csv`` files shipped. This is an internal
+    consistency fact (not a claim about whether a successor Asplund
+    compilation exists -- that judgment stays with the author).
+
+    ON FAILURE: the code is wrong; the accepted years and the shipped CSVs
+    disagree.
     """
     data_dir = resources.files("solarwindpy.core") / "data"
     with resources.as_file(data_dir) as data_path:
         shipped = shipped_asplund_years(data_path)
+    assert shipped  # the fixture: the package ships at least one compilation
 
-    valid = set(ReferenceAbundances._VALID_YEARS)
+    accepted = set()
+    for year in range(1980, 2051):
+        try:
+            ref = ReferenceAbundances(year=year)
+        except ValueError:
+            continue
+        assert ref.year == year
+        accepted.add(year)
 
-    assert shipped == valid, (
-        f"asplund*.csv years {sorted(shipped)} != " f"_VALID_YEARS {sorted(valid)}"
-    )
+    assert accepted == shipped
