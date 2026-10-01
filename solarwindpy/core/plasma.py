@@ -29,6 +29,10 @@ Propoded Updates
  alfvenic_turbulence.py. Did not move tests out of `test_plasma.py`.  (20181121)
 """
 
+__all__ = [
+    "Plasma",
+]
+
 import numpy as np
 import pandas as pd
 import itertools
@@ -41,7 +45,7 @@ from . import base
 from . import vector
 from . import ions
 from . import spacecraft
-from . import alfvenic_turbulence as alf_turb
+from . import alfvenic_turbulence
 
 
 class Plasma(base.Base):
@@ -1819,7 +1823,7 @@ species: {}
 
         v = v.cartesian
 
-        turb = alf_turb.AlfvenicTurbulence(v, b, r, species, **kwargs)
+        turb = alfvenic_turbulence.AlfvenicTurbulence(v, b, r, species, **kwargs)
 
         return turb
 

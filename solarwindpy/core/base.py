@@ -6,6 +6,11 @@ physics applications.
 """
 
 from __future__ import annotations
+
+__all__ = [
+    "Core",
+    "Base",
+]
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Tuple
@@ -14,7 +19,7 @@ import numpy as np
 import pandas as pd
 from pandas import MultiIndex as MI
 
-from . import units_constants as uc
+from . import units_constants
 
 
 class Core(ABC):
@@ -91,23 +96,23 @@ class Core(ABC):
         return self._logger
 
     @property
-    def units(self) -> uc.Units:
+    def units(self) -> units_constants.Units:
         """Units conversion factors.
 
         Returns
         -------
-        uc.Units
+        units_constants.Units
             Units conversion instance.
         """
         return self._units
 
     @property
-    def constants(self) -> uc.Constants:
+    def constants(self) -> units_constants.Constants:
         """Physical constants.
 
         Returns
         -------
-        uc.Constants
+        units_constants.Constants
             Physical constants instance.
         """
         return self._constants
@@ -127,10 +132,10 @@ class Core(ABC):
         self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def _init_units(self) -> None:
-        self._units = uc.Units()
+        self._units = units_constants.Units()
 
     def _init_constants(self) -> None:
-        self._constants = uc.Constants()
+        self._constants = units_constants.Constants()
 
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:

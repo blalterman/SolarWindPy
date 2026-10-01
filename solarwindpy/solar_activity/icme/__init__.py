@@ -5,30 +5,19 @@ analysis. See https://helioforecast.space/icmecat for the most up-to-date
 rules of the road.
 """
 
-from .icmecat import (
-    ICMECAT,
-    ICMECAT_URL,
-    ICMECATDownloadError,
-    SPACECRAFT_NAMES,
-    RULES_OF_THE_ROAD,
-)
+from . import icmecat
 
 __doc__ = f"""{__doc__}
 Rules of the Road (as of January 2026)
 --------------------------------------
-{RULES_OF_THE_ROAD}
+{icmecat.RULES_OF_THE_ROAD}
 
 Example
 -------
->>> from solarwindpy.solar_activity.icme import ICMECAT  # doctest: +SKIP
+>>> from solarwindpy.solar_activity.icme.icmecat import ICMECAT  # doctest: +SKIP
 >>> cat = ICMECAT(spacecraft="Ulysses")  # doctest: +SKIP
 >>> print(f"Found {{len(cat)}} Ulysses ICMEs")  # doctest: +SKIP
 >>> in_icme = cat.contains(observations.index)  # doctest: +SKIP
 """
 
-__all__ = [
-    "ICMECAT",
-    "ICMECAT_URL",
-    "ICMECATDownloadError",
-    "SPACECRAFT_NAMES",
-]
+__all__ = ["icmecat"]

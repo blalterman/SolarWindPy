@@ -5,6 +5,10 @@ These classes calculate bin edges, perform data aggregation, and provide
 common functionality used by :mod:`solarwindpy` histogram plots.
 """
 
+__all__ = [
+    "AggPlot",
+]
+
 import numpy as np
 import pandas as pd
 

@@ -9,6 +9,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed - BREAKING CHANGES
 
+- One import path per public object: every public object is imported from the module that
+  defines it, e.g. `from solarwindpy.core.plasma import Plasma` or
+  `solarwindpy.plotting.hist2d.Hist2D`. Packages no longer re-export objects; their
+  `__all__` lists submodules (and objects the package file itself defines, such as
+  `fitfunctions.available`). `solarwindpy.pp` (for `solarwindpy.plotting`) is the one
+  temporary nickname. `plotting/histograms.py` is removed. Two misspelled names are
+  corrected and ten internal helpers are private. No aliases are kept; an old path raises
+  `AttributeError` or `ImportError`. Every removed path and its replacement:
+
+  | Old path | New path |
+  |---|---|
+  | `solarwindpy.units_constants` | `solarwindpy.core.units_constants` |
+  | `solarwindpy.base` | `solarwindpy.core.base` |
+  | `solarwindpy.vector` | `solarwindpy.core.vector` |
+  | `solarwindpy.tensor` | `solarwindpy.core.tensor` |
+  | `solarwindpy.ions` | `solarwindpy.core.ions` |
+  | `solarwindpy.plasma` | `solarwindpy.core.plasma` |
+  | `solarwindpy.spacecraft` | `solarwindpy.core.spacecraft` |
+  | `solarwindpy.alfvenic_turbulence` | `solarwindpy.core.alfvenic_turbulence` |
+  | `solarwindpy.Plasma` | `solarwindpy.core.plasma.Plasma` |
+  | `solarwindpy.ReferenceAbundances` | `solarwindpy.core.abundances.ReferenceAbundances` |
+  | `solarwindpy.at` | `solarwindpy.core.alfvenic_turbulence` |
+  | `solarwindpy.sc` | `solarwindpy.core.spacecraft` |
+  | `solarwindpy.sa` | `solarwindpy.solar_activity` |
+  | `solarwindpy.Hist1D` | `solarwindpy.plotting.hist1d.Hist1D` |
+  | `solarwindpy.Hist2D` | `solarwindpy.plotting.hist2d.Hist2D` |
+  | `solarwindpy.TeXlabel` | `solarwindpy.plotting.labels.base.TeXlabel` |
+  | `solarwindpy.core.Base` | `solarwindpy.core.base.Base` |
+  | `solarwindpy.core.Core` | `solarwindpy.core.base.Core` |
+  | `solarwindpy.core.Vector` | `solarwindpy.core.vector.Vector` |
+  | `solarwindpy.core.Tensor` | `solarwindpy.core.tensor.Tensor` |
+  | `solarwindpy.core.Ion` | `solarwindpy.core.ions.Ion` |
+  | `solarwindpy.core.Plasma` | `solarwindpy.core.plasma.Plasma` |
+  | `solarwindpy.core.Spacecraft` | `solarwindpy.core.spacecraft.Spacecraft` |
+  | `solarwindpy.core.Units` | `solarwindpy.core.units_constants.Units` |
+  | `solarwindpy.core.Constants` | `solarwindpy.core.units_constants.Constants` |
+  | `solarwindpy.core.AlfvenicTurbulence` | `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence` |
+  | `solarwindpy.core.ReferenceAbundances` | `solarwindpy.core.abundances.ReferenceAbundances` |
+  | `solarwindpy.core.Abundance` | `solarwindpy.core.abundances.Abundance` |
+  | `solarwindpy.fitfunctions.FitFunction` | `solarwindpy.fitfunctions.core.FitFunction` |
+  | `solarwindpy.fitfunctions.TrendFit` | `solarwindpy.fitfunctions.trend_fits.TrendFit` |
+  | `solarwindpy.fitfunctions.Exponential` | `solarwindpy.fitfunctions.exponentials.Exponential` |
+  | `solarwindpy.fitfunctions.ExponentialCDF` | `solarwindpy.fitfunctions.exponentials.ExponentialCDF` |
+  | `solarwindpy.fitfunctions.ExponentialPlusC` | `solarwindpy.fitfunctions.exponentials.ExponentialPlusC` |
+  | `solarwindpy.fitfunctions.Gaussian` | `solarwindpy.fitfunctions.gaussians.Gaussian` |
+  | `solarwindpy.fitfunctions.GaussianLn` | `solarwindpy.fitfunctions.gaussians.GaussianLn` |
+  | `solarwindpy.fitfunctions.GaussianNormalized` | `solarwindpy.fitfunctions.gaussians.GaussianNormalized` |
+  | `solarwindpy.fitfunctions.GaussianPlusHeavySide` | `solarwindpy.fitfunctions.composite.GaussianPlusHeavySide` |
+  | `solarwindpy.fitfunctions.GaussianTimesHeavySide` | `solarwindpy.fitfunctions.composite.GaussianTimesHeavySide` |
+  | `solarwindpy.fitfunctions.GaussianTimesHeavySidePlusHeavySide` | `solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide` |
+  | `solarwindpy.fitfunctions.HeavySide` | `solarwindpy.fitfunctions.heaviside.HeavySide` |
+  | `solarwindpy.fitfunctions.HingeAtPoint` | `solarwindpy.fitfunctions.hinge.HingeAtPoint` |
+  | `solarwindpy.fitfunctions.HingeMax` | `solarwindpy.fitfunctions.hinge.HingeMax` |
+  | `solarwindpy.fitfunctions.HingeMin` | `solarwindpy.fitfunctions.hinge.HingeMin` |
+  | `solarwindpy.fitfunctions.HingeSaturation` | `solarwindpy.fitfunctions.hinge.HingeSaturation` |
+  | `solarwindpy.fitfunctions.Line` | `solarwindpy.fitfunctions.lines.Line` |
+  | `solarwindpy.fitfunctions.LineXintercept` | `solarwindpy.fitfunctions.lines.LineXintercept` |
+  | `solarwindpy.fitfunctions.PowerLaw` | `solarwindpy.fitfunctions.power_laws.PowerLaw` |
+  | `solarwindpy.fitfunctions.PowerLawOffCenter` | `solarwindpy.fitfunctions.power_laws.PowerLawOffCenter` |
+  | `solarwindpy.fitfunctions.PowerLawPlusC` | `solarwindpy.fitfunctions.power_laws.PowerLawPlusC` |
+  | `solarwindpy.fitfunctions.Saturation` | `solarwindpy.fitfunctions.hinge.Saturation` |
+  | `solarwindpy.fitfunctions.TwoLine` | `solarwindpy.fitfunctions.hinge.TwoLine` |
+  | `solarwindpy.fitfunctions.FitFunctionError` | `solarwindpy.fitfunctions.core.FitFunctionError` |
+  | `solarwindpy.fitfunctions.InsufficientDataError` | `solarwindpy.fitfunctions.core.InsufficientDataError` |
+  | `solarwindpy.fitfunctions.FitFailedError` | `solarwindpy.fitfunctions.core.FitFailedError` |
+  | `solarwindpy.fitfunctions.InvalidParameterError` | `solarwindpy.fitfunctions.core.InvalidParameterError` |
+  | `solarwindpy.plotting.subplots` | `solarwindpy.plotting.tools.subplots` |
+  | `solarwindpy.plotting.save` | `solarwindpy.plotting.tools.save` |
+  | `solarwindpy.plotting.nan_gaussian_filter` | `solarwindpy.plotting.tools.nan_gaussian_filter` |
+  | `solarwindpy.plotting.histograms.agg_plot` | `solarwindpy.plotting.agg_plot` |
+  | `solarwindpy.plotting.histograms.hist1d` | `solarwindpy.plotting.hist1d` |
+  | `solarwindpy.plotting.histograms.hist2d` | `solarwindpy.plotting.hist2d` |
+  | `solarwindpy.plotting.histograms.AggPlot` | `solarwindpy.plotting.agg_plot.AggPlot` |
+  | `solarwindpy.plotting.histograms.Hist1D` | `solarwindpy.plotting.hist1d.Hist1D` |
+  | `solarwindpy.plotting.histograms.Hist2D` | `solarwindpy.plotting.hist2d.Hist2D` |
+  | `solarwindpy.plotting.labels.TeXlabel` | `solarwindpy.plotting.labels.base.TeXlabel` |
+  | `solarwindpy.plotting.labels.Vsw` | `solarwindpy.plotting.labels.special.Vsw` |
+  | `solarwindpy.plotting.labels.Count` | `solarwindpy.plotting.labels.special.Count` |
+  | `solarwindpy.plotting.labels.Ion` | `solarwindpy.plotting.labels.composition.Ion` |
+  | `solarwindpy.plotting.labels.ChargeStateRatio` | `solarwindpy.plotting.labels.composition.ChargeStateRatio` |
+  | `solarwindpy.plotting.labels.ElementalAbundance` | `solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance` |
+  | `solarwindpy.solar_activity.ssn` | `solarwindpy.solar_activity.sunspot_number` |
+  | `solarwindpy.solar_activity.icme.ICMECAT` | `solarwindpy.solar_activity.icme.icmecat.ICMECAT` |
+  | `solarwindpy.solar_activity.icme.ICMECATDownloadError` | `solarwindpy.solar_activity.icme.icmecat.ICMECATDownloadError` |
+  | `solarwindpy.solar_activity.lisird.LISIRD` | `solarwindpy.solar_activity.lisird.lisird.LISIRD` |
+  | `solarwindpy.solar_activity.lisird.ExtremaCalculator` | `solarwindpy.solar_activity.lisird.extrema_calculator.ExtremaCalculator` |
+  | `solarwindpy.solar_activity.icme.ICMECAT_URL` | `solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL` |
+  | `solarwindpy.solar_activity.icme.SPACECRAFT_NAMES` | `solarwindpy.solar_activity.icme.icmecat.SPACECRAFT_NAMES` |
+  | `solarwindpy.solar_activity.icme.RULES_OF_THE_ROAD` | `solarwindpy.solar_activity.icme.icmecat.RULES_OF_THE_ROAD` |
+  | `solarwindpy.solar_activity.sunspot_number.sidc.Base` | `solarwindpy.solar_activity.base.Base` |
+  | `solarwindpy.core.alfvenic_turbulence.AlvenicTurbAveraging` | `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbAveraging` |
+  | `solarwindpy.plotting.labels.special.ComparisonLable` | `solarwindpy.plotting.labels.special.ComparisonLabel` |
+  | `solarwindpy.fitfunctions.core.Observations` | `solarwindpy.fitfunctions.core._Observations` (private) |
+  | `solarwindpy.fitfunctions.core.UsedRawObs` | `solarwindpy.fitfunctions.core._UsedRawObs` (private) |
+  | `solarwindpy.fitfunctions.core.InitialGuessInfo` | `solarwindpy.fitfunctions.core._InitialGuessInfo` (private) |
+  | `solarwindpy.fitfunctions.core.ChisqPerDegreeOfFreedom` | `solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom` (private) |
+  | `solarwindpy.fitfunctions.core.FitBounds` | `solarwindpy.fitfunctions.core._FitBounds` (private) |
+  | `solarwindpy.plotting.labels.base.MCS` | `solarwindpy.plotting.labels.base._MCS` (private) |
+  | `solarwindpy.plotting.base.CbarMaker` | `solarwindpy.plotting.base._CbarMaker` (private) |
+  | `solarwindpy.plotting.base.DataLimFormatter` | `solarwindpy.plotting.base._DataLimFormatter` (private) |
+  | `solarwindpy.plotting.tools.calculate_nrows_ncols` | `solarwindpy.plotting.tools._calculate_nrows_ncols` (private) |
+  | `solarwindpy.plotting.tools.use_style` | `solarwindpy.plotting.tools._use_style` (private; importing solarwindpy.plotting applies the style) |
+  | `solarwindpy.plotting.labels.species_translation` | none (removed; it was `labels.base._run_species_substitution`) |
+
 - Python 3.12 or newer is required (was 3.11).
 - pandas 3 is required: the supported range is `pandas>=3,<4` (was `>=2.0`). The suite
   also passes on pandas 2.2 and 2.3, but only one major version is tested and declared.

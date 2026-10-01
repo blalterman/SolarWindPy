@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-"""Tests for solarwindpy.plotting.histograms module.
-
-This module provides comprehensive test coverage for the histograms convenience module
-that re-exports AggPlot, Hist1D, and Hist2D classes.
-"""
+"""Tests for the Hist1D and Hist2D histogram plotters."""
 
 import pytest
 import numpy as np
@@ -12,7 +8,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import solarwindpy.plotting.histograms as histograms  # noqa: E402
 from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
@@ -33,45 +28,8 @@ def _known_1d_sample():
     return pd.Series(values, name="x"), centers
 
 
-class TestHistogramsModuleExports:
-    """Test that the histograms module correctly re-exports all required classes."""
-
-    def test_module_exports_aggplot(self):
-        """Test that AggPlot is correctly exported."""
-        assert hasattr(histograms, "AggPlot")
-        assert histograms.AggPlot is AggPlot
-
-    def test_module_exports_hist1d(self):
-        """Test that Hist1D is correctly exported."""
-        assert hasattr(histograms, "Hist1D")
-        assert histograms.Hist1D is Hist1D
-
-    def test_module_exports_hist2d(self):
-        """Test that Hist2D is correctly exported."""
-        assert hasattr(histograms, "Hist2D")
-        assert histograms.Hist2D is Hist2D
-
-    def test_all_exports_accessible(self):
-        """Test that all expected exports are accessible."""
-        expected_exports = ["AggPlot", "Hist1D", "Hist2D"]
-
-        for export in expected_exports:
-            assert hasattr(histograms, export), f"Missing export: {export}"
-
-    def test_imported_classes_are_correct_types(self):
-        """Test that imported classes are the correct types."""
-        # Check that they are class objects
-        assert isinstance(histograms.AggPlot, type)
-        assert isinstance(histograms.Hist1D, type)
-        assert isinstance(histograms.Hist2D, type)
-
-        # Check inheritance relationships
-        assert issubclass(histograms.Hist1D, histograms.AggPlot)
-        assert issubclass(histograms.Hist2D, histograms.AggPlot)
-
-
 class TestHist1DBasicFunctionality:
-    """Test basic functionality of Hist1D through the histograms module."""
+    """Test basic functionality of Hist1D."""
 
     def setup_method(self):
         """Set up test data for each test."""
@@ -82,7 +40,7 @@ class TestHist1DBasicFunctionality:
 
     def test_hist1d_instantiation_count_histogram(self):
         """Test __init__(x_series) produces a count histogram."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
 
         assert hasattr(hist, "data")
         assert hasattr(hist, "_gb_axes")
@@ -98,7 +56,7 @@ class TestHist1DBasicFunctionality:
 
     def test_hist1d_instantiation_aggregation_histogram(self):
         """Test __init__(x, y_series) aggregates y values."""
-        hist = histograms.Hist1D(self.x_data, self.y_data)
+        hist = Hist1D(self.x_data, self.y_data)
 
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
@@ -112,7 +70,7 @@ class TestHist1DBasicFunctionality:
         """Test __init__(..., logx=True) applies log₁₀ transform to x."""
         # Use positive data for log transform
         x_positive = pd.Series(np.random.uniform(1, 100, self.n))
-        hist = histograms.Hist1D(x_positive, logx=True)
+        hist = Hist1D(x_positive, logx=True)
 
         assert hist.log.x is True
         assert hist.log.y is False
@@ -123,12 +81,12 @@ class TestHist1DBasicFunctionality:
 
     def test_hist1d_gb_axes_property(self):
         """Test that _gb_axes property returns ('x',)."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         assert hist._gb_axes == ("x",)
 
     def test_hist1d_set_path_auto(self):
         """Test set_path('auto') builds path from labels."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_labels(x="density", y="count")
 
         hist.set_path("auto")
@@ -141,7 +99,7 @@ class TestHist1DBasicFunctionality:
         """Test set_path('custom', add_scale=False) sets _path to Path('custom')."""
         from pathlib import Path
 
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_path("custom", add_scale=False)
 
         # Should have the custom path
@@ -149,7 +107,7 @@ class TestHist1DBasicFunctionality:
 
     def test_hist1d_set_data_with_clipping(self):
         """Test set_data(x, y, clip=True) stores DataFrame with columns x,y & clip."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_data(self.x_data, self.y_data, clip=True)
 
         assert "x" in hist.data.columns
@@ -158,8 +116,8 @@ class TestHist1DBasicFunctionality:
 
     def test_hist1d_clip_attribute(self):
         """Test that .clip attribute equals clip flag."""
-        hist_no_clip = histograms.Hist1D(self.x_data, clip_data=False)
-        hist_with_clip = histograms.Hist1D(self.x_data, clip_data=True)
+        hist_no_clip = Hist1D(self.x_data, clip_data=False)
+        hist_with_clip = Hist1D(self.x_data, clip_data=True)
 
         assert hist_no_clip.clip is False
         assert hist_with_clip.clip is True
@@ -176,7 +134,7 @@ class TestHist1DAxisNormalization:
 
     def test_set_axnorm_density(self):
         """Test set_axnorm('d') sets density normalization and updates label."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_axnorm("d")
 
         assert hist.axnorm == "d"
@@ -187,14 +145,14 @@ class TestHist1DAxisNormalization:
 
     def test_set_axnorm_invalid_raises_assertion_error(self):
         """Test that set_axnorm('x') raises AssertionError."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
 
         with pytest.raises(AssertionError):
             hist.set_axnorm("x")
 
     def test_axis_normalizer_none(self):
         """Test _axis_normalizer(None) returns input unchanged."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
 
         # Create some test aggregated data
         test_data = pd.Series([1, 2, 3], index=["a", "b", "c"])
@@ -212,7 +170,7 @@ class TestHist1DAxisNormalization:
         integrating to 1 is a contradiction, not a calibration choice.
         """
         x, _ = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
         hist.set_axnorm("d")
 
         widths = np.diff(KNOWN_EDGES)
@@ -228,7 +186,7 @@ class TestHist1DAxisNormalization:
         ON FAILURE: the code is wrong.
         """
         x, _ = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
         hist.set_axnorm("d")
 
         expected = np.asarray(KNOWN_BIN_COUNTS) / (x.size * np.diff(KNOWN_EDGES))
@@ -236,7 +194,7 @@ class TestHist1DAxisNormalization:
 
     def test_axis_normalizer_total(self):
         """Test _axis_normalizer('t') normalizes by max."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         # Don't set axnorm to 't' since it may not be supported
         # Instead test the method directly by setting _axnorm
         hist._axnorm = "t"
@@ -251,7 +209,7 @@ class TestHist1DAxisNormalization:
 
     def test_axis_normalizer_invalid_raises_value_error(self):
         """Test that _axis_normalizer('bad') raises ValueError."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         # Set axnorm directly to avoid assertion in set_axnorm
         hist._axnorm = "bad"
 
@@ -272,7 +230,7 @@ class TestHist1DAggregation:
 
     def test_agg_count_with_density_works(self):
         """Test agg(fcn='count') with axnorm='d' works."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_axnorm("d")
 
         # Should not raise an error
@@ -281,7 +239,7 @@ class TestHist1DAggregation:
 
     def test_agg_sum_with_density_raises_value_error(self):
         """Test that agg(fcn='sum', axnorm='d') raises ValueError."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         hist.set_axnorm("d")
 
         with pytest.raises(
@@ -295,7 +253,7 @@ class TestHist1DAggregation:
         ON FAILURE: the code is wrong.
         """
         x, _ = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
 
         result = hist.agg()
         np.testing.assert_array_equal(result.values, KNOWN_BIN_COUNTS)
@@ -311,7 +269,7 @@ class TestHist1DAggregation:
         bins.
         """
         x, _ = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
 
         intervals = pd.IntervalIndex(hist.agg().index)
         np.testing.assert_allclose(intervals.left.values, KNOWN_EDGES[:-1])
@@ -329,7 +287,7 @@ class TestHist1DLabels:
 
     def test_set_labels_y_updates_label(self):
         """Test set_labels(y='new') updates y-label."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
 
         hist.set_labels(y="new_label")
 
@@ -337,7 +295,7 @@ class TestHist1DLabels:
 
     def test_set_labels_z_raises_value_error(self):
         """Test that set_labels(z='z') raises ValueError."""
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
 
         with pytest.raises(ValueError, match="doesn't have a z-label"):
             hist.set_labels(z="some_z_label")
@@ -363,7 +321,7 @@ class TestHist1DPlotting:
         import matplotlib.pyplot as plt
 
         x, centers = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
         fig, ax = plt.subplots()
 
         returned_ax, _ = hist.make_plot(ax)
@@ -388,7 +346,7 @@ class TestHist1DPlotting:
         import matplotlib.pyplot as plt
 
         x, _ = _known_1d_sample()
-        hist = histograms.Hist1D(x, nbins=KNOWN_EDGES)
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
 
         fig, ax = plt.subplots()
         hist.make_plot(ax)
@@ -412,7 +370,7 @@ class TestHist1DPlotting:
         """Test that make_plot(fcn='bad') raises ValueError."""
         import matplotlib.pyplot as plt
 
-        hist = histograms.Hist1D(self.x_data)
+        hist = Hist1D(self.x_data)
         fig, ax = plt.subplots()
 
         # Test with invalid function - this actually raises AttributeError in pandas
@@ -425,7 +383,7 @@ class TestHist1DPlotting:
 
 
 class TestHist2DBasicFunctionality:
-    """Test basic functionality of Hist2D through the histograms module."""
+    """Test basic functionality of Hist2D."""
 
     def setup_method(self):
         """Set up test data for each test."""
@@ -437,7 +395,7 @@ class TestHist2DBasicFunctionality:
 
     def test_hist2d_instantiation_count_heatmap(self):
         """Test __init__(x, y) produces 2D count heatmap."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+        hist = Hist2D(self.x_data, self.y_data)
 
         assert hasattr(hist, "data")
         assert hasattr(hist, "_gb_axes")
@@ -454,7 +412,7 @@ class TestHist2DBasicFunctionality:
 
     def test_hist2d_instantiation_aggregation_heatmap(self):
         """Test __init__(x, y, z) aggregates mean of z."""
-        hist = histograms.Hist2D(self.x_data, self.y_data, self.z_data)
+        hist = Hist2D(self.x_data, self.y_data, self.z_data)
 
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
@@ -467,7 +425,7 @@ class TestHist2DBasicFunctionality:
 
     def test_hist2d_gb_axes_property(self):
         """Test that _gb_axes returns ('x','y')."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+        hist = Hist2D(self.x_data, self.y_data)
         assert hist._gb_axes == ("x", "y")
 
     def test_hist2d_log_scale_conversion(self):
@@ -476,7 +434,7 @@ class TestHist2DBasicFunctionality:
         x_positive = pd.Series(np.random.uniform(1, 100, self.n))
         y_positive = pd.Series(np.random.uniform(1, 100, self.n))
 
-        hist = histograms.Hist2D(x_positive, y_positive, logx=True, logy=True)
+        hist = Hist2D(x_positive, y_positive, logx=True, logy=True)
 
         assert hist.log.x is True
         assert hist.log.y is True
@@ -500,7 +458,7 @@ class TestHist2DBasicFunctionality:
         x_positive = pd.Series(np.random.uniform(1, 100, self.n))
         y_positive = pd.Series(np.random.uniform(1, 100, self.n))
 
-        hist = histograms.Hist2D(x_positive, y_positive, logx=True, logy=True)
+        hist = Hist2D(x_positive, y_positive, logx=True, logy=True)
 
         # Data should be log-transformed
         assert hist.data["x"].min() >= 0  # log10(1) = 0
@@ -510,7 +468,7 @@ class TestHist2DBasicFunctionality:
 
     def test_hist2d_set_labels_z(self):
         """Test set_labels(z='z') updates z-label."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+        hist = Hist2D(self.x_data, self.y_data)
 
         hist.set_labels(z="new_z_label")
 
@@ -529,7 +487,7 @@ class TestHist2DAxisNormalization:
 
     def test_set_axnorm_valid_options(self):
         """Test that set_axnorm('c'), 'r', 't', 'd' work; invalid → AssertionError."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+        hist = Hist2D(self.x_data, self.y_data)
 
         # Valid options should work
         valid_options = ["c", "r", "t", "d"]
@@ -554,7 +512,7 @@ class TestHist2DAxisNormalization:
 
         ON FAILURE: the code is wrong.
         """
-        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6, axnorm=axnorm)
+        hist = Hist2D(self.x_data, self.y_data, nbins=6, axnorm=axnorm)
         grid = hist.agg().unstack("x")
 
         axis = 0 if along == "columns" else 1
@@ -568,7 +526,7 @@ class TestHist2DAxisNormalization:
         ON FAILURE: the code is wrong -- it is normalizing per-axis rather than
         over the whole grid.
         """
-        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6, axnorm="t")
+        hist = Hist2D(self.x_data, self.y_data, nbins=6, axnorm="t")
         values = hist.agg().dropna()
 
         assert np.isclose(values.max(), 1.0)
@@ -583,9 +541,7 @@ class TestHist2DAxisNormalization:
         ON FAILURE: the code is wrong.
         """
         edges = np.round(np.linspace(0.0, 20.0, 9), 5)
-        hist = histograms.Hist2D(
-            self.x_data, self.y_data, nbins=[edges, edges], axnorm="d"
-        )
+        hist = Hist2D(self.x_data, self.y_data, nbins=[edges, edges], axnorm="d")
         agg = hist.agg()
 
         # Unpopulated bins are absent from the aggregation, so the areas are
@@ -607,7 +563,7 @@ class TestHist2DAxisNormalization:
 
         ON FAILURE: the code is wrong.
         """
-        hist = histograms.Hist2D(self.x_data, self.y_data, nbins=6)
+        hist = Hist2D(self.x_data, self.y_data, nbins=6)
         hist._axnorm = ("c", "sum")
 
         column_sums = hist.agg().unstack("x").sum(axis=0)
@@ -615,7 +571,7 @@ class TestHist2DAxisNormalization:
 
     def test_axis_normalizer_invalid_raises_value_error(self):
         """Test that _axis_normalizer('bad') raises ValueError."""
-        hist = histograms.Hist2D(self.x_data, self.y_data)
+        hist = Hist2D(self.x_data, self.y_data)
         # Hist2D raises AssertionError in set_axnorm, not ValueError
         # So we test AssertionError instead
         with pytest.raises(AssertionError, match="Unrecgonized axnorm"):
@@ -623,16 +579,16 @@ class TestHist2DAxisNormalization:
 
 
 class TestModuleIntegration:
-    """Test integration between different components of the histograms module."""
+    """Test integration between different histogram plotters."""
 
     def test_hist1d_inherits_from_aggplot(self):
         """Test that Hist1D properly inherits from AggPlot."""
-        assert issubclass(histograms.Hist1D, histograms.AggPlot)
+        assert issubclass(Hist1D, AggPlot)
 
         # Create instance and verify it has AggPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
-        hist = histograms.Hist1D(x_data)
+        hist = Hist1D(x_data)
 
         # Should have AggPlot methods
         assert hasattr(hist, "agg")
@@ -642,13 +598,13 @@ class TestModuleIntegration:
 
     def test_hist2d_inherits_from_aggplot(self):
         """Test that Hist2D properly inherits from AggPlot."""
-        assert issubclass(histograms.Hist2D, histograms.AggPlot)
+        assert issubclass(Hist2D, AggPlot)
 
         # Create instance and verify it has AggPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
         y_data = pd.Series(np.random.normal(10, 3, 100))
-        hist = histograms.Hist2D(x_data, y_data)
+        hist = Hist2D(x_data, y_data)
 
         # Should have AggPlot methods
         assert hasattr(hist, "agg")

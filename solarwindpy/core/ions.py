@@ -6,6 +6,10 @@ Vector and Tensor objects.
 """
 
 from __future__ import annotations
+
+__all__ = [
+    "Ion",
+]
 import pandas as pd
 
 from . import base

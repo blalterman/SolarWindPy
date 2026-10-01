@@ -14,6 +14,13 @@ References
    Verscharen2016a
 """
 
+__all__ = [
+    "insta_params",
+    "beta_ani_inst",
+    "StabilityCondition",
+    "StabilityContours",
+]
+
 import logging
 
 import numpy as np

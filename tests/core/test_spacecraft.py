@@ -10,8 +10,8 @@ from abc import ABC, abstractclassmethod, abstractproperty
 
 from . import test_base as base
 
-from solarwindpy import vector
-from solarwindpy import spacecraft
+from solarwindpy.core import vector
+from solarwindpy.core import spacecraft
 
 pd.set_option("mode.chained_assignment", "raise")
 

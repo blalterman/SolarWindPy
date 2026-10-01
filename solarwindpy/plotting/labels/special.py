@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 r"""Labels that :class:`~solarwindpy.plotting.labels.base.TeXlabel` does not build."""
 
+__all__ = [
+    "ArbitraryLabel",
+    "ManualLabel",
+    "Vsw",
+    "CarringtonRotation",
+    "Count",
+    "Power",
+    "Probability",
+    "CountOther",
+    "MathFcn",
+    "AbsoluteValue",
+    "Distance2Sun",
+    "SSN",
+    "ComparisonLabel",
+    "Xcorr",
+]
+
 from pathlib import Path
 from string import Template as StringTemplate
 from string import Formatter as StringFormatter
@@ -794,7 +811,7 @@ class SSN(ArbitraryLabel):
         self._path = Path(f"""{new.upper()!s}ssn""")
 
 
-class ComparisonLable(ArbitraryLabel):
+class ComparisonLabel(ArbitraryLabel):
     """Label comparing two other labels via a function."""
 
     def __init__(self, labelA, labelB, fcn_name, fcn=None, description=None):

@@ -1,11 +1,11 @@
-# Spent-When: PERMANENT(solarwindpy.fitfunctions stops offering its fit functions at package level)
+# Spent-When: PERMANENT(solarwindpy.fitfunctions stops declaring each fit function public in its module)
 # Supersedes: none
 """Contract tests for the public names of ``solarwindpy.fitfunctions``.
 
-Every fit function a user can build is reachable as
-``solarwindpy.fitfunctions.<Name>`` and declared in the package's
-``__all__``. The modules that define them are implementation. No test here
-names a particular fit function, so adding one needs no test edit.
+Every fit function a user can build has one import path, the module that
+defines it, and is declared in that module's ``__all__``. The package itself
+re-exports none of them. No test here names a particular fit function, so
+adding one needs no test edit.
 """
 
 import importlib
@@ -32,39 +32,37 @@ def _fit_functions_found_by_scanning_modules():
     return found
 
 
-def test_every_fit_function_is_reachable_at_package_level():
-    """Each fit function the modules define is ``ff.<Name>``, the same class.
+def test_scan_finds_fit_functions():
+    """The module scan finds at least one fit function.
 
-    ON FAILURE: the code is wrong; a fit function is missing from, or
-    shadowed in, solarwindpy/fitfunctions/__init__.py.
+    Guards the tests below against passing vacuously.
+
+    ON FAILURE: the scan no longer reaches the fit functions; fix the test.
     """
-    for name, cls in _fit_functions_found_by_scanning_modules().items():
-        assert getattr(ff, name, None) is cls, name
+    assert _fit_functions_found_by_scanning_modules()
 
 
-def test_every_fit_function_is_declared_public():
-    """Each fit function the modules define is listed in ``ff.__all__``.
+def test_every_fit_function_is_declared_public_in_its_module():
+    """Each fit function is listed in its defining module's ``__all__``.
 
-    ON FAILURE: the code is wrong; add the new fit function to
-    solarwindpy.fitfunctions.__all__.
+    ON FAILURE: the code is wrong; add the new fit function to the
+    ``__all__`` of the module that defines it.
     """
-    missing = set(_fit_functions_found_by_scanning_modules()) - set(ff.__all__)
-    assert not missing, sorted(missing)
+    missing = [
+        f"{cls.__module__}.{name}"
+        for name, cls in _fit_functions_found_by_scanning_modules().items()
+        if name not in importlib.import_module(cls.__module__).__all__
+    ]
+    assert not missing, missing
 
 
-def test_every_public_name_exists():
-    """``from solarwindpy.fitfunctions import *`` succeeds and binds every name.
+def test_no_fit_function_is_reexported_by_the_package():
+    """``solarwindpy.fitfunctions`` binds no fit function at package level.
 
-    ON FAILURE: the code is wrong; __all__ names something undefined.
+    ON FAILURE: the code is wrong; import the fit function from its module
+    instead of re-exporting it in solarwindpy/fitfunctions/__init__.py.
     """
-    namespace = {}
-    exec("from solarwindpy.fitfunctions import *", namespace)
-    assert set(ff.__all__) <= set(namespace)
-
-
-def test_public_names_are_listed_once():
-    """No name appears twice in ``ff.__all__``.
-
-    ON FAILURE: the code is wrong; remove the duplicate entry.
-    """
-    assert len(ff.__all__) == len(set(ff.__all__))
+    reexported = [
+        name for name in _fit_functions_found_by_scanning_modules() if hasattr(ff, name)
+    ]
+    assert not reexported, reexported

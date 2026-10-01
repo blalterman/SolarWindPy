@@ -273,8 +273,8 @@ def test_base_class_properties(labels_base):
 
 
 def test_mcs_namedtuple(labels_base):
-    """Test MCS namedtuple functionality."""
-    mcs = labels_base.MCS("v", "x", "p")
+    """Test _MCS namedtuple functionality."""
+    mcs = labels_base._MCS("v", "x", "p")
     assert mcs.m == "v"
     assert mcs.c == "x"
     assert mcs.s == "p"
@@ -331,7 +331,7 @@ def test_path_special_characters(labels_base):
 
 
 def test_empty_string_handling(labels_base):
-    """Test handling of empty strings in MCS components."""
+    """Test handling of empty strings in _MCS components."""
     cases = [
         ("", "x", "p"),  # Empty measurement
         ("v", "", "p"),  # Empty component

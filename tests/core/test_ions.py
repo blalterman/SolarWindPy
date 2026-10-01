@@ -14,9 +14,9 @@ from scipy.constants import physical_constants
 
 from . import test_base as base
 
-from solarwindpy import vector
-from solarwindpy import tensor
-from solarwindpy import ions
+from solarwindpy.core import vector
+from solarwindpy.core import tensor
+from solarwindpy.core import ions
 
 pd.set_option("mode.chained_assignment", "raise")
 

@@ -11,7 +11,7 @@ from scipy.optimize import OptimizeWarning
 from solarwindpy.fitfunctions import gaussians, trend_fits, lines
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from solarwindpy.fitfunctions.plots import AxesLabels
-from solarwindpy.plotting.labels import TeXlabel
+from solarwindpy.plotting.labels.base import TeXlabel
 
 
 @pytest.fixture

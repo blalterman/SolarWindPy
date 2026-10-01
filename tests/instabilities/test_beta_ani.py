@@ -17,7 +17,7 @@ import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
-from solarwindpy.plotting import labels  # noqa: E402
+from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 
 # Four populations in four distinct cells of a 2 x 2 grid:
 #   5 at (beta, R) = (3, 0.3)   -> log10 cell (x0, y0), shown (5 >= 5)
@@ -96,13 +96,13 @@ def test_axes_are_labelled_parallel_beta_and_anisotropy_of_species(
 ):
     """x is labelled parallel beta and y the T (or, summed, P) anisotropy of species.
 
-    Labels are rendered by solarwindpy.plotting.labels.TeXlabel; wording is theirs.
+    Labels are rendered by solarwindpy.plotting.labels.base.TeXlabel; wording is theirs.
 
     ON FAILURE: the code is wrong.
     """
     ax, _ = BetaRPlot(BETA, ANI, species, nbins=NBINS).make_plot()
-    assert ax.get_xlabel() == str(labels.TeXlabel(beta_label))
-    assert ax.get_ylabel() == str(labels.TeXlabel(ani_label))
+    assert ax.get_xlabel() == str(TeXlabel(beta_label))
+    assert ax.get_ylabel() == str(TeXlabel(ani_label))
 
 
 @pytest.mark.parametrize(

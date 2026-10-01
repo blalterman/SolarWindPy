@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 r"""Spiral mesh plots and associated binning utilities."""
 
+__all__ = [
+    "InitialSpiralEdges",
+    "SpiralMeshBinID",
+    "SpiralFilterThresholds",
+    "get_counts_per_bin",
+    "calculate_bin_number_with_numba",
+    "SpiralMesh",
+    "SpiralPlot2D",
+]
+
 import logging
 
 import numpy as np
@@ -15,7 +25,7 @@ from numba import njit, prange
 from matplotlib import pyplot as plt
 
 from . import base
-from . import labels as labels_module
+from . import labels
 
 InitialSpiralEdges = namedtuple("InitialSpiralEdges", "x,y")
 SpiralMeshBinID = namedtuple("SpiralMeshBinID", "id,fill,visited")
@@ -518,7 +528,7 @@ They will be replaced by NaNs and excluded from the aggregation.
         self._cat = cat
 
 
-class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
+class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
     r"""2D spiral plotting with adaptive mesh refinement.
 
     Examples
@@ -548,7 +558,7 @@ class SpiralPlot2D(base.PlotWithZdata, base.CbarMaker):
         super().__init__()
         self.set_log(x=logx, y=logy)
         self.set_data(x, y, z, clip_data)
-        self.set_labels(x="x", y="y", z=labels_module.Count() if z is None else "z")
+        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
         self.calc_initial_bins(initial_bins)
         self.set_clim(None, None)
 

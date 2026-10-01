@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 r"""One-dimensional histogram plotting utilities."""
 
+__all__ = [
+    "Hist1D",
+]
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -9,7 +13,7 @@ from types import FunctionType
 from matplotlib import pyplot as plt
 
 from . import base
-from . import labels as labels_module
+from . import labels
 from .agg_plot import AggPlot
 
 
@@ -62,7 +66,9 @@ class Hist1D(AggPlot):
         self.set_log(x=logx)
         self.set_axnorm(axnorm)
         self.set_data(x, y, clip_data)
-        self.set_labels(x="x", y=labels_module.Count(norm=axnorm) if y is None else "y")
+        self.set_labels(
+            x="x", y=labels.special.Count(norm=axnorm) if y is None else "y"
+        )
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
@@ -114,7 +120,7 @@ class Hist1D(AggPlot):
             assert new in ("d", "t"), f"Unrecognized axnorm `{new}`"
 
         ylbl = self.labels.y
-        if isinstance(ylbl, labels_module.Count):
+        if isinstance(ylbl, labels.special.Count):
             ylbl.set_axnorm(new)
             ylbl.build_label()
 
@@ -192,7 +198,7 @@ class Hist1D(AggPlot):
             raise ValueError(r"{} doesn't have a z-label".format(self))
 
         y = kwargs.pop("y", self.labels.y)
-        if isinstance(y, labels_module.Count):
+        if isinstance(y, labels.special.Count):
             y.set_axnorm(self.axnorm)
             y.build_label()
 

@@ -7,6 +7,15 @@ providing convenient plotting helpers.  Subclasses need only define
 the functional form and an initial parameter guess.
 """
 
+__all__ = [
+    "FitFunctionError",
+    "InsufficientDataError",
+    "FitFailedError",
+    "InvalidParameterError",
+    "FitFunctionMeta",
+    "FitFunction",
+]
+
 import logging  # noqa: F401
 import warnings
 
@@ -38,11 +47,11 @@ from scipy.linalg import svd, cholesky, LinAlgError
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
-Observations = namedtuple("Observations", "x,y,w")
-UsedRawObs = namedtuple("UsedRawObs", "used,raw,tk_observed")
-InitialGuessInfo = namedtuple("InitialGuessInfo", "p0,bounds")
-ChisqPerDegreeOfFreedom = namedtuple("ChisqPerDegreeOfFreedom", "linear,robust")
-FitBounds = namedtuple("FitBounds", "lower,upper")
+_Observations = namedtuple("_Observations", "x,y,w")
+_UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
+_InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
+_ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
+_FitBounds = namedtuple("_FitBounds", "lower,upper")
 
 
 class FitFunctionError(Exception):
@@ -152,7 +161,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Examples
         --------
         >>> import numpy as np  # doctest: +SKIP
-        >>> from solarwindpy.fitfunctions import Gaussian  # doctest: +SKIP
+        >>> from solarwindpy.fitfunctions.gaussians import Gaussian  # doctest: +SKIP
         >>> x = np.linspace(-5, 5, 100)  # doctest: +SKIP
         >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP
         >>> fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP
@@ -283,7 +292,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Returns
         -------
         dict or None
-            ``{name: InitialGuessInfo(p0, bounds)}``, or None when no initial
+            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial
             guess was made (``p0`` is None) or no fit has set the bounds.
         """
         try:
@@ -296,7 +305,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         names = self.argnames
         info = {
-            name: InitialGuessInfo(guess, tuple(bounds[name]))
+            name: _InitialGuessInfo(guess, tuple(bounds[name]))
             for name, guess in zip(names, p0)
         }
 
@@ -487,7 +496,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         Examples
         --------
         >>> import numpy as np
-        >>> from solarwindpy.fitfunctions import Gaussian
+        >>> from solarwindpy.fitfunctions.gaussians import Gaussian
         >>> x = np.linspace(0, 10, 101)
         >>> y = 4 * np.exp(-0.5 * ((x - 5) / 1) ** 2)
         >>> # Create FitFunction with constraints
@@ -585,9 +594,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         if weights_raw is not None:
             weights = weights_raw[mask]
 
-        used = Observations(xobs, yobs, weights)
-        raw = Observations(xobs_raw, yobs_raw, weights_raw)
-        usedrawobs = UsedRawObs(used, raw, mask)
+        used = _Observations(xobs, yobs, weights)
+        raw = _Observations(xobs_raw, yobs_raw, weights_raw)
+        usedrawobs = _UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
 
     def _run_least_squares(self, **kwargs):
@@ -674,7 +683,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             raise FitFailedError("Optimal parameters not found: " + res.message)
 
         fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
-        fit_bounds = {k: FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
+        fit_bounds = {k: _FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
         fit_bounds = tuple(fit_bounds.items())
         self._fit_bounds = fit_bounds
 
@@ -730,7 +739,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         # Based on `curve_fit`'s `absolute_sigma` documentation and reading
         # `least_square`, `s_sq` should be chisq_nu based on robust residuals
         # that account for `f_scale`(20200527).
-        all_chisq = ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
+        all_chisq = _ChisqPerDegreeOfFreedom(chisq_dof, s_sq)
 
         return popt, pcov, psigma, all_chisq
 

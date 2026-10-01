@@ -4,61 +4,33 @@ Primary focus is in situ solar wind measurements and the additional tools necess
 context (e.g. solar activity indicies) and some simple plotting methods.
 """
 
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
+from importlib.metadata import version as _version
 
-import pandas as pd
+import pandas as _pd
 
-from .core import (
-    units_constants,
-    base,
-    vector,
-    tensor,
-    ions,
-    plasma,
-    spacecraft,
-    alfvenic_turbulence,
-)
-from . import core, plotting, solar_activity, tools, fitfunctions
-from . import instabilities  # noqa: F401
+from . import core, fitfunctions, instabilities, plotting, solar_activity, tools
 
 
 def _configure_pandas() -> None:
     """Configure global pandas options used throughout SolarWindPy."""
-    pd.set_option("mode.chained_assignment", "raise")
+    _pd.set_option("mode.chained_assignment", "raise")
 
 
 _configure_pandas()
 
-Plasma = core.plasma.Plasma
-ReferenceAbundances = core.abundances.ReferenceAbundances
-at = alfvenic_turbulence
-sc = spacecraft
+# ``pp`` is the one temporary nickname in the package: every other public
+# object has exactly one import path, the module that defines it. It stays
+# only until the author's analysis code migrates to ``solarwindpy.plotting``.
 pp = plotting
-sa = solar_activity
-Hist1D = plotting.histograms.Hist1D
-Hist2D = plotting.histograms.Hist2D
-TeXlabel = plotting.labels.TeXlabel
 
 __all__ = [
     "core",
-    "plasma",
-    "ReferenceAbundances",
-    "ions",
-    "tensor",
-    "vector",
-    "spacecraft",
-    "sc",
-    "alfvenic_turbulence",
-    "at",
-    "base",
-    "units_constants",
-    "plotting",
-    "pp",
-    "solar_activity",
-    "sa",
-    "tools",
     "fitfunctions",
     "instabilities",
+    "plotting",
+    "solar_activity",
+    "tools",
 ]
 
 __author__ = "B. L. Alterman <blaltermanphd@gmail.com>"
@@ -66,7 +38,7 @@ __author__ = "B. L. Alterman <blaltermanphd@gmail.com>"
 __name__ = "solarwindpy"
 
 try:
-    __version__ = version(__name__)
-except PackageNotFoundError:
+    __version__ = _version(__name__)
+except _PackageNotFoundError:
     # package is not installed
     __version__ = "unknown"

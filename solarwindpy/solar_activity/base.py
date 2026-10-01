@@ -1,5 +1,13 @@
 """Base classes for solar activity indicators."""
 
+__all__ = [
+    "Base",
+    "ID",
+    "DataLoader",
+    "ActivityIndicator",
+    "IndicatorExtrema",
+]
+
 import logging
 import re
 import urllib

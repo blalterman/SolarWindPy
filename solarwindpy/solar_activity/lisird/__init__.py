@@ -1,5 +1,5 @@
 """Solar activity indices from the LASP Interactive Solar Irradiance Data Center."""
 
-from . import lisird  # noqa: F401
-from .lisird import LISIRD  # noqa: F401
-from .extrema_calculator import ExtremaCalculator  # noqa: F401
+from . import extrema_calculator, lisird
+
+__all__ = ["extrema_calculator", "lisird"]

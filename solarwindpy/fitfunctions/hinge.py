@@ -6,6 +6,16 @@ hinge point, commonly used for modeling saturation behavior.
 
 from __future__ import annotations
 
+__all__ = [
+    "XIntercepts",
+    "HingeSaturation",
+    "TwoLine",
+    "Saturation",
+    "HingeMin",
+    "HingeMax",
+    "HingeAtPoint",
+]
+
 from collections import namedtuple
 
 import numpy as np
@@ -56,7 +66,7 @@ class HingeSaturation(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import HingeSaturation
+    >>> from solarwindpy.fitfunctions.hinge import HingeSaturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.where(x < 5, 2*x, 10)  # Saturation at y=10 for x>=5
     >>> fit = HingeSaturation(x, y, guess_xh=5, guess_yh=10)
@@ -245,7 +255,7 @@ class TwoLine(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import TwoLine
+    >>> from solarwindpy.fitfunctions.hinge import TwoLine
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))  # Two lines intersecting at (5, 10)
     >>> fit = TwoLine(x, y, guess_xs=5.0)
@@ -477,7 +487,7 @@ class Saturation(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import Saturation
+    >>> from solarwindpy.fitfunctions.hinge import Saturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))
     >>> fit = Saturation(x, y, guess_xs=5.0, guess_s=10.0)
@@ -713,7 +723,7 @@ class HingeMin(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import HingeMin
+    >>> from solarwindpy.fitfunctions.hinge import HingeMin
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -2*(x-10))  # Two lines meeting at (5, 10)
     >>> fit = HingeMin(x, y, guess_h=5.0)
@@ -931,7 +941,7 @@ class HingeMax(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import HingeMax
+    >>> from solarwindpy.fitfunctions.hinge import HingeMax
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.maximum(-2*(x-0), 2*(x-10))  # V-shape with vertex at (5, -10)
     >>> fit = HingeMax(x, y, guess_h=5.0)
@@ -1140,7 +1150,7 @@ class HingeAtPoint(FitFunction):
     Examples
     --------
     >>> import numpy as np
-    >>> from solarwindpy.fitfunctions import HingeAtPoint
+    >>> from solarwindpy.fitfunctions.hinge import HingeAtPoint
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))  # Hinge at (5, 10)
     >>> fit = HingeAtPoint(x, y, guess_xh=5.0, guess_yh=10.0)

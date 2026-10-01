@@ -7,6 +7,11 @@ quick trend estimation and serve as basic examples of the
 FitFunction interface.
 """
 
+__all__ = [
+    "Line",
+    "LineXintercept",
+]
+
 import numpy as np
 
 from .core import FitFunction

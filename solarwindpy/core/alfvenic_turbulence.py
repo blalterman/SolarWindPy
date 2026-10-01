@@ -21,6 +21,11 @@ https://doi.org/10.1093/mnrasl/slw135
 *Astrophys. J.*, 856, 49.
 """
 
+__all__ = [
+    "AlfvenicTurbAveraging",
+    "AlfvenicTurbulence",
+]
+
 import numpy as np
 import pandas as pd
 
@@ -32,7 +37,7 @@ from collections import namedtuple
 
 from . import base
 
-AlvenicTurbAveraging = namedtuple("AlvenicTurbAveraging", "window,min_periods")
+AlfvenicTurbAveraging = namedtuple("AlfvenicTurbAveraging", "window,min_periods")
 
 
 class AlfvenicTurbulence(base.Core):
@@ -398,7 +403,7 @@ unexpected.""")
         self._data = deltas
         self._polarity = polarity
         self._species = species
-        self._averaging_info = AlvenicTurbAveraging(window, min_periods)
+        self._averaging_info = AlfvenicTurbAveraging(window, min_periods)
 
     def _clean_species_for_setting(self, species):
         if not isinstance(species, str):

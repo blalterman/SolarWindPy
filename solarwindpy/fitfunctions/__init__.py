@@ -1,8 +1,9 @@
 r"""Fit parametric models to observations with robust least squares.
 
 Each fit function is a subclass of
-:class:`~solarwindpy.fitfunctions.core.FitFunction` and is importable as
-``solarwindpy.fitfunctions.<Name>``. :func:`available` prints every one with
+:class:`~solarwindpy.fitfunctions.core.FitFunction` and is imported from the
+module that defines it, for example
+``solarwindpy.fitfunctions.gaussians.Gaussian``. :func:`available` prints every one with
 its module and LaTeX formula.
 
 Using a fit function
@@ -10,7 +11,7 @@ Using a fit function
 Construct it from the observations, then call ``make_fit``:
 
 >>> import numpy as np
->>> from solarwindpy.fitfunctions import Line
+>>> from solarwindpy.fitfunctions.lines import Line
 >>> x = np.arange(10.0)
 >>> fit = Line(x, 2.0 * x + 1.0)
 >>> fit.make_fit()
@@ -66,81 +67,33 @@ in each bin of 2-D aggregated data and a second to the trend of the results.
 """
 
 __all__ = [
-    "FitFunction",
-    "TrendFit",
     "available",
-    # Fit functions
-    "Exponential",
-    "ExponentialCDF",
-    "ExponentialPlusC",
-    "Gaussian",
-    "GaussianLn",
-    "GaussianNormalized",
-    "GaussianPlusHeavySide",
-    "GaussianTimesHeavySide",
-    "GaussianTimesHeavySidePlusHeavySide",
-    "HeavySide",
-    "HingeAtPoint",
-    "HingeMax",
-    "HingeMin",
-    "HingeSaturation",
-    "Line",
-    "LineXintercept",
-    "PowerLaw",
-    "PowerLawOffCenter",
-    "PowerLawPlusC",
-    "Saturation",
-    "TwoLine",
-    # Exceptions
-    "FitFunctionError",
-    "InsufficientDataError",
-    "FitFailedError",
-    "InvalidParameterError",
+    "composite",
+    "core",
+    "exponentials",
+    "gaussians",
+    "heaviside",
+    "hinge",
+    "lines",
+    "plots",
+    "power_laws",
+    "tex_info",
+    "trend_fits",
 ]
 
 from inspect import isabstract
 
-from . import core
-from . import lines
-from . import gaussians
-from . import exponentials
-from . import power_laws
-
-from . import hinge
-from . import heaviside
-from . import trend_fits
 from . import composite
-
-FitFunction = core.FitFunction
-TrendFit = trend_fits.TrendFit
-
-Exponential = exponentials.Exponential
-ExponentialCDF = exponentials.ExponentialCDF
-ExponentialPlusC = exponentials.ExponentialPlusC
-Gaussian = gaussians.Gaussian
-GaussianLn = gaussians.GaussianLn
-GaussianNormalized = gaussians.GaussianNormalized
-GaussianPlusHeavySide = composite.GaussianPlusHeavySide
-GaussianTimesHeavySide = composite.GaussianTimesHeavySide
-GaussianTimesHeavySidePlusHeavySide = composite.GaussianTimesHeavySidePlusHeavySide
-HeavySide = heaviside.HeavySide
-HingeAtPoint = hinge.HingeAtPoint
-HingeMax = hinge.HingeMax
-HingeMin = hinge.HingeMin
-HingeSaturation = hinge.HingeSaturation
-Line = lines.Line
-LineXintercept = lines.LineXintercept
-PowerLaw = power_laws.PowerLaw
-PowerLawOffCenter = power_laws.PowerLawOffCenter
-PowerLawPlusC = power_laws.PowerLawPlusC
-Saturation = hinge.Saturation
-TwoLine = hinge.TwoLine
-
-# Exception classes for better error handling
-FitFunctionError = core.FitFunctionError
-InsufficientDataError = core.InsufficientDataError
-FitFailedError = core.FitFailedError
-InvalidParameterError = core.InvalidParameterError
+from . import core
+from . import exponentials
+from . import gaussians
+from . import heaviside
+from . import hinge
+from . import lines
+from . import plots
+from . import power_laws
+from . import tex_info
+from . import trend_fits
 
 
 def _fit_function_classes():

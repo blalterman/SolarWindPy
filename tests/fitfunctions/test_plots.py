@@ -9,9 +9,9 @@ from scipy.optimize import OptimizeResult
 
 from solarwindpy.fitfunctions.plots import FFPlot, AxesLabels, LogAxes
 from solarwindpy.fitfunctions.core import (
-    ChisqPerDegreeOfFreedom,
-    Observations,
-    UsedRawObs,
+    _ChisqPerDegreeOfFreedom,
+    _Observations,
+    _UsedRawObs,
 )
 from solarwindpy.fitfunctions.tex_info import TeXinfo
 
@@ -22,7 +22,7 @@ def make_texinfo(m=2.0, b=1.0):
         {"m": m, "b": b},
         {"m": 0.1, "b": 0.1},
         "m x + b",
-        ChisqPerDegreeOfFreedom(0.0, 0.0),
+        _ChisqPerDegreeOfFreedom(0.0, 0.0),
         1.0,
     )
 
@@ -49,7 +49,7 @@ class Label:
 
 
 def make_observations(n, include_weights=True):
-    """Build ``UsedRawObs`` with ``n`` raw points and every other point used.
+    """Build ``_UsedRawObs`` with ``n`` raw points and every other point used.
 
     Parameters
     ----------
@@ -63,12 +63,12 @@ def make_observations(n, include_weights=True):
     w = np.ones_like(x) if include_weights else None
     mask = np.zeros_like(x, dtype=bool)
     mask[::2] = True
-    raw = Observations(x, y, w)
+    raw = _Observations(x, y, w)
     if include_weights:
-        used = Observations(x[mask], y[mask], w[mask])
+        used = _Observations(x[mask], y[mask], w[mask])
     else:
-        used = Observations(x[mask], y[mask], None)
-    return UsedRawObs(used, raw, mask), y
+        used = _Observations(x[mask], y[mask], None)
+    return _UsedRawObs(used, raw, mask), y
 
 
 def make_ffplot(n=5, include_weights=True):

@@ -1,20 +1,26 @@
 #!/usr/bin/env python
-"""Helper functions and shortcuts for solar activity data.
+"""Helper functions for solar activity data.
 
 This package consolidates the different solar activity indicators available in
-:mod:`solarwindpy` and exposes convenience utilities for working with them.
+:mod:`solarwindpy` and provides :func:`get_all_indices` to combine them.
 """
 
-__all__ = ["sunspot_number", "ssn", "lisird", "plots", "icme"]
+__all__ = [
+    "base",
+    "get_all_indices",
+    "icme",
+    "lisird",
+    "plots",
+    "sunspot_number",
+]
 
 import pandas as pd
 
-from . import sunspot_number  # noqa: F401
-from . import lisird  # noqa: F401
-from . import plots  # noqa: F401
-from . import icme  # noqa: F401
-
-ssn = sunspot_number
+from . import base
+from . import icme
+from . import lisird
+from . import plots
+from . import sunspot_number
 
 
 def get_all_indices():
@@ -30,7 +36,7 @@ def get_all_indices():
     Lalpha = lisird.lisird.LISIRD("Lalpha")
     CaK = lisird.lisird.LISIRD("CaK")
     MgII = lisird.lisird.LISIRD("MgII")
-    sidc = ssn.sidc.SIDC("m13")
+    sidc = sunspot_number.sidc.SIDC("m13")
 
     mgII = MgII.data.mg_index
     mgII.index = pd.DatetimeIndex(MgII.data.index.date)

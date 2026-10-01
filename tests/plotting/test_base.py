@@ -7,7 +7,7 @@ a minimal ``PlotWithZdata`` subclass. Axis formatting and colorbars are tested
 through the package's own ``Hist1D`` and ``Scatter``, asserting on the real
 matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Two behaviours have no
 public path, the colorbar's missing ``ax``/``cax`` error and
-``DataLimFormatter``, so ``LinePlot`` and ``LimPlot`` call those hooks. Expected values come from the hand-typed ``ROWS``
+``_DataLimFormatter``, so ``LinePlot`` and ``LimPlot`` call those hooks. Expected values come from the hand-typed ``ROWS``
 table or the ``_expected_path`` helper, which rebuilds the documented path
 layout (class, x, y, z, scale) from ``pathlib`` alone.
 """
@@ -28,14 +28,14 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from solarwindpy.plotting.base import (  # noqa: E402
     AxesLabels,
     Base,
-    CbarMaker,
-    DataLimFormatter,
+    _CbarMaker,
+    _DataLimFormatter,
     LogAxes,
     PlotWithZdata,
     RangeLimits,
 )
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
-from solarwindpy.plotting.labels import TeXlabel  # noqa: E402
+from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -85,7 +85,7 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
     return Path(cls_name, x, y, z, _scale(logx, logy))
 
 
-class LinePlot(PlotWithZdata, CbarMaker):
+class LinePlot(PlotWithZdata, _CbarMaker):
     """Minimal concrete plot: points coloured by z, passed to the cbar hook."""
 
     def __init__(self, x, y, z=None, clip_data=False):
@@ -98,8 +98,8 @@ class LinePlot(PlotWithZdata, CbarMaker):
         return coll, self._make_cbar(coll, **cbar_kwargs)
 
 
-class LimPlot(DataLimFormatter, PlotWithZdata):
-    """Minimal plot using the ``DataLimFormatter`` mixin."""
+class LimPlot(_DataLimFormatter, PlotWithZdata):
+    """Minimal plot using the ``_DataLimFormatter`` mixin."""
 
     def __init__(self, x, y):
         super().__init__()
@@ -470,7 +470,7 @@ def test_data_lim_formatter_pins_limits_to_the_data_extent(ax):
     """Axis limits are the min and max of the kept data, with no margin.
 
     Also formats the axis through ``Base`` (labels are applied). No package
-    class uses ``DataLimFormatter``, so ``LimPlot`` calls its hook.
+    class uses ``_DataLimFormatter``, so ``LimPlot`` calls its hook.
 
     ON FAILURE: the code is wrong.
     """

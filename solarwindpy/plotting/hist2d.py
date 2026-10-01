@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 r"""Two-dimensional histogram and heatmap plotting utilities."""
 
+__all__ = [
+    "Hist2D",
+]
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -11,17 +15,14 @@ from scipy.signal import savgol_filter
 
 
 from . import base
-from . import labels as labels_module
+from . import labels
 from .tools import nan_gaussian_filter
 
-from . import agg_plot
-from . import hist1d
-
-AggPlot = agg_plot.AggPlot
-Hist1D = hist1d.Hist1D
+from .agg_plot import AggPlot
+from .hist1d import Hist1D
 
 
-class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
+class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
     Parameters
@@ -68,7 +69,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
         self.set_log(x=logx, y=logy)
         self.set_data(x, y, z, clip_data)
         self.set_labels(
-            x="x", y="y", z=labels_module.Count(norm=axnorm) if z is None else "z"
+            x="x", y="y", z=labels.special.Count(norm=axnorm) if z is None else "z"
         )
 
         self.set_axnorm(axnorm)
@@ -91,7 +92,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
     def set_labels(self, **kwargs):
         r"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""
         z = kwargs.pop("z", self.labels.z)
-        if isinstance(z, labels_module.Count):
+        if isinstance(z, labels.special.Count):
             try:
                 z.set_axnorm(self.axnorm)
             except AttributeError:
@@ -136,7 +137,7 @@ class Hist2D(base.PlotWithZdata, base.CbarMaker, AggPlot):
             ), f"Unrecgonized axnorm `{new}`"
 
         zlbl = self.labels.z
-        if isinstance(zlbl, labels_module.Count):
+        if isinstance(zlbl, labels.special.Count):
             zlbl.set_axnorm(new)
             zlbl.build_label()
 

@@ -17,8 +17,8 @@ After installation, import the package and create a plasma object with sample da
 
 .. code-block:: python
 
-   import solarwindpy as swp
    import pandas as pd
+   from solarwindpy.core.plasma import Plasma
 
    # Create sample solar wind data (3 time points)
    epoch = pd.date_range('2023-01-01', periods=3, freq='1h')
@@ -40,7 +40,7 @@ After installation, import the package and create a plasma object with sample da
    ], index=epoch, columns=columns)
 
    # Create plasma object with protons and alphas
-   plasma = swp.Plasma(data, 'p1', 'a')
+   plasma = Plasma(data, 'p1', 'a')
 
    # Access ion species
    print(plasma.species)  # ('a', 'p1')

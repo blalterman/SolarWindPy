@@ -15,7 +15,7 @@ from scipy.constants import physical_constants
 
 from . import test_base as base
 
-from solarwindpy import alfvenic_turbulence as turb
+from solarwindpy.core import alfvenic_turbulence as turb
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -163,7 +163,7 @@ class AlfvenicTrubulenceTestBase(ABC):
     def test_averaging_info(self):
         ot = self.object_testing
         avg = ot.averaging_info
-        expected = turb.AlvenicTurbAveraging(self.test_window, self.test_periods)
+        expected = turb.AlfvenicTurbAveraging(self.test_window, self.test_periods)
         self.assertEqual(expected, avg)
 
     def test_bfield(self):

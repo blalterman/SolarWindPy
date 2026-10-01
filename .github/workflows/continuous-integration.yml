@@ -119,7 +119,8 @@ jobs:
           
           # Test core functionality
           import numpy as np
-          from solarwindpy.core import Plasma, Ion
+          from solarwindpy.core.plasma import Plasma
+          from solarwindpy.core.ions import Ion
           
           print('Core classes imported successfully')
           "

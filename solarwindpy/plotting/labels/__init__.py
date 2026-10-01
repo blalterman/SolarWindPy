@@ -2,32 +2,24 @@
 r"""Tools for creating physical quantity plot labels."""
 
 __all__ = [
-    "TeXlabel",
-    "Vsw",
-    "Count",
-    "base",
-    "special",
     "available",
-    "species_translation",
+    "base",
+    "chemistry",
+    "composition",
+    "datetime",
+    "elemental_abundance",
+    "special",
 ]
 
 from inspect import isclass
 import pandas as pd
 
 from . import base
-from . import special
+from . import chemistry
 from . import composition
+from . import datetime
 from . import elemental_abundance
-from . import datetime  # noqa: F401
-from . import chemistry  # noqa: F401
-
-TeXlabel = base.TeXlabel
-species_translation = base._run_species_substitution
-Vsw = special.Vsw
-Count = special.Count
-Ion = composition.Ion
-ChargeStateRatio = composition.ChargeStateRatio
-ElementalAbundance = elemental_abundance.ElementalAbundance
+from . import special
 
 
 def _clean_str_list_for_printing(data):

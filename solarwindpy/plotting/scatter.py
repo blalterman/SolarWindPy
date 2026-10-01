@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 r"""Scatter plot utilities with optional color mapping."""
 
+__all__ = [
+    "Scatter",
+]
+
 from matplotlib import pyplot as plt
 
 from . import base
 from .agg_plot import AggPlot
 
 
-class Scatter(base.PlotWithZdata, base.CbarMaker):
+class Scatter(base.PlotWithZdata, base._CbarMaker):
     r"""Scatter plot of y against x, optionally colored by z."""
 
     def __init__(self, x, y, z=None, clip_data=False):

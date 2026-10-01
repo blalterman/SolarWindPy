@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 r"""Tools for creating physical quantity plot labels."""
 
+__all__ = [
+    "Base",
+    "TeXlabel",
+]
+
 import logging
 import re
 from abc import ABC
@@ -8,7 +13,7 @@ from pathlib import Path
 from string import Template as StringTemplate
 from collections import namedtuple
 
-MCS = namedtuple("MCS", "m,c,s")
+_MCS = namedtuple("_MCS", "m,c,s")
 
 
 __isotope_species = r"^{%s}\mathrm{%s}"
@@ -450,12 +455,12 @@ class TeXlabel(Base):
 
     @property
     def mcs0(self):
-        r"""``MCS`` namedtuple (measurement, component, species) of the numerator."""
+        r"""``_MCS`` namedtuple (measurement, component, species) of the numerator."""
         return self._mcs0
 
     @property
     def mcs1(self):
-        r"""``MCS`` namedtuple of the denominator, or None."""
+        r"""``_MCS`` namedtuple of the denominator, or None."""
         return self._mcs1
 
     @property
@@ -489,12 +494,12 @@ class TeXlabel(Base):
         return self._axnorm
 
     def set_mcs(self, mcs0, mcs1):
-        r"""Store the numerator and optional denominator as ``MCS`` namedtuples."""
-        mcs0_ = MCS(*mcs0)
+        r"""Store the numerator and optional denominator as ``_MCS`` namedtuples."""
+        mcs0_ = _MCS(*mcs0)
 
         mcs1_ = None
         if mcs1 is not None:
-            mcs1_ = MCS(*mcs1)
+            mcs1_ = _MCS(*mcs1)
 
         self._mcs0 = mcs0_
         self._mcs1 = mcs1_

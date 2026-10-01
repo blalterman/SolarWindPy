@@ -1,3 +1,5 @@
 """Sunspot number data utilities."""
 
-from . import sidc  # noqa: F401
+from . import sidc
+
+__all__ = ["sidc"]

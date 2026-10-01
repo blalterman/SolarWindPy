@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 """Access sunspot-number data from the SIDC."""
 
+__all__ = [
+    "SIDC_ID",
+    "SIDCLoader",
+    "SIDC",
+    "SSNExtrema",
+]
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -8,14 +15,13 @@ import matplotlib as mpl
 from pathlib import Path
 from collections import namedtuple
 
-from .. import base
-
-Base = base.Base
-ID = base.ID
-DataLoader = base.DataLoader
-IndicatorExtrema = base.IndicatorExtrema
-_Loader_Dtypes_Columns = base._Loader_Dtypes_Columns
-ActivityIndicator = base.ActivityIndicator
+from ..base import (
+    ActivityIndicator,
+    DataLoader,
+    ID,
+    IndicatorExtrema,
+    _Loader_Dtypes_Columns,
+)
 
 pd.set_option("mode.chained_assignment", "raise")
 

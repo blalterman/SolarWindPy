@@ -1,10 +1,16 @@
 """Plotting helpers for solar activity indicators."""
 
+__all__ = [
+    "IndicatorPlot",
+    "SSNPlot",
+]
+
 from matplotlib import dates as mdates
 
 from abc import abstractmethod
 
-from ..plotting import base, labels, subplots
+from ..plotting import base, labels
+from ..plotting.tools import subplots
 
 
 class IndicatorPlot(base.Base):

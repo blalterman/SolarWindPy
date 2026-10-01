@@ -1,5 +1,12 @@
 """ICMECAT class for accessing the HELIO4CAST ICME catalog."""
 
+__all__ = [
+    "ICMECAT_URL",
+    "SPACECRAFT_NAMES",
+    "ICMECATDownloadError",
+    "ICMECAT",
+]
+
 import logging
 import time
 import warnings
