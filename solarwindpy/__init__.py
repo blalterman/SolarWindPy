@@ -4,17 +4,16 @@ Primary focus is in situ solar wind measurements and the additional tools necess
 context (e.g. solar activity indicies) and some simple plotting methods.
 """
 
-from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
-from importlib.metadata import version as _version
-
-import pandas as _pd
-
 from . import core, fitfunctions, instabilities, plotting, solar_activity, tools
 
 
 def _configure_pandas() -> None:
     """Configure global pandas options used throughout SolarWindPy."""
-    _pd.set_option("mode.chained_assignment", "raise")
+    # Imported here, not at module level, so ``solarwindpy`` binds no
+    # third-party names.
+    import pandas as pd
+
+    pd.set_option("mode.chained_assignment", "raise")
 
 
 _configure_pandas()
@@ -37,8 +36,15 @@ __author__ = "B. L. Alterman <blaltermanphd@gmail.com>"
 
 __name__ = "solarwindpy"
 
-try:
-    __version__ = _version(__name__)
-except _PackageNotFoundError:
-    # package is not installed
-    __version__ = "unknown"
+
+def _installed_version() -> str:
+    """The installed distribution's version, or ``"unknown"`` if not installed."""
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version(__name__)
+    except PackageNotFoundError:
+        return "unknown"
+
+
+__version__ = _installed_version()

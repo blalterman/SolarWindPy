@@ -10,7 +10,7 @@ import logging
 import re
 from abc import ABC
 from pathlib import Path
-from string import Template as StringTemplate
+from string import Template
 from collections import namedtuple
 
 _MCS = namedtuple("_MCS", "m,c,s")
@@ -574,7 +574,7 @@ class TeXlabel(Base):
         d = {"M": m1, "C": c1, "S": s1}
 
         template_string = _templates.get(m, _default_template_string)
-        template = StringTemplate(template_string)
+        template = Template(template_string)
 
         tex = template.safe_substitute(**d)
         if err:
