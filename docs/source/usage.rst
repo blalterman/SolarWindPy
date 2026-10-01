@@ -97,8 +97,11 @@ to a noise-free Gaussian recovers the parameters that generated it:
 formula:
 
 >>> import solarwindpy.fitfunctions as ff
->>> ff.available()  # doctest: +ELLIPSIS
-Fit function...Gaussian...
+>>> ff.available()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+Fit function  Module  LaTeX
+...
+Gaussian  gaussians  f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}
+...
 
 Save a Plot
 -----------
