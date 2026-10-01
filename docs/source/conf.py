@@ -84,9 +84,9 @@ numpydoc_xref_param_type = True
 
 # Docstring type specs are written with the names the source imports: numpy,
 # pandas and matplotlib under their conventional short names, and package
-# modules under the names the source imports them by (``from pandas import
-# MultiIndex as MI`` and ``from . import units_constants`` in
-# ``core/base.py``). Map each spelling to the fully qualified name that intersphinx or this build indexes.
+# modules under the names the source imports them by
+# (``from . import units_constants`` in ``core/base.py``). Map each spelling to
+# the fully qualified name that intersphinx or this build indexes.
 # A spelling that is not an import the source uses belongs in the docstring.
 numpydoc_xref_aliases = {
     "np.ndarray": "numpy.ndarray",
@@ -94,7 +94,6 @@ numpydoc_xref_aliases = {
     "pd.Series": "pandas.Series",
     "pd.Index": "pandas.Index",
     "pd.MultiIndex": "pandas.MultiIndex",
-    "MI": "pandas.MultiIndex",
     "pd.DatetimeIndex": "pandas.DatetimeIndex",
     "pd.Timestamp": "pandas.Timestamp",
     "pd.Timedelta": "pandas.Timedelta",

@@ -17,7 +17,6 @@ from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
-from pandas import MultiIndex as MI
 
 from . import units_constants
 
@@ -211,7 +210,7 @@ class Base(Core):
         self.set_data(data)
 
     @staticmethod
-    def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> MI:
+    def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> pd.MultiIndex:
         """Create a MultiIndex from tuples with appropriate names.
 
         Parameters
@@ -221,11 +220,11 @@ class Base(Core):
 
         Returns
         -------
-        MI
+        pd.MultiIndex
             MultiIndex created from tuples.
         """
         names = ["M", "C", "S"]
-        return MI.from_tuples(x, names=names)
+        return pd.MultiIndex.from_tuples(x, names=names)
 
     @abstractmethod
     def set_data(self, new: pd.DataFrame) -> None:

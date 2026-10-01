@@ -2,11 +2,6 @@
 r"""Spiral mesh plots and associated binning utilities."""
 
 __all__ = [
-    "InitialSpiralEdges",
-    "SpiralMeshBinID",
-    "SpiralFilterThresholds",
-    "get_counts_per_bin",
-    "calculate_bin_number_with_numba",
     "SpiralMesh",
     "SpiralPlot2D",
 ]
@@ -27,15 +22,15 @@ from matplotlib import pyplot as plt
 from . import base
 from . import labels
 
-InitialSpiralEdges = namedtuple("InitialSpiralEdges", "x,y")
-SpiralMeshBinID = namedtuple("SpiralMeshBinID", "id,fill,visited")
-SpiralFilterThresholds = namedtuple(
-    "SpiralFilterThresholds", "density,size", defaults=(False,)
+_InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
+_SpiralMeshBinID = namedtuple("_SpiralMeshBinID", "id,fill,visited")
+_SpiralFilterThresholds = namedtuple(
+    "_SpiralFilterThresholds", "density,size", defaults=(False,)
 )
 
 
 @njit(parallel=True)
-def get_counts_per_bin(bins, x, y):
+def _get_counts_per_bin(bins, x, y):
     r"""Count the points in each rectangular bin.
 
     Parameters
@@ -66,7 +61,7 @@ def get_counts_per_bin(bins, x, y):
 
 
 @njit(parallel=True)
-def calculate_bin_number_with_numba(mesh, x, y):
+def _calculate_bin_number_with_numba(mesh, x, y):
     r"""Assign each point the index of the mesh cell that contains it.
 
     Parameters
@@ -126,11 +121,13 @@ class SpiralMesh(object):
         self.set_data(x, y)
         self.set_min_per_bin(min_per_bin)
         self.set_initial_edges(initial_xedges, initial_yedges)
-        self._cell_filter_thresholds = SpiralFilterThresholds(density=False, size=False)
+        self._cell_filter_thresholds = _SpiralFilterThresholds(
+            density=False, size=False
+        )
 
     @property
     def bin_id(self):
-        r"""``SpiralMeshBinID`` of (cell index per point, fill value, visit counts)."""
+        r"""``_SpiralMeshBinID`` of (cell index per point, fill value, visit counts)."""
         return self._bin_id
 
     @property
@@ -145,7 +142,7 @@ class SpiralMesh(object):
 
     @property
     def initial_edges(self):
-        r"""``InitialSpiralEdges`` namedtuple of the initial x and y edges."""
+        r"""``_InitialSpiralEdges`` namedtuple of the initial x and y edges."""
         return self._initial_edges
 
     @property
@@ -160,7 +157,7 @@ class SpiralMesh(object):
 
     @property
     def cell_filter_thresholds(self):
-        r"""``SpiralFilterThresholds`` of the density and size quantiles."""
+        r"""``_SpiralFilterThresholds`` of the density and size quantiles."""
         return self._cell_filter_thresholds
 
     @property
@@ -225,13 +222,13 @@ class SpiralMesh(object):
             extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
-        self._cell_filter_thresholds = SpiralFilterThresholds(
+        self._cell_filter_thresholds = _SpiralFilterThresholds(
             density=density, size=size
         )
 
     def set_initial_edges(self, xedges, yedges):
         r"""Store the initial x and y edges."""
-        self._initial_edges = InitialSpiralEdges(xedges, yedges)
+        self._initial_edges = _InitialSpiralEdges(xedges, yedges)
 
     def set_data(self, x, y):
         r"""Store ``x`` and ``y`` as the columns of one DataFrame."""
@@ -289,7 +286,7 @@ class SpiralMesh(object):
         n : int
             Number of cells split.
         """
-        cell_count = get_counts_per_bin(bins, x, y)
+        cell_count = _get_counts_per_bin(bins, x, y)
 
         bins_to_replace = cell_count > min_per_bin
         nbins_to_replace = bins_to_replace.sum()
@@ -412,7 +409,7 @@ class SpiralMesh(object):
         x = x[tk_data_in_mesh]
         y = y[tk_data_in_mesh]
 
-        initial_cell_count = get_counts_per_bin(initial_bins, x, y)
+        initial_cell_count = _get_counts_per_bin(initial_bins, x, y)
         bins_to_replace = initial_cell_count > min_per_bin
         nbins_to_replace = bins_to_replace.sum()
 
@@ -454,9 +451,10 @@ class SpiralMesh(object):
 
         Returns
         -------
-        SpiralMeshBinID
-            Cell index per point (fill value outside the mesh), the fill value,
-            and the visit count of each cell.
+        tuple
+            Named tuple ``(id, fill, visited)``: cell index per point (fill
+            value outside the mesh), the fill value, and the visit count of
+            each cell.
 
         Raises
         ------
@@ -473,7 +471,7 @@ class SpiralMesh(object):
         nbins = mesh.shape[0]
 
         start = datetime.now()
-        zbin, fill, bin_visited = calculate_bin_number_with_numba(mesh, x, y)
+        zbin, fill, bin_visited = _calculate_bin_number_with_numba(mesh, x, y)
         stop = datetime.now()
 
         logger.warning(f"Elapsed time {stop - start}")
@@ -504,7 +502,7 @@ They will be replaced by NaNs and excluded from the aggregation.
                 f"{nbins - bin_frequency.shape[0]} mesh cells do not have an associated z-value"
             )
 
-        bin_id = SpiralMeshBinID(zbin, fill, bin_visited)
+        bin_id = _SpiralMeshBinID(zbin, fill, bin_visited)
         self._bin_id = bin_id
         return bin_id
 

@@ -19,8 +19,8 @@ __all__ = [
 ]
 
 from pathlib import Path
-from string import Template as StringTemplate
-from string import Formatter as StringFormatter
+from string import Template
+from string import Formatter
 from abc import abstractmethod
 from . import base
 
@@ -922,7 +922,7 @@ labelB : {labelB.units}
             }
             fcn = translate.get(get_fcn)
 
-        keys = [x[1] for x in StringFormatter().parse(fcn)]
+        keys = [x[1] for x in Formatter().parse(fcn)]
         if not (("$labelA" in keys) and ("$labelB" in keys)):
             raise ValueError(
                 rf"""{self.__class__.__name__}'s function must have the keys "$labelA" and "$labelB".
@@ -947,7 +947,7 @@ keys : {",".join(keys)}
         except AttributeError:
             texB = labelB
 
-        template = StringTemplate(function)
+        template = Template(function)
         tex = template.safe_substitute(labelA=texA, labelB=texB)
 
         while tex.find(r"\,\,") >= 0:

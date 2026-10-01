@@ -31,8 +31,8 @@ from scipy.ndimage import gaussian_filter  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
-    calculate_bin_number_with_numba,
-    get_counts_per_bin,
+    _calculate_bin_number_with_numba,
+    _get_counts_per_bin,
 )
 
 # ---------------------------------------------------------------------------
@@ -261,11 +261,11 @@ class TestCountsAndBinNumbers:
     """The numba kernels count and locate samples in half-open cells."""
 
     def test_counts_per_bin_match_a_hand_count(self):
-        """``get_counts_per_bin`` counts ROWS per initial cell: 1, 0, 1, 0, 1, 3.
+        """``_get_counts_per_bin`` counts ROWS per initial cell: 1, 0, 1, 0, 1, 3.
 
         ON FAILURE: the code is wrong.
         """
-        counts = get_counts_per_bin(np.array(INITIAL), X.values, Y.values)
+        counts = _get_counts_per_bin(np.array(INITIAL), X.values, Y.values)
         assert counts.tolist() == [1, 0, 1, 0, 1, 3]
         assert counts.tolist() == [len(z) for z in _tally(INITIAL, ROWS)]
 
@@ -281,9 +281,9 @@ class TestCountsAndBinNumbers:
         mesh = np.array(INITIAL)
         x = np.array([2.0, 6.0, 0.0])
         y = np.array([1.0, 4.0, 2.0])
-        counts = get_counts_per_bin(mesh, x, y)
+        counts = _get_counts_per_bin(mesh, x, y)
         assert counts.tolist() == [0, 0, 1, 0, 1, 0]
-        zbin, fill, _ = calculate_bin_number_with_numba(mesh, x, y)
+        zbin, fill, _ = _calculate_bin_number_with_numba(mesh, x, y)
         assert zbin.tolist() == [4, fill, 2]
 
     def test_bin_number_is_the_index_of_the_containing_cell(self):
@@ -297,7 +297,7 @@ class TestCountsAndBinNumbers:
         mesh = np.array(INITIAL)
         x = np.append(X.values, [-1.0, 7.0, np.nan])
         y = np.append(Y.values, [0.5, 0.5, 0.5])
-        zbin, fill, visited = calculate_bin_number_with_numba(mesh, x, y)
+        zbin, fill, visited = _calculate_bin_number_with_numba(mesh, x, y)
         assert fill == FILL
         assert zbin.tolist() == [0, 4, 5, 5, 5, 2, FILL, FILL, FILL]
         assert visited.tolist() == [1] * len(INITIAL)

@@ -7,7 +7,6 @@ hinge point, commonly used for modeling saturation behavior.
 from __future__ import annotations
 
 __all__ = [
-    "XIntercepts",
     "HingeSaturation",
     "TwoLine",
     "Saturation",
@@ -23,7 +22,7 @@ import numpy as np
 from .core import FitFunction
 
 # Named tuple for x-intercepts used by HingeAtPoint
-XIntercepts = namedtuple("XIntercepts", "x1,x2")
+_XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
 class HingeSaturation(FitFunction):
@@ -1144,7 +1143,7 @@ class HingeAtPoint(FitFunction):
         Slope of first line (fitted parameter).
     m2 : float
         Slope of second line (fitted parameter).
-    x_intercepts : XIntercepts
+    x_intercepts : tuple
         Named tuple with x1 and x2 attributes (derived property).
 
     Examples
@@ -1218,7 +1217,7 @@ class HingeAtPoint(FitFunction):
         return hinge_at_point
 
     @property
-    def x_intercepts(self) -> XIntercepts:
+    def x_intercepts(self) -> tuple[float, float]:
         r"""x-intercepts of the two lines.
 
         Returns a named tuple with:
@@ -1233,7 +1232,7 @@ class HingeAtPoint(FitFunction):
         m2 = popt["m2"]
         x1 = xh - (yh / m1)
         x2 = xh - (yh / m2)
-        return XIntercepts(x1, x2)
+        return _XIntercepts(x1, x2)
 
     @property
     def p0(self) -> list:

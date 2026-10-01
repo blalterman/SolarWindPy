@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `__all__` lists submodules (and objects the package file itself defines, such as
   `fitfunctions.available`). `solarwindpy.pp` (for `solarwindpy.plotting`) is the one
   temporary nickname. `plotting/histograms.py` is removed. Two misspelled names are
-  corrected and ten internal helpers are private. No aliases are kept; an old path raises
+  corrected and sixteen internal helpers are private. No aliases are kept; an old path raises
   `AttributeError` or `ImportError`. Every removed path and its replacement:
 
   | Old path | New path |
@@ -111,6 +111,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.plotting.base.DataLimFormatter` | `solarwindpy.plotting.base._DataLimFormatter` (private) |
   | `solarwindpy.plotting.tools.calculate_nrows_ncols` | `solarwindpy.plotting.tools._calculate_nrows_ncols` (private) |
   | `solarwindpy.plotting.tools.use_style` | `solarwindpy.plotting.tools._use_style` (private; importing solarwindpy.plotting applies the style) |
+  | `solarwindpy.fitfunctions.hinge.XIntercepts` | `solarwindpy.fitfunctions.hinge._XIntercepts` (private) |
+  | `solarwindpy.plotting.spiral.InitialSpiralEdges` | `solarwindpy.plotting.spiral._InitialSpiralEdges` (private) |
+  | `solarwindpy.plotting.spiral.SpiralMeshBinID` | `solarwindpy.plotting.spiral._SpiralMeshBinID` (private) |
+  | `solarwindpy.plotting.spiral.SpiralFilterThresholds` | `solarwindpy.plotting.spiral._SpiralFilterThresholds` (private) |
+  | `solarwindpy.plotting.spiral.get_counts_per_bin` | `solarwindpy.plotting.spiral._get_counts_per_bin` (private) |
+  | `solarwindpy.plotting.spiral.calculate_bin_number_with_numba` | `solarwindpy.plotting.spiral._calculate_bin_number_with_numba` (private) |
   | `solarwindpy.plotting.labels.species_translation` | none (removed; it was `labels.base._run_species_substitution`) |
 
 - Python 3.12 or newer is required (was 3.11).
