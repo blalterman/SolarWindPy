@@ -189,6 +189,8 @@ These change computed values; rerun any analysis that used them.
 - The `"Q"` plot label key. It was commented as a heating rate, carried a heat flux
   unit, and nothing in the package computes a heating rate. Heat flux is labelled
   `"q"`.
+- `Hist2D`: removed the undocumented, unreachable tuple `axnorm` branch; `set_axnorm`
+  already rejected tuples and still does.
 
 ## [0.3.0] - 2025-12-24
 

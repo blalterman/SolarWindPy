@@ -1710,5 +1710,23 @@ class TestJointPlot:
         plt.close("all")
 
 
+class TestAxnormKeys:
+    """``axnorm`` is one of the string keys documented in ``set_axnorm``."""
+
+    def test_set_axnorm_rejects_a_tuple(self, known_hist):
+        """A ``(kind, fcn)`` tuple is not an axnorm key and is refused.
+
+        ``set_axnorm`` lower-cases its argument before checking it, so a tuple
+        fails there with ``AttributeError``.
+
+        ON FAILURE: the code is wrong, unless the author has made tuple axnorm
+        a feature.
+        """
+        with pytest.raises(
+            AttributeError, match="'tuple' object has no attribute 'lower'"
+        ):
+            known_hist.set_axnorm(("c", "max"))
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
