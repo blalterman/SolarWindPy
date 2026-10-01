@@ -31,8 +31,6 @@ from scipy.ndimage import gaussian_filter  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
-    _calculate_bin_number_with_numba,
-    _get_counts_per_bin,
 )
 
 # ---------------------------------------------------------------------------
@@ -257,17 +255,41 @@ def test_fixture_separates_orientation_widths_and_depth():
     assert shared == [(2.0, 4.0, 2.0, 3.0)]
 
 
+def _unsplit_bin_ids(x, y):
+    """``bin_id`` of a ``SpiralMesh`` on the initial grid, with no cell split.
+
+    ``min_per_bin`` is the number of samples, so no cell can hold more and
+    the mesh stays the initial grid, row ``i`` being ``INITIAL[i]``.
+    """
+    mesh = SpiralMesh(
+        pd.Series(x),
+        pd.Series(y),
+        np.array(XEDGES),
+        np.array(YEDGES),
+        min_per_bin=len(x),
+    )
+    bin_id = mesh.place_spectra_in_mesh()
+    assert [tuple(c) for c in mesh.mesh] == INITIAL  # the fixture: no split
+    return bin_id
+
+
+def _counts(bin_id):
+    """Samples per initial cell, from the cell index of each in-mesh sample."""
+    ids = np.asarray(bin_id.id)
+    return np.bincount(ids[ids != bin_id.fill], minlength=len(INITIAL)).tolist()
+
+
 class TestCountsAndBinNumbers:
-    """The numba kernels count and locate samples in half-open cells."""
+    """Samples are counted and located in half-open cells."""
 
     def test_counts_per_bin_match_a_hand_count(self):
-        """``_get_counts_per_bin`` counts ROWS per initial cell: 1, 0, 1, 0, 1, 3.
+        """ROWS fall 1, 0, 1, 0, 1, 3 to the six initial cells.
 
         ON FAILURE: the code is wrong.
         """
-        counts = _get_counts_per_bin(np.array(INITIAL), X.values, Y.values)
-        assert counts.tolist() == [1, 0, 1, 0, 1, 3]
-        assert counts.tolist() == [len(z) for z in _tally(INITIAL, ROWS)]
+        bin_id = _unsplit_bin_ids(X.values, Y.values)
+        assert _counts(bin_id) == [1, 0, 1, 0, 1, 3]
+        assert _counts(bin_id) == [len(z) for z in _tally(INITIAL, ROWS)]
 
     def test_cells_are_closed_below_and_open_above(self):
         """A sample on a shared edge belongs to the cell above or right of it.
@@ -278,13 +300,29 @@ class TestCountsAndBinNumbers:
 
         ON FAILURE: the code is wrong.
         """
-        mesh = np.array(INITIAL)
-        x = np.array([2.0, 6.0, 0.0])
-        y = np.array([1.0, 4.0, 2.0])
-        counts = _get_counts_per_bin(mesh, x, y)
-        assert counts.tolist() == [0, 0, 1, 0, 1, 0]
-        zbin, fill, _ = _calculate_bin_number_with_numba(mesh, x, y)
-        assert zbin.tolist() == [4, fill, 2]
+        bin_id = _unsplit_bin_ids(np.array([2.0, 6.0, 0.0]), np.array([1.0, 4.0, 2.0]))
+        assert _counts(bin_id) == [0, 0, 1, 0, 1, 0]
+        assert np.asarray(bin_id.id).tolist() == [4, bin_id.fill, 2]
+
+    def test_a_sample_on_a_right_edge_does_not_split_the_cell_left_of_it(self):
+        """An edge sample counts only in the cell to its right when splitting.
+
+        With ``min_per_bin=1``, [0,2)x[1,2) holds (1, 1.5) and [2,6)x[1,2)
+        holds (2, 1.5), on their shared edge. Each cell holds one sample, which
+        is not more than 1, so the mesh stays the initial grid; counting the
+        edge sample in both cells would split [0,2)x[1,2).
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = SpiralMesh(
+            pd.Series([1.0, 2.0]),
+            pd.Series([1.5, 1.5]),
+            np.array(XEDGES),
+            np.array(YEDGES),
+            min_per_bin=1,
+        )
+        mesh.generate_mesh()
+        assert [tuple(c) for c in mesh.mesh] == INITIAL
 
     def test_bin_number_is_the_index_of_the_containing_cell(self):
         """Each sample gets the row of the mesh cell containing it; others get -9999.
@@ -294,13 +332,12 @@ class TestCountsAndBinNumbers:
 
         ON FAILURE: the code is wrong.
         """
-        mesh = np.array(INITIAL)
         x = np.append(X.values, [-1.0, 7.0, np.nan])
         y = np.append(Y.values, [0.5, 0.5, 0.5])
-        zbin, fill, visited = _calculate_bin_number_with_numba(mesh, x, y)
-        assert fill == FILL
-        assert zbin.tolist() == [0, 4, 5, 5, 5, 2, FILL, FILL, FILL]
-        assert visited.tolist() == [1] * len(INITIAL)
+        bin_id = _unsplit_bin_ids(x, y)
+        assert bin_id.fill == FILL
+        assert np.asarray(bin_id.id).tolist() == [0, 4, 5, 5, 5, 2, FILL, FILL, FILL]
+        assert np.asarray(bin_id.visited).tolist() == [1] * len(INITIAL)
 
 
 class TestSpiralMesh:
