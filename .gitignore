@@ -7,7 +7,7 @@ solarwindpy/solar_activity/data/*.json
 solarwindpy/solar_activity/data/**/*.csv
 stale
 .*.swp
-.DS_store
+.DS_Store
 __pycache__/
 *.py[cod]
 *$py.class
