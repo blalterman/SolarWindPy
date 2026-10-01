@@ -451,9 +451,10 @@ class SpiralMesh(object):
 
         Returns
         -------
-        _SpiralMeshBinID
-            Cell index per point (fill value outside the mesh), the fill value,
-            and the visit count of each cell.
+        tuple
+            Named tuple ``(id, fill, visited)``: cell index per point (fill
+            value outside the mesh), the fill value, and the visit count of
+            each cell.
 
         Raises
         ------

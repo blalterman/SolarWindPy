@@ -1143,7 +1143,7 @@ class HingeAtPoint(FitFunction):
         Slope of first line (fitted parameter).
     m2 : float
         Slope of second line (fitted parameter).
-    x_intercepts : _XIntercepts
+    x_intercepts : tuple
         Named tuple with x1 and x2 attributes (derived property).
 
     Examples
@@ -1217,7 +1217,7 @@ class HingeAtPoint(FitFunction):
         return hinge_at_point
 
     @property
-    def x_intercepts(self) -> _XIntercepts:
+    def x_intercepts(self) -> tuple[float, float]:
         r"""x-intercepts of the two lines.
 
         Returns a named tuple with:
