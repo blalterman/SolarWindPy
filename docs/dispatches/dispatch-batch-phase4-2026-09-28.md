@@ -438,3 +438,67 @@ the author has chosen to drop it; the owner of that change is not yet assigned.
 ## Held outside phase 4
 
 - The planning scripts named under Reserved.
+
+---
+
+## Empirical Findings (2026-10-01 trial run)
+
+### End-state metrics
+
+- Units: 24 defined (14 W4, 7 W5, 3 W6); 24 pull requests opened (#446-#469); 24 merged, the last at `c3f2ce92`. Unit to PR: core-repair #452, core-units-constants #454, fitfunctions-repair #447, plotting-orbits #446, plotting-spiral #451, plotting-base-scatter #456, plotting-agg-tools #459, plotting-hist1d #457, plotting-misc #458, solar-activity-root #462, instabilities #453, import-contract #460, drift-shrink #461, tooling-lint #464, usage #463, install-citation #469, test-patterns-refs #466, source-core #449, source-fitfunctions #455, source-plotting #450, source-misc #448, retire-paper #465, retire-scripts #467, retire-reports #468.
+- Done criterion (both suites at `0 failed`), measured on master `9ebf2753`, both environments importing `/Users/balterma/observatories/code/SolarWindPy/solarwindpy`: `conda run -n solarwindpy pytest -q` 2847 passed, 0 failed; `conda run -n imap-loaders-20260225 pytest -q --no-header --ignore=tests/plotting/test_performance.py --ignore=tests/test_issue_titles.py` (pandas 3.0.5, Python 3.12.13) 2847 passed, 0 failed.
+- Coverage: 85.30% at launch, 94.13% at `9ebf2753` (`pytest --cov=solarwindpy --cov-report=json`). `verscharen2016.py` 32.8% to 96.3%; `spiral.py` 66.9% to 86.3%; `orbits.py` (24.3% at launch) was deleted after the batch, which also raises the total.
+- Combined check of all 24 branches before merge: `RESULT: all green`; merged master tree `faaccce1` equals the combined-check tree.
+- Strict xfails the units recorded for out-of-scope defects: 67 at merge, 0 after the follow-on fix batch.
+- Strict docs build (`-W --keep-going -n`): failing on master since `0742fd6a`; green from the merged tree onward.
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| install-citation: how the author is cited | RESOLVED -- `CITATION.rst` reference and BibTeX in #469; `CITATION.cff` with ORCID in `ffed1beb` |
+| source-fitfunctions: GaussianPlusHeavySide fit method | RESOLVED -- author kept the x0 scan with no opt-out switch (PR review Q3) |
+| instabilities: thresholds no paper states | RESOLVED -- none handed back; every threshold is cited to Verscharen et al. (2016) doi:10.3847/0004-637X/831/2/128 Table 1 and Eq. (5) in `tests/instabilities/test_verscharen2016.py` |
+| `plt.cm.get_cmap` (#453) and unused `psutil` (#458) | RESOLVED -- `f536a56c` and `4f1b7524` |
+| Reserved: the `29.9` constant in `Plasma.lnlambda` | DEFERRED -- still at `solarwindpy/core/plasma.py:1416`, awaiting the author's citation; no tracker row |
+| Held outside phase 4: planning scripts | SUPERSEDED -- the author retired the GitHub Issues planning workflow in `523f66b0` |
+| Not partitioned: dropping the section prose of `api_reference.rst` | DEFERRED -- owner still unassigned; `api_reference.rst` was edited only for import paths and removed modules |
+
+### Deviations from plan
+
+- The units were reviewed together before merge: a cross-PR synthesis of the 24 `claude-review` comments, author rulings on review cards, and pre-merge fixes on 10 PR branches, after which the session merged all 24 at the author's instruction.
+- Defects recorded as strict xfails were retired by a follow-on fix batch in lanes rather than per unit, grouped by shared library file so no fix turned another unit's marker into XPASS(strict).
+- Scope added after the batch by author rulings: one import path per public object, internal import aliases banned and enforced by a test, percentile `alim` replacing `limit_color_norm`, reusable logic in one shared method, and removal of the orbit plots, LISIRD, Moyal, `reproducibility`, `scripts` and unreachable code.
+- The commit route's `conda run -n solarwindpy git commit` was replaced by plain `git commit`; the hooks run in the env via `.claude/hooks/project-env.sh`, and `TEST_PATTERNS.md` now says so.
+- Incident: the `mock_git_repo` fixture in `tests/test_hook_integration.py`, run inside a pre-commit hook, inherited `GIT_DIR` and `GIT_INDEX_FILE` and wrote `core.bare = true` and a `Test` identity into the shared `.git/config`. The author restored the config; `77417467` strips every `GIT_*` variable in the fixture and adds a decoy-repository test.
+
+### Commits
+
+Merge commits of the 24 unit pull requests, in merge order:
+
+- `884f069a` Merge #446: test(plotting): rebuild orbits tests on a hand-built orbit
+- `463f75c7` Merge #447: test(fitfunctions): real boundaries, resolved skips, flake8 clean (phase-4 fitfunctions-repair)
+- `71299fa8` Merge #448: docs(source-misc): resolve Verscharen2016a, document solar_activity, drop commented-out code
+- `73a9dd13` Merge #449: fix(core): clear core nitpicky docs warnings and commented-out code
+- `3e9ab6f2` Merge #450: fix(plotting): clear nitpicky docs warnings, document plotting, fix four defects
+- `346e9f80` Merge #451: test(plotting): rebuild spiral mesh tests on a hand-worked mesh
+- `d04d2dc3` Merge #452: test(core): repair core tests (TestData rename, revive skipped and uncollected tests, flake8)
+- `cdc2257e` Merge #453: test(instabilities): first tests for verscharen2016 and beta_ani
+- `9f9dd89a` Merge #454: test(core): rebuild units_constants tests against CODATA, SI, and IAU
+- `84933cc1` Merge #455: fix+docs(fitfunctions): GaussianPlusHeavySide fits x0; zero nitpicky warnings; own-path defects (phase-4 source-fitfunctions)
+- `53e458ca` Merge #456: test(plotting): rebuild base and scatter tests on real Agg objects
+- `3882ef94` Merge #457: test(plotting): add Hist1D contract tests against numpy.histogram
+- `c524af1e` Merge #458: test(plotting): rebuild plotting-misc on the label/mathtext contract
+- `4a48de4f` Merge #459: test(plotting): rebuild agg_plot, tools and nan_gaussian_filter tests on behaviour (phase-4 plotting-agg-tools)
+- `be514dad` Merge #460: test: replace circular-import tests with an import-linter contract
+- `b74660aa` Merge #461: test(drift): retire the Read the Docs drift test superseded by declared versions
+- `0f5c846b` Merge #462: test(solar_activity): rebuild root tests on real objects
+- `9ab3645c` Merge #463: docs(usage): rewrite usage.rst as a first session that runs
+- `c319e2a7` Merge #464: style(hooks): clear flake8 findings in the plan and compaction scripts
+- `1b52171d` Merge #465: chore(paper): retire the abandoned JOSS paper directory
+- `b9bec933` Merge #466: docs(tests): repoint TEST_PATTERNS citations; make ast-grep test rules loadable
+- `ee527e99` Merge #467: chore(scripts): retire six one-off scripts whose use is over
+- `cbb73f69` Merge #468: chore: retire one-time reports and dead scaffolding
+- `c3f2ce92` Merge #469: docs: point install docs at pyproject.toml and fill CITATION
+
+## Spent-Mark: executed, findings recorded
