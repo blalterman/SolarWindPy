@@ -277,3 +277,49 @@ is DONE.
 
 ---
 
+
+---
+
+## Empirical Findings (2026-10-02 trial run)
+
+### End-state metrics
+
+- Collected tests classified: 2861 of 2861 (`tmp/test-quality-review/tests.csv`).
+- Public objects inventoried: 942 (`tmp/test-quality-review/contract_inventory.csv`).
+- Tool trial: 19 candidates, 10 kept, 9 dropped, each with its reason.
+- Mutation sample: 9 modules, scores 0.65 to 0.90; whole-file recheck complete for 7, partial
+  for `core/plasma.py` (499 of 729), absent for `plotting/hist2d.py`.
+- Fix program: 13 units with disjoint `OWNS:` lines, plus 2 long-running units.
+
+### Governing Property
+
+not served -- the review measured the distance to the property (12 executed-but-unchecked or
+unexecuted physics paths, 5 tests that cannot fail, 112 existence-only tests, 31 failing
+skipped examples; `docs/dispatches/findings-test-quality-review-2026-10-02.md`); the property
+holds only after `docs/dispatches/batch-test-quality-fixes-2026-10-02.md` lands.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| Tool trial complete | PASS | loop over 19 names prints nothing; control `notatool` prints `MISSING notatool` |
+| Contract inventory reproducible | PASS | 942 objects; control `grep -c Plasma tmp/test-quality-review/contract_inventory.csv` → 51 |
+| Every test classified | PASS | 2861 rows = 2861 collected; control copy minus one row → 2860 |
+| Known defects surfaced | PASS | 5 of 5 named in findings; control invented path prints `MISSED` |
+| Mutation sampling live | PASS | survivors reported per module; hand flip of `x0 <= x` killed by `test_limits_drop_vertices_outside_them` |
+| Fix program partitioned | PASS | 13 `OWNS:` lines, no duplicate; control duplicate path printed |
+| Read-only held | PASS | `git status --porcelain -- solarwindpy tests` empty; `b8afd536` lists only the two documents; control scratch edit listed, then reverted |
+
+### Deviations from plan
+
+- The review subagent stalled once during write-up and was resumed; its analysis artifacts
+  survived.
+- The subagent could not write the two output documents (subagents return findings as text);
+  the parent session wrote them from its report.
+- The per-test classifier missed the `test_sidc.py:12` docstring defect; the fixture-aware
+  `patch_inventory.py` caught it.
+- `pylint` was installed into the `solarwindpy` env for the pyreverse trial and is undeclared.
+
+### Commits
+
+- `b8afd536` docs(review): record test-quality findings and the fix program
