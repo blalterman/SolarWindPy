@@ -20,6 +20,9 @@ jobs:
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
     
+    # Dependabot-triggered runs receive no repository Actions secrets, so the
+    # OAuth token is empty and the review step fails without reviewing anything.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
