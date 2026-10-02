@@ -5,8 +5,6 @@
 # 2. `pip install -e .` enforces pyproject.toml's minimum requirements
 # 3. Avoids PyPI/conda-forge version mismatches that break CI
 #
-# Technical details: .claude/docs/root-cause-analysis/pr-405-conda-patching.md
-#
 # NOTE: Python version is dynamically injected by GitHub Actions workflows
 # during matrix testing to support multiple Python versions.
 #

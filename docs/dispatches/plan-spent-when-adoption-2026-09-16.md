@@ -162,10 +162,6 @@ home for a fact makes two authorities on it.
 
 - [ ] `docs/objectives-and-requirements.md` exists, carries a rendered declaration, and states
       Surface, Parties, Seam, Layer, Held stable, and Non-objectives.
-- [ ] `.claude/hooks/plan-scope-auditor.py` cites the document as the source of the mission it
-      scores. *Positive control:* run the auditor against a plan that plainly serves the
-      objective and against one that plainly does not, and confirm the scores differ. A scorer
-      that returns the same number for both is measuring nothing.
 - [ ] `CLAUDE.md` points at the document by name and restates none of it.
 
 ### Phase 3 — Declare the 49 sidecar files and the 2 percent-carriers
@@ -243,16 +239,9 @@ currently states no condition for revisiting it.
 | `solar_activity/icme/icmecat.py` | `HELIO4CAST_ICMECAT_v23.csv`, plus a transcribed co-authorship policy | HELIO4CAST publishes a successor catalog version |
 | `sunspot_number/ssn_extrema.csv` | SILSO solar cycle minima and maxima | SILSO revises the cycle table |
 | `core/data/asplund2021.csv` | Asplund et al. 2021 photospheric abundances | a successor compilation is published |
-| `pyproject.toml` bounds | `numpy<3.0`, `docstring-inheritance<3.0`, `pandas>=2.0` | the named incompatibility is resolved upstream |
-| `requirements.txt`, `requirements-dev.lock`, `docs/requirements.txt` | three mutually inconsistent locks | a regeneration run |
-| four `conda-recipe`/`recipe` `meta.yaml` | versions 0.1.2 / 0.1.4 / 0.1.dev1034 against a released 0.3.0 | the generating script runs |
-| `.readthedocs.yaml` | `ubuntu-22.04`, Python 3.11 | RTD retires the image |
-| `.pre-commit-config.yaml` | black 23.1.0, flake8 6.0.0 | the pins reach the floors `pyproject.toml` declares |
-
-Two of these resolve defects on contact. The conda recipes and the lockfiles disagree with
-`pyproject.toml` and with each other, and writing the condition forces the question of which
-one is canonical. `tox.ini` names `requirements-dev.txt`, a file that does not exist, so tox
-cannot run at all.
+| `pyproject.toml` bounds | `numpy<3.0`, `docstring-inheritance>=3.0,<4`, `pandas>=3,<4` | the next major release of each |
+| `.readthedocs.yaml` | `ubuntu-22.04`, Python 3.12 | RTD retires the image |
+| `.pre-commit-config.yaml` | black 26.5.1, flake8 7.3.0, the only declaration of either version | a pin is bumped |
 
 `units_constants.py` derives from `scipy.constants` and rides CODATA updates automatically.
 Two literals, `Re` and `Rs`, do not, and carry no cited source. Citing them is the
@@ -277,12 +266,9 @@ declaration.
 - [ ] `/session:close` step 5 runs clean against this repository with `--corpus` setting the
       denominator, reporting four populations: conditions met, invalid declarations, files
       carrying none, and declarations revised in the window.
-- [ ] `docs/PROGRESS.md` exists and records the state and the next action.
-- [ ] The project memory directory holds a `MEMORY.md` index and the decisions this work
-      settled. It is currently empty, so `/session:recall` against this project returns
-      nothing.
-- [ ] The pandas-3 dispatch's measured baselines are re-derived and the dispatch either
-      carries current numbers or is declared spent. The three downstream tasks may begin.
+- [ ] The project memory directory's `MEMORY.md` index lists the decisions this work
+      settled.
+- [ ] The three downstream tasks may begin.
 
 ## Positive controls for this plan
 
