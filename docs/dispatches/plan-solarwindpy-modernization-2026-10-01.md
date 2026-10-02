@@ -961,3 +961,30 @@ property did not hold for every gate it touched, so the program is not recorded 
   `sidc.py`; `:90` patches `SIDCLoader.download_data`.
 - W4 suite-wide checks (introspection-only assertions, numeric expectations, `ON FAILURE`
   coverage) go to the next program, test and documentation quality.
+
+### Gate demonstrations (2026-10-02)
+
+- Marker gate, wired and demonstrated in `24c2a0db`: `strict_markers = true` in
+  `[tool.pytest.ini_options]`, pytest floor raised to 9.0 in the `test` and `dev` extras. A
+  scratch test using `@pytest.mark.notregistered` → `1 error during collection` under pytest
+  9.0.1 and 9.0.3; full suite with the gate on → 2848 passed, 12 skipped, 0 failed.
+  `addopts = "--strict-markers"` did not take effect under pytest 9.0.1, so the ini option
+  carries the gate.
+- Coverage gate, the hook's own command on known-bad input:
+  `pytest --cov=solarwindpy --cov-fail-under=92 -q --ignore=tests/plotting` → exit 1,
+  `FAIL Required test coverage of 92% not reached. Total coverage: 74.73%`; the same command
+  without `--ignore` → exit 0, `Required test coverage of 92% reached. Total coverage: 94.13%`.
+- Governing property: every gate this program touched now has a recorded failing run
+  (doctests `93337e07`, Sphinx `ca29eda5`, black on `scripts/` `2ddc52c6`, declared versions
+  `c4c849b1`, markers `24c2a0db`, coverage above), so it holds.
+
+### Open item dispositions
+
+| Open item | Disposition |
+|---|---|
+| Coverage-gate and marker-gate failing demonstrations | RESOLVED: Gate demonstrations above |
+| doc8 findings in `plans/tests-audit/artifacts/` | DEFERRED: resolved by retiring the `plans/` records, item 5 of the 2026-10-02 work plan, pending the author's confirmation of the file list |
+| `test_sidc.py:12` docstring contradicts `:90` | DEFERRED: a positive control of `docs/dispatches/dispatch-test-quality-review-2026-10-02.md`, fixed by its fix program |
+| W4 suite-wide checks (introspection-only assertions, numeric expectations, `ON FAILURE` coverage) | DEFERRED: scope of `docs/dispatches/dispatch-test-quality-review-2026-10-02.md` |
+
+## Spent-Mark: executed, findings recorded
