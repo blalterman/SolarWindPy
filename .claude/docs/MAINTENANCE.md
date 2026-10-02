@@ -213,7 +213,7 @@ pip-licenses --format=markdown --with-urls
 
 ### Audit Outputs
 
-Create audit report in `plans/audits/attribution-audit-YYYY.md`:
+Create audit report in `docs/audits/attribution-audit-YYYY.md`:
 ```markdown
 # Attribution Audit YYYY
 
