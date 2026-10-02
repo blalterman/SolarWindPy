@@ -76,8 +76,7 @@ physics itself is right is the author's layer.
 ### Blast radius
 
 Two new documents in `docs/dispatches/`, re-runnable artifacts under the git-ignored
-`tmp/test-quality-review/`, and a throwaway conda environment for the tools. One local commit;
-push on the author's approval.
+`tmp/test-quality-review/`. One local commit; push on the author's approval.
 
 ## Motivation
 
@@ -125,13 +124,15 @@ to execute a pre-specified change. Follow this protocol:
 Run in this order. Artifacts go to `tmp/test-quality-review/`; each artifact's generating
 command is recorded in the findings.
 
-1. **Tool trial.** In a throwaway conda env (Python 3.12, `pip install -e ".[dev]"`), try:
+1. **Tool trial.** In the `solarwindpy` conda env, whose `dev` extra installs most candidates
+   (a candidate it lacks, such as pyreverse, is installed there with `pip`), try:
    griffe, coverage.py dynamic contexts (`--cov-context=test`), mutmut, ast-grep, Sybil,
    pytest-randomly, grimp, pydeps, pyreverse, radon, wily, vulture, deptry,
    pytest-deadfixtures, ruff with the `PT` and `B` rule sets, `pytest --durations`,
    interrogate, numpydoc validation, Sphinx linkcheck. A tool is kept when it runs on this
    package and writes a re-runnable artifact. Record each tool as kept or dropped, with the
-   reason. Remove the env at the end.
+   reason, and list the tools the fix program removes from the `dev` extra in
+   `pyproject.toml`.
 2. **Contract inventory.** Every public object (griffe over `solarwindpy/`, cross-checked
    against `solarwindpy.fitfunctions.available()` and
    `solarwindpy.plotting.labels.available()`), the
