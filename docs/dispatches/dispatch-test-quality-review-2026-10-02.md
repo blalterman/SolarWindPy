@@ -293,8 +293,9 @@ is DONE.
 
 ### Governing Property
 
-not served -- the review measured the distance to the property (12 executed-but-unchecked or
-unexecuted physics paths, 5 tests that cannot fail, 112 existence-only tests, 31 failing
+not served -- the review measured the distance to the property (`Plasma.nuc` executed but unchecked
+in its Gaussian term; `sound_speed`/`cs`, `Wk`, `Vector.lat`/`latitude`, `Tensor.magnitude` never
+executed; 5 tests that cannot fail, 112 existence-only tests, 31 failing
 skipped examples; `docs/dispatches/findings-test-quality-review-2026-10-02.md`); the property
 holds only after `docs/dispatches/batch-test-quality-fixes-2026-10-02.md` lands.
 
