@@ -170,25 +170,3 @@ class TestAllFitFunctionsInstantiate:
                 pytest.fail(
                     f"{FitClass.__name__} instantiation raised unexpected error: {e}"
                 )
-
-
-class TestDocstringInheritanceVersionCompatibility:
-    """Test compatibility with specific docstring-inheritance versions."""
-
-    def test_version_constraint(self):
-        """Verify docstring-inheritance version is in safe range."""
-        from importlib.metadata import version as get_version
-        from packaging.version import Version
-
-        version = Version(get_version("docstring-inheritance"))
-
-        # Must be >= 2.2.0 for MRO compatibility
-        assert version >= Version(
-            "2.2.0"
-        ), f"docstring-inheritance {version} is below minimum 2.2.0 for MRO compatibility"
-
-        # Must be < 3.0 (version 3.0+ breaks MRO)
-        assert version < Version("3.0"), (
-            f"docstring-inheritance {version} is 3.0+, which breaks MRO compatibility. "
-            "Update pyproject.toml constraint to exclude incompatible versions."
-        )

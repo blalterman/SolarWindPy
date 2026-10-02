@@ -78,8 +78,11 @@ class InvalidParameterError(FitFunctionError):
     pass
 
 
-# Combine ABC and docstring inheritance metaclasses
-class FitFunctionMeta(NumpyDocstringInheritanceMeta, type(ABC)):
+# Combine ABC and docstring inheritance metaclasses. ABCMeta comes first:
+# docstring-inheritance 3.x binds NumpyDocstringInheritanceMeta to plain
+# ``type`` when its switch is off, and ``type`` may not precede its subclass
+# ABCMeta in a list of bases.
+class FitFunctionMeta(type(ABC), NumpyDocstringInheritanceMeta):
     """Metaclass combining ABC and docstring inheritance."""
 
     pass

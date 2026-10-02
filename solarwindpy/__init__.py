@@ -4,7 +4,56 @@ Primary focus is in situ solar wind measurements and the additional tools necess
 context (e.g. solar activity indicies) and some simple plotting methods.
 """
 
-from . import core, fitfunctions, instabilities, plotting, solar_activity, tools
+
+def _enable_docstring_inheritance() -> None:
+    """Switch on docstring-inheritance before any subpackage imports it.
+
+    docstring-inheritance 3.x reads ``DOCSTRING_INHERITANCE_ENABLE`` once, at
+    its own import, and without it binds its metaclasses to plain ``type``, so
+    subclass methods lose the help text they inherit. ``setdefault`` keeps a
+    value the user set explicitly.
+    """
+    import os
+
+    os.environ.setdefault("DOCSTRING_INHERITANCE_ENABLE", "1")
+
+
+_enable_docstring_inheritance()
+
+from . import (  # noqa: E402
+    core,
+    fitfunctions,
+    instabilities,
+    plotting,
+    solar_activity,
+    tools,
+)
+
+
+def _check_docstring_inheritance() -> None:
+    """Warn when docstring inheritance was requested but is not active.
+
+    The library reads its switch only at first import, so a program that
+    imported it with the switch off before importing solarwindpy keeps it off.
+    """
+    import os
+    import warnings
+
+    import docstring_inheritance
+
+    requested = bool(os.environ.get("DOCSTRING_INHERITANCE_ENABLE"))
+    if requested and docstring_inheritance.NumpyDocstringInheritanceMeta is type:
+        warnings.warn(
+            "docstring inheritance is off: docstring_inheritance was imported "
+            "before solarwindpy with DOCSTRING_INHERITANCE_ENABLE unset, so "
+            "fit-function methods show no inherited help text. Import "
+            "solarwindpy first, or set DOCSTRING_INHERITANCE_ENABLE=1 before "
+            "starting Python.",
+            stacklevel=2,
+        )
+
+
+_check_docstring_inheritance()
 
 
 def _configure_pandas() -> None:

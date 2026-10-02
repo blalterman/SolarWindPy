@@ -156,6 +156,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Hist1D` no longer accepts `axnorm` words beyond `"d"`/`"t"` (e.g. `"density"`, which
   was truncated to `"d"`). An invalid `axnorm` on `Hist1D` or `Hist2D` raises `TypeError`
   (not a string or None) or `ValueError` (unknown key) instead of `AssertionError`.
+- Fit-function help text inheritance now uses `docstring-inheritance` 3.x
+  (`>=3.0,<4`). Importing `solarwindpy` sets `DOCSTRING_INHERITANCE_ENABLE=1` unless
+  the variable is already set, and warns if `docstring_inheritance` was imported
+  earlier with inheritance off.
 
 ### Added
 
