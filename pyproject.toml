@@ -14,6 +14,7 @@ exclude = '''
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+strict_markers = true
 markers = [
     "drift: asserts an external fact still holds; requires network; opt-in",
     "integration: downloads real data over the network",
@@ -98,7 +99,7 @@ keywords = [
 
 [project.optional-dependencies]
 test = [
-    "pytest>=8.0",
+    "pytest>=9.0",
     "pytest-cov>=6.0",
     "packaging>=23.0",
 ]
@@ -113,7 +114,7 @@ docs = [
 ]
 dev = [
     # Testing tools
-    "pytest>=8.0",
+    "pytest>=9.0",
     "pytest-cov>=6.0",
     # Documentation tools
     "sphinx>=7.0",
