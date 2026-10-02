@@ -1,0 +1,150 @@
+<!--
+Spent-When: MARKED(<self>)
+Supersedes: none
+-->
+
+# Batch: test-quality fixes
+
+author_signoff: none
+
+owner: /Users/balterma/observatories/code/SolarWindPy
+
+The instruction the author pastes after `/batch`. Findings and evidence:
+`docs/dispatches/findings-test-quality-review-2026-10-02.md`. Test standard:
+`.claude/docs/TEST_PATTERNS.md`.
+
+## Governance
+
+**Governing Property.** Every passing test in SolarWindPy means a behavior the package owes
+its users holds; every behavior the package owes has a test that would fail if it broke; and
+no test fails when the package changes correctly.
+
+**Seam.** A unit decides test structure, fixtures, and how a finding is fixed inside its own
+files. Physics correctness stays with the author: a unit that cannot derive or cite an
+expected value reports that instead of asserting what the code returns. A defect found
+outside a unit's files becomes a strict xfail naming what retires it.
+
+**Approved by the author:** the listed test removals, the dev-extra tool removals, the
+`CLAUDE.md` coverage figure, and the `Vector.latitude`/`colatitude` swap.
+
+## Every unit
+
+- Runs its positive control and reports the command and output: each new or repaired test is
+  shown failing on a deliberately broken input, then passing.
+- Every test it writes or touches carries an `ON FAILURE` line.
+- Keeps both suites green: `conda run -n solarwindpy pytest -q` → 0 failed.
+- Commits with `conda run -n solarwindpy git commit -F <msgfile> -- <paths written out individually>`,
+  explicit-path staging, never `--no-verify`, a conventional subject, and the line
+  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; pushes its branch, opens a pull
+  request, and does not merge.
+
+Baselines in brackets are collected test counts from
+`conda run -n solarwindpy pytest --collect-only -q <files>`; per-file pass counts are in
+`tmp/test-quality-review/per_file_baseline.txt`.
+
+## Units
+
+### hook-and-alias-tests
+
+OWNS: tests/test_hook_integration.py, tests/test_import_aliases.py, .claude/hooks/tests/
+
+Delete the 5 cannot-fail tests, the 5 shell-script substring checks, the 3 file-exists checks,
+and the `CLAUDE.md`-coupled `test_coverage_requirement_in_pre_commit`. Move the 6 hook-behaviour
+tests to `.claude/hooks/tests/`. Replace `tests/test_import_aliases.py` with ruff `ICN` rules
+only if the rule set reproduces the check; otherwise keep it and report. [20 + 2]
+
+### plasma-physics-cases
+
+OWNS: tests/core/test_plasma.py
+
+Add a low dv/w hand case for `Plasma.nuc`, expected values computed in the test from
+Hernández & Marsch (1985), Eqs. 18 and 23 (cited in the `nuc` docstring). Add cases for
+`sound_speed`/`cs` from cs = sqrt(gamma p / rho), `heat_flux` from its docstring formula, and
+the multi-species ordering in `specific_entropy` and `estimate_electrons`. `Wk` waits for the
+author's definition and source; report it rather than asserting the code's output.
+Control: the coefficient change 2.0 → 3.0 in `nuc` now fails a test. [245]
+
+### quantities-and-vector
+
+OWNS: tests/core/test_quantities.py, solarwindpy/core/vector.py, CHANGELOG.md
+
+Swap `Vector.latitude` and `colatitude` in `solarwindpy/core/vector.py` so latitude is
+`arctan2(z, rho)` and colatitude is `arctan2(rho, z)`; record the fix in `CHANGELOG.md`. Add hand cases: (0, 0, 1) has latitude 90 and
+colatitude 0, (1, 0, 0) has latitude 0 and colatitude 90; `Tensor.magnitude`; the
+`project`/`cos_theta` survivors. Control: the unswapped code fails the new cases. [83]
+
+### icme-tests
+
+OWNS: tests/solar_activity/icme/test_icmecat.py, tests/solar_activity/icme/conftest.py, tests/solar_activity/icme/test_icmecat_smoke.py, tests/solar_activity/icme/test_icmecat_integration.py
+
+Replace the process-wide `pandas.read_csv` patch with a URL constant pointed at a local file;
+switch to `default_rng`; fix the vacuous tests; remove the docstring-text tests.
+[42 + 17 + 8; the 8 integration tests are skipped opt-in]
+
+### sidc-docstring
+
+OWNS: tests/solar_activity/sunspot_number/test_sidc.py
+
+Make the module docstring state the `no_download` fixture's `SIDCLoader.download_data` guard, or
+move the guard to the network boundary. [33]
+
+### fitfunction-small-files
+
+OWNS: tests/fitfunctions/test_lines.py, tests/fitfunctions/test_exponentials.py, tests/fitfunctions/test_power_laws.py
+
+Fix the vacuous tests (including `test_line_vertical_like_data_fails`), add `ON FAILURE` lines,
+switch to `default_rng`. [27 + 31 + 35]
+
+### abundances-tests
+
+OWNS: tests/core/test_abundances.py
+
+Replace the 40 existence-only tests with value assertions or remove them; fix the vacuous
+float64 test. [169]
+
+### hist2d-tests
+
+OWNS: tests/plotting/test_hist2d_pandas_compat.py, tests/plotting/test_hist2d_plotting.py
+
+Fix the vacuous column-normalize test and the existence-only tests; pin xlim/ylim inclusivity
+with a limit placed exactly on a vertex (kills the surviving `x0 < x` mutant). [25 + 126]
+
+### docstring-examples
+
+OWNS: solarwindpy/core/plasma.py, solarwindpy/tools/__init__.py, solarwindpy/fitfunctions/core.py, solarwindpy/core/abundances.py, solarwindpy/instabilities/beta_ani.py, solarwindpy/solar_activity/icme/__init__.py, solarwindpy/solar_activity/icme/icmecat.py
+
+Docstrings and their examples only: correct the `Plasma` docstring (`beta` returns a DataFrame;
+species order), the `swap_protons` example, seed the inherited `FitFunction.__init__` example,
+keep ICMECAT examples off the network, replace the dead Google Drive link, and drop `+SKIP`
+wherever the example can run. Control: `pytest --doctest-modules solarwindpy -q` skip count
+falls from 36. [doctests: 24 passed, 36 skipped]
+
+### documented-examples
+
+OWNS: README.rst, docs/source/tutorial/quickstart.rst, docs/source/installation.rst, conftest.py, .github/workflows/doctest_validation.yml
+
+Run the rst examples under Sybil in CI and give each an asserted expected output. Control: an
+example with a wrong expected output fails the run. [31 Sybil examples pass, none assert]
+
+### dev-extras-and-coverage-figure
+
+OWNS: pyproject.toml, CLAUDE.md
+
+Remove grimp, pydeps, radon, wily, deptry, pytest-deadfixtures, and interrogate from the `dev`
+extra; set the coverage figure in `CLAUDE.md` from a fresh measurement without restating the
+hook's threshold number.
+
+## Long-running units
+
+### mutation-recheck
+
+OWNS: tmp/test-quality-review/mutmut/
+
+Finish `tmp/test-quality-review/recheck_survivors.sh` for the remaining plasma survivors and all
+of `hist2d.py`; re-baseline mutation scores after the other units land.
+
+### linkcheck
+
+OWNS: tmp/test-quality-review/linkcheck/
+
+Re-run Sphinx linkcheck (network required) after the `docstring-examples` unit lands.
