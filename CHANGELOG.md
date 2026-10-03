@@ -197,6 +197,8 @@ These change computed values; rerun any analysis that used them.
 - `Vector.project` and `Vector.cos_theta` returned 0 (a perpendicular answer) on rows
   present in only one of the two vectors, or with a NaN component. They now return NaN
   there. The `Plasma` methods built on `project` change the same way on such rows.
+- Plot labels for a latitude component (`"lat"`) now render as lambda and a colatitude
+  component (`"colat"`) as theta; the two symbols were swapped.
 
 ### Removed
 

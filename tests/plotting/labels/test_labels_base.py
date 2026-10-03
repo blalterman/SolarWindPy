@@ -475,3 +475,26 @@ def test_energy_flux_labels_match_author_declared_contract(labels_base, mcs, tex
     label = labels_base.TeXlabel(mcs)
     assert label.tex == tex
     assert label.units == "\\mathrm{\\mu W \\, m^{-2}}"
+
+
+@pytest.mark.parametrize(
+    "mcs, tex",
+    [
+        (("b", "lat", ""), "B_{\\lambda}"),
+        (("b", "colat", ""), "B_{\\theta}"),
+        (("v", "lat", "p1"), "{v}_{{\\lambda};{p_1}}"),
+        (("v", "colat", "p1"), "{v}_{{\\theta};{p_1}}"),
+    ],
+    ids=["b_lat", "b_colat", "v_lat_p1", "v_colat_p1"],
+)
+def test_latitude_is_lambda_and_colatitude_is_theta(labels_base, mcs, tex):
+    """A latitude component renders as lambda and a colatitude component as theta.
+
+    The symbols are the author's declared contract, matching Vector.latitude (angle
+    above the xy-plane) and Vector.colatitude (angle from +z); both are in degrees.
+
+    ON FAILURE: the label changed; confirm with the author before updating.
+    """
+    label = labels_base.TeXlabel(mcs)
+    assert label.tex == tex
+    assert label.units == "\\mathrm{deg.}"
