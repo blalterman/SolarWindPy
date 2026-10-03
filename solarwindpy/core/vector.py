@@ -126,14 +126,18 @@ class Vector(base.Base):
 
     @property
     def colatitude(self) -> pd.Series:
-        """Colatitude of the vector.
+        """Colatitude of the vector, the angle from the +z axis.
 
         Returns
         -------
         pd.Series
-            Colatitude in degrees.
+            Colatitude in degrees, in [0, 180]: 0 on +z, 90 in the xy-plane.
+
+        Notes
+        -----
+        ``colatitude = arctan2(rho, z) = 90 - latitude``.
         """
-        colat = np.rad2deg(np.arctan2(self.data.z, self.rho))
+        colat = np.rad2deg(np.arctan2(self.rho, self.data.z))
         colat.name = "colatitude"
         return colat
 
@@ -150,14 +154,18 @@ class Vector(base.Base):
 
     @property
     def latitude(self):
-        """Latitude of the vector.
+        """Latitude of the vector, the angle above the xy-plane.
 
         Returns
         -------
         pd.Series
-            Latitude in degrees.
+            Latitude in degrees, in [-90, 90]: 90 on +z, 0 in the xy-plane.
+
+        Notes
+        -----
+        ``latitude = arctan2(z, rho) = 90 - colatitude``.
         """
-        lat = np.rad2deg(np.arctan2(self.rho, self.data.z))
+        lat = np.rad2deg(np.arctan2(self.data.z, self.rho))
         lat.name = "latitude"
         return lat
 
@@ -233,13 +241,13 @@ class Vector(base.Base):
         """
         return self.unit_vector
 
-    def project(self, other: "Vector | pd.DataFrame") -> pd.DataFrame:
+    def project(self, other: "Vector") -> pd.DataFrame:
         """Project self onto ``other``.
 
         Parameters
         ----------
-        other : :class:`Vector` or :class:`pandas.DataFrame`
-            Vector to project onto.
+        other : :class:`Vector`
+            Vector to project onto; only its direction is used.
 
         Returns
         -------
@@ -249,7 +257,7 @@ class Vector(base.Base):
         Raises
         ------
         NotImplementedError
-            If ``other`` is not a ``Vector`` or ``DataFrame``.
+            If ``other`` is not a ``Vector``, including a bare ``DataFrame``.
         """
         if isinstance(other, Vector):
             other = other.uv.data
@@ -268,12 +276,12 @@ class Vector(base.Base):
         )
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
-    def cos_theta(self, other: "Vector | pd.DataFrame") -> pd.Series:
+    def cos_theta(self, other: "Vector") -> pd.Series:
         """Cosine of the angle between this vector and ``other``.
 
         Parameters
         ----------
-        other : :class:`Vector` or :class:`pandas.DataFrame`
+        other : :class:`Vector`
             Vector to calculate the angle with.
 
         Returns
@@ -284,7 +292,7 @@ class Vector(base.Base):
         Raises
         ------
         NotImplementedError
-            If ``other`` is not a ``Vector`` or ``DataFrame``.
+            If ``other`` is not a ``Vector``, including a bare ``DataFrame``.
         """
         if isinstance(other, Vector):
             other = other.uv.data

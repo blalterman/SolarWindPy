@@ -187,6 +187,10 @@ These change computed values; rerun any analysis that used them.
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
 - Kinetic energy flux has a plot label, `"Wk"`, rendered W_K in uW m^-2.
+- `Vector.latitude` / `lat` and `Vector.colatitude` / `colat` were swapped. Latitude is
+  now the angle above the xy-plane, `arctan2(z, rho)` in [-90, 90]; colatitude is the
+  angle from +z, `arctan2(rho, z)` in [0, 180]. A vector along +z has latitude 90 and
+  colatitude 0 (previously the reverse); each old value converts as `new = 90 - old`.
 
 ### Removed
 
