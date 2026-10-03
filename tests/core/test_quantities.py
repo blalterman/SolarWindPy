@@ -14,6 +14,7 @@ from . import test_base as base
 
 from solarwindpy.core import vector
 from solarwindpy.core import tensor
+from solarwindpy.core import plasma
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -453,33 +454,48 @@ class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
     pass
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ValueError,
-    reason="Tensor.magnitude in solarwindpy/core/tensor.py passes a two-key dict with "
-    "level='C' to DataFrame.multiply, which fails on the flat C-indexed par/per/scalar "
-    "columns every Tensor carries (Ion.thermal_speed builds exactly these); "
-    "expected message 'Unable to coerce to Series, length must be 3: given 2'; "
-    "remove this marker when Tensor.magnitude computes on flat par/per columns",
-)
-def test_tensor_magnitude_is_trace_over_three():
-    """magnitude is (par + 2 per) / 3, the trace over three of diag(per, per, par).
+class TestTensorMagnitude:
+    """Tensor.magnitude is the thermal-speed scalar sqrt((par^2 + 2 per^2) / 3).
 
-    Hand cases: par = 3, per = 6 gives 5; par = 6, per = 0 gives 2; par = per = 4
-    gives 4 (an isotropic tensor's magnitude is its diagonal value). The scalar
-    column is deliberately inconsistent so a magnitude that reads it fails.
-
-    ON FAILURE: the code is wrong, unless the author rejects trace/3 of a gyrotropic
-    tensor as the definition of Tensor.magnitude.
+    Thermal speeds combine through the temperatures, T = (T_par + 2 T_per) / 3 with
+    T proportional to w^2, so w = sqrt((w_par^2 + 2 w_per^2) / 3) (author decision).
     """
-    cols = pd.Index(["par", "per", "scalar"], name="C")
-    data = pd.DataFrame(
-        [[3.0, 6.0, -1.0], [6.0, 0.0, -1.0], [4.0, 4.0, -1.0]], columns=cols
-    )
-    # Exact inputs; 1e-12 relative covers the 1/3 and 2/3 rounding only.
-    np.testing.assert_allclose(
-        tensor.Tensor(data).magnitude, [5.0, 2.0, 4.0], rtol=1e-12, atol=0
-    )
+
+    def test_magnitude_of_hand_tensors(self):
+        """magnitude is sqrt(3) for (par=3, per=0), sqrt(6) for (0, 3), w for par=per=w.
+
+        The scalar column is deliberately inconsistent (-1) so a magnitude that reads
+        it fails, and par != per in two rows so the trace form (par + 2 per) / 3
+        (1, 2) and a swapped weighting (sqrt(3) <-> sqrt(6)) fail.
+
+        ON FAILURE: the code is wrong.
+        """
+        cols = pd.Index(["par", "per", "scalar"], name="C")
+        data = pd.DataFrame(
+            [[3.0, 0.0, -1.0], [0.0, 3.0, -1.0], [4.0, 4.0, -1.0]], columns=cols
+        )
+        expected = [np.sqrt(3.0), np.sqrt(6.0), 4.0]
+        # Exact inputs; 1e-12 relative covers the rounding of sqrt and /3 only.
+        np.testing.assert_allclose(
+            tensor.Tensor(data).magnitude, expected, rtol=1e-12, atol=0
+        )
+
+    def test_magnitude_of_plasma_thermal_speed(self):
+        """A Plasma-built p1 thermal-speed Tensor's magnitude is its own scalar column.
+
+        Plasma stores w_scalar = sqrt((w_par^2 + 2 w_per^2) / 3), the same thermal-speed
+        identity, so magnitude must reproduce it row by row on the package's own
+        Tensor layout (flat par/per/scalar columns from Ion.thermal_speed).
+
+        ON FAILURE: the code is wrong.
+        """
+        p = plasma.Plasma(base.SyntheticData().plasma_data, "p1", "a")
+        w = p.p1.w
+        # Same formula evaluated in a different order; 1e-12 relative covers rounding.
+        np.testing.assert_allclose(
+            w.magnitude, w.data.loc[:, "scalar"], rtol=1e-12, atol=0
+        )
+        pdt.assert_index_equal(w.magnitude.index, w.data.index)
 
 
 class TestQuantitySubclassEquality(TestCase):

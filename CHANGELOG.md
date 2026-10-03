@@ -191,6 +191,9 @@ These change computed values; rerun any analysis that used them.
   now the angle above the xy-plane, `arctan2(z, rho)` in [-90, 90]; colatitude is the
   angle from +z, `arctan2(rho, z)` in [0, 180]. A vector along +z has latitude 90 and
   colatitude 0 (previously the reverse); each old value converts as `new = 90 - old`.
+- `Tensor.magnitude` raised `ValueError` on every Tensor the package builds. It now
+  returns the scalar thermal speed sqrt((w_par^2 + 2 w_per^2) / 3), which combines the
+  components through the temperatures and matches the stored `scalar` column.
 
 ### Removed
 
