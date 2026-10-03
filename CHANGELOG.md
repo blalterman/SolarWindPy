@@ -187,6 +187,18 @@ These change computed values; rerun any analysis that used them.
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
 - Kinetic energy flux has a plot label, `"Wk"`, rendered W_K in uW m^-2.
+- `Vector.latitude` / `lat` and `Vector.colatitude` / `colat` were swapped. Latitude is
+  now the angle above the xy-plane, `arctan2(z, rho)` in [-90, 90]; colatitude is the
+  angle from +z, `arctan2(rho, z)` in [0, 180]. A vector along +z has latitude 90 and
+  colatitude 0 (previously the reverse); each old value converts as `new = 90 - old`.
+- `Tensor.magnitude` raised `ValueError` on every Tensor the package builds. It now
+  returns the scalar thermal speed sqrt((w_par^2 + 2 w_per^2) / 3), which combines the
+  components through the temperatures and matches the stored `scalar` column.
+- `Vector.project` and `Vector.cos_theta` returned 0 (a perpendicular answer) on rows
+  present in only one of the two vectors, or with a NaN component. They now return NaN
+  there. The `Plasma` methods built on `project` change the same way on such rows.
+- Plot labels for a latitude component (`"lat"`) now render as lambda and a colatitude
+  component (`"colat"`) as theta; the two symbols were swapped.
 
 ### Removed
 
