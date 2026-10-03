@@ -33,8 +33,8 @@ outside a unit's files becomes a strict xfail naming what retires it.
   shown failing on a deliberately broken input, then passing.
 - Every test it writes or touches carries an `ON FAILURE` line.
 - Keeps both suites green: `conda run -n solarwindpy pytest -q` → 0 failed.
-- Commits with `conda run -n solarwindpy git commit -F <msgfile> -- <paths written out individually>`,
-  explicit-path staging, never `--no-verify`, a conventional subject, and the line
+- Commits from its worktree with plain `git commit -F <msgfile> -- <paths written out individually>`
+  (the pre-commit hooks enter the solarwindpy env themselves), explicit-path staging, never `--no-verify`, a conventional subject, and the line
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; pushes its branch, opens a pull
   request, and does not merge.
 
