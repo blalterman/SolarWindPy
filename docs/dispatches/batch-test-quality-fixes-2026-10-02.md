@@ -66,12 +66,20 @@ Control: the coefficient change 2.0 → 3.0 in `nuc` now fails a test. [245]
 
 ### quantities-and-vector
 
-OWNS: tests/core/test_quantities.py, solarwindpy/core/vector.py, CHANGELOG.md
+OWNS: tests/core/test_quantities.py, solarwindpy/core/vector.py, solarwindpy/core/tensor.py, solarwindpy/plotting/labels/base.py, tests/plotting/labels/test_labels_base.py, CHANGELOG.md
 
 Swap `Vector.latitude` and `colatitude` in `solarwindpy/core/vector.py` so latitude is
 `arctan2(z, rho)` and colatitude is `arctan2(rho, z)`; record the fix in `CHANGELOG.md`. Add hand cases: (0, 0, 1) has latitude 90 and
 colatitude 0, (1, 0, 0) has latitude 0 and colatitude 90; `Tensor.magnitude`; the
 `project`/`cos_theta` survivors. Control: the unswapped code fails the new cases. [83]
+
+Author decisions after the pilot's first report:
+
+- `Tensor.magnitude` is the scalar magnitude of a thermal speed, which combines through the
+  temperatures: sqrt((par² + 2 per²) / 3). Fix `tensor.py` (it raises on every Tensor the
+  package builds) and replace the trace-form xfail with a passing hand case.
+- `project` and `cos_theta` return NaN for a row present in only one of the two vectors.
+- In `_trans_component` (`plotting/labels/base.py`), `lat` maps to λ and `colat` to θ.
 
 ### icme-tests
 
