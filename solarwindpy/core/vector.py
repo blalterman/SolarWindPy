@@ -252,7 +252,8 @@ class Vector(base.Base):
         Returns
         -------
         pd.DataFrame
-            Parallel and perpendicular components of the projection.
+            Parallel and perpendicular components of the projection, on the union
+            of both indices; NaN on rows missing from either vector.
 
         Raises
         ------
@@ -267,11 +268,11 @@ class Vector(base.Base):
             )
 
         cart = self.cartesian
-        par = cart.multiply(other, axis=1).sum(axis=1)
+        par = cart.multiply(other, axis=1).sum(axis=1, skipna=False)
         per = (
             cart.subtract(other.multiply(par, axis=0), axis=1)
             .pow(2)
-            .sum(axis=1)
+            .sum(axis=1, skipna=False)
             .pipe(np.sqrt)
         )
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
@@ -287,7 +288,8 @@ class Vector(base.Base):
         Returns
         -------
         pd.Series
-            Cosine of the angle.
+            Cosine of the angle, on the union of both indices; NaN on rows
+            missing from either vector.
 
         Raises
         ------
@@ -301,7 +303,7 @@ class Vector(base.Base):
                 f"cos_theta method not implemented for {type(other)}"
             )
 
-        return self.uv.data.multiply(other, axis=1).sum(axis=1)
+        return self.uv.data.multiply(other, axis=1).sum(axis=1, skipna=False)
 
 
 class BField(Vector):

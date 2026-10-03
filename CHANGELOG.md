@@ -194,6 +194,9 @@ These change computed values; rerun any analysis that used them.
 - `Tensor.magnitude` raised `ValueError` on every Tensor the package builds. It now
   returns the scalar thermal speed sqrt((w_par^2 + 2 w_per^2) / 3), which combines the
   components through the temperatures and matches the stored `scalar` column.
+- `Vector.project` and `Vector.cos_theta` returned 0 (a perpendicular answer) on rows
+  present in only one of the two vectors, or with a NaN component. They now return NaN
+  there. The `Plasma` methods built on `project` change the same way on such rows.
 
 ### Removed
 

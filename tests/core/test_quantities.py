@@ -397,6 +397,41 @@ class TestVectorProjectionHandCases:
         np.testing.assert_allclose(v.cos_theta(b), expected, **VALUE_TOL)
         np.testing.assert_allclose(b.cos_theta(v), expected, **VALUE_TOL)
 
+    def test_rows_in_only_one_vector_are_nan(self):
+        """project and cos_theta are NaN on rows present in only one of the two vectors.
+
+        v covers minutes 0-2 and b covers minutes 1-3, so the result spans minutes 0-3:
+        minute 0 has no b and minute 3 has no v, and both must be NaN rather than 0
+        (0 would claim a perpendicular field). Minutes 1 and 2 reuse the hand rows
+        (1, 1, 1) on (0, 0, 5) and (0, -2, 0) on (0, 3, 0).
+
+        ON FAILURE: the code is wrong.
+        """
+        minutes = pd.date_range("2000-01-01", periods=4, freq="min")
+        v = vector.Vector(
+            pd.DataFrame(self.V, index=minutes[:3], columns=["x", "y", "z"])
+        )
+        b = vector.BField(
+            pd.DataFrame(
+                [self.B[1], self.B[2], self.B[0]],
+                index=minutes[1:],
+                columns=["x", "y", "z"],
+            )
+        )
+        nan = np.nan
+        out = v.project(b)
+        pdt.assert_index_equal(out.index, minutes)
+        # assert_allclose treats NaN as equal only to NaN, so a 0 fails.
+        np.testing.assert_allclose(out["par"], [nan, 1.0, -2.0, nan], **VALUE_TOL)
+        np.testing.assert_allclose(
+            out["per"], [nan, np.sqrt(2.0), 0.0, nan], **VALUE_TOL
+        )
+        cos = v.cos_theta(b)
+        pdt.assert_index_equal(cos.index, minutes)
+        np.testing.assert_allclose(
+            cos, [nan, 1.0 / np.sqrt(3.0), -1.0, nan], **VALUE_TOL
+        )
+
     @pytest.mark.parametrize("method", ["project", "cos_theta"])
     def test_non_vector_argument_raises_naming_its_type(self, v, method):
         """project and cos_theta reject a non-Vector with NotImplementedError naming its type.
