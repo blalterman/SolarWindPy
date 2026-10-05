@@ -12,10 +12,10 @@ brute-force weighted mean built with numpy, and from a hand-computed case.
 import math
 
 import numpy as np
-import pytest
 from scipy.ndimage import gaussian_filter
 
 from solarwindpy.plotting.tools import nan_gaussian_filter
+from tests.tolerances import exact
 
 
 def _brute_force_normalized_convolution(array, sigma, truncate=4.0):
@@ -61,8 +61,7 @@ class TestNanGaussianFilter:
         arr = np.random.default_rng(42).random((10, 12))
         result = nan_gaussian_filter(arr, sigma=1.5)
         expected = gaussian_filter(arr, sigma=1.5)
-        # rel 1e-12: only float rounding in dividing by a mask that filters to ~1.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(expected)
 
     def test_hand_computed_neighbour_average_across_a_hole(self):
         """Row ``[1, nan, 2]``, sigma 1, zero padding.
@@ -76,9 +75,8 @@ class TestNanGaussianFilter:
         arr = np.array([[1.0, np.nan, 2.0]])
         result = nan_gaussian_filter(arr, sigma=1.0, mode="constant")
         w = math.exp(-2.0)
-        # rel 1e-12: exact closed form, float rounding only.
-        assert result[0, 0] == pytest.approx((1 + 2 * w) / (1 + w), rel=1e-12, abs=0)
-        assert result[0, 2] == pytest.approx((2 + w) / (1 + w), rel=1e-12, abs=0)
+        assert result[0, 0] == exact((1 + 2 * w) / (1 + w))
+        assert result[0, 2] == exact((2 + w) / (1 + w))
         assert np.isnan(result[0, 1])
 
     def test_matches_brute_force_normalized_convolution(self):
@@ -93,8 +91,7 @@ class TestNanGaussianFilter:
         arr[rng.random(arr.shape) < 0.25] = np.nan
         result = nan_gaussian_filter(arr, sigma=1.3, mode="constant")
         expected = _brute_force_normalized_convolution(arr, sigma=1.3)
-        # rel 1e-12: same sums in a different order, float rounding only.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(expected, nan_ok=True)
 
     def test_kwargs_change_the_result_as_scipy_predicts(self):
         """``truncate`` is forwarded: a radius-1 kernel changes the output.
@@ -108,8 +105,7 @@ class TestNanGaussianFilter:
         arr[2, 3] = np.nan
         narrow = nan_gaussian_filter(arr, sigma=1.0, mode="constant", truncate=1.0)
         expected = _brute_force_normalized_convolution(arr, sigma=1.0, truncate=1.0)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(narrow, expected, rtol=1e-12, atol=0)
+        assert np.asarray(narrow) == exact(expected, nan_ok=True)
         wide = nan_gaussian_filter(arr, sigma=1.0, mode="constant")
         assert not np.allclose(narrow[~np.isnan(arr)], wide[~np.isnan(arr)])
 
@@ -124,8 +120,7 @@ class TestNanGaussianFilter:
         arr[[0, 3, 3, 7], [0, 3, 4, 7]] = np.nan
         result = nan_gaussian_filter(arr, sigma=2.0)
         valid = ~np.isnan(arr)
-        # rel 1e-12: ratio of two sums of the same weights, float rounding only.
-        np.testing.assert_allclose(result[valid], 3.5, rtol=1e-12, atol=0)
+        assert np.asarray(result[valid]) == exact(3.5)
 
     def test_nans_are_preserved_and_nothing_else_becomes_nan(self):
         """The output is NaN exactly where the input is, including edges and corners.
@@ -158,5 +153,4 @@ class TestNanGaussianFilter:
         counts = np.array([[0, 10, 0], [0, 0, 5]])
         result = nan_gaussian_filter(counts, sigma=1.0)
         expected = nan_gaussian_filter(counts.astype(float), sigma=1.0)
-        # rel 1e-12: identical computation on identical values.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(expected)

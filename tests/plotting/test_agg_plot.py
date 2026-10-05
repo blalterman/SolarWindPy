@@ -23,6 +23,7 @@ from scipy.stats import binned_statistic_2d
 from solarwindpy.plotting.agg_plot import AggPlot
 from solarwindpy.plotting.hist1d import Hist1D
 from solarwindpy.plotting.hist2d import Hist2D
+from tests.tolerances import exact
 
 # Non-square grid (4 x-bins, 3 y-bins) so a transposed result cannot pass.
 X_EDGES = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
@@ -197,7 +198,7 @@ class TestCut:
         x = pd.Series(np.r_[np.arange(10.0), 1000.0])
         h = Hist1D(x, clip_data=clip, nbins=[-1.0, 5.0, 999.5, 1001.0])
         assert h.cut["x"].iloc[-1].right == expected_right
-        assert np.quantile(x, 0.9999) == pytest.approx(999.009, rel=1e-12, abs=0)
+        assert np.quantile(x, 0.9999) == exact(999.009)
 
 
 # ---------------------------------------------------------------------------
@@ -240,10 +241,7 @@ class TestAgg:
         expected = binned_statistic_2d(
             x, y, z, statistic="mean", bins=[X_EDGES, Y_EDGES]
         ).statistic
-        # rel 1e-12: same means summed in a different order.
-        np.testing.assert_allclose(
-            _grid(h.agg(), X_EDGES, Y_EDGES), expected, rtol=1e-12, atol=0
-        )
+        assert np.asarray(_grid(h.agg(), X_EDGES, Y_EDGES)) == exact(expected)
 
     def test_constant_z_is_counted_not_averaged(self, xyz):
         """A z with one unique value is counted, per the ``agg`` docstring.
@@ -275,10 +273,7 @@ class TestAgg:
         expected = binned_statistic_2d(
             x, y, z, statistic=statistic, bins=[X_EDGES, Y_EDGES]
         ).statistic
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(
-            _grid(h.agg(fcn=fcn), X_EDGES, Y_EDGES), expected, rtol=1e-12, atol=0
-        )
+        assert np.asarray(_grid(h.agg(fcn=fcn), X_EDGES, Y_EDGES)) == exact(expected)
 
     @pytest.mark.parametrize(
         "clim, keep",
@@ -305,9 +300,8 @@ class TestAgg:
         kept = keep(counts)
         assert kept.any() and not kept.all()
         expected = np.where(kept, means, np.nan)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(
-            _grid(h.agg(), X_EDGES, Y_EDGES), expected, rtol=1e-12, atol=0
+        assert np.asarray(_grid(h.agg(), X_EDGES, Y_EDGES)) == exact(
+            expected, nan_ok=True
         )
         assert h.clim == clim
 
@@ -326,9 +320,8 @@ class TestAgg:
         lo, hi = np.nanpercentile(means, [25, 75])
         h.set_alim(lo, hi)
         expected = np.where((means >= lo) & (means <= hi), means, np.nan)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(
-            _grid(h.agg(), X_EDGES, Y_EDGES), expected, rtol=1e-12, atol=0
+        assert np.asarray(_grid(h.agg(), X_EDGES, Y_EDGES)) == exact(
+            expected, nan_ok=True
         )
         assert h.alim == (lo, hi)
 
@@ -506,9 +499,8 @@ class TestSelection:
         h = Hist2D(x, y, logx=True, logy=True, nbins=[X_EDGES, Y_EDGES])
         subset, mask = h.get_subset_above_threshold(1)
         assert mask.all()
-        # rel 1e-12: log10 then 10** round trip, float rounding only.
-        np.testing.assert_allclose(subset["x"], x, rtol=1e-12, atol=0)
-        np.testing.assert_allclose(subset["y"], y, rtol=1e-12, atol=0)
+        assert np.asarray(subset["x"]) == exact(x)
+        assert np.asarray(subset["y"]) == exact(y)
 
 
 # ---------------------------------------------------------------------------
@@ -534,8 +526,7 @@ class TestClipData:
         """
         result = AggPlot.clip_data(SERIES, True)
         expected = np.r_[1.0009, np.arange(2.0, 10.0), 9.9991]
-        # rel 1e-12: interpolated quantiles, float rounding only.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(expected)
         assert isinstance(result, pd.Series)
 
     def test_dataframe_both_tails_per_column(self):
@@ -546,8 +537,7 @@ class TestClipData:
         result = AggPlot.clip_data(FRAME, "both")
         lo = np.quantile(FRAME, 1e-4, axis=0)
         hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(result, np.clip(FRAME, lo, hi), rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, lo, hi))
         assert list(result.columns) == ["a", "b"]
 
     def test_series_lower(self):
@@ -557,9 +547,8 @@ class TestClipData:
         """
         result = AggPlot.clip_data(SERIES, "l")
         expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
-        assert result.iloc[0] == pytest.approx(1.0009, rel=1e-12, abs=0)
+        assert np.asarray(result) == exact(expected)
+        assert result.iloc[0] == exact(1.0009)
         assert result.iloc[-1] == 10.0
 
     def test_series_upper(self):
@@ -569,9 +558,8 @@ class TestClipData:
         """
         result = AggPlot.clip_data(SERIES, "u")
         expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(result, expected, rtol=1e-12, atol=0)
-        assert result.iloc[-1] == pytest.approx(9.9991, rel=1e-12, abs=0)
+        assert np.asarray(result) == exact(expected)
+        assert result.iloc[-1] == exact(9.9991)
         assert result.iloc[0] == 1.0
 
     def test_dataframe_lower(self):
@@ -581,8 +569,7 @@ class TestClipData:
         """
         result = AggPlot.clip_data(FRAME, "l")
         lo = np.quantile(FRAME, 1e-4, axis=0)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(result, np.clip(FRAME, lo, None), rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, lo, None))
 
     def test_dataframe_upper(self):
         """``"u"`` clips each column's high tail at that column's percentile.
@@ -591,8 +578,7 @@ class TestClipData:
         """
         result = AggPlot.clip_data(FRAME, "u")
         hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
-        # rel 1e-12: float rounding only.
-        np.testing.assert_allclose(result, np.clip(FRAME, None, hi), rtol=1e-12, atol=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, None, hi))
 
     def test_tail_selector_is_case_insensitive(self):
         """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
@@ -607,10 +593,7 @@ class TestClipData:
             ("U", upper),
             ("Upper", upper),
         ):
-            # rel 1e-12: float rounding only.
-            np.testing.assert_allclose(
-                AggPlot.clip_data(SERIES, mode), expected, rtol=1e-12, atol=0
-            )
+            assert np.asarray(AggPlot.clip_data(SERIES, mode)) == exact(expected)
 
     def test_rejects_non_pandas_input_with_typeerror(self):
         """A list is neither Series nor DataFrame and raises TypeError.

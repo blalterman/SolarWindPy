@@ -32,6 +32,7 @@ from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
 )
+from tests.tolerances import exact  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Chosen input. No sample lies on a cell edge (the edge convention has its own
@@ -91,11 +92,6 @@ MESH_MIN2 = set(INITIAL[:5]) | {
 }
 
 FILL = -9999  # the documented out-of-mesh bin number
-
-# Tolerance for values built from a handful of exactly representable numbers
-# (areas, means, quantiles, powers of ten): only rounding separates package
-# and reference.
-REL = 1e-12
 
 
 def _inside(cell, x, y):
@@ -216,7 +212,7 @@ def _assert_same_segments(qset, ref):
         assert len(got) == len(want)
         for g, w in zip(got, want):
             # Same arrays through the same scipy and matplotlib routines.
-            np.testing.assert_allclose(g, w, rtol=1e-9, atol=0)
+            assert np.asarray(g) == exact(w)
 
 
 def _segments_differ(a, b):
@@ -420,7 +416,7 @@ class TestSpiralMesh:
         mesh.generate_mesh()
         m = mesh.mesh
         area = ((m[:, 1] - m[:, 0]) * (m[:, 3] - m[:, 2])).sum()
-        assert area == pytest.approx(24.0, rel=REL, abs=0)
+        assert area == exact(24.0)
         assert max(len(z) for z in _tally(m, ROWS)) <= min_per_bin
 
     def test_samples_outside_the_grid_do_not_drive_refinement(self):
@@ -588,9 +584,7 @@ class TestInitialBins:
         v = pd.Series([-100.0, 10.0, 1000.0])
         splot = SpiralPlot2D(v, v, logx=True, logy=True, initial_bins=1)
         for axis in ("x", "y"):
-            assert splot.data[axis].tolist() == pytest.approx(
-                [2.0, 1.0, 3.0], rel=REL, abs=0
-            )
+            assert splot.data[axis].tolist() == exact([2.0, 1.0, 3.0])
 
     def test_all_nan_data_is_rejected(self):
         """A plot whose every sample has a NaN raises ValueError.
@@ -639,11 +633,11 @@ class TestAggregation:
         """
         splot = _plot(3)
         agg = splot.agg()
-        np.testing.assert_allclose(
-            agg.values, _expected_agg(splot, np.mean), rtol=REL, atol=0
+        assert np.asarray(agg.values) == exact(
+            _expected_agg(splot, np.mean), nan_ok=True
         )
-        assert agg.tolist() == pytest.approx(
-            [1.0, np.nan, 4.0, np.nan, 3.0, 16 / 3], rel=REL, abs=0, nan_ok=True
+        assert agg.tolist() == exact(
+            [1.0, np.nan, 4.0, np.nan, 3.0, 16 / 3], nan_ok=True
         )
 
     def test_explicit_function_is_applied(self):
@@ -672,7 +666,7 @@ class TestAggregation:
         counts = [len(z) for z in _tally(splot.mesh.mesh, ROWS)]
         means = _expected_agg(splot, np.mean)
         expected = [m if n and keep(n) else np.nan for m, n in zip(means, counts)]
-        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert np.asarray(splot.agg().values) == exact(expected, nan_ok=True)
 
     def test_cell_filter_masks_aggregated_cells(self):
         """Cells rejected by the mesh's ``cell_filter`` aggregate to NaN.
@@ -685,7 +679,7 @@ class TestAggregation:
         means = _expected_agg(splot, np.mean)
         assert 0 < keep.sum() < np.isfinite(means).sum()
         expected = np.where(keep, means, np.nan)
-        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert np.asarray(splot.agg().values) == exact(expected, nan_ok=True)
 
     def test_alim_masks_cells_whose_value_is_outside_the_range(self):
         """After ``set_alim(3, 4)`` a cell keeps its mean iff 3 <= mean <= 4.
@@ -700,8 +694,7 @@ class TestAggregation:
         splot.set_alim(3.0, 4.0)
         means = _expected_agg(splot, np.mean)
         expected = np.where((means >= 3.0) & (means <= 4.0), means, np.nan)
-        # rel REL: float rounding only.
-        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert np.asarray(splot.agg().values) == exact(expected, nan_ok=True)
         assert sorted(splot.agg().dropna().tolist()) == [3.0, 3.5, 4.0]
         assert splot.alim == (3.0, 4.0)
 
@@ -718,12 +711,11 @@ class TestAggregation:
         splot = _plot(2)
         means = _expected_agg(splot, np.mean)
         lo, hi = np.nanquantile(means, [0.25, 0.75])
-        assert (lo, hi) == pytest.approx((3.0, 4.0), rel=REL, abs=0)  # hand-computed
+        assert (lo, hi) == exact((3.0, 4.0))  # hand-computed
 
         splot.set_alim(0.25, 0.75, kind="quantile")
         expected = np.where((means >= lo) & (means <= hi), means, np.nan)
-        # rel REL: float rounding only.
-        np.testing.assert_allclose(splot.agg().values, expected, rtol=REL, atol=0)
+        assert np.asarray(splot.agg().values) == exact(expected, nan_ok=True)
         assert splot.alim_kind == "quantile"
 
 
@@ -741,11 +733,9 @@ class TestMakePlot:
         ax, coll = splot.make_plot(ax=ax, cbar=False)
         assert isinstance(coll, PatchCollection)
         expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
-        np.testing.assert_allclose(_rectangles(coll), expected, rtol=REL, atol=0)
+        assert np.asarray(_rectangles(coll)) == exact(expected)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
-        np.testing.assert_allclose(
-            values, _expected_agg(splot, np.mean), rtol=REL, atol=0
-        )
+        assert np.asarray(values) == exact(_expected_agg(splot, np.mean), nan_ok=True)
         scale = "log" if log else "linear"
         assert (ax.get_xscale(), ax.get_yscale()) == (scale, scale)
 
@@ -757,9 +747,7 @@ class TestMakePlot:
         splot = _plot(2, log=True)
         _, coll = splot.make_plot(cbar=False)
         rects = _rectangles(coll).tolist()
-        assert any(
-            r == pytest.approx([1.0, 100.0, 1.0, 10.0], rel=REL, abs=0) for r in rects
-        )
+        assert any(r == exact([1.0, 100.0, 1.0, 10.0]) for r in rects)
 
     def test_colorbar_is_returned_for_the_collection(self):
         """With ``cbar=True`` the second return is a Colorbar of the collection.
@@ -796,14 +784,13 @@ class TestMakePlot:
         splot = _plot(2)
         means = _expected_agg(splot, np.mean)
         lo, hi = np.nanquantile(means, [0.01, 0.99])
-        assert (lo, hi) == pytest.approx((1.08, 8.8), rel=REL, abs=0)  # hand-computed
+        assert (lo, hi) == exact((1.08, 8.8))  # hand-computed
 
         splot.set_alim(0.01, 0.99, kind="quantile")
         _, coll = splot.make_plot(cbar=False)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
         expected = np.where((means >= lo) & (means <= hi), means, np.nan)
-        # rel REL: float rounding only.
-        np.testing.assert_allclose(values, expected, rtol=REL, atol=0)
+        assert np.asarray(values) == exact(expected, nan_ok=True)
         assert sorted(values[np.isfinite(values)]) == [3.0, 3.5, 4.0]
         plt.close("all")
 
@@ -823,10 +810,10 @@ class TestMakePlot:
         scaled = (vmax - np.nanmin(vmax)) / (np.nanmax(vmax) - np.nanmin(vmax))
         expected = np.nan_to_num((1 - scaled) ** 0.25, nan=0.0)
         alpha = coll.get_facecolors()[:, 3]
-        np.testing.assert_allclose(alpha, expected, rtol=REL, atol=1e-15)
+        assert alpha == exact(expected)
         by_value = dict(zip(vmax.tolist(), alpha.tolist()))
-        assert by_value[5.0] == pytest.approx(0.5**0.25, rel=REL, abs=0)
-        assert by_value[1.0] == pytest.approx(1.0, rel=REL, abs=0)
+        assert by_value[5.0] == exact(0.5**0.25)
+        assert by_value[1.0] == exact(1.0)
         assert by_value[9.0] == 0.0
 
 

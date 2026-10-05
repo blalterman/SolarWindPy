@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from solarwindpy.plotting.hist2d import Hist2D
+from tests.tolerances import exact
 
 # A hand-built grid for column normalisation. counts[i, j]: y-bin i, x-bin j.
 # Three y-bins by two x-bins, so a transpose cannot pass.
@@ -35,7 +36,10 @@ class TestHist2DPandasCompatibility:
         self.z_data = pd.Series(np.random.uniform(0, 10, n), name="z")
 
     def test_column_normalize(self):
-        """Test column normalize (axnorm='c')."""
+        """Test column normalize (axnorm='c').
+
+        ON FAILURE: the code is wrong.
+        """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("c")
 
@@ -47,8 +51,8 @@ class TestHist2DPandasCompatibility:
         for col in agg_unstacked.columns:
             col_max = agg_unstacked[col].max()
             if not pd.isna(col_max):
-                assert np.isclose(
-                    col_max, 1.0, atol=1e-10
+                assert col_max == exact(
+                    1.0
                 ), f"Column {col} max is {col_max}, expected 1.0"
 
         # Check that all non-NaN values are between 0 and 1
@@ -61,7 +65,10 @@ class TestHist2DPandasCompatibility:
         ).all(), "Found values > 1 after column normalization"
 
     def test_row_normalize(self):
-        """Test row normalize (axnorm='r')."""
+        """Test row normalize (axnorm='r').
+
+        ON FAILURE: the code is wrong.
+        """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("r")
 
@@ -73,8 +80,8 @@ class TestHist2DPandasCompatibility:
         for row_idx in agg_unstacked.index:
             row_max = agg_unstacked.loc[row_idx].max()
             if not pd.isna(row_max):
-                assert np.isclose(
-                    row_max, 1.0, atol=1e-10
+                assert row_max == exact(
+                    1.0
                 ), f"Row {row_idx} max is {row_max}, expected 1.0"
 
         # Check that all non-NaN values are between 0 and 1
@@ -87,7 +94,10 @@ class TestHist2DPandasCompatibility:
         ).all(), "Found values > 1 after row normalization"
 
     def test_total_normalize(self):
-        """Test total normalize (axnorm='t')."""
+        """Test total normalize (axnorm='t').
+
+        ON FAILURE: the code is wrong.
+        """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("t")
 
@@ -96,9 +106,7 @@ class TestHist2DPandasCompatibility:
 
         # Check that max value overall is 1.0
         max_val = agg.max()
-        assert np.isclose(
-            max_val, 1.0, atol=1e-10
-        ), f"Total max is {max_val}, expected 1.0"
+        assert max_val == exact(1.0), f"Total max is {max_val}, expected 1.0"
 
         # Check that all non-NaN values are between 0 and 1
         non_nan_values = agg.dropna()
@@ -114,6 +122,8 @@ class TestHist2DPandasCompatibility:
 
         This should create a true 2D probability density function where
         the integral over the entire domain equals 1.
+
+        ON FAILURE: the code is wrong.
         """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("d")
@@ -144,9 +154,9 @@ class TestHist2DPandasCompatibility:
                     dy = dy_values[y_interval]
                     total_integral += value * dx * dy
 
-        # The integral should be close to 1
-        assert np.isclose(
-            total_integral, 1.0, atol=0.01
+        # A density integrates to 1 over the cell areas.
+        assert total_integral == exact(
+            1.0
         ), f"Density integral is {total_integral}, expected 1.0"
 
         # Values should be non-negative
@@ -159,6 +169,8 @@ class TestHist2DPandasCompatibility:
         """Test PDFs in each column (axnorm='cd').
 
         This creates PDFs in each column, so integrating over y for each x should give 1.
+
+        ON FAILURE: the code is wrong.
         """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("cd")
@@ -185,8 +197,8 @@ class TestHist2DPandasCompatibility:
 
             # Each column should integrate to 1 (if it has data)
             if integral > 0:  # Only check columns with data
-                assert np.isclose(
-                    integral, 1.0, atol=0.01
+                assert integral == exact(
+                    1.0
                 ), f"Column {col} PDF integral is {integral}, expected 1.0"
 
         # Values should be non-negative
@@ -199,6 +211,8 @@ class TestHist2DPandasCompatibility:
         """Test PDFs in each row (axnorm='rd').
 
         This creates PDFs in each row, so integrating over x for each y should give 1.
+
+        ON FAILURE: the code is wrong.
         """
         hist = Hist2D(self.x_data, self.y_data, self.z_data, nbins=10)
         hist.set_axnorm("rd")
@@ -225,8 +239,8 @@ class TestHist2DPandasCompatibility:
 
             # Each row should integrate to 1 (if it has data)
             if integral > 0:  # Only check rows with data
-                assert np.isclose(
-                    integral, 1.0, atol=0.01
+                assert integral == exact(
+                    1.0
                 ), f"Row {row} PDF integral is {integral}, expected 1.0"
 
         # Values should be non-negative
@@ -255,7 +269,10 @@ class TestHist2DPandasCompatibility:
         ), "Found unexpectedly large values in raw aggregation"
 
     def test_edge_case_single_bin(self):
-        """Test normalization with data that falls into a single bin."""
+        """Test normalization with data that falls into a single bin.
+
+        ON FAILURE: the code is wrong.
+        """
         # Create data that falls into one bin
         x_single = pd.Series([0.5] * 100, name="x")
         y_single = pd.Series([0.5] * 100, name="y")
@@ -273,8 +290,8 @@ class TestHist2DPandasCompatibility:
 
         # The single value should be 1.0 after normalization
         non_nan_value = agg.dropna().iloc[0]
-        assert np.isclose(
-            non_nan_value, 1.0, atol=1e-10
+        assert non_nan_value == exact(
+            1.0
         ), f"Single bin value is {non_nan_value}, expected 1.0"
 
     def test_edge_case_with_nans(self):
@@ -329,8 +346,7 @@ class TestHist2DPandasCompatibility:
         )
         grid = hist.agg().unstack("x").values
 
-        # rel=1e-12: one division of small integers.
-        np.testing.assert_allclose(grid, COLUMN_NORMALIZED_BY_HAND, rtol=1e-12, atol=0)
+        assert np.asarray(grid) == exact(COLUMN_NORMALIZED_BY_HAND, nan_ok=True)
 
     def test_log_scale_with_normalization(self):
         """Test normalization with log-scaled data."""
@@ -389,6 +405,8 @@ class TestHist2DPandasCompatibility:
         """Test density normalize with count data (no z values).
 
         This should create a proper 2D probability density where integral = 1.
+
+        ON FAILURE: the code is wrong.
         """
         hist = Hist2D(self.x_data, self.y_data, nbins=10)
         hist.set_axnorm("d")
@@ -419,9 +437,9 @@ class TestHist2DPandasCompatibility:
                     dy = dy_values[y_interval]
                     total_integral += value * dx * dy
 
-        # The integral should be close to 1
-        assert np.isclose(
-            total_integral, 1.0, atol=0.01
+        # A density integrates to 1 over the cell areas.
+        assert total_integral == exact(
+            1.0
         ), f"Count density integral is {total_integral}, expected 1.0"
 
 
@@ -474,9 +492,10 @@ class TestNormalizationBounds:
             axnorm=axnorm,
         )
 
-        pd.testing.assert_series_equal(
-            doubled.agg(), single.agg(), check_names=False, rtol=1e-10
-        )
+        got, want = doubled.agg(), single.agg()
+        pd.testing.assert_index_equal(got.index, want.index, check_names=False)
+        assert got.dtype == want.dtype
+        assert got.to_numpy() == exact(want.to_numpy(), nan_ok=True)
 
 
 if __name__ == "__main__":
@@ -526,9 +545,8 @@ class TestLogAxisDensity:
         hist = Hist2D(x, y, logx=logx, logy=logy, axnorm="d", nbins=[X_EDGES, Y_EDGES])
         density = hist.agg().unstack("x").values
 
-        # Tolerance: a handful of float divisions.
-        np.testing.assert_allclose(density, DENSITY_BY_HAND, rtol=1e-12, atol=0)
+        assert np.asarray(density) == exact(DENSITY_BY_HAND)
         areas = np.outer(np.diff(Y_EDGES), np.diff(X_EDGES))
         total = (density * areas).sum()
-        if not np.isclose(total, 1.0, rtol=1e-12, atol=0):
+        if total != exact(1.0):
             raise DensityNotNormalised(f"sum over cell areas = {total}")

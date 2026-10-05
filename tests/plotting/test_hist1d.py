@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # Unequal widths (2, 0.5, 0.5, 0.25, 1.75, 1.5): a width, center, or
 # assignment error in any one bin changes the expectation.
@@ -172,10 +173,7 @@ class TestAggregation:
 
         agg = Hist1D(x, y, nbins=EDGES).agg()
 
-        # Tolerance: summation-order differences in a 400-sample mean.
-        np.testing.assert_allclose(
-            agg.values, _per_bin(x, y, np.mean), rtol=1e-12, atol=0
-        )
+        assert np.asarray(agg.values) == exact(_per_bin(x, y, np.mean))
 
     def test_clim_blanks_bins_with_fewer_counts_than_its_lower_limit(self, xy):
         """``set_clim(lower)`` blanks every bin holding fewer than ``lower``.
@@ -197,10 +195,7 @@ class TestAggregation:
         agg = hist.agg()
 
         np.testing.assert_array_equal(agg.notna().values, keep)
-        # Tolerance: summation-order differences in a 400-sample mean.
-        np.testing.assert_allclose(
-            agg.values[keep], _per_bin(x, y, np.mean)[keep], rtol=1e-12, atol=0
-        )
+        assert np.asarray(agg.values[keep]) == exact(_per_bin(x, y, np.mean)[keep])
 
 
 class TestDensity:
@@ -216,8 +211,7 @@ class TestDensity:
 
         agg = Hist1D(x, axnorm="d", nbins=np.array([0.0, 1.0, 2.0, 4.0])).agg()
 
-        # Tolerance: exact binary fractions, only rounding can differ.
-        np.testing.assert_allclose(agg.values, [0.25, 0.5, 0.125], rtol=1e-12, atol=0)
+        assert np.asarray(agg.values) == exact([0.25, 0.5, 0.125])
 
     def test_density_is_count_over_total_and_width(self, xy):
         """Density equals numpy's counts / (N * width) and integrates to 1.
@@ -230,11 +224,8 @@ class TestDensity:
 
         agg = Hist1D(x, axnorm="d", nbins=EDGES).agg()
 
-        # Tolerance: one division per bin.
-        np.testing.assert_allclose(
-            agg.values, counts / (counts.sum() * widths), rtol=1e-12, atol=0
-        )
-        assert (agg.values * widths).sum() == pytest.approx(1.0, rel=1e-12, abs=0)
+        assert np.asarray(agg.values) == exact(counts / (counts.sum() * widths))
+        assert (agg.values * widths).sum() == exact(1.0)
 
     def test_logx_density_integrates_to_one_over_log10_x(self):
         """A logx density integrates to 1 over log10(x).
@@ -251,8 +242,7 @@ class TestDensity:
         agg = Hist1D(x, logx=True, axnorm="d", nbins=log_edges).agg()
 
         over_log = (agg.values * np.diff(log_edges)).sum()
-        # Tolerance: a handful of float divisions and sums.
-        if not np.isclose(over_log, 1, rtol=1e-9, atol=0):
+        if over_log != exact(1.0):
             raise _DensityNotNormalised(f"integral over log10(x) = {over_log}")
 
 
@@ -275,8 +265,7 @@ class TestPeakNormalization:
         hist.make_plot(ax)
 
         _, line_y = _line_xy(ax.lines[0])
-        # Tolerance: one division per bin.
-        np.testing.assert_allclose(line_y, counts / counts.max(), rtol=1e-12, atol=0)
+        assert np.asarray(line_y) == exact(counts / counts.max())
         assert line_y.max() == 1.0
 
     @pytest.mark.parametrize("bad", ["c", "r", "x", "density", "tx", "dog"])
@@ -334,10 +323,7 @@ class TestMakePlot:
         Hist1D(x, logx=True, nbins=log_edges).make_plot(ax)
 
         line_x, line_y = _line_xy(ax.lines[0])
-        # Tolerance: log10 then power round trip.
-        np.testing.assert_allclose(
-            line_x, np.sqrt(linear[:-1] * linear[1:]), rtol=1e-12, atol=0
-        )
+        assert np.asarray(line_x) == exact(np.sqrt(linear[:-1] * linear[1:]))
         np.testing.assert_array_equal(line_y, _numpy_counts(np.log10(x), log_edges))
 
     def test_without_an_axis_it_draws_the_counts_on_new_axes(self, xy):
@@ -350,7 +336,7 @@ class TestMakePlot:
         ax, _ = Hist1D(x, nbins=EDGES).make_plot()
 
         line_x, line_y = _line_xy(ax.lines[0])
-        np.testing.assert_allclose(line_x, _centers(), rtol=1e-12, atol=0)
+        assert np.asarray(line_x) == exact(_centers())
         np.testing.assert_array_equal(line_y, _numpy_counts(x))
 
     @pytest.mark.parametrize(
@@ -380,17 +366,13 @@ class TestMakePlot:
         _, container = Hist1D(x, y, nbins=EDGES).make_plot(ax, fcn=fcn)
 
         line_x, line_y = _line_xy(container.lines[0])
-        # Tolerance: summation-order differences in per-bin statistics.
-        np.testing.assert_allclose(line_x, _centers(), rtol=1e-12, atol=0)
-        np.testing.assert_allclose(line_y, expected_y, rtol=1e-12, atol=0)
+        assert np.asarray(line_x) == exact(_centers())
+        assert np.asarray(line_y) == exact(expected_y)
         (bars,) = container.lines[2]
         segments = np.array(bars.get_segments())
-        np.testing.assert_allclose(segments[:, :, 0].T, [_centers()] * 2, rtol=1e-12)
-        np.testing.assert_allclose(
-            np.sort(segments[:, :, 1], axis=1),
-            np.column_stack([expected_y - expected_dy, expected_y + expected_dy]),
-            rtol=1e-12,
-            atol=0,
+        assert np.asarray(segments[:, :, 0].T) == exact(np.array([_centers()] * 2))
+        assert np.asarray(np.sort(segments[:, :, 1], axis=1)) == exact(
+            np.column_stack([expected_y - expected_dy, expected_y + expected_dy])
         )
 
     def test_three_element_fcn_raises_value_error(self, xy):
@@ -421,10 +403,7 @@ class TestMakePlot:
             ax, gaussian_filter_std=1.5, gaussian_filter_kwargs={"mode": "constant"}
         )
 
-        # Tolerance: summation-order differences in the means.
-        np.testing.assert_allclose(
-            _line_xy(ax.lines[0])[1], expected, rtol=1e-12, atol=0
-        )
+        assert np.asarray(_line_xy(ax.lines[0])[1]) == exact(expected)
 
     def test_gaussian_smoothing_of_counts_is_not_truncated(self, xy):
         """Smoothed counts equal scipy's Gaussian filter of the float counts.
@@ -438,8 +417,7 @@ class TestMakePlot:
         Hist1D(x, nbins=EDGES).make_plot(ax, gaussian_filter_std=1.0)
 
         got = _line_xy(ax.lines[0])[1]
-        # Tolerance: float convolution of small integers.
-        if not np.allclose(got, expected, rtol=1e-12, atol=0):
+        if np.asarray(got) != exact(expected):
             raise _SmoothedCountsTruncated(f"{got.tolist()} != {expected.tolist()}")
 
     def test_plot_window_band_spans_y_minus_to_plus_dy(self, xy):
@@ -459,8 +437,7 @@ class TestMakePlot:
             ax, fcn=("mean", "std"), plot_window=True
         )
 
-        # Tolerance: summation-order differences in per-bin statistics.
-        np.testing.assert_allclose(_line_xy(line[0])[1], mean, rtol=1e-12, atol=0)
+        assert np.asarray(_line_xy(line[0])[1]) == exact(mean)
         vertices = np.unique(band.get_paths()[0].vertices.round(9), axis=0)
         expected = np.unique(
             np.vstack(
@@ -471,7 +448,7 @@ class TestMakePlot:
             ).round(9),
             axis=0,
         )
-        np.testing.assert_allclose(vertices, expected, rtol=1e-12, atol=0)
+        assert np.asarray(vertices) == exact(expected)
 
     def test_plot_window_edges_draw_the_band_boundaries(self, xy):
         """``plot_window_edges`` adds lines at y + dy and y - dy, in that order.
@@ -488,10 +465,9 @@ class TestMakePlot:
         )
 
         central, upper, lower = ax.lines
-        # Tolerance: summation-order differences in per-bin statistics.
-        np.testing.assert_allclose(_line_xy(central)[1], mean, rtol=1e-12, atol=0)
-        np.testing.assert_allclose(_line_xy(upper)[1], mean + std, rtol=1e-12, atol=0)
-        np.testing.assert_allclose(_line_xy(lower)[1], mean - std, rtol=1e-12, atol=0)
+        assert np.asarray(_line_xy(central)[1]) == exact(mean)
+        assert np.asarray(_line_xy(upper)[1]) == exact(mean + std)
+        assert np.asarray(_line_xy(lower)[1]) == exact(mean - std)
 
     def test_transposed_plot_window_spans_x_minus_to_plus_dx(self, xy):
         """Transposed, the band spans value -/+ error horizontally at each center.
@@ -517,7 +493,7 @@ class TestMakePlot:
             ).round(9),
             axis=0,
         )
-        np.testing.assert_allclose(vertices, expected, rtol=1e-12, atol=0)
+        assert np.asarray(vertices) == exact(expected)
 
 
 class TestConstructCdf:
@@ -535,12 +511,8 @@ class TestConstructCdf:
         cdf = Hist1D(x, nbins=EDGES).construct_cdf(only_plotted=False)
 
         np.testing.assert_array_equal(cdf["x"].values, inside)
-        # Tolerance: one division per row.
-        np.testing.assert_allclose(
-            cdf["position"].values,
-            np.linspace(0.0, 1.0, inside.size),
-            rtol=1e-12,
-            atol=0,
+        assert np.asarray(cdf["position"].values) == exact(
+            np.linspace(0.0, 1.0, inside.size)
         )
 
     def test_logx_cdf_is_in_linear_units(self):
@@ -555,10 +527,7 @@ class TestConstructCdf:
             only_plotted=False
         )
 
-        # Tolerance: log10 then power round trip.
-        np.testing.assert_allclose(
-            cdf["x"].values, np.sort(x.values), rtol=1e-12, atol=0
-        )
+        assert np.asarray(cdf["x"].values) == exact(np.sort(x.values))
 
     def test_cdf_of_aggregated_y_raises_value_error(self, xy):
         """A cdf is refused when y holds values rather than counts.
