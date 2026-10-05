@@ -78,7 +78,9 @@ class ICMECAT:
     ----------
     spacecraft : str, optional
         If provided, filter catalog to this spacecraft on load.
-        Valid names: Ulysses, Wind, ACE, STEREO-A, STEREO-B, etc.
+        Valid names are the ``SPACECRAFT_NAMES`` values, matched
+        case-insensitively: BepiColombo, Juno, MAVEN, MESSENGER, PSP,
+        SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.
     cache_dir : Path, optional
         Directory for caching downloaded data, saved as ``icmecat.csv``
         (the format the catalog downloads in). If None, no caching.

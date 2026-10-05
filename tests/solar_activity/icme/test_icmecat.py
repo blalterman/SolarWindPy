@@ -262,6 +262,20 @@ class TestICMECATStrictIntervals:
 class TestICMECATFilter:
     """ICMECAT.filter() returns a new, filtered catalog."""
 
+    def test_documented_spacecraft_names_are_spacecraft_names(self):
+        """The names the ICMECAT docstring lists are exactly SPACECRAFT_NAMES.
+
+        A user picks ``spacecraft`` from that list, so a name with no events in
+        the catalog (such as ACE) or a missing one misleads them.
+
+        ON FAILURE: the docstring or SPACECRAFT_NAMES is wrong; make the
+        docstring's "Valid names" list match SPACECRAFT_NAMES.
+        """
+        doc = " ".join(ICMECAT.__doc__.split())
+        listed = doc.split("matched case-insensitively:", 1)[1].split(".", 1)[0]
+        names = {name.strip() for name in listed.split(",")}
+        assert names == set(icmecat.SPACECRAFT_NAMES)
+
     def test_filter_returns_new_instance(self, serve_catalog):
         """filter() returns a different ICMECAT and leaves the original whole.
 
