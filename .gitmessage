@@ -14,7 +14,7 @@
 # ============================================
 # CHECKLIST (complete before committing):
 # ============================================
-# [ ] Tests added/updated (coverage ≥95%)
+# [ ] Tests added/updated (coverage at or above the pre-commit hook's floor)
 # [ ] Physics validation passed (if applicable)
 # [ ] Documentation updated (docstrings, README)
 # [ ] Code formatted (black) and linted (flake8)
@@ -25,12 +25,12 @@
 # ============================================
 # ATTRIBUTION (required for AI-assisted code):
 # ============================================
-# Co-Authored-By: Claude <noreply@anthropic.com>
+# End the message with a `Co-Authored-By: Claude …` trailer naming the model.
 
 # ============================================
 # ATTRIBUTION QUICK REFERENCE:
 # ============================================
-# - AI code: Include above footer in commit message
+# - AI code: Include the Co-Authored-By trailer above in the commit message
 # - External code: Add source comments in code file
 # - Algorithms: Cite papers in docstrings
 # - Uncertain provenance? Reimplement rather than copy (CLAUDE.md, Conventions)

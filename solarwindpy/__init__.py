@@ -22,6 +22,7 @@ _enable_docstring_inheritance()
 
 from . import (  # noqa: E402
     core,
+    examples,
     fitfunctions,
     instabilities,
     plotting,
@@ -74,6 +75,7 @@ pp = plotting
 
 __all__ = [
     "core",
+    "examples",
     "fitfunctions",
     "instabilities",
     "plotting",

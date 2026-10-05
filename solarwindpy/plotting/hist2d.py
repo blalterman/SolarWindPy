@@ -645,6 +645,11 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             10% of the number of observations (`window_length`) and 3 (`polyorder`).
             Note that because `window_length` must be odd, if the 10% value is even, we
             take 1-window_length.
+        xlim, ylim: tuple of (float or None, float or None), optional
+            Inclusive ``(lower, upper)`` limits, in data coordinates, on the edge
+            vertices drawn. A vertex outside a limit is dropped; a vertex exactly
+            on a limit is kept. ``None`` leaves that side unbounded. Default
+            ``(None, None)``.
         kwargs:
             Passed to `ax.plot`
         """

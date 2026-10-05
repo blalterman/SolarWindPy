@@ -1,6 +1,7 @@
 """Tests for linear fit functions."""
 
 import inspect
+import warnings
 import numpy as np
 import pytest
 
@@ -246,7 +247,10 @@ def test_line_with_weights():
 
 
 def test_line_horizontal_data():
-    """Line fitted to y = 3 has slope 0 and intercept 3.
+    """Line fitted to y = 3 has slope 0 and intercept 3, and R² is NaN.
+
+    Constant data have no spread, so R² is undefined and ``rsq`` returns NaN
+    without a divide-by-zero warning, per its docstring.
 
     ON FAILURE: the code is wrong.
     """
@@ -259,6 +263,10 @@ def test_line_horizontal_data():
     # True slope is 0, so rel is meaningless; 1e-9 is optimizer noise on O(1) data.
     assert obj.popt["m"] == pytest.approx(0.0, abs=1e-9)
     assert obj.popt["b"] == pytest.approx(3.0, **NOISE_FREE)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert np.isnan(obj.rsq)
 
 
 def test_line_recovers_near_vertical_slope():
@@ -276,11 +284,55 @@ def test_line_recovers_near_vertical_slope():
     assert obj.popt["b"] == pytest.approx(-1e5, **NOISE_FREE)
 
 
+def test_line_x_intercept_p0_is_none_for_zero_slope():
+    """Flat y at distinct x estimates m = 0, so LineXintercept.p0 is None.
+
+    y = 3 at x = 0..3: every step slope is 0. A flat line has no x-intercept,
+    so p0 gives no estimate (None, the same contract as repeated x), with no
+    divide-by-zero warning, per the p0 docstring.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0, 3.0])
+    y = np.full_like(x, 3.0)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert LineXintercept(x, y).p0 is None
+
+
+def test_line_x_intercept_fits_when_median_slope_is_zero():
+    """With p0 None from a zero median slope, make_fit still finds the line.
+
+    y = [0, 0, 0, 0, 6, 12] at x = 0..5: the step slopes [0, 0, 0, 6, 6] have
+    median 0, so p0 is None. Hand value under make_fit's default Huber loss
+    (f_scale = 0.1): the line y = 2 (x - 1) passes through (1, 0) and (4, 6);
+    the other residuals f - y are -2, +2, +4, -4 at x = 0, 2, 3, 5, all in
+    Huber's linear region, so each pulls with weight sign(r). Their gradient
+    in m, sum sign(r) (x - x0) = 1 + 1 + 2 - 4, and in x0, -m sum sign(r) =
+    -2 (-1 + 1 + 1 - 1), are both 0. The loss is convex in (m, b = -m x0), so
+    m = 2, x0 = 1 is the minimum. It is not the least-squares line
+    (m = 39/17.5), and it is away from the default start (1, 1), so a fit that
+    never moves fails.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])
+    y = np.array([0.0, 0.0, 0.0, 0.0, 6.0, 12.0])
+
+    obj = LineXintercept(x, y)
+    assert obj.p0 is None
+    obj.make_fit()
+
+    assert [obj.popt["m"], obj.popt["x0"]] == pytest.approx([2.0, 1.0], **NOISE_FREE)
+
+
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
 def test_line_p0_is_none_with_duplicate_x_values(cls):
     """Repeated x leaves no slope estimate, so p0 is None, and the fit still runs.
 
-    The p0 docstring promises None for repeated ``x``. The data are
+    The p0 docstring promises None for repeated ``x``. The x-steps are checked
+    before dividing, so no divide-by-zero RuntimeWarning is emitted. The data are
     y = 2x + 0.05 +/- 0.05 at x in {1, 2}, whose least-squares line is
     m = 2, b = 0.05 (x0 = -0.025); residuals stay inside the Huber quadratic
     region, so the fit equals that line.
@@ -291,8 +343,8 @@ def test_line_p0_is_none_with_duplicate_x_values(cls):
     y = np.array([2.0, 2.1, 4.0, 4.1])
 
     obj = cls(x, y)
-    # The slope estimate divides by the zero x-steps before giving up.
-    with pytest.warns(RuntimeWarning, match="divide by zero"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
         assert obj.p0 is None
     obj.make_fit()
 

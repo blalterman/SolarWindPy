@@ -363,8 +363,18 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         r"""Coefficient of determination.
 
         Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
+
+        Returns
+        -------
+        float
+            ``1 - SS_res / SS_tot``. When the used ``y`` have no spread (a single
+            point, or constant data), ``SS_tot = 0`` and R² is undefined, so
+            ``nan`` is returned without a divide-by-zero warning.
         """
         y = self.observations.used.y
+        if np.ptp(y) == 0:
+            return np.nan
+
         ybar = y.mean()
         yfit = self(self.observations.used.x)
         sum_squares_total = ((y - ybar) ** 2).sum()
