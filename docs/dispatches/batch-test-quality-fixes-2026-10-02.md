@@ -143,6 +143,19 @@ OWNS: README.rst, docs/source/tutorial/quickstart.rst, docs/source/installation.
 Run the rst examples under Sybil in CI and give each an asserted expected output. Control: an
 example with a wrong expected output fails the run. [31 Sybil examples pass, none assert]
 
+### abundances-2021-only
+
+OWNS: solarwindpy/core/abundances.py, solarwindpy/core/data/asplund2009.csv, solarwindpy/core/data/asplund2021.csv, tests/core/test_abundances.py, CHANGELOG.md
+
+Runs after `docstring-examples` and `abundances-tests` merge. Author decisions: delete
+`asplund2009.csv`; remove the `year` parameter and the `.year` property so
+`ReferenceAbundances()` always loads Asplund et al. (2021), Table 2
+(doi:10.1051/0004-6361/202140445); restore the CI_chondrites Ab values the CSV leaves blank,
+Ne −1.12, Ar −0.50, Kr −2.27, Xe −1.95 (each ± 0.18, as printed in Table 2). Every other row
+of the 2021 CSV already matches Table 2. Drop the 2009 tests, retire the noble-gas strict
+xfails, record the removal and the fix in `CHANGELOG.md`. Control: blanking any one of the
+four cells again fails a test.
+
 ### dev-extras-and-coverage-figure
 
 OWNS: pyproject.toml, CLAUDE.md
