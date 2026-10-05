@@ -2540,6 +2540,28 @@ def test_Wk_species_sum_is_nan_where_no_species_is_present():
         assert np.isnan(total.iloc[1])
 
 
+def test_scalar_thermal_speed_is_nan_where_par_and_per_are_missing():
+    r"""`w.scalar` is NaN on a row whose parallel and perpendicular parts are both missing.
+
+    Row 0 has w_par = 10 and w_per = 110 km/s, so the scalar moment identity
+    w^2 = (w_par^2 + 2 w_per^2) / 3 gives (100 + 24200) / 3 = 8100, w = 90 km/s by
+    hand. Row 1 has neither part; per the author, an empty sum is NaN, not 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma(
+        [
+            {"p1": (5.0, (400.0, 0.0, 0.0), 10.0, 110.0)},
+            {"p1": (5.0, (400.0, 0.0, 0.0), np.nan, np.nan)},
+        ],
+        "p1",
+    )
+    w = p.data.xs(("w", "scalar", "p1"), axis=1)
+
+    assert w.iloc[0] == exact(90.0)
+    assert np.isnan(w.iloc[1])
+
+
 def test_heat_flux_matches_its_docstring_formula():
     r"""`heat_flux` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
 

@@ -694,13 +694,8 @@ class Plasma(base.Base):
             .multiply(coeff, axis=1, level="C")
         )
 
-        # TODO: test `skipna=False` to ensure we don't accidentially create valid data
-        #       where there is none. Actually, not possible as we are combining along
-        #       "S".
-
-        # Workaround for `skipna=False` bug. (20200814)
-        # Changed to new groupby method (20250611)
-        w = w.T.groupby("S").sum().T.pow(0.5)
+        # min_count=1: a time with both parts missing is NaN, not 0.
+        w = w.T.groupby("S").sum(min_count=1).T.pow(0.5)
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
