@@ -39,6 +39,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from solarwindpy.solar_activity.base import ActivityIndicator  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 from solarwindpy.solar_activity.sunspot_number.sidc import (  # noqa: E402
     SIDC,
     SIDC_ID,
@@ -394,7 +395,7 @@ def test_normalization_by_zscore_gives_each_cycle_zero_mean_unit_variance(sidc):
     sidc.run_normalization(norm_by="zscore")
 
     for _, group in normalized_by_cycle(sidc):
-        np.testing.assert_allclose(group.mean(), 0.0, atol=1e-10)
+        assert group.mean() == exact(0.0, scale=1.0)  # mean of O(1) z-scores
         np.testing.assert_allclose(group.std(), 1.0)
 
 
@@ -409,7 +410,7 @@ def test_normalization_by_feature_scale_maps_each_cycle_onto_the_unit_interval(s
     sidc.run_normalization(norm_by="feature-scale")
 
     for _, group in normalized_by_cycle(sidc):
-        np.testing.assert_allclose(group.min(), 0.0, atol=1e-10)
+        assert group.min() == exact(0.0)  # (min - min) / range
         np.testing.assert_allclose(group.max(), 1.0)
 
 
@@ -542,9 +543,7 @@ def test_interpolate_data_recovers_a_linear_ramp(fake_home, seeded_index):
     target = pd.date_range(seeded_index[10], seeded_index[-10], freq="10D")
     interpolated = indicator.interpolate_data(target, key="ssn")
 
-    np.testing.assert_allclose(
-        interpolated.loc[:, "ssn"].values, ramp(target), rtol=1e-8, atol=1e-6
-    )
+    assert interpolated.loc[:, "ssn"].to_numpy() == exact(ramp(target))
 
 
 def test_interpolate_data_does_not_extrapolate(fake_home, seeded_index):
@@ -687,9 +686,8 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
             # fit against ssn is zero, and the slope is positive.
             slope, intercept = np.polyfit(window.values, values, 1)
             assert slope > 0
-            np.testing.assert_allclose(
-                values, slope * window.values + intercept, atol=1e-9
-            )
+            # Coordinates span the unit interval of the fresh axes.
+            assert values == exact(slope * window.values + intercept, scale=1.0)
     finally:
         plt.close(figure)
 
@@ -725,7 +723,7 @@ def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index)
             coords = np.asarray(line.get_data()[0], dtype=float)
             assert np.isfinite(coords).all()
             # Hand-computed: 30 / 100 of the fresh axes' unit span.
-            np.testing.assert_allclose(coords, 0.3, rtol=1e-12, atol=0)
+            assert coords == exact(0.3)
         # Hand-computed: top = 100, so ticks read 0, 100 / 2, 100.
         assert _value_axis_labels(axes) == ["0", "50", "100"]
     finally:
@@ -756,8 +754,8 @@ def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(fake_home, seeded_index
         for line in axes.lines:
             coords = np.asarray(line.get_data()[0], dtype=float)
             # Hand-computed: 140 / 200 and 20 / 200 of the unit span.
-            assert coords.max() == pytest.approx(0.7, rel=1e-12, abs=0)
-            assert coords.min() == pytest.approx(0.1, rel=1e-12, abs=0)
+            assert coords.max() == exact(0.7)
+            assert coords.min() == exact(0.1)
         assert _value_axis_labels(axes) == ["0", "100", "200"]
     finally:
         plt.close(figure)

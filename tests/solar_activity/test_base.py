@@ -20,6 +20,7 @@ from solarwindpy.solar_activity.base import (
     DataLoader,
     IndicatorExtrema,
 )
+from tests.tolerances import exact
 
 # ---------------------------------------------------------------------------
 # Concrete subclasses
@@ -383,8 +384,7 @@ def test_interpolation_reproduces_a_straight_line():
 
     assert list(out.columns) == ["flux"]
     assert out.index.equals(target)
-    # rel=1e-9: a spline on nanosecond epochs carries ~1e-12 rounding.
-    assert out["flux"].to_numpy() == pytest.approx([15.0, 32.5], rel=1e-9, abs=0)
+    assert out["flux"].to_numpy() == exact([15.0, 32.5])
 
 
 def test_interpolation_blanks_targets_outside_the_source_span():
@@ -396,8 +396,7 @@ def test_interpolation_blanks_targets_outside_the_source_span():
     out = Indicator().interpolate_data(LINEAR_SOURCE, target)["flux"]
 
     assert np.isnan(out.iloc[0])
-    # rel=1e-9: a spline on nanosecond epochs carries ~1e-12 rounding.
-    assert out.iloc[1] == pytest.approx(20.0, rel=1e-9, abs=0)
+    assert out.iloc[1] == exact(20.0)
     assert np.isnan(out.iloc[2])
 
 
@@ -414,9 +413,8 @@ def test_interpolation_handles_each_column_and_keeps_the_result():
     indicator = Indicator()
     out = indicator.interpolate_data(source, target)
 
-    # rel=1e-9: a spline on nanosecond epochs carries ~1e-12 rounding.
-    assert out.loc[target[0], "flux"] == pytest.approx(15.0, rel=1e-9, abs=0)
-    assert out.loc[target[0], "double"] == pytest.approx(30.0, rel=1e-9, abs=0)
+    assert out.loc[target[0], "flux"] == exact(15.0)
+    assert out.loc[target[0], "double"] == exact(30.0)
     assert indicator.interpolated is out
 
 

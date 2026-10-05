@@ -15,6 +15,7 @@ import pytest
 from scipy import stats
 
 from solarwindpy.tools import normal_parameters, swap_protons
+from tests.tolerances import assert_within_error_bars, exact
 
 # ---------------------------------------------------------------------------
 # solarwindpy.tools.swap_protons
@@ -218,9 +219,8 @@ class TestNormalParameters:
         result = normal_parameters(m, s)
         dist = stats.lognorm(s=s.values, scale=np.exp(m.values))
         assert list(result.columns) == ["mu", "sigma"]
-        # rel 1e-10: scipy evaluates equivalent closed forms (expm1) in another order.
-        np.testing.assert_allclose(result["mu"], dist.mean(), rtol=1e-10, atol=0)
-        np.testing.assert_allclose(result["sigma"], dist.std(), rtol=1e-10, atol=0)
+        assert result["mu"].to_numpy() == exact(dist.mean())
+        assert result["sigma"].to_numpy() == exact(dist.std())
 
     def test_zero_log_width_is_a_point_mass_at_e_to_the_m(self):
         """With s = 0, X = e^m exactly: mu = e^(ln 2) = 2 and sigma = 0.
@@ -228,8 +228,7 @@ class TestNormalParameters:
         ON FAILURE: the code is wrong.
         """
         mu, sigma = normal_parameters(math.log(2.0), 0.0)
-        # rel 1e-12: exp(log(2)) is 2 up to rounding.
-        assert mu == pytest.approx(2.0, rel=1e-12, abs=0)
+        assert mu == exact(2.0)  # exp(log(2))
         assert sigma == 0.0
 
     def test_scalar_inputs_unpack_as_mu_then_sigma(self):
@@ -240,9 +239,8 @@ class TestNormalParameters:
         """
         mu, sigma = normal_parameters(1.0, 0.5)
         dist = stats.lognorm(s=0.5, scale=math.e)
-        # rel 1e-10: as above.
-        assert mu == pytest.approx(dist.mean(), rel=1e-10, abs=0)
-        assert sigma == pytest.approx(dist.std(), rel=1e-10, abs=0)
+        assert mu == exact(dist.mean())
+        assert sigma == exact(dist.std())
 
     @pytest.mark.parametrize("base", [10.0, 2.0])
     def test_other_base_matches_scipy_lognorm_scaled_by_ln_base(self, base):
@@ -256,9 +254,8 @@ class TestNormalParameters:
         s = pd.Series([0.05, 0.2, 0.4, 0.1])
         result = normal_parameters(m, s, base=base)
         dist = stats.lognorm(s=s.values * np.log(base), scale=base**m.values)
-        # rel 1e-10: scipy evaluates equivalent closed forms in another order.
-        np.testing.assert_allclose(result["mu"], dist.mean(), rtol=1e-10, atol=0)
-        np.testing.assert_allclose(result["sigma"], dist.std(), rtol=1e-10, atol=0)
+        assert result["mu"].to_numpy() == exact(dist.mean())
+        assert result["sigma"].to_numpy() == exact(dist.std())
 
     def test_base_e_is_the_default(self):
         """``base=np.e`` reproduces the default natural-log result.
@@ -267,19 +264,21 @@ class TestNormalParameters:
         """
         m = pd.Series([0.0, 1.0, -0.5])
         s = pd.Series([0.25, 0.5, 1.0])
-        # rel 1e-12: ln(e) is 1 up to rounding.
-        pd.testing.assert_frame_equal(
-            normal_parameters(m, s, base=np.e),
-            normal_parameters(m, s),
-            rtol=1e-12,
-            atol=0,
-        )
+        with_base = normal_parameters(m, s, base=np.e)
+        default = normal_parameters(m, s)
+        pd.testing.assert_index_equal(with_base.index, default.index)
+        pd.testing.assert_index_equal(with_base.columns, default.columns)
+        assert with_base.to_numpy() == exact(default.to_numpy())  # ln(e) = 1
 
     @pytest.mark.parametrize("base", [np.e, 10.0])
     def test_sample_mean_of_base_b_lognormal_matches_mu(self, base):
-        """Sampled X = b^Z, Z ~ N(m, s), has mean within 4 standard errors of mu.
+        """Sampled X = b^Z, Z ~ N(m, s), has mean and std within 4 errors of mu, sigma.
 
-        Fixed seed; the standard error is sigma / sqrt(N).
+        Fixed seed. The standard error of the sample mean is sigma / sqrt(N); that
+        of the sample standard deviation is sigma sqrt((kappa + 2) / N) / 2, since
+        the sample variance has variance sigma^4 (kappa + 2) / N for large N and
+        the square root halves its relative error (delta method). The excess
+        kurtosis kappa is scipy's for lognorm(s ln b).
 
         ON FAILURE: the code is wrong.
         """
@@ -287,10 +286,11 @@ class TestNormalParameters:
         z = np.random.default_rng(20260930).normal(m, s, n)
         x = base**z
         mu, sigma = normal_parameters(m, s, base=base)
-        # 4 standard errors: passes for almost any seed, per TEST_PATTERNS.
-        assert abs(x.mean() - mu) < 4.0 * sigma / np.sqrt(n)
-        # sigma itself: sample std within 4 percent (its own error is ~0.3 %).
-        assert x.std() == pytest.approx(sigma, rel=0.04, abs=0)
+        kappa = stats.lognorm(s=s * np.log(base)).stats(moments="k")
+        assert_within_error_bars(x.mean(), sigma / np.sqrt(n), mu)
+        assert_within_error_bars(
+            x.std(), sigma * np.sqrt((kappa + 2.0) / n) / 2.0, sigma
+        )
 
     @pytest.mark.parametrize("base", [1.0, 0.0, -10.0, np.nan])
     def test_invalid_base_raises_value_error(self, base):

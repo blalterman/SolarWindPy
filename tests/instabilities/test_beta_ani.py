@@ -19,6 +19,7 @@ from matplotlib.collections import QuadMesh  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # Four populations in four distinct cells of a 2 x 2 grid:
 #   5 at (beta, R) = (3, 0.3)   -> log10 cell (x0, y0), shown (5 >= 5)
@@ -67,8 +68,8 @@ def test_default_plot_bins_log10_beta_and_anisotropy_and_hides_cells_below_5():
 
     coords = mesh.get_coordinates()
     # Edges are exact powers of ten here: log10 ranges [0, 2] and [-1, 1].
-    np.testing.assert_allclose(coords[0, :, 0], 10.0**xedges, rtol=1e-12, atol=0)
-    np.testing.assert_allclose(coords[:, 0, 1], 10.0**yedges, rtol=1e-12, atol=0)
+    assert np.asarray(coords[0, :, 0]) == exact(10.0**xedges)
+    assert np.asarray(coords[:, 0, 1]) == exact(10.0**yedges)
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
 
 
@@ -80,7 +81,7 @@ def test_logx_false_bins_beta_linearly():
     ax, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS, logx=False).make_plot()
     coords = _mesh(ax).get_coordinates()
     xedges = np.histogram_bin_edges(BETA, NBINS)  # [1, 50.5, 100]
-    np.testing.assert_allclose(coords[0, :, 0], xedges, rtol=1e-12, atol=0)
+    assert np.asarray(coords[0, :, 0]) == exact(xedges)
     assert (ax.get_xscale(), ax.get_yscale()) == ("linear", "log")
 
 
