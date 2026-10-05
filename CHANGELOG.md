@@ -199,6 +199,12 @@ These change computed values; rerun any analysis that used them.
   there. The `Plasma` methods built on `project` change the same way on such rows.
 - Plot labels for a latitude component (`"lat"`) now render as lambda and a colatitude
   component (`"colat"`) as theta; the two symbols were swapped.
+- `ReferenceAbundances` CI chondrite abundances for Ne, Ar, Kr and Xe were NaN. They are
+  now the Asplund et al. (2021) Table 2 values -1.12, -0.50, -2.27 and -1.95 dex (each
+  ± 0.18), doi:10.1051/0004-6361/202140445.
+- `ReferenceAbundances.get_element` named its Series by the index level it did not
+  search: `get_element("Fe")` was named 26 and `get_element(26)` was named `"Fe"`. Both
+  are now named by the atomic number, 26.
 
 ### Removed
 
@@ -216,6 +222,10 @@ These change computed values; rerun any analysis that used them.
   commit beb10945.
 - The `"Lalpha"`, `"f10.7"`, `"CaK"`, and `"MgII"` plot label keys, which existed only
   for the removed LISIRD indices.
+- Asplund et al. (2009) abundances: `ReferenceAbundances` loses its `year` parameter and
+  `.year` property, and `core/data/asplund2009.csv` is removed. `ReferenceAbundances()`
+  always loads Asplund et al. (2021), Table 2 (doi:10.1051/0004-6361/202140445);
+  passing `year=` raises `TypeError`.
 
 ## [0.3.0] - 2025-12-24
 
