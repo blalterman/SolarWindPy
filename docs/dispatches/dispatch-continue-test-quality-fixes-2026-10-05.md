@@ -97,12 +97,12 @@ pushed with the author's approval each time.
 
 - Merged fix-program pull requests:
   `gh pr list --state merged --limit 300 --json headRefName --jq '[.[]|select(.headRefName|startswith("tq-fix/"))]|length'`
-  printed 18 when this dispatch was written.
-- The open pull request:
+  printed 19 after PR #493 (`tolerance-helpers`) merged. #493 routes every hand-written test
+  tolerance through `tests/tolerances.py` and tightened about 15 of them; none were loosened. Its
+  CI passed on a re-run.
+- Open fix-program pull requests:
   `gh pr list --state open --json number,headRefName --jq '.[]|"\(.number) \(.headRefName)"'`
-  printed `493 tq-fix/tolerance-helpers` when this dispatch was written. It routes every
-  hand-written test tolerance through `tests/tolerances.py` and tightens about 15 of them; none
-  were loosened.
+  printed nothing after #493 merged.
 - Units not yet run, each specified in the batch file: `p0-simplify`, `scalar-w-nan`, and the
   long-running `mutation-recheck`.
   `grep -nE '^### (p0-simplify|scalar-w-nan|mutation-recheck)$' /Users/balterma/observatories/code/SolarWindPy/docs/dispatches/batch-test-quality-fixes-2026-10-02.md`
@@ -135,16 +135,14 @@ re-derive, re-plan, or "improve" the scope and intent it settles.
 
 Execute in this order. A step that waits on a merge waits for the author.
 
-1. **PR #493 (`tolerance-helpers`).** Read its latest Claude review
-   (`gh pr view 493 --json comments --jq '[.comments[]|select(.author.login=="claude")]|last|.body'`),
-   verify each claim against the code, and send confirmed fixes to a resumed or fresh agent on the
-   same branch. Put two questions to the author: whether the agent's `printed(actual/expected,
-   decimals=...)` ratio form becomes a fifth named tolerance kind, and whether bare
-   `pytest.approx(x)` calls (no tolerance keyword, so pytest's `abs=1e-12` default applies) join
-   the enforcing test. Watch CI for intermittent failures in the fit-result checks it tightened to
+1. **Two open questions from PR #493 (merged).** Put both to the author: whether the
+   `printed(actual/expected, decimals=...)` ratio form in `tests/tolerances.py` becomes a fifth
+   named tolerance kind, and whether bare `pytest.approx(x)` calls (no tolerance keyword, so
+   pytest's `abs=1e-12` default applies) join the enforcing test `tests/test_tolerance_rule.py`.
+   Watch later CI runs for intermittent failures in the fit-result checks #493 tightened to
    `exact`; such a failure means a tolerance too tight for an optimizer result, and goes to the
    author.
-2. **After #493 merges, launch `p0-simplify` and `scalar-w-nan` in parallel.** Their `OWNS:` lines
+2. **Launch `p0-simplify` and `scalar-w-nan` in parallel.** Their `OWNS:` lines
    in the batch file are disjoint; `p0-simplify` also owns CLAUDE.md and CHANGELOG.md, so give
    `scalar-w-nan` its CHANGELOG entry only after `p0-simplify` merges, or drop CHANGELOG from one
    brief. Each brief: point the agent at the batch file's "Governance", "Every unit", and its own
@@ -154,7 +152,10 @@ Execute in this order. A step that waits on a merge waits for the author.
    shared history), run `conda run -n solarwindpy pytest -q` and
    `conda run -n solarwindpy pytest --doctest-modules solarwindpy -q`, and set the unit's Status
    dropdown to Merged in the work-plan doc. A red suite stops further merges and goes to the author
-   with the failing test.
+   with the failing test. A red CI check whose conclusion is CANCELLED with "The job was not
+   acquired by Runner of type hosted" is a GitHub runner shortage, not a failure: re-run it with
+   `gh run rerun <run-id> --failed` (with the author's approval) and merge only after the re-run
+   is green.
 4. **Read the 20 warnings** (read-only): `conda run -n solarwindpy pytest -q -rw` and report each
    source in one line. A warning from package code that a decided rule covers (for example an
    empty-sum or divide-by-zero case) becomes a fix in the next unit; any other goes to the author.
@@ -196,8 +197,9 @@ progress, PR open, Merged, Blocked) in its row.
    every unit's `OWNS:` line and author decisions; the sections each unit brief points to.
 2. `/Users/balterma/observatories/code/SolarWindPy/docs/dispatches/findings-test-quality-review-2026-10-02.md`:
    the baseline numbers and the `## Re-measurement (2026-10-05)` section step 5 extends.
-3. `/Users/balterma/observatories/code/SolarWindPy/.claude/docs/TEST_PATTERNS.md`: the test standard
-   every unit writes to; after #493 merges it points to `tests/tolerances.py`.
+3. `/Users/balterma/observatories/code/SolarWindPy/.claude/docs/TEST_PATTERNS.md` and
+   `/Users/balterma/observatories/code/SolarWindPy/tests/tolerances.py`: the test standard every
+   unit writes to, and the helper module that holds its tolerance rule.
 4. `/Users/balterma/.claude/projects/-Users-balterma-observatories-code-SolarWindPy/memory/feedback_push-explicit-refspec.md`
    and
    `/Users/balterma/.claude/projects/-Users-balterma-observatories-code-SolarWindPy/memory/feedback_subagent-limits.md`:
@@ -213,7 +215,7 @@ git fetch -q origin
 git rev-list --count origin/master..master        # expect 0
 git rev-list --count master..origin/master        # expect 0
 git status --porcelain | grep -v '^??'            # expect no output
-gh pr list --state open --json number,headRefName --jq '.[]|"\(.number) \(.headRefName)"'   # expect 493 tq-fix/tolerance-helpers, or nothing once it merged
+gh pr list --state open --json number,headRefName --jq '.[]|"\(.number) \(.headRefName)"'   # expect no output
 grep -cE '^### (p0-simplify|scalar-w-nan|mutation-recheck)$' docs/dispatches/batch-test-quality-fixes-2026-10-02.md   # expect 3
 echo "$CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS"      # the concurrency cap
 git config --get push.default                     # expect upstream: every push uses an explicit refspec
