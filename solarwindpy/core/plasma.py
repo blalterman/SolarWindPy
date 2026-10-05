@@ -99,6 +99,16 @@ class Plasma(base.Base):
     >>> plasma.p1.n.tolist()  # Proton number density
     [1.0, 2.0, 3.0]
 
+    Build a Plasma from your own DataFrame with ("M", "C", "S") columns by
+    passing it with the species to load; here the example's frame stands in:
+
+    >>> from solarwindpy.core.plasma import Plasma
+    >>> mine = Plasma(plasma.data, *plasma.species)
+    >>> mine.species
+    ('a', 'e', 'p1', 'p2')
+    >>> mine.data.equals(plasma.data)
+    True
+
     Calculate plasma physics parameters:
 
     >>> beta = plasma.beta('p1')          # Plasma beta for protons
