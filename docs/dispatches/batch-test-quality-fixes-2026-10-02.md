@@ -189,9 +189,35 @@ outside `docs/dispatches/` returns nothing.
 ## Follow-up units
 
 Both run after every unit above has merged; their files are disjoint. `plasma-code-fixes`
-also waits for the revert of 6ed14f84 (PR #487) and the PR that re-applies it, since both
-change `plasma.py`. Each retires the strict
+also waits for `examples-and-logging-cleanup`, since both change `plasma.py`. Each retires the strict
 xfails its fixes resolve, with the three-run demonstration from TEST_PATTERNS.md.
+
+### examples-and-logging-cleanup
+
+OWNS: solarwindpy/examples.py (new), solarwindpy/__init__.py, solarwindpy/core/data/ (new example CSVs only), tests/data/, tests/core/test_base.py, tests/test_examples.py (new), conftest.py, solarwindpy/core/plasma.py, CHANGELOG.md
+
+Replaces the re-apply of 6ed14f84 (the conftest-fixture approach). Author decisions:
+
+- Docstring examples get their Plasma from one public loader, `swp.examples.load_plasma()`,
+  which builds a full Plasma from the suite's three-row test data: plasma, epoch, and
+  spacecraft, plus auxiliary data if a CSV holds it (none does today). Move
+  `tests/data/{epoch,plasma,spacecraft}.csv` into `solarwindpy/core/data/` (already packaged)
+  as `example_*.csv` with `git mv`, keeping their bytes. The loader holds the one copy of the
+  `a|b|c` → `(M, C, S)` column parsing; `tests/core/test_base.py` uses the loader instead of
+  its own. The examples in `Plasma.epoch`, `set_spacecraft` and `set_auxiliary_data` start
+  with `>>> plasma = swp.examples.load_plasma()` and show this data's real values. Remove the
+  root `conftest.py` doctest fixture (`_doctest_plasma`, `_small_plasma`), which then has no
+  users.
+- Remove the unused plasma-statistics logging to simplify the code: the `log_plasma_stats`
+  argument, `log_plasma_at_init`, `set_log_plasma_stats`, the pass-throughs at the class
+  constructor and the species-subset method, and the statistics in `_log_object_at_load`
+  (this also removes the pandas-3 `applymap` crash). Keep the INFO message "No %s data passed
+  to %s" when an optional input is None. Record the removal in `CHANGELOG.md`.
+
+Controls: an installed-style check that the loader finds its CSVs through the package (not a
+path into `tests/`); a test that `load_plasma()` returns the documented species, row count and
+spacecraft columns, failing on a broken CSV; `Plasma(..., log_plasma_stats=True)` raises
+`TypeError`; the "No … data passed" message is still logged (caplog).
 
 ### plasma-code-fixes
 
@@ -208,8 +234,8 @@ Author decisions:
 - `vdf_ratio` returns NaN where the projection is NaN (`skipna=False`).
 - `estimate_electrons` sets T_e = T_p, as its docstring states: w_e² = (m_p/m_e) w_p², not
   the current (n_p/n_e)(m_p/m_e) w_p².
-- Replace `DataFrame.applymap` (removed in pandas 3) in `_log_object_at_load`, with a test
-  that `log_plasma_stats=True` no longer raises.
+- (The pandas-3 `applymap` crash is removed with the logging in
+  `examples-and-logging-cleanup`, which runs first.)
 
 ### small-code-fixes
 
