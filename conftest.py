@@ -27,9 +27,6 @@ that hook puts each document's examples back in line order.
 
 Docstring examples that need a ``Plasma`` build one with
 ``solarwindpy.examples.load_plasma()``; no fixture injects one.
-
-``TEST_XFAIL`` marks ordinary tests strict xfail by node id, for a defect in
-a file the change that found it does not own.
 """
 
 from pathlib import Path
@@ -38,17 +35,6 @@ import pytest
 
 # Doctest node id -> reason. Each entry names the defect that retires it.
 DOCTEST_XFAIL = {}
-
-# Test node id -> reason. Strict, and only for an AssertionError.
-TEST_XFAIL = {
-    "tests/test_public_imports.py::"
-    "test_every_public_object_is_documented_on_the_api_reference": (
-        "docs/source/api_reference.rst has no ':recursive:' autosummary entry "
-        "for solarwindpy.examples, so solarwindpy.examples.load_plasma is not "
-        "documented; expected AssertionError ['solarwindpy.examples']; remove "
-        "this entry when api_reference.rst lists solarwindpy.examples"
-    ),
-}
 
 # rst documents whose examples run under Sybil, relative to this directory.
 SYBIL_DOCUMENTS = [
@@ -110,11 +96,6 @@ def pytest_collection_modifyitems(config, items):
         reason = DOCTEST_XFAIL.get(item.nodeid)
         if reason is not None:
             item.add_marker(pytest.mark.xfail(strict=True, reason=reason))
-        reason = TEST_XFAIL.get(item.nodeid)
-        if reason is not None:
-            item.add_marker(
-                pytest.mark.xfail(strict=True, raises=AssertionError, reason=reason)
-            )
     if SybilItem is not None:
         _deselect_doctest_duplicates(config, items)
         _restore_document_order(items)
