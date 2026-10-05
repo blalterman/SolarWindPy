@@ -28,7 +28,8 @@ def _read_example(name):
     Parameters
     ----------
     name : str
-        ``"plasma"``, ``"spacecraft"`` or ``"auxiliary_data"``.
+        ``"plasma"`` or ``"spacecraft"``; also ``"auxiliary_data"``, read
+        only when the package ships ``example_auxiliary_data.csv``.
 
     Returns
     -------
@@ -83,6 +84,8 @@ def load_plasma():
     from ..core.spacecraft import Spacecraft
 
     data = _read_example("plasma")
+    # `if s` drops the empty species label of spacecraft-frame quantities
+    # (e.g. `b`), so only particle species (a, e, p1, p2) reach Plasma.
     species = sorted(s for s in data.columns.get_level_values("S").unique() if s)
 
     sc = _read_example("spacecraft").xs("", axis=1, level="S")
