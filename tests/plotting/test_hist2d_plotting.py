@@ -29,6 +29,7 @@ from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 
 @pytest.fixture
@@ -194,7 +195,6 @@ class TestContourGrid:
         vertices = np.concatenate([seg for segs in qset.allsegs for seg in segs])
         plt.close(fig)
         assert vertices.size  # the fixture: the chosen levels draw contours
-        # rel=1e-12: vertices on the outermost centre line are exact up to rounding.
         assert vertices[:, 0].min() >= x_mid.min() * (1 - 1e-12)
         assert vertices[:, 0].max() <= x_mid.max() * (1 + 1e-12)
         assert vertices[:, 1].min() >= y_mid.min() * (1 - 1e-12)
@@ -311,9 +311,8 @@ class TestPlotHistWithContours:
         ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(label_levels=False)
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         expected = _expected_grid(known_counts) / known_counts.max()
-        # rel=1e-12: one division of small integers.
-        np.testing.assert_allclose(
-            values.reshape(expected.shape), expected, rtol=1e-12, atol=0
+        assert np.asarray(values.reshape(expected.shape)) == exact(
+            expected, nan_ok=True
         )
         plt.close("all")
 
@@ -358,8 +357,7 @@ class TestPlotHistWithContours:
         for got_at_level, want_at_level in zip(qset.allsegs, expected.allsegs):
             assert len(got_at_level) == len(want_at_level)
             for got, want in zip(got_at_level, want_at_level):
-                # rtol=1e-10: the same float operations in a different order.
-                np.testing.assert_allclose(got, want, rtol=1e-10)
+                assert np.asarray(got) == exact(want)
         plt.close("all")
 
 
@@ -805,7 +803,7 @@ class TestQuantileAlimInPlots:
     def _expected_grid():
         occupied = KNOWN_COUNTS[KNOWN_COUNTS > 0]  # the chosen input's bins
         lo, hi = np.quantile(occupied, [0.01, 0.99])
-        assert (lo, hi) == pytest.approx((1.0, 5.87), rel=1e-12, abs=0)  # by hand
+        assert (lo, hi) == exact((1.0, 5.87))  # by hand
         kept = (KNOWN_COUNTS >= lo) & (KNOWN_COUNTS <= hi)
         return np.where(kept, KNOWN_COUNTS, np.nan)
 
@@ -1272,16 +1270,12 @@ class TestPlotEdges:
         fig, ax = plt.subplots()
         (top_line,), _ = h.plot_edges(ax, smooth=False)
 
-        np.testing.assert_allclose(
-            np.asarray(top_line.get_xdata(), float),
-            10.0 ** _bin_centers(log_x),
-            rtol=1e-10,
+        assert np.asarray(np.asarray(top_line.get_xdata(), float)) == exact(
+            10.0 ** _bin_centers(log_x)
         )
         # Every column of `counts` is populated in the upper y-bin.
-        np.testing.assert_allclose(
-            np.asarray(top_line.get_ydata(), float),
-            np.full(len(xedges) - 1, 10.0 ** _bin_centers(log_y)[-1]),
-            rtol=1e-10,
+        assert np.asarray(np.asarray(top_line.get_ydata(), float)) == exact(
+            np.full(len(xedges) - 1, 10.0 ** _bin_centers(log_y)[-1])
         )
         plt.close("all")
 
@@ -1303,9 +1297,7 @@ class TestPlotEdges:
         )
 
         expected = savgol_filter(np.asarray(raw.get_ydata(), float), 5, 2)
-        np.testing.assert_allclose(
-            np.asarray(smoothed.get_ydata(), float), expected, rtol=1e-10
-        )
+        assert np.asarray(np.asarray(smoothed.get_ydata(), float)) == exact(expected)
         plt.close("all")
 
     def test_both_edges_get_the_smoothing_the_caller_asked_for(self, smoothable_hist):
@@ -1326,8 +1318,8 @@ class TestPlotEdges:
         )
 
         expected = savgol_filter(np.asarray(raw_bottom.get_ydata(), float), 21, 1)
-        np.testing.assert_allclose(
-            np.asarray(smoothed_bottom.get_ydata(), float), expected, rtol=1e-10
+        assert np.asarray(np.asarray(smoothed_bottom.get_ydata(), float)) == exact(
+            expected
         )
         plt.close("all")
 
@@ -1393,9 +1385,7 @@ class TestProject1D:
         projected = h.project_1d("x", project_counts=True)
         assert projected.log.x is True
         np.testing.assert_allclose(projected.agg().values, counts.sum(axis=0))
-        np.testing.assert_allclose(
-            10.0 ** projected.edges["x"].values, xedges, rtol=1e-10
-        )
+        assert np.asarray(10.0 ** projected.edges["x"].values) == exact(xedges)
 
     def test_projection_aggregates_z_when_the_histogram_has_z_values(self):
         """With z-values present, the marginal is the mean of z per x-bin.

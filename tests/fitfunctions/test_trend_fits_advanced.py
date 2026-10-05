@@ -13,6 +13,7 @@ from solarwindpy.fitfunctions.gaussians import Gaussian
 from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.power_laws import PowerLaw
 from solarwindpy.fitfunctions.trend_fits import TrendFit
+from tests.tolerances import exact
 
 matplotlib.use("Agg")  # Non-interactive backend for testing
 
@@ -60,7 +61,10 @@ class TestResidualsEnhancement:
         np.testing.assert_array_equal(r_fitted, r_all)
 
     def test_percentage_residuals(self):
-        """Test percentage residuals calculation."""
+        """Percent residuals are 100 (y - f) / f of the plain residuals.
+
+        ON FAILURE: the code is wrong.
+        """
         # Use Line fit for more predictable results
         x = np.linspace(1, 10, 50)
         rng = np.random.default_rng(66)
@@ -76,7 +80,7 @@ class TestResidualsEnhancement:
         fitted = ff(ff.observations.used.x)
         expected_pct = 100 * (r_abs / fitted)
 
-        np.testing.assert_allclose(r_pct, expected_pct, rtol=1e-10)
+        assert r_pct == exact(expected_pct, nan_ok=True)
 
     def test_percentage_residuals_use_all(self):
         """Test percentage residuals with use_all=True."""
@@ -128,10 +132,8 @@ class TestResidualsEnhancement:
 
         fitted = ff.popt["A"] * x[1:] ** ff.popt["b"]
         assert np.isnan(r_pct[0])
-        # rel=1e-9: the same arithmetic evaluated from popt.
-        np.testing.assert_allclose(
-            r_pct[1:], 100.0 * (y[1:] - fitted) / fitted, rtol=1e-9, atol=0
-        )
+        # The same arithmetic, evaluated from popt.
+        assert r_pct[1:] == exact(100.0 * (y[1:] - fitted) / fitted, nan_ok=True)
 
 
 class TestInPlaceOperations:

@@ -15,14 +15,13 @@ from . import test_base as base
 from solarwindpy.core import vector
 from solarwindpy.core import tensor
 from solarwindpy.core import plasma
+from tests.tolerances import exact
 
 pd.set_option("mode.chained_assignment", "raise")
 
-# Angles are O(1-180) degrees computed from exact inputs, so 1e-12 absolute is far below
-# any formula error (the smallest wrong answer in these cases is off by >= 1 degree).
-ANGLE_TOL = dict(rtol=1e-12, atol=1e-12)
-# Projections and cosines are O(1) and computed from exact inputs; same reasoning.
-VALUE_TOL = dict(rtol=1e-12, atol=1e-12)
+# Hand inputs are of order 1, so a component that cancels to 0 carries rounding of
+# order 1e-16 times this scale.
+UNIT_SCALE = 1.0
 
 
 def _hand_vector(rows, cls=vector.Vector):
@@ -142,9 +141,9 @@ class VectorTestBase(QuantityTestBase):
         pdt.assert_series_equal(lat, self.object_testing.lat)
         pdt.assert_series_equal(colat, self.object_testing.colatitude)
         pdt.assert_series_equal(colat, self.object_testing.colat)
-        np.testing.assert_allclose(
-            self.object_testing.lat + self.object_testing.colat, 90.0, **ANGLE_TOL
-        )
+        assert (
+            self.object_testing.lat + self.object_testing.colat
+        ).to_numpy() == exact(90.0)
 
     def test_longitude(self):
         """lon and longitude are arctan2(y, x) in degrees.
@@ -343,8 +342,8 @@ class TestVectorAngleHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [c[1] for c in self.CASES]
-        np.testing.assert_allclose(v.latitude, expected, **ANGLE_TOL)
-        np.testing.assert_allclose(v.lat, expected, **ANGLE_TOL)
+        assert np.asarray(v.latitude) == exact(expected, scale=UNIT_SCALE)
+        assert np.asarray(v.lat) == exact(expected, scale=UNIT_SCALE)
 
     def test_colatitude_of_hand_directions(self, v):
         """colatitude and colat are 0 on +z, 90 on +x, 180 on -z, 45 and 120 off-axis.
@@ -352,8 +351,8 @@ class TestVectorAngleHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [c[2] for c in self.CASES]
-        np.testing.assert_allclose(v.colatitude, expected, **ANGLE_TOL)
-        np.testing.assert_allclose(v.colat, expected, **ANGLE_TOL)
+        assert np.asarray(v.colatitude) == exact(expected, scale=UNIT_SCALE)
+        assert np.asarray(v.colat) == exact(expected, scale=UNIT_SCALE)
 
 
 class TestVectorProjectionHandCases:
@@ -385,8 +384,10 @@ class TestVectorProjectionHandCases:
         out = v.project(b)
         assert list(out.columns) == ["par", "per"]
         pdt.assert_index_equal(out.index, v.data.index)
-        np.testing.assert_allclose(out["par"], [3.0, 1.0, -2.0], **VALUE_TOL)
-        np.testing.assert_allclose(out["per"], [4.0, np.sqrt(2.0), 0.0], **VALUE_TOL)
+        assert out["par"].to_numpy() == exact([3.0, 1.0, -2.0], scale=UNIT_SCALE)
+        assert out["per"].to_numpy() == exact(
+            [4.0, np.sqrt(2.0), 0.0], scale=UNIT_SCALE
+        )
 
     def test_cos_theta_gives_hand_cosines(self, v, b):
         """cos_theta returns (3/5, 1/sqrt(3), -1), and is symmetric in its arguments.
@@ -394,8 +395,8 @@ class TestVectorProjectionHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [0.6, 1.0 / np.sqrt(3.0), -1.0]
-        np.testing.assert_allclose(v.cos_theta(b), expected, **VALUE_TOL)
-        np.testing.assert_allclose(b.cos_theta(v), expected, **VALUE_TOL)
+        assert np.asarray(v.cos_theta(b)) == exact(expected, scale=UNIT_SCALE)
+        assert np.asarray(b.cos_theta(v)) == exact(expected, scale=UNIT_SCALE)
 
     def test_rows_in_only_one_vector_are_nan(self):
         """project and cos_theta are NaN on rows present in only one of the two vectors.
@@ -421,15 +422,17 @@ class TestVectorProjectionHandCases:
         nan = np.nan
         out = v.project(b)
         pdt.assert_index_equal(out.index, minutes)
-        # assert_allclose treats NaN as equal only to NaN, so a 0 fails.
-        np.testing.assert_allclose(out["par"], [nan, 1.0, -2.0, nan], **VALUE_TOL)
-        np.testing.assert_allclose(
-            out["per"], [nan, np.sqrt(2.0), 0.0, nan], **VALUE_TOL
+        # nan_ok matches NaN only to NaN, so a 0 fails.
+        assert out["par"].to_numpy() == exact(
+            [nan, 1.0, -2.0, nan], scale=UNIT_SCALE, nan_ok=True
+        )
+        assert out["per"].to_numpy() == exact(
+            [nan, np.sqrt(2.0), 0.0, nan], scale=UNIT_SCALE, nan_ok=True
         )
         cos = v.cos_theta(b)
         pdt.assert_index_equal(cos.index, minutes)
-        np.testing.assert_allclose(
-            cos, [nan, 1.0 / np.sqrt(3.0), -1.0, nan], **VALUE_TOL
+        assert cos.to_numpy() == exact(
+            [nan, 1.0 / np.sqrt(3.0), -1.0, nan], scale=UNIT_SCALE, nan_ok=True
         )
 
     @pytest.mark.parametrize("method", ["project", "cos_theta"])
@@ -510,10 +513,7 @@ class TestTensorMagnitude:
             [[3.0, 0.0, -1.0], [0.0, 3.0, -1.0], [4.0, 4.0, -1.0]], columns=cols
         )
         expected = [np.sqrt(3.0), np.sqrt(6.0), 4.0]
-        # Exact inputs; 1e-12 relative covers the rounding of sqrt and /3 only.
-        np.testing.assert_allclose(
-            tensor.Tensor(data).magnitude, expected, rtol=1e-12, atol=0
-        )
+        assert tensor.Tensor(data).magnitude.to_numpy() == exact(expected)
 
     def test_magnitude_of_plasma_thermal_speed(self):
         """A Plasma-built p1 thermal-speed Tensor's magnitude is its own scalar column.
@@ -526,10 +526,7 @@ class TestTensorMagnitude:
         """
         p = plasma.Plasma(base.SyntheticData().plasma_data, "p1", "a")
         w = p.p1.w
-        # Same formula evaluated in a different order; 1e-12 relative covers rounding.
-        np.testing.assert_allclose(
-            w.magnitude, w.data.loc[:, "scalar"], rtol=1e-12, atol=0
-        )
+        assert w.magnitude.to_numpy() == exact(w.data.loc[:, "scalar"].to_numpy())
         pdt.assert_index_equal(w.magnitude.index, w.data.index)
 
 

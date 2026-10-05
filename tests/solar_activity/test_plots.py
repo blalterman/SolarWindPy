@@ -22,6 +22,7 @@ import pytest  # noqa: E402
 from solarwindpy.plotting import labels  # noqa: E402
 from solarwindpy.solar_activity.plots import IndicatorPlot, SSNPlot  # noqa: E402
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDC, SIDC_ID  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 MONTHS = pd.date_range("2000-01-01", "2009-12-01", freq="MS")
 SSN = 50.0 + np.arange(MONTHS.size)  # month i after 2000-01 has SSN 50 + i
@@ -89,8 +90,7 @@ def test_the_fixture_series_is_the_one_chosen(sidc):
     """
     ssn = sidc.data["ssn"]
     assert ssn.index.equals(MONTHS.as_unit(ssn.index.unit))
-    # rel=1e-12: values pass through a CSV round trip unchanged.
-    assert ssn.to_numpy() == pytest.approx(SSN, rel=1e-12, abs=0)
+    assert ssn.to_numpy() == exact(SSN)  # through a CSV round trip
 
 
 def test_ssn_plot_shows_the_whole_ssn_series(sidc):
@@ -102,8 +102,7 @@ def test_ssn_plot_shows_the_whole_ssn_series(sidc):
     assert plot.ykey == "ssn"
     assert plot.indicator is sidc
     assert plot.plasma_index is None
-    # rel=1e-12: values pass through a CSV round trip unchanged.
-    assert plot.plot_data.to_numpy() == pytest.approx(SSN, rel=1e-12, abs=0)
+    assert plot.plot_data.to_numpy() == exact(SSN)  # through a CSV round trip
 
 
 def test_plasma_index_trims_to_data_from_its_earliest_time(sidc):
@@ -154,9 +153,8 @@ def test_make_plot_draws_the_series_against_date_numbers(sidc):
 
     assert len(ax.lines) == 1
     x, y = ax.lines[0].get_data()
-    # rel=1e-12: whole and half day numbers are exact in float64.
-    assert np.asarray(x) == pytest.approx(days_since_1970(MONTHS), rel=1e-12, abs=0)
-    assert np.asarray(y) == pytest.approx(SSN, rel=1e-12, abs=0)
+    assert np.asarray(x) == exact(days_since_1970(MONTHS))
+    assert np.asarray(y) == exact(SSN)
 
 
 def test_make_plot_without_axes_draws_on_a_new_figure(sidc):

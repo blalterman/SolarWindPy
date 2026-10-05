@@ -24,6 +24,7 @@ import pytest
 
 from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.core import InsufficientDataError
+from tests.tolerances import exact
 
 # =============================================================================
 # Fixtures
@@ -126,6 +127,8 @@ def test_func_evaluates_below_step_correctly():
     """For x < x0: f(x) = y1 + y0.
 
     With x0=5, y0=2, y1=3: f(x<5) = 3 + 2 = 5.
+
+    ON FAILURE: the code is wrong.
     """
     x0, y0, y1 = 5.0, 2.0, 3.0
 
@@ -139,18 +142,15 @@ def test_func_evaluates_below_step_correctly():
     obj = HeavySide(x_dummy, y_dummy)
     result = obj.function(x_test, x0, y0, y1)
 
-    np.testing.assert_allclose(
-        result,
-        expected,
-        rtol=1e-10,
-        err_msg="Below step (x < x0): f(x) should equal y0 + y1",
-    )
+    assert result == exact(expected), "Below step (x < x0): f(x) should equal y0 + y1"
 
 
 def test_func_evaluates_above_step_correctly():
     """For x > x0: f(x) = y0.
 
     With x0=5, y0=2, y1=3: f(x>5) = 2.
+
+    ON FAILURE: the code is wrong.
     """
     x0, y0, y1 = 5.0, 2.0, 3.0
 
@@ -163,12 +163,7 @@ def test_func_evaluates_above_step_correctly():
     obj = HeavySide(x_dummy, y_dummy)
     result = obj.function(x_test, x0, y0, y1)
 
-    np.testing.assert_allclose(
-        result,
-        expected,
-        rtol=1e-10,
-        err_msg="Above step (x > x0): f(x) should equal y0",
-    )
+    assert result == exact(expected), "Above step (x > x0): f(x) should equal y0"
 
 
 def test_func_evaluates_at_step_transition():
@@ -179,6 +174,8 @@ def test_func_evaluates_at_step_transition():
 
     Note: This is unusual behavior for a step function. The typical
     midpoint would be 0.5*(y0 + y0+y1) = y0 + 0.5*y1 = 3.5.
+
+    ON FAILURE: the code is wrong.
     """
     x0, y0, y1 = 5.0, 2.0, 3.0
 
@@ -193,12 +190,9 @@ def test_func_evaluates_at_step_transition():
     obj = HeavySide(x_dummy, y_dummy)
     result = obj.function(x_test, x0, y0, y1)
 
-    np.testing.assert_allclose(
-        result,
-        expected,
-        rtol=1e-10,
-        err_msg=f"At step (x == x0): f(x) should equal {expected_at_transition:.2f}",
-    )
+    assert result == exact(
+        expected
+    ), f"At step (x == x0): f(x) should equal {expected_at_transition:.2f}"
 
 
 def test_func_with_negative_step_height():
@@ -207,6 +201,8 @@ def test_func_with_negative_step_height():
     With x0=5, y0=8, y1=-3:
     - For x < 5: f(x) = -3 + 8 = 5
     - For x > 5: f(x) = 8
+
+    ON FAILURE: the code is wrong.
     """
     x0, y0, y1 = 5.0, 8.0, -3.0
 
@@ -218,12 +214,9 @@ def test_func_with_negative_step_height():
     obj = HeavySide(x_dummy, y_dummy)
     result = obj.function(x_test, x0, y0, y1)
 
-    np.testing.assert_allclose(
-        result,
-        expected,
-        rtol=1e-10,
-        err_msg="Negative y1: step down should give y0+y1 below, y0 above",
-    )
+    assert result == exact(
+        expected
+    ), "Negative y1: step down should give y0+y1 below, y0 above"
 
 
 def test_func_with_zero_baseline():
@@ -232,6 +225,8 @@ def test_func_with_zero_baseline():
     With x0=3, y0=0, y1=4:
     - For x < 3: f(x) = 4 + 0 = 4
     - For x > 3: f(x) = 0
+
+    ON FAILURE: the code is wrong.
     """
     x0, y0, y1 = 3.0, 0.0, 4.0
 
@@ -243,12 +238,7 @@ def test_func_with_zero_baseline():
     obj = HeavySide(x_dummy, y_dummy)
     result = obj.function(x_test, x0, y0, y1)
 
-    np.testing.assert_allclose(
-        result,
-        expected,
-        rtol=1e-10,
-        err_msg="Zero baseline: should give y1 below, 0 above",
-    )
+    assert result == exact(expected), "Zero baseline: should give y1 below, 0 above"
 
 
 # =============================================================================
@@ -468,13 +458,15 @@ def test_p0_provides_reasonable_initial_guesses(clean_step_data):
 
     For clean step data with x0=5, y0=2, y1=3:
     - x0 guess should be near midpoint of x range
-    - y0 guess should be near minimum y value (2)
+    - y0 guess is the median y above x0, which is y0 = 2 on clean data
     - y1 guess should be positive (step height estimate)
 
     Note: The y1 estimate may not be accurate because the HeavySide function
     has an unusual value at the transition point x0 (not the simple midpoint).
     The heuristic uses max(y) - min(y), which can be inflated by the
     transition value y1*0.5*(y0+y1) + y0.
+
+    ON FAILURE: the code is wrong.
     """
     x, y, w, true_params = clean_step_data
     obj = HeavySide(x, y)
@@ -486,13 +478,10 @@ def test_p0_provides_reasonable_initial_guesses(clean_step_data):
         min(x) <= p0[0] <= max(x)
     ), f"x0 guess {p0[0]} should be within data range [{min(x)}, {max(x)}]"
 
-    # y0 guess should be close to minimum y (baseline)
-    np.testing.assert_allclose(
-        p0[1],
-        true_params["y0"],
-        atol=0.5,
-        err_msg=f"y0 guess {p0[1]} should be near true y0={true_params['y0']}",
-    )
+    # p0 takes y0 as the median y above x0.
+    assert p0[1] == exact(
+        true_params["y0"]
+    ), f"y0 guess {p0[1]} should be near true y0={true_params['y0']}"
 
     # y1 guess should be positive and finite (allows fitting to converge)
     assert p0[2] > 0, f"y1 guess {p0[2]} should be positive"
@@ -508,6 +497,8 @@ def test_step_discontinuity_magnitude(clean_step_data):
     """Verify that the step magnitude equals y1.
 
     The difference between values just below and just above x0 should be y1.
+
+    ON FAILURE: the code is wrong.
     """
     x, y, w, true_params = clean_step_data
 
@@ -528,12 +519,9 @@ def test_step_discontinuity_magnitude(clean_step_data):
 
     step_magnitude = y_below - y_above
 
-    np.testing.assert_allclose(
-        step_magnitude,
-        y1_expected,
-        rtol=1e-3,
-        err_msg=f"Step magnitude {step_magnitude:.4f} should equal y1={y1_expected:.4f}",
-    )
+    assert step_magnitude == exact(
+        y1_expected
+    ), f"Step magnitude {step_magnitude:.4f} should equal y1={y1_expected:.4f}"
 
 
 # =============================================================================

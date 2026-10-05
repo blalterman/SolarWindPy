@@ -9,6 +9,7 @@ from solarwindpy.fitfunctions.gaussians import (
     GaussianLn,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
+from tests.tolerances import exact, noise_free
 
 
 @pytest.mark.parametrize(
@@ -203,6 +204,8 @@ class TestGaussianLn:
         The conversion formulas are:
         - mu = exp(m + s^2/2)
         - sigma = sqrt(exp(s^2 + 2m) * (exp(s^2) - 1))
+
+        ON FAILURE: the code is wrong.
         """
         x, y, params = lognormal_data
         obj = GaussianLn(x, y)
@@ -215,8 +218,8 @@ class TestGaussianLn:
         expected_sigma = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
 
         normal = obj.normal_parameters
-        assert np.isclose(normal["mu"], expected_mu, rtol=1e-10)
-        assert np.isclose(normal["sigma"], expected_sigma, rtol=1e-10)
+        assert normal["mu"] == exact(expected_mu)
+        assert normal["sigma"] == exact(expected_sigma)
 
     def test_TeX_report_normal_parameters_default(self, lognormal_data):
         """Test that TeX_report_normal_parameters defaults to False."""
@@ -246,7 +249,10 @@ class TestGaussianLn:
         assert "A" in tex_popt
 
     def test_make_fit_success(self, lognormal_data):
-        """Test successful fit of GaussianLn to log-normal data."""
+        """GaussianLn fitted to noise-free log-normal data recovers m, |s|, A.
+
+        ON FAILURE: the code is wrong.
+        """
         x, y, params = lognormal_data
         obj = GaussianLn(x, y)
         obj.make_fit()
@@ -256,8 +262,7 @@ class TestGaussianLn:
         assert "s" in obj.popt
         assert "A" in obj.popt
 
-        # Verify fitted parameters are close to true values
-        # Note: s can be negative in fitted result (same shape, different sign)
-        assert np.isclose(obj.popt["m"], params["m"], rtol=0.1)
-        assert np.isclose(np.abs(obj.popt["s"]), params["s"], rtol=0.1)
-        assert np.isclose(obj.popt["A"], params["A"], rtol=0.1)
+        # s enters squared, so its fitted sign is arbitrary.
+        assert obj.popt["m"] == noise_free(params["m"])
+        assert np.abs(obj.popt["s"]) == noise_free(params["s"])
+        assert obj.popt["A"] == noise_free(params["A"])

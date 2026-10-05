@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import itertools
 import pandas.testing as pdt
-import pytest
 
 from abc import ABC, abstractproperty, abstractmethod
 
@@ -20,6 +19,7 @@ from solarwindpy.core import ions
 from solarwindpy.core import plasma
 from solarwindpy.core import spacecraft
 from solarwindpy.core import alfvenic_turbulence
+from tests.tolerances import CODATA_JOINT_DECIMALS, exact, printed
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -182,6 +182,8 @@ class PlasmaTestBase(ABC):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing.number_density(*s)
+
+        ON FAILURE: the code is wrong.
         """
         pass
 
@@ -2266,10 +2268,9 @@ GAMMA = 5.0 / 3.0  # adiabatic index of a monatomic ideal gas
 PER_CC = 1e6  # m^-3 per cm^-3
 KM = 1e3  # m s^-1 per km s^-1
 MICRO = 1e-6  # W m^-2 per uW m^-2
-# rel=1e-9 wherever an alpha mass density enters: the package forms it from the
-# CODATA alpha/proton mass ratio times m_p, these tests from the CODATA alpha
-# mass; the two agree to 1e-11.
-REL_ALPHA = 1e-9
+# Where an alpha mass density enters, the package forms it from the CODATA
+# alpha/proton mass ratio times m_p and these tests from the CODATA alpha mass,
+# so those comparisons divide by the expected value and use CODATA_JOINT_DECIMALS.
 
 
 class MissingFieldGaveNumber(AssertionError):
@@ -2361,7 +2362,7 @@ def test_nuc_test_particle_rate_is_hernandez_marsch_at_low_drift():
 
     nu = p.nuc("a", "p1", both_species=False)
     assert nu.name == "a-p1"
-    assert nu.to_numpy() == pytest.approx(expected, rel=REL_ALPHA, abs=0)
+    assert nu.to_numpy() / expected == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
 
 def test_nuc_drift_dependence_is_the_hernandez_marsch_rate_function():
@@ -2385,8 +2386,7 @@ def test_nuc_drift_dependence_is_the_hernandez_marsch_rate_function():
     # row ratio only because both rows share the same densities.
     for both in (False, True):
         nu = p.nuc("a", "p1", both_species=both)
-        # rel=1e-9: the hand values carry 10 significant digits.
-        assert nu.iloc[0] / nu.iloc[1] == pytest.approx(g1 / g05, rel=1e-9, abs=0)
+        assert nu.iloc[0] / nu.iloc[1] == printed(g1 / g05, decimals=9)
 
 
 def test_nuc_both_species_adds_the_reverse_rate_eq23():
@@ -2405,8 +2405,8 @@ def test_nuc_both_species_adds_the_reverse_rate_eq23():
     expected_ratio = 1.0 + (0.2 * M_ALPHA) / (5.0 * M_P)  # Eq. 23, chosen inputs
 
     assert both.name == "a+p1"
-    assert (both / single).to_numpy() == pytest.approx(
-        [expected_ratio] * 2, rel=REL_ALPHA, abs=0
+    assert (both / single).to_numpy() / expected_ratio == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
     )
 
 
@@ -2420,10 +2420,9 @@ def test_sound_speed_of_one_species_is_sqrt_gamma_p_over_rho():
     with gamma = 5/3.
     """
     p = _hand_plasma([{"p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)}], "p1")
-    # rel=1e-9: the hand value carries 10 significant digits.
     # 27.38612788 uses no physical constant (30 sqrt(5/6)); no CODATA dependence.
-    assert p.sound_speed("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
-    assert p.cs("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
+    assert p.sound_speed("p1").iloc[0] == printed(27.38612788, decimals=8)
+    assert p.cs("p1").iloc[0] == printed(27.38612788, decimals=8)
 
 
 def test_sound_speed_per_species_and_species_sum():
@@ -2453,12 +2452,14 @@ def test_sound_speed_per_species_and_species_sum():
     each = p.cs("p1", "a")
     for s in ("a", "p1"):
         expected = np.sqrt(GAMMA * pth[s] / rho[s]) / KM
-        assert each.loc[:, s].iloc[0] == pytest.approx(expected, rel=REL_ALPHA, abs=0)
+        assert each.loc[:, s].iloc[0] / expected == printed(
+            1.0, decimals=CODATA_JOINT_DECIMALS
+        )
 
     expected_sum = np.sqrt(GAMMA * sum(pth.values()) / sum(rho.values())) / KM
     total = p.sound_speed("a+p1")
     assert total.name == "a+p1"
-    assert total.iloc[0] == pytest.approx(expected_sum, rel=REL_ALPHA, abs=0)
+    assert total.iloc[0] / expected_sum == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
 
 def test_Wk_of_one_species_is_half_rho_v_cubed():
@@ -2474,11 +2475,9 @@ def test_Wk_of_one_species_is_half_rho_v_cubed():
     p = _hand_plasma([{"p1": (5.0, (240.0, 320.0, 0.0), 30.0, 30.0)}], "p1")
     expected = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
     for wk in (p.Wk("p1"), p.kinetic_energy_flux("p1")):
-        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
-        assert wk.iloc[0] == pytest.approx(expected, rel=1e-12, abs=0)
-        # rel=1e-4: the hand value carries 5 significant digits.
+        assert wk.iloc[0] == exact(expected)
         # 267.62 uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
-        assert wk.iloc[0] == pytest.approx(267.62, rel=1e-4, abs=0)
+        assert wk.iloc[0] == printed(267.62, decimals=2)
 
 
 def test_Wk_species_sum_is_a_partial_sum_over_species():
@@ -2500,14 +2499,17 @@ def test_Wk_species_sum_is_a_partial_sum_over_species():
     wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
 
     each = p.Wk("a", "p1")
-    assert each.loc[:, "a"].iloc[0] == pytest.approx(wk_a, rel=REL_ALPHA, abs=0)
+    assert each.loc[:, "a"].iloc[0] / wk_a == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
+    )
     assert np.isnan(each.loc[:, "a"].iloc[1])
-    # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
-    assert each.loc[:, "p1"].to_numpy() == pytest.approx([wk_p] * 2, rel=1e-12, abs=0)
+    assert each.loc[:, "p1"].to_numpy() == exact([wk_p] * 2)
 
     total = p.Wk("a+p1")
     assert total.name == "a+p1"
-    assert total.to_numpy() == pytest.approx([wk_a + wk_p, wk_p], rel=REL_ALPHA, abs=0)
+    assert total.to_numpy() / np.array([wk_a + wk_p, wk_p]) == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
+    )
 
 
 _PROTON_ROW = (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)
@@ -2534,8 +2536,7 @@ def test_Wk_species_sum_is_nan_where_no_species_is_present():
     wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
 
     for total in (p.Wk("a+p1"), p.kinetic_energy_flux("a+p1")):
-        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
-        assert total.iloc[0] == pytest.approx(wk_p, rel=1e-12, abs=0)
+        assert total.iloc[0] == exact(wk_p)
         assert np.isnan(total.iloc[1])
 
 
@@ -2569,16 +2570,14 @@ def test_heat_flux_matches_its_docstring_formula():
 
     each = p.heat_flux("p1", "p2")
     total = p.qpar("p1+p2")
-    # rel=1e-10: the code projects onto b / |b|, which is inexact in binary.
     for s in ("p1", "p2"):
-        assert each.loc[:, s].iloc[0] == pytest.approx(expected[s], rel=1e-10, abs=0)
+        assert each.loc[:, s].iloc[0] == exact(expected[s])
     assert total.name == "p1+p2"
-    assert total.iloc[0] == pytest.approx(sum(expected.values()), rel=1e-10, abs=0)
-    # rel=1e-9: the hand values carry 10 significant digits.
-    # They use m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
-    assert each.loc[:, "p1"].iloc[0] == pytest.approx(-1.609898604, rel=1e-9, abs=0)
-    assert each.loc[:, "p2"].iloc[0] == pytest.approx(2.048961859, rel=1e-9, abs=0)
-    assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
+    assert total.iloc[0] == exact(sum(expected.values()))
+    # The hand values use m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
+    assert each.loc[:, "p1"].iloc[0] == printed(-1.609898604, decimals=9)
+    assert each.loc[:, "p2"].iloc[0] == printed(2.048961859, decimals=9)
+    assert total.iloc[0] == printed(0.4390632556, decimals=10)
 
 
 def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
@@ -2622,9 +2621,8 @@ def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
         b=[(3.0, 4.0, 0.0)] * 2,
     )
     q = p.heat_flux("a+p1+p2")
-    # rel=1e-9: the hand value carries 10 significant digits.
     # It uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
-    assert q.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
+    assert q.iloc[0] == printed(0.4390632556, decimals=10)
     assert np.isnan(q.iloc[1])
 
 
@@ -2724,14 +2722,15 @@ def test_specific_entropy_per_species_and_species_sum():
     each = p.S("p1", "a")
     for s in ("a", "p1"):
         expected = pth[s] * rho[s] ** (-GAMMA) / unit
-        assert each.loc[:, s].iloc[0] == pytest.approx(expected, rel=REL_ALPHA, abs=0)
-    # rel=1e-9: the hand value carries 10 significant digits.
+        assert each.loc[:, s].iloc[0] / expected == printed(
+            1.0, decimals=CODATA_JOINT_DECIMALS
+        )
     # It uses m_p and e from CODATA 2022 (scipy.constants, scipy 1.18.1).
-    assert each.loc[:, "p1"].iloc[0] == pytest.approx(1.606644911, rel=1e-9, abs=0)
+    assert each.loc[:, "p1"].iloc[0] == printed(1.606644911, decimals=9)
 
     expected_sum = sum(pth.values()) * sum(rho.values()) ** (-GAMMA) / unit
     total = p.specific_entropy("a+p1")
-    assert total.iloc[0] == pytest.approx(expected_sum, rel=REL_ALPHA, abs=0)
+    assert total.iloc[0] / expected_sum == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
 
 def test_estimate_electrons_weights_each_species_by_its_own_charge():
@@ -2751,11 +2750,11 @@ def test_estimate_electrons_weights_each_species_by_its_own_charge():
         }
     ]
     e = _hand_plasma(rows, "p1", "a").estimate_electrons()
-    # rel=1e-12: exact sums of chosen inputs.
-    assert e.n.iloc[0] == pytest.approx(5.4, rel=1e-12, abs=0)
+    # Sums of chosen inputs.
+    assert e.n.iloc[0] == exact(5.4)
     v = e.v.cartesian.iloc[0]
-    assert v.loc["x"] == pytest.approx(2180.0 / 5.4, rel=1e-12, abs=0)
-    assert v.loc["y"] == pytest.approx(12.0 / 5.4, rel=1e-12, abs=0)
+    assert v.loc["x"] == exact(2180.0 / 5.4)
+    assert v.loc["y"] == exact(12.0 / 5.4)
     assert v.loc["z"] == 0.0
 
 
@@ -2786,13 +2785,41 @@ def test_estimate_electrons_temperature_equals_proton_scalar_temperature():
     expected = np.sqrt(684.0 * mp_me)  # km/s, w_e^2 = (m_p / m_e) w_p^2
     for c in ("par", "per"):
         we = e.w.data.loc[:, c].iloc[0]
-        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
-        assert we == pytest.approx(expected, rel=1e-12, abs=0)
-        # Half the last printed digit of the hand value 1120.6821 km/s.
-        assert we == pytest.approx(1120.6821, rel=0, abs=5e-5)
+        assert we == exact(expected)
+        assert we == printed(1120.6821, decimals=4)
 
-    # rel=1e-9: T_e uses CODATA m_e, T_p uses m_p; m_p / m_e from the CODATA
-    # ratio agrees with their quotient to ~1e-10.
+    # T_e uses CODATA m_e and T_p uses m_p: two CODATA routes to m_p / m_e.
     t_e = e.temperature.loc[:, "scalar"].iloc[0]
     t_p = p.ions.loc["p1"].temperature.loc[:, "scalar"].iloc[0]
-    assert t_e == pytest.approx(t_p, rel=1e-9, abs=0)
+    assert t_e / t_p == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
+
+
+def test_estimate_electrons_inplace_adds_the_estimate_as_species_e():
+    r"""`estimate_electrons(inplace=True)` adds the estimate to the plasma as "e".
+
+    Without ``inplace`` the plasma is unchanged. With it, the plasma holds "e"
+    beside its ions, and its "e" ion carries the n, v and w the plain call
+    returns: n_e = 5 + 2 * 0.2 = 5.4 cm^-3 for the rows of
+    `test_estimate_electrons_weights_each_species_by_its_own_charge`.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 24.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p1", "a")
+    before = p.data.copy()
+    estimate = p.estimate_electrons()
+    pdt.assert_frame_equal(p.data, before)
+    assert p.species == ("a", "p1")
+
+    p.estimate_electrons(inplace=True)
+    assert p.species == ("a", "e", "p1")
+    assert "e" in p.ions.index
+    held = p.data.xs("e", axis=1, level="S")
+    pdt.assert_frame_equal(held, estimate.data, check_like=True)
+    assert p.ions.loc["e"].n.iloc[0] == exact(5.4)
+    pdt.assert_frame_equal(p.data.drop(columns="e", level="S"), before)

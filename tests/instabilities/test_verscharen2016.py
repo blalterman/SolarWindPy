@@ -26,6 +26,7 @@ from matplotlib.colors import to_hex  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
 from solarwindpy.instabilities import verscharen2016 as v16  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # Verscharen et al. (2016), doi:10.3847/0004-637X/831/2/128, Table 1.
 # Keys: log10(gamma_m / Omega_p). Values: (a, b, c) for use in Eq. (5).
@@ -57,10 +58,6 @@ ROWS = [(g, k) for g in GROWTH_RATES for k in INSTABILITIES]
 FINITE_BETA = np.logspace(np.log10(0.75), 2, 40)
 # Spans beta_par < c for the FM/W fits, where Eq. (5) is undefined (NaN).
 WIDE_BETA = np.logspace(-1, 2, 40)
-
-# The module and the reference evaluate the same closed form in double
-# precision; only operation order may differ.
-REL_SAME_FORM = 1e-12
 
 
 def eq5(beta, a, b, c):
@@ -97,7 +94,7 @@ def test_fit_parameters_are_verscharen2016_table_1(growth_rate, instability, par
     """
     expected = dict(zip("abc", TABLE_1[growth_rate][instability]))[param]
     actual = v16.insta_params.loc[(instability, growth_rate), param]
-    assert actual == pytest.approx(expected, rel=1e-12, abs=0)
+    assert actual == exact(expected)
 
 
 @pytest.mark.parametrize(
@@ -113,9 +110,7 @@ def test_beta_ani_inst_is_equation_5(growth_rate, instability):
     a, b, c = TABLE_1[growth_rate][instability]
     with np.errstate(invalid="ignore"):
         actual = v16.beta_ani_inst(WIDE_BETA, a=a, b=b, c=c)
-    np.testing.assert_allclose(
-        actual, eq5(WIDE_BETA, a, b, c), rtol=REL_SAME_FORM, atol=0, equal_nan=True
-    )
+    assert actual == exact(eq5(WIDE_BETA, a, b, c), nan_ok=True)
 
 
 def test_threshold_is_undefined_below_the_fit_offset():
@@ -148,8 +143,7 @@ def test_threshold_at_unit_offset_is_one_plus_a(instability, beta, expected):
     """
     sc = v16.StabilityCondition(-2, pd.Series([beta]), pd.Series([1.0]))
     actual = sc.instability_thresholds[instability].iloc[0]
-    # beta = c + 1 is inexact in binary, so (beta - c)**b = 1 to ~1e-16.
-    assert actual == pytest.approx(expected, rel=1e-12, abs=0)
+    assert actual == exact(expected)
 
 
 @pytest.mark.parametrize("growth_rate", GROWTH_RATES)
@@ -163,11 +157,8 @@ def test_stability_condition_thresholds_are_equation_5(growth_rate):
     thresholds = sc.instability_thresholds
     assert sorted(thresholds.columns) == INSTABILITIES
     for instability in INSTABILITIES:
-        np.testing.assert_allclose(
-            thresholds[instability].to_numpy(),
-            eq5(FINITE_BETA, *TABLE_1[growth_rate][instability]),
-            rtol=REL_SAME_FORM,
-            atol=0,
+        assert thresholds[instability].to_numpy() == exact(
+            eq5(FINITE_BETA, *TABLE_1[growth_rate][instability])
         )
 
 
@@ -273,7 +264,7 @@ def test_color_norm_centres_each_stability_bin():
     n = len(keys)
     for k in keys:
         expected = (k - keys[0] + 0.5) / n
-        assert float(sc.norm(k)) == pytest.approx(expected, rel=1e-12, abs=0)
+        assert float(sc.norm(k)) == exact(expected)
 
 
 @pytest.mark.filterwarnings("error::matplotlib.MatplotlibDeprecationWarning")
@@ -307,13 +298,8 @@ def _matching_growth_rates(instability, beta, ydata):
     return [
         g
         for g in GROWTH_RATES
-        if np.allclose(
-            ydata,
-            eq5(beta, *TABLE_1[g][instability]),
-            rtol=REL_SAME_FORM,
-            atol=0,
-            equal_nan=True,
-        )
+        if np.asarray(ydata, dtype=float)
+        == exact(eq5(beta, *TABLE_1[g][instability]), nan_ok=True)
     ]
 
 
@@ -329,12 +315,8 @@ def test_contours_are_equation_5_for_every_growth_rate(growth_rate, instability)
     """
     with np.errstate(invalid="ignore"):
         sc = v16.StabilityContours(WIDE_BETA)
-    np.testing.assert_allclose(
-        np.asarray(sc.contours.loc[growth_rate, instability], dtype=float),
-        eq5(WIDE_BETA, *TABLE_1[growth_rate][instability]),
-        rtol=REL_SAME_FORM,
-        atol=0,
-        equal_nan=True,
+    assert np.asarray(sc.contours.loc[growth_rate, instability], dtype=float) == exact(
+        eq5(WIDE_BETA, *TABLE_1[growth_rate][instability]), nan_ok=True
     )
 
 

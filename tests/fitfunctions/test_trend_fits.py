@@ -12,6 +12,7 @@ from solarwindpy.fitfunctions import gaussians, trend_fits, lines
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
+from tests.tolerances import exact
 
 
 @pytest.fixture
@@ -197,9 +198,9 @@ def test_plot_all_popt_1d_returns_errorbar_artists(agged):
 
     segments = np.array(bars.get_segments())
     np.testing.assert_array_equal(segments[:, 0, 0], x)
-    # rel=1e-12: y - w and y + w recomputed by the same float operations.
-    np.testing.assert_allclose(segments[:, 0, 1], y - width, rtol=1e-12, atol=0)
-    np.testing.assert_allclose(segments[:, 1, 1], y + width, rtol=1e-12, atol=0)
+    # y - w and y + w, recomputed.
+    assert segments[:, 0, 1] == exact(y - width, nan_ok=True)
+    assert segments[:, 1, 1] == exact(y + width, nan_ok=True)
 
     dashed = LineCollection([], linestyles="--", linewidths=bars.get_linewidths())
     assert bars.get_linestyle() == dashed.get_linestyle()

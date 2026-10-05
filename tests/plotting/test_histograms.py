@@ -13,6 +13,7 @@ matplotlib.use("Agg")
 from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # Bins chosen by the test, so every count below is an input rather than a
 # recorded output. The edges are exact at the 5 decimal places at which
@@ -193,10 +194,7 @@ class TestHist1DAxisNormalization:
         x, _ = _known_1d_sample()
         hist = Hist1D(x, nbins=KNOWN_EDGES)
         hist.set_axnorm("t")
-        # rel=1e-12: one division of small integers.
-        np.testing.assert_allclose(
-            hist.agg().values, np.array(KNOWN_BIN_COUNTS) / 6.0, rtol=1e-12, atol=0
-        )
+        assert np.asarray(hist.agg().values) == exact(np.array(KNOWN_BIN_COUNTS) / 6.0)
 
 
 class TestHist1DAggregation:

@@ -23,6 +23,7 @@ from matplotlib.figure import Figure  # noqa: E402
 from matplotlib.transforms import Bbox  # noqa: E402
 
 from solarwindpy.plotting import tools as plotting_tools  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 CBAR_LOCS = ("top", "bottom", "left", "right")
 
@@ -58,8 +59,7 @@ class TestSubplots:
             fig, axes = plotting_tools.subplots(
                 nrows=2, ncols=3, scale_width=1.5, scale_height=0.5
             )
-        # rel 1e-12: products of exact binary fractions.
-        assert fig.get_size_inches() == pytest.approx([13.5, 2.0], rel=1e-12, abs=0)
+        assert fig.get_size_inches() == exact([13.5, 2.0])
         assert axes.shape == (2, 3)
 
     def test_figsize_kwarg_is_the_per_panel_size(self):
@@ -70,8 +70,7 @@ class TestSubplots:
         per-panel size (the docstring says kwargs pass straight to plt.subplots).
         """
         fig, axes = plotting_tools.subplots(nrows=1, ncols=2, figsize=(10, 5))
-        # rel 1e-12: exact integers.
-        assert fig.get_size_inches() == pytest.approx([20.0, 5.0], rel=1e-12, abs=0)
+        assert fig.get_size_inches() == exact([20.0, 5.0])
 
     def test_other_kwargs_reach_pyplot_subplots(self):
         """``sharex=True`` is forwarded: setting one panel's xlim sets them all.
@@ -287,9 +286,8 @@ class TestJointLegend:
         fig.canvas.draw()
         lb = legend.get_window_extent()
         ab = axes[1].get_window_extent()
-        # abs 1e-9: display-coordinate arithmetic; a real misplacement is >= 1e-2.
-        assert (lb.x0 - ab.x0) / ab.width == pytest.approx(1.05, abs=1e-9)
-        assert (lb.y0 - ab.y0) / ab.height == pytest.approx(0.1, abs=1e-9)
+        assert (lb.x0 - ab.x0) / ab.width == exact(1.05)
+        assert (lb.y0 - ab.y0) / ab.height == exact(0.1)
 
     def test_kwargs_reach_axes_legend(self):
         """``loc`` overrides the default and other kwargs (``title``) are forwarded.
@@ -389,14 +387,12 @@ class TestBuildAxArrayWithCommonColorbar:
             3, 2, cbar_loc=cbar_loc
         )
         cx0, cy0, cx1, cy1 = _pos(cax)
-        # rel 1e-12: gridspec boundaries from the same cumulative ratios.
-        tol = dict(rel=1e-12, abs=1e-15)
         if cbar_loc in ("left", "right"):
-            assert cy1 == pytest.approx(_pos(axes[0, 0])[3], **tol)
-            assert cy0 == pytest.approx(_pos(axes[-1, 0])[1], **tol)
+            assert cy1 == exact(_pos(axes[0, 0])[3])
+            assert cy0 == exact(_pos(axes[-1, 0])[1])
         else:
-            assert cx0 == pytest.approx(_pos(axes[0, 0])[0], **tol)
-            assert cx1 == pytest.approx(_pos(axes[0, -1])[2], **tol)
+            assert cx0 == exact(_pos(axes[0, 0])[0])
+            assert cx1 == exact(_pos(axes[0, -1])[2])
 
     @pytest.mark.parametrize(
         "cbar_loc, expected",
@@ -419,8 +415,7 @@ class TestBuildAxArrayWithCommonColorbar:
             fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(
                 2, 3, cbar_loc=cbar_loc
             )
-        # rel 1e-12: float products.
-        assert fig.get_size_inches() == pytest.approx(expected, rel=1e-12, abs=0)
+        assert fig.get_size_inches() == exact(expected)
 
     def test_explicit_figsize_and_fig_kwargs_are_used(self):
         """An explicit ``figsize`` is used as is; ``fig_kwargs`` reach plt.figure.
@@ -441,8 +436,7 @@ class TestBuildAxArrayWithCommonColorbar:
         fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(
             2, 2, cbar_loc="right", gs_kwargs={"left": 0.2}
         )
-        # rel 1e-12: gridspec stores the value directly.
-        assert _pos(axes[0, 0])[0] == pytest.approx(0.2, rel=1e-12, abs=0)
+        assert _pos(axes[0, 0])[0] == exact(0.2)
 
     def test_hspace_and_wspace_set_the_gaps_between_panels(self):
         """Default spacing 0 makes panels touch; positive spacing opens a gap.
@@ -450,9 +444,8 @@ class TestBuildAxArrayWithCommonColorbar:
         ON FAILURE: the code is wrong.
         """
         fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(2, 2)
-        # abs 1e-12: adjacent gridspec cells share a boundary up to rounding.
-        assert _pos(axes[0, 0])[1] == pytest.approx(_pos(axes[1, 0])[3], abs=1e-12)
-        assert _pos(axes[0, 0])[2] == pytest.approx(_pos(axes[0, 1])[0], abs=1e-12)
+        assert _pos(axes[0, 0])[1] == exact(_pos(axes[1, 0])[3])
+        assert _pos(axes[0, 0])[2] == exact(_pos(axes[0, 1])[0])
 
         fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(
             2, 2, hspace=0.5, wspace=0.5

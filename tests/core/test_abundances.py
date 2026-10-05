@@ -25,6 +25,7 @@ import pandas as pd
 import pytest
 
 from solarwindpy.core.abundances import ReferenceAbundances, Abundance
+from tests.tolerances import exact, printed
 
 # =============================================================================
 # Test Data Specifications
@@ -115,15 +116,6 @@ PUBLISHED_NOBLE_GAS_CI = {
     "Kr": (-2.27, 0.18),
     "Xe": (-1.95, 0.18),
 }
-
-
-def exact(x):
-    """``pytest.approx`` for a value shipped verbatim or computed from verbatim inputs.
-
-    Tolerance rel=1e-12, abs=0: the CSV carries the table's decimals unchanged,
-    so only float parsing or rounding may differ.
-    """
-    return pytest.approx(x, rel=1e-12, abs=0)
 
 
 # Fe (CI Ab, CI Uncert, Photosphere Ab, Photosphere Uncert),
@@ -673,9 +665,8 @@ class TestAbundanceRatio:
         uncert = ratio * np.log(10) * np.hypot(sigma_fe, sigma_o)
         assert measurement == exact(ratio)
         assert uncertainty == exact(uncert)
-        # Hand values written to 5 significant digits.
-        assert measurement == pytest.approx(hand_ratio, rel=1e-4, abs=0)
-        assert uncertainty == pytest.approx(hand_uncert, rel=1e-4, abs=0)
+        assert measurement == printed(hand_ratio, decimals=6)
+        assert uncertainty == printed(hand_uncert, decimals=7)
 
     @pytest.mark.parametrize("numerator,denominator", [("Fe", "O"), ("C", "O")])
     def test_ratio_calculation_matches_expected(self, ref, numerator, denominator):

@@ -10,9 +10,7 @@ from solarwindpy.fitfunctions.lines import (
     LineXintercept,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
-
-# Noise-free fits: rel=1e-6 is far above optimizer convergence, far below any real bug.
-NOISE_FREE = dict(rel=1e-6, abs=0)
+from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 
 
 @pytest.mark.parametrize(
@@ -37,9 +35,7 @@ def test_function_signature_and_output(
     assert tuple(sig.parameters.keys()) == expected_params
 
     # Exact arithmetic on binary-representable inputs.
-    assert obj.function(*sample_args) == pytest.approx(
-        expected_result, rel=1e-12, abs=0
-    )
+    assert obj.function(*sample_args) == exact(expected_result)
 
 
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
@@ -66,7 +62,7 @@ def test_line_p0_estimation():
 
     p0 = Line(x, y).p0
 
-    assert p0 == pytest.approx([2.0, 1.0], **NOISE_FREE)
+    assert p0 == noise_free([2.0, 1.0])
 
 
 def test_line_x_intercept_p0_estimation():
@@ -79,7 +75,7 @@ def test_line_x_intercept_p0_estimation():
 
     p0 = LineXintercept(x, y).p0
 
-    assert p0 == pytest.approx([2.0, 1.5], **NOISE_FREE)
+    assert p0 == noise_free([2.0, 1.5])
 
 
 @pytest.mark.parametrize(
@@ -152,7 +148,7 @@ def test_line_x_intercept_property():
     obj = Line(x, y)
     obj.make_fit()
 
-    assert obj.x_intercept == pytest.approx(2.0, **NOISE_FREE)
+    assert obj.x_intercept == noise_free(2.0)
 
 
 def test_line_x_intercept_y_intercept_property():
@@ -166,7 +162,7 @@ def test_line_x_intercept_y_intercept_property():
     obj = LineXintercept(x, y)
     obj.make_fit()
 
-    assert obj.y_intercept == pytest.approx(-2.0, **NOISE_FREE)
+    assert obj.y_intercept == noise_free(-2.0)
 
 
 def test_line_perfect_fit():
@@ -181,9 +177,9 @@ def test_line_perfect_fit():
     obj = Line(x, y)
     obj.make_fit()
 
-    assert obj.popt["m"] == pytest.approx(m_true, **NOISE_FREE)
-    assert obj.popt["b"] == pytest.approx(b_true, **NOISE_FREE)
-    assert obj(x) == pytest.approx(y, **NOISE_FREE)
+    assert obj.popt["m"] == noise_free(m_true)
+    assert obj.popt["b"] == noise_free(b_true)
+    assert obj(x) == noise_free(y)
 
 
 def test_line_x_intercept_perfect_fit():
@@ -198,9 +194,9 @@ def test_line_x_intercept_perfect_fit():
     obj = LineXintercept(x, y)
     obj.make_fit()
 
-    assert obj.popt["m"] == pytest.approx(m_true, **NOISE_FREE)
-    assert obj.popt["x0"] == pytest.approx(x0_true, **NOISE_FREE)
-    assert obj(x) == pytest.approx(y, **NOISE_FREE)
+    assert obj.popt["m"] == noise_free(m_true)
+    assert obj.popt["x0"] == noise_free(x0_true)
+    assert obj(x) == noise_free(y)
 
 
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
@@ -217,7 +213,7 @@ def test_str_and_call_methods(cls):
 
     # Points off the fitted grid: 2*0.5+1, 2*1.5+1, 2*7+1.
     x_test = np.array([0.5, 1.5, 7.0])
-    assert obj(x_test) == pytest.approx([2.0, 4.0, 15.0], **NOISE_FREE)
+    assert obj(x_test) == noise_free([2.0, 4.0, 15.0])
 
 
 def test_line_with_weights():
@@ -239,11 +235,11 @@ def test_line_with_weights():
 
     m_w, b_w = np.polyfit(x, y, 1, w=1.0 / sigma)
     m_u, b_u = np.polyfit(x, y, 1)
-    assert [obj.popt["m"], obj.popt["b"]] == pytest.approx([m_w, b_w], **NOISE_FREE)
+    assert [obj.popt["m"], obj.popt["b"]] == noise_free([m_w, b_w])
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(np.array([m_w, b_w]) / np.array([m_u, b_u]) - 1))
-    assert gap > 100 * NOISE_FREE["rel"]
+    assert gap > 100 * NOISE_FREE_REL
 
 
 def test_line_horizontal_data():
@@ -260,9 +256,8 @@ def test_line_horizontal_data():
     obj = Line(x, y)
     obj.make_fit()
 
-    # True slope is 0, so rel is meaningless; 1e-9 is optimizer noise on O(1) data.
-    assert obj.popt["m"] == pytest.approx(0.0, abs=1e-9)
-    assert obj.popt["b"] == pytest.approx(3.0, **NOISE_FREE)
+    assert obj.popt["m"] == exact(0.0, scale=3.0)
+    assert obj.popt["b"] == noise_free(3.0)
 
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
@@ -280,8 +275,8 @@ def test_line_recovers_near_vertical_slope():
     obj = Line(x, y)
     obj.make_fit()
 
-    assert obj.popt["m"] == pytest.approx(1e5, **NOISE_FREE)
-    assert obj.popt["b"] == pytest.approx(-1e5, **NOISE_FREE)
+    assert obj.popt["m"] == noise_free(1e5)
+    assert obj.popt["b"] == noise_free(-1e5)
 
 
 def test_line_x_intercept_p0_is_none_for_zero_slope():
@@ -324,7 +319,7 @@ def test_line_x_intercept_fits_when_median_slope_is_zero():
     assert obj.p0 is None
     obj.make_fit()
 
-    assert [obj.popt["m"], obj.popt["x0"]] == pytest.approx([2.0, 1.0], **NOISE_FREE)
+    assert [obj.popt["m"], obj.popt["x0"]] == noise_free([2.0, 1.0])
 
 
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
@@ -348,7 +343,7 @@ def test_line_p0_is_none_with_duplicate_x_values(cls):
         assert obj.p0 is None
     obj.make_fit()
 
-    assert obj(np.array([1.0, 2.0])) == pytest.approx([2.05, 4.05], **NOISE_FREE)
+    assert obj(np.array([1.0, 2.0])) == noise_free([2.05, 4.05])
 
 
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
@@ -386,8 +381,8 @@ def test_line_intercept_properties_require_fit():
     line_obj.make_fit()
     xint_obj.make_fit()
 
-    assert line_obj.x_intercept == pytest.approx(-0.5, **NOISE_FREE)
-    assert xint_obj.y_intercept == pytest.approx(1.0, **NOISE_FREE)
+    assert line_obj.x_intercept == noise_free(-0.5)
+    assert xint_obj.y_intercept == noise_free(1.0)
 
 
 def test_line_edge_cases():
@@ -401,9 +396,8 @@ def test_line_edge_cases():
     obj = Line(x, y)
     obj.make_fit()
 
-    # Truth is exactly 0, so rel is meaningless; 1e-10 is optimizer noise on O(1) x.
-    assert obj.popt["m"] == pytest.approx(0.0, abs=1e-10)
-    assert obj.popt["b"] == pytest.approx(0.0, abs=1e-10)
+    assert obj.popt["m"] == exact(0.0, scale=2.0)
+    assert obj.popt["b"] == exact(0.0, scale=2.0)
 
 
 def test_line_numerical_precision():
@@ -417,7 +411,5 @@ def test_line_numerical_precision():
     obj = Line(x, y)
     obj.make_fit()
 
-    assert obj.popt["m"] == pytest.approx(2.0, **NOISE_FREE)
-    # 2 * (1e6 + 0.5) = 2e6 + 1. abs=1e-3 is far above float64 resolution at 2e6
-    # (~4e-10) and far below a misplaced intercept or slope error of 1e-6.
-    assert obj(1e6 + 0.5) == pytest.approx(2e6 + 1.0, rel=0, abs=1e-3)
+    assert obj.popt["m"] == noise_free(2.0)
+    assert obj(1e6 + 0.5) == exact(2e6 + 1.0)  # 2 * (1e6 + 0.5)

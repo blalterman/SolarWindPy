@@ -15,6 +15,7 @@ import pytest
 
 from solarwindpy.solar_activity.icme import icmecat
 from solarwindpy.solar_activity.icme.icmecat import ICMECAT, ICMECATDownloadError
+from tests.tolerances import exact
 
 T = pd.Timestamp
 
@@ -464,11 +465,11 @@ class TestICMECATSummary:
         """
         serve_catalog()
         row = ICMECAT().summary().iloc[0]
-        # Whole hours from whole-hour timestamps: exact up to float rounding.
-        assert row["duration_median_hours"] == pytest.approx(60.0, rel=1e-12, abs=0)
-        assert row["duration_mean_hours"] == pytest.approx(72.0, rel=1e-12, abs=0)
-        assert row["duration_min_hours"] == pytest.approx(24.0, rel=1e-12, abs=0)
-        assert row["duration_max_hours"] == pytest.approx(120.0, rel=1e-12, abs=0)
+        # Whole hours from whole-hour timestamps.
+        assert row["duration_median_hours"] == exact(60.0)
+        assert row["duration_mean_hours"] == exact(72.0)
+        assert row["duration_min_hours"] == exact(24.0)
+        assert row["duration_max_hours"] == exact(120.0)
 
     def test_summary_date_range(self, serve_catalog):
         """date_range runs from the first icme_start to the last interval_end.
@@ -491,8 +492,8 @@ class TestICMECATSummary:
         row = ICMECAT(spacecraft="Ulysses").summary().iloc[0]
         assert row["spacecraft"] == "Ulysses"
         assert row["n_events"] == 3
-        # Whole hours: exact up to float rounding.
-        assert row["duration_mean_hours"] == pytest.approx(96.0, rel=1e-12, abs=0)
+        # Whole hours from whole-hour timestamps.
+        assert row["duration_mean_hours"] == exact(96.0)
 
 
 class TestICMECATDunderMethods:
