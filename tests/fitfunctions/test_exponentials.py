@@ -12,11 +12,7 @@ from solarwindpy.fitfunctions.exponentials import (
     ExponentialCDF,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
-
-# Noise-free fits: rel=1e-6 is far above optimizer convergence, far below any real bug.
-NOISE_FREE = dict(rel=1e-6, abs=0)
-# Closed-form evaluation: only floating-point rounding separates the two sides.
-EXACT = dict(rel=1e-12, abs=0)
+from tests.tolerances import NOISE_FREE_REL, exact, noise_free, printed
 
 E_INV = 0.36787944117144233  # e^-1
 
@@ -49,7 +45,7 @@ def test_function_signature_and_output(
     sig = inspect.signature(obj.function)
     assert tuple(sig.parameters.keys()) == expected_params
 
-    assert obj.function(*sample_args) == pytest.approx(expected_value, **EXACT)
+    assert obj.function(*sample_args) == exact(expected_value)
 
 
 @pytest.fixture
@@ -87,8 +83,8 @@ def test_exponential_p0_estimation():
     obj = Exponential(x, 3.0 * np.exp(-0.8 * x))
     obj.make_fit()
 
-    assert obj.popt["c"] == pytest.approx(0.8, **NOISE_FREE)
-    assert obj.popt["A"] == pytest.approx(3.0, **NOISE_FREE)
+    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["A"] == noise_free(3.0)
 
 
 def test_exponential_plus_c_p0_estimation():
@@ -100,9 +96,9 @@ def test_exponential_plus_c_p0_estimation():
     obj = ExponentialPlusC(x, 3.0 * np.exp(-0.8 * x) + 0.5)
     obj.make_fit()
 
-    assert obj.popt["c"] == pytest.approx(0.8, **NOISE_FREE)
-    assert obj.popt["A"] == pytest.approx(3.0, **NOISE_FREE)
-    assert obj.popt["d"] == pytest.approx(0.5, **NOISE_FREE)
+    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["A"] == noise_free(3.0)
+    assert obj.popt["d"] == noise_free(0.5)
 
 
 def test_exponential_cdf_p0_estimation():
@@ -115,7 +111,7 @@ def test_exponential_cdf_p0_estimation():
     obj.set_y0(1.0)
     obj.make_fit()
 
-    assert obj.popt["c"] == pytest.approx(0.8, **NOISE_FREE)
+    assert obj.popt["c"] == noise_free(0.8)
 
 
 @pytest.mark.parametrize(
@@ -212,7 +208,7 @@ def test_exponential_cdf_fits_one_point():
         assert obj.make_fit() is None
     assert not [w for w in record if issubclass(w.category, RuntimeWarning)]
     # One point leaves the optimizer's own xtol (1e-8) as the accuracy limit.
-    assert obj.popt["c"] == pytest.approx(0.8, rel=1e-6, abs=0)
+    assert obj.popt["c"] == noise_free(0.8)
 
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
@@ -228,10 +224,8 @@ def test_exponential_numerical_stability():
     y = np.array([1.0, 0.1, 0.01])
     obj = Exponential(x, y)
 
-    # e^-100 = 3.720075976020836e-44; abs=0 because the value is tiny.
-    assert obj.function(100.0, 1.0, 1.0) == pytest.approx(
-        3.720075976020836e-44, **EXACT
-    )
+    # e^-100 = 3.720075976020836e-44.
+    assert obj.function(100.0, 1.0, 1.0) == exact(3.720075976020836e-44)
 
 
 def test_exponential_plus_c_constant_term():
@@ -244,7 +238,7 @@ def test_exponential_plus_c_constant_term():
     obj = ExponentialPlusC(x, np.ones_like(x))
 
     # 2 + 0.5 and 2/2 + 0.5
-    assert obj.function(x, c, A, d) == pytest.approx([2.5, 1.5], **EXACT)
+    assert obj.function(x, c, A, d) == exact([2.5, 1.5])
 
 
 def test_exponential_cdf_monotonicity():
@@ -263,7 +257,7 @@ def test_exponential_cdf_monotonicity():
     assert result[0] == 0.0  # 3 (1 - e^0)
     assert result[-1] < 3.0
     # 3 (1 - 1/2) at the half-life.
-    assert obj.function(np.log(2.0) / c, c) == pytest.approx(1.5, **EXACT)
+    assert obj.function(np.log(2.0) / c, c) == exact(1.5)
 
 
 def test_str_and_call_methods_regular():
@@ -280,9 +274,7 @@ def test_str_and_call_methods_regular():
 
         assert cls.__name__ in str(obj)
         # A + d at x = 0; A/2 + d at the half-life.
-        assert obj(x_test) == pytest.approx(
-            [3.0 + offset, 1.5 + offset], **NOISE_FREE
-        ), cls
+        assert obj(x_test) == noise_free([3.0 + offset, 1.5 + offset]), cls
 
 
 def test_str_and_call_methods_cdf():
@@ -297,7 +289,7 @@ def test_str_and_call_methods_cdf():
 
     assert "ExponentialCDF" in str(obj)
     # 2 (1 - 1/2) at the half-life ln2/0.8.
-    assert obj(np.log(2.0) / 0.8) == pytest.approx(1.0, **NOISE_FREE)
+    assert obj(np.log(2.0) / 0.8) == noise_free(1.0)
 
 
 def test_exponential_decay_behavior():
@@ -313,7 +305,7 @@ def test_exponential_decay_behavior():
 
     half_life = np.log(2.0) / 0.5
     x_test = np.array([0.0, half_life, 2 * half_life])
-    assert obj(x_test) == pytest.approx([2.0, 1.0, 0.5], **NOISE_FREE)
+    assert obj(x_test) == noise_free([2.0, 1.0, 0.5])
 
 
 @pytest.mark.parametrize("cls", [Exponential, ExponentialPlusC, ExponentialCDF])
@@ -354,11 +346,11 @@ def test_exponential_with_weights():
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0])
-    assert [obj.popt["c"], obj.popt["A"]] == pytest.approx(weighted, **NOISE_FREE)
+    assert [obj.popt["c"], obj.popt["A"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
-    assert gap > 100 * NOISE_FREE["rel"]
+    assert gap > 100 * NOISE_FREE_REL
 
 
 @pytest.mark.parametrize(
@@ -384,9 +376,9 @@ def test_extreme_decay_rates_reach_their_limits(cls, params, y0, expected):
     if y0 is not None:
         obj.set_y0(y0)
 
-    # abs=1e-11 covers the dropped second-order term (c x)^2 / 2 <= 2e-12 and the
-    # e^-100 ~ 4e-44 remainder, and is 1e5 times below the 1e-6 effects asserted.
-    assert obj.function(x, *params) == pytest.approx(expected, rel=0, abs=1e-11)
+    # The limit forms drop (c x)^2 / 2 <= 2e-12 or e^-100 ~ 4e-44, so they hold
+    # to 11 decimal places.
+    assert obj.function(x, *params) == printed(expected, decimals=11)
 
 
 # ============================================================================

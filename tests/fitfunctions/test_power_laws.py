@@ -11,11 +11,7 @@ from solarwindpy.fitfunctions.power_laws import (
     PowerLawOffCenter,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
-
-# Noise-free fits: rel=1e-6 is far above optimizer convergence, far below any real bug.
-NOISE_FREE = dict(rel=1e-6, abs=0)
-# Closed-form evaluation: only floating-point rounding separates the two sides.
-EXACT = dict(rel=1e-12, abs=0)
+from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 
 
 @pytest.mark.parametrize(
@@ -53,7 +49,7 @@ def test_function_signature_and_output(
     sig = inspect.signature(obj.function)
     assert tuple(sig.parameters.keys()) == expected_params
 
-    assert obj.function(*sample_args) == pytest.approx(expected_value, **EXACT)
+    assert obj.function(*sample_args) == exact(expected_value)
 
 
 @pytest.fixture
@@ -176,9 +172,9 @@ def test_power_law_perfect_fit():
     obj = PowerLaw(x, y)
     obj.make_fit()
 
-    assert obj.popt["A"] == pytest.approx(A, **NOISE_FREE)
-    assert obj.popt["b"] == pytest.approx(b, **NOISE_FREE)
-    assert obj(x) == pytest.approx(y, **NOISE_FREE)
+    assert obj.popt["A"] == noise_free(A)
+    assert obj.popt["b"] == noise_free(b)
+    assert obj(x) == noise_free(y)
 
 
 def test_power_law_plus_c_perfect_fit():
@@ -193,10 +189,10 @@ def test_power_law_plus_c_perfect_fit():
     obj = PowerLawPlusC(x, y)
     obj.make_fit()
 
-    assert obj.popt["A"] == pytest.approx(A, **NOISE_FREE)
-    assert obj.popt["b"] == pytest.approx(b, **NOISE_FREE)
-    assert obj.popt["c"] == pytest.approx(c, **NOISE_FREE)
-    assert obj(x) == pytest.approx(y, **NOISE_FREE)
+    assert obj.popt["A"] == noise_free(A)
+    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["c"] == noise_free(c)
+    assert obj(x) == noise_free(y)
 
 
 def test_power_law_off_center_perfect_fit():
@@ -211,10 +207,10 @@ def test_power_law_off_center_perfect_fit():
     obj = PowerLawOffCenter(x, y)
     obj.make_fit()
 
-    assert obj.popt["A"] == pytest.approx(A, **NOISE_FREE)
-    assert obj.popt["b"] == pytest.approx(b, **NOISE_FREE)
-    assert obj.popt["x0"] == pytest.approx(x0, **NOISE_FREE)
-    assert obj(x) == pytest.approx(y, **NOISE_FREE)
+    assert obj.popt["A"] == noise_free(A)
+    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["x0"] == noise_free(x0)
+    assert obj(x) == noise_free(y)
 
 
 def test_power_law_numerical_stability():
@@ -227,9 +223,9 @@ def test_power_law_numerical_stability():
 
     obj = PowerLaw(x, y)
 
-    assert obj.function(0.1, 1.0, -10.0) == pytest.approx(1e10, **EXACT)
+    assert obj.function(0.1, 1.0, -10.0) == exact(1e10)
     # 10^0.1 = 1.2589254117941673 (tenth root of 10).
-    assert obj.function(10.0, 1.0, 0.1) == pytest.approx(1.2589254117941673, **EXACT)
+    assert obj.function(10.0, 1.0, 0.1) == exact(1.2589254117941673)
 
 
 def test_power_law_zero_handling():
@@ -242,8 +238,8 @@ def test_power_law_zero_handling():
 
     obj = PowerLaw(x, y)
 
-    assert obj.function(0.01, 1.0, 1.0) == pytest.approx(0.01, **EXACT)
-    assert obj.function(2.0, 5.0, 0.0) == pytest.approx(5.0, **EXACT)
+    assert obj.function(0.01, 1.0, 1.0) == exact(0.01)
+    assert obj.function(2.0, 5.0, 0.0) == exact(5.0)
 
 
 def test_power_law_off_center_centering():
@@ -257,7 +253,7 @@ def test_power_law_off_center_centering():
     obj = PowerLawOffCenter(x, np.ones_like(x))
 
     result = obj.function(x, 2.0, 1.0, x0)
-    assert result == pytest.approx([1.0, 3.0, 5.0, 7.0], **EXACT)
+    assert result == exact([1.0, 3.0, 5.0, 7.0])
 
 
 @pytest.mark.parametrize(
@@ -282,7 +278,7 @@ def test_str_and_call_methods(cls, offset):
     # Points off the fitted grid: 16 / x^2 + offset.
     x_test = np.array([0.5, 3.0, 16.0])
     expected = np.array([64.0, 16.0 / 9.0, 0.0625]) + offset
-    assert obj(x_test) == pytest.approx(expected, **NOISE_FREE)
+    assert obj(x_test) == noise_free(expected)
 
 
 def test_power_law_with_weights():
@@ -307,11 +303,11 @@ def test_power_law_with_weights():
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0])
-    assert [obj.popt["A"], obj.popt["b"]] == pytest.approx(weighted, **NOISE_FREE)
+    assert [obj.popt["A"], obj.popt["b"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
-    assert gap > 100 * NOISE_FREE["rel"]
+    assert gap > 100 * NOISE_FREE_REL
 
 
 def test_power_law_scaling_behavior():
@@ -325,7 +321,7 @@ def test_power_law_scaling_behavior():
     obj = PowerLaw(x, y)
     obj.make_fit()
 
-    assert obj(4.0) / obj(2.0) == pytest.approx(0.5, **NOISE_FREE)
+    assert obj(4.0) / obj(2.0) == noise_free(0.5)
 
 
 @pytest.mark.parametrize("cls", [PowerLaw, PowerLawPlusC, PowerLawOffCenter])
@@ -353,7 +349,7 @@ def test_power_law_negative_x_handling():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 1.0, 2.0) == pytest.approx([4.0, 1.0, 1.0, 4.0], **EXACT)
+    assert obj.function(x, 1.0, 2.0) == exact([4.0, 1.0, 1.0, 4.0])
 
 
 def test_power_law_integer_vs_float_exponents():
@@ -366,8 +362,8 @@ def test_power_law_integer_vs_float_exponents():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, A, 2) == pytest.approx([2.0, 8.0, 18.0], **EXACT)
-    assert obj.function(x, A, 2.0) == pytest.approx([2.0, 8.0, 18.0], **EXACT)
+    assert obj.function(x, A, 2) == exact([2.0, 8.0, 18.0])
+    assert obj.function(x, A, 2.0) == exact([2.0, 8.0, 18.0])
 
 
 def test_power_law_edge_case_exponents():
@@ -378,6 +374,6 @@ def test_power_law_edge_case_exponents():
     x = np.array([1.0, 2.0, 4.0])
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 3.0, 1.0) == pytest.approx([3.0, 6.0, 12.0], **EXACT)
-    assert obj.function(x, 5.0, 0.0) == pytest.approx([5.0, 5.0, 5.0], **EXACT)
-    assert obj.function(x, 2.0, -1.0) == pytest.approx([2.0, 1.0, 0.5], **EXACT)
+    assert obj.function(x, 3.0, 1.0) == exact([3.0, 6.0, 12.0])
+    assert obj.function(x, 5.0, 0.0) == exact([5.0, 5.0, 5.0])
+    assert obj.function(x, 2.0, -1.0) == exact([2.0, 1.0, 0.5])

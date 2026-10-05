@@ -12,6 +12,7 @@ from solarwindpy.fitfunctions.core import (
 )
 from solarwindpy.fitfunctions.plots import FFPlot
 from solarwindpy.fitfunctions.tex_info import TeXinfo
+from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 
 
 def linear_function(x, m, b):
@@ -167,10 +168,11 @@ def test_make_fit_defaults_match_documented_least_squares_call(line_with_outlier
     plain = _direct_least_squares(x, y, w, p0, method="trf", loss="linear")
 
     popt = np.array([lf.popt["m"], lf.popt["b"]])
-    # rel=1e-6: noise-free comparison of two identical solver calls.
-    assert popt == pytest.approx(documented, rel=1e-6, abs=0)
-    # The fixture must separate huber from linear, else the check above is idle.
-    assert popt != pytest.approx(plain, rel=1e-2, abs=0)
+    assert popt == noise_free(documented)
+    # The fixture must separate huber from linear (~0.6 in slope) by over
+    # 1e4x the fit tolerance, else the check above is idle.
+    gap = np.max(np.abs(popt / plain - 1))
+    assert gap > 1e4 * NOISE_FREE_REL
 
 
 def test_make_fit_records_the_initial_guess_and_rejects_args(simple_linear_data):
@@ -196,12 +198,11 @@ def test_exact_line_fits_with_zero_uncertainty_and_chisq():
     x = np.array([0.0, 1.0, 2.0])
     lf = LinearFit(x, 2.0 * x + 1.0)
     lf.make_fit()
-    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
-    assert lf.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
-    # abs=1e-10: residuals of an exact fit are rounding error, so these are ~0.
-    assert [lf.psigma["m"], lf.psigma["b"]] == pytest.approx([0, 0], abs=1e-10)
-    assert lf.chisq_dof.linear == pytest.approx(0, abs=1e-10)
-    assert lf.chisq_dof.robust == pytest.approx(0, abs=1e-10)
+    assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
+    # An exact fit leaves rounding only: zero on the scale of m = 2, y <= 5.
+    assert [lf.psigma["m"], lf.psigma["b"]] == exact([0, 0], scale=2.0)
+    assert lf.chisq_dof.linear == exact(0, scale=25.0)
+    assert lf.chisq_dof.robust == exact(0, scale=25.0)
 
 
 def test_make_fit_success_failure(simple_linear_data, small_n):
@@ -245,12 +246,16 @@ def fitted_linear(simple_linear_data):
 
 
 def test_str_call_and_properties(fitted_linear):
+    """str names the model; calling evaluates m x + b at popt; properties hold.
+
+    ON FAILURE: the code is wrong.
+    """
     lf = fitted_linear
     s = str(lf)
     assert "LinearFit" in s and "m x + b" in s
     xnew = np.array([0.0, 0.5])
     ypred = lf(xnew)
-    assert np.allclose(ypred, lf.popt["m"] * xnew + lf.popt["b"], rtol=1e-2, atol=1e-2)
+    assert ypred == exact(lf.popt["m"] * xnew + lf.popt["b"])
     assert lf.argnames == ["m", "b"]
     assert isinstance(lf.fit_bounds, dict)
     assert lf.chisq_dof._fields == ("linear", "robust")
@@ -331,8 +336,7 @@ class TestBoundsDictHandling:
         # p0 must start inside the bounds; LinearFit's data-driven guess is m=2.
         lf.make_fit(p0=[1.0, 1.0], bounds={"m": (-10.0, 1.5), "b": (-5.0, 5.0)})
 
-        # rel=1e-6: trf stops within its xtol of an active bound.
-        assert lf.popt["m"] == pytest.approx(1.5, rel=1e-6, abs=0)
+        assert lf.popt["m"] == noise_free(1.5)
         assert tuple(lf.fit_bounds["m"]) == (-10.0, 1.5)
         assert tuple(lf.fit_bounds["b"]) == (-5.0, 5.0)
 
@@ -458,14 +462,18 @@ class TestResidualsAllOptions:
         assert not np.allclose(r_abs, r_pct)
 
     def test_residuals_pct_handles_zero_fitted(self):
-        """Verify residuals handles division by zero in pct mode."""
+        """Percent residuals where the fit is zero are NaN, the rest zero.
+
+        ON FAILURE: the code is wrong.
+        """
         x = np.array([-1.0, 0.0, 1.0])
         y = np.array([-1.0, 0.0, 1.0])
         lf = LinearFit(x, y)
         lf.make_fit()
 
         r_pct = lf.residuals(pct=True)
-        assert np.any(np.isnan(r_pct)) or np.allclose(r_pct, 0.0, atol=1e-10)
+        # An exact fit: zero on the scale of 100 percent.
+        assert np.any(np.isnan(r_pct)) or r_pct == exact(0.0, scale=100.0)
 
     def test_residuals_use_all_and_pct_together(self, simple_linear_data):
         """Verify residuals works with both use_all=True and pct=True."""

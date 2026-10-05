@@ -19,6 +19,7 @@ import pytest
 from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from solarwindpy.fitfunctions.lines import Line, LineXintercept
+from tests.tolerances import exact, noise_free
 
 
 def _model(x, x0, y0, y1, mu, sigma, A):
@@ -197,7 +198,7 @@ def test_line_p0_is_slope_and_intercept_of_exact_line():
 
     ON FAILURE: the code is wrong.
     """
-    assert Line(LINE_X, LINE_Y).p0 == pytest.approx([2.0, 1.0], rel=1e-12, abs=0)
+    assert Line(LINE_X, LINE_Y).p0 == exact([2.0, 1.0])
 
 
 def test_line_x_intercept_p0_is_slope_and_x_intercept_of_exact_line():
@@ -209,7 +210,7 @@ def test_line_x_intercept_p0_is_slope_and_x_intercept_of_exact_line():
     ON FAILURE: the code is wrong.
     """
     p0 = LineXintercept(LINE_X, LINE_Y).p0
-    assert p0 == pytest.approx([2.0, -0.5], rel=1e-12, abs=0)
+    assert p0 == exact([2.0, -0.5])
 
 
 def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
@@ -247,5 +248,4 @@ def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
     assert fit.p0 is None  # the input exists to exercise this branch
 
     assert fit.make_fit(return_exception=True) is None
-    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
-    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+    assert fit.popt == noise_free({"m": 2.0, "b": 1.0})

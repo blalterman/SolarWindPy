@@ -33,6 +33,7 @@ from solarwindpy.fitfunctions.hinge import (
     Saturation,
     TwoLine,
 )
+from tests.tolerances import exact, noise_free
 
 
 def _line(x, m, b):
@@ -157,10 +158,9 @@ def test_gaussian_width_must_reach_half_the_x_spacing(peak, resolved):
     """
     p0 = Gaussian(np.array([0.0, 1, 2]), np.array([1.0, peak, 1])).p0
     if resolved:
-        # Hand values: mean 1, width sqrt(2 / (2 + peak)), peak; rel=1e-12 for
-        # a few float operations on exact inputs.
+        # Hand values: mean 1, width sqrt(2 / (2 + peak)), peak.
         expected = [1.0, np.sqrt(2 / (2 + peak)), peak]
-        assert p0 == pytest.approx(expected, rel=1e-12, abs=0), p0
+        assert p0 == exact(expected), p0
     else:
         assert p0 is None, p0
 
@@ -180,8 +180,7 @@ def test_gaussianln_guess_recovers_the_model_parameters():
     x = np.logspace(1, 3, 201)
     y = A * np.exp(-0.5 * ((np.log(x) - m) / s) ** 2)
     p0 = GaussianLn(x, y).p0
-    # rel=1e-6: discretisation and truncation errors are far smaller.
-    assert p0 == pytest.approx([m, s, A], rel=1e-6, abs=0), p0
+    assert p0 == noise_free([m, s, A]), p0
 
 
 @pytest.mark.parametrize(
@@ -214,8 +213,7 @@ def test_a_none_guess_fits_from_the_feasible_default():
     """
     fit = _NoGuessLine(LINE_X, LINE_Y)
     assert fit.make_fit() is None
-    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
-    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+    assert fit.popt == noise_free({"m": 2.0, "b": 1.0})
     assert fit.dof == LINE_X.size - 2
     assert fit.initial_guess_info is None
 
@@ -229,8 +227,7 @@ def test_a_none_guess_starts_inside_dict_bounds():
     """
     fit = _NoGuessLine(LINE_X, LINE_Y)
     fit.make_fit(bounds={"m": (1.5, 5.0), "b": (-5.0, 5.0)})
-    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
-    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+    assert fit.popt == noise_free({"m": 2.0, "b": 1.0})
 
 
 def test_insufficient_data_check_survives_python_O(tmp_path):
@@ -403,8 +400,7 @@ def test_hinge_fallback_start_is_the_authors_point(cls):
     """
     fit = cls(np.arange(6.0), np.arange(6.0))
     start = fit.fallback_p0()
-    # rel=1e-12: a few float operations on exact inputs (x2 rounds at ~1e-12).
-    assert start == pytest.approx(HINGE_START[cls], rel=1e-12, abs=0), start
+    assert start == exact(HINGE_START[cls]), start
     with np.errstate(divide="raise", invalid="raise"):
         values = fit.function(np.linspace(0.0, 1000.0, 101), *start)
     assert np.all(np.isfinite(values)), values
@@ -513,8 +509,7 @@ def test_normal_input_estimate_matches_hand_calculation(cls, x, y, kwargs, expec
     ON FAILURE: the code is wrong, unless the author changed the estimator.
     """
     p0 = cls(x, y, **kwargs).p0
-    # rel=1e-12: a few float operations on small exact inputs; abs covers the 0s.
-    assert p0 == pytest.approx(expected, rel=1e-12, abs=1e-15), p0
+    assert p0 == exact(expected), p0
 
 
 def test_insufficient_data_still_raises_from_p0():

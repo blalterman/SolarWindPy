@@ -40,6 +40,7 @@ from solarwindpy.fitfunctions.composite import (
     GaussianTimesHeavySidePlusHeavySide,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
+from tests.tolerances import exact
 
 # =============================================================================
 # Helper Functions
@@ -227,6 +228,8 @@ class TestGaussianPlusHeavySide:
         - Gaussian(0) = 4 * exp(-0.5 * ((0-5)/1)^2) = 4 * exp(-12.5) ~ 1.48e-5
         - H(2-0) = H(2) = 1
         - f(0) = Gaussian(0) + 3*1 + 1 ~ 4.0 (Gaussian contribution negligible)
+
+        ON FAILURE: the code is wrong.
         """
         x0, y0, y1, mu, sigma, A = 2.0, 1.0, 3.0, 5.0, 1.0, 4.0
 
@@ -239,12 +242,9 @@ class TestGaussianPlusHeavySide:
         obj = GaussianPlusHeavySide(x_dummy, y_dummy)
         result = obj.function(x_test, x0, y0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Below x0: f(x) should equal Gaussian(x) + y1 + y0",
-        )
+        assert result == exact(
+            expected
+        ), "Below x0: f(x) should equal Gaussian(x) + y1 + y0"
 
     def test_func_evaluates_above_x0_correctly(self):
         """For x > x0: f(x) = Gaussian(x) + y0 (Heaviside term is 0).
@@ -253,6 +253,8 @@ class TestGaussianPlusHeavySide:
         - Gaussian(5) = 4 * exp(0) = 4.0
         - H(2-5) = H(-3) = 0
         - f(5) = 4.0 + 0 + 1.0 = 5.0
+
+        ON FAILURE: the code is wrong.
         """
         x0, y0, y1, mu, sigma, A = 2.0, 1.0, 3.0, 5.0, 1.0, 4.0
 
@@ -265,12 +267,7 @@ class TestGaussianPlusHeavySide:
         obj = GaussianPlusHeavySide(x_dummy, y_dummy)
         result = obj.function(x_test, x0, y0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Above x0: f(x) should equal Gaussian(x) + y0",
-        )
+        assert result == exact(expected), "Above x0: f(x) should equal Gaussian(x) + y0"
 
     def test_func_evaluates_at_x0_correctly(self):
         """At x = x0: f(x) = Gaussian(x0) + 0.5*y1 + y0.
@@ -279,6 +276,8 @@ class TestGaussianPlusHeavySide:
         - Gaussian(2) = 4 * exp(-0.5 * ((2-5)/1)^2) = 4 * exp(-4.5) ~ 0.0446
         - H(0) = 0.5
         - f(2) = Gaussian(2) + 3*0.5 + 1 = Gaussian(2) + 2.5
+
+        ON FAILURE: the code is wrong.
         """
         x0, y0, y1, mu, sigma, A = 2.0, 1.0, 3.0, 5.0, 1.0, 4.0
 
@@ -291,12 +290,9 @@ class TestGaussianPlusHeavySide:
         obj = GaussianPlusHeavySide(x_dummy, y_dummy)
         result = obj.function(x_test, x0, y0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At x0: f(x) should equal Gaussian(x0) + 0.5*y1 + y0",
-        )
+        assert result == exact(
+            expected
+        ), "At x0: f(x) should equal Gaussian(x0) + 0.5*y1 + y0"
 
     def test_func_evaluates_at_gaussian_peak(self):
         """At x = mu (Gaussian peak): f(mu) = A + y0 (assuming mu > x0).
@@ -305,6 +301,8 @@ class TestGaussianPlusHeavySide:
         - Gaussian(5) = A = 4.0
         - H(2-5) = 0
         - f(5) = 4.0 + 0 + 1.0 = 5.0
+
+        ON FAILURE: the code is wrong.
         """
         x0, y0, y1, mu, sigma, A = 2.0, 1.0, 3.0, 5.0, 1.0, 4.0
 
@@ -316,12 +314,7 @@ class TestGaussianPlusHeavySide:
         obj = GaussianPlusHeavySide(x_dummy, y_dummy)
         result = obj.function(x_test, x0, y0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At Gaussian peak (mu > x0): f(mu) = A + y0",
-        )
+        assert result == exact(expected), "At Gaussian peak (mu > x0): f(mu) = A + y0"
 
     # -------------------------------------------------------------------------
     # E2. Parameter Recovery Tests (Clean Data)
@@ -602,6 +595,8 @@ class TestGaussianTimesHeavySide:
         """For x < x0: f(x) = 0 (Heaviside is 0).
 
         With x0=3, the function should be exactly 0 for all x < 3.
+
+        ON FAILURE: the code is wrong.
         """
         x0, mu, sigma, A = 3.0, 5.0, 1.0, 4.0
 
@@ -613,12 +608,7 @@ class TestGaussianTimesHeavySide:
         obj = GaussianTimesHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Below x0: f(x) should be exactly 0",
-        )
+        assert result == exact(expected), "Below x0: f(x) should be exactly 0"
 
     def test_func_evaluates_above_x0_as_gaussian(self):
         """For x > x0: f(x) = Gaussian(x).
@@ -627,6 +617,8 @@ class TestGaussianTimesHeavySide:
         - f(5) = 4 * exp(0) = 4.0 (Gaussian peak)
         - f(4) = 4 * exp(-0.5) ~ 2.426
         - f(6) = 4 * exp(-0.5) ~ 2.426
+
+        ON FAILURE: the code is wrong.
         """
         x0, mu, sigma, A = 3.0, 5.0, 1.0, 4.0
 
@@ -638,12 +630,7 @@ class TestGaussianTimesHeavySide:
         obj = GaussianTimesHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Above x0: f(x) should equal Gaussian(x)",
-        )
+        assert result == exact(expected), "Above x0: f(x) should equal Gaussian(x)"
 
     def test_func_evaluates_at_x0_correctly(self):
         """At x = x0: f(x) = Gaussian(x0) * 1.0 = Gaussian(x0).
@@ -653,6 +640,8 @@ class TestGaussianTimesHeavySide:
 
         With x0=3, mu=5, sigma=1, A=4:
         - Gaussian(3) = 4 * exp(-0.5 * ((3-5)/1)^2) = 4 * exp(-2) ~ 0.541
+
+        ON FAILURE: the code is wrong.
         """
         x0, mu, sigma, A = 3.0, 5.0, 1.0, 4.0
 
@@ -664,12 +653,9 @@ class TestGaussianTimesHeavySide:
         obj = GaussianTimesHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At x0: f(x0) should equal Gaussian(x0) since H(0)=1.0",
-        )
+        assert result == exact(
+            expected
+        ), "At x0: f(x0) should equal Gaussian(x0) since H(0)=1.0"
 
     def test_func_evaluates_at_gaussian_peak(self):
         """At x = mu: f(mu) = A (assuming mu > x0).
@@ -678,6 +664,8 @@ class TestGaussianTimesHeavySide:
         - Gaussian(5) = 4 * exp(0) = 4.0
         - H(5-3) = H(2) = 1.0
         - f(5) = 4.0 * 1.0 = 4.0
+
+        ON FAILURE: the code is wrong.
         """
         x0, mu, sigma, A = 3.0, 5.0, 1.0, 4.0
 
@@ -689,12 +677,7 @@ class TestGaussianTimesHeavySide:
         obj = GaussianTimesHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At Gaussian peak (mu > x0): f(mu) = A",
-        )
+        assert result == exact(expected), "At Gaussian peak (mu > x0): f(mu) = A"
 
     # -------------------------------------------------------------------------
     # E2. Parameter Recovery Tests (Clean Data)
@@ -950,6 +933,8 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         - H(3-x) = 1 for x < 3
         - H(x-3) = 0 for x < 3
         - f(x) = 0 + y1*1 = 2
+
+        ON FAILURE: the code is wrong.
         """
         x0, y1, mu, sigma, A = 3.0, 2.0, 5.0, 1.0, 4.0
 
@@ -961,12 +946,7 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         obj = GaussianTimesHeavySidePlusHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Below x0: f(x) should be constant y1",
-        )
+        assert result == exact(expected), "Below x0: f(x) should be constant y1"
 
     def test_func_evaluates_above_x0_as_gaussian(self):
         """For x > x0: f(x) = Gaussian(x) (H(x0-x) = 0).
@@ -975,6 +955,8 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         - H(3-x) = 0 for x > 3
         - H(x-3) = 1 for x > 3
         - f(x) = Gaussian(x) * 1 + y1 * 0 = Gaussian(x)
+
+        ON FAILURE: the code is wrong.
         """
         x0, y1, mu, sigma, A = 3.0, 2.0, 5.0, 1.0, 4.0
 
@@ -986,12 +968,7 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         obj = GaussianTimesHeavySidePlusHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="Above x0: f(x) should equal Gaussian(x)",
-        )
+        assert result == exact(expected), "Above x0: f(x) should equal Gaussian(x)"
 
     def test_func_evaluates_at_x0_correctly(self):
         """At x = x0: f(x) = Gaussian(x0)*1.0 + y1*1.0.
@@ -1001,6 +978,8 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         With x0=3, y1=2, mu=5, sigma=1, A=4:
         - Gaussian(3) = 4 * exp(-2) ~ 0.541
         - f(3) = 0.541*1.0 + 2*1.0 = 2.541
+
+        ON FAILURE: the code is wrong.
         """
         x0, y1, mu, sigma, A = 3.0, 2.0, 5.0, 1.0, 4.0
 
@@ -1013,12 +992,9 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         obj = GaussianTimesHeavySidePlusHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At x0: f(x0) should equal Gaussian(x0)*1.0 + y1*1.0",
-        )
+        assert result == exact(
+            expected
+        ), "At x0: f(x0) should equal Gaussian(x0)*1.0 + y1*1.0"
 
     def test_func_evaluates_at_gaussian_peak(self):
         """At x = mu: f(mu) = A (assuming mu > x0).
@@ -1028,6 +1004,8 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         - H(5-3) = H(2) = 1.0
         - H(3-5) = H(-2) = 0.0
         - f(5) = 4.0 * 1.0 + y1 * 0.0 = 4.0
+
+        ON FAILURE: the code is wrong.
         """
         x0, y1, mu, sigma, A = 3.0, 2.0, 5.0, 1.0, 4.0
 
@@ -1039,12 +1017,7 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         obj = GaussianTimesHeavySidePlusHeavySide(x_dummy, y_dummy, guess_x0=x0)
         result = obj.function(x_test, x0, y1, mu, sigma, A)
 
-        np.testing.assert_allclose(
-            result,
-            expected,
-            rtol=1e-10,
-            err_msg="At Gaussian peak (mu > x0): f(mu) = A",
-        )
+        assert result == exact(expected), "At Gaussian peak (mu > x0): f(mu) = A"
 
     # -------------------------------------------------------------------------
     # E2. Parameter Recovery Tests (Clean Data)
@@ -1286,6 +1259,8 @@ class TestGaussianTimesHeavySidePlusHeavySide:
 
         The function transitions from constant y1 (for x < x0) to Gaussian (for x > x0).
         At x = x0, both Heaviside functions contribute 0.5.
+
+        ON FAILURE: the code is wrong.
         """
         x, y, w, true_params = gthph_clean_data
 
@@ -1307,24 +1282,21 @@ class TestGaussianTimesHeavySidePlusHeavySide:
         y_above = obj(x_above)[0]
 
         # Below x0 should be close to y1
-        np.testing.assert_allclose(
-            y_below,
-            y1,
-            rtol=0.1,
-            err_msg=f"Value just below x0 ({y_below:.4f}) should be close to y1 ({y1:.4f})",
-        )
+        assert y_below == exact(
+            y1
+        ), f"Value just below x0 ({y_below:.4f}) should be close to y1 ({y1:.4f})"
 
         # Above x0 should be close to Gaussian(x0)
         gauss_at_x0 = gaussian(np.array([x0 + 0.01]), mu, sigma, A)[0]
-        np.testing.assert_allclose(
-            y_above,
-            gauss_at_x0,
-            rtol=0.1,
-            err_msg=f"Value just above x0 ({y_above:.4f}) should be close to Gaussian ({gauss_at_x0:.4f})",
-        )
+        assert y_above == exact(
+            gauss_at_x0
+        ), f"Value just above x0 ({y_above:.4f}) should be close to Gaussian ({gauss_at_x0:.4f})"
 
     def test_plateau_region_is_constant(self, gthph_clean_data):
-        """Test that the region x < x0 is a constant plateau at y1."""
+        """Test that the region x < x0 is a constant plateau at y1.
+
+        ON FAILURE: the code is wrong.
+        """
         x, y, w, true_params = gthph_clean_data
 
         obj = GaussianTimesHeavySidePlusHeavySide(x, y, guess_x0=true_params["x0"])
@@ -1341,9 +1313,6 @@ class TestGaussianTimesHeavySidePlusHeavySide:
             y_plateau = obj(x_plateau)
             expected = np.full_like(y_plateau, y1)
 
-            np.testing.assert_allclose(
-                y_plateau,
-                expected,
-                rtol=1e-6,
-                err_msg="Plateau region (x < x0) should be constant at y1",
-            )
+            assert y_plateau == exact(
+                expected
+            ), "Plateau region (x < x0) should be constant at y1"
