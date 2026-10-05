@@ -368,7 +368,7 @@ class NeverEnoughData(LinearFit):
     """LinearFit whose ``sufficient_data`` override returns False.
 
     The base class raises from ``sufficient_data``; a subclass returning False
-    is the only way to reach make_fit's AssertionError branch.
+    instead must still stop the fit with InsufficientDataError.
     """
 
     @property
@@ -395,7 +395,7 @@ class TestMakeFitAssertionError:
 
         err = lf.make_fit(return_exception=True)
         assert isinstance(err, InsufficientDataError)
-        assert "Insufficient data" in str(err)
+        assert "insufficient data to fit the model" in str(err)
 
     def test_make_fit_assertion_error_raised_as_insufficient_data(
         self, simple_linear_data

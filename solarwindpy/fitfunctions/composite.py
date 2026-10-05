@@ -25,6 +25,7 @@ __all__ = [
 import numpy as np
 
 from .core import FitFailedError, FitFunction, InsufficientDataError
+from .gaussians import _weighted_moments
 
 
 class GaussianPlusHeavySide(FitFunction):
@@ -125,10 +126,19 @@ class GaussianPlusHeavySide(FitFunction):
         """
         user_p0 = kwargs.pop("p0", None)
         try:
-            p0 = list(self.p0 if user_p0 is None else user_p0)
-        except (AssertionError, ValueError, InsufficientDataError):
-            # The base class reports insufficient or unusable data.
+            p0 = self.p0 if user_p0 is None else user_p0
+        except InsufficientDataError:
+            # The base class reports insufficient data.
             return super().make_fit(return_exception=return_exception, **kwargs)
+        if p0 is None:
+            # No estimate: scan from the feasible default the base fit uses.
+            try:
+                p0 = self.fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+            except ValueError:
+                # Malformed bounds: the base fit reports them, honouring
+                # return_exception.
+                return super().make_fit(return_exception=return_exception, **kwargs)
+        p0 = list(p0)
 
         scan_kwargs = {k: v for k, v in kwargs.items() if k != "absolute_sigma"}
         x = np.unique(self.observations.used.x)
@@ -215,48 +225,45 @@ class GaussianPlusHeavySide(FitFunction):
         - y0 = 0, y1 = 0.8 * peak
         - Gaussian parameters recalculated for x > x0
 
+        There is no estimate, and ``p0`` is None, when the weighted mean
+        and variance are undefined for all the data or for the data above
+        ``x0`` (no such data, weights summing to zero, a negative variance,
+        or a width under half the smallest spacing of distinct ``x``).
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x0, y0, y1, mu, sigma, A].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
         -----
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, _ = moments
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if str(e).startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
-            raise
+        peak = y.max()
 
         x0 = 0.75 * mean
         y1 = 0.8 * peak
 
         tk = x > x0
         x, y = x[tk], y[tk]
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
         p0 = [x0, 0, y1, mean, std, peak]
         return p0
@@ -391,44 +398,39 @@ class GaussianTimesHeavySide(FitFunction):
         - Weighted mean and std for Gaussian parameters (using x > x0)
         - Peak amplitude from data
 
+        There is no estimate, and ``p0`` is None, when the weighted mean
+        and variance are undefined for the data above ``x0`` (no such data,
+        weights summing to zero, a negative variance, or a width under half
+        the smallest spacing of distinct ``x``).
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x0, mu, sigma, A].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
         -----
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
         x0 = self.guess_x0
         tk = x > x0
 
         x, y = x[tk], y[tk]
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if str(e).startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
-            raise
+        peak = y.max()
 
         p0 = [x0, mean, std, peak]
         return p0
@@ -577,48 +579,47 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
         - Weighted mean and std for Gaussian parameters (using x > x0)
         - Peak amplitude from data
 
+        There is no estimate, and ``p0`` is None, when no data lie at or
+        below ``x0`` (no level for ``y1``), or when the weighted mean and
+        variance are undefined for the data above ``x0`` (no such data,
+        weights summing to zero, a negative variance, or a width under half
+        the smallest spacing of distinct ``x``).
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x0, y1, mu, sigma, A].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
         -----
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
         x0 = self.guess_x0
         tk = x > x0
 
+        if tk.all():
+            self.logger.warning(
+                f"No points at or below x0 = {x0}, so no level y1.\nReturning None."
+            )
+            return None
         y1 = y[~tk].mean()
-        if np.isnan(y1):
-            y1 = 0
 
         x, y = x[tk], y[tk]
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
-        try:
-            peak = y.max()
-        except ValueError as e:
-            chk = (
-                r"zero-size array to reduction operation maximum "
-                "which has no identity"
-            )
-            if str(e).startswith(chk):
-                msg = (
-                    "There is no maximum of a zero-size array. "
-                    "Please check input data."
-                )
-                raise ValueError(msg)
-            raise
+        peak = y.max()
 
         p0 = [x0, y1, mean, std, peak]
         return p0

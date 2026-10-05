@@ -39,7 +39,7 @@ class PowerLaw(FitFunction):
     @property
     def p0(self):
         r"""Return initial guesses ``[A, b]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         p0 = [1, 1]
         return p0
@@ -83,7 +83,7 @@ class PowerLawPlusC(FitFunction):
     @property
     def p0(self):
         r"""Return initial guesses ``[A, b, c]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         p0 = [1, 1, 0]
         return p0
@@ -118,7 +118,7 @@ class PowerLawOffCenter(FitFunction):
     @property
     def p0(self):
         r"""Return initial guesses ``[A, b, x0]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         p0 = [1, 1, 0]
         return p0

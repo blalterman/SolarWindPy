@@ -38,7 +38,7 @@ Every `FitFunction` subclass MUST implement these three properties:
 | Property | Returns | Purpose |
 |----------|---------|---------|
 | `function` | callable | The mathematical function `f(x, *params)` to fit |
-| `p0` | list | Initial parameter guesses (data-driven) |
+| `p0` | list or None | Initial parameter guesses (data-driven), or None (see §3.2) |
 | `TeX_function` | str | LaTeX representation for plotting |
 
 **Minimal implementation:**
@@ -72,11 +72,13 @@ class MyFunction(FitFunction):
         return my_func
 
     @property
-    def p0(self) -> list:
-        assert self.sufficient_data
+    def p0(self) -> list | None:
+        self._require_sufficient_data()
         x = self.observations.used.x
         y = self.observations.used.y
         # Data-driven estimation (see §3.2)
+        if x[-1] == x[0]:
+            return None  # No slope: the fit starts from the feasible default.
         m = (y[-1] - y[0]) / (x[-1] - x[0])
         b = y[0] - m * x[0]
         return [m, b]
@@ -90,12 +92,26 @@ class MyFunction(FitFunction):
 
 Initial parameter guesses MUST be data-driven. Hardcoded domain values are prohibited.
 
+**The contract** (stated once, in the `FitFunction.p0` docstring in `core.py`):
+
+- `p0` returns one finite guess per parameter, in `argnames` order, or `None`.
+- Return `None` when the data make a guess impossible: an empty region, an undefined
+  slope, weights summing to zero. Decide which inputs those are from the model's math,
+  test for them where they arise, and say so in the `p0` docstring. `make_fit` then
+  starts from `fallback_p0()`: by default the feasible start (ones when unbounded), as
+  `curve_fit` does. A class whose model is singular there overrides `fallback_p0`.
+- Never return NaN or infinity, and never substitute a stand-in value for an estimate
+  that failed unless the docstring documents it as the estimate. `make_fit` rejects a
+  non-finite guess with a `ValueError` naming the class and parameter.
+- Start with `self._require_sufficient_data()`, never `assert self.sufficient_data`:
+  `python -O` removes asserts. It raises `InsufficientDataError`.
+
 **REQUIRED pattern:**
 
 ```python
 @property
-def p0(self) -> list:
-    assert self.sufficient_data
+def p0(self) -> list | None:
+    self._require_sufficient_data()
     x = self.observations.used.x
     y = self.observations.used.y
 
@@ -352,6 +368,7 @@ Before submitting a PR, verify:
 
 - [ ] All 3 abstract properties implemented (`function`, `p0`, `TeX_function`)
 - [ ] p0 is data-driven (no hardcoded domain values)
+- [ ] p0 returns None, never NaN or infinity, for inputs it cannot estimate (§3.2)
 - [ ] Tests cover categories E1-E5 minimum
 - [ ] All tests are non-trivial (pass criteria in §7)
 - [ ] Docstrings complete with `.. math::` blocks

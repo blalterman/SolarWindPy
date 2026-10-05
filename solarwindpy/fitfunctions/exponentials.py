@@ -42,7 +42,7 @@ class Exponential(FitFunction):
     @property
     def p0(self):
         r"""Return initial guesses ``[c, A]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         y = self.observations.used.y
 
@@ -82,7 +82,7 @@ class ExponentialPlusC(FitFunction):
     @property
     def p0(self):
         r"""Return initial guesses ``[c, A, d]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         y = self.observations.used.y
 
@@ -142,7 +142,7 @@ class ExponentialCDF(FitFunction):
     @property
     def p0(self):
         r"""Return initial guess ``[c]`` for the fit."""
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         y = self.observations.used.y
 

@@ -18,6 +18,66 @@ import numpy as np
 from .core import FitFunction
 
 
+def _weighted_moments(fitfunction, x, y):
+    r"""Mean and variance of ``x`` weighted by ``y``, or None.
+
+    The mean is :math:`\sum x y / \sum y` and the variance
+    :math:`\sum (x - \mathrm{mean})^2 y / \sum y`. Both are undefined when
+    ``x`` is empty or ``y`` sums to zero, they are not finite when a sum
+    overflows (finite data near the float maximum), and a negative variance
+    (possible when some weights are negative) has no square root. A width
+    (the square root of the variance) under half the smallest spacing between
+    distinct ``x``, including any width when there is only one distinct
+    ``x``, is narrower than the samples can resolve, as when all the weight
+    sits at one ``x``. In those cases, the reason is logged and None
+    returned, so the caller's ``p0`` can return None.
+
+    Parameters
+    ----------
+    fitfunction : FitFunction
+        Whose logger records why no estimate was made.
+    x, y : numpy.ndarray
+        Positions and their weights.
+
+    Returns
+    -------
+    tuple of float or None
+        ``(mean, variance)``, or None.
+    """
+    total = y.sum()
+    if x.size == 0 or total == 0 or not np.isfinite(total):
+        fitfunction.logger.warning(
+            f"No weighted mean: {x.size} points with weights summing to {total}."
+            "\nReturning None."
+        )
+        return None
+
+    mean = (x * y).sum() / total
+    var = ((x - mean) ** 2.0 * y).sum() / total
+    if not (np.isfinite(mean) and np.isfinite(var)):
+        fitfunction.logger.warning(
+            f"Weighted mean {mean} or variance {var} is not finite (overflow)."
+            "\nReturning None."
+        )
+        return None
+    if var < 0:
+        fitfunction.logger.warning(
+            f"Weighted variance {var} is negative, so no width.\nReturning None."
+        )
+        return None
+
+    distinct = np.unique(x)
+    half_spacing = 0.5 * np.diff(distinct).min() if distinct.size > 1 else np.inf
+    if np.sqrt(var) < half_spacing:
+        fitfunction.logger.warning(
+            f"Width {np.sqrt(var)} is under half the smallest x spacing "
+            f"({half_spacing}), so the samples cannot resolve it.\nReturning None."
+        )
+        return None
+
+    return mean, var
+
+
 class Gaussian(FitFunction):
     """Standard Gaussian distribution for symmetric peak fitting.
 
@@ -41,12 +101,23 @@ class Gaussian(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[mu, sigma, A]`` for the fit."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[mu, sigma, A]`` for the fit, or None.
+
+        ``mu`` and ``sigma`` are the mean and standard deviation of ``x``
+        weighted by ``y``, and ``A`` is the largest ``y``. When ``y`` sums to
+        zero, the weighted variance is negative, or the width ``sigma`` is
+        under half the smallest spacing between distinct ``x`` (narrower than
+        the samples resolve, as when all the weight sits at one ``x``), there
+        is no estimate and ``p0`` is None.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
         peak = y.max()
 
@@ -100,12 +171,19 @@ class GaussianNormalized(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[mu, sigma, n]`` for the fit."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[mu, sigma, n]`` for the fit, or None.
+
+        Estimated as in :attr:`Gaussian.p0`, with ``n`` the area of a
+        Gaussian of that width and peak. None under the same conditions.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
         peak = y.max()
 
@@ -171,18 +249,33 @@ class GaussianLn(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[ln(mu), ln(sigma), ln(A)]``."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[m, s, A]`` for the fit, or None.
+
+        The model is a Gaussian in :math:`\ln x`, so the guess is estimated in
+        :math:`\ln x`: ``m`` and ``s`` are the mean and standard deviation of
+        :math:`\ln x` weighted by ``y``, and ``A`` is the largest ``y`` (``A``
+        multiplies the model directly and is not logged). ``p0`` is None when
+        any used ``x`` is not positive (no logarithm), or when the weighted
+        moments of :math:`\ln x` give no estimate, under the same rules as
+        :attr:`Gaussian.p0` applied to :math:`\ln x`.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
 
-        mean = (x * y).sum() / y.sum()
-        std = ((x - mean) ** 2.0 * y).sum() / y.sum()
+        if not np.all(x > 0):
+            self.logger.warning(
+                f"{np.sum(x <= 0)} used x are not positive, so ln x is undefined."
+                "\nReturning None."
+            )
+            return None
 
-        peak = y.max()
+        moments = _weighted_moments(self, np.log(x), y)
+        if moments is None:
+            return None
+        m, var = moments
 
-        p0 = [mean, std, peak]
-        p0 = [np.log(x) for x in p0]
+        p0 = [m, np.sqrt(var), y.max()]
         return p0
 
     @property
