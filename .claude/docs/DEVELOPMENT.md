@@ -81,8 +81,8 @@ The rule is stated in `CLAUDE.md` under Conventions.
 
 **AI-Generated Code:**
 ```bash
-# End the commit message with the trailer:
-Co-Authored-By: Claude <noreply@anthropic.com>
+# End the commit message with a `Co-Authored-By: Claude …` trailer,
+# naming the model that wrote the code.
 ```
 
 **External Code:**

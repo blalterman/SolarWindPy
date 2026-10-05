@@ -44,8 +44,7 @@ The configuration enforces these requirements:
 2. Code must be formatted (`black solarwindpy/`)
 3. No linting errors (`flake8`)
 4. NumPy-style docstrings required
-5. Target ≥95% code coverage
-6. **NEW:** Include "Generated with Claude Code" in commit messages
+5. Coverage at or above the pre-commit hook's floor
 
 ### File Overview
 

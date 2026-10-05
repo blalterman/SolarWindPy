@@ -14,7 +14,7 @@
 ## Testing
 
 - [ ] All tests pass locally (`pytest -q`)
-- [ ] Test coverage ≥95% (`pytest --cov=solarwindpy --cov-report=term`)
+- [ ] Test coverage at or above the pre-commit hook's floor (`pytest --cov=solarwindpy --cov-report=term`)
 - [ ] Physics validation passed (`.claude/hooks/test-runner.sh --physics`)
 - [ ] New tests added for new functionality
 
