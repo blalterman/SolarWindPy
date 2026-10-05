@@ -3,7 +3,7 @@
 import inspect
 import numpy as np
 import pytest
-from scipy.optimize import curve_fit
+from scipy.optimize import OptimizeWarning, curve_fit
 
 from solarwindpy.fitfunctions.exponentials import (
     Exponential,
@@ -201,8 +201,11 @@ def test_exponential_cdf_fits_one_point():
     obj = ExponentialCDF(np.array([1.0]), np.array([1.0 - np.exp(-0.8)]))
     obj.set_y0(1.0)
 
-    # Zero degrees of freedom: the covariance warning is expected, not the subject.
-    with pytest.warns(Warning):
+    # Zero degrees of freedom: the parameter covariance is undefined, and the fit
+    # says so with scipy's OptimizeWarning.
+    with pytest.warns(
+        OptimizeWarning, match="Covariance of the parameters could not be estimated"
+    ):
         assert obj.make_fit() is None
     # One point leaves the optimizer's own xtol (1e-8) as the accuracy limit.
     assert obj.popt["c"] == pytest.approx(0.8, rel=1e-6, abs=0)
