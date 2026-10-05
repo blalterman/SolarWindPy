@@ -1590,9 +1590,12 @@ species: {}
         The electron density and velocity follow from quasi-neutrality and
         zero net current, :math:`n_e = \sum_s q_s n_s` and
         :math:`n_e v_e = \sum_s q_s n_s v_s`. The electron temperature equals
-        the (core) proton scalar temperature, so with :math:`m w^2 = 2 k T`
+        the proton scalar temperature :math:`T_p`, so with :math:`m w^2 = 2 k T`
 
             :math:`w_e^2 = \frac{m_p}{m_e} w_p^2`.
+
+        :math:`T_p` is taken from species ``p`` if the plasma holds it, and
+        otherwise from the core protons ``p1``; the beam ``p2`` is never used.
         """
 
         species = self.species
@@ -1685,7 +1688,9 @@ species: {}
 
         For each species :math:`s` this is the third moment of its velocity
         distribution along the magnetic field, taken in the center-of-mass
-        frame of the requested species,
+        frame of the species passed to this method, and only those: for
+        ``heat_flux("a+p1")`` or ``heat_flux("a", "p1")`` it is the a+p1
+        center of mass, not that of every species in the plasma,
 
             :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,
 
