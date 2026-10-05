@@ -1,6 +1,6 @@
 # Spent-When: PERMANENT(SolarWindPy stops collecting doctests with pytest)
 # Supersedes: none
-"""Repository-root pytest configuration for documentation examples.
+r"""Repository-root pytest configuration for documentation examples.
 
 ``pytest --doctest-modules solarwindpy`` collects docstring examples as
 ``DoctestItem`` objects, which accept no decorators. Examples that document
@@ -11,7 +11,7 @@ The examples in the rst files listed in ``SYBIL_DOCUMENTS`` run under Sybil:
 ``>>>`` examples as doctests, so each shown output is asserted, and any
 ``code-block:: python`` as plain code that must run. Run them with::
 
-    pytest -p no:doctest README.rst \\
+    pytest -p no:doctest README.rst \
         docs/source/tutorial/quickstart.rst docs/source/installation.rst
 
 ``-p no:doctest`` stops pytest's own doctest plugin from collecting the same
