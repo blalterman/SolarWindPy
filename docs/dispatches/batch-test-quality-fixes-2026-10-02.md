@@ -241,6 +241,37 @@ Author decisions:
 - The PR template and `.gitmessage` say "coverage ≥95%", which is neither the hook's floor
   nor a promise; say "coverage at or above the pre-commit hook's floor" instead.
 
+### p0-contract
+
+OWNS: solarwindpy/fitfunctions/ (all modules), tests/fitfunctions/
+
+Runs after `small-code-fixes` merges. Author decision, after an evaluation in which a NaN
+left in a guess failed every fit and a base-class NaN fill matched `None` exactly while
+hiding estimator bugs: a fit function's `p0` returns `None` when it cannot make a guess, and
+the fit starts from the feasible default (`core.py`'s existing `None` path). State that
+contract once, in the base class's `p0` docstring. The base class rejects any guess holding
+NaN or infinity with a `ValueError` naming the class and the parameter, instead of scipy's
+"Initial guess is outside of provided bounds". Bring every subclass onto the contract:
+`Heaviside`'s NaN substitutions, the unchecked estimates in `exponentials`, `power_laws`,
+`gaussians` and `hinge`, and `composite`'s empty-data error; replace `assert
+self.sufficient_data` (removed under `python -O`) with an explicit check. Controls: a guess
+with NaN raises the new error; a subclass returning `None` still fits.
+
+### tolerance-helpers
+
+OWNS: tests/ (all files), .claude/docs/TEST_PATTERNS.md
+
+Runs after `plasma-code-fixes` and `p0-contract` merge, before `mutation-recheck`. Author
+decision: one test helper module is the tolerance rule, a named function per comparison
+kind (`exact`, `printed(x, decimals=d)`, `noise_free`, and the 4-error-bar check for noisy
+fits), each with its reason in its docstring; `TEST_PATTERNS.md` points to the module instead
+of restating numbers. Migrate the hand-written tolerances (304 `rel=`/`abs=`/`rtol=`/`atol=`
+keywords across 33 test files), promoting `test_abundances.py`'s `exact()`. Add a test that
+fails when a test file writes `rel=`, `abs=`, `rtol=` or `atol=` outside the helper module.
+Line comments keep only the source of an expected value, never a restated rule. Controls: a
+hand-written tolerance added to a test file fails the enforcing test; each helper fails on a
+value shifted past its tolerance.
+
 ## Long-running units
 
 ### mutation-recheck
