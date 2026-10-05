@@ -111,8 +111,12 @@ def save(
 
     Examples
     --------
+    >>> import tempfile
     >>> fig, ax = subplots()
-    >>> save(fig, Path('my_plot'))
+    >>> with tempfile.TemporaryDirectory() as d:
+    ...     save(fig, Path(d) / "my_plot")
+    ...     sorted(p.name for p in Path(d).iterdir())
+    ['my_plot.pdf', 'my_plot.png']
     """
     if isinstance(fig, mpl.axes.Axes):
         fig = fig.figure

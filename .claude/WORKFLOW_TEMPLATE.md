@@ -58,28 +58,14 @@ black solarwindpy/          # Format code
 flake8                      # Check linting
 ```
 
-### Step 5: Commit with Attribution
-
-**Commit format:**
-```bash
-git add .
-git commit -m "feat(module): descriptive summary
-
-Detailed description of changes and rationale.
-
-Generated with Claude Code
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-```
-
-### Step 6: Push and Track
+### Step 5: Push and Track
 
 **Push branch:**
 ```bash
 git push origin <branch-name>
 ```
 
-### Step 7: Completion Notice
+### Step 6: Completion Notice
 
 **Claude provides:**
 - Summary of changes made

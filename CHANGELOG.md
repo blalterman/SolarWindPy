@@ -161,6 +161,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the variable is already set, and warns if `docstring_inheritance` was imported
   earlier with inheritance off.
 
+### Changed
+
+- `ICMECAT(cache_dir=...)` caches the catalog as `icmecat.csv`, the format it downloads
+  in, instead of `icmecat.parquet`, so caching needs no parquet engine (it raised
+  `ImportError` without one). An existing `icmecat.parquet` cache is ignored, so the
+  catalog downloads once more.
+- `FitFunction.rsq` returns NaN when the fitted `y` have no spread (a single point, or
+  constant data), where R^2 is undefined. It previously divided by zero, warning and
+  returning -inf or NaN.
+- `Line.p0` and `LineXintercept.p0` return `None` (no initial estimate) for repeated `x`
+  without a divide-by-zero warning. `LineXintercept.p0` also returns `None` when the
+  estimated slope is zero, since a flat line has no x-intercept; it previously returned
+  an x-intercept of -inf or NaN, and a NaN initial guess made `make_fit` fail.
+- `Hist2D.plot_edges` documents its `xlim` and `ylim` keywords as inclusive: a vertex
+  exactly on a limit is kept. Behaviour is unchanged.
+
 ### Added
 
 - `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
