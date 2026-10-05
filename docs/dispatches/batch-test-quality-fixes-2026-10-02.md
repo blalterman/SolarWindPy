@@ -316,6 +316,8 @@ Also folded into `tolerance-helpers` (from PR #490's report): a test for
 `estimate_electrons(inplace=True)`, and the one `tests/core/test_plasma.py` test missing its
 `ON FAILURE` line.
 
+Author decision (2026-10-05): the `heat_flux` plot label stays `q` (`Q` reads as charge); no label change.
+
 ### loader-examples
 
 OWNS: solarwindpy/core/ions.py, solarwindpy/core/spacecraft.py, solarwindpy/core/plasma.py (the `Plasma` class docstring only)
