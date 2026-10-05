@@ -312,6 +312,19 @@ Line comments keep only the source of an expected value, never a restated rule. 
 hand-written tolerance added to a test file fails the enforcing test; each helper fails on a
 value shifted past its tolerance.
 
+Also folded into `tolerance-helpers` (from PR #490's report): a test for
+`estimate_electrons(inplace=True)`, and the one `tests/core/test_plasma.py` test missing its
+`ON FAILURE` line.
+
+### loader-examples
+
+OWNS: solarwindpy/core/ions.py, solarwindpy/core/spacecraft.py, solarwindpy/core/plasma.py (the `Plasma` class docstring only)
+
+Author decision: the `Plasma` class, `Ion` and `Spacecraft` docstring examples load their
+data with `swp.examples.load_plasma()` (`plasma`, `plasma.p1`, `plasma.spacecraft`) instead of
+building random or hand-typed frames, so the example CSVs are the single source. Docstrings
+only. Runs alongside `tolerance-helpers` (disjoint files).
+
 ## Long-running units
 
 ### mutation-recheck
