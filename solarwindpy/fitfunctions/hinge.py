@@ -25,6 +25,37 @@ from .core import FitFunction
 _XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
+def _undefined(fitfunction, reason, **estimates):
+    r"""Whether any named estimate is undefined (NaN or infinite).
+
+    A hinge ``p0`` estimates slopes from the points on each side of its
+    hinge guess. A side with fewer than two points or repeated ``x`` has no
+    slope, and a zero slope has no x-intercept. When any of the estimates
+    passed here is undefined for such a reason, this logs which ones and
+    ``reason``, and the caller's ``p0`` returns None.
+
+    Parameters
+    ----------
+    fitfunction : FitFunction
+        Whose logger records the undefined estimates.
+    reason : str
+        Why those estimates can be undefined.
+    **estimates : float
+        The estimates to check, by parameter name.
+
+    Returns
+    -------
+    bool
+        True when at least one estimate is undefined.
+    """
+    bad = {k: v for k, v in estimates.items() if not np.isfinite(v)}
+    if bad:
+        fitfunction.logger.warning(
+            f"Undefined estimates {bad}: {reason}.\nReturning None."
+        )
+    return bool(bad)
+
+
 class HingeSaturation(FitFunction):
     r"""Piecewise linear function with hinge point for saturation modeling.
 
@@ -141,17 +172,20 @@ class HingeSaturation(FitFunction):
         - Estimated x1 from linear fit to rising region, or data minimum
         - Median slope in plateau region for m2
 
+        ``m2`` is undefined, and ``p0`` is None, when the plateau region
+        has repeated ``x``.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [xh, yh, x1, m2].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         xh, yh = self.saturation_guess
 
@@ -180,6 +214,9 @@ class HingeSaturation(FitFunction):
             m2 = np.median(np.ediff1d(y[plateau_mask]) / np.ediff1d(x[plateau_mask]))
         else:
             m2 = 0.0
+
+        if _undefined(self, "the plateau region has repeated x", m2=m2):
+            return None
 
         p0 = [xh, yh, x1, m2]
         return p0
@@ -372,14 +409,18 @@ class TwoLine(FitFunction):
         The initial guess is derived from the data by estimating slopes
         and intercepts in regions separated by ``guess_xs``.
 
+        Each side of ``guess_xs`` needs at least two points with distinct
+        ``x`` for a slope, and a nonzero slope for an x-intercept. Otherwise
+        an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x1, x2, m1, m2].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -388,7 +429,7 @@ class TwoLine(FitFunction):
         Uses hardcoded xs=425 as the default separation point, which is
         appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         def estimate_line(x, y, tk, xs):
             x = x[tk]
@@ -408,6 +449,13 @@ class TwoLine(FitFunction):
 
         x1, m1 = estimate_line(x, y, tk, xs)
         x2, m2 = estimate_line(x, y, ~tk, xs)
+
+        reason = (
+            "each side of xs needs two points with distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, x1=x1, x2=x2, m1=m1, m2=m2):
+            return None
 
         p0 = [x1, x2, m1, m2]
         return p0
@@ -607,14 +655,18 @@ class Saturation(FitFunction):
         The initial guess is derived from the data by estimating slopes
         and intercepts in regions separated by the saturation guess.
 
+        Each side of ``xs`` needs at least two points with distinct ``x``
+        for a slope, and the rising side a nonzero slope for ``x1``.
+        Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x1, xs, s, theta].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -623,7 +675,7 @@ class Saturation(FitFunction):
         Uses hardcoded xs=425 as the default separation point, which is
         appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         def estimate_line(x, y, tk, xs):
             x = x[tk]
@@ -647,6 +699,13 @@ class Saturation(FitFunction):
 
         s = np.nanmedian([s1, s2])
         theta = np.arctan((m1 - m2) / (1 + m1 * m2))
+
+        reason = (
+            "each side of xs needs two points with distinct x for a slope, "
+            "and the rising side a nonzero slope for x1"
+        )
+        if _undefined(self, reason, x1=x1, s=s, theta=theta):
+            return None
 
         p0 = [x1, xs, s, theta]
         return p0
@@ -825,14 +884,19 @@ class HingeMin(FitFunction):
         The initial guess estimates slopes and intercepts from the data
         in regions separated by the hinge guess.
 
+        Each side of ``guess_h`` with two or more points needs distinct
+        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
+        ``m1`` falls back to the slope across the x range, which needs
+        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [m1, x1, x2, h].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -840,7 +904,7 @@ class HingeMin(FitFunction):
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         Default guess_h=400 is appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x = self.observations.used.x
         y = self.observations.used.y
@@ -865,6 +929,13 @@ class HingeMin(FitFunction):
         else:
             m2 = 0.0
             x2 = h
+
+        reason = (
+            "each side of h needs distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
+            return None
 
         p0 = [m1, x1, x2, h]
         return p0
@@ -1043,14 +1114,19 @@ class HingeMax(FitFunction):
         The initial guess estimates slopes and intercepts from the data
         in regions separated by the hinge guess.
 
+        Each side of ``guess_h`` with two or more points needs distinct
+        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
+        ``m1`` falls back to the slope across the x range, which needs
+        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [m1, x1, x2, h].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1058,7 +1134,7 @@ class HingeMax(FitFunction):
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         Default guess_h=400 is appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x = self.observations.used.x
         y = self.observations.used.y
@@ -1083,6 +1159,13 @@ class HingeMax(FitFunction):
         else:
             m2 = 0.0
             x2 = h
+
+        reason = (
+            "each side of h needs distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
+            return None
 
         p0 = [m1, x1, x2, h]
         return p0
@@ -1241,14 +1324,17 @@ class HingeAtPoint(FitFunction):
         The initial guess uses the hinge_guess for (xh, yh) and estimates
         slopes from the data in regions separated by the hinge guess.
 
+        A side of ``guess_xh`` with two or more points needs distinct ``x``
+        for a slope. Otherwise a slope is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [xh, yh, m1, m2].
 
         Raises
         ------
-        AssertionError
+        InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1257,7 +1343,7 @@ class HingeAtPoint(FitFunction):
         Default guess_xh=400 and guess_yh=0.5 are appropriate for solar
         wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         xh, yh_guess = self._hinge_guess
 
@@ -1282,6 +1368,9 @@ class HingeAtPoint(FitFunction):
             m2 = np.median(np.ediff1d(y[tk_above]) / np.ediff1d(x[tk_above]))
         else:
             m2 = 0.0
+
+        if _undefined(self, "each side of xh needs distinct x", m1=m1, m2=m2):
+            return None
 
         p0 = [xh, yh, m1, m2]
         return p0

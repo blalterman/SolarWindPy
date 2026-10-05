@@ -1,0 +1,356 @@
+# Spent-When: PERMANENT(the repository stops maintaining a test suite)
+# Supersedes: none
+"""The ``p0`` contract shared by every fit function.
+
+A ``p0`` returns one finite guess per parameter, or None when the data make a
+guess impossible; the fit then starts from the feasible default (ones when
+unbounded). ``make_fit`` rejects a guess holding NaN or infinity with a
+``ValueError`` naming the class and the parameter. The contract is stated in
+``FitFunction.p0``'s docstring.
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+import solarwindpy
+from solarwindpy.fitfunctions.composite import (
+    GaussianPlusHeavySide,
+    GaussianTimesHeavySide,
+    GaussianTimesHeavySidePlusHeavySide,
+)
+from solarwindpy.fitfunctions.core import FitFunction, InsufficientDataError
+from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
+from solarwindpy.fitfunctions.heaviside import HeavySide
+from solarwindpy.fitfunctions.hinge import (
+    HingeAtPoint,
+    HingeMax,
+    HingeMin,
+    HingeSaturation,
+    Saturation,
+    TwoLine,
+)
+
+
+def _line(x, m, b):
+    return m * x + b
+
+
+class _FixedGuessLine(FitFunction):
+    """A line whose ``p0`` is the class's ``guess``, to exercise the base class."""
+
+    guess = None
+
+    @property
+    def function(self):
+        return _line
+
+    @property
+    def p0(self):
+        return self.guess
+
+    @property
+    def TeX_function(self):
+        return "m x + b"
+
+
+class _NanGuessLine(_FixedGuessLine):
+    guess = [np.nan, 1.0]
+
+
+class _NoGuessLine(_FixedGuessLine):
+    guess = None
+
+
+# Exact line y = 2x + 1 on distinct x: any start converges to (2, 1).
+LINE_X = np.arange(6.0)
+LINE_Y = 2.0 * LINE_X + 1.0
+
+
+def test_nan_in_a_subclass_guess_raises_value_error_naming_class_and_parameter():
+    """A ``p0`` holding NaN is refused before scipy, naming the class and ``m``.
+
+    Without the check scipy reports "Initial guess is outside of provided
+    bounds", which names neither.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _NanGuessLine(LINE_X, LINE_Y)
+    msg = r"^_NanGuessLine initial guess is not finite: m=nan\."
+    with pytest.raises(ValueError, match=msg):
+        fit.make_fit()
+    err = fit.make_fit(return_exception=True)
+    assert isinstance(err, ValueError) and "m=nan" in str(err), repr(err)
+
+
+def test_infinite_caller_p0_raises_value_error_naming_the_parameter():
+    """A caller's ``p0=`` holding infinity gets the same check, naming ``b``.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _NoGuessLine(LINE_X, LINE_Y)
+    msg = r"^_NoGuessLine initial guess is not finite: b=inf\."
+    with pytest.raises(ValueError, match=msg):
+        fit.make_fit(p0=[2.0, np.inf])
+
+
+def test_a_none_guess_fits_from_the_feasible_default():
+    """``p0`` None still fits: the exact line is recovered and dof counts parameters.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _NoGuessLine(LINE_X, LINE_Y)
+    assert fit.make_fit() is None
+    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
+    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+    assert fit.dof == LINE_X.size - 2
+    assert fit.initial_guess_info is None
+
+
+def test_a_none_guess_starts_inside_dict_bounds():
+    """With bounds excluding the default ones, ``p0`` None starts inside them.
+
+    ``m`` is bounded to [1.5, 5], so a start at m = 1 would be infeasible.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _NoGuessLine(LINE_X, LINE_Y)
+    fit.make_fit(bounds={"m": (1.5, 5.0), "b": (-5.0, 5.0)})
+    # Noise-free fit: rel=1e-6 is far above optimizer convergence, far below a bug.
+    assert fit.popt == pytest.approx({"m": 2.0, "b": 1.0}, rel=1e-6, abs=0)
+
+
+def test_insufficient_data_check_survives_python_O(tmp_path):
+    """Under ``python -O`` too, ``p0`` with too little data raises InsufficientDataError.
+
+    The check was an ``assert``, which ``-O`` strips; a Gaussian then guessed
+    from two points for three parameters.
+
+    ON FAILURE: the code is wrong.
+    """
+    script = tmp_path / "probe.py"
+    script.write_text(
+        "import numpy as np\n"
+        "from solarwindpy.fitfunctions.core import InsufficientDataError\n"
+        "from solarwindpy.fitfunctions.gaussians import Gaussian\n"
+        "try:\n"
+        "    Gaussian(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0\n"
+        "except InsufficientDataError:\n"
+        "    print('raised')\n"
+        "else:\n"
+        "    print('no error')\n"
+    )
+    root = Path(solarwindpy.__file__).resolve().parents[1]
+    out = subprocess.run(
+        [sys.executable, "-O", str(script)],
+        capture_output=True,
+        text=True,
+        env={"PYTHONPATH": str(root), "PATH": ""},
+        check=True,
+    )
+    assert out.stdout.strip() == "raised", out.stdout + out.stderr
+
+
+def _case(cls, x, y, kwargs, *rest, id):
+    return pytest.param(cls, np.array(x), np.array(y), kwargs, *rest, id=id)
+
+
+# Inputs for which each family's estimate is impossible, and why.
+IMPOSSIBLE = [
+    # y sums to zero: no weighted mean.
+    _case(Gaussian, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="Gaussian"),
+    _case(GaussianNormalized, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="GaussianNorm"),
+    # Weighted mean -2 has no logarithm.
+    _case(GaussianLn, [-3.0, -2, -1], [1.0, 2, 1], {}, id="GaussianLn"),
+    # No data above guess_x0 = 20.
+    _case(
+        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {"guess_x0": 20.0}, id="Step"
+    ),
+    # y sums to zero: no weighted mean.
+    _case(
+        GaussianPlusHeavySide,
+        [0.0, 1, 2, 3, 4, 5],
+        [1.0, -1, 1, -1, 1, -1],
+        {},
+        id="GaussianPlusHeavySide",
+    ),
+    # No data above guess_x0 = 20 (was "There is no maximum of a zero-size array").
+    _case(
+        GaussianTimesHeavySide,
+        [0.0, 1, 2, 3, 4],
+        [1.0, 2, 3, 2, 1],
+        {"guess_x0": 20.0},
+        id="GaussianTimesHeavySide",
+    ),
+    # No data at or below guess_x0 = -1: no level y1.
+    _case(
+        GaussianTimesHeavySidePlusHeavySide,
+        [0.0, 1, 2, 3, 4, 5],
+        [1.0, 2, 3, 2, 1, 0.5],
+        {"guess_x0": -1.0},
+        id="GaussianTimesHeavySidePlusHeavySide",
+    ),
+    # Default xs = 425 leaves no data on the upper side: no slope.
+    _case(TwoLine, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="TwoLine"),
+    _case(Saturation, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="Saturation"),
+    # Plateau x = [3, 3, 4] repeats x with a rise: slope inf.
+    _case(
+        HingeSaturation,
+        [0.0, 1, 2, 3, 3, 4],
+        [0.0, 1, 2, 2, 2.5, 2.5],
+        {"guess_xh": 2.5, "guess_yh": 2.0},
+        id="HingeSaturation",
+    ),
+    # Flat plateau: zero slope, so no x-intercept x2.
+    _case(
+        HingeMin, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 2, 2], {"guess_h": 2.5}, id="Min"
+    ),
+    _case(
+        HingeMax, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 2, 2], {"guess_h": 2.5}, id="Max"
+    ),
+    # Lower side x = [0, 0, 1] repeats x with a rise: slope inf.
+    _case(
+        HingeAtPoint,
+        [0.0, 0, 1, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_xh": 2.5, "guess_yh": 2.0},
+        id="HingeAtPoint",
+    ),
+]
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs", IMPOSSIBLE)
+def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
+    cls, x, y, kwargs
+):
+    """An input with no estimate gives ``p0`` None, and the fit starts from ones.
+
+    The fit with ``p0`` None must end exactly as the fit given ``p0=`` ones,
+    the feasible default for unbounded parameters, and is never refused with
+    the non-finite-guess ValueError. Whether that start converges is scipy's
+    business: for some models all-ones is a singular point (x1 = x2 for the
+    hinges, log of negative x for GaussianLn), and scipy then reports
+    "Residuals are not finite in the initial point" on both routes alike.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = cls(x, y, **kwargs)
+    assert fit.p0 is None, fit.p0
+
+    explicit = cls(x, y, **kwargs)
+    ones = np.ones(len(fit.argnames))
+    expected = explicit.make_fit(return_exception=True, p0=ones)
+    got = fit.make_fit(return_exception=True)
+    assert "initial guess is not finite" not in str(got), got
+    assert type(got) is type(expected), (got, expected)
+    assert str(got) == str(expected), (got, expected)
+    if got is None:
+        # Same start, same solver: identical results.
+        assert fit.popt == explicit.popt
+
+
+S = np.sqrt(0.5)
+# Hand cases: x = [1, 2, 3] weighted by y = [1, 2, 1] has mean 2 and variance 0.5.
+NORMAL = [
+    _case(Gaussian, [1.0, 2, 3], [1.0, 2, 1], {}, [2.0, S, 2.0], id="Gaussian"),
+    # n = peak * sigma * sqrt(2 pi) = 2 sqrt(0.5) sqrt(2 pi) = 2 sqrt(pi).
+    _case(
+        GaussianNormalized,
+        [1.0, 2, 3],
+        [1.0, 2, 1],
+        {},
+        [2.0, S, 2 * np.sqrt(np.pi)],
+        id="GaussianNormalized",
+    ),
+    # Logs of mean 2, variance 0.5 and peak 2.
+    _case(
+        GaussianLn,
+        [1.0, 2, 3],
+        [1.0, 2, 1],
+        {},
+        [np.log(2), np.log(0.5), np.log(2)],
+        id="GaussianLn",
+    ),
+    # x0 = midpoint 2; median y above is 2, below is 5, so y1 = 3.
+    _case(
+        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {}, [2.0, 2.0, 3.0], id="Step"
+    ),
+    # Weighted mean (3 + 8 + 5) / 4 = 4 gives x0 = 3 and y1 = 0.8 * 2; above x0,
+    # x = [4, 5, 6] weighted by [2, 1, 0] has mean 13/3 and variance 2/9.
+    _case(
+        GaussianPlusHeavySide,
+        [1.0, 2, 3, 4, 5, 6],
+        [0.0, 0, 1, 2, 1, 0],
+        {},
+        [3.0, 0.0, 1.6, 13 / 3, np.sqrt(2) / 3, 2.0],
+        id="GaussianPlusHeavySide",
+    ),
+    # Above x0 = 0.5 the data are the [1, 2, 1] case.
+    _case(
+        GaussianTimesHeavySide,
+        [0.0, 1, 2, 3],
+        [7.0, 1, 2, 1],
+        {"guess_x0": 0.5},
+        [0.5, 2.0, S, 2.0],
+        id="GaussianTimesHeavySide",
+    ),
+    # y1 is the mean y at or below x0 = 1.5, which is 7; above x0, x = [2, 3, 4]
+    # weighted by [1, 2, 1] has mean 3 and variance 0.5.
+    _case(
+        GaussianTimesHeavySidePlusHeavySide,
+        [0.0, 1, 2, 3, 4],
+        [7.0, 7, 1, 2, 1],
+        {"guess_x0": 1.5},
+        [1.5, 7.0, 3.0, S, 2.0],
+        id="GaussianTimesHeavySidePlusHeavySide",
+    ),
+    # Below 2.5: y = x, so m1 = 1, x1 = 0. Above: y = 5 - x, so m2 = -1, x2 = 5.
+    _case(
+        TwoLine,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_xs": 2.5},
+        [0.0, 5.0, 1.0, -1.0],
+        id="TwoLine",
+    ),
+    _case(
+        HingeMin,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_h": 2.5},
+        [1.0, 0.0, 5.0, 2.5],
+        id="HingeMin",
+    ),
+    # yh is y at the x nearest 2.5 (the first of the tie, x = 2).
+    _case(
+        HingeAtPoint,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_xh": 2.5, "guess_yh": 9.0},
+        [2.5, 2.0, 1.0, -1.0],
+        id="HingeAtPoint",
+    ),
+]
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs, expected", NORMAL)
+def test_normal_input_estimate_matches_hand_calculation(cls, x, y, kwargs, expected):
+    """On an ordinary input each family's ``p0`` is the hand-computed estimate.
+
+    ON FAILURE: the code is wrong, unless the author changed the estimator.
+    """
+    p0 = cls(x, y, **kwargs).p0
+    # rel=1e-12: a few float operations on small exact inputs; abs covers the 0s.
+    assert p0 == pytest.approx(expected, rel=1e-12, abs=1e-15), p0
+
+
+def test_insufficient_data_still_raises_from_p0():
+    """Two points for a three-parameter model: ``p0`` raises InsufficientDataError.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(InsufficientDataError, match="insufficient data"):
+        HeavySide(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0

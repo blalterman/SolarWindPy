@@ -35,7 +35,7 @@ def _median_slope_intercept(fitfunction):
     tuple of float or None
         ``(m, b)``, or ``None`` if the slope cannot be estimated.
     """
-    assert fitfunction.sufficient_data
+    fitfunction._require_sufficient_data()
 
     x = fitfunction.observations.used.x
     y = fitfunction.observations.used.y

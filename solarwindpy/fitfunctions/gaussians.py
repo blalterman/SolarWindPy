@@ -18,6 +18,47 @@ import numpy as np
 from .core import FitFunction
 
 
+def _weighted_moments(fitfunction, x, y):
+    r"""Mean and variance of ``x`` weighted by ``y``, or None.
+
+    The mean is :math:`\sum x y / \sum y` and the variance
+    :math:`\sum (x - \mathrm{mean})^2 y / \sum y`. Both are undefined when
+    ``x`` is empty or ``y`` sums to zero, and a negative variance (possible
+    when some weights are negative) has no square root. In those cases, the
+    reason is logged and None returned, so the caller's ``p0`` can return
+    None. A zero variance (all weight at one ``x``) is returned as is.
+
+    Parameters
+    ----------
+    fitfunction : FitFunction
+        Whose logger records why no estimate was made.
+    x, y : numpy.ndarray
+        Positions and their weights.
+
+    Returns
+    -------
+    tuple of float or None
+        ``(mean, variance)``, or None.
+    """
+    total = y.sum()
+    if x.size == 0 or total == 0:
+        fitfunction.logger.warning(
+            f"No weighted mean: {x.size} points with weights summing to {total}."
+            "\nReturning None."
+        )
+        return None
+
+    mean = (x * y).sum() / total
+    var = ((x - mean) ** 2.0 * y).sum() / total
+    if var < 0:
+        fitfunction.logger.warning(
+            f"Weighted variance {var} is negative, so no width.\nReturning None."
+        )
+        return None
+
+    return mean, var
+
+
 class Gaussian(FitFunction):
     """Standard Gaussian distribution for symmetric peak fitting.
 
@@ -41,12 +82,21 @@ class Gaussian(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[mu, sigma, A]`` for the fit."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[mu, sigma, A]`` for the fit, or None.
+
+        ``mu`` and ``sigma`` are the mean and standard deviation of ``x``
+        weighted by ``y``, and ``A`` is the largest ``y``. When ``y`` sums to
+        zero or the weighted variance is negative, there is no estimate
+        and ``p0`` is None.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
         peak = y.max()
 
@@ -100,12 +150,19 @@ class GaussianNormalized(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[mu, sigma, n]`` for the fit."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[mu, sigma, n]`` for the fit, or None.
+
+        Estimated as in :attr:`Gaussian.p0`, with ``n`` the area of a
+        Gaussian of that width and peak. None under the same conditions.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-        mean = (x * y).sum() / y.sum()
-        std = np.sqrt(((x - mean) ** 2.0 * y).sum() / y.sum())
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, var = moments
+        std = np.sqrt(var)
 
         peak = y.max()
 
@@ -171,15 +228,31 @@ class GaussianLn(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[ln(mu), ln(sigma), ln(A)]``."""
-        assert self.sufficient_data
+        r"""Return initial guesses ``[ln(mu), ln(sigma), ln(A)]``, or None.
+
+        ``mu`` and ``sigma`` are taken from the mean and variance of ``x``
+        weighted by ``y``, and ``A`` from the largest ``y``. A logarithm needs
+        a positive argument, so ``p0`` is None when there is no weighted
+        mean or variance (as in :attr:`Gaussian.p0`), or when the mean or the
+        largest ``y`` is not positive, or the variance is zero.
+        """
+        self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
 
-        mean = (x * y).sum() / y.sum()
-        std = ((x - mean) ** 2.0 * y).sum() / y.sum()
+        moments = _weighted_moments(self, x, y)
+        if moments is None:
+            return None
+        mean, std = moments
 
         peak = y.max()
+
+        if not (mean > 0 and std > 0 and peak > 0):
+            self.logger.warning(
+                f"Weighted mean {mean}, variance {std} or peak {peak} is not "
+                "positive, so it has no logarithm.\nReturning None."
+            )
+            return None
 
         p0 = [mean, std, peak]
         p0 = [np.log(x) for x in p0]

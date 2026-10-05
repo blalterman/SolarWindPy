@@ -52,6 +52,7 @@ _UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
 _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
+_INSUFFICIENT_DATA = "There is insufficient data to fit the model."
 
 
 class FitFunctionError(Exception):
@@ -254,7 +255,31 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     @property
     @abstractmethod
     def p0(self):
-        r"""The initial guess for the FitFunction."""
+        r"""The initial guess for the FitFunction, or None.
+
+        This docstring states the contract every subclass's ``p0`` follows.
+
+        Returns
+        -------
+        list of float or None
+            One finite guess per parameter, in :attr:`argnames` order. When
+            the data make a guess impossible (an empty region, an undefined
+            slope, a zero total weight, and so on), ``p0`` returns ``None``
+            rather than a guess holding NaN or infinity, and :meth:`make_fit`
+            starts from the feasible default for the bounds: ones when
+            unbounded, as :func:`scipy.optimize.curve_fit` does.
+
+        Raises
+        ------
+        InsufficientDataError
+            If fewer observations are used than the model has parameters.
+
+        Notes
+        -----
+        :meth:`make_fit` rejects a guess holding NaN or infinity, whether it
+        comes from ``p0`` or from the caller's ``p0=``, with a ``ValueError``
+        naming the class and each offending parameter.
+        """
         pass
 
     @property
@@ -287,7 +312,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     @property
     def dof(self):
         r"""Degrees of freedom in the fit."""
-        return self.observations.used.y.size - len(self.p0)
+        return self.observations.used.y.size - len(self.argnames)
 
     @property
     def fit_result(self):
@@ -388,10 +413,70 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         r"""Ensure that we can fit the data before doing any computations."""
         chk = self.nobs >= len(self.argnames)
         if not chk:
-            msg = "There is insufficient data to fit the model."
-            raise InsufficientDataError(msg)
+            raise InsufficientDataError(_INSUFFICIENT_DATA)
         else:
             return True
+
+    def _require_sufficient_data(self):
+        r"""Raise :class:`InsufficientDataError` unless the data can be fit.
+
+        The explicit form of ``assert self.sufficient_data``, which ``python
+        -O`` removes. It also covers a subclass whose :attr:`sufficient_data`
+        returns False instead of raising.
+        """
+        if not self.sufficient_data:
+            raise InsufficientDataError(_INSUFFICIENT_DATA)
+
+    def _feasible_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The feasible default guess for ``bounds``, used when ``p0`` is None.
+
+        Parameters
+        ----------
+        bounds : 2-tuple or dict, optional
+            As accepted by :meth:`make_fit`.
+
+        Returns
+        -------
+        numpy.ndarray
+            One value per parameter, as :func:`scipy.optimize.curve_fit`
+            chooses: ones when unbounded, otherwise a point inside the bounds.
+        """
+        # The fit parameters are the function's arguments after x.
+        n = len(self.argnames)
+        if n < 1:
+            raise ValueError("Unable to determine number of fit parameters.")
+        lb, ub = prepare_bounds(self._bounds_array(bounds), n)
+        return _initialize_feasible(lb, ub)
+
+    def _bounds_array(self, bounds):
+        r"""Convert ``bounds`` stored as ``{name: (lower, upper)}`` to an array."""
+        if isinstance(bounds, dict):
+            # Monkey patch to work with bounds being stored as
+            # dict for TeX_info. (20201202)
+            bounds = [bounds[k] for k in self.argnames]
+            bounds = np.array(bounds).T
+        return bounds
+
+    def _reject_nonfinite_p0(self, p0):
+        r"""Raise ``ValueError`` naming each parameter whose guess is NaN or inf.
+
+        Without this, SciPy reports a NaN guess as "Initial guess is outside
+        of provided bounds", which names neither the class nor the parameter.
+        """
+        bad = ~np.isfinite(np.asarray(p0, dtype=float))
+        if not bad.any():
+            return
+        names = (
+            self.argnames
+            if len(self.argnames) == p0.size
+            else [f"p0[{i}]" for i in range(p0.size)]
+        )
+        detail = ", ".join(f"{k}={v}" for k, v, b in zip(names, p0, bad) if b)
+        raise ValueError(
+            f"{self.__class__.__name__} initial guess is not finite: {detail}. "
+            "A p0 that cannot make a guess returns None, and the fit then "
+            "starts from the feasible default."
+        )
 
     @property
     def TeX_info(self):
@@ -628,26 +713,16 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         f_scale = kwargs.pop("f_scale", 0.1)
         jac = kwargs.pop("jac", "2-point")
 
-        # Adapted from `curve_fit` line 704 (20200527)
+        bounds = self._bounds_array(bounds)
+
+        # Adapted from `curve_fit` lines 704 and 715 (20200527)
         if p0 is None:
-            # The fit parameters are the function's arguments after x.
-            n = len(self.argnames)
-            if n < 1:
-                raise ValueError("Unable to determine number of fit parameters.")
+            p0 = self._feasible_p0(bounds)
         else:
             p0 = np.atleast_1d(p0)
-            n = p0.size
+            self._reject_nonfinite_p0(p0)
 
-        if isinstance(bounds, dict):
-            # Monkey patch to work with bounds being stored as
-            # dict for TeX_info. (20201202)
-            bounds = [bounds[k] for k in self.argnames]
-            bounds = np.array(bounds).T
-
-        # Copied from `curve_fit` line 715 (20200527)
-        lb, ub = prepare_bounds(bounds, n)
-        if p0 is None:
-            p0 = _initialize_feasible(lb, ub)
+        lb, ub = prepare_bounds(bounds, p0.size)
 
         if "args" in kwargs:
             raise ValueError(
@@ -789,10 +864,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
                 ============= ======================================
         """
         try:
-            assert self.sufficient_data  # Check we have enough data to fit.
-        except (AssertionError, ValueError, InsufficientDataError) as e:
-            if isinstance(e, AssertionError):
-                e = InsufficientDataError("Insufficient data to fit the model")
+            self._require_sufficient_data()
+        except (ValueError, InsufficientDataError) as e:
             if return_exception:
                 return e
             else:

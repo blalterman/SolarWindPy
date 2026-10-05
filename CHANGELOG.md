@@ -174,6 +174,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without a divide-by-zero warning. `LineXintercept.p0` also returns `None` when the
   estimated slope is zero, since a flat line has no x-intercept; it previously returned
   an x-intercept of -inf or NaN, and a NaN initial guess made `make_fit` fail.
+- Every fit function's `p0` follows one contract, stated in `FitFunction.p0`: it returns
+  one finite guess per parameter, or `None` when the data make a guess impossible, and
+  `make_fit` then starts from the feasible default (ones when unbounded). `None` replaces
+  NaN or infinite guesses in the Gaussian, Heaviside, composite and hinge fit functions
+  (for example, `y` summing to zero, no data on one side of a step or hinge, or a zero
+  slope where an x-intercept is needed). `HeavySide.p0` no longer substitutes the mean `y`
+  or a zero step for a level it cannot estimate, and
+  `GaussianTimesHeavySidePlusHeavySide.p0` no longer substitutes 0 for `y1`; both return
+  `None`. `GaussianTimesHeavySide` with no data above `guess_x0` no longer raises
+  `ValueError: There is no maximum of a zero-size array`.
+- `make_fit` rejects an initial guess holding NaN or infinity, from `p0` or the caller's
+  `p0=`, with `ValueError: <Class> initial guess is not finite: <name>=<value>. A p0 that
+  cannot make a guess returns None, and the fit then starts from the feasible default.`
+  scipy previously reported it as "Initial guess is outside of provided bounds".
+- Too little data for an initial guess raises `InsufficientDataError` under `python -O`
+  as well; the check was an `assert`, which `-O` removes.
 - `Hist2D.plot_edges` documents its `xlim` and `ylim` keywords as inclusive: a vertex
   exactly on a limit is kept. Behaviour is unchanged.
 
