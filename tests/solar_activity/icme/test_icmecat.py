@@ -609,17 +609,19 @@ class TestICMECATDownloadAndCache:
     ):
         """A cache written by one load serves the next even when the URL is gone.
 
-        The served catalog equals the one written: same events, and the
-        datetime columns still parse, so interval_end matches the
-        hand-computed fallbacks in INTERVAL_END.
+        The catalog served from cache equals the one a fresh download gives,
+        values and dtypes alike (the datetime columns come back as
+        datetimes), so interval_end matches the hand-computed fallbacks in
+        INTERVAL_END.
 
         ON FAILURE: the code is wrong.
         """
         cache_dir = tmp_path / "cache"
         serve_catalog()
-        ICMECAT(cache_dir=cache_dir)
+        downloaded = ICMECAT(cache_dir=cache_dir)
         monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
         cat = ICMECAT(cache_dir=cache_dir)
+        pd.testing.assert_frame_equal(cat.data, downloaded.data, check_exact=True)
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
         assert cat.intervals["interval_end"].tolist() == INTERVAL_END
 
