@@ -577,19 +577,6 @@ class TestICMECATEdgeCases:
         assert result.tolist() == [False]
 
 
-CACHE_NEEDS_PARQUET_ENGINE = pytest.mark.xfail(
-    strict=True,
-    raises=ImportError,
-    reason=(
-        "ICMECAT(cache_dir=...) writes icmecat.parquet "
-        "(solarwindpy/solar_activity/icme/icmecat.py, _download/_read_cache) but "
-        "pyproject.toml declares no parquet engine; expected message 'Unable to "
-        "find a usable engine; tried using: 'pyarrow', 'fastparquet''; remove this "
-        "marker when pyarrow is a declared dependency or the cache stops using parquet"
-    ),
-)
-
-
 class TestICMECATDownloadAndCache:
     """Download failure and the on-disk cache."""
 
@@ -603,14 +590,16 @@ class TestICMECATDownloadAndCache:
         with pytest.raises(ICMECATDownloadError, match="Failed to download ICMECAT"):
             ICMECAT()
 
-    @CACHE_NEEDS_PARQUET_ENGINE
     def test_fresh_cache_is_used_without_download(
         self, serve_catalog, tmp_path, monkeypatch
     ):
         """A cache written by one load serves the next even when the URL is gone.
 
-        ON FAILURE: (unexpected pass) a parquet engine is now a declared
-        dependency or the cache no longer uses parquet; drop the xfail marker.
+        The served catalog equals the one written: same events, and the
+        datetime columns still parse, so interval_end matches the
+        hand-computed fallbacks in INTERVAL_END.
+
+        ON FAILURE: the code is wrong.
         """
         cache_dir = tmp_path / "cache"
         serve_catalog()
@@ -618,21 +607,20 @@ class TestICMECATDownloadAndCache:
         monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
         cat = ICMECAT(cache_dir=cache_dir)
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
+        assert cat.intervals["interval_end"].tolist() == INTERVAL_END
 
-    @CACHE_NEEDS_PARQUET_ENGINE
     def test_stale_cache_served_with_warning_when_download_fails(
         self, serve_catalog, tmp_path, monkeypatch
     ):
         """A cache older than 30 days is served, with a warning, if download fails.
 
-        ON FAILURE: (unexpected pass) a parquet engine is now a declared
-        dependency or the cache no longer uses parquet; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         cache_dir = tmp_path / "cache"
         serve_catalog()
         ICMECAT(cache_dir=cache_dir)
         forty_days_ago = time.time() - 40 * 86400
-        os.utime(cache_dir / "icmecat.parquet", (forty_days_ago, forty_days_ago))
+        os.utime(cache_dir / "icmecat.csv", (forty_days_ago, forty_days_ago))
         monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
         with pytest.warns(UserWarning, match="serving cached data that is 40 days old"):
             cat = ICMECAT(cache_dir=cache_dir)

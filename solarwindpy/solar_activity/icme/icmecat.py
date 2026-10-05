@@ -22,6 +22,9 @@ ICMECAT_URL = (
 
 _PINNED_VERSION = "v23"
 _CACHE_MAX_AGE_DAYS = 30
+# The cache is CSV, the format the catalog downloads in, so caching needs no
+# dependency beyond pandas (parquet would need an undeclared engine).
+_CACHE_FILENAME = "icmecat.csv"
 
 # The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
 # ACE and Cassini were previously (and wrongly) included: both have zero
@@ -77,7 +80,8 @@ class ICMECAT:
         If provided, filter catalog to this spacecraft on load.
         Valid names: Ulysses, Wind, ACE, STEREO-A, STEREO-B, etc.
     cache_dir : Path, optional
-        Directory for caching downloaded data. If None, no caching.
+        Directory for caching downloaded data, saved as ``icmecat.csv``
+        (the format the catalog downloads in). If None, no caching.
 
     Attributes
     ----------
@@ -247,12 +251,12 @@ class ICMECAT:
         if self._cache_dir is None:
             return None, None
 
-        cache_path = self._cache_dir / "icmecat.parquet"
+        cache_path = self._cache_dir / _CACHE_FILENAME
         if not cache_path.exists():
             return None, None
 
         age_days = (time.time() - cache_path.stat().st_mtime) / 86400
-        return pd.read_parquet(cache_path), age_days
+        return pd.read_csv(cache_path, parse_dates=_DATETIME_COLUMNS), age_days
 
     def _download(self) -> None:
         """Download ICMECAT from helioforecast.space."""
@@ -274,8 +278,8 @@ class ICMECAT:
         # Save to cache if configured
         if self._cache_dir is not None:
             self._cache_dir.mkdir(parents=True, exist_ok=True)
-            cache_path = self._cache_dir / "icmecat.parquet"
-            self._data.to_parquet(cache_path, index=False)
+            cache_path = self._cache_dir / _CACHE_FILENAME
+            self._data.to_csv(cache_path, index=False)
             self.logger.info("Cached to %s", cache_path)
 
     # -------------------------------------------------------------------------
