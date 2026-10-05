@@ -5,11 +5,13 @@ import pandas as pd
 import numpy as np
 import itertools
 import pandas.testing as pdt
+import pytest
 
 from abc import ABC, abstractproperty, abstractmethod
 
 from scipy import constants
 from scipy.constants import physical_constants
+from scipy.special import erf
 
 from . import test_base as base
 
@@ -2245,3 +2247,440 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
                 if isinstance(s, str):
                     s = [s]
                 self.object_testing.number_density(*s)
+
+
+# ---------------------------------------------------------------------------
+# Hand-worked physics cases.
+#
+# Each Plasma below is built from round-number inputs in the package's storage
+# units (`solarwindpy.core.units_constants.Units`): n [cm^-3], v and w [km/s],
+# b [nT]. Thermal speeds follow m w^2 = 2 k T (`Plasma.__init__` Notes;
+# `Ion.temperature` and `Ion.pth` = rho w^2 / 2 in solarwindpy/core/ions.py),
+# the convention Hernandez & Marsch (1985) state after their Eq. 5. Outputs are
+# in `Units`: rho [m_p cm^-3], nuc [1e-7 Hz], qpar and Wk [uW m^-2], cs [km/s],
+# specific_entropy [eV cm^2 m_p^-5/3]. Expected values are computed here in SI
+# from the named source and converted to those units.
+# ---------------------------------------------------------------------------
+
+M_P = constants.m_p
+M_ALPHA = physical_constants["alpha particle mass"][0]
+GAMMA = 5.0 / 3.0  # adiabatic index of a monatomic ideal gas
+PER_CC = 1e6  # m^-3 per cm^-3
+KM = 1e3  # m s^-1 per km s^-1
+MICRO = 1e-6  # W m^-2 per uW m^-2
+# rel=1e-9 wherever an alpha mass density enters: the package forms it from the
+# CODATA alpha/proton mass ratio times m_p, these tests from the CODATA alpha
+# mass; the two agree to 1e-11.
+REL_ALPHA = 1e-9
+
+
+class MissingFieldGaveNumber(AssertionError):
+    """A quantity that needs the field direction returned a number where b is missing."""
+
+
+def _hand_plasma(rows, *species, b=None):
+    """Build a `Plasma` from hand-chosen rows.
+
+    rows: list of {species: (n, (vx, vy, vz), w_par, w_per)}, one dict per time.
+    b: list of (bx, by, bz) per time; defaults to 5 nT along x.
+    """
+    if b is None:
+        b = [(5.0, 0.0, 0.0)] * len(rows)
+    records = []
+    for sp, bb in zip(rows, b):
+        d = {("b", c, ""): x for c, x in zip("xyz", bb)}
+        for s, (n, v, wpar, wper) in sp.items():
+            d[("n", "", s)] = n
+            d.update({("v", c, s): x for c, x in zip("xyz", v)})
+            d[("w", "par", s)] = wpar
+            d[("w", "per", s)] = wper
+        records.append(d)
+    data = pd.DataFrame.from_records(records)
+    data.columns = pd.MultiIndex.from_tuples(data.columns, names=["M", "C", "S"])
+    data.index = pd.date_range("2020-01-01", periods=len(rows), freq="min")
+    data.index.name = "Epoch"
+    return plasma.Plasma(data, *species)
+
+
+def _hm_rate_function(x):
+    """Drift dependence of the H&M momentum exchange rate.
+
+    (erf(x) - x erf'(x)) / x^3 with erf'(x) = (2/sqrt(pi)) exp(-x^2):
+    Hernandez & Marsch (1985), doi:10.1029/JA090iA11p11062, Eqs. 26-27, where it
+    appears as phi_1(x) / tau_0 with tau_0 = (3 sqrt(pi)/4) tau. It tends to
+    4/(3 sqrt(pi)) = 0.7523 as x -> 0 (phi_1(0) = 1).
+    """
+    return (erf(x) - x * (2.0 / np.sqrt(np.pi)) * np.exp(-(x**2))) / x**3
+
+
+# Alphas (test species a) drifting through protons (field species b = p1).
+# Isotropic w_a = 40 and w_p1 = 30 km/s, so W_ab = sqrt(40^2 + 30^2) = 50 km/s
+# (H&M Eq. 10). Row 0 drifts 50 km/s (x = 1), row 1 drifts 25 km/s (x = 0.5).
+# At x = 1 the Gaussian term (2/sqrt(pi)) x exp(-x^2) = 0.4151 is 49% of
+# erf(1) = 0.8427, so the rate depends on it; the SWE fixture has x >= 8.6,
+# where that term is below 1e-30 of erf(x). Isotropic inputs also make the
+# rate independent of which thermal-speed component `nuc` reads (it reads
+# w_par): H&M treat isotropic Maxwellians.
+NUC_ROWS = [
+    {
+        "a": (0.2, (450.0, 0.0, 0.0), 40.0, 40.0),
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+    },
+    {
+        "a": (0.2, (425.0, 0.0, 0.0), 40.0, 40.0),
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+    },
+]
+
+
+def test_nuc_test_particle_rate_is_hernandez_marsch_at_low_drift():
+    r"""`nuc(a, p1, both_species=False)` is the H&M alpha-proton rate at x = 1 and 0.5.
+
+    nu_ab = q_a^2 q_b^2 n_b lnL / (4 pi eps0^2 m_a mu_ab W_ab^3) * G(x), with
+    mu_ab = m_a m_b / (m_a + m_b): Hernandez & Marsch (1985),
+    doi:10.1029/JA090iA11p11062, Eq. 14 (tau_ab^-1, Gaussian units converted to SI
+    by e^2 -> e^2 / (4 pi eps0)) and Eq. 18 with the rate function of Eqs. 26-27.
+    lnL is an input taken from `Plasma.lnlambda`, which `test_lnlambda` checks.
+
+    ON FAILURE: the code is wrong, unless the author rejects Hernandez & Marsch
+    (1985) Eqs. 14, 18 and 26-27 as the definition of `nuc`.
+    """
+    p = _hand_plasma(NUC_ROWS, "a", "p1")
+    q_a, q_b = 2.0 * constants.e, constants.e
+    mu_ab = M_ALPHA * M_P / (M_ALPHA + M_P)  # reduced mass, Eq. 14
+    n_b = 5.0 * PER_CC  # proton density, chosen input
+    w_ab = 50.0 * KM  # sqrt(40^2 + 30^2) km/s, Eq. 10
+    x = np.array([50.0, 25.0]) / 50.0  # drift / W_ab, Eq. 10
+    lnlambda = p.lnlambda("a", "p1").to_numpy()
+    tau_inv = (
+        q_a**2
+        * q_b**2
+        * n_b
+        * lnlambda
+        / (4.0 * np.pi * constants.epsilon_0**2 * M_ALPHA * mu_ab * w_ab**3)
+    )  # Eq. 14 in SI
+    expected = tau_inv * _hm_rate_function(x) / 1e-7  # Units.nuc = 1e-7 Hz
+
+    nu = p.nuc("a", "p1", both_species=False)
+    assert nu.name == "a-p1"
+    assert nu.to_numpy() == pytest.approx(expected, rel=REL_ALPHA, abs=0)
+
+
+def test_nuc_drift_dependence_is_the_hernandez_marsch_rate_function():
+    r"""Halving the drift from x = 1 to x = 0.5 scales `nuc` by G(1)/G(0.5) = 0.65898.
+
+    Both rows share n, T and W_ab, so lnL and the Eq. 14 prefactor cancel and the
+    ratio is the H&M (1985) rate function alone (Eqs. 18, 26-27), worked by hand:
+    G(1) = erf(1) - 2 e^-1 / sqrt(pi) = 0.8427007929 - 0.4151074974 = 0.4275932955;
+    G(0.5) = (erf(0.5) - e^-0.25 / sqrt(pi)) / 0.125
+           = (0.5204998778 - 0.4393912895) / 0.125 = 0.6488687068.
+    Writing 3 for the Gaussian coefficient 2 turns the ratio to -0.198.
+
+    ON FAILURE: the code is wrong, unless the author rejects Hernandez & Marsch
+    (1985) Eqs. 18 and 26-27 as the drift dependence of `nuc`.
+    """
+    p = _hand_plasma(NUC_ROWS, "a", "p1")
+    g1 = 0.8427007929 - 0.4151074974  # G(1), hand-worked above
+    g05 = (0.5204998778 - 0.4393912895) / 0.125  # G(0.5), hand-worked above
+
+    for both in (False, True):
+        nu = p.nuc("a", "p1", both_species=both)
+        # rel=1e-9: the hand values carry 10 significant digits.
+        assert nu.iloc[0] / nu.iloc[1] == pytest.approx(g1 / g05, rel=1e-9, abs=0)
+
+
+def test_nuc_both_species_adds_the_reverse_rate_eq23():
+    r"""`nuc(..., both_species=True)` is nu_ab + nu_ba = nu_ab (1 + rho_a / rho_b).
+
+    Hernandez & Marsch (1985) Eq. 23: 1/tau = 1/tau_ab + 1/tau_ba, and momentum
+    conservation (rho_a nu_ab = rho_b nu_ba, F_ab = -F_ba below their Eq. 14) gives
+    nu_ba = nu_ab rho_a / rho_b. Here rho_a / rho_b = 0.2 m_alpha / (5 m_p).
+
+    ON FAILURE: the code is wrong, unless the author rejects Hernandez & Marsch
+    (1985) Eq. 23 as the definition of the two-species rate.
+    """
+    p = _hand_plasma(NUC_ROWS, "a", "p1")
+    single = p.nuc("a", "p1", both_species=False)
+    both = p.nuc("a", "p1", both_species=True)
+    expected_ratio = 1.0 + (0.2 * M_ALPHA) / (5.0 * M_P)  # Eq. 23, chosen inputs
+
+    assert both.name == "a+p1"
+    assert (both / single).to_numpy() == pytest.approx(
+        [expected_ratio] * 2, rel=REL_ALPHA, abs=0
+    )
+
+
+def test_sound_speed_of_one_species_is_sqrt_gamma_p_over_rho():
+    r"""Protons at w = 30 km/s have c_s = sqrt(gamma p / rho) = 30 sqrt(5/6) km/s.
+
+    With p = rho w^2 / 2 (m w^2 = 2 k T) and gamma = 5/3, c_s = w sqrt(gamma / 2)
+    = 30 * 0.9128709292 = 27.38612788 km/s, independent of the density.
+
+    ON FAILURE: the code is wrong, unless the author rejects c_s = sqrt(gamma p / rho)
+    with gamma = 5/3.
+    """
+    p = _hand_plasma([{"p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)}], "p1")
+    # rel=1e-9: the hand value carries 10 significant digits.
+    assert p.sound_speed("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
+    assert p.cs("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
+
+
+def test_sound_speed_per_species_and_species_sum():
+    r"""`cs` per species and for "a+p1" equal sqrt(gamma p / rho) of those species.
+
+    Scalar pressure p_s = rho_s w_s^2 / 2 with w_s^2 = (w_par^2 + 2 w_per^2) / 3
+    (the trace of the pressure tensor); the species sum uses sum(p) / sum(rho).
+    Species are requested in the order ("p1", "a") so a swapped column fails.
+
+    ON FAILURE: the code is wrong, unless the author rejects c_s = sqrt(gamma p / rho)
+    with total pressure over total mass density for a species sum.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 0.0, 0.0), 50.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        }
+    ]
+    p = _hand_plasma(rows, "a", "p1")
+    rho = {"a": 0.2 * PER_CC * M_ALPHA, "p1": 5.0 * PER_CC * M_P}
+    wsq = {
+        "a": (50.0**2 + 2 * 40.0**2) / 3 * KM**2,  # trace of the pressure tensor
+        "p1": 30.0**2 * KM**2,
+    }
+    pth = {s: 0.5 * rho[s] * wsq[s] for s in rho}  # p = rho w^2 / 2
+
+    each = p.cs("p1", "a")
+    for s in ("a", "p1"):
+        expected = np.sqrt(GAMMA * pth[s] / rho[s]) / KM
+        assert each.loc[:, s].iloc[0] == pytest.approx(expected, rel=REL_ALPHA, abs=0)
+
+    expected_sum = np.sqrt(GAMMA * sum(pth.values()) / sum(rho.values())) / KM
+    total = p.sound_speed("a+p1")
+    assert total.name == "a+p1"
+    assert total.iloc[0] == pytest.approx(expected_sum, rel=REL_ALPHA, abs=0)
+
+
+def test_Wk_of_one_species_is_half_rho_v_cubed():
+    r"""5 cm^-3 protons at 400 km/s carry W_K = rho v^3 / 2 = 267.62 uW m^-2.
+
+    W_K,s = rho_s v_s^3 / 2 with v_s the species speed (author's definition).
+    The velocity (240, 320, 0) km/s has speed 400 km/s, so a component used in
+    place of the speed fails. By hand: 0.5 * 5e6 * 1.67262e-27 * (4e5)^3
+    = 2.6762e-4 W m^-2.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma([{"p1": (5.0, (240.0, 320.0, 0.0), 30.0, 30.0)}], "p1")
+    expected = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
+    for wk in (p.Wk("p1"), p.kinetic_energy_flux("p1")):
+        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+        assert wk.iloc[0] == pytest.approx(expected, rel=1e-12, abs=0)
+        # rel=1e-4: the hand value carries 5 significant digits.
+        assert wk.iloc[0] == pytest.approx(267.62, rel=1e-4, abs=0)
+
+
+def test_Wk_species_sum_is_a_partial_sum_over_species():
+    r"""`Wk("a+p1")` adds rho_s v_s^3 / 2 over species; a NaN species drops out.
+
+    Row 0 holds both species; row 1 has no alpha data. Per the author, a species
+    sum is a partial sum: row 1 of the sum is the proton term alone, while the
+    per-species frame keeps the alpha NaN.
+
+    ON FAILURE: the code is wrong.
+    """
+    alpha = (0.2, (450.0, 0.0, 0.0), 40.0, 40.0)
+    proton = (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+    missing = (np.nan, (np.nan, np.nan, np.nan), np.nan, np.nan)
+    p = _hand_plasma(
+        [{"a": alpha, "p1": proton}, {"a": missing, "p1": proton}], "a", "p1"
+    )
+    wk_a = 0.5 * 0.2 * PER_CC * M_ALPHA * (450.0 * KM) ** 3 / MICRO
+    wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
+
+    each = p.Wk("a", "p1")
+    assert each.loc[:, "a"].iloc[0] == pytest.approx(wk_a, rel=REL_ALPHA, abs=0)
+    assert np.isnan(each.loc[:, "a"].iloc[1])
+    # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+    assert each.loc[:, "p1"].to_numpy() == pytest.approx([wk_p] * 2, rel=1e-12, abs=0)
+
+    total = p.Wk("a+p1")
+    assert total.name == "a+p1"
+    assert total.to_numpy() == pytest.approx([wk_a + wk_p, wk_p], rel=REL_ALPHA, abs=0)
+
+
+def test_heat_flux_matches_its_docstring_formula():
+    r"""`heat_flux` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
+
+    Two proton populations of 5 cm^-3 move along b = (3, 4, 0) nT at 400 and
+    500 km/s, so the centre of mass moves at 450 km/s and v = -50, +50 km/s along
+    b; w_par = 30 and 40 km/s (w_per is set to other values and must not enter).
+    By hand, in m_p cm^-3 km^3 s^-3 (1 unit = 1.67262e-6 uW m^-2):
+    p1: 5 (-125000 - 67500) = -962500 -> -1.609898604 uW m^-2
+    p2: 5 ( 125000 + 120000) = 1225000 ->  2.048961859 uW m^-2
+    sum: 262500 -> 0.4390632556 uW m^-2.
+
+    ON FAILURE: the code is wrong, unless the author revises the `heat_flux`
+    docstring formula.
+    """
+    uv = np.array([0.6, 0.8, 0.0])  # unit vector along b = (3, 4, 0)
+    rows = [
+        {
+            "p1": (5.0, tuple(400.0 * uv), 30.0, 20.0),
+            "p2": (5.0, tuple(500.0 * uv), 40.0, 25.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p1", "p2", b=[(3.0, 4.0, 0.0)])
+    rho = 5.0 * PER_CC * M_P
+    expected = {}
+    for s, v, w in (("p1", -50.0, 30.0), ("p2", 50.0, 40.0)):
+        v, w = v * KM, w * KM
+        expected[s] = rho * (v**3 + 1.5 * v * w**2) / MICRO  # docstring formula
+
+    each = p.heat_flux("p1", "p2")
+    total = p.qpar("p1+p2")
+    # rel=1e-10: the code projects onto b / |b|, which is inexact in binary.
+    for s in ("p1", "p2"):
+        assert each.loc[:, s].iloc[0] == pytest.approx(expected[s], rel=1e-10, abs=0)
+    assert total.name == "p1+p2"
+    assert total.iloc[0] == pytest.approx(sum(expected.values()), rel=1e-10, abs=0)
+    # rel=1e-9: the hand values carry 10 significant digits.
+    assert each.loc[:, "p1"].iloc[0] == pytest.approx(-1.609898604, rel=1e-9, abs=0)
+    assert each.loc[:, "p2"].iloc[0] == pytest.approx(2.048961859, rel=1e-9, abs=0)
+    assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
+
+
+def _missing_b_plasma(*species):
+    """Two identical rows, the second without b: a/p1 from NUC_ROWS, or p1/p2."""
+    if species == ("p1", "p2"):
+        sp = {
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 20.0),
+            "p2": (0.5, (500.0, 0.0, 0.0), 60.0, 40.0),
+        }
+    else:
+        sp = NUC_ROWS[0]
+    return _hand_plasma(
+        [sp, sp], *species, b=[(5.0, 0.0, 0.0), (np.nan, np.nan, np.nan)]
+    )
+
+
+def test_heat_flux_per_species_is_nan_where_b_is_missing():
+    r"""Without b there is no parallel direction, so each species' Q_par is NaN.
+
+    `Vector.project` returns NaN on rows missing from either vector (author
+    decision); row 0, with b, stays finite.
+
+    ON FAILURE: the code is wrong.
+    """
+    q = _missing_b_plasma("a", "p1").heat_flux("a", "p1")
+    assert np.isfinite(q.iloc[0]).all()
+    assert q.iloc[1].isna().all()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=MissingFieldGaveNumber,
+    reason="Plasma.heat_flux sums species with DataFrame.sum(axis=1), whose skipna "
+    "turns a row where every species is NaN into 0.0 (solarwindpy/core/plasma.py, "
+    "heat_flux); expected message 'heat_flux(\"a+p1\") is 0.0 where b is missing'; "
+    "remove this marker when heat_flux sums species with min_count=1",
+)
+def test_heat_flux_species_sum_is_nan_where_b_is_missing():
+    r"""Without b, no species contributes to Q_par, so the species sum is NaN, not 0.
+
+    A partial sum keeps the species that are present; where none is, a zero heat
+    flux would be invented data.
+
+    ON FAILURE: (unexpected pass) heat_flux sums with min_count=1; drop the xfail
+    marker.
+    """
+    q = _missing_b_plasma("a", "p1").heat_flux("a+p1")
+    assert np.isfinite(q.iloc[0])
+    if not np.isnan(q.iloc[1]):
+        raise MissingFieldGaveNumber(
+            f'heat_flux("a+p1") is {q.iloc[1]} where b is missing'
+        )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=MissingFieldGaveNumber,
+    reason="Plasma.vdf_ratio sums (dv/w)^2 over par and per with "
+    "DataFrame.sum(axis=1), whose skipna turns the NaN projection into 0 and "
+    "returns ln(n2 w1^3 / n1 w2^3) (solarwindpy/core/plasma.py, vdf_ratio); "
+    "expected message 'vdf_ratio is -4.38... where b is missing'; remove this "
+    "marker when vdf_ratio sums with skipna=False",
+)
+def test_vdf_ratio_is_nan_where_b_is_missing():
+    r"""Without b the beam drift has no par/per split, so ln(f2/f1) is NaN.
+
+    `Vector.project` returns NaN on rows missing from either vector (author
+    decision); row 0, with b, stays finite.
+
+    ON FAILURE: (unexpected pass) vdf_ratio sums with skipna=False; drop the xfail
+    marker.
+    """
+    f2f1 = _missing_b_plasma("p1", "p2").vdf_ratio()
+    assert np.isfinite(f2f1.iloc[0])
+    if not np.isnan(f2f1.iloc[1]):
+        raise MissingFieldGaveNumber(f"vdf_ratio is {f2f1.iloc[1]} where b is missing")
+
+
+def test_specific_entropy_per_species_and_species_sum():
+    r"""S = p rho^-gamma per species, and sum(p) sum(rho)^-gamma for "a+p1".
+
+    Siscoe (1983), doi:10.1007/978-94-009-7194-3_2, as cited by
+    `specific_entropy`, in eV cm^2 m_p^-5/3. Hand case for protons alone:
+    S = k T n^(-2/3) with k T = m_p (30 km/s)^2 / 2 = 4.697858218 eV and
+    n = 5 cm^-3, so S = 4.697858218 / 5^(2/3) = 1.606644911. Species are requested
+    as ("p1", "a") so a swapped column fails.
+
+    ON FAILURE: the code is wrong, unless the author rejects the Siscoe (1983)
+    definition or its species sum.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 0.0, 0.0), 50.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        }
+    ]
+    p = _hand_plasma(rows, "a", "p1")
+    rho = {"a": 0.2 * PER_CC * M_ALPHA, "p1": 5.0 * PER_CC * M_P}
+    wsq = {"a": (50.0**2 + 2 * 40.0**2) / 3 * KM**2, "p1": 30.0**2 * KM**2}
+    pth = {s: 0.5 * rho[s] * wsq[s] for s in rho}  # p = rho w^2 / 2
+    unit = constants.e * 1e-4 * M_P ** (-GAMMA)  # eV cm^2 m_p^-5/3 in SI
+
+    each = p.S("p1", "a")
+    for s in ("a", "p1"):
+        expected = pth[s] * rho[s] ** (-GAMMA) / unit
+        assert each.loc[:, s].iloc[0] == pytest.approx(expected, rel=REL_ALPHA, abs=0)
+    # rel=1e-9: the hand value carries 10 significant digits.
+    assert each.loc[:, "p1"].iloc[0] == pytest.approx(1.606644911, rel=1e-9, abs=0)
+
+    expected_sum = sum(pth.values()) * sum(rho.values()) ** (-GAMMA) / unit
+    total = p.specific_entropy("a+p1")
+    assert total.iloc[0] == pytest.approx(expected_sum, rel=REL_ALPHA, abs=0)
+
+
+def test_estimate_electrons_weights_each_species_by_its_own_charge():
+    r"""n_e = sum z_s n_s and n_e v_e = sum z_s n_s v_s, with z_a = 2 on the alphas.
+
+    Quasi-neutrality and zero net current. With 5 cm^-3 protons at (400, 0, 0)
+    and 0.2 cm^-3 alphas at (450, 30, 0) km/s: n_e = 5 + 2 * 0.2 = 5.4 cm^-3
+    (a swapped charge gives 10.2) and v_e = (2180, 12, 0) / 5.4
+    = (403.7037, 2.2222, 0) km/s.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        }
+    ]
+    e = _hand_plasma(rows, "p1", "a").estimate_electrons()
+    # rel=1e-12: exact sums of chosen inputs.
+    assert e.n.iloc[0] == pytest.approx(5.4, rel=1e-12, abs=0)
+    v = e.v.cartesian.iloc[0]
+    assert v.loc["x"] == pytest.approx(2180.0 / 5.4, rel=1e-12, abs=0)
+    assert v.loc["y"] == pytest.approx(12.0 / 5.4, rel=1e-12, abs=0)
+    assert v.loc["z"] == 0.0
