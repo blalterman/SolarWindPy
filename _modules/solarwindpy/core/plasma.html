@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g676d70066 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0f6accb1"></script>
+      <script src="../../../_static/documentation_options.js?v=0ce898b7"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1928,7 +1928,9 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        f2f1 : pd.Series</span>
-<span class="sd">            Natural logarithm of the beam to core VDF ratio.</span>
+<span class="sd">            Natural logarithm of the beam to core VDF ratio. NaN where the</span>
+<span class="sd">            beam drift cannot be projected onto the magnetic field, e.g. where</span>
+<span class="sd">            b is missing.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -1965,7 +1967,9 @@
         <span class="n">w2_per</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">per</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">beam</span><span class="p">]</span>
 
         <span class="n">dv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dv</span><span class="p">(</span><span class="n">beam</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
-        <span class="n">dvw</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">))</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># skipna=False: where b is missing the projection is NaN, and the</span>
+        <span class="c1"># ratio must be NaN rather than the drift-free value ln(n2 w1^3 / n1 w2^3).</span>
+        <span class="n">dvw</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">))</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="n">nbar</span> <span class="o">=</span> <span class="n">n2</span> <span class="o">/</span> <span class="n">n1</span>
         <span class="n">wbar</span> <span class="o">=</span> <span class="p">(</span><span class="n">w1_par</span> <span class="o">/</span> <span class="n">w2_par</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">((</span><span class="n">w1_per</span> <span class="o">/</span> <span class="n">w2_per</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1984,7 +1988,15 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">estimate_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Estimate the electron parameters with a scalar temperature.</span>
 
-<span class="sd">        Assume temperature is the same as proton scalar temerature.</span>
+<span class="sd">        The electron density and velocity follow from quasi-neutrality and</span>
+<span class="sd">        zero net current, :math:`n_e = \sum_s q_s n_s` and</span>
+<span class="sd">        :math:`n_e v_e = \sum_s q_s n_s v_s`. The electron temperature equals</span>
+<span class="sd">        the proton scalar temperature :math:`T_p`, so with :math:`m w^2 = 2 k T`</span>
+
+<span class="sd">            :math:`w_e^2 = \frac{m_p}{m_e} w_p^2`.</span>
+
+<span class="sd">        :math:`T_p` is taken from species ``p`` if the plasma holds it, and</span>
+<span class="sd">        otherwise from the core protons ``p1``; the beam ``p2`` is never used.</span>
 <span class="sd">        """</span>
 
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
@@ -2038,11 +2050,12 @@
 
         <span class="n">ve</span> <span class="o">=</span> <span class="n">niqivi</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
+        <span class="c1"># T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.</span>
         <span class="n">wp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="n">tkw</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"scalar"</span><span class="p">]</span>
-        <span class="n">nrat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_density</span><span class="p">(</span><span class="n">tkw</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">mpme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_in_mp</span><span class="p">[</span><span class="s2">"e"</span><span class="p">]</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="n">we</span> <span class="o">=</span> <span class="p">(</span><span class="n">nrat</span> <span class="o">*</span> <span class="n">mpme</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">wp</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
-        <span class="n">we</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">we</span><span class="p">,</span> <span class="n">we</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">"par"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">we</span> <span class="o">=</span> <span class="n">wp</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">mpme</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+        <span class="c1"># Isotropic electrons: the scalar thermal speed equals both components.</span>
+        <span class="n">we</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">we</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">we</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">"par"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">,</span> <span class="s2">"scalar"</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">ne</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="n">electrons</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
@@ -2075,12 +2088,29 @@
 <div class="viewcode-block" id="Plasma.heat_flux">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.heat_flux">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">heat_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate the parallel heat flux.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate the parallel-parallel component of the heat flux tensor.</span>
 
-<span class="sd">            :math:`Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)`</span>
+<span class="sd">        For each species :math:`s` this is the third moment of its velocity</span>
+<span class="sd">        distribution along the magnetic field, taken in the center-of-mass</span>
+<span class="sd">        frame of the species passed to this method, and only those: for</span>
+<span class="sd">        ``heat_flux("a+p1")`` or ``heat_flux("a", "p1")`` it is the a+p1</span>
+<span class="sd">        center of mass, not that of every species in the plasma,</span>
 
-<span class="sd">        where :math:`v` is each species' velocity in the Center-of-Mass frame and</span>
-<span class="sd">        :math:`w` is each species parallel thermal speed.</span>
+<span class="sd">            :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,</span>
+
+<span class="sd">        where :math:`c_\parallel` is the velocity component along</span>
+<span class="sd">        :math:`\hat{b}` relative to the center of mass. For a drifting</span>
+<span class="sd">        bi-Maxwellian with :math:`w^2 = 2kT/m` this evaluates to</span>
+
+<span class="sd">            :math:`Q_{\parallel,s} = \rho_s (U_s^3 + \frac{3}{2} U_s w_{\parallel,s}^2)`,</span>
+
+<span class="sd">        where :math:`U_s` is the species' drift along :math:`\hat{b}` in the</span>
+<span class="sd">        center-of-mass frame and :math:`w_{\parallel,s}` its parallel thermal</span>
+<span class="sd">        speed.</span>
+
+<span class="sd">        This is the parallel-parallel part of the energy flux only, not the</span>
+<span class="sd">        total energy flux along the field: the perpendicular thermal speed</span>
+<span class="sd">        does not enter.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2091,7 +2121,9 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        q: `pd.Series` or `pd.DataFrame`</span>
-<span class="sd">            Dimensionality depends on species inputs.</span>
+<span class="sd">            Dimensionality depends on species inputs. A species sum is a</span>
+<span class="sd">            partial sum over the species present in each row; a row with no</span>
+<span class="sd">            species present is NaN.</span>
 <span class="sd">        """</span>
 
         <span class="n">slist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
@@ -2110,7 +2142,8 @@
 
         <span class="n">qs</span> <span class="o">=</span> <span class="n">qa</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">qb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># min_count=1: a partial sum over the species present, NaN where none is.</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">qs</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"+"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
         <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">rho</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">v</span><span class="o">**</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">qpar</span>
@@ -2244,8 +2277,10 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        rho: pd.Series or pd.DataFrame</span>
-<span class="sd">            See Parameters for more info.</span>
+<span class="sd">        w: pd.Series or pd.DataFrame</span>
+<span class="sd">            See Parameters for more info. A species sum is a partial sum over</span>
+<span class="sd">            the species present in each row; a row with no species present is</span>
+<span class="sd">            NaN.</span>
 <span class="sd">        """</span>
         <span class="n">slist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
 
@@ -2253,7 +2288,8 @@
         <span class="n">w</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"S"</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># min_count=1: a partial sum over the species present, NaN where none is.</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">w</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">w</span></div>

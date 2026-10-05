@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+g676d70066 documentation</title>
+  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0f6accb1"></script>
+      <script src="../_static/documentation_options.js?v=0ce898b7"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -1273,7 +1273,9 @@ of the beam and core species.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>f2f1</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>Natural logarithm of the beam to core VDF ratio.</p>
+<dt><strong>f2f1</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>Natural logarithm of the beam to core VDF ratio. NaN where the
+beam drift cannot be projected onto the magnetic field, e.g. where
+b is missing.</p>
 </dd>
 </dl>
 </dd>
@@ -1288,18 +1290,41 @@ the velocity window in which they are measured.</p>
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.estimate_electrons">
 <span class="sig-name descname"><span class="pre">estimate_electrons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.estimate_electrons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.estimate_electrons" title="Link to this definition"></a></dt>
 <dd><p>Estimate the electron parameters with a scalar temperature.</p>
-<p>Assume temperature is the same as proton scalar temerature.</p>
+<p>The electron density and velocity follow from quasi-neutrality and
+zero net current, <span class="math notranslate nohighlight">\(n_e = \sum_s q_s n_s\)</span> and
+<span class="math notranslate nohighlight">\(n_e v_e = \sum_s q_s n_s v_s\)</span>. The electron temperature equals
+the proton scalar temperature <span class="math notranslate nohighlight">\(T_p\)</span>, so with <span class="math notranslate nohighlight">\(m w^2 = 2 k T\)</span></p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(w_e^2 = \frac{m_p}{m_e} w_p^2\)</span>.</p>
+</div></blockquote>
+<p><span class="math notranslate nohighlight">\(T_p\)</span> is taken from species <code class="docutils literal notranslate"><span class="pre">p</span></code> if the plasma holds it, and
+otherwise from the core protons <code class="docutils literal notranslate"><span class="pre">p1</span></code>; the beam <code class="docutils literal notranslate"><span class="pre">p2</span></code> is never used.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.heat_flux">
 <span class="sig-name descname"><span class="pre">heat_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.heat_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.heat_flux" title="Link to this definition"></a></dt>
-<dd><p>Calculate the parallel heat flux.</p>
+<dd><p>Calculate the parallel-parallel component of the heat flux tensor.</p>
+<p>For each species <span class="math notranslate nohighlight">\(s\)</span> this is the third moment of its velocity
+distribution along the magnetic field, taken in the center-of-mass
+frame of the species passed to this method, and only those: for
+<code class="docutils literal notranslate"><span class="pre">heat_flux(&quot;a+p1&quot;)</span></code> or <code class="docutils literal notranslate"><span class="pre">heat_flux(&quot;a&quot;,</span> <span class="pre">&quot;p1&quot;)</span></code> it is the a+p1
+center of mass, not that of every species in the plasma,</p>
 <blockquote>
-<div><p><span class="math notranslate nohighlight">\(Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)\)</span></p>
+<div><p><span class="math notranslate nohighlight">\(Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v\)</span>,</p>
 </div></blockquote>
-<p>where <span class="math notranslate nohighlight">\(v\)</span> is each species’ velocity in the Center-of-Mass frame and
-<span class="math notranslate nohighlight">\(w\)</span> is each species parallel thermal speed.</p>
+<p>where <span class="math notranslate nohighlight">\(c_\parallel\)</span> is the velocity component along
+<span class="math notranslate nohighlight">\(\hat{b}\)</span> relative to the center of mass. For a drifting
+bi-Maxwellian with <span class="math notranslate nohighlight">\(w^2 = 2kT/m\)</span> this evaluates to</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(Q_{\parallel,s} = \rho_s (U_s^3 + \frac{3}{2} U_s w_{\parallel,s}^2)\)</span>,</p>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(U_s\)</span> is the species’ drift along <span class="math notranslate nohighlight">\(\hat{b}\)</span> in the
+center-of-mass frame and <span class="math notranslate nohighlight">\(w_{\parallel,s}\)</span> its parallel thermal
+speed.</p>
+<p>This is the parallel-parallel part of the energy flux only, not the
+total energy flux along the field: the perpendicular thermal speed
+does not enter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -1310,7 +1335,9 @@ of the input species.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>q: <cite>pd.Series</cite> or <cite>pd.DataFrame</cite></dt><dd><p>Dimensionality depends on species inputs.</p>
+<dt>q: <cite>pd.Series</cite> or <cite>pd.DataFrame</cite></dt><dd><p>Dimensionality depends on species inputs. A species sum is a
+partial sum over the species present in each row; a row with no
+species present is NaN.</p>
 </dd>
 </dl>
 </dd>
@@ -1398,7 +1425,9 @@ returned as a pd.DataFrame.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>rho: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>See Parameters for more info.</p>
+<dt>w: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>See Parameters for more info. A species sum is a partial sum over
+the species present in each row; a row with no species present is
+NaN.</p>
 </dd>
 </dl>
 </dd>
