@@ -25,8 +25,8 @@ later examples use the ``plasma`` its earlier ones build. pytest-randomly
 shuffles items before this file's ``pytest_collection_modifyitems`` runs, so
 that hook puts each document's examples back in line order.
 
-Docstring examples (``DoctestItem``) find a fresh ``plasma`` in their
-namespace, provided by the ``_doctest_plasma`` fixture.
+Docstring examples in ``.py`` modules find a fresh ``plasma`` in their
+namespace, provided by the ``_doctest_plasma`` fixture; rst doctests do not.
 """
 
 from pathlib import Path
@@ -42,7 +42,9 @@ SYBIL_DOCUMENTS = [
     "docs/source/tutorial/quickstart.rst",
     "docs/source/installation.rst",
 ]
-_SYBIL_PATHS = {Path(__file__).parent / document for document in SYBIL_DOCUMENTS}
+_SYBIL_PATHS = {
+    Path(__file__).resolve().parent / document for document in SYBIL_DOCUMENTS
+}
 
 try:
     from sybil import Sybil
@@ -81,11 +83,12 @@ def _deselect_doctest_duplicates(config, items):
     duplicates = [
         item
         for item in items
-        if isinstance(item, pytest.DoctestItem) and item.path in _SYBIL_PATHS
+        if isinstance(item, pytest.DoctestItem) and item.path.resolve() in _SYBIL_PATHS
     ]
     if duplicates:
+        dropped = {id(item) for item in duplicates}
         config.hook.pytest_deselected(items=duplicates)
-        items[:] = [item for item in items if item not in duplicates]
+        items[:] = [item for item in items if id(item) not in dropped]
 
 
 def pytest_collection_modifyitems(config, items):
@@ -129,6 +132,18 @@ def _small_plasma():
 
 @pytest.fixture(autouse=True)
 def _doctest_plasma(request):
-    """Give each docstring example a fresh ``plasma``; other tests get nothing."""
-    if isinstance(request.node, pytest.DoctestItem):
-        request.getfixturevalue("doctest_namespace")["plasma"] = _small_plasma()
+    """Give each ``.py`` docstring example a fresh ``plasma``.
+
+    rst doctests and all other tests get nothing, so a document example that
+    uses ``plasma`` without building it still fails. ``doctest_namespace`` is
+    session-scoped, so the name is removed again after each docstring runs;
+    otherwise an rst doctest running later would inherit it.
+    """
+    node = request.node
+    if not (isinstance(node, pytest.DoctestItem) and node.path.suffix == ".py"):
+        yield
+        return
+    namespace = request.getfixturevalue("doctest_namespace")
+    namespace["plasma"] = _small_plasma()
+    yield
+    namespace.pop("plasma", None)

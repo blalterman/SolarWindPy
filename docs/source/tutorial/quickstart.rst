@@ -13,6 +13,7 @@ Installation
 Basic Usage
 -----------
 
->>> import solarwindpy as sw; sw.__version__ != "unknown"  # "unknown": not installed
+>>> import solarwindpy as sw
+>>> sw.__version__ != "unknown"  # "unknown" means solarwindpy is not installed
 True
 
