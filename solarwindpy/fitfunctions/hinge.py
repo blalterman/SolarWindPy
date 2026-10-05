@@ -25,6 +25,59 @@ from .core import FitFunction
 _XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
+def _author_start():
+    r"""The author's fallback hinge, shared by the hinge ``fallback_p0`` overrides.
+
+    When a hinge ``p0`` cannot estimate a start, the all-ones default is a
+    singular point of these models (the two lines' intercepts coincide), so
+    the fit starts here instead: the hinge :math:`(x_h, y_h) = (433, 4.12)`,
+    the rising line's x-intercept :math:`x_1 = 250`, its slope
+    :math:`m_1 = y_h / (x_h - x_1)`, and a small non-zero plateau slope
+    :math:`m_2 = 0.01\,m_1`, as chosen by the package author.
+
+    Returns
+    -------
+    dict
+        ``xh``, ``yh``, ``x1``, ``m1``, ``m2`` and the plateau line's
+        x-intercept ``x2 = xh - yh / m2``.
+    """
+    xh, yh, x1 = 433.0, 4.12, 250.0
+    m1 = yh / (xh - x1)
+    m2 = 0.01 * m1
+    return dict(xh=xh, yh=yh, x1=x1, m1=m1, m2=m2, x2=xh - yh / m2)
+
+
+def _undefined(fitfunction, reason, **estimates):
+    r"""Whether any named estimate is undefined (NaN or infinite).
+
+    A hinge ``p0`` estimates slopes from the points on each side of its
+    hinge guess. A side with fewer than two points or repeated ``x`` has no
+    slope, and a zero slope has no x-intercept. When any of the estimates
+    passed here is undefined for such a reason, this logs which ones and
+    ``reason``, and the caller's ``p0`` returns None.
+
+    Parameters
+    ----------
+    fitfunction : FitFunction
+        Whose logger records the undefined estimates.
+    reason : str
+        Why those estimates can be undefined.
+    **estimates : float
+        The estimates to check, by parameter name.
+
+    Returns
+    -------
+    bool
+        True when at least one estimate is undefined.
+    """
+    bad = {k: v for k, v in estimates.items() if not np.isfinite(v)}
+    if bad:
+        fitfunction.logger.warning(
+            f"Undefined estimates {bad}: {reason}.\nReturning None."
+        )
+    return bool(bad)
+
+
 class HingeSaturation(FitFunction):
     r"""Piecewise linear function with hinge point for saturation modeling.
 
@@ -141,17 +194,20 @@ class HingeSaturation(FitFunction):
         - Estimated x1 from linear fit to rising region, or data minimum
         - Median slope in plateau region for m2
 
+        ``m2`` is undefined, and ``p0`` is None, when the plateau region
+        has repeated ``x``.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [xh, yh, x1, m2].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         xh, yh = self.saturation_guess
 
@@ -181,8 +237,23 @@ class HingeSaturation(FitFunction):
         else:
             m2 = 0.0
 
+        if _undefined(self, "the plateau region has repeated x", m2=m2):
+            return None
+
         p0 = [xh, yh, x1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[xh, yh, x1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+        """
+        s = _author_start()
+        return [s["xh"], s["yh"], s["x1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:
@@ -372,14 +443,18 @@ class TwoLine(FitFunction):
         The initial guess is derived from the data by estimating slopes
         and intercepts in regions separated by ``guess_xs``.
 
+        Each side of ``guess_xs`` needs at least two points with distinct
+        ``x`` for a slope, and a nonzero slope for an x-intercept. Otherwise
+        an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x1, x2, m1, m2].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -388,7 +463,7 @@ class TwoLine(FitFunction):
         Uses hardcoded xs=425 as the default separation point, which is
         appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         def estimate_line(x, y, tk, xs):
             x = x[tk]
@@ -409,8 +484,29 @@ class TwoLine(FitFunction):
         x1, m1 = estimate_line(x, y, tk, xs)
         x2, m2 = estimate_line(x, y, ~tk, xs)
 
+        reason = (
+            "each side of xs needs two points with distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, x1=x1, x2=x2, m1=m1, m2=m2):
+            return None
+
         p0 = [x1, x2, m1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[x1, x2, m1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``x2 = 433 - 4.12 / m2`` puts the second line through the hinge.
+        """
+        s = _author_start()
+        return [s["x1"], s["x2"], s["m1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:
@@ -607,14 +703,18 @@ class Saturation(FitFunction):
         The initial guess is derived from the data by estimating slopes
         and intercepts in regions separated by the saturation guess.
 
+        Each side of ``xs`` needs at least two points with distinct ``x``
+        for a slope, and the rising side a nonzero slope for ``x1``.
+        Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x1, xs, s, theta].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -623,7 +723,7 @@ class Saturation(FitFunction):
         Uses hardcoded xs=425 as the default separation point, which is
         appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         def estimate_line(x, y, tk, xs):
             x = x[tk]
@@ -648,8 +748,31 @@ class Saturation(FitFunction):
         s = np.nanmedian([s1, s2])
         theta = np.arctan((m1 - m2) / (1 + m1 * m2))
 
+        reason = (
+            "each side of xs needs two points with distinct x for a slope, "
+            "and the rising side a nonzero slope for x1"
+        )
+        if _undefined(self, reason, x1=x1, s=s, theta=theta):
+            return None
+
         p0 = [x1, xs, s, theta]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[x1, xs, s, theta]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``theta = arctan(m1) - arctan(m2)`` inverts the model's
+        ``m2 = tan(arctan(m1) - theta)``.
+        """
+        s = _author_start()
+        theta = np.arctan(s["m1"]) - np.arctan(s["m2"])
+        return [s["x1"], s["xh"], s["yh"], theta]
 
     @property
     def TeX_function(self) -> str:
@@ -825,14 +948,19 @@ class HingeMin(FitFunction):
         The initial guess estimates slopes and intercepts from the data
         in regions separated by the hinge guess.
 
+        Each side of ``guess_h`` with two or more points needs distinct
+        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
+        ``m1`` falls back to the slope across the x range, which needs
+        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [m1, x1, x2, h].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -840,7 +968,7 @@ class HingeMin(FitFunction):
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         Default guess_h=400 is appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x = self.observations.used.x
         y = self.observations.used.y
@@ -866,8 +994,30 @@ class HingeMin(FitFunction):
             m2 = 0.0
             x2 = h
 
+        reason = (
+            "each side of h needs distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
+            return None
+
         p0 = [m1, x1, x2, h]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[m1, x1, x2, h]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``x2 = 433 - 4.12 / m2`` and ``h = 433``, so the model's
+        ``m2 = m1 (h - x1) / (h - x2)`` recovers ``m2``.
+        """
+        s = _author_start()
+        return [s["m1"], s["x1"], s["x2"], s["xh"]]
 
     @property
     def TeX_function(self) -> str:
@@ -1043,14 +1193,19 @@ class HingeMax(FitFunction):
         The initial guess estimates slopes and intercepts from the data
         in regions separated by the hinge guess.
 
+        Each side of ``guess_h`` with two or more points needs distinct
+        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
+        ``m1`` falls back to the slope across the x range, which needs
+        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [m1, x1, x2, h].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1058,7 +1213,7 @@ class HingeMax(FitFunction):
         # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
         Default guess_h=400 is appropriate for solar wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x = self.observations.used.x
         y = self.observations.used.y
@@ -1084,8 +1239,30 @@ class HingeMax(FitFunction):
             m2 = 0.0
             x2 = h
 
+        reason = (
+            "each side of h needs distinct x for a slope, "
+            "and a nonzero slope for an x-intercept"
+        )
+        if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
+            return None
+
         p0 = [m1, x1, x2, h]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: not yet defined.
+
+        The hinge maximum has a different shape from the other hinge models,
+        and the author has not yet chosen its fallback start.
+
+        Raises
+        ------
+        NotImplementedError
+            Always, until a default start is defined.
+        """
+        raise NotImplementedError(
+            "HingeMax has no default start defined yet; pass p0= to make_fit."
+        )
 
     @property
     def TeX_function(self) -> str:
@@ -1241,14 +1418,17 @@ class HingeAtPoint(FitFunction):
         The initial guess uses the hinge_guess for (xh, yh) and estimates
         slopes from the data in regions separated by the hinge guess.
 
+        A side of ``guess_xh`` with two or more points needs distinct ``x``
+        for a slope. Otherwise a slope is undefined and ``p0`` is None.
+
         Returns
         -------
-        list
+        list or None
             Initial guesses as [xh, yh, m1, m2].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1257,7 +1437,7 @@ class HingeAtPoint(FitFunction):
         Default guess_xh=400 and guess_yh=0.5 are appropriate for solar
         wind speed analysis.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         xh, yh_guess = self._hinge_guess
 
@@ -1283,8 +1463,23 @@ class HingeAtPoint(FitFunction):
         else:
             m2 = 0.0
 
+        if _undefined(self, "each side of xh needs distinct x", m1=m1, m2=m2):
+            return None
+
         p0 = [xh, yh, m1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[xh, yh, m1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+        """
+        s = _author_start()
+        return [s["xh"], s["yh"], s["m1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:

@@ -128,21 +128,27 @@ class HeavySide(FitFunction):
     def p0(self) -> list:
         r"""Calculate initial parameter guess.
 
-        The initial guess is derived from:
-        - User-provided guesses if available
-        - Otherwise, heuristic estimates from the data
+        The initial guess uses the user-provided guesses if available.
+        Otherwise it is estimated from the data: ``x0`` is the midpoint of
+        the x range, ``y0`` the median ``y`` above ``x0`` and ``y1`` the
+        median ``y`` below ``x0`` less ``y0``.
+
+        Without both ``guess_y0`` and ``guess_y1``, the levels need data on
+        each side of ``x0``. When either side is empty (all ``x`` equal, or a
+        ``guess_x0`` outside the data), there is no estimate and ``p0`` is
+        None.
 
         Returns
         -------
-        list
+        list or None
             Initial guesses as [x0, y0, y1].
 
         Raises
         ------
-        AssertionError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
         """
-        assert self.sufficient_data
+        self._require_sufficient_data()
 
         x = self.observations.used.x
         y = self.observations.used.y
@@ -159,12 +165,15 @@ class HeavySide(FitFunction):
             y1 = self._guess_y1
         else:
             # Estimate y0 and y1 from data above and below x0
-            y0 = np.median(y[x > x0])  # Value after step
-            y1 = np.median(y[x < x0]) - y0  # Step height (y_left - y0)
-            if np.isnan(y0):
-                y0 = y.mean()
-            if np.isnan(y1):
-                y1 = 0.0
+            above, below = x > x0, x < x0
+            if not (above.any() and below.any()):
+                self.logger.warning(
+                    f"{above.sum()} points above and {below.sum()} below "
+                    f"x0 = {x0}, so no step levels.\nReturning None."
+                )
+                return None
+            y0 = np.median(y[above])  # Value after step
+            y1 = np.median(y[below]) - y0  # Step height (y_left - y0)
 
         p0 = [x0, y0, y1]
         return p0
