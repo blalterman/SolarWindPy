@@ -8,6 +8,7 @@ They live in ``tests/`` so the suite, the pre-commit hook and CI run them.
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -96,8 +97,8 @@ def test_mock_git_repo_leaves_the_callers_repository_untouched(
     _make_mock_git_repo(target)
 
     assert (config.read_bytes(), index.read_bytes()) == before
-    log = _git("log", "--format=%s", cwd=target).stdout.split()
-    assert log == ["Initial", "commit"]
+    log = _git("log", "--format=%s", cwd=target).stdout.strip()
+    assert log == "Initial commit"
 
 
 def test_compaction_with_no_context_files_reports_zero_reduction(
@@ -149,13 +150,17 @@ def test_post_tool_use_hook_configured() -> None:
     fix the PostToolUse entries in settings.json, unless the author dropped
     the per-edit test run.
     """
-    commands = {
-        entry["matcher"]: [h["command"] for h in entry["hooks"]]
-        for entry in _hooks()["PostToolUse"]
-    }
+    entries = _hooks()["PostToolUse"]
     for tool in ("Edit", "MultiEdit", "Write"):
+        # Claude Code matchers are regular expressions, e.g. "Edit|MultiEdit|Write".
+        commands = [
+            h["command"]
+            for entry in entries
+            if re.fullmatch(entry["matcher"], tool)
+            for h in entry["hooks"]
+        ]
         assert any(
-            "test-runner.sh --changed" in c for c in commands.get(tool, [])
+            "test-runner.sh --changed" in c for c in commands
         ), f"{tool} does not run test-runner.sh --changed"
 
 
