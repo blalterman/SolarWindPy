@@ -1202,9 +1202,8 @@ class TestPlotEdges:
     def test_limits_drop_vertices_outside_them(self, known_hist):
         """`xlim`/`ylim` keep vertices inside the range and drop those outside.
 
-        The limits sit between vertices. Whether a vertex exactly on a limit is
-        kept is not stated by any docstring or document, so it is not asserted
-        here; it is an open question for the author.
+        The limits sit between vertices; vertices on a limit are covered by
+        the two tests that follow.
 
         ON FAILURE: the code is wrong.
         """
@@ -1216,6 +1215,41 @@ class TestPlotEdges:
         assert kept.size > 0
         assert np.all((0.3 <= kept) & (kept <= 0.8))
         np.testing.assert_allclose(kept, _bin_centers(XEDGES)[1:3])
+        plt.close("all")
+
+    def test_vertex_exactly_on_an_x_limit_is_kept(self, known_hist):
+        """A vertex whose x equals an `xlim` bound is drawn, per the docstring.
+
+        The x bin centers 0.375 and 0.625 are exact in binary, so passing them
+        as the lower and upper limits puts a vertex exactly on each bound.
+
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        (top_line,), _ = known_hist.plot_edges(
+            ax, smooth=False, xlim=(0.375, 0.625), ylim=(None, None)
+        )
+        kept = np.asarray(top_line.get_xdata(), float)
+        np.testing.assert_array_equal(kept, [0.375, 0.625])
+        plt.close("all")
+
+    def test_vertex_exactly_on_a_y_limit_is_kept(self, known_hist):
+        """A vertex whose y equals a `ylim` bound is drawn, per the docstring.
+
+        The limits are the smallest and largest y of the unrestricted top
+        edge, so every vertex lies on or inside them and all are kept.
+
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        (full,), _ = known_hist.plot_edges(ax, smooth=False)
+        full_y = np.asarray(full.get_ydata(), float)
+        assert full_y.min() < full_y.max()  # both bounds are distinct vertices
+
+        (clipped,), _ = known_hist.plot_edges(
+            ax, smooth=False, ylim=(full_y.min(), full_y.max())
+        )
+        np.testing.assert_array_equal(np.asarray(clipped.get_ydata(), float), full_y)
         plt.close("all")
 
     def test_log_axes_place_the_edges_at_linear_coordinates(self):
