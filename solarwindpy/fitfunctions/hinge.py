@@ -182,7 +182,7 @@ class HingeSaturation(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
         """
         self._require_sufficient_data()
@@ -420,7 +420,7 @@ class TwoLine(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -666,7 +666,7 @@ class Saturation(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -896,7 +896,7 @@ class HingeMin(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1126,7 +1126,7 @@ class HingeMax(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -1334,7 +1334,7 @@ class HingeAtPoint(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes

@@ -23,10 +23,11 @@ def _weighted_moments(fitfunction, x, y):
 
     The mean is :math:`\sum x y / \sum y` and the variance
     :math:`\sum (x - \mathrm{mean})^2 y / \sum y`. Both are undefined when
-    ``x`` is empty or ``y`` sums to zero, and a negative variance (possible
-    when some weights are negative) has no square root. In those cases, the
-    reason is logged and None returned, so the caller's ``p0`` can return
-    None. A zero variance (all weight at one ``x``) is returned as is.
+    ``x`` is empty or ``y`` sums to zero, they are not finite when a sum
+    overflows (finite data near the float maximum), and a negative variance
+    (possible when some weights are negative) has no square root. In those
+    cases, the reason is logged and None returned, so the caller's ``p0`` can
+    return None. A zero variance (all weight at one ``x``) is returned as is.
 
     Parameters
     ----------
@@ -41,7 +42,7 @@ def _weighted_moments(fitfunction, x, y):
         ``(mean, variance)``, or None.
     """
     total = y.sum()
-    if x.size == 0 or total == 0:
+    if x.size == 0 or total == 0 or not np.isfinite(total):
         fitfunction.logger.warning(
             f"No weighted mean: {x.size} points with weights summing to {total}."
             "\nReturning None."
@@ -50,6 +51,12 @@ def _weighted_moments(fitfunction, x, y):
 
     mean = (x * y).sum() / total
     var = ((x - mean) ** 2.0 * y).sum() / total
+    if not (np.isfinite(mean) and np.isfinite(var)):
+        fitfunction.logger.warning(
+            f"Weighted mean {mean} or variance {var} is not finite (overflow)."
+            "\nReturning None."
+        )
+        return None
     if var < 0:
         fitfunction.logger.warning(
             f"Weighted variance {var} is negative, so no width.\nReturning None."

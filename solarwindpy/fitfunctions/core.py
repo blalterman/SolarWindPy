@@ -271,7 +271,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If fewer observations are used than the model has parameters.
 
         Notes

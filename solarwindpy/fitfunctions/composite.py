@@ -132,7 +132,12 @@ class GaussianPlusHeavySide(FitFunction):
             return super().make_fit(return_exception=return_exception, **kwargs)
         if p0 is None:
             # No estimate: scan from the feasible default the base fit uses.
-            p0 = self._feasible_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+            try:
+                p0 = self._feasible_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+            except ValueError:
+                # Malformed bounds: the base fit reports them, honouring
+                # return_exception.
+                return super().make_fit(return_exception=return_exception, **kwargs)
         p0 = list(p0)
 
         scan_kwargs = {k: v for k, v in kwargs.items() if k != "absolute_sigma"}
@@ -232,7 +237,7 @@ class GaussianPlusHeavySide(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -404,7 +409,7 @@ class GaussianTimesHeavySide(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes
@@ -585,7 +590,7 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
 
         Notes

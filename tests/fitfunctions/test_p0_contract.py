@@ -97,6 +97,60 @@ def test_infinite_caller_p0_raises_value_error_naming_the_parameter():
         fit.make_fit(p0=[2.0, np.inf])
 
 
+def test_wrong_length_caller_p0_names_entries_by_position():
+    """A caller's ``p0=`` of the wrong length names its bad entry ``p0[i]``.
+
+    Three guesses for the two parameters ``m, b`` cannot be matched to names,
+    so the NaN in the second entry is reported as ``p0[1]``.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _NoGuessLine(LINE_X, LINE_Y)
+    msg = r"^_NoGuessLine initial guess is not finite: p0\[1\]=nan\."
+    with pytest.raises(ValueError, match=msg):
+        fit.make_fit(p0=[2.0, np.nan, 1.0])
+
+
+def test_malformed_bounds_with_no_guess_are_returned_by_the_x0_scan():
+    """``GaussianPlusHeavySide`` with ``p0`` None returns, not raises, a bounds error.
+
+    y summing to zero gives ``p0`` None, so ``make_fit`` builds the feasible
+    default from ``bounds``. A three-element ``bounds`` is malformed (it must
+    be a (lower, upper) pair); with ``return_exception=True`` the resulting
+    ValueError comes back, as the base ``make_fit`` documents.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(6.0)
+    fit = GaussianPlusHeavySide(x, np.array([1.0, -1, 1, -1, 1, -1]))
+    assert fit.p0 is None, fit.p0
+    err = fit.make_fit(return_exception=True, bounds=(0.0, 1.0, 2.0))
+    assert isinstance(err, ValueError), err
+
+
+@pytest.mark.parametrize(
+    "x, y",
+    [
+        # Weights sum to 3e308, which overflows to inf.
+        pytest.param([1.0, 2, 3], [1e308, 1e308, 1e308], id="total-overflows"),
+        # Weights sum to 3e306 (finite), but x * y reaches 3e308, so the mean
+        # overflows.
+        pytest.param([100.0, 200, 300], [1e306, 1e306, 1e306], id="moment-overflows"),
+    ],
+)
+def test_overflowing_weighted_moments_give_no_gaussian_guess(x, y):
+    """Finite data whose weighted sums overflow give ``p0`` None, not NaN or inf.
+
+    Non-finite observations are masked before ``p0``, so overflow is how a
+    non-finite moment can still arise.
+
+    ON FAILURE: the code is wrong.
+    """
+    with np.errstate(over="ignore", invalid="ignore"):
+        p0 = Gaussian(np.array(x), np.array(y)).p0
+    assert p0 is None, p0
+
+
 def test_a_none_guess_fits_from_the_feasible_default():
     """``p0`` None still fits: the exact line is recovered and dof counts parameters.
 

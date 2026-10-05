@@ -128,11 +128,10 @@ class HeavySide(FitFunction):
     def p0(self) -> list:
         r"""Calculate initial parameter guess.
 
-        The initial guess is derived from:
-        - User-provided guesses if available
-        - Otherwise, heuristic estimates from the data: ``x0`` is the
-          midpoint of the x range, ``y0`` the median ``y`` above ``x0`` and
-          ``y1`` the median ``y`` below ``x0`` less ``y0``.
+        The initial guess uses the user-provided guesses if available.
+        Otherwise it is estimated from the data: ``x0`` is the midpoint of
+        the x range, ``y0`` the median ``y`` above ``x0`` and ``y1`` the
+        median ``y`` below ``x0`` less ``y0``.
 
         Without both ``guess_y0`` and ``guess_y1``, the levels need data on
         each side of ``x0``. When either side is empty (all ``x`` equal, or a
@@ -146,7 +145,7 @@ class HeavySide(FitFunction):
 
         Raises
         ------
-        InsufficientDataError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
         """
         self._require_sufficient_data()
