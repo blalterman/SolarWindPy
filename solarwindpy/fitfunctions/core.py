@@ -266,8 +266,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             the data make a guess impossible (an empty region, an undefined
             slope, a zero total weight, and so on), ``p0`` returns ``None``
             rather than a guess holding NaN or infinity, and :meth:`make_fit`
-            starts from the feasible default for the bounds: ones when
-            unbounded, as :func:`scipy.optimize.curve_fit` does.
+            starts from :meth:`fallback_p0`: by default the feasible start
+            for the bounds (ones when unbounded, as
+            :func:`scipy.optimize.curve_fit` does), unless the class
+            overrides it.
 
         Raises
         ------
@@ -427,8 +429,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         if not self.sufficient_data:
             raise InsufficientDataError(_INSUFFICIENT_DATA)
 
-    def _feasible_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The feasible default guess for ``bounds``, used when ``p0`` is None.
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start :meth:`make_fit` uses when :attr:`p0` is None.
+
+        This is the one hook for a class-specific fallback start: a subclass
+        whose model is singular at the default overrides it. The default is
+        the feasible start :func:`scipy.optimize.curve_fit` chooses.
 
         Parameters
         ----------
@@ -438,8 +444,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Returns
         -------
         numpy.ndarray
-            One value per parameter, as :func:`scipy.optimize.curve_fit`
-            chooses: ones when unbounded, otherwise a point inside the bounds.
+            One value per parameter: ones when unbounded, otherwise a point
+            inside the bounds.
         """
         # The fit parameters are the function's arguments after x.
         n = len(self.argnames)
@@ -475,7 +481,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         raise ValueError(
             f"{self.__class__.__name__} initial guess is not finite: {detail}. "
             "A p0 that cannot make a guess returns None, and the fit then "
-            "starts from the feasible default."
+            "starts from fallback_p0()."
         )
 
     @property
@@ -717,7 +723,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         # Adapted from `curve_fit` lines 704 and 715 (20200527)
         if p0 is None:
-            p0 = self._feasible_p0(bounds)
+            p0 = np.atleast_1d(np.asarray(self.fallback_p0(bounds), dtype=float))
         else:
             p0 = np.atleast_1d(p0)
             self._reject_nonfinite_p0(p0)

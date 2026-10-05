@@ -25,6 +25,28 @@ from .core import FitFunction
 _XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
+def _author_start():
+    r"""The author's fallback hinge, shared by the hinge ``fallback_p0`` overrides.
+
+    When a hinge ``p0`` cannot estimate a start, the all-ones default is a
+    singular point of these models (the two lines' intercepts coincide), so
+    the fit starts here instead: the hinge :math:`(x_h, y_h) = (433, 4.12)`,
+    the rising line's x-intercept :math:`x_1 = 250`, its slope
+    :math:`m_1 = y_h / (x_h - x_1)`, and a small non-zero plateau slope
+    :math:`m_2 = 0.01\,m_1`, as chosen by the package author.
+
+    Returns
+    -------
+    dict
+        ``xh``, ``yh``, ``x1``, ``m1``, ``m2`` and the plateau line's
+        x-intercept ``x2 = xh - yh / m2``.
+    """
+    xh, yh, x1 = 433.0, 4.12, 250.0
+    m1 = yh / (xh - x1)
+    m2 = 0.01 * m1
+    return dict(xh=xh, yh=yh, x1=x1, m1=m1, m2=m2, x2=xh - yh / m2)
+
+
 def _undefined(fitfunction, reason, **estimates):
     r"""Whether any named estimate is undefined (NaN or infinite).
 
@@ -220,6 +242,18 @@ class HingeSaturation(FitFunction):
 
         p0 = [xh, yh, x1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[xh, yh, x1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+        """
+        s = _author_start()
+        return [s["xh"], s["yh"], s["x1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:
@@ -459,6 +493,20 @@ class TwoLine(FitFunction):
 
         p0 = [x1, x2, m1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[x1, x2, m1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``x2 = 433 - 4.12 / m2`` puts the second line through the hinge.
+        """
+        s = _author_start()
+        return [s["x1"], s["x2"], s["m1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:
@@ -710,6 +758,22 @@ class Saturation(FitFunction):
         p0 = [x1, xs, s, theta]
         return p0
 
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[x1, xs, s, theta]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``theta = arctan(m1) - arctan(m2)`` inverts the model's
+        ``m2 = tan(arctan(m1) - theta)``.
+        """
+        s = _author_start()
+        theta = np.arctan(s["m1"]) - np.arctan(s["m2"])
+        return [s["x1"], s["xh"], s["yh"], theta]
+
     @property
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
@@ -939,6 +1003,21 @@ class HingeMin(FitFunction):
 
         p0 = [m1, x1, x2, h]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[m1, x1, x2, h]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+
+        ``x2 = 433 - 4.12 / m2`` and ``h = 433``, so the model's
+        ``m2 = m1 (h - x1) / (h - x2)`` recovers ``m2``.
+        """
+        s = _author_start()
+        return [s["m1"], s["x1"], s["x2"], s["xh"]]
 
     @property
     def TeX_function(self) -> str:
@@ -1170,6 +1249,21 @@ class HingeMax(FitFunction):
         p0 = [m1, x1, x2, h]
         return p0
 
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: not yet defined.
+
+        The hinge maximum has a different shape from the other hinge models,
+        and the author has not yet chosen its fallback start.
+
+        Raises
+        ------
+        NotImplementedError
+            Always, until a default start is defined.
+        """
+        raise NotImplementedError(
+            "HingeMax has no default start defined yet; pass p0= to make_fit."
+        )
+
     @property
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
@@ -1374,6 +1468,18 @@ class HingeAtPoint(FitFunction):
 
         p0 = [xh, yh, m1, m2]
         return p0
+
+    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+        r"""The start used when :attr:`p0` is None: ``[xh, yh, m1, m2]``.
+
+        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
+        rising line with x-intercept :math:`x_1 = 250` (so
+        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
+        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
+        not used: the start is the same point whatever the bounds.
+        """
+        s = _author_start()
+        return [s["xh"], s["yh"], s["m1"], s["m2"]]
 
     @property
     def TeX_function(self) -> str:

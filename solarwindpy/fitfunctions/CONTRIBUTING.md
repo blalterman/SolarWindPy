@@ -98,7 +98,8 @@ Initial parameter guesses MUST be data-driven. Hardcoded domain values are prohi
 - Return `None` when the data make a guess impossible: an empty region, an undefined
   slope, weights summing to zero. Decide which inputs those are from the model's math,
   test for them where they arise, and say so in the `p0` docstring. `make_fit` then
-  starts from the feasible default (ones when unbounded), as `curve_fit` does.
+  starts from `fallback_p0()`: by default the feasible start (ones when unbounded), as
+  `curve_fit` does. A class whose model is singular there overrides `fallback_p0`.
 - Never return NaN or infinity, and never substitute a stand-in value for an estimate
   that failed unless the docstring documents it as the estimate. `make_fit` rejects a
   non-finite guess with a `ValueError` naming the class and parameter.
