@@ -1587,7 +1587,12 @@ species: {}
     def estimate_electrons(self, inplace=False):
         r"""Estimate the electron parameters with a scalar temperature.
 
-        Assume temperature is the same as proton scalar temerature.
+        The electron density and velocity follow from quasi-neutrality and
+        zero net current, :math:`n_e = \sum_s q_s n_s` and
+        :math:`n_e v_e = \sum_s q_s n_s v_s`. The electron temperature equals
+        the (core) proton scalar temperature, so with :math:`m w^2 = 2 k T`
+
+            :math:`w_e^2 = \frac{m_p}{m_e} w_p^2`.
         """
 
         species = self.species
@@ -1641,11 +1646,12 @@ species: {}
 
         ve = niqivi.divide(ne, axis=0)
 
+        # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
         wp = self.w(tkw).loc[:, "scalar"]
-        nrat = self.number_density(tkw).divide(ne, axis=0)
         mpme = self.constants.m_in_mp["e"] ** -1
-        we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
-        we = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
+        we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
+        # Isotropic electrons: the scalar thermal speed equals both components.
+        we = pd.concat([we, we, we], axis=1, keys=["par", "per", "scalar"], sort=True)
 
         ne.name = ""
         electrons = pd.concat(

@@ -224,6 +224,14 @@ These change computed values; rerun any analysis that used them.
 - `ReferenceAbundances.get_element` named its Series by the index level it did not
   search: `get_element("Fe")` was named 26 and `get_element(26)` was named `"Fe"`. Both
   are now named by the atomic number, 26.
+- `Plasma.estimate_electrons` now sets the electron temperature equal to the (core)
+  proton scalar temperature, as its docstring states: w_e^2 = (m_p / m_e) w_p^2. It
+  previously multiplied by n_p / n_e, so with alphas or other ions present the electron
+  thermal speed was too small by sqrt(n_p / n_e) (about 4% at n_a / n_p = 0.04) and the
+  temperature by n_p / n_e. Proton-only plasmas are unchanged.
+- The `Ion` returned by `Plasma.estimate_electrons` carries the scalar thermal speed
+  (equal to `par` and `per`), so its `w`, `temperature` and other thermal properties
+  work; they raised `ValueError` before.
 - `Plasma.vdf_ratio` is NaN where the beam drift cannot be projected onto b, e.g. where b
   is missing. It previously dropped the drift term there and returned
   ln(n2 w1^3 / n1 w2^3).

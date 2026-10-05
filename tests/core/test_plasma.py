@@ -1308,11 +1308,12 @@ class PlasmaTestBase(ABC):
             ot.nc(sa, combo)
 
     def test_estimate_electrons(self):
-        r"""Electron moments follow from charge neutrality and zero net current.
+        r"""Electron moments follow from charge neutrality, zero net current, T_e = T_p.
 
         ON FAILURE: the code is wrong; n_e, v_e and w_e are recomputed here from
-        charge neutrality, zero net current, and the CODATA electron-proton mass
-        ratio, independently of `Plasma`.
+        charge neutrality, zero net current, T_e equal to the (core) proton scalar
+        temperature, and the CODATA electron-proton mass ratio, independently of
+        `Plasma`.
         """
         stuple = self.stuple
 
@@ -1338,21 +1339,18 @@ class PlasmaTestBase(ABC):
 
             if "p" in self.stuple:
                 tkw = pd.IndexSlice["scalar", "p"]
-                tkn = "p"
-                exp = pd.Series({"p": 1.0, "e": -1.0})
             else:
                 tkw = pd.IndexSlice["scalar", "p1"]
-                tkn = "p1"
-                exp = pd.Series({"p1": 1.0, "e": -1.0})
 
+            # T_e = T_p with m w^2 = 2 k T: w_e^2 = (m_p / m_e) w_p^2.
             wp = self.data.w.loc[:, tkw]
-            npne = self.data.n.xs("", axis=1, level="C").loc[:, tkn]
-            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"], sort=True)
-            nrat = npne.pow(exp, axis=1, level="S").product(axis=1)
             mpme = physical_constants["electron-proton mass ratio"][0] ** -1.0
-            we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
+            we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
 
-            tmp = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
+            # Isotropic electrons: scalar, par and per thermal speeds are equal.
+            tmp = pd.concat(
+                [we, we, we], axis=1, keys=["par", "per", "scalar"], sort=True
+            )
             ne.name = ""
             electrons = pd.concat(
                 [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
@@ -2692,3 +2690,42 @@ def test_estimate_electrons_weights_each_species_by_its_own_charge():
     assert v.loc["x"] == pytest.approx(2180.0 / 5.4, rel=1e-12, abs=0)
     assert v.loc["y"] == pytest.approx(12.0 / 5.4, rel=1e-12, abs=0)
     assert v.loc["z"] == 0.0
+
+
+def test_estimate_electrons_temperature_equals_proton_scalar_temperature():
+    r"""`estimate_electrons` sets T_e = T_p1, so w_e^2 = (m_p / m_e) w_p1^2.
+
+    The docstring's assumption with m w^2 = 2 k T. Alphas make n_e = 5.4 differ
+    from n_p1 = 5 cm^-3, so a density ratio in w_e fails. Anisotropic protons
+    (w_par = 30, w_per = 24 km/s) make the scalar w_p1^2 = (900 + 2 * 576) / 3
+    = 684 km^2/s^2 (trace of the pressure tensor) differ from either component.
+    By hand, with m_p / m_e = 1836.152673426 (CODATA 2022):
+    w_e = sqrt(684 * 1836.152673426) = sqrt(1255928.428623) = 1120.6821 km/s,
+    on both the par and per components.
+
+    ON FAILURE: the code is wrong, unless the author rejects T_e = T_p as the
+    electron estimate.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 24.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p1", "a")
+    e = p.estimate_electrons()
+
+    mp_me = 1.0 / physical_constants["electron-proton mass ratio"][0]
+    expected = np.sqrt(684.0 * mp_me)  # km/s, w_e^2 = (m_p / m_e) w_p^2
+    for c in ("par", "per"):
+        we = e.w.data.loc[:, c].iloc[0]
+        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+        assert we == pytest.approx(expected, rel=1e-12, abs=0)
+        # Half the last printed digit of the hand value 1120.6821 km/s.
+        assert we == pytest.approx(1120.6821, rel=0, abs=5e-5)
+
+    # rel=1e-9: T_e uses CODATA m_e, T_p uses m_p; m_p / m_e from the CODATA
+    # ratio agrees with their quotient to ~1e-10.
+    t_e = e.temperature.loc[:, "scalar"].iloc[0]
+    t_p = p.ions.loc["p1"].temperature.loc[:, "scalar"].iloc[0]
+    assert t_e == pytest.approx(t_p, rel=1e-9, abs=0)
