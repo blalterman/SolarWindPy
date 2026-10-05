@@ -162,7 +162,8 @@ of the 2021 CSV already matches Table 2. Drop the 2009 tests, retire the noble-g
 xfails, record the removal and the fix in `CHANGELOG.md`. Add a test asserting that the 15
 Photosphere cells Table 2 leaves blank (unavailable) stay NaN: As, Se, Br, Cd, Sb, Te, I, Cs,
 Ta, Re, Ir, Pt, Hg, Bi, U. Controls: blanking any one of the four restored cells fails a test,
-and filling any one of the 15 blank cells fails a test.
+and filling any one of the 15 blank cells fails a test. Also make `get_element("Fe")` and
+`get_element(26)` return Series with the same name, retiring the name-quirk xfail.
 
 ### dev-extras-and-coverage-figure
 
@@ -181,6 +182,50 @@ when provenance is unclear, reimplement. Drop `ATTRIBUTION.md` from the "Further
 documentation" list, and repoint or remove the references in `DEVELOPMENT.md`,
 `MAINTENANCE.md`, the PR template, and `.gitmessage`. Control: `git grep -n ATTRIBUTION.md`
 outside `docs/dispatches/` returns nothing.
+
+## Follow-up units
+
+Both run after every unit above has merged; their files are disjoint. Each retires the strict
+xfails its fixes resolve, with the three-run demonstration from TEST_PATTERNS.md.
+
+### plasma-code-fixes
+
+OWNS: solarwindpy/core/plasma.py, tests/core/test_plasma.py
+
+Author decisions:
+
+- `heat_flux` keeps its formula, ρ(v³ + 3/2 v w∥²): it is the along-field (parallel-parallel)
+  part of the energy flux, not the total energy flux along the field. The docstring and its
+  label say so precisely. The parallel-only thermal speed has been deliberate since 2019.
+- A species sum with no species present is NaN, not 0, while a sum with some species present
+  stays a partial sum: `heat_flux("a+p1")` and `kinetic_energy_flux("a+p1")` use
+  `min_count=1`. Add the `Wk` all-missing row case beside the existing partial-sum case.
+- `vdf_ratio` returns NaN where the projection is NaN (`skipna=False`).
+- `estimate_electrons` sets T_e = T_p, as its docstring states: w_e² = (m_p/m_e) w_p², not
+  the current (n_p/n_e)(m_p/m_e) w_p².
+- Replace `DataFrame.applymap` (removed in pandas 3) in `_log_object_at_load`, with a test
+  that `log_plasma_stats=True` no longer raises.
+
+### small-code-fixes
+
+OWNS: solarwindpy/solar_activity/icme/icmecat.py, tests/solar_activity/icme/test_icmecat.py, solarwindpy/plotting/hist2d.py, tests/plotting/test_hist2d_plotting.py, solarwindpy/fitfunctions/lines.py, solarwindpy/fitfunctions/core.py, tests/fitfunctions/test_lines.py, tests/fitfunctions/test_exponentials.py, solarwindpy/plotting/tools.py, .claude/docs/TEST_PATTERNS.md
+
+Author decisions:
+
+- ICMECAT cache: save and read the cached copy as CSV (the format the catalog downloads in),
+  not parquet, so caching needs no undeclared dependency; retire the two cache xfails.
+- `plot_edges`: a vertex exactly on an `xlim`/`ylim` limit is kept. State it in the docstring
+  and add the vertex-on-limit test that kills the `x0 < x` mutant.
+- `Line.p0` checks for repeated x before dividing (no divide-by-zero warning);
+  `LineXintercept.p0`'s docstring says it returns `[m, x0]`.
+- `FitFunction.rsq` does not divide 0/0 on a single point or constant data; decide the
+  returned value from its docstring, or report it if the docstring does not say.
+- The `plotting/tools.py` `save` example writes into a temporary directory, not the current
+  directory, and drops `+SKIP`.
+- TEST_PATTERNS.md tolerance rule, replacing "values published to N significant digits":
+  when the package stores a published value as printed, compare exactly; when it computes a
+  value a source prints to d decimal places, allow half the last printed digit
+  (`abs = 0.5 × 10^-d`, `rel = 0`). This holds on linear and logarithmic scales alike.
 
 ## Long-running units
 
