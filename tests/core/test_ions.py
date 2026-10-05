@@ -4,7 +4,6 @@
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
-import pytest
 
 from abc import ABC, abstractproperty
 from unittest import TestCase
@@ -17,6 +16,7 @@ from . import test_base as base
 from solarwindpy.core import vector
 from solarwindpy.core import tensor
 from solarwindpy.core import ions
+from tests.tolerances import exact, printed
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -268,11 +268,9 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     )
     data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
     expected = 0.5 * (5e6 * constants.m_p) * (400e3) ** 3 / 1e-6  # [uW m^-2]
-    assert ions.Ion(data, "p1").kinetic_energy_flux.iloc[0] == pytest.approx(
-        expected, rel=1e-12
-    )
+    assert ions.Ion(data, "p1").kinetic_energy_flux.iloc[0] == exact(expected)
     # Guard the hand value in the docstring against the formula above.
-    assert expected == pytest.approx(267.6, rel=1e-3)
+    assert expected == printed(267.6, decimals=1)
 
 
 def test_specific_entropy_of_a_hand_computed_proton_population():
@@ -290,9 +288,7 @@ def test_specific_entropy_of_a_hand_computed_proton_population():
     data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
     kt_ev = 0.5 * constants.m_p * (50e3) ** 2 / constants.e
     expected = kt_ev / 5.0 ** (2.0 / 3.0)
-    assert ions.Ion(data, "p1").specific_entropy.iloc[0] == pytest.approx(
-        expected, rel=1e-12
-    )
+    assert ions.Ion(data, "p1").specific_entropy.iloc[0] == exact(expected)
     # Guard the hand values in the docstring against the formula above.
-    assert kt_ev == pytest.approx(13.05, rel=1e-3)
-    assert expected == pytest.approx(4.463, rel=1e-3)
+    assert kt_ev == printed(13.05, decimals=2)
+    assert expected == printed(4.463, decimals=3)

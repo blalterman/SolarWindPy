@@ -23,6 +23,7 @@ from scipy import constants
 from scipy.constants import physical_constants
 
 from solarwindpy.core import units_constants as uc
+from tests.tolerances import CODATA_JOINT_DECIMALS, exact, printed
 
 # Defining constants of the 2019 SI, exact by definition (BIPM SI Brochure, 9th
 # ed., 2019, Table 1).
@@ -40,17 +41,6 @@ IAU_2012_AU = 149_597_870_700.0  # [m]
 IAU_2015_SOLAR_RADIUS = 695.7e6  # [m]
 IAU_2015_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
 
-# Float rounding only: both sides are the same exact or identically sourced value.
-EXACT = dict(rel=1e-12, abs=0)
-# CODATA (2018 on scipy < 1.15, 2022 after) publishes these quantities to 11-13
-# significant digits from one joint adjustment, so cross-identities hold to ~1e-11;
-# 1e-10 is above that rounding and far below a swapped species or a wrong constant
-# (>=1e-3).
-CODATA_JOINT = dict(rel=1e-10, abs=0)
-# CODATA 2018 lists exact derived constants (R, hbar, k in eV/K) truncated to 10
-# significant digits, and scipy < 1.15 (allowed by pyproject.toml) carries that
-# table; comparing one of them to its exact SI derivation needs rel = 1e-9.
-CODATA_TRUNCATED = dict(rel=1e-9, abs=0)
 
 # Species label -> CODATA particle name. The label's first letter names the particle
 # ("p1", "pm", "p_bimax" are protons; "a2", "a_bimax" are alpha particles).
@@ -84,9 +74,6 @@ MISC_EXPECTED = {
     "Rs [m]": IAU_2015_SOLAR_RADIUS,  # IAU 2015 Resolution B3
     "gas constant": SI_NA * SI_K,  # R = N_A k, exact in the 2019 SI
 }
-
-# Keys whose stored value comes from a table scipy < 1.15 truncates (see above).
-MISC_TOLERANCE = {"gas constant": CODATA_TRUNCATED}
 
 PROTON_MASS = codata("proton mass")
 
@@ -131,8 +118,7 @@ def test_misc_constant_matches_its_published_value(key):
     ON FAILURE: the code is wrong, unless a new key lacks an entry in
     MISC_EXPECTED; add its published value with the source on the line.
     """
-    tolerance = MISC_TOLERANCE.get(key, EXACT)
-    assert uc.Constants().misc[key] == pytest.approx(MISC_EXPECTED[key], **tolerance)
+    assert uc.Constants().misc[key] == exact(MISC_EXPECTED[key])
 
 
 def test_hbar_is_codata_reduced_planck_constant():
@@ -140,9 +126,7 @@ def test_hbar_is_codata_reduced_planck_constant():
 
     ON FAILURE: the code is wrong.
     """
-    assert uc.Constants().misc["hbar"] == pytest.approx(
-        codata("reduced Planck constant"), **CODATA_TRUNCATED
-    )
+    assert uc.Constants().misc["hbar"] == exact(codata("reduced Planck constant"))
 
 
 def test_permittivity_permeability_and_c_satisfy_e0_mu0_c2_equals_one():
@@ -151,8 +135,8 @@ def test_permittivity_permeability_and_c_satisfy_e0_mu0_c2_equals_one():
     ON FAILURE: the code is wrong.
     """
     misc = uc.Constants().misc
-    assert misc["e0"] * misc["mu0"] * misc["c"] ** 2 == pytest.approx(
-        1.0, **CODATA_JOINT
+    assert misc["e0"] * misc["mu0"] * misc["c"] ** 2 == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
     )
 
 
@@ -161,7 +145,7 @@ def test_boltzmann_constant_in_joules_is_the_si_defining_value():
 
     ON FAILURE: the code is wrong.
     """
-    assert uc.Constants().kb["J"] == pytest.approx(SI_K, **EXACT)
+    assert uc.Constants().kb["J"] == exact(SI_K)
 
 
 def test_boltzmann_constant_in_ev_is_k_over_e():
@@ -170,8 +154,8 @@ def test_boltzmann_constant_in_ev_is_k_over_e():
     ON FAILURE: the code is wrong.
     """
     kb_ev = uc.Constants().kb["eV"]
-    assert kb_ev == pytest.approx(SI_K / SI_E, **CODATA_TRUNCATED)
-    assert kb_ev == pytest.approx(codata("Boltzmann constant in eV/K"), **EXACT)
+    assert kb_ev == exact(SI_K / SI_E)
+    assert kb_ev == exact(codata("Boltzmann constant in eV/K"))
 
 
 # --- Constants: per-species tables -------------------------------------------
@@ -195,7 +179,7 @@ def test_species_mass_matches_codata(species):
     ON FAILURE: the code is wrong.
     """
     expected = codata(f"{particle(species)} mass")
-    assert uc.Constants().m[species] == pytest.approx(expected, **EXACT)
+    assert uc.Constants().m[species] == exact(expected)
 
 
 @pytest.mark.parametrize("species", SPECIES)
@@ -205,7 +189,7 @@ def test_species_mass_in_u_matches_codata(species):
     ON FAILURE: the code is wrong.
     """
     expected = codata(f"{particle(species)} mass in u")
-    assert uc.Constants().m_amu[species] == pytest.approx(expected, **EXACT)
+    assert uc.Constants().m_amu[species] == exact(expected)
 
 
 @pytest.mark.parametrize("species", SPECIES)
@@ -215,8 +199,9 @@ def test_mass_in_u_times_atomic_mass_constant_is_mass_in_kg(species):
     ON FAILURE: the code is wrong.
     """
     c = uc.Constants()
-    assert c.m_amu[species] * codata("atomic mass constant") == pytest.approx(
-        c.m[species], **CODATA_JOINT
+    m_u = codata("atomic mass constant")
+    assert c.m_amu[species] * m_u / c.m[species] == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
     )
 
 
@@ -228,13 +213,15 @@ def test_mass_in_proton_masses_is_mass_over_proton_mass(species):
     """
     c = uc.Constants()
     ratio = c.m_in_mp[species]
-    assert ratio == pytest.approx(c.m[species] / PROTON_MASS, **CODATA_JOINT)
+    assert ratio / (c.m[species] / PROTON_MASS) == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
+    )
     name = particle(species)
     if name == "proton":
         # A proton is one proton mass by definition.
         assert ratio == 1.0
     else:
-        assert ratio == pytest.approx(codata(f"{name}-proton mass ratio"), **EXACT)
+        assert ratio == exact(codata(f"{name}-proton mass ratio"))
 
 
 @pytest.mark.parametrize("species", SPECIES)
@@ -254,7 +241,7 @@ def test_charge_is_charge_state_times_elementary_charge(species):
     ON FAILURE: the code is wrong.
     """
     expected = CHARGE_NUMBER[particle(species)] * SI_E
-    assert uc.Constants().charges[species] == pytest.approx(expected, **EXACT)
+    assert uc.Constants().charges[species] == exact(expected)
 
 
 def test_polytropic_indices_are_the_double_adiabatic_and_adiabatic_values():
@@ -271,7 +258,7 @@ def test_polytropic_indices_are_the_double_adiabatic_and_adiabatic_values():
     gamma = uc.Constants().polytropic_index
     for key in gamma.index:
         f = degrees_of_freedom[key]
-        assert gamma[key] == pytest.approx((f + 2) / f, **EXACT)
+        assert gamma[key] == exact((f + 2) / f)
 
 
 def test_constants_rejects_a_table_that_is_not_a_series():
@@ -296,7 +283,7 @@ def test_units_field_is_one_display_unit_in_si(name):
     ON FAILURE: the code is wrong, unless a new field lacks an entry in
     DISPLAY_UNIT_IN_SI; add its display unit built from scipy.constants.
     """
-    assert getattr(uc.Units(), name) == pytest.approx(DISPLAY_UNIT_IN_SI[name], **EXACT)
+    assert getattr(uc.Units(), name) == exact(DISPLAY_UNIT_IN_SI[name])
 
 
 def test_pressure_unit_is_consistent_with_n_k_t():
@@ -309,7 +296,7 @@ def test_pressure_unit_is_consistent_with_n_k_t():
     u = uc.Units()
     kb = uc.Constants().kb["J"]
     p = (1.0 * u.n) * kb * (1.0 * u.temperature) / u.pth
-    assert p == pytest.approx(1.380649, **EXACT)
+    assert p == exact(1.380649)
 
 
 def test_temperature_unit_is_8_617_ev():
@@ -318,8 +305,7 @@ def test_temperature_unit_is_8_617_ev():
     ON FAILURE: the code is wrong.
     """
     kt = uc.Units().temperature * uc.Constants().kb["eV"]
-    # Published to 10 significant digits.
-    assert kt == pytest.approx(8.617333262, rel=1e-9, abs=0)
+    assert kt == printed(8.617333262, decimals=9)
 
 
 def test_kinetic_energy_flux_of_5_per_cc_protons_at_400_km_s_is_267_6_uw_m2():
@@ -333,8 +319,7 @@ def test_kinetic_energy_flux_of_5_per_cc_protons_at_400_km_s_is_267_6_uw_m2():
     rho = 5.0 * u.rho
     v = 400.0 * u.v
     flux = 0.5 * rho * v**3 / u.kinetic_energy_flux
-    # The hand calculation keeps 4 significant digits.
-    assert flux == pytest.approx(267.6, rel=1e-3, abs=0)
+    assert flux == printed(267.6, decimals=1)
 
 
 def test_specific_entropy_unit_is_p_over_rho_to_five_thirds():
@@ -348,4 +333,4 @@ def test_specific_entropy_unit_is_p_over_rho_to_five_thirds():
     u = uc.Units()
     p = u.n * codata("electron volt")  # 1 eV per cm^3, in Pa
     s = p / u.rho ** (5.0 / 3.0)
-    assert s / u.specific_entropy == pytest.approx(1.0, **EXACT)
+    assert s / u.specific_entropy == exact(1.0)
