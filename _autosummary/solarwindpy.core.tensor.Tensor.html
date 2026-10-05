@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.tensor.Tensor &mdash; SolarWindPy 0.1.dev1+g9e4488cf3 documentation</title>
+  <title>solarwindpy.core.tensor.Tensor &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,9 +16,11 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=739e9865"></script>
+      <script src="../_static/documentation_options.js?v=12b555cc"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -367,8 +369,23 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.core.tensor.Tensor.magnitude">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">magnitude</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><span class="pre">Series</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.magnitude" title="Link to this definition"></a></dt>
-<dd><p>Calculate and return the magnitude of the tensor.</p>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">magnitude</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><span class="pre">Series</span></a></span><a class="headerlink" href="#solarwindpy.core.tensor.Tensor.magnitude" title="Link to this definition"></a></dt>
+<dd><p>Scalar magnitude of a thermal-speed tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Scalar thermal speed, in the units of the stored components.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Thermal speeds combine through the temperatures. With
+<span class="math notranslate nohighlight">\(T = (T_\parallel + 2 T_\perp) / 3\)</span> and <span class="math notranslate nohighlight">\(T \propto w^2\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[w = \sqrt{\frac{w_\parallel^2 + 2 w_\perp^2}{3}}\]</div>
+<p>This is the combination <code class="docutils literal notranslate"><span class="pre">Plasma</span></code> uses for the stored <code class="docutils literal notranslate"><span class="pre">scalar</span></code> thermal
+speed; the <code class="docutils literal notranslate"><span class="pre">scalar</span></code> column itself is not read.</p>
 </dd></dl>
 
 <dl class="py property">
