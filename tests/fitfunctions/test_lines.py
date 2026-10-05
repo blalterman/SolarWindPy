@@ -247,7 +247,10 @@ def test_line_with_weights():
 
 
 def test_line_horizontal_data():
-    """Line fitted to y = 3 has slope 0 and intercept 3.
+    """Line fitted to y = 3 has slope 0 and intercept 3, and R² is NaN.
+
+    Constant data have no spread, so R² is undefined and ``rsq`` returns NaN
+    without a divide-by-zero warning, per its docstring.
 
     ON FAILURE: the code is wrong.
     """
@@ -260,6 +263,10 @@ def test_line_horizontal_data():
     # True slope is 0, so rel is meaningless; 1e-9 is optimizer noise on O(1) data.
     assert obj.popt["m"] == pytest.approx(0.0, abs=1e-9)
     assert obj.popt["b"] == pytest.approx(3.0, **NOISE_FREE)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert np.isnan(obj.rsq)
 
 
 def test_line_recovers_near_vertical_slope():

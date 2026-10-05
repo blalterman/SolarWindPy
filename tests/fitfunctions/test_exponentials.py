@@ -1,6 +1,7 @@
 """Tests for exponential fit functions."""
 
 import inspect
+import warnings
 import numpy as np
 import pytest
 from scipy.optimize import OptimizeWarning, curve_fit
@@ -194,7 +195,9 @@ def test_make_fit_insufficient_data():
 def test_exponential_cdf_fits_one_point():
     """ExponentialCDF has one free parameter, so one point suffices to fit it.
 
-    The point (1, 1 - e^-0.8) with y0 = 1 fixes c = 0.8.
+    The point (1, 1 - e^-0.8) with y0 = 1 fixes c = 0.8. One point has no
+    spread, so R² is undefined: ``rsq`` is NaN, per its docstring, and neither
+    the fit nor ``rsq`` divides by zero.
 
     ON FAILURE: the code is wrong.
     """
@@ -205,10 +208,15 @@ def test_exponential_cdf_fits_one_point():
     # says so with scipy's OptimizeWarning.
     with pytest.warns(
         OptimizeWarning, match="Covariance of the parameters could not be estimated"
-    ):
+    ) as record:
         assert obj.make_fit() is None
+    assert not [w for w in record if issubclass(w.category, RuntimeWarning)]
     # One point leaves the optimizer's own xtol (1e-8) as the accuracy limit.
     assert obj.popt["c"] == pytest.approx(0.8, rel=1e-6, abs=0)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert np.isnan(obj.rsq)
 
 
 def test_exponential_numerical_stability():
