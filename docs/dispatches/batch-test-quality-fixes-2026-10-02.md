@@ -60,8 +60,17 @@ OWNS: tests/core/test_plasma.py
 Add a low dv/w hand case for `Plasma.nuc`, expected values computed in the test from
 Hernández & Marsch (1985), Eqs. 18 and 23 (cited in the `nuc` docstring). Add cases for
 `sound_speed`/`cs` from cs = sqrt(gamma p / rho), `heat_flux` from its docstring formula, and
-the multi-species ordering in `specific_entropy` and `estimate_electrons`. `Wk` waits for the
-author's definition and source; report it rather than asserting the code's output.
+the multi-species ordering in `specific_entropy` and `estimate_electrons`. `Wk` is defined, not
+derived: W_K,s = ½ ρ_s v_s³ per species, with v_s the species speed; no citation is needed.
+Add hand cases for one species and for a species sum.
+
+Author decisions:
+
+- A species sum (`"a+p1"`) is a partial sum: a NaN row in one species leaves the other
+  species' contribution, it does not make the sum NaN.
+- Since `Vector.project` returns NaN on rows missing from either vector, add a hand case
+  where a missing `b` row gives NaN in `heat_flux` and `vdf_ratio`.
+
 Control: the coefficient change 2.0 → 3.0 in `nuc` now fails a test. [245]
 
 ### quantities-and-vector
