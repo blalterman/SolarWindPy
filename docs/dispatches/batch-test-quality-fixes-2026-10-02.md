@@ -166,11 +166,21 @@ and filling any one of the 15 blank cells fails a test.
 
 ### dev-extras-and-coverage-figure
 
-OWNS: pyproject.toml, CLAUDE.md
+OWNS: pyproject.toml, CLAUDE.md, .claude/docs/ATTRIBUTION.md, .pre-commit-config.yaml, .claude/docs/DEVELOPMENT.md, .claude/docs/MAINTENANCE.md, .github/PULL_REQUEST_TEMPLATE.md, .gitmessage
 
-Remove grimp, pydeps, radon, wily, deptry, pytest-deadfixtures, and interrogate from the `dev`
-extra; set the coverage figure in `CLAUDE.md` from a fresh measurement without restating the
-hook's threshold number.
+Runs after `hook-and-alias-tests` merges. Remove grimp, pydeps, radon, wily, deptry,
+pytest-deadfixtures, and interrogate from the `dev` extra; set the coverage figure in
+`CLAUDE.md` from a fresh measurement without restating the hook's threshold number.
+
+Author decision: retire `.claude/docs/ATTRIBUTION.md`. The `Co-Authored-By` trailer is the
+attribution for AI-written commits; there is no "Generated with Claude Code" commit line.
+Delete the file and the echo-only `attribution-reminder` hook in `.pre-commit-config.yaml`.
+`CLAUDE.md` keeps the rule in its Conventions list, rewritten: AI-written commits carry the
+`Co-Authored-By` trailer; external code records URL, license, and modifications in a comment;
+when provenance is unclear, reimplement. Drop `ATTRIBUTION.md` from the "Further
+documentation" list, and repoint or remove the references in `DEVELOPMENT.md`,
+`MAINTENANCE.md`, the PR template, and `.gitmessage`. Control: `git grep -n ATTRIBUTION.md`
+outside `docs/dispatches/` returns nothing.
 
 ## Long-running units
 
