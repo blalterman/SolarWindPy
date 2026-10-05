@@ -192,6 +192,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of these models ("Residuals are not finite in the initial point"). `HingeMax` has no
   fallback start yet: with `p0` `None`, its fit raises `NotImplementedError` (returned
   under `return_exception=True`).
+- `GaussianLn.p0` estimates in ln x, the space of its model: `m` and `s` are the
+  y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).
+  It previously returned the logs of the mean and variance of `x` and of the peak, which
+  match none of the model's parameters. `p0` is `None` when any used `x` is not positive.
 - The Gaussian fit functions (`Gaussian`, `GaussianNormalized`, `GaussianLn` and the
   composite Gaussian-plus-step models) return `p0 = None` when the estimated width is
   under half the smallest spacing between distinct `x`, including all the weight at one

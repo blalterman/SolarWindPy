@@ -249,34 +249,33 @@ class GaussianLn(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[ln(mu), ln(sigma), ln(A)]``, or None.
+        r"""Return initial guesses ``[m, s, A]`` for the fit, or None.
 
-        ``mu`` and ``sigma`` are taken from the mean and variance of ``x``
-        weighted by ``y``, and ``A`` from the largest ``y``. A logarithm needs
-        a positive argument, so ``p0`` is None when there is no weighted
-        mean or variance (as in :attr:`Gaussian.p0`), or when the mean or the
-        largest ``y`` is not positive, or the variance is zero.
+        The model is a Gaussian in :math:`\ln x`, so the guess is estimated in
+        :math:`\ln x`: ``m`` and ``s`` are the mean and standard deviation of
+        :math:`\ln x` weighted by ``y``, and ``A`` is the largest ``y`` (``A``
+        multiplies the model directly and is not logged). ``p0`` is None when
+        any used ``x`` is not positive (no logarithm), or when the weighted
+        moments of :math:`\ln x` give no estimate, under the same rules as
+        :attr:`Gaussian.p0` applied to :math:`\ln x`.
         """
         self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
 
-        moments = _weighted_moments(self, x, y)
-        if moments is None:
-            return None
-        mean, std = moments
-
-        peak = y.max()
-
-        if not (mean > 0 and std > 0 and peak > 0):
+        if not np.all(x > 0):
             self.logger.warning(
-                f"Weighted mean {mean}, variance {std} or peak {peak} is not "
-                "positive, so it has no logarithm.\nReturning None."
+                f"{np.sum(x <= 0)} used x are not positive, so ln x is undefined."
+                "\nReturning None."
             )
             return None
 
-        p0 = [mean, std, peak]
-        p0 = [np.log(x) for x in p0]
+        moments = _weighted_moments(self, np.log(x), y)
+        if moments is None:
+            return None
+        m, var = moments
+
+        p0 = [m, np.sqrt(var), y.max()]
         return p0
 
     @property

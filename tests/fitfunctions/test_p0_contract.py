@@ -165,6 +165,25 @@ def test_gaussian_width_must_reach_half_the_x_spacing(peak, resolved):
         assert p0 is None, p0
 
 
+def test_gaussianln_guess_recovers_the_model_parameters():
+    """On data from the model with m = ln 100, s = 0.3, A = 10, ``p0`` is (m, s, A).
+
+    x is 201 points evenly spaced in ln x from ln 10 to ln 1000, symmetric
+    about ln 100 and including x = 100, so the y-weighted mean of ln x is m and
+    the peak is A. The grid step (0.023) is far below s and the range spans
+    +-7.7 s, so the discrete weighted standard deviation equals s to well
+    under 1e-6.
+
+    ON FAILURE: the code is wrong, unless the author changed the estimator.
+    """
+    m, s, A = np.log(100.0), 0.3, 10.0
+    x = np.logspace(1, 3, 201)
+    y = A * np.exp(-0.5 * ((np.log(x) - m) / s) ** 2)
+    p0 = GaussianLn(x, y).p0
+    # rel=1e-6: discretisation and truncation errors are far smaller.
+    assert p0 == pytest.approx([m, s, A], rel=1e-6, abs=0), p0
+
+
 @pytest.mark.parametrize(
     "x, y",
     [
@@ -414,13 +433,14 @@ NORMAL = [
         [2.0, S, 2 * np.sqrt(np.pi)],
         id="GaussianNormalized",
     ),
-    # Logs of mean 2, variance 0.5 and peak 2.
+    # ln x = [0, 1, 2] weighted by [1, 2, 1]: m = 1, s = sqrt(0.5), and A is
+    # the peak y, 2, not logged.
     _case(
         GaussianLn,
-        [1.0, 2, 3],
+        np.exp([0.0, 1, 2]),
         [1.0, 2, 1],
         {},
-        [np.log(2), np.log(0.5), np.log(2)],
+        [1.0, S, 2.0],
         id="GaussianLn",
     ),
     # x0 = midpoint 2; median y above is 2, below is 5, so y1 = 3.

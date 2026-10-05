@@ -82,10 +82,11 @@ def test_p0_estimation(cls, params):
         )
         lnx = np.log(x)
         y = params["A"] * np.exp(-0.5 * ((lnx - params["m"]) / params["s"]) ** 2)
-        mean = (x * y).sum() / y.sum()
-        std = ((x - mean) ** 2 * y).sum() / y.sum()
-        peak = y.max()
-        expected = [np.log(mean), np.log(std), np.log(peak)]
+        # Estimated in ln x: weighted mean and standard deviation of ln x, and
+        # the peak y unlogged. Hand and recovery cases: test_p0_contract.py.
+        m = (lnx * y).sum() / y.sum()
+        s = np.sqrt(((lnx - m) ** 2 * y).sum() / y.sum())
+        expected = [m, s, y.max()]
     obj = cls(x, y)
     assert np.allclose(obj.p0, expected)
 
