@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+g69461d741 documentation</title>
+  <title>solarwindpy.core.ions &mdash; SolarWindPy 0.1.dev1+gaa0d66f72 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e395b1cf"></script>
+      <script src="../../../_static/documentation_options.js?v=fdc93ddd"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -373,20 +373,24 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        Create a proton ion from measurement data:</span>
+<span class="sd">        Create a proton ion from the example plasma's measurement data:</span>
 
-<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">        ...     ('n', '', 'p1'),</span>
-<span class="sd">        ...     ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),</span>
-<span class="sd">        ...     ('w', 'par', 'p1'), ('w', 'per', 'p1')</span>
-<span class="sd">        ... ], names=['M', 'C', 'S'])</span>
-<span class="sd">        &gt;&gt;&gt; df = pd.DataFrame(np.random.rand(2, 6), columns=columns)</span>
-<span class="sd">        &gt;&gt;&gt; proton_data = df.xs('p1', level='S', axis=1)</span>
+<span class="sd">        &gt;&gt;&gt; import solarwindpy as swp</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.core.ions import Ion</span>
+<span class="sd">        &gt;&gt;&gt; plasma = swp.examples.load_plasma()</span>
+<span class="sd">        &gt;&gt;&gt; proton_data = plasma.data.xs('p1', level='S', axis=1)</span>
 <span class="sd">        &gt;&gt;&gt; proton = Ion(proton_data, 'p1')</span>
 <span class="sd">        &gt;&gt;&gt; proton.species</span>
 <span class="sd">        'p1'</span>
+<span class="sd">        &gt;&gt;&gt; proton.n.tolist()</span>
+<span class="sd">        [1.0, 2.0, 3.0]</span>
+<span class="sd">        &gt;&gt;&gt; proton.v.mag.round(2).tolist()</span>
+<span class="sd">        [458.26, 700.0, 1044.03]</span>
+
+<span class="sd">        It matches the proton ion the plasma builds itself:</span>
+
+<span class="sd">        &gt;&gt;&gt; proton == plasma.p1</span>
+<span class="sd">        True</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_species</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>

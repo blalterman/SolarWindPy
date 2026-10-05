@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+g69461d741 documentation</title>
+  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+gaa0d66f72 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e395b1cf"></script>
+      <script src="../_static/documentation_options.js?v=fdc93ddd"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -359,23 +359,23 @@ and <span class="math notranslate nohighlight">\(T\)</span> is temperature.</p>
 - Level 1 (C): Component (‘x’, ‘y’, ‘z’, ‘par’, ‘per’, etc.)
 - Level 2 (S): Species identifier (‘p1’, ‘a’, ‘o6’, etc.)</p>
 <p class="rubric">Examples</p>
-<p>Create a plasma object from multi-species data:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create sample MultiIndex data</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">'1min'</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s1">'n'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s1">'n'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'v'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s1">'w'</span><span class="p">,</span> <span class="s1">'par'</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'w'</span><span class="p">,</span> <span class="s1">'per'</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'w'</span><span class="p">,</span> <span class="s1">'par'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'w'</span><span class="p">,</span> <span class="s1">'per'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s1">'b'</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'b'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">,</span> <span class="s1">''</span><span class="p">),</span> <span class="p">(</span><span class="s1">'b'</span><span class="p">,</span> <span class="s1">'z'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">'M'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'S'</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">))),</span>
-<span class="gp">... </span>                    <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'p1'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">)</span>  <span class="c1"># Protons and alphas</span>
+<p>Load the example plasma, which holds multi-species data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">load_plasma</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># Proton ion object</span>
 <span class="go">'Ion'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">n</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># Proton number density</span>
+<span class="go">[1.0, 2.0, 3.0]</span>
+</pre></div>
+</div>
+<p>Build a Plasma from your own DataFrame with (“M”, “C”, “S”) columns by
+passing it with the species to load; here the example’s frame stands in:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.core.plasma</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plasma</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mine</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">plasma</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mine</span><span class="o">.</span><span class="n">species</span>
+<span class="go">('a', 'e', 'p1', 'p2')</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mine</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">plasma</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 <p>Calculate plasma physics parameters:</p>
@@ -384,11 +384,13 @@ and <span class="math notranslate nohighlight">\(T\)</span> is temperature.</p>
 <span class="go">'DataFrame'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">beta</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 <span class="go">['par', 'per', 'scalar']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">beta</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"scalar"</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.3447, 4.178, 4.9268]</span>
 </pre></div>
 </div>
 <p>Identify ion species in plasma (stored sorted, as a tuple):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">species</span>
-<span class="go">('a', 'p1')</span>
+<span class="go">('a', 'e', 'p1', 'p2')</span>
 </pre></div>
 </div>
 <dl class="py method">

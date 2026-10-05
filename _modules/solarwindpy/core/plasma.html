@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g69461d741 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gaa0d66f72 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e395b1cf"></script>
+      <script src="../../../_static/documentation_options.js?v=fdc93ddd"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -396,24 +396,24 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    Create a plasma object from multi-species data:</span>
+<span class="sd">    Load the example plasma, which holds multi-species data:</span>
 
-<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
-<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; # Create sample MultiIndex data</span>
-<span class="sd">    &gt;&gt;&gt; epoch = pd.date_range('2023-01-01', periods=3, freq='1min')</span>
-<span class="sd">    &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">    ...     ('n', '', 'p1'), ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),</span>
-<span class="sd">    ...     ('n', '', 'a'), ('v', 'x', 'a'), ('v', 'y', 'a'), ('v', 'z', 'a'),</span>
-<span class="sd">    ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),</span>
-<span class="sd">    ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')</span>
-<span class="sd">    ... ], names=['M', 'C', 'S'])</span>
-<span class="sd">    &gt;&gt;&gt; rng = np.random.default_rng(0)</span>
-<span class="sd">    &gt;&gt;&gt; data = pd.DataFrame(rng.random((3, len(columns))),</span>
-<span class="sd">    ...                     index=epoch, columns=columns)</span>
-<span class="sd">    &gt;&gt;&gt; plasma = Plasma(data, 'p1', 'a')  # Protons and alphas</span>
+<span class="sd">    &gt;&gt;&gt; import solarwindpy as swp</span>
+<span class="sd">    &gt;&gt;&gt; plasma = swp.examples.load_plasma()</span>
 <span class="sd">    &gt;&gt;&gt; type(plasma.p1).__name__  # Proton ion object</span>
 <span class="sd">    'Ion'</span>
+<span class="sd">    &gt;&gt;&gt; plasma.p1.n.tolist()  # Proton number density</span>
+<span class="sd">    [1.0, 2.0, 3.0]</span>
+
+<span class="sd">    Build a Plasma from your own DataFrame with ("M", "C", "S") columns by</span>
+<span class="sd">    passing it with the species to load; here the example's frame stands in:</span>
+
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.core.plasma import Plasma</span>
+<span class="sd">    &gt;&gt;&gt; mine = Plasma(plasma.data, *plasma.species)</span>
+<span class="sd">    &gt;&gt;&gt; mine.species</span>
+<span class="sd">    ('a', 'e', 'p1', 'p2')</span>
+<span class="sd">    &gt;&gt;&gt; mine.data.equals(plasma.data)</span>
+<span class="sd">    True</span>
 
 <span class="sd">    Calculate plasma physics parameters:</span>
 
@@ -422,11 +422,13 @@
 <span class="sd">    'DataFrame'</span>
 <span class="sd">    &gt;&gt;&gt; beta.columns.tolist()</span>
 <span class="sd">    ['par', 'per', 'scalar']</span>
+<span class="sd">    &gt;&gt;&gt; beta.loc[:, "scalar"].round(4).tolist()</span>
+<span class="sd">    [0.3447, 4.178, 4.9268]</span>
 
 <span class="sd">    Identify ion species in plasma (stored sorted, as a tuple):</span>
 
 <span class="sd">    &gt;&gt;&gt; plasma.species</span>
-<span class="sd">    ('a', 'p1')</span>
+<span class="sd">    ('a', 'e', 'p1', 'p2')</span>
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="Plasma.__init__">

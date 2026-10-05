@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+g69461d741 documentation</title>
+  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+gaa0d66f72 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e395b1cf"></script>
+      <script src="../../../_static/documentation_options.js?v=fdc93ddd"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -360,31 +360,25 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; epoch = pd.Series({0: pd.to_datetime("1995-01-01"),</span>
-<span class="sd">        ...                    1: pd.to_datetime("2015-03-23"),</span>
-<span class="sd">        ...                    2: pd.to_datetime("2022-10-09")}, name="Epoch")</span>
-<span class="sd">        &gt;&gt;&gt; data = {("pos", "x", ""): {0: -42, 1: -22, 2: -34},</span>
-<span class="sd">        ...         ("pos", "y", ""): {0: 23, 1: 31, 2: 11},</span>
-<span class="sd">        ...         ("pos", "z", ""): {0: 35, 1: 27, 2: 49},</span>
-<span class="sd">        ...         ("v", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},</span>
-<span class="sd">        ...         ("v", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},</span>
-<span class="sd">        ...         ("v", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},</span>
-<span class="sd">        ...         ("carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},</span>
-<span class="sd">        ...         ("carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0}}</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft = pd.DataFrame.from_dict(data,</span>
-<span class="sd">        ...                                     orient="columns",</span>
-<span class="sd">        ...                                     dtype=np.float64)</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft.index = epoch</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft.columns.names = ["M", "C", "S"]</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft = spacecraft.xs("", axis=1, level="S")</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft  # doctest: +NORMALIZE_WHITESPACE</span>
-<span class="sd">        M            pos                 v            carr</span>
-<span class="sd">        C              x     y     z     x     y    z  lat   lon</span>
-<span class="sd">        Epoch</span>
-<span class="sd">        1995-01-01 -42.0  23.0  35.0   9.0 -80.0 -0.5 -2.0 -26.0</span>
-<span class="sd">        2015-03-23 -22.0  31.0  27.0  10.0 -70.0  0.5 -1.0 -36.0</span>
-<span class="sd">        2022-10-09 -34.0  11.0  49.0   8.0 -90.0  1.5  3.0 -16.0</span>
-<span class="sd">        &gt;&gt;&gt; spacecraft = Spacecraft(spacecraft, "PSP", "HCI")</span>
+<span class="sd">        Build a spacecraft from the example Parker Solar Probe trajectory:</span>
+
+<span class="sd">        &gt;&gt;&gt; import solarwindpy as swp</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.core.spacecraft import Spacecraft</span>
+<span class="sd">        &gt;&gt;&gt; data = swp.examples.load_plasma().spacecraft.data</span>
+<span class="sd">        &gt;&gt;&gt; data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">        [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),</span>
+<span class="sd">         ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]</span>
+<span class="sd">        &gt;&gt;&gt; times = data.index.strftime("%Y-%m-%d %H:%M:%S.%f")</span>
+<span class="sd">        &gt;&gt;&gt; times.tolist()  # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">        ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',</span>
+<span class="sd">         '2022-10-09 01:47:01.234560']</span>
+<span class="sd">        &gt;&gt;&gt; spacecraft = Spacecraft(data, "psp", "HCI")</span>
+<span class="sd">        &gt;&gt;&gt; spacecraft.name, spacecraft.frame</span>
+<span class="sd">        ('PSP', 'HCI')</span>
+<span class="sd">        &gt;&gt;&gt; spacecraft.position.data.loc[:, "x"].tolist()</span>
+<span class="sd">        [-42.0, -22.0, -34.0]</span>
+<span class="sd">        &gt;&gt;&gt; spacecraft.velocity.data.loc[:, "y"].tolist()</span>
+<span class="sd">        [-80.0, -70.0, -90.0]</span>
 <span class="sd">        """</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Spacecraft</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_frame_name</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
