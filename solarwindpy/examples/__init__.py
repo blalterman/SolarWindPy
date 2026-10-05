@@ -67,8 +67,10 @@ def load_plasma():
     >>> plasma = swp.examples.load_plasma()
     >>> plasma.species
     ('a', 'e', 'p1', 'p2')
-    >>> [str(t) for t in plasma.epoch]
-    ['1995-01-01 12:35:00', '2022-03-23 19:29:09', '2022-10-09 01:47:01.234560']
+    >>> times = plasma.epoch.strftime("%Y-%m-%d %H:%M:%S.%f")
+    >>> times.tolist()  # doctest: +NORMALIZE_WHITESPACE
+    ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',
+     '2022-10-09 01:47:01.234560']
     >>> plasma.data.loc[:, ("n", "", "p1")].tolist()
     [1.0, 2.0, 3.0]
     >>> plasma.spacecraft.name, plasma.spacecraft.frame

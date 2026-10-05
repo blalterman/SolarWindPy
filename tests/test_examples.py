@@ -37,8 +37,9 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
     The copy is the ``solarwindpy`` directory without the rest of the
     repository, imported from an empty working directory, so a loader that
     reads from ``tests/`` or any path outside the package, found relative to
-    the package file or the working directory, fails here. Whether a wheel ships the CSVs is setuptools' part:
-    ``include_package_data`` ships every git-tracked file in the package.
+    the package file or the working directory, fails here. A wheel ships
+    the CSVs through the ``[tool.setuptools.package-data]`` glob
+    ``core/data/*.csv`` in pyproject.toml; this test does not build one.
 
     ON FAILURE: the code is wrong; the loader must read its CSVs from the
     package (``importlib.resources``), not from a path outside it.
@@ -76,9 +77,9 @@ def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
     plasma = load_plasma()
 
     assert plasma.species == ("a", "e", "p1", "p2")
-    assert [str(t) for t in plasma.epoch] == [
-        "1995-01-01 12:35:00",
-        "2022-03-23 19:29:09",
+    assert plasma.epoch.strftime("%Y-%m-%d %H:%M:%S.%f").tolist() == [
+        "1995-01-01 12:35:00.000000",
+        "2022-03-23 19:29:09.000000",
         "2022-10-09 01:47:01.234560",
     ]
     assert plasma.data.loc[:, ("n", "", "p1")].tolist() == [1.0, 2.0, 3.0]

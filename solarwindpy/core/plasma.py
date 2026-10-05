@@ -225,8 +225,10 @@ class Plasma(base.Base):
         --------
         >>> import solarwindpy as swp
         >>> plasma = swp.examples.load_plasma()
-        >>> [str(t) for t in plasma.epoch]
-        ['1995-01-01 12:35:00', '2022-03-23 19:29:09', '2022-10-09 01:47:01.234560']
+        >>> times = plasma.epoch.strftime("%Y-%m-%d %H:%M:%S.%f")
+        >>> times.tolist()  # doctest: +NORMALIZE_WHITESPACE
+        ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',
+         '2022-10-09 01:47:01.234560']
         >>> plasma.epoch.name
         'epoch'
         """
@@ -585,6 +587,9 @@ class Plasma(base.Base):
         >>> import solarwindpy as swp
         >>> plasma = swp.examples.load_plasma()
         >>> psp = plasma.spacecraft
+
+        Setting ``None`` logs "No spacecraft data passed to Plasma" at INFO:
+
         >>> plasma.set_spacecraft(None)
         >>> plasma.spacecraft is None
         True
