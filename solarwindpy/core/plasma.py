@@ -1681,12 +1681,27 @@ species: {}
         return electrons
 
     def heat_flux(self, *species):
-        r"""Calculate the parallel heat flux.
+        r"""Calculate the parallel-parallel component of the heat flux tensor.
 
-            :math:`Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)`
+        For each species :math:`s` this is the third moment of its velocity
+        distribution along the magnetic field, taken in the center-of-mass
+        frame of the requested species,
 
-        where :math:`v` is each species' velocity in the Center-of-Mass frame and
-        :math:`w` is each species parallel thermal speed.
+            :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,
+
+        where :math:`c_\parallel` is the velocity component along
+        :math:`\hat{b}` relative to the center of mass. For a drifting
+        bi-Maxwellian with :math:`w^2 = 2kT/m` this evaluates to
+
+            :math:`Q_{\parallel,s} = \rho_s (U_s^3 + \frac{3}{2} U_s w_{\parallel,s}^2)`,
+
+        where :math:`U_s` is the species' drift along :math:`\hat{b}` in the
+        center-of-mass frame and :math:`w_{\parallel,s}` its parallel thermal
+        speed.
+
+        This is the parallel-parallel part of the energy flux only, not the
+        total energy flux along the field: the perpendicular thermal speed
+        does not enter.
 
         Parameters
         ----------

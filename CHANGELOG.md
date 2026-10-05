@@ -176,6 +176,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an x-intercept of -inf or NaN, and a NaN initial guess made `make_fit` fail.
 - `Hist2D.plot_edges` documents its `xlim` and `ylim` keywords as inclusive: a vertex
   exactly on a limit is kept. Behaviour is unchanged.
+- `Plasma.heat_flux` documents its quantity precisely: the parallel-parallel component of
+  the heat flux tensor in the center-of-mass frame of the requested species,
+  rho (U^3 + 3/2 U w_par^2) for a drifting bi-Maxwellian. It is not the total energy
+  flux along the field. Behaviour is unchanged.
 
 ### Added
 
