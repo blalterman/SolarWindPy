@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g595eebf34 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0ce898b7"></script>
+      <script src="../../../_static/documentation_options.js?v=284e34a8"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -356,6 +356,7 @@
 <span class="n">_InitialGuessInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_InitialGuessInfo"</span><span class="p">,</span> <span class="s2">"p0,bounds"</span><span class="p">)</span>
 <span class="n">_ChisqPerDegreeOfFreedom</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_ChisqPerDegreeOfFreedom"</span><span class="p">,</span> <span class="s2">"linear,robust"</span><span class="p">)</span>
 <span class="n">_FitBounds</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_FitBounds"</span><span class="p">,</span> <span class="s2">"lower,upper"</span><span class="p">)</span>
+<span class="n">_INSUFFICIENT_DATA</span> <span class="o">=</span> <span class="s2">"There is insufficient data to fit the model."</span>
 
 
 <div class="viewcode-block" id="FitFunctionError">
@@ -578,7 +579,33 @@
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The initial guess for the FitFunction."""</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The initial guess for the FitFunction, or None.</span>
+
+<span class="sd">        This docstring states the contract every subclass's ``p0`` follows.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of float or None</span>
+<span class="sd">            One finite guess per parameter, in :attr:`argnames` order. When</span>
+<span class="sd">            the data make a guess impossible (an empty region, an undefined</span>
+<span class="sd">            slope, a zero total weight, and so on), ``p0`` returns ``None``</span>
+<span class="sd">            rather than a guess holding NaN or infinity, and :meth:`make_fit`</span>
+<span class="sd">            starts from :meth:`fallback_p0`: by default the feasible start</span>
+<span class="sd">            for the bounds (ones when unbounded, as</span>
+<span class="sd">            :func:`scipy.optimize.curve_fit` does), unless the class</span>
+<span class="sd">            overrides it.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
+<span class="sd">            If fewer observations are used than the model has parameters.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        :meth:`make_fit` rejects a guess holding NaN or infinity, whether it</span>
+<span class="sd">        comes from ``p0`` or from the caller's ``p0=``, with a ``ValueError``</span>
+<span class="sd">        naming the class and each offending parameter.</span>
+<span class="sd">        """</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
@@ -611,7 +638,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Degrees of freedom in the fit."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fit_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -712,10 +739,77 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Ensure that we can fit the data before doing any computations."""</span>
         <span class="n">chk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nobs</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">chk</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There is insufficient data to fit the model."</span>
-            <span class="k">raise</span> <span class="n">InsufficientDataError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InsufficientDataError</span><span class="p">(</span><span class="n">_INSUFFICIENT_DATA</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_require_sufficient_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise :class:`InsufficientDataError` unless the data can be fit.</span>
+
+<span class="sd">        The explicit form of ``assert self.sufficient_data``, which ``python</span>
+<span class="sd">        -O`` removes. It also covers a subclass whose :attr:`sufficient_data`</span>
+<span class="sd">        returns False instead of raising.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InsufficientDataError</span><span class="p">(</span><span class="n">_INSUFFICIENT_DATA</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FitFunction.fallback_p0">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.fallback_p0">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start :meth:`make_fit` uses when :attr:`p0` is None.</span>
+
+<span class="sd">        This is the one hook for a class-specific fallback start: a subclass</span>
+<span class="sd">        whose model is singular at the default overrides it. The default is</span>
+<span class="sd">        the feasible start :func:`scipy.optimize.curve_fit` chooses.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bounds : 2-tuple or dict, optional</span>
+<span class="sd">            As accepted by :meth:`make_fit`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            One value per parameter: ones when unbounded, otherwise a point</span>
+<span class="sd">            inside the bounds.</span>
+<span class="sd">        """</span>
+        <span class="c1"># The fit parameters are the function's arguments after x.</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unable to determine number of fit parameters."</span><span class="p">)</span>
+        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prepare_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds_array</span><span class="p">(</span><span class="n">bounds</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_initialize_feasible</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bounds_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Convert ``bounds`` stored as ``{name: (lower, upper)}`` to an array."""</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># Monkey patch to work with bounds being stored as</span>
+            <span class="c1"># dict for TeX_info. (20201202)</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">]</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">bounds</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reject_nonfinite_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p0</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise ``ValueError`` naming each parameter whose guess is NaN or inf.</span>
+
+<span class="sd">        Without this, SciPy reports a NaN guess as "Initial guess is outside</span>
+<span class="sd">        of provided bounds", which names neither the class nor the parameter.</span>
+<span class="sd">        """</span>
+        <span class="n">bad</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bad</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span> <span class="o">==</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">else</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"p0[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">bad</span><span class="p">)</span> <span class="k">if</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> initial guess is not finite: </span><span class="si">{</span><span class="n">detail</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="s2">"A p0 that cannot make a guess returns None, and the fit then "</span>
+            <span class="s2">"starts from fallback_p0()."</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -964,26 +1058,16 @@
         <span class="n">f_scale</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"f_scale"</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
         <span class="n">jac</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"jac"</span><span class="p">,</span> <span class="s2">"2-point"</span><span class="p">)</span>
 
-        <span class="c1"># Adapted from `curve_fit` line 704 (20200527)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds_array</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+
+        <span class="c1"># Adapted from `curve_fit` lines 704 and 715 (20200527)</span>
         <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># The fit parameters are the function's arguments after x.</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unable to determine number of fit parameters."</span><span class="p">)</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fallback_p0</span><span class="p">(</span><span class="n">bounds</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reject_nonfinite_p0</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="c1"># Monkey patch to work with bounds being stored as</span>
-            <span class="c1"># dict for TeX_info. (20201202)</span>
-            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">]</span>
-            <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-
-        <span class="c1"># Copied from `curve_fit` line 715 (20200527)</span>
-        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prepare_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">p0</span> <span class="o">=</span> <span class="n">_initialize_feasible</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
+        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">prepare_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s2">"args"</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -1127,10 +1211,8 @@
 <span class="sd">                ============= ======================================</span>
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>  <span class="c1"># Check we have enough data to fit.</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">InsufficientDataError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
-                <span class="n">e</span> <span class="o">=</span> <span class="n">InsufficientDataError</span><span class="p">(</span><span class="s2">"Insufficient data to fit the model"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">InsufficientDataError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">return_exception</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">e</span>
             <span class="k">else</span><span class="p">:</span>

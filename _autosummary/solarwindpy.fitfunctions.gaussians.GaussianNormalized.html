@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians.GaussianNormalized &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians.GaussianNormalized &mdash; SolarWindPy 0.1.dev1+g595eebf34 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0ce898b7"></script>
+      <script src="../_static/documentation_options.js?v=284e34a8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -390,7 +390,9 @@ recover those parameters:</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0" title="Link to this definition"></a></dt>
-<dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[mu,</span> <span class="pre">sigma,</span> <span class="pre">n]</span></code> for the fit.</p>
+<dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[mu,</span> <span class="pre">sigma,</span> <span class="pre">n]</span></code> for the fit, or None.</p>
+<p>Estimated as in <a class="reference internal" href="solarwindpy.fitfunctions.gaussians.Gaussian.html#solarwindpy.fitfunctions.gaussians.Gaussian.p0" title="solarwindpy.fitfunctions.gaussians.Gaussian.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Gaussian.p0</span></code></a>, with <code class="docutils literal notranslate"><span class="pre">n</span></code> the area of a
+Gaussian of that width and peak. None under the same conditions.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -462,6 +464,30 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianNormalized.dof">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.dof" title="Link to this definition"></a></dt>
 <dd><p>Degrees of freedom in the fit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianNormalized.fallback_p0">
+<span class="sig-name descname"><span class="pre">fallback_p0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-inf,</span> <span class="pre">inf)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.fallback_p0" title="Link to this definition"></a></dt>
+<dd><p>The start <a class="reference internal" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit" title="solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a> uses when <a class="reference internal" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0" title="solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is None.</p>
+<p>This is the one hook for a class-specific fallback start: a subclass
+whose model is singular at the default overrides it. The default is
+the feasible start <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html#scipy.optimize.curve_fit" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit()</span></code></a> chooses.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>bounds</strong><span class="classifier">2-tuple or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>As accepted by <a class="reference internal" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit" title="solarwindpy.fitfunctions.gaussians.GaussianNormalized.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>One value per parameter: ones when unbounded, otherwise a point
+inside the bounds.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

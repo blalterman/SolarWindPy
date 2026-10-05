@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.heaviside &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
+  <title>solarwindpy.fitfunctions.heaviside &mdash; SolarWindPy 0.1.dev1+g595eebf34 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0ce898b7"></script>
+      <script src="../../../_static/documentation_options.js?v=284e34a8"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -437,21 +437,27 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
 
-<span class="sd">        The initial guess is derived from:</span>
-<span class="sd">        - User-provided guesses if available</span>
-<span class="sd">        - Otherwise, heuristic estimates from the data</span>
+<span class="sd">        The initial guess uses the user-provided guesses if available.</span>
+<span class="sd">        Otherwise it is estimated from the data: ``x0`` is the midpoint of</span>
+<span class="sd">        the x range, ``y0`` the median ``y`` above ``x0`` and ``y1`` the</span>
+<span class="sd">        median ``y`` below ``x0`` less ``y0``.</span>
+
+<span class="sd">        Without both ``guess_y0`` and ``guess_y1``, the levels need data on</span>
+<span class="sd">        each side of ``x0``. When either side is empty (all ``x`` equal, or a</span>
+<span class="sd">        ``guess_x0`` outside the data), there is no estimate and ``p0`` is</span>
+<span class="sd">        None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
+<span class="sd">        list or None</span>
 <span class="sd">            Initial guesses as [x0, y0, y1].</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
 <span class="sd">            If insufficient data for estimation.</span>
 <span class="sd">        """</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
@@ -468,12 +474,15 @@
             <span class="n">y1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_y1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Estimate y0 and y1 from data above and below x0</span>
-            <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">x0</span><span class="p">])</span>  <span class="c1"># Value after step</span>
-            <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">x0</span><span class="p">])</span> <span class="o">-</span> <span class="n">y0</span>  <span class="c1"># Step height (y_left - y0)</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y0</span><span class="p">):</span>
-                <span class="n">y0</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y1</span><span class="p">):</span>
-                <span class="n">y1</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">above</span><span class="p">,</span> <span class="n">below</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">x0</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">above</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="n">below</span><span class="o">.</span><span class="n">any</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">above</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> points above and </span><span class="si">{</span><span class="n">below</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> below "</span>
+                    <span class="sa">f</span><span class="s2">"x0 = </span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">, so no step levels.</span><span class="se">\n</span><span class="s2">Returning None."</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">above</span><span class="p">])</span>  <span class="c1"># Value after step</span>
+            <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">below</span><span class="p">])</span> <span class="o">-</span> <span class="n">y0</span>  <span class="c1"># Step height (y_left - y0)</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">y1</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>

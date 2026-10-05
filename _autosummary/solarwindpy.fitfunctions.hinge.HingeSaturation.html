@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge.HingeSaturation &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge.HingeSaturation &mdash; SolarWindPy 0.1.dev1+g595eebf34 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0ce898b7"></script>
+      <script src="../_static/documentation_options.js?v=284e34a8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -450,16 +450,44 @@ recover those parameters:</p>
 - <code class="docutils literal notranslate"><span class="pre">saturation_guess</span></code> for (xh, yh)
 - Estimated x1 from linear fit to rising region, or data minimum
 - Median slope in plateau region for m2</p>
+<p><code class="docutils literal notranslate"><span class="pre">m2</span></code> is undefined, and <code class="docutils literal notranslate"><span class="pre">p0</span></code> is None, when the plateau region
+has repeated <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></dt><dd><p>Initial guesses as [xh, yh, x1, m2].</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>Initial guesses as [xh, yh, x1, m2].</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AssertionError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AssertionError</span></code></a></dt><dd><p>If insufficient data for estimation.</p>
+<dt><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html#solarwindpy.fitfunctions.core.InsufficientDataError" title="solarwindpy.fitfunctions.core.InsufficientDataError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InsufficientDataError</span></code></a></dt><dd><p>If insufficient data for estimation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeSaturation.fallback_p0">
+<span class="sig-name descname"><span class="pre">fallback_p0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-inf,</span> <span class="pre">inf)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/hinge.html#HingeSaturation.fallback_p0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeSaturation.fallback_p0" title="Link to this definition"></a></dt>
+<dd><p>The start used when <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeSaturation.p0" title="solarwindpy.fitfunctions.hinge.HingeSaturation.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is None: <code class="docutils literal notranslate"><span class="pre">[xh,</span> <span class="pre">yh,</span> <span class="pre">x1,</span> <span class="pre">m2]</span></code>.</p>
+<p>The author’s reference hinge: <span class="math notranslate nohighlight">\((x_h, y_h) = (433, 4.12)\)</span>, a
+rising line with x-intercept <span class="math notranslate nohighlight">\(x_1 = 250\)</span> (so
+<span class="math notranslate nohighlight">\(m_1 = 4.12 / 183\)</span>) and a small non-zero plateau slope
+<span class="math notranslate nohighlight">\(m_2 = 0.01\,m_1\)</span>. <code class="docutils literal notranslate"><span class="pre">bounds</span></code> is
+not used: the start is the same point whatever the bounds.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>bounds</strong><span class="classifier">2-tuple or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>As accepted by <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeSaturation.make_fit" title="solarwindpy.fitfunctions.hinge.HingeSaturation.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>One value per parameter: ones when unbounded, otherwise a point
+inside the bounds.</p>
 </dd>
 </dl>
 </dd>

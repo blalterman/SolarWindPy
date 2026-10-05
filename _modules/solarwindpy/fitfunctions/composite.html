@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.composite &mdash; SolarWindPy 0.1.dev1+ga800840b5 documentation</title>
+  <title>solarwindpy.fitfunctions.composite &mdash; SolarWindPy 0.1.dev1+g595eebf34 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0ce898b7"></script>
+      <script src="../../../_static/documentation_options.js?v=284e34a8"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -329,6 +329,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFailedError</span><span class="p">,</span> <span class="n">FitFunction</span><span class="p">,</span> <span class="n">InsufficientDataError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gaussians</span><span class="w"> </span><span class="kn">import</span> <span class="n">_weighted_moments</span>
 
 
 <div class="viewcode-block" id="GaussianPlusHeavySide">
@@ -436,10 +437,19 @@
 <span class="sd">        """</span>
         <span class="n">user_p0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"p0"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">p0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="k">if</span> <span class="n">user_p0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">user_p0</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">AssertionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">InsufficientDataError</span><span class="p">):</span>
-            <span class="c1"># The base class reports insufficient or unusable data.</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="k">if</span> <span class="n">user_p0</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">user_p0</span>
+        <span class="k">except</span> <span class="n">InsufficientDataError</span><span class="p">:</span>
+            <span class="c1"># The base class reports insufficient data.</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># No estimate: scan from the feasible default the base fit uses.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_p0</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bounds"</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="c1"># Malformed bounds: the base fit reports them, honouring</span>
+                <span class="c1"># return_exception.</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
 
         <span class="n">scan_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"absolute_sigma"</span><span class="p">}</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
@@ -527,48 +537,45 @@
 <span class="sd">        - y0 = 0, y1 = 0.8 * peak</span>
 <span class="sd">        - Gaussian parameters recalculated for x &gt; x0</span>
 
+<span class="sd">        There is no estimate, and ``p0`` is None, when the weighted mean</span>
+<span class="sd">        and variance are undefined for all the data or for the data above</span>
+<span class="sd">        ``x0`` (no such data, weights summing to zero, a negative variance,</span>
+<span class="sd">        or a width under half the smallest spacing of distinct ``x``).</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
+<span class="sd">        list or None</span>
 <span class="sd">            Initial guesses as [x0, y0, y1, mu, sigma, A].</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
 <span class="sd">            If insufficient data for estimation.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        """</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">moments</span> <span class="o">=</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">moments</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
-                <span class="s2">"which has no identity"</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">"There is no maximum of a zero-size array. "</span>
-                    <span class="s2">"Please check input data."</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">raise</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="n">x0</span> <span class="o">=</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">mean</span>
         <span class="n">y1</span> <span class="o">=</span> <span class="mf">0.8</span> <span class="o">*</span> <span class="n">peak</span>
 
         <span class="n">tk</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">x0</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">moments</span> <span class="o">=</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">moments</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">peak</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>
@@ -709,44 +716,39 @@
 <span class="sd">        - Weighted mean and std for Gaussian parameters (using x &gt; x0)</span>
 <span class="sd">        - Peak amplitude from data</span>
 
+<span class="sd">        There is no estimate, and ``p0`` is None, when the weighted mean</span>
+<span class="sd">        and variance are undefined for the data above ``x0`` (no such data,</span>
+<span class="sd">        weights summing to zero, a negative variance, or a width under half</span>
+<span class="sd">        the smallest spacing of distinct ``x``).</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
+<span class="sd">        list or None</span>
 <span class="sd">            Initial guesses as [x0, mu, sigma, A].</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
 <span class="sd">            If insufficient data for estimation.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        """</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guess_x0</span>
         <span class="n">tk</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">x0</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">moments</span> <span class="o">=</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">moments</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
-                <span class="s2">"which has no identity"</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">"There is no maximum of a zero-size array. "</span>
-                    <span class="s2">"Please check input data."</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">raise</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">peak</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>
@@ -901,48 +903,47 @@
 <span class="sd">        - Weighted mean and std for Gaussian parameters (using x &gt; x0)</span>
 <span class="sd">        - Peak amplitude from data</span>
 
+<span class="sd">        There is no estimate, and ``p0`` is None, when no data lie at or</span>
+<span class="sd">        below ``x0`` (no level for ``y1``), or when the weighted mean and</span>
+<span class="sd">        variance are undefined for the data above ``x0`` (no such data,</span>
+<span class="sd">        weights summing to zero, a negative variance, or a width under half</span>
+<span class="sd">        the smallest spacing of distinct ``x``).</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        list</span>
+<span class="sd">        list or None</span>
 <span class="sd">            Initial guesses as [x0, y1, mu, sigma, A].</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
 <span class="sd">            If insufficient data for estimation.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
 <span class="sd">        """</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sufficient_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
         <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guess_x0</span>
         <span class="n">tk</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">x0</span>
 
+        <span class="k">if</span> <span class="n">tk</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"No points at or below x0 = </span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">, so no level y1.</span><span class="se">\n</span><span class="s2">Returning None."</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">tk</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y1</span><span class="p">):</span>
-            <span class="n">y1</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">moments</span> <span class="o">=</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">moments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">moments</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">chk</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">r</span><span class="s2">"zero-size array to reduction operation maximum "</span>
-                <span class="s2">"which has no identity"</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">chk</span><span class="p">):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">"There is no maximum of a zero-size array. "</span>
-                    <span class="s2">"Please check input data."</span>
-                <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">raise</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">peak</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>
