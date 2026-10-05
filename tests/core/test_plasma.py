@@ -2383,6 +2383,8 @@ def test_nuc_drift_dependence_is_the_hernandez_marsch_rate_function():
     g1 = 0.8427007929 - 0.4151074974  # G(1), hand-worked above
     g05 = (0.5204998778 - 0.4393912895) / 0.125  # G(0.5), hand-worked above
 
+    # With both_species=True the Eq. 23 factor (1 + rho_a / rho_b) cancels in the
+    # row ratio only because both rows share the same densities.
     for both in (False, True):
         nu = p.nuc("a", "p1", both_species=both)
         # rel=1e-9: the hand values carry 10 significant digits.
@@ -2421,6 +2423,7 @@ def test_sound_speed_of_one_species_is_sqrt_gamma_p_over_rho():
     """
     p = _hand_plasma([{"p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)}], "p1")
     # rel=1e-9: the hand value carries 10 significant digits.
+    # 27.38612788 uses no physical constant (30 sqrt(5/6)); no CODATA dependence.
     assert p.sound_speed("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
     assert p.cs("p1").iloc[0] == pytest.approx(27.38612788, rel=1e-9, abs=0)
 
@@ -2476,6 +2479,7 @@ def test_Wk_of_one_species_is_half_rho_v_cubed():
         # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
         assert wk.iloc[0] == pytest.approx(expected, rel=1e-12, abs=0)
         # rel=1e-4: the hand value carries 5 significant digits.
+        # 267.62 uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
         assert wk.iloc[0] == pytest.approx(267.62, rel=1e-4, abs=0)
 
 
@@ -2544,6 +2548,7 @@ def test_heat_flux_matches_its_docstring_formula():
     assert total.name == "p1+p2"
     assert total.iloc[0] == pytest.approx(sum(expected.values()), rel=1e-10, abs=0)
     # rel=1e-9: the hand values carry 10 significant digits.
+    # They use m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
     assert each.loc[:, "p1"].iloc[0] == pytest.approx(-1.609898604, rel=1e-9, abs=0)
     assert each.loc[:, "p2"].iloc[0] == pytest.approx(2.048961859, rel=1e-9, abs=0)
     assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
@@ -2665,6 +2670,7 @@ def test_specific_entropy_per_species_and_species_sum():
         expected = pth[s] * rho[s] ** (-GAMMA) / unit
         assert each.loc[:, s].iloc[0] == pytest.approx(expected, rel=REL_ALPHA, abs=0)
     # rel=1e-9: the hand value carries 10 significant digits.
+    # It uses m_p and e from CODATA 2022 (scipy.constants, scipy 1.18.1).
     assert each.loc[:, "p1"].iloc[0] == pytest.approx(1.606644911, rel=1e-9, abs=0)
 
     expected_sum = sum(pth.values()) * sum(rho.values()) ** (-GAMMA) / unit
