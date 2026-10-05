@@ -25,9 +25,12 @@ def _weighted_moments(fitfunction, x, y):
     :math:`\sum (x - \mathrm{mean})^2 y / \sum y`. Both are undefined when
     ``x`` is empty or ``y`` sums to zero, they are not finite when a sum
     overflows (finite data near the float maximum), and a negative variance
-    (possible when some weights are negative) has no square root. In those
-    cases, the reason is logged and None returned, so the caller's ``p0`` can
-    return None. A zero variance (all weight at one ``x``) is returned as is.
+    (possible when some weights are negative) has no square root. A width
+    (the square root of the variance) under half the smallest spacing between
+    distinct ``x``, including any width when there is only one distinct
+    ``x``, is narrower than the samples can resolve, as when all the weight
+    sits at one ``x``. In those cases, the reason is logged and None
+    returned, so the caller's ``p0`` can return None.
 
     Parameters
     ----------
@@ -63,6 +66,15 @@ def _weighted_moments(fitfunction, x, y):
         )
         return None
 
+    distinct = np.unique(x)
+    half_spacing = 0.5 * np.diff(distinct).min() if distinct.size > 1 else np.inf
+    if np.sqrt(var) < half_spacing:
+        fitfunction.logger.warning(
+            f"Width {np.sqrt(var)} is under half the smallest x spacing "
+            f"({half_spacing}), so the samples cannot resolve it.\nReturning None."
+        )
+        return None
+
     return mean, var
 
 
@@ -93,8 +105,10 @@ class Gaussian(FitFunction):
 
         ``mu`` and ``sigma`` are the mean and standard deviation of ``x``
         weighted by ``y``, and ``A`` is the largest ``y``. When ``y`` sums to
-        zero or the weighted variance is negative, there is no estimate
-        and ``p0`` is None.
+        zero, the weighted variance is negative, or the width ``sigma`` is
+        under half the smallest spacing between distinct ``x`` (narrower than
+        the samples resolve, as when all the weight sits at one ``x``), there
+        is no estimate and ``p0`` is None.
         """
         self._require_sufficient_data()
 

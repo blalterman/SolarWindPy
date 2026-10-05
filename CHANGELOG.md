@@ -184,6 +184,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `GaussianTimesHeavySidePlusHeavySide.p0` no longer substitutes 0 for `y1`; both return
   `None`. `GaussianTimesHeavySide` with no data above `guess_x0` no longer raises
   `ValueError: There is no maximum of a zero-size array`.
+- The Gaussian fit functions (`Gaussian`, `GaussianNormalized`, `GaussianLn` and the
+  composite Gaussian-plus-step models) return `p0 = None` when the estimated width is
+  under half the smallest spacing between distinct `x`, including all the weight at one
+  `x`. That width cannot be resolved by the samples; a zero width previously made
+  `make_fit` fail with "Residuals are not finite in the initial point".
 - `make_fit` rejects an initial guess holding NaN or infinity, from `p0` or the caller's
   `p0=`, with `ValueError: <Class> initial guess is not finite: <name>=<value>. A p0 that
   cannot make a guess returns None, and the fit then starts from the feasible default.`

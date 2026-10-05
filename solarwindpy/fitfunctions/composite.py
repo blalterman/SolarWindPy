@@ -227,8 +227,8 @@ class GaussianPlusHeavySide(FitFunction):
 
         There is no estimate, and ``p0`` is None, when the weighted mean
         and variance are undefined for all the data or for the data above
-        ``x0`` (no such data, weights summing to zero, or a negative
-        variance).
+        ``x0`` (no such data, weights summing to zero, a negative variance,
+        or a width under half the smallest spacing of distinct ``x``).
 
         Returns
         -------
@@ -400,7 +400,8 @@ class GaussianTimesHeavySide(FitFunction):
 
         There is no estimate, and ``p0`` is None, when the weighted mean
         and variance are undefined for the data above ``x0`` (no such data,
-        weights summing to zero, or a negative variance).
+        weights summing to zero, a negative variance, or a width under half
+        the smallest spacing of distinct ``x``).
 
         Returns
         -------
@@ -581,7 +582,8 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
         There is no estimate, and ``p0`` is None, when no data lie at or
         below ``x0`` (no level for ``y1``), or when the weighted mean and
         variance are undefined for the data above ``x0`` (no such data,
-        weights summing to zero, or a negative variance).
+        weights summing to zero, a negative variance, or a width under half
+        the smallest spacing of distinct ``x``).
 
         Returns
         -------

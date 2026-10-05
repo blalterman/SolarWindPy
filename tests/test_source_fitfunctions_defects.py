@@ -159,22 +159,28 @@ def test_gaussian_plus_heavyside_replaces_the_x0_of_a_caller_p0():
     assert lo < fit.popt["x0"] < hi
 
 
-def test_gaussian_plus_heavyside_with_a_single_x_returns_the_fit_error():
-    """All samples at one ``x``: no gap to scan, and the fit error is returned.
+def test_gaussian_plus_heavyside_with_a_single_x_starts_from_the_default():
+    """All samples at one ``x``: no width estimate, so the fit starts from ones.
 
-    With one unique ``x`` there are no gaps, so the scan has no candidate and
-    the base fit runs on the default ``p0``. Its zero-width Gaussian gives
-    non-finite residuals, which ``least_squares`` reports as ``ValueError``;
-    ``return_exception=True`` returns it instead of raising.
+    One distinct ``x`` cannot resolve any Gaussian width, so ``p0`` is None
+    rather than the zero-width guess that gave non-finite residuals. With no
+    gaps the scan has no candidate, and the fit runs from the feasible
+    default: it ends exactly as a fit given ``p0=`` ones.
 
-    ON FAILURE: the code is wrong.
+    ON FAILURE: the code is wrong, unless the author changed the zero-width
+    rule in ``_weighted_moments``.
     """
     x = np.full(20, 3.0)
-    fit = GaussianPlusHeavySide(x, np.linspace(1.0, 2.0, x.size))
+    y = np.linspace(1.0, 2.0, x.size)
+    fit = GaussianPlusHeavySide(x, y)
+    assert fit.p0 is None, fit.p0
 
-    with np.errstate(divide="ignore", invalid="ignore"):
-        result = fit.make_fit(return_exception=True)
-    assert isinstance(result, ValueError)
+    explicit = GaussianPlusHeavySide(x, y)
+    expected = explicit.make_fit(return_exception=True, p0=np.ones(6))
+    result = fit.make_fit(return_exception=True)
+    assert type(result) is type(expected), (result, expected)
+    assert str(result) == str(expected), (result, expected)
+    assert "Residuals are not finite" not in str(result), result
 
 
 # y = 2x + 1 on integer x: slope 2, intercept 1, x-intercept -1/2, all exact

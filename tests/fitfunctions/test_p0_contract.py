@@ -128,6 +128,43 @@ def test_malformed_bounds_with_no_guess_are_returned_by_the_x0_scan():
     assert isinstance(err, ValueError), err
 
 
+@pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
+def test_all_weight_at_one_x_gives_no_gaussian_guess(cls):
+    """All the weight at x = 2 means zero width: ``p0`` is None.
+
+    A zero width is under half the sample spacing (0.5), so the samples
+    cannot resolve it.
+
+    ON FAILURE: the code is wrong.
+    """
+    p0 = cls(np.array([1.0, 2, 3]), np.array([0.0, 5, 0])).p0
+    assert p0 is None, p0
+
+
+@pytest.mark.parametrize(
+    "peak, resolved",
+    [
+        # Weights [1, 5.9, 1] at x = [0, 1, 2]: variance 2/7.9, width 0.5032.
+        pytest.param(5.9, True, id="width-just-above-half-spacing"),
+        # Weights [1, 6.1, 1]: variance 2/8.1, width 0.4969.
+        pytest.param(6.1, False, id="width-just-below-half-spacing"),
+    ],
+)
+def test_gaussian_width_must_reach_half_the_x_spacing(peak, resolved):
+    """A width just above half the spacing (0.5) is estimated; just below is None.
+
+    ON FAILURE: the code is wrong, unless the author moved the threshold.
+    """
+    p0 = Gaussian(np.array([0.0, 1, 2]), np.array([1.0, peak, 1])).p0
+    if resolved:
+        # Hand values: mean 1, width sqrt(2 / (2 + peak)), peak; rel=1e-12 for
+        # a few float operations on exact inputs.
+        expected = [1.0, np.sqrt(2 / (2 + peak)), peak]
+        assert p0 == pytest.approx(expected, rel=1e-12, abs=0), p0
+    else:
+        assert p0 is None, p0
+
+
 @pytest.mark.parametrize(
     "x, y",
     [
@@ -332,14 +369,15 @@ NORMAL = [
     _case(
         HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {}, [2.0, 2.0, 3.0], id="Step"
     ),
-    # Weighted mean (3 + 8 + 5) / 4 = 4 gives x0 = 3 and y1 = 0.8 * 2; above x0,
-    # x = [4, 5, 6] weighted by [2, 1, 0] has mean 13/3 and variance 2/9.
+    # Weighted mean (3 + 8 + 10 + 6) / 6 = 4.5 (variance 11/12) gives x0 = 3.375
+    # and y1 = 0.8 * 2; above x0, x = [4, 5, 6] weighted by [2, 2, 1] has mean
+    # 24/5 and variance 2.8/5 = 0.56, a width 0.75 above half the spacing 0.5.
     _case(
         GaussianPlusHeavySide,
         [1.0, 2, 3, 4, 5, 6],
-        [0.0, 0, 1, 2, 1, 0],
+        [0.0, 0, 1, 2, 2, 1],
         {},
-        [3.0, 0.0, 1.6, 13 / 3, np.sqrt(2) / 3, 2.0],
+        [3.375, 0.0, 1.6, 4.8, np.sqrt(0.56), 2.0],
         id="GaussianPlusHeavySide",
     ),
     # Above x0 = 0.5 the data are the [1, 2, 1] case.
