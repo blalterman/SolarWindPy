@@ -1,0 +1,35 @@
+﻿solarwindpy.examples
+====================
+
+.. automodule:: solarwindpy.examples
+   :no-members:
+   :no-undoc-members:
+   :no-inherited-members:
+   :no-show-inheritance:
+   :no-special-members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      load_plasma
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

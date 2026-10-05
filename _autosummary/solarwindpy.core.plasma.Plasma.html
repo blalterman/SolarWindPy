@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+g2de51e5b0 documentation</title>
+  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+g783b1e056 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8f504270"></script>
+      <script src="../_static/documentation_options.js?v=203ad89a"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#solar-activity-module">Solar Activity Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#instabilities-module">Instabilities Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tools-module">Tools Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#examples-module">Examples Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_reference.html#package">Package</a></li>
 </ul>
 </li>
@@ -317,7 +318,7 @@
 <h1>solarwindpy.core.plasma.Plasma<a class="headerlink" href="#solarwindpy-core-plasma-plasma" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Plasma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_plasma_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Plasma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.core.base.Base.html#solarwindpy.core.base.Base" title="solarwindpy.core.base.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
 <p>Container for multi-species plasma physics data and analysis.</p>
 <p>The Plasma class serves as the central container for solar wind plasma
@@ -392,7 +393,7 @@ and <span class="math notranslate nohighlight">\(T\)</span> is temperature.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_plasma_stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacecraft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize a <a class="reference internal" href="#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a> instance.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -411,8 +412,6 @@ Coulomb number <a class="reference internal" href="#solarwindpy.core.plasma.Plas
 </dd>
 <dt><strong>auxiliary_data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>, optional</span></dt><dd><p>Additional measurements to carry with the plasma, for example data
 quality flags. The column labelling scheme must match <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
-</dd>
-<dt><strong>log_plasma_stats</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default <code class="docutils literal notranslate"><span class="pre">False</span></code></span></dt><dd><p>Log summary statistics when <code class="docutils literal notranslate"><span class="pre">data</span></code> is set.</p>
 </dd>
 </dl>
 </dd>
@@ -479,18 +478,14 @@ quality flags. The column labelling scheme must match <code class="docutils lite
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="s2">"2023-01-01 00:00"</span><span class="p">,</span> <span class="s2">"2023-01-01 00:01"</span><span class="p">],</span>
-<span class="gp">... </span>                         <span class="n">name</span><span class="o">=</span><span class="s2">"Epoch"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">),</span> <span class="s2">"p1"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
-<span class="go">True</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">load_plasma</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S.</span><span class="si">%f</span><span class="s2">"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',</span>
+<span class="go"> '2022-10-09 01:47:01.234560']</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span><span class="o">.</span><span class="n">name</span>
-<span class="go">'Epoch'</span>
+<span class="go">'epoch'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -524,61 +519,6 @@ quality flags. The column labelling scheme must match <code class="docutils lite
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.aux">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">aux</span></span><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.aux" title="Link to this definition"></a></dt>
 <dd><p>Shortcut to <a class="reference internal" href="#solarwindpy.core.plasma.Plasma.auxiliary_data" title="solarwindpy.core.plasma.Plasma.auxiliary_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">auxiliary_data</span></code></a>.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.log_plasma_at_init">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">log_plasma_at_init</span></span><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.log_plasma_at_init" title="Link to this definition"></a></dt>
-<dd><p>Flag indicating whether to log plasma statistics during initialization.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></dt><dd><p>True if plasma statistics should be logged at initialization.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="#solarwindpy.core.plasma.Plasma.set_log_plasma_stats" title="solarwindpy.core.plasma.Plasma.set_log_plasma_stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_log_plasma_stats</span></code></a></dt><dd><p>Method to modify this setting</p>
-</dd>
-</dl>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.set_log_plasma_stats">
-<span class="sig-name descname"><span class="pre">set_log_plasma_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_log_plasma_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.set_log_plasma_stats" title="Link to this definition"></a></dt>
-<dd><p>Set flag for logging plasma statistics during initialization.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>Whether to enable logging of plasma statistics.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>When enabled, summary statistics including density ranges, velocity
-distributions, and magnetic field statistics are logged during
-plasma initialization.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="s2">"2023-01-01 00:00"</span><span class="p">,</span> <span class="s2">"2023-01-01 00:01"</span><span class="p">],</span>
-<span class="gp">... </span>                         <span class="n">name</span><span class="o">=</span><span class="s2">"Epoch"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">),</span> <span class="s2">"p1"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">log_plasma_at_init</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_log_plasma_stats</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">log_plasma_at_init</span>
-<span class="go">True</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -708,25 +648,20 @@ Must have matching datetime index with plasma data.</p>
 parameters such as Coulomb collision frequencies that depend on the
 plasma frame transformation.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.core.spacecraft</span><span class="w"> </span><span class="kn">import</span> <span class="n">Spacecraft</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="s2">"2023-01-01 00:00"</span><span class="p">,</span> <span class="s2">"2023-01-01 00:01"</span><span class="p">],</span>
-<span class="gp">... </span>                         <span class="n">name</span><span class="o">=</span><span class="s2">"Epoch"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">),</span> <span class="s2">"p1"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">trajectory</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">{(</span><span class="s2">"pos"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">):</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">(</span><span class="s2">"pos"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
-<span class="gp">... </span>     <span class="p">(</span><span class="s2">"pos"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">):</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">trajectory</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sc</span> <span class="o">=</span> <span class="n">Spacecraft</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="s2">"PSP"</span><span class="p">,</span> <span class="s2">"HCI"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="n">sc</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">load_plasma</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">psp</span> <span class="o">=</span> <span class="n">plasma</span><span class="o">.</span><span class="n">spacecraft</span>
+</pre></div>
+</div>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">None</span></code> logs “No spacecraft data passed to Plasma” at INFO:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">spacecraft</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="n">psp</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">spacecraft</span><span class="o">.</span><span class="n">name</span>
 <span class="go">'PSP'</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">spacecraft</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># trajectory</span>
-<span class="go">[1.0, 2.0]</span>
+<span class="go">[-42.0, -22.0, -34.0]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -757,20 +692,16 @@ without being part of the core plasma physics calculations. Common
 examples include quality flags, statistical uncertainties, or
 instrument operational parameters.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">epoch</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="s2">"2023-01-01 00:00"</span><span class="p">,</span> <span class="s2">"2023-01-01 00:01"</span><span class="p">],</span>
-<span class="gp">... </span>                         <span class="n">name</span><span class="o">=</span><span class="s2">"Epoch"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">([</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">,</span> <span class="s2">"p1"</span><span class="p">),</span>
-<span class="gp">... </span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">Plasma</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">),</span> <span class="s2">"p1"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">quality_flags</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({(</span><span class="s2">"quality"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">solarwindpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">swp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span> <span class="o">=</span> <span class="n">swp</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">load_plasma</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">auxiliary_data</span> <span class="ow">is</span> <span class="kc">None</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quality_flags</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({(</span><span class="s2">"quality"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]},</span>
 <span class="gp">... </span>                             <span class="n">index</span><span class="o">=</span><span class="n">plasma</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">quality_flags</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">set_auxiliary_data</span><span class="p">(</span><span class="n">quality_flags</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plasma</span><span class="o">.</span><span class="n">aux</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">"quality"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># auxiliary data</span>
-<span class="go">[0, 1]</span>
+<span class="go">[0, 1, 0]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -778,7 +709,7 @@ instrument operational parameters.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.plasma.Plasma.set_data">
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.set_data" title="Link to this definition"></a></dt>
-<dd><p>Set the data and log statistics about it.</p>
+<dd><p>Set the data, logging its shape and any columns dropped.</p>
 </dd></dl>
 
 <dl class="py property">

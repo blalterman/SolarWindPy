@@ -1,0 +1,6 @@
+solarwindpy.examples.load\_plasma
+=================================
+
+.. currentmodule:: solarwindpy.examples
+
+.. autofunction:: load_plasma
