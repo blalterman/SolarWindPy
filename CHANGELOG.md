@@ -176,6 +176,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an x-intercept of -inf or NaN, and a NaN initial guess made `make_fit` fail.
 - `Hist2D.plot_edges` documents its `xlim` and `ylim` keywords as inclusive: a vertex
   exactly on a limit is kept. Behaviour is unchanged.
+- `Plasma.heat_flux` documents its quantity precisely: the parallel-parallel component of
+  the heat flux tensor in the center-of-mass frame of the requested species,
+  rho (U^3 + 3/2 U w_par^2) for a drifting bi-Maxwellian. It is not the total energy
+  flux along the field. Behaviour is unchanged.
 
 ### Added
 
@@ -224,6 +228,21 @@ These change computed values; rerun any analysis that used them.
 - `ReferenceAbundances.get_element` named its Series by the index level it did not
   search: `get_element("Fe")` was named 26 and `get_element(26)` was named `"Fe"`. Both
   are now named by the atomic number, 26.
+- `Plasma.estimate_electrons` now sets the electron temperature equal to the (core)
+  proton scalar temperature, as its docstring states: w_e^2 = (m_p / m_e) w_p^2. It
+  previously multiplied by n_p / n_e, so with alphas or other ions present the electron
+  thermal speed was too small by sqrt(n_p / n_e) (about 4% at n_a / n_p = 0.04) and the
+  temperature by n_p / n_e. Proton-only plasmas are unchanged.
+- The `Ion` returned by `Plasma.estimate_electrons` carries the scalar thermal speed
+  (equal to `par` and `per`), so its `w`, `temperature` and other thermal properties
+  work; they raised `ValueError` before.
+- A species sum in `Plasma.heat_flux` / `qpar` and `Plasma.kinetic_energy_flux` / `Wk`
+  (e.g. `"a+p1"`) is NaN on rows where no species is present, e.g. where b is missing
+  for `heat_flux`. It was 0. Rows with some species present remain partial sums over
+  those species.
+- `Plasma.vdf_ratio` is NaN where the beam drift cannot be projected onto b, e.g. where b
+  is missing. It previously dropped the drift term there and returned
+  ln(n2 w1^3 / n1 w2^3).
 
 ### Removed
 

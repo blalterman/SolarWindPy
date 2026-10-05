@@ -1530,7 +1530,9 @@ species: {}
         Returns
         -------
         f2f1 : pd.Series
-            Natural logarithm of the beam to core VDF ratio.
+            Natural logarithm of the beam to core VDF ratio. NaN where the
+            beam drift cannot be projected onto the magnetic field, e.g. where
+            b is missing.
 
         Notes
         -----
@@ -1567,7 +1569,9 @@ species: {}
         w2_per = w.per.loc[:, beam]
 
         dv = self.dv(beam, core, project_m2q=True).project(self.b)
-        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
+        # skipna=False: where b is missing the projection is NaN, and the
+        # ratio must be NaN rather than the drift-free value ln(n2 w1^3 / n1 w2^3).
+        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1, skipna=False)
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
@@ -1583,7 +1587,15 @@ species: {}
     def estimate_electrons(self, inplace=False):
         r"""Estimate the electron parameters with a scalar temperature.
 
-        Assume temperature is the same as proton scalar temerature.
+        The electron density and velocity follow from quasi-neutrality and
+        zero net current, :math:`n_e = \sum_s q_s n_s` and
+        :math:`n_e v_e = \sum_s q_s n_s v_s`. The electron temperature equals
+        the proton scalar temperature :math:`T_p`, so with :math:`m w^2 = 2 k T`
+
+            :math:`w_e^2 = \frac{m_p}{m_e} w_p^2`.
+
+        :math:`T_p` is taken from species ``p`` if the plasma holds it, and
+        otherwise from the core protons ``p1``; the beam ``p2`` is never used.
         """
 
         species = self.species
@@ -1637,11 +1649,12 @@ species: {}
 
         ve = niqivi.divide(ne, axis=0)
 
+        # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
         wp = self.w(tkw).loc[:, "scalar"]
-        nrat = self.number_density(tkw).divide(ne, axis=0)
         mpme = self.constants.m_in_mp["e"] ** -1
-        we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
-        we = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
+        we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
+        # Isotropic electrons: the scalar thermal speed equals both components.
+        we = pd.concat([we, we, we], axis=1, keys=["par", "per", "scalar"], sort=True)
 
         ne.name = ""
         electrons = pd.concat(
@@ -1671,12 +1684,29 @@ species: {}
         return electrons
 
     def heat_flux(self, *species):
-        r"""Calculate the parallel heat flux.
+        r"""Calculate the parallel-parallel component of the heat flux tensor.
 
-            :math:`Q_\parallel = \rho (v^3 + \frac{3}{2}vw^2)`
+        For each species :math:`s` this is the third moment of its velocity
+        distribution along the magnetic field, taken in the center-of-mass
+        frame of the species passed to this method, and only those: for
+        ``heat_flux("a+p1")`` or ``heat_flux("a", "p1")`` it is the a+p1
+        center of mass, not that of every species in the plasma,
 
-        where :math:`v` is each species' velocity in the Center-of-Mass frame and
-        :math:`w` is each species parallel thermal speed.
+            :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,
+
+        where :math:`c_\parallel` is the velocity component along
+        :math:`\hat{b}` relative to the center of mass. For a drifting
+        bi-Maxwellian with :math:`w^2 = 2kT/m` this evaluates to
+
+            :math:`Q_{\parallel,s} = \rho_s (U_s^3 + \frac{3}{2} U_s w_{\parallel,s}^2)`,
+
+        where :math:`U_s` is the species' drift along :math:`\hat{b}` in the
+        center-of-mass frame and :math:`w_{\parallel,s}` its parallel thermal
+        speed.
+
+        This is the parallel-parallel part of the energy flux only, not the
+        total energy flux along the field: the perpendicular thermal speed
+        does not enter.
 
         Parameters
         ----------
@@ -1687,7 +1717,9 @@ species: {}
         Returns
         -------
         q: `pd.Series` or `pd.DataFrame`
-            Dimensionality depends on species inputs.
+            Dimensionality depends on species inputs. A species sum is a
+            partial sum over the species present in each row; a row with no
+            species present is NaN.
         """
 
         slist = self._chk_species(*species)
@@ -1706,7 +1738,8 @@ species: {}
 
         qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
-            qs = qs.sum(axis=1)
+            # min_count=1: a partial sum over the species present, NaN where none is.
+            qs = qs.sum(axis=1, min_count=1)
             qs.name = "+".join(species)
 
         coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
@@ -1825,8 +1858,10 @@ species: {}
 
         Returns
         -------
-        rho: pd.Series or pd.DataFrame
-            See Parameters for more info.
+        w: pd.Series or pd.DataFrame
+            See Parameters for more info. A species sum is a partial sum over
+            the species present in each row; a row with no species present is
+            NaN.
         """
         slist = self._chk_species(*species)
 
@@ -1834,7 +1869,8 @@ species: {}
         w = pd.concat(w, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            w = w.sum(axis=1)
+            # min_count=1: a partial sum over the species present, NaN where none is.
+            w = w.sum(axis=1, min_count=1)
             w.name = species[0]
 
         return w

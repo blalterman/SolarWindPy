@@ -1308,11 +1308,12 @@ class PlasmaTestBase(ABC):
             ot.nc(sa, combo)
 
     def test_estimate_electrons(self):
-        r"""Electron moments follow from charge neutrality and zero net current.
+        r"""Electron moments follow from charge neutrality, zero net current, T_e = T_p.
 
         ON FAILURE: the code is wrong; n_e, v_e and w_e are recomputed here from
-        charge neutrality, zero net current, and the CODATA electron-proton mass
-        ratio, independently of `Plasma`.
+        charge neutrality, zero net current, T_e equal to the (core) proton scalar
+        temperature, and the CODATA electron-proton mass ratio, independently of
+        `Plasma`.
         """
         stuple = self.stuple
 
@@ -1338,21 +1339,18 @@ class PlasmaTestBase(ABC):
 
             if "p" in self.stuple:
                 tkw = pd.IndexSlice["scalar", "p"]
-                tkn = "p"
-                exp = pd.Series({"p": 1.0, "e": -1.0})
             else:
                 tkw = pd.IndexSlice["scalar", "p1"]
-                tkn = "p1"
-                exp = pd.Series({"p1": 1.0, "e": -1.0})
 
+            # T_e = T_p with m w^2 = 2 k T: w_e^2 = (m_p / m_e) w_p^2.
             wp = self.data.w.loc[:, tkw]
-            npne = self.data.n.xs("", axis=1, level="C").loc[:, tkn]
-            npne = pd.concat([npne, ne], axis=1, keys=[tkn, "e"], sort=True)
-            nrat = npne.pow(exp, axis=1, level="S").product(axis=1)
             mpme = physical_constants["electron-proton mass ratio"][0] ** -1.0
-            we = (nrat * mpme).multiply(wp.pow(2), axis=0).pipe(np.sqrt)
+            we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
 
-            tmp = pd.concat([we, we], axis=1, keys=["par", "per"], sort=True)
+            # Isotropic electrons: scalar, par and per thermal speeds are equal.
+            tmp = pd.concat(
+                [we, we, we], axis=1, keys=["par", "per", "scalar"], sort=True
+            )
             ne.name = ""
             electrons = pd.concat(
                 [ne, ve, tmp], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
@@ -2512,6 +2510,35 @@ def test_Wk_species_sum_is_a_partial_sum_over_species():
     assert total.to_numpy() == pytest.approx([wk_a + wk_p, wk_p], rel=REL_ALPHA, abs=0)
 
 
+_PROTON_ROW = (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+_MISSING_ROW = (np.nan, (np.nan, np.nan, np.nan), np.nan, np.nan)
+
+
+def test_Wk_species_sum_is_nan_where_no_species_is_present():
+    r"""`Wk("a+p1")` is NaN on a row with neither species, and partial where one is.
+
+    Row 0 has protons only, row 1 has no species. Per the author, a sum with some
+    species present is a partial sum (row 0 is the proton term alone,
+    0.5 * 5 cm^-3 * m_p * (400 km/s)^3), and a sum with none present is NaN, not 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": _PROTON_ROW},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+    )
+    wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
+
+    for total in (p.Wk("a+p1"), p.kinetic_energy_flux("a+p1")):
+        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+        assert total.iloc[0] == pytest.approx(wk_p, rel=1e-12, abs=0)
+        assert np.isnan(total.iloc[1])
+
+
 def test_heat_flux_matches_its_docstring_formula():
     r"""`heat_flux` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
 
@@ -2554,6 +2581,53 @@ def test_heat_flux_matches_its_docstring_formula():
     assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
 
 
+def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
+    r"""A `heat_flux` species sum is partial over the species present, NaN where none is.
+
+    Per the author, a sum with some species present is a partial sum and a sum
+    with none present is NaN, not 0. b is present on every row.
+
+    "a+p1": row 0 has protons only. A lone species is its own centre of mass, so
+    its drift is 0 and Q = rho (0 + 0) = 0. Row 1 has no species: NaN.
+
+    "a+p1+p2": row 0 has the two proton populations of
+    `test_heat_flux_matches_its_docstring_formula` and no alphas, so the partial
+    sum is that test's hand value, 0.4390632556 uW m^-2. Row 1 has no species: NaN.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": _PROTON_ROW},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+    )
+    q = p.heat_flux("a+p1")
+    assert q.iloc[0] == 0.0  # exact: the lone species' drift is 400 - 400 = 0
+    assert np.isnan(q.iloc[1])
+
+    uv = np.array([0.6, 0.8, 0.0])  # unit vector along b = (3, 4, 0)
+    p1 = (5.0, tuple(400.0 * uv), 30.0, 20.0)
+    p2 = (5.0, tuple(500.0 * uv), 40.0, 25.0)
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": p1, "p2": p2},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW, "p2": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+        "p2",
+        b=[(3.0, 4.0, 0.0)] * 2,
+    )
+    q = p.heat_flux("a+p1+p2")
+    # rel=1e-9: the hand value carries 10 significant digits.
+    # It uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
+    assert q.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
+    assert np.isnan(q.iloc[1])
+
+
 _MISSING_B_ROWS = {
     ("a", "p1"): NUC_ROWS[0],
     ("p1", "p2"): {
@@ -2592,22 +2666,13 @@ def test_heat_flux_per_species_is_nan_where_b_is_missing():
     assert q.iloc[1].isna().all()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=MissingFieldGaveNumber,
-    reason="Plasma.heat_flux sums species with DataFrame.sum(axis=1), whose skipna "
-    "turns a row where every species is NaN into 0.0 (solarwindpy/core/plasma.py, "
-    "heat_flux); expected message 'heat_flux(\"a+p1\") is 0.0 where b is missing'; "
-    "remove this marker when heat_flux sums species with min_count=1",
-)
 def test_heat_flux_species_sum_is_nan_where_b_is_missing():
     r"""Without b, no species contributes to Q_par, so the species sum is NaN, not 0.
 
     A partial sum keeps the species that are present; where none is, a zero heat
-    flux would be invented data.
+    flux would be invented data (author decision).
 
-    ON FAILURE: (unexpected pass) heat_flux sums with min_count=1; drop the xfail
-    marker.
+    ON FAILURE: the code is wrong.
     """
     q = _missing_b_plasma("a", "p1").heat_flux("a+p1")
     assert np.isfinite(q.iloc[0])
@@ -2617,23 +2682,14 @@ def test_heat_flux_species_sum_is_nan_where_b_is_missing():
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=MissingFieldGaveNumber,
-    reason="Plasma.vdf_ratio sums (dv/w)^2 over par and per with "
-    "DataFrame.sum(axis=1), whose skipna turns the NaN projection into 0 and "
-    "returns ln(n2 w1^3 / n1 w2^3) (solarwindpy/core/plasma.py, vdf_ratio); "
-    "expected message 'vdf_ratio is -4.38... where b is missing'; remove this "
-    "marker when vdf_ratio sums with skipna=False",
-)
 def test_vdf_ratio_is_nan_where_b_is_missing():
     r"""Without b the beam drift has no par/per split, so ln(f2/f1) is NaN.
 
-    `Vector.project` returns NaN on rows missing from either vector (author
-    decision); row 0, with b, stays finite.
+    `Vector.project` returns NaN on rows missing from either vector, and
+    `vdf_ratio` propagates it rather than returning the drift-free value
+    ln(n2 w1^3 / n1 w2^3) (author decisions); row 0, with b, stays finite.
 
-    ON FAILURE: (unexpected pass) vdf_ratio sums with skipna=False; drop the xfail
-    marker.
+    ON FAILURE: the code is wrong.
     """
     f2f1 = _missing_b_plasma("p1", "p2").vdf_ratio()
     assert np.isfinite(f2f1.iloc[0])
@@ -2701,3 +2757,42 @@ def test_estimate_electrons_weights_each_species_by_its_own_charge():
     assert v.loc["x"] == pytest.approx(2180.0 / 5.4, rel=1e-12, abs=0)
     assert v.loc["y"] == pytest.approx(12.0 / 5.4, rel=1e-12, abs=0)
     assert v.loc["z"] == 0.0
+
+
+def test_estimate_electrons_temperature_equals_proton_scalar_temperature():
+    r"""`estimate_electrons` sets T_e = T_p1, so w_e^2 = (m_p / m_e) w_p1^2.
+
+    The docstring's assumption with m w^2 = 2 k T. Alphas make n_e = 5.4 differ
+    from n_p1 = 5 cm^-3, so a density ratio in w_e fails. Anisotropic protons
+    (w_par = 30, w_per = 24 km/s) make the scalar w_p1^2 = (900 + 2 * 576) / 3
+    = 684 km^2/s^2 (trace of the pressure tensor) differ from either component.
+    By hand, with m_p / m_e = 1836.152673426 (CODATA 2022):
+    w_e = sqrt(684 * 1836.152673426) = sqrt(1255928.428623) = 1120.6821 km/s,
+    on both the par and per components.
+
+    ON FAILURE: the code is wrong, unless the author rejects T_e = T_p as the
+    electron estimate.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 24.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p1", "a")
+    e = p.estimate_electrons()
+
+    mp_me = 1.0 / physical_constants["electron-proton mass ratio"][0]
+    expected = np.sqrt(684.0 * mp_me)  # km/s, w_e^2 = (m_p / m_e) w_p^2
+    for c in ("par", "per"):
+        we = e.w.data.loc[:, c].iloc[0]
+        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+        assert we == pytest.approx(expected, rel=1e-12, abs=0)
+        # Half the last printed digit of the hand value 1120.6821 km/s.
+        assert we == pytest.approx(1120.6821, rel=0, abs=5e-5)
+
+    # rel=1e-9: T_e uses CODATA m_e, T_p uses m_p; m_p / m_e from the CODATA
+    # ratio agrees with their quotient to ~1e-10.
+    t_e = e.temperature.loc[:, "scalar"].iloc[0]
+    t_p = p.ions.loc["p1"].temperature.loc[:, "scalar"].iloc[0]
+    assert t_e == pytest.approx(t_p, rel=1e-9, abs=0)
