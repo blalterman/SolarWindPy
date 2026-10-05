@@ -167,7 +167,7 @@ git log --since="1 year ago" --stat --oneline
 # Look for:
 # - Large new files (potential external code)
 # - Unusual commit patterns
-# - Missing "Generated with Claude Code" in AI commits
+# - Missing Co-Authored-By trailer in AI commits
 ```
 
 **2. Check High-Risk Files** (30 minutes)
@@ -206,9 +206,7 @@ pip-licenses --format=markdown --with-urls
 ```
 
 **5. Documentation Update** (30 minutes)
-- Review and update `.claude/docs/ATTRIBUTION.md` if practices evolved
-- Add new examples if patterns emerged
-- Update license compatibility matrix if needed
+- Review and update the attribution rule in `CLAUDE.md` (Conventions) if practices evolved
 - Document any attribution issues found and resolved
 
 ### Audit Outputs

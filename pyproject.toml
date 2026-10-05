@@ -131,20 +131,13 @@ dev = [
     "tables>=3.9",  # PyTables for HDF5 testing
     "import-linter>=2.6",  # lint-imports; 2.6 adds the acyclic_siblings contract
     "pre-commit>=3.5",  # Git hook framework
-    # Test-quality review tools; the review's tool trial decides which stay
+    # Test-quality review tools
     "griffe>=2.3",  # API inventory
     "mutmut>=3.8",  # mutation testing
     "sybil>=10.1",  # run rst code-block examples under pytest
     "pytest-randomly>=5.0",  # random test order
-    "grimp>=3.17",  # import graph
-    "pydeps>=3.0",  # import graph rendering
-    "radon>=5.1",  # complexity; wily 1.25 pins radon<5.2
-    "wily>=1.25",  # complexity over history
     "vulture>=2.16",  # dead code
-    "deptry>=0.25",  # imports vs declared dependencies
-    "pytest-deadfixtures>=3.1",  # unused fixtures
     "ruff>=0.16",  # PT and B rule sets
-    "interrogate>=1.7",  # docstring coverage
 ]
 analysis = [
     # Interactive analysis environment
