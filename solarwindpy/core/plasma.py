@@ -7,9 +7,6 @@ Propoded Updates
  an ion and return a new plasma without that ion in it. Well, either
  mod or subtract. Subtract and add probably make more sense. (20180129)
 
--Consider the various methods that might be worth including, e.g. __getattr__
- vs __getattribute__, __hash__, __deepcopy__, __copy__, etc. (20180129)
-
 -Convert `Plasma.__call__` to `Plasma.__getitem__` and `Plasma.__iter__` to
  to allow iterating over ions. (20180316)
  N.B. This could have complicated results as to how we actually access the

@@ -108,14 +108,15 @@ class ICMECAT:
     ...                       "1998-03-01 06:00"],
     ...     "mo_end_time": ["1998-01-02 00:00", "", "1998-03-02 00:00"],
     ... })
-    >>> local = Path(tempfile.mkdtemp()) / "icmecat.csv"
-    >>> catalog.to_csv(local, index=False)
-    >>> original_url = icmecat.ICMECAT_URL
-    >>> icmecat.ICMECAT_URL = str(local)
-    >>> try:
-    ...     cat = ICMECAT(spacecraft="Ulysses")
-    ... finally:
-    ...     icmecat.ICMECAT_URL = original_url
+    >>> with tempfile.TemporaryDirectory() as d:
+    ...     local = Path(d) / "icmecat.csv"
+    ...     catalog.to_csv(local, index=False)
+    ...     original_url = icmecat.ICMECAT_URL
+    ...     icmecat.ICMECAT_URL = str(local)
+    ...     try:
+    ...         cat = ICMECAT(spacecraft="Ulysses")
+    ...     finally:
+    ...         icmecat.ICMECAT_URL = original_url
     >>> cat
     ICMECAT(spacecraft='Ulysses', n_events=2)
 

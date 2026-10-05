@@ -29,14 +29,15 @@ small local catalog in the same CSV layout.
 ...     "mo_start_time": ["1998-01-01 06:00", "1998-03-01 06:00"],
 ...     "mo_end_time": ["1998-01-02 00:00", "1998-03-02 00:00"],
 ... }})
->>> local = Path(tempfile.mkdtemp()) / "icmecat.csv"
->>> catalog.to_csv(local, index=False)
->>> original_url = icmecat.ICMECAT_URL
->>> icmecat.ICMECAT_URL = str(local)
->>> try:
-...     cat = ICMECAT(spacecraft="Ulysses")
-... finally:
-...     icmecat.ICMECAT_URL = original_url
+>>> with tempfile.TemporaryDirectory() as d:
+...     local = Path(d) / "icmecat.csv"
+...     catalog.to_csv(local, index=False)
+...     original_url = icmecat.ICMECAT_URL
+...     icmecat.ICMECAT_URL = str(local)
+...     try:
+...         cat = ICMECAT(spacecraft="Ulysses")
+...     finally:
+...         icmecat.ICMECAT_URL = original_url
 >>> print(f"Found {{len(cat)}} Ulysses ICMEs")
 Found 1 Ulysses ICMEs
 >>> observations = pd.DatetimeIndex(["1998-01-01 12:00", "1998-03-01 12:00"])
