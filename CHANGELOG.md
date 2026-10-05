@@ -232,6 +232,10 @@ These change computed values; rerun any analysis that used them.
 - The `Ion` returned by `Plasma.estimate_electrons` carries the scalar thermal speed
   (equal to `par` and `per`), so its `w`, `temperature` and other thermal properties
   work; they raised `ValueError` before.
+- A species sum in `Plasma.heat_flux` / `qpar` and `Plasma.kinetic_energy_flux` / `Wk`
+  (e.g. `"a+p1"`) is NaN on rows where no species is present, e.g. where b is missing
+  for `heat_flux`. It was 0. Rows with some species present remain partial sums over
+  those species.
 - `Plasma.vdf_ratio` is NaN where the beam drift cannot be projected onto b, e.g. where b
   is missing. It previously dropped the drift term there and returned
   ln(n2 w1^3 / n1 w2^3).

@@ -2510,6 +2510,35 @@ def test_Wk_species_sum_is_a_partial_sum_over_species():
     assert total.to_numpy() == pytest.approx([wk_a + wk_p, wk_p], rel=REL_ALPHA, abs=0)
 
 
+_PROTON_ROW = (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+_MISSING_ROW = (np.nan, (np.nan, np.nan, np.nan), np.nan, np.nan)
+
+
+def test_Wk_species_sum_is_nan_where_no_species_is_present():
+    r"""`Wk("a+p1")` is NaN on a row with neither species, and partial where one is.
+
+    Row 0 has protons only, row 1 has no species. Per the author, a sum with some
+    species present is a partial sum (row 0 is the proton term alone,
+    0.5 * 5 cm^-3 * m_p * (400 km/s)^3), and a sum with none present is NaN, not 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": _PROTON_ROW},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+    )
+    wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
+
+    for total in (p.Wk("a+p1"), p.kinetic_energy_flux("a+p1")):
+        # rel=1e-12: same IEEE-754 arithmetic as the code, in a different order.
+        assert total.iloc[0] == pytest.approx(wk_p, rel=1e-12, abs=0)
+        assert np.isnan(total.iloc[1])
+
+
 def test_heat_flux_matches_its_docstring_formula():
     r"""`heat_flux` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
 
@@ -2552,6 +2581,53 @@ def test_heat_flux_matches_its_docstring_formula():
     assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
 
 
+def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
+    r"""A `heat_flux` species sum is partial over the species present, NaN where none is.
+
+    Per the author, a sum with some species present is a partial sum and a sum
+    with none present is NaN, not 0. b is present on every row.
+
+    "a+p1": row 0 has protons only. A lone species is its own centre of mass, so
+    its drift is 0 and Q = rho (0 + 0) = 0. Row 1 has no species: NaN.
+
+    "a+p1+p2": row 0 has the two proton populations of
+    `test_heat_flux_matches_its_docstring_formula` and no alphas, so the partial
+    sum is that test's hand value, 0.4390632556 uW m^-2. Row 1 has no species: NaN.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": _PROTON_ROW},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+    )
+    q = p.heat_flux("a+p1")
+    assert q.iloc[0] == 0.0  # exact: the lone species' drift is 400 - 400 = 0
+    assert np.isnan(q.iloc[1])
+
+    uv = np.array([0.6, 0.8, 0.0])  # unit vector along b = (3, 4, 0)
+    p1 = (5.0, tuple(400.0 * uv), 30.0, 20.0)
+    p2 = (5.0, tuple(500.0 * uv), 40.0, 25.0)
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": p1, "p2": p2},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW, "p2": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+        "p2",
+        b=[(3.0, 4.0, 0.0)] * 2,
+    )
+    q = p.heat_flux("a+p1+p2")
+    # rel=1e-9: the hand value carries 10 significant digits.
+    # It uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
+    assert q.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
+    assert np.isnan(q.iloc[1])
+
+
 _MISSING_B_ROWS = {
     ("a", "p1"): NUC_ROWS[0],
     ("p1", "p2"): {
@@ -2590,22 +2666,13 @@ def test_heat_flux_per_species_is_nan_where_b_is_missing():
     assert q.iloc[1].isna().all()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=MissingFieldGaveNumber,
-    reason="Plasma.heat_flux sums species with DataFrame.sum(axis=1), whose skipna "
-    "turns a row where every species is NaN into 0.0 (solarwindpy/core/plasma.py, "
-    "heat_flux); expected message 'heat_flux(\"a+p1\") is 0.0 where b is missing'; "
-    "remove this marker when heat_flux sums species with min_count=1",
-)
 def test_heat_flux_species_sum_is_nan_where_b_is_missing():
     r"""Without b, no species contributes to Q_par, so the species sum is NaN, not 0.
 
     A partial sum keeps the species that are present; where none is, a zero heat
-    flux would be invented data.
+    flux would be invented data (author decision).
 
-    ON FAILURE: (unexpected pass) heat_flux sums with min_count=1; drop the xfail
-    marker.
+    ON FAILURE: the code is wrong.
     """
     q = _missing_b_plasma("a", "p1").heat_flux("a+p1")
     assert np.isfinite(q.iloc[0])

@@ -1697,7 +1697,9 @@ species: {}
         Returns
         -------
         q: `pd.Series` or `pd.DataFrame`
-            Dimensionality depends on species inputs.
+            Dimensionality depends on species inputs. A species sum is a
+            partial sum over the species present in each row; a row with no
+            species present is NaN.
         """
 
         slist = self._chk_species(*species)
@@ -1716,7 +1718,8 @@ species: {}
 
         qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
-            qs = qs.sum(axis=1)
+            # min_count=1: a partial sum over the species present, NaN where none is.
+            qs = qs.sum(axis=1, min_count=1)
             qs.name = "+".join(species)
 
         coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
@@ -1835,8 +1838,10 @@ species: {}
 
         Returns
         -------
-        rho: pd.Series or pd.DataFrame
-            See Parameters for more info.
+        w: pd.Series or pd.DataFrame
+            See Parameters for more info. A species sum is a partial sum over
+            the species present in each row; a row with no species present is
+            NaN.
         """
         slist = self._chk_species(*species)
 
@@ -1844,7 +1849,8 @@ species: {}
         w = pd.concat(w, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            w = w.sum(axis=1)
+            # min_count=1: a partial sum over the species present, NaN where none is.
+            w = w.sum(axis=1, min_count=1)
             w.name = species[0]
 
         return w
