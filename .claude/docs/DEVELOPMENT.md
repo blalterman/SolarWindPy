@@ -69,22 +69,19 @@ git add pyproject.toml
 - **Formatting**: Black for code formatting (88 characters)
 - **Linting**: Flake8 for style checking (88 characters)
 - **Documentation**: NumPy-style docstrings with doc8 validation (100 characters)
-- **Commits**: Conventional Commits format with 'Generated with Claude Code'
+- **Commits**: Conventional Commits format; AI-written commits carry the `Co-Authored-By` trailer
 - **Testing**: All tests must pass before committing
 
 ## Code Attribution
 
 All code incorporated into SolarWindPy must follow proper attribution practices.
-
-**See comprehensive guidelines:** [ATTRIBUTION.md](./ATTRIBUTION.md)
+The rule is stated in `CLAUDE.md` under Conventions.
 
 ### Quick Reference
 
 **AI-Generated Code:**
 ```bash
-# Include in commit message:
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
+# End the commit message with the trailer:
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 

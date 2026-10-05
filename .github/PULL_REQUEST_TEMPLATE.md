@@ -31,11 +31,11 @@
 
 - [ ] External code properly attributed (source, license, modifications in comments)
 - [ ] Scientific algorithms cite papers in docstrings (DOI/arXiv where applicable)
-- [ ] AI-assisted code includes "Generated with Claude Code" in commits
+- [ ] AI-assisted commits carry the `Co-Authored-By` trailer
 - [ ] No code with incompatible licenses (GPL, proprietary, unknown)
 - [ ] Documentation updated (README, CHANGELOG, docstrings)
 
-See [Attribution Guidelines](.claude/docs/ATTRIBUTION.md) for details.
+See the attribution rule in `CLAUDE.md` (Conventions) for details.
 
 ## Breaking Changes
 
