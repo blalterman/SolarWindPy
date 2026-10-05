@@ -81,6 +81,15 @@ Tools Module
 
    solarwindpy.tools
 
+Examples Module
+---------------
+
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
+
+   solarwindpy.examples
+
 Package
 -------
 

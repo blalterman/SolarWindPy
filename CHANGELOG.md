@@ -186,6 +186,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CITATION.cff` gives the Zenodo concept DOI and the author's ORCID in Citation File
   Format, so GitHub and Zenodo can read the citation.
 - Python 3.14 is supported and declared; the full suite passes on it.
+- `solarwindpy.examples.load_plasma()` returns a small example `Plasma`: three rows with
+  species `a`, `e`, `p1` and `p2`, and a Parker Solar Probe trajectory in HCI. The data
+  ships in `core/data/example_*.csv`; docstring examples start from it.
 
 ### Fixed
 
@@ -242,6 +245,12 @@ These change computed values; rerun any analysis that used them.
   `.year` property, and `core/data/asplund2009.csv` is removed. `ReferenceAbundances()`
   always loads Asplund et al. (2021), Table 2 (doi:10.1051/0004-6361/202140445);
   passing `year=` raises `TypeError`.
+- `Plasma` plasma-statistics logging: the `log_plasma_stats` argument (of `Plasma` and
+  `Plasma.load_from_file`), the `log_plasma_at_init` property and `set_log_plasma_stats`.
+  Nothing used them, and turning them on raised `AttributeError` on pandas 3
+  (`DataFrame.applymap` is gone). Passing `log_plasma_stats=` raises `TypeError`. `Plasma`
+  still logs "No spacecraft data passed to Plasma" (and likewise for `auxiliary_data`) at
+  INFO when that input is `None`.
 
 ## [0.3.0] - 2025-12-24
 
