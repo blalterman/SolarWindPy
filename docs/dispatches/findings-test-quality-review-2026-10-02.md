@@ -180,3 +180,27 @@ rules cover.
 
 The per-test method alone was too weak for fixture-level patches; the fixture-aware scan is
 required.
+
+## Re-measurement (2026-10-05)
+
+Run after the fix program's units merged, as the long-running units of
+`docs/dispatches/batch-test-quality-fixes-2026-10-02.md`.
+
+### Linkcheck
+
+`conda run -n solarwindpy sphinx-build -q -E -b linkcheck docs/source tmp/test-quality-review/linkcheck/out`
+on master after PR #476 (results in `tmp/test-quality-review/linkcheck/out/output.json`; the
+2026-10-02 baseline is kept in `tmp/test-quality-review/linkcheck-2026-10-02/`).
+
+| | 2026-10-02 | 2026-10-05 |
+|---|---|---|
+| Broken | 5 | 4 |
+| OK | 76 | 77 |
+| Redirected | 7 | 7 |
+| Unchecked (in-page anchors, one `mailto:`) | 170 | 170 |
+
+The dead Google Drive link in the `plasma` module docstring is gone. The four remaining broken
+links are DOIs whose publisher landing pages return 403 to the checker (Wiley/AGU
+`10.1029/JA090iA11p11062`, A&A `10.1051/0004-6361/202140445`, Annual Reviews
+`10.1146/annurev.astro.46.060407.145222`, OUP `10.1093/mnrasl/slw135`); reading them as
+bot-blocks rather than dead links is an inference, not checked in a browser. No new broken link.
