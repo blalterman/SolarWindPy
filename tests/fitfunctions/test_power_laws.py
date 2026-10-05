@@ -307,10 +307,11 @@ def test_power_law_with_weights():
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0])
-    # Weighted and unweighted differ by ~1e-3, far outside rel=1e-6, so ignoring
-    # the weights fails the first assertion.
     assert [obj.popt["A"], obj.popt["b"]] == pytest.approx(weighted, **NOISE_FREE)
-    assert list(weighted) != pytest.approx(unweighted, **NOISE_FREE)
+    # Ignoring the weights must fail the line above by a wide margin: the
+    # weighted and unweighted answers differ by over 100x the fit tolerance.
+    gap = np.max(np.abs(weighted / unweighted - 1))
+    assert gap > 100 * NOISE_FREE["rel"]
 
 
 def test_power_law_scaling_behavior():

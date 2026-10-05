@@ -238,10 +238,11 @@ def test_line_with_weights():
 
     m_w, b_w = np.polyfit(x, y, 1, w=1.0 / sigma)
     m_u, b_u = np.polyfit(x, y, 1)
-    # The weighted and unweighted answers differ by ~1e-3, far outside rel=1e-6,
-    # so ignoring the weights fails the first assertion.
     assert [obj.popt["m"], obj.popt["b"]] == pytest.approx([m_w, b_w], **NOISE_FREE)
-    assert [m_w, b_w] != pytest.approx([m_u, b_u], **NOISE_FREE)
+    # Ignoring the weights must fail the line above by a wide margin: the
+    # weighted and unweighted answers differ by over 100x the fit tolerance.
+    gap = np.max(np.abs(np.array([m_w, b_w]) / np.array([m_u, b_u]) - 1))
+    assert gap > 100 * NOISE_FREE["rel"]
 
 
 def test_line_horizontal_data():
@@ -290,9 +291,10 @@ def test_line_p0_is_none_with_duplicate_x_values(cls):
     y = np.array([2.0, 2.1, 4.0, 4.1])
 
     obj = cls(x, y)
-    with np.errstate(divide="ignore", invalid="ignore"):
+    # The slope estimate divides by the zero x-steps before giving up.
+    with pytest.warns(RuntimeWarning, match="divide by zero"):
         assert obj.p0 is None
-        obj.make_fit()
+    obj.make_fit()
 
     assert obj(np.array([1.0, 2.0])) == pytest.approx([2.05, 4.05], **NOISE_FREE)
 
