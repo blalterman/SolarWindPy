@@ -182,6 +182,8 @@ class PlasmaTestBase(ABC):
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
                     self.object_testing.number_density(*s)
+
+        ON FAILURE: the code is wrong.
         """
         pass
 
@@ -2790,3 +2792,34 @@ def test_estimate_electrons_temperature_equals_proton_scalar_temperature():
     t_e = e.temperature.loc[:, "scalar"].iloc[0]
     t_p = p.ions.loc["p1"].temperature.loc[:, "scalar"].iloc[0]
     assert t_e / t_p == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
+
+
+def test_estimate_electrons_inplace_adds_the_estimate_as_species_e():
+    r"""`estimate_electrons(inplace=True)` adds the estimate to the plasma as "e".
+
+    Without ``inplace`` the plasma is unchanged. With it, the plasma holds "e"
+    beside its ions, and its "e" ion carries the n, v and w the plain call
+    returns: n_e = 5 + 2 * 0.2 = 5.4 cm^-3 for the rows of
+    `test_estimate_electrons_weights_each_species_by_its_own_charge`.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 24.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p1", "a")
+    before = p.data.copy()
+    estimate = p.estimate_electrons()
+    pdt.assert_frame_equal(p.data, before)
+    assert p.species == ("a", "p1")
+
+    p.estimate_electrons(inplace=True)
+    assert p.species == ("a", "e", "p1")
+    assert "e" in p.ions.index
+    held = p.data.xs("e", axis=1, level="S")
+    pdt.assert_frame_equal(held, estimate.data, check_like=True)
+    assert p.ions.loc["e"].n.iloc[0] == exact(5.4)
+    pdt.assert_frame_equal(p.data.drop(columns="e", level="S"), before)
