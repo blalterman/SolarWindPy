@@ -218,7 +218,7 @@ class TestPlotHistWithContours:
         changed.
         """
         known_hist.set_axnorm("t")
-        fig, supplied = plt.subplots()
+        _, supplied = plt.subplots()
         ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(
             ax=supplied, levels=[0.3, 0.6]
         )
@@ -337,10 +337,12 @@ class TestPlotHistWithContours:
         _, _, qset, _ = known_hist.plot_hist_with_contours(
             cbar=False,
             levels=levels,
+            use_contourf=True,
             gaussian_filter_std=sigma,
             nan_aware_filter=True,
         )
 
+        # axnorm "t" divides every bin by the largest bin count in the grid.
         grid = _expected_grid(known_counts) / known_counts.max()
         valid = ~np.isnan(grid)
         smoothed = gaussian_filter(np.where(valid, grid, 0.0), sigma) / gaussian_filter(
@@ -348,7 +350,7 @@ class TestPlotHistWithContours:
         )
         smoothed[~valid] = np.nan
         XX, YY = np.meshgrid(_bin_centers(XEDGES), _bin_centers(YEDGES))
-        fig, ref_ax = plt.subplots()
+        _, ref_ax = plt.subplots()
         expected = ref_ax.contourf(XX, YY, np.ma.masked_invalid(smoothed), levels)
 
         assert sum(len(segs) for segs in expected.allsegs) > 0  # contours exist
