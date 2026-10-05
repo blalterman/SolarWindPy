@@ -135,6 +135,48 @@ class PublishedTableMismatch(AssertionError):
     """A shipped abundance disagrees with the published Asplund table."""
 
 
+def exact(x):
+    """``pytest.approx`` for a value shipped verbatim or computed from verbatim inputs.
+
+    Tolerance rel=1e-12, abs=0: the CSVs carry the tables' decimals unchanged,
+    so only float parsing or rounding may differ.
+    """
+    return pytest.approx(x, rel=1e-12, abs=0)
+
+
+# Fe (CI Ab, CI Uncert, Photosphere Ab, Photosphere Uncert) by year.
+PUBLISHED_FE = {
+    2009: (
+        7.45,
+        0.01,
+        7.50,
+        0.04,
+    ),  # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
+    2021: (
+        7.46,
+        0.02,
+        7.46,
+        0.04,
+    ),  # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
+}
+
+# O photosphere (Ab, Uncert) by year.
+PUBLISHED_O_PHOTOSPHERE = {
+    2009: (
+        8.69,
+        0.05,
+    ),  # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
+    2021: (8.69, 0.04),  # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
+}
+
+# Fe/O photosphere (ratio, uncertainty) by hand, to 5 significant digits:
+# 10**(Fe-O) and ratio x ln10 x hypot(sigma_Fe, sigma_O).
+HAND_FE_O = {
+    2009: (0.064565, 0.0095194),  # 10**-1.19; hypot(.04, .05)
+    2021: (0.058884, 0.0076699),  # 10**-1.23; hypot(.04, .04)
+}
+
+
 # Expected abundance ratios computed from published values
 # Format: (expected_ratio, sigma_numerator, sigma_denominator)
 EXPECTED_RATIOS: Dict[int, Dict[tuple, tuple]] = {
@@ -232,34 +274,22 @@ class TestDataLoading:
 class TestDataStructure:
     """Unit tests for DataFrame structure: shape, dtype, index."""
 
-    @pytest.mark.parametrize(
-        "year,ci_ab,ci_uncert,ph_ab,ph_uncert",
-        [
-            # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
-            (2009, 7.45, 0.01, 7.50, 0.04),
-            # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
-            (2021, 7.46, 0.02, 7.46, 0.04),
-        ],
-        ids=["asplund2009", "asplund2021"],
-    )
-    def test_data_fe_row_matches_published_table(
-        self, year, ci_ab, ci_uncert, ph_ab, ph_uncert
-    ):
-        """``data`` holds the published Fe row, addressed by (Z, Symbol).
+    def test_data_fe_row_matches_published_table(self, ref_with_year):
+        """``data`` holds the published Fe row (PUBLISHED_FE), addressed by (Z, Symbol).
 
-        Tolerance: the package ships the table's decimals verbatim, so the
-        only admissible difference is float parsing (rel=1e-12); the
-        significant-digit rule would accept 7.50 for 7.46.
+        Tolerance is ``exact``, not the significant-digit rule, which would
+        accept 7.50 for 7.46.
 
         ON FAILURE: the code is wrong, unless the author rejects the cited
         table value.
         """
-        row = ReferenceAbundances(year=year).data.loc[(26, "Fe")]
-        exact = dict(rel=1e-12, abs=0)  # verbatim decimals; see docstring
-        assert row[("CI_chondrites", "Ab")] == pytest.approx(ci_ab, **exact)
-        assert row[("CI_chondrites", "Uncert")] == pytest.approx(ci_uncert, **exact)
-        assert row[("Photosphere", "Ab")] == pytest.approx(ph_ab, **exact)
-        assert row[("Photosphere", "Uncert")] == pytest.approx(ph_uncert, **exact)
+        ref, year = ref_with_year
+        ci_ab, ci_uncert, ph_ab, ph_uncert = PUBLISHED_FE[year]
+        row = ref.data.loc[(26, "Fe")]
+        assert row[("CI_chondrites", "Ab")] == exact(ci_ab)
+        assert row[("CI_chondrites", "Uncert")] == exact(ci_uncert)
+        assert row[("Photosphere", "Ab")] == exact(ph_ab)
+        assert row[("Photosphere", "Uncert")] == exact(ph_uncert)
 
     def test_data_has_83_elements(self, ref_any_year):
         """Both Asplund 2009 and 2021 have 83 elements."""
@@ -481,30 +511,22 @@ class TestCommentsColumn:
 class TestGetElement:
     """Unit tests for element lookup by symbol and Z."""
 
-    @pytest.mark.parametrize(
-        "year,key,ab,uncert",
-        [
-            # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
-            (2009, "Fe", 7.50, 0.04),
-            (2009, 26, 7.50, 0.04),
-            # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
-            (2021, "Fe", 7.46, 0.04),
-            (2021, 26, 7.46, 0.04),
-        ],
-        ids=["2009-symbol", "2009-z", "2021-symbol", "2021-z"],
-    )
-    def test_get_element_returns_published_fe_photosphere(self, year, key, ab, uncert):
+    @pytest.mark.parametrize("key", ["Fe", 26], ids=["symbol", "z"])
+    def test_get_element_returns_published_fe_photosphere(self, ref_with_year, key):
         """``get_element`` by symbol or by Z is the published Fe photosphere Series.
+
+        Expected values: PUBLISHED_FE.
 
         ON FAILURE: the code is wrong, unless the author rejects the cited
         table value.
         """
-        fe = ReferenceAbundances(year=year).get_element(key)
+        ref, year = ref_with_year
+        _, _, ab, uncert = PUBLISHED_FE[year]
+        fe = ref.get_element(key)
         assert isinstance(fe, pd.Series)
         assert fe.index.tolist() == ["Ab", "Uncert"]
-        # Verbatim table decimals: only float parsing may differ.
-        assert fe["Ab"] == pytest.approx(ab, rel=1e-12, abs=0)
-        assert fe["Uncert"] == pytest.approx(uncert, rel=1e-12, abs=0)
+        assert fe["Ab"] == exact(ab)
+        assert fe["Uncert"] == exact(uncert)
 
     @pytest.mark.xfail(
         strict=True,
@@ -615,9 +637,8 @@ class TestMissingPhotosphereData:
         """
         ab, uncert = PUBLISHED_CI_WITHOUT_PHOTOSPHERE[symbol]
         element = ref_any_year.get_element(symbol, kind="CI_chondrites")
-        # Verbatim table decimals: only float parsing may differ.
-        assert element.Ab == pytest.approx(ab, rel=1e-12, abs=0)
-        assert element.Uncert == pytest.approx(uncert, rel=1e-12, abs=0)
+        assert element.Ab == exact(ab)
+        assert element.Uncert == exact(uncert)
 
     def test_h_photosphere_ab_is_12(self, ref_any_year):
         """H photosphere Ab is 12.00 (by definition)."""
@@ -737,8 +758,7 @@ class TestValueValidation:
         drop the xfail marker.
         """
         ab = ref_2009.get_element("Ar", kind="CI_chondrites").Ab
-        # Verbatim table decimals: only float parsing may differ.
-        if ab != pytest.approx(-0.50, rel=1e-12, abs=0):
+        if ab != exact(-0.50):
             raise PublishedTableMismatch(
                 f"Ar CI_chondrites Ab: expected -0.50, got {ab}"
             )
@@ -773,8 +793,7 @@ class TestValueValidation:
         CI values; drop the xfail marker.
         """
         got = ref_2021.get_element(symbol, kind="CI_chondrites").Ab
-        # Verbatim table decimals: only float parsing may differ.
-        if got != pytest.approx(ab, rel=1e-12, abs=0):
+        if got != exact(ab):
             raise PublishedTableMismatch(
                 f"{symbol} CI_chondrites Ab: expected {ab}, got {got}"
             )
@@ -788,42 +807,32 @@ class TestValueValidation:
 class TestAbundanceRatio:
     """Integration tests for abundance ratio calculations."""
 
-    @pytest.mark.parametrize(
-        "year,fe,sigma_fe,o,sigma_o,hand_ratio,hand_uncert",
-        [
-            # Fe, O photosphere: Asplund+2009 Table 1,
-            # doi:10.1146/annurev.astro.46.060407.145222
-            # hand: 10**-1.19 = 0.064565; x ln10 x hypot(.04, .05) = 0.0095194
-            (2009, 7.50, 0.04, 8.69, 0.05, 0.064565, 0.0095194),
-            # Fe, O photosphere: Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
-            # hand: 10**-1.23 = 0.058884; x ln10 x hypot(.04, .04) = 0.0076699
-            (2021, 7.46, 0.04, 8.69, 0.04, 0.058884, 0.0076699),
-        ],
-        ids=["2009", "2021"],
-    )
-    def test_fe_o_ratio_is_abundance_of_published_values(
-        self, year, fe, sigma_fe, o, sigma_o, hand_ratio, hand_uncert
-    ):
+    def test_fe_o_ratio_is_abundance_of_published_values(self, ref_with_year):
         """``abundance_ratio('Fe', 'O')`` is Abundance(10**(Fe-O), ratio ln10 sqrt(sFe^2+sO^2)).
 
         Unpacking yields (measurement, uncertainty) in that order. Expected
         values follow the propagation stated in the ``abundance_ratio``
-        docstring Notes, from the published dex values, plus an independent
-        hand-computed case so a formula wrong in both places still fails.
+        docstring Notes, from the published dex values (PUBLISHED_FE,
+        PUBLISHED_O_PHOTOSPHERE), plus the independent hand-computed HAND_FE_O
+        so a formula wrong in both places still fails.
 
         ON FAILURE: the code is wrong, unless the author rejects the cited
         table values or the stated error propagation.
         """
-        result = ReferenceAbundances(year=year).abundance_ratio("Fe", "O")
+        ref, year = ref_with_year
+        _, _, fe, sigma_fe = PUBLISHED_FE[year]
+        o, sigma_o = PUBLISHED_O_PHOTOSPHERE[year]
+        hand_ratio, hand_uncert = HAND_FE_O[year]
+
+        result = ref.abundance_ratio("Fe", "O")
         assert isinstance(result, Abundance)
         measurement, uncertainty = result
         assert (measurement, uncertainty) == (result.measurement, result.uncertainty)
 
         ratio = 10.0 ** (fe - o)
         uncert = ratio * np.log(10) * np.hypot(sigma_fe, sigma_o)
-        # Same published inputs, same formula: only float rounding differs.
-        assert measurement == pytest.approx(ratio, rel=1e-12, abs=0)
-        assert uncertainty == pytest.approx(uncert, rel=1e-12, abs=0)
+        assert measurement == exact(ratio)
+        assert uncertainty == exact(uncert)
         # Hand values written to 5 significant digits.
         assert measurement == pytest.approx(hand_ratio, rel=1e-4, abs=0)
         assert uncertainty == pytest.approx(hand_uncert, rel=1e-4, abs=0)
