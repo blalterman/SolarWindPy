@@ -52,31 +52,25 @@ class Spacecraft(base.Base):
 
         Examples
         --------
-        >>> epoch = pd.Series({0: pd.to_datetime("1995-01-01"),
-        ...                    1: pd.to_datetime("2015-03-23"),
-        ...                    2: pd.to_datetime("2022-10-09")}, name="Epoch")
-        >>> data = {("pos", "x", ""): {0: -42, 1: -22, 2: -34},
-        ...         ("pos", "y", ""): {0: 23, 1: 31, 2: 11},
-        ...         ("pos", "z", ""): {0: 35, 1: 27, 2: 49},
-        ...         ("v", "x", ""): {0: 9.0, 1: 10.0, 2: 8.0},
-        ...         ("v", "y", ""): {0: -80.0, 1: -70.0, 2: -90.0},
-        ...         ("v", "z", ""): {0: -0.5, 1: 0.5, 2: 1.5},
-        ...         ("carr", "lat", ""): {0: -2.0, 1: -1.0, 2: 3.0},
-        ...         ("carr", "lon", ""): {0: -26.0, 1: -36.0, 2: -16.0}}
-        >>> spacecraft = pd.DataFrame.from_dict(data,
-        ...                                     orient="columns",
-        ...                                     dtype=np.float64)
-        >>> spacecraft.index = epoch
-        >>> spacecraft.columns.names = ["M", "C", "S"]
-        >>> spacecraft = spacecraft.xs("", axis=1, level="S")
-        >>> spacecraft  # doctest: +NORMALIZE_WHITESPACE
-        M            pos                 v            carr
-        C              x     y     z     x     y    z  lat   lon
-        Epoch
-        1995-01-01 -42.0  23.0  35.0   9.0 -80.0 -0.5 -2.0 -26.0
-        2015-03-23 -22.0  31.0  27.0  10.0 -70.0  0.5 -1.0 -36.0
-        2022-10-09 -34.0  11.0  49.0   8.0 -90.0  1.5  3.0 -16.0
-        >>> spacecraft = Spacecraft(spacecraft, "PSP", "HCI")
+        Build a spacecraft from the example Parker Solar Probe trajectory:
+
+        >>> import solarwindpy as swp
+        >>> from solarwindpy.core.spacecraft import Spacecraft
+        >>> data = swp.examples.load_plasma().spacecraft.data
+        >>> data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE
+        [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),
+         ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]
+        >>> times = data.index.strftime("%Y-%m-%d %H:%M:%S.%f")
+        >>> times.tolist()  # doctest: +NORMALIZE_WHITESPACE
+        ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',
+         '2022-10-09 01:47:01.234560']
+        >>> spacecraft = Spacecraft(data, "psp", "HCI")
+        >>> spacecraft.name, spacecraft.frame
+        ('PSP', 'HCI')
+        >>> spacecraft.position.data.loc[:, "x"].tolist()
+        [-42.0, -22.0, -34.0]
+        >>> spacecraft.velocity.data.loc[:, "y"].tolist()
+        [-80.0, -70.0, -90.0]
         """
         super(Spacecraft, self).__init__(data)
         self.set_frame_name(frame, name)

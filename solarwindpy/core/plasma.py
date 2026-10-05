@@ -90,24 +90,24 @@ class Plasma(base.Base):
 
     Examples
     --------
-    Create a plasma object from multi-species data:
+    Load the example plasma, which holds multi-species data:
 
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> # Create sample MultiIndex data
-    >>> epoch = pd.date_range('2023-01-01', periods=3, freq='1min')
-    >>> columns = pd.MultiIndex.from_tuples([
-    ...     ('n', '', 'p1'), ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),
-    ...     ('n', '', 'a'), ('v', 'x', 'a'), ('v', 'y', 'a'), ('v', 'z', 'a'),
-    ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),
-    ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')
-    ... ], names=['M', 'C', 'S'])
-    >>> rng = np.random.default_rng(0)
-    >>> data = pd.DataFrame(rng.random((3, len(columns))),
-    ...                     index=epoch, columns=columns)
-    >>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas
+    >>> import solarwindpy as swp
+    >>> plasma = swp.examples.load_plasma()
     >>> type(plasma.p1).__name__  # Proton ion object
     'Ion'
+    >>> plasma.p1.n.tolist()  # Proton number density
+    [1.0, 2.0, 3.0]
+
+    Build a Plasma from your own DataFrame with ("M", "C", "S") columns by
+    passing it with the species to load; here the example's frame stands in:
+
+    >>> from solarwindpy.core.plasma import Plasma
+    >>> mine = Plasma(plasma.data, *plasma.species)
+    >>> mine.species
+    ('a', 'e', 'p1', 'p2')
+    >>> mine.data.equals(plasma.data)
+    True
 
     Calculate plasma physics parameters:
 
@@ -116,11 +116,13 @@ class Plasma(base.Base):
     'DataFrame'
     >>> beta.columns.tolist()
     ['par', 'per', 'scalar']
+    >>> beta.loc[:, "scalar"].round(4).tolist()
+    [0.3447, 4.178, 4.9268]
 
     Identify ion species in plasma (stored sorted, as a tuple):
 
     >>> plasma.species
-    ('a', 'p1')
+    ('a', 'e', 'p1', 'p2')
     """
 
     def __init__(
