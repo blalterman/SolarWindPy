@@ -9,9 +9,12 @@ cache with a sunspot series of known shape, and then construct a real
 ``SIDC``: a real ``SIDC_ID``, a real ``SIDCLoader``, a real ``SSNExtrema``
 reading the real shipped ``ssn_extrema.csv``, and the real labelling code.
 
-Nothing here patches a name defined in ``sidc.py``. Expectations are
-recomputed from the inputs -- the seeded series and the extrema table -- or are
-analytic identities of the normalization being applied.
+Nothing here patches a name defined in ``sidc.py``. Two boundaries are faked,
+both outside the package: ``Path.home`` (the ``fake_home`` fixture) and the
+socket layer (the autouse ``no_network`` fixture, which makes
+``socket.getaddrinfo`` and ``socket.socket.connect`` raise ``NetworkRefused``).
+Expectations are recomputed from the inputs -- the seeded series and the
+extrema table -- or are analytic identities of the normalization being applied.
 
 KNOWN GAP -- the download itself
 --------------------------------
@@ -23,6 +26,7 @@ serves that format is a drift question, not a unit-test question.
 
 import inspect
 import re
+import socket
 
 import matplotlib
 import numpy as np
@@ -67,27 +71,34 @@ def fake_home(tmp_path, monkeypatch):
     return home
 
 
+class NetworkRefused(AssertionError):
+    """Raised by ``no_network`` when a test in this module opens a socket."""
+
+
 @pytest.fixture(autouse=True)
-def no_download(monkeypatch):
-    """Refuse any attempt to download, so no test in this module hits SILSO.
+def no_network(monkeypatch):
+    """Refuse every socket, so no test in this module reaches SILSO.
 
     Every test here seeds today's cache and expects the loader to read it.
     ``maybe_update_stale_data`` recomputes "today" at load time, so a run that
     straddles local midnight between seeding and loading would judge the cache
-    stale and call ``download_data`` -- which, because these fixtures build a
-    real ``SIDC_ID``, points at the live SILSO endpoint. This is a guard on
-    the external boundary, not a stand-in that lets a test pass: it turns a
-    silent network call into a named failure, and it enforces the module
-    docstring's claim that the download is not exercised here.
+    stale and run the real ``SIDCLoader.download_data``, whose
+    ``pd.read_csv(self.url)`` opens a connection to the live SILSO endpoint.
+    This guard sits on that network boundary rather than on any SolarWindPy
+    name: ``socket.getaddrinfo`` (the DNS lookup) and ``socket.socket.connect``
+    raise ``NetworkRefused``. It subclasses ``AssertionError``, not
+    ``OSError``, so urllib does not wrap it and the failure names its cause.
+    It is a guard, not a stand-in: a test that needs the network fails.
     """
 
-    def refuse(self, new_data_path, old_data_path):
-        raise AssertionError(
-            "download_data was called; the seeded cache was judged stale, "
-            "most likely because this run straddled local midnight"
+    def refuse(*args, **kwargs):
+        raise NetworkRefused(
+            "a test opened a network connection; the seeded cache was most "
+            "likely judged stale because this run straddled local midnight"
         )
 
-    monkeypatch.setattr(SIDCLoader, "download_data", refuse)
+    monkeypatch.setattr(socket, "getaddrinfo", refuse)
+    monkeypatch.setattr(socket.socket, "connect", refuse)
 
 
 def seed_cache(home, key, frame):
@@ -130,6 +141,36 @@ def sidc(fake_home, seeded_index):
 def extrema():
     """The real extrema table, built independently of the SIDC under test."""
     return SSNExtrema()
+
+
+# ---------------------------------------------------------------------------
+# The network guard.
+# ---------------------------------------------------------------------------
+def test_no_network_refuses_the_download_a_stale_cache_triggers(
+    fake_home, seeded_index
+):
+    """A cache dated yesterday sends SIDC to the network, and the guard stops it.
+
+    Seeding yesterday's slot instead of today's is the input chosen so the
+    answer is known: ``maybe_update_stale_data`` must call the real
+    ``download_data``, whose ``pd.read_csv`` on the SILSO URL is the only
+    network access in the chain. Seeing ``NetworkRefused`` proves the guard
+    sits on that path, so every other test's offline claim rests on it.
+
+    ON FAILURE: the no_network fixture no longer separates a cached load from
+    a live download; fix the fixture.
+    """
+    frame = pd.DataFrame(
+        {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
+        index=seeded_index,
+    )
+    cache = fake_home / "solarwindpy" / "data" / "sidc" / "m13"
+    cache.mkdir(parents=True)
+    yesterday = pd.to_datetime("today") - pd.Timedelta("1D")
+    frame.to_csv(cache / f"{yesterday.strftime('%Y%m%d')}.csv")
+
+    with pytest.raises(NetworkRefused, match="opened a network connection"):
+        SIDC("m13")
 
 
 # ---------------------------------------------------------------------------
