@@ -2549,15 +2549,26 @@ def test_heat_flux_matches_its_docstring_formula():
     assert total.iloc[0] == pytest.approx(0.4390632556, rel=1e-9, abs=0)
 
 
+_MISSING_B_ROWS = {
+    ("a", "p1"): NUC_ROWS[0],
+    ("p1", "p2"): {
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 20.0),
+        "p2": (0.5, (500.0, 0.0, 0.0), 60.0, 40.0),
+    },
+}
+
+
 def _missing_b_plasma(*species):
-    """Two identical rows, the second without b: a/p1 from NUC_ROWS, or p1/p2."""
-    if species == ("p1", "p2"):
-        sp = {
-            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 20.0),
-            "p2": (0.5, (500.0, 0.0, 0.0), 60.0, 40.0),
-        }
-    else:
-        sp = NUC_ROWS[0]
+    """Two identical rows, the second without b, for ("a", "p1") or ("p1", "p2").
+
+    Raises ValueError for any other species pair.
+    """
+    if species not in _MISSING_B_ROWS:
+        raise ValueError(
+            f"_missing_b_plasma has no rows for species {species}; "
+            f"supported: {sorted(_MISSING_B_ROWS)}"
+        )
+    sp = _MISSING_B_ROWS[species]
     return _hand_plasma(
         [sp, sp], *species, b=[(5.0, 0.0, 0.0), (np.nan, np.nan, np.nan)]
     )
