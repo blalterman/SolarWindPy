@@ -227,11 +227,16 @@ class Plasma(base.Base):
 
         Examples
         --------
-        ``plasma`` is a two-row, proton-only Plasma with epochs one minute
-        apart, supplied to docstring examples by the test configuration.
-
-        >>> plasma.epoch.strftime("%Y-%m-%d %H:%M").tolist()
-        ['2023-01-01 00:00', '2023-01-01 00:01']
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+        >>> plasma.epoch.equals(epoch)
+        True
         >>> plasma.epoch.name
         'Epoch'
         """
@@ -296,9 +301,14 @@ class Plasma(base.Base):
 
         Examples
         --------
-        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring
-        examples by the test configuration.
-
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
         >>> plasma.log_plasma_at_init
         False
         >>> plasma.set_log_plasma_stats(True)
@@ -631,13 +641,18 @@ class Plasma(base.Base):
 
         Examples
         --------
-        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring
-        examples by the test configuration.
-
         >>> from solarwindpy.core.spacecraft import Spacecraft
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
         >>> trajectory = pd.DataFrame(
         ...     {("pos", "x"): [1.0, 2.0], ("pos", "y"): [0.0, 0.0],
-        ...      ("pos", "z"): [0.0, 0.0]}, index=plasma.epoch)
+        ...      ("pos", "z"): [0.0, 0.0]}, index=epoch)
         >>> trajectory.columns.names = ["M", "C"]
         >>> sc = Spacecraft(trajectory, "PSP", "HCI")
         >>> plasma.set_spacecraft(sc)
@@ -683,9 +698,14 @@ class Plasma(base.Base):
 
         Examples
         --------
-        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring
-        examples by the test configuration.
-
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
         >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1]},
         ...                              index=plasma.epoch)
         >>> quality_flags.columns.names = ["M", "C", "S"]
