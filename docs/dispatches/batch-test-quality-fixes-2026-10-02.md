@@ -188,7 +188,9 @@ outside `docs/dispatches/` returns nothing.
 
 ## Follow-up units
 
-Both run after every unit above has merged; their files are disjoint. Each retires the strict
+Both run after every unit above has merged; their files are disjoint. `plasma-code-fixes`
+also waits for the revert of 6ed14f84 (PR #487) and the PR that re-applies it, since both
+change `plasma.py`. Each retires the strict
 xfails its fixes resolve, with the three-run demonstration from TEST_PATTERNS.md.
 
 ### plasma-code-fixes
@@ -211,7 +213,7 @@ Author decisions:
 
 ### small-code-fixes
 
-OWNS: solarwindpy/solar_activity/icme/icmecat.py, tests/solar_activity/icme/test_icmecat.py, solarwindpy/plotting/hist2d.py, tests/plotting/test_hist2d_plotting.py, solarwindpy/fitfunctions/lines.py, solarwindpy/fitfunctions/core.py, tests/fitfunctions/test_lines.py, tests/fitfunctions/test_exponentials.py, solarwindpy/plotting/tools.py, .claude/docs/TEST_PATTERNS.md
+OWNS: solarwindpy/solar_activity/icme/icmecat.py, tests/solar_activity/icme/test_icmecat.py, solarwindpy/plotting/hist2d.py, tests/plotting/test_hist2d_plotting.py, solarwindpy/fitfunctions/lines.py, solarwindpy/fitfunctions/core.py, tests/fitfunctions/test_lines.py, tests/fitfunctions/test_exponentials.py, solarwindpy/plotting/tools.py, .claude/docs/TEST_PATTERNS.md, .claude/README.md, .claude/WORKFLOW_TEMPLATE.md, .claude/docs/DEVELOPMENT.md, .claude/docs/MAINTENANCE.md, .github/PULL_REQUEST_TEMPLATE.md, .gitmessage
 
 Author decisions:
 
@@ -229,6 +231,15 @@ Author decisions:
   when the package stores a published value as printed, compare exactly; when it computes a
   value a source prints to d decimal places, allow half the last printed digit
   (`abs = 0.5 × 10^-d`, `rel = 0`). This holds on linear and logarithmic scales alike.
+- Attribution leftovers after ATTRIBUTION.md's retirement (author-approved): remove the
+  "Generated with Claude Code" commit instruction from `.claude/README.md` and
+  `.claude/WORKFLOW_TEMPLATE.md` (including its "Commit with Attribution" step); where docs
+  show the trailer, describe it as "a `Co-Authored-By: Claude …` trailer" rather than one exact
+  string; remove the "Annual Attribution Audit" procedure in `MAINTENANCE.md` that writes to
+  `docs/audits/attribution-audit-YYYY.md`. Control: `git grep -n "Generated with Claude Code"`
+  outside `docs/dispatches/` returns nothing.
+- The PR template and `.gitmessage` say "coverage ≥95%", which is neither the hook's floor
+  nor a promise; say "coverage at or above the pre-commit hook's floor" instead.
 
 ## Long-running units
 
