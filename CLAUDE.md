@@ -65,13 +65,11 @@ coverage from a `Stop` hook — those numbers are advisory and block nothing.
   overrides the global "three examples before abstracting" rule.
 - Cite scientific sources in docstrings: DOI or arXiv, and the equation number
   when implementing a specific published result.
-- Attribution rules live in `.claude/docs/ATTRIBUTION.md`. In short: note
-  "Generated with Claude Code" in commit messages for AI-written code, and
-  record URL, license, and modifications in a comment for external code. When
-  the provenance of a snippet is unclear, reimplement rather than copy.
+- Attribution: AI-written commits carry the `Co-Authored-By` trailer. External
+  code records its URL, license, and modifications in a comment. When the
+  provenance of a snippet is unclear, reimplement rather than copy.
 
 ## Further documentation
 
 `.claude/docs/` holds the detail beyond this file: `DEVELOPMENT.md`,
-`HOOKS.md`, `TEST_PATTERNS.md`, `MAINTENANCE.md`,
-`RELEASING.md`, `ATTRIBUTION.md`.
+`HOOKS.md`, `TEST_PATTERNS.md`, `MAINTENANCE.md`, `RELEASING.md`.
