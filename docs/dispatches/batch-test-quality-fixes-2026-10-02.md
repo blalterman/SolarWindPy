@@ -37,6 +37,9 @@ outside a unit's files becomes a strict xfail naming what retires it.
   (the pre-commit hooks enter the solarwindpy env themselves), explicit-path staging, never `--no-verify`, a conventional subject, and the line
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; pushes its branch, opens a pull
   request, and does not merge.
+- Pushes only with an explicit refspec, `git push -u origin HEAD:refs/heads/tq-fix/<unit>`.
+  The author's git sets `push.default=upstream`, so a branch created from `origin/master`
+  tracks master and a plain push lands on master unreviewed.
 
 Baselines in brackets are collected test counts from
 `conda run -n solarwindpy pytest --collect-only -q <files>`; per-file pass counts are in
