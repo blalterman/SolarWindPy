@@ -271,8 +271,12 @@ class TestICMECATFilter:
         ON FAILURE: the docstring or SPACECRAFT_NAMES is wrong; make the
         docstring's "Valid names" list match SPACECRAFT_NAMES.
         """
+        marker = "matched case-insensitively:"
         doc = " ".join(ICMECAT.__doc__.split())
-        listed = doc.split("matched case-insensitively:", 1)[1].split(".", 1)[0]
+        assert (
+            marker in doc
+        ), f"ICMECAT docstring no longer contains {marker!r}; update this test's marker"
+        listed = doc.split(marker, 1)[1].split(".", 1)[0]
         names = {name.strip() for name in listed.split(",")}
         assert names == set(icmecat.SPACECRAFT_NAMES)
 
