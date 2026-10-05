@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g6ed14f84f documentation</title>
+  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g1ace93ee7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ca1907ca"></script>
+      <script src="../_static/documentation_options.js?v=9f139e0c"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -320,23 +320,15 @@
 <h1>solarwindpy.core.abundances.ReferenceAbundances<a class="headerlink" href="#solarwindpy-core-abundances-referenceabundances" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.core.abundances.ReferenceAbundances">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ReferenceAbundances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2021</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/abundances.html#ReferenceAbundances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ReferenceAbundances</span></span><a class="reference internal" href="../_modules/solarwindpy/core/abundances.html#ReferenceAbundances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Elemental abundances from Asplund et al. (2009, 2021).</p>
+<p>Elemental abundances from Asplund et al. (2021), Table 2.</p>
 <p>Provides photospheric and CI chondrite (meteoritic) abundances
 in the standard dex scale: log ε_X = log(N_X/N_H) + 12.</p>
 <dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>year</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a>, default 2021</span></dt><dd><p>Reference year: 2009 or 2021. Default uses Asplund 2021.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Attributes<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
 <dt><a class="reference internal" href="#solarwindpy.core.abundances.ReferenceAbundances.data" title="solarwindpy.core.abundances.ReferenceAbundances.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Elemental abundances in dex scale.</p>
-</dd>
-<dt><a class="reference internal" href="#solarwindpy.core.abundances.ReferenceAbundances.year" title="solarwindpy.core.abundances.ReferenceAbundances.year"><code class="xref py py-obj docutils literal notranslate"><span class="pre">year</span></code></a><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The reference year for the loaded data.</p>
 </dd>
 </dl>
 </dd>
@@ -345,10 +337,6 @@ in the standard dex scale: log ε_X = log(N_X/N_H) + 12.</p>
 <p>Asplund, M., Amarsi, A. M., &amp; Grevesse, N. (2021).
 The chemical make-up of the Sun: A 2020 vision.
 A&amp;A, 653, A141. <a class="reference external" href="https://doi.org/10.1051/0004-6361/202140445">https://doi.org/10.1051/0004-6361/202140445</a></p>
-<p>Asplund, M., Grevesse, N., Sauval, A. J., &amp; Scott, P. (2009).
-The Chemical Composition of the Sun.
-Annu. Rev. Astron. Astrophys., 47, 481-522.
-<a class="reference external" href="https://doi.org/10.1146/annurev.astro.46.060407.145222">https://doi.org/10.1146/annurev.astro.46.060407.145222</a></p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="n">ReferenceAbundances</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
@@ -356,23 +344,10 @@ Annu. Rev. Astron. Astrophys., 47, 481-522.
 <span class="go">Fe = 7.46 ± 0.04</span>
 </pre></div>
 </div>
-<p>Using 2009 data:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ref_2009</span> <span class="o">=</span> <span class="n">ReferenceAbundances</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2009</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fe_2009</span> <span class="o">=</span> <span class="n">ref_2009</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Fe (2009) = </span><span class="si">{</span><span class="n">fe_2009</span><span class="o">.</span><span class="n">Ab</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="go">Fe (2009) = 7.50</span>
-</pre></div>
-</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.abundances.ReferenceAbundances.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2021</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/abundances.html#ReferenceAbundances.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/abundances.html#ReferenceAbundances.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.core.abundances.ReferenceAbundances.year">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">year</span></span><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances.year" title="Link to this definition"></a></dt>
-<dd><p>The reference year for the loaded data.</p>
-</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.core.abundances.ReferenceAbundances.data">
@@ -410,7 +385,9 @@ or “Meteorites” (alias for CI_chondrites).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Series with ‘Ab’ (abundance in dex) and ‘Uncert’ (uncertainty).</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Series with ‘Ab’ (abundance in dex) and ‘Uncert’ (uncertainty),
+named by the element’s atomic number Z whether <cite>key</cite> is the
+symbol or Z.</p>
 </dd>
 </dl>
 </dd>
@@ -425,11 +402,14 @@ or “Meteorites” (alias for CI_chondrites).</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="n">ReferenceAbundances</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">float</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">Ab</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">Uncert</span><span class="p">)</span>
-<span class="go">(7.46, 0.04)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="mi">26</span><span class="p">)</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>  <span class="c1"># Same values using atomic number</span>
-<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
+<span class="go">Ab        7.46</span>
+<span class="go">Uncert    0.04</span>
+<span class="go">Name: 26, dtype: float64</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="mi">26</span><span class="p">)</span>  <span class="c1"># Same result using atomic number</span>
+<span class="go">Ab        7.46</span>
+<span class="go">Uncert    0.04</span>
+<span class="go">Name: 26, dtype: float64</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -437,7 +417,7 @@ or “Meteorites” (alias for CI_chondrites).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.core.abundances.ReferenceAbundances.get_comment">
 <span class="sig-name descname"><span class="pre">get_comment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/abundances.html#ReferenceAbundances.get_comment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.abundances.ReferenceAbundances.get_comment" title="Link to this definition"></a></dt>
-<dd><p>Get the source comment for an element (2021 data only).</p>
+<dd><p>Get the source comment for an element.</p>
 <p>The comment indicates the source methodology for elements where
 the adopted abundance is not from photospheric spectroscopy:
 - ‘definition’: H abundance is defined as 12.00
@@ -455,7 +435,7 @@ the adopted abundance is not from photospheric spectroscopy:
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>The comment string, or None if no comment (spectroscopic
-measurement) or if using 2009 data.</p>
+measurement).</p>
 </dd>
 </dl>
 </dd>
