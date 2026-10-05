@@ -65,20 +65,24 @@ class Ion(base.Base):
 
         Examples
         --------
-        Create a proton ion from measurement data:
+        Create a proton ion from the example plasma's measurement data:
 
-        >>> import pandas as pd
-        >>> import numpy as np
-        >>> columns = pd.MultiIndex.from_tuples([
-        ...     ('n', '', 'p1'),
-        ...     ('v', 'x', 'p1'), ('v', 'y', 'p1'), ('v', 'z', 'p1'),
-        ...     ('w', 'par', 'p1'), ('w', 'per', 'p1')
-        ... ], names=['M', 'C', 'S'])
-        >>> df = pd.DataFrame(np.random.rand(2, 6), columns=columns)
-        >>> proton_data = df.xs('p1', level='S', axis=1)
+        >>> import solarwindpy as swp
+        >>> from solarwindpy.core.ions import Ion
+        >>> plasma = swp.examples.load_plasma()
+        >>> proton_data = plasma.data.xs('p1', level='S', axis=1)
         >>> proton = Ion(proton_data, 'p1')
         >>> proton.species
         'p1'
+        >>> proton.n.tolist()
+        [1.0, 2.0, 3.0]
+        >>> proton.v.mag.round(2).tolist()
+        [458.26, 700.0, 1044.03]
+
+        It matches the proton ion the plasma builds itself:
+
+        >>> proton == plasma.p1
+        True
         """
         self.set_species(species)
         super().__init__(data)
