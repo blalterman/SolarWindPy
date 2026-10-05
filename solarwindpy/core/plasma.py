@@ -227,18 +227,12 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
-        ...                          name="Epoch")
-        >>> columns = pd.MultiIndex.from_tuples([
-        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
-        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
-        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
-        ... ], names=["M", "C", "S"])
-        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
-        >>> plasma.epoch.equals(epoch)
-        True
+        >>> import solarwindpy as swp
+        >>> plasma = swp.examples.load_plasma()
+        >>> [str(t) for t in plasma.epoch]
+        ['1995-01-01 12:35:00', '2022-03-23 19:29:09', '2022-10-09 01:47:01.234560']
         >>> plasma.epoch.name
-        'Epoch'
+        'epoch'
         """
         return self.data.index
 
@@ -641,25 +635,17 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> from solarwindpy.core.spacecraft import Spacecraft
-        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
-        ...                          name="Epoch")
-        >>> columns = pd.MultiIndex.from_tuples([
-        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
-        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
-        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
-        ... ], names=["M", "C", "S"])
-        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
-        >>> trajectory = pd.DataFrame(
-        ...     {("pos", "x"): [1.0, 2.0], ("pos", "y"): [0.0, 0.0],
-        ...      ("pos", "z"): [0.0, 0.0]}, index=epoch)
-        >>> trajectory.columns.names = ["M", "C"]
-        >>> sc = Spacecraft(trajectory, "PSP", "HCI")
-        >>> plasma.set_spacecraft(sc)
+        >>> import solarwindpy as swp
+        >>> plasma = swp.examples.load_plasma()
+        >>> psp = plasma.spacecraft
+        >>> plasma.set_spacecraft(None)
+        >>> plasma.spacecraft is None
+        True
+        >>> plasma.set_spacecraft(psp)
         >>> plasma.spacecraft.name
         'PSP'
         >>> plasma.spacecraft.position.data.loc[:, "x"].tolist()  # trajectory
-        [1.0, 2.0]
+        [-42.0, -22.0, -34.0]
         """
         assert isinstance(new, spacecraft.Spacecraft) or new is None
 
@@ -698,20 +684,16 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
-        ...                          name="Epoch")
-        >>> columns = pd.MultiIndex.from_tuples([
-        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
-        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
-        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
-        ... ], names=["M", "C", "S"])
-        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
-        >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1]},
+        >>> import solarwindpy as swp
+        >>> plasma = swp.examples.load_plasma()
+        >>> plasma.auxiliary_data is None
+        True
+        >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1, 0]},
         ...                              index=plasma.epoch)
         >>> quality_flags.columns.names = ["M", "C", "S"]
         >>> plasma.set_auxiliary_data(quality_flags)
         >>> plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data
-        [0, 1]
+        [0, 1, 0]
         """
         assert isinstance(new, pd.DataFrame) or new is None
 

@@ -1,27 +1,25 @@
 #!/usr/bin/env python
 """Tests for basic synthetic data setup."""
 
-import numpy as np
 import pandas as pd
-from pathlib import Path
 from unittest import TestCase
+
+from solarwindpy.examples import _read_example
 
 pd.set_option("mode.chained_assignment", "raise")
 
-DATA_PATH = Path(__file__).parent.parent / "data"
-
 
 class SyntheticData(object):
-    def __init__(self):
-        self.set_plasma_data()
-        self.set_spacecraft_data()
+    """The example data behind ``solarwindpy.examples.load_plasma``, as frames.
 
-    @property
-    def epoch(self):
-        path = DATA_PATH / "epoch.csv"
-        epoch = pd.read_csv(path)["epoch"].map(pd.to_datetime)
-        epoch.name = "epoch"
-        return epoch
+    ``plasma_data`` keeps every column of the example CSV, including those
+    ``Plasma`` drops; ``spacecraft_data`` holds both the HCI trajectory and
+    the GSE position as ``(M, C)`` columns.
+    """
+
+    def __init__(self):
+        self._plasma_data = _read_example("plasma")
+        self._spacecraft_data = _read_example("spacecraft").xs("", axis=1, level="S")
 
     @property
     def spacecraft_data(self):
@@ -38,29 +36,6 @@ class SyntheticData(object):
         ).reorder_levels(["M", "C", "S"], axis=1)
         out = pd.concat([self.plasma_data, sc], axis=1, sort=True)
         return out
-
-    def set_spacecraft_data(self):
-        path = DATA_PATH / "spacecraft.csv"
-        test_data = pd.read_csv(path)
-        test_data.columns = pd.MultiIndex.from_tuples(
-            [tuple(c.split("|")) for c in test_data.columns]
-        )
-        test_data.columns.names = ["M", "C", "S"]
-        test_data = test_data.astype(np.float64).sort_index(axis=1)
-        test_data.index = self.epoch
-        self._spacecraft_data = test_data.xs("", axis=1, level="S")
-
-    def set_plasma_data(self):
-        path = DATA_PATH / "plasma.csv"
-        test_plasma = pd.read_csv(path)
-        test_plasma.columns = pd.MultiIndex.from_tuples(
-            [tuple(c.split("|")) for c in test_plasma.columns]
-        )
-        test_plasma = test_plasma.astype(np.float64)
-        test_plasma.columns.names = ["M", "C", "S"]
-        test_plasma.index = self.epoch
-        test_plasma = test_plasma.sort_index(axis=1)
-        self._plasma_data = test_plasma
 
 
 class SWEData(TestCase):
