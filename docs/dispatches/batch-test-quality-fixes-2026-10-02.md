@@ -153,8 +153,10 @@ Runs after `docstring-examples` and `abundances-tests` merge. Author decisions: 
 (doi:10.1051/0004-6361/202140445); restore the CI_chondrites Ab values the CSV leaves blank,
 Ne −1.12, Ar −0.50, Kr −2.27, Xe −1.95 (each ± 0.18, as printed in Table 2). Every other row
 of the 2021 CSV already matches Table 2. Drop the 2009 tests, retire the noble-gas strict
-xfails, record the removal and the fix in `CHANGELOG.md`. Control: blanking any one of the
-four cells again fails a test.
+xfails, record the removal and the fix in `CHANGELOG.md`. Add a test asserting that the 15
+Photosphere cells Table 2 leaves blank (unavailable) stay NaN: As, Se, Br, Cd, Sb, Te, I, Cs,
+Ta, Re, Ir, Pt, Hg, Bi, U. Controls: blanking any one of the four restored cells fails a test,
+and filling any one of the 15 blank cells fails a test.
 
 ### dev-extras-and-coverage-figure
 
