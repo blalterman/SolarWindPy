@@ -91,22 +91,27 @@ def no_network(monkeypatch):
     It is a guard, not a stand-in: a test that needs the network fails.
     """
 
-    def refuse(*args, **kwargs):
-        raise NetworkRefused(
-            "a test opened a network connection; the seeded cache was most "
-            "likely judged stale because this run straddled local midnight"
-        )
+    def refuse_lookup(host, *args, **kwargs):
+        raise NetworkRefused(f"a test tried to open a network connection to {host}")
 
-    monkeypatch.setattr(socket, "getaddrinfo", refuse)
-    monkeypatch.setattr(socket.socket, "connect", refuse)
+    def refuse_connect(self, address, *args, **kwargs):
+        host = address[0] if isinstance(address, tuple) else address
+        raise NetworkRefused(f"a test tried to open a network connection to {host}")
+
+    monkeypatch.setattr(socket, "getaddrinfo", refuse_lookup)
+    monkeypatch.setattr(socket.socket, "connect", refuse_connect)
 
 
-def seed_cache(home, key, frame):
-    """Write ``frame`` into today's SIDC cache slot for ``key``."""
+def seed_cache(home, key, frame, date=None):
+    """Write ``frame`` into the SIDC cache slot for ``key`` dated ``date``.
+
+    ``date`` defaults to today, the slot the loader reads without downloading.
+    """
     cache = home / "solarwindpy" / "data" / "sidc" / key
     cache.mkdir(parents=True, exist_ok=True)
-    today = pd.to_datetime("today").strftime("%Y%m%d")
-    frame.to_csv(cache / f"{today}.csv")
+    if date is None:
+        date = pd.to_datetime("today")
+    frame.to_csv(cache / f"{date.strftime('%Y%m%d')}.csv")
     return cache
 
 
@@ -164,12 +169,10 @@ def test_no_network_refuses_the_download_a_stale_cache_triggers(
         {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    cache = fake_home / "solarwindpy" / "data" / "sidc" / "m13"
-    cache.mkdir(parents=True)
     yesterday = pd.to_datetime("today") - pd.Timedelta("1D")
-    frame.to_csv(cache / f"{yesterday.strftime('%Y%m%d')}.csv")
+    seed_cache(fake_home, "m13", frame, date=yesterday)
 
-    with pytest.raises(NetworkRefused, match="opened a network connection"):
+    with pytest.raises(NetworkRefused, match="tried to open a network connection"):
         SIDC("m13")
 
 
