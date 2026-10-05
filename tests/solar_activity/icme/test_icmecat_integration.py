@@ -45,6 +45,7 @@ class TestLiveDownload:
         cat = ICMECAT()
         assert pd.api.types.is_datetime64_any_dtype(cat.data["icme_start_time"])
         assert pd.api.types.is_datetime64_any_dtype(cat.data["mo_end_time"])
+        # pandas 3 gives str, not object: do not revert to `== object`.
         assert pd.api.types.is_string_dtype(cat.data["icmecat_id"])
 
     def test_filter_then_contains(self):

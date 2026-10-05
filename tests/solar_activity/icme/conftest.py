@@ -27,6 +27,9 @@ NaT = pd.NaT
 #   S1  STEREO-A   2000-06-01        2000-06-01 12:00  2000-06-03  2000-06-03    mo_end
 #
 # mo_bmax is a catalog column that ICMECAT.intervals does not carry.
+#
+# CATALOG is read-only shared state: tests receive copies through the
+# `catalog` and `serve_catalog` fixtures and never touch it directly.
 CATALOG = pd.DataFrame(
     {
         "icmecat_id": ["U1", "U2", "U3", "W1", "W2", "S1"],
@@ -90,7 +93,7 @@ def serve_catalog(tmp_path, monkeypatch):
     """
 
     def _serve(frame=None):
-        frame = CATALOG if frame is None else frame
+        frame = (CATALOG if frame is None else frame).copy()
         path = tmp_path / "icmecat.csv"
         frame.to_csv(path, index=False)
         monkeypatch.setattr(icmecat, "ICMECAT_URL", str(path))
