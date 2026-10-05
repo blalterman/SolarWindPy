@@ -136,6 +136,12 @@ keep ICMECAT examples off the network, replace the dead Google Drive link, and d
 wherever the example can run. Control: `pytest --doctest-modules solarwindpy -q` skip count
 falls from 36. [doctests: 24 passed, 36 skipped]
 
+Review follow-up (author decision): the four `plasma.py` examples that repeat the same
+`Plasma` setup (`epoch`, `set_log_plasma_stats`, `set_spacecraft`, `set_auxiliary_data`) use a
+shared `plasma` from `doctest_namespace`, provided by the root `conftest.py` that
+`documented-examples` adds. This unit makes that switch after `documented-examples` merges,
+and each of the four docstrings says where `plasma` comes from.
+
 ### documented-examples
 
 OWNS: README.rst, docs/source/tutorial/quickstart.rst, docs/source/installation.rst, conftest.py, .github/workflows/doctest_validation.yml
