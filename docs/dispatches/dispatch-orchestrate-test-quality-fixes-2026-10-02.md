@@ -274,3 +274,66 @@ is DONE.
 
 ---
 
+
+---
+
+## Empirical Findings (2026-10-05 trial run)
+
+### End-state metrics
+
+- Fix-program pull requests merged: 18 (AC predicted 11 or more). Open: 1 (#493, `tolerance-helpers`).
+- Suite on master after #492: `2836 passed, 12 skipped`, 0 failed, 0 xfailed (baseline `2849 passed, 12 skipped`; counts moved as units removed and added tests).
+- Doctests: `59 passed, 1 skipped` (baseline `24 passed, 36 skipped`).
+- Sphinx linkcheck broken links: 5 to 4.
+- Units added beyond the original 11 plus 2 long-running, each by author decision: `abundances-2021-only`, `examples-and-logging-cleanup`, `small-code-fixes`, `plasma-code-fixes`, `p0-contract`, `loader-examples`, `tolerance-helpers`, `p0-simplify`, `scalar-w-nan`.
+
+### Governing Property
+
+not served -- the work is incomplete: PR #493 is open and `p0-simplify`, `scalar-w-nan` and `mutation-recheck` have not run (`gh pr list --state open` shows #493). One change, 6ed14f84, reached master without review; PR #487 reverted it and PR #489 replaced it through review.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| Every unit merged through a PR (11 or more) | PASS | `gh pr list --state merged ... startswith("tq-fix/")` → 18; control `"tq-fix/no-such-unit"` → 0 |
+| No fix-program PR open | FAIL | the same query with `--state open` → 1 (#493); carried to `dispatch-continue-test-quality-fixes-2026-10-05.md` |
+| Suite green after the merges | PASS | `2836 passed, 12 skipped, 20 warnings, 18 subtests passed` on master after #492; control `tmp/test-quality-review/baseline_run.txt` prints `2849 passed, 12 skipped` |
+| Latitude fix landed | PASS | the `Vector(0, 0, 1).latitude` command printed 90 (it printed 0 before #475) |
+| Re-measurement recorded | PASS | `grep -c '^## Re-measurement' findings-test-quality-review-2026-10-02.md` → 1 (linkcheck only; mutation pending); control on the batch file → 0 |
+| Unit worktrees removed | DEFERRED | `git worktree list | grep -c '.claude/worktrees/agent-'` → 18; carried to the successor's step 7 |
+| Revised adoption plan drafted | DEFERRED | only `plan-spent-when-adoption-2026-09-16.md` exists; carried to the successor's step 8 |
+
+### Deviations from plan
+
+- The pilot's prescribed `conda run ... git commit` was refused by the worktree guard; units commit with plain `git commit` from the worktree (9166fba3).
+- The two long-running units ran in the main checkout, not worktrees, because `tmp/` is git-ignored; `run_mutmut.sh` mutates an isolated copy.
+- A branch created from `origin/master` tracked master under `push.default=upstream`, so 6ed14f84 landed on master unreviewed. Reverted through PR #487, replaced through PR #489; units now push with an explicit refspec (08bf75c5) and a project memory records the rule.
+- Two units were given CHANGELOG.md in `OWNS:`, and units ran only the test suites while CI builds the docs with `-W`; PR #491 failed CI on 11 Sphinx references. Units now build the docs (297e1328).
+- Local master merged `origin/master` instead of `git pull --ff-only`, because local orchestration commits diverged from merged pull requests.
+- Each pull request also went through one or more rounds of automated Claude review, triaged against the code before fixes were sent.
+- Units followed the worktree guard's prescribed plain-command alternatives when a command's shape was refused; the author accepted this.
+
+### Commits
+
+- `9166fba3` docs(dispatch): units commit with plain git commit from the worktree
+- `75efe5f5` docs(dispatch): record pilot physics decisions and widen its OWNS
+- `72dc836c` docs(dispatch): give plasma-physics-cases the Wk definition and NaN rules
+- `80629fab` docs(dispatch): add abundances-2021-only unit
+- `760e834c` docs(dispatch): pin the 15 unavailable Asplund 2021 photosphere cells as NaN
+- `14d500f2` docs(dispatch): record the shared doctest setup decision for plasma.py examples
+- `97b8c3ec` docs(dispatch): retire ATTRIBUTION.md in the dev-extras unit
+- `3daf67cd` docs(dispatch): add plasma-code-fixes and small-code-fixes follow-up units
+- `08bf75c5` docs(dispatch): units push only with an explicit refspec
+- `59550929` docs(review): record the linkcheck re-measurement
+- `53d872f2` docs(dispatch): fold attribution and coverage-wording leftovers into small-code-fixes
+- `319217e4` docs(dispatch): add p0-contract and tolerance-helpers units
+- `12be2b0a` docs(dispatch): add examples-and-logging-cleanup unit
+- `297e1328` docs(dispatch): units build the docs with warnings as errors
+- `53dd5ef1` docs(dispatch): record zero-width, hinge fallback and GaussianLn decisions
+- `69461d74` docs(dispatch): add loader-examples unit; fold #490's test gaps into tolerance-helpers
+- `564a703d` docs(dispatch): record that the heat_flux label stays q
+- `e1f9cec8` docs(dispatch): add scalar-w-nan unit (author decision)
+- `85621bf4` docs(dispatch): add p0-simplify unit (author decision)
+- `cc9284b8` docs(dispatch): continue the test-quality fix program in a new session
+
+## Spent-Mark: declined; stopped by decision; the remaining work continues in docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md
