@@ -1,549 +1,639 @@
-"""Unit tests for ICMECAT class.
+"""Unit tests for the ICMECAT class.
 
-Tests cover:
-- Initialization and data loading
-- Spacecraft filtering
-- Interval preparation with fallbacks
-- Containment checking
-- Summary statistics
-- Property types, shapes, and dtypes
+Every test reads a real CSV through the real ``pandas.read_csv``: the
+``serve_catalog`` fixture (``conftest.py``) writes a hand-built catalog under
+``tmp_path`` and points ``icmecat.ICMECAT_URL`` at it. Expected values are read
+off the table in ``conftest.py``.
 """
 
+import os
+import time
+
+import numpy as np
 import pandas as pd
-from unittest.mock import patch
+import pytest
+
+from solarwindpy.solar_activity.icme import icmecat
+from solarwindpy.solar_activity.icme.icmecat import ICMECAT, ICMECATDownloadError
+
+T = pd.Timestamp
+
+ALL_IDS = ["U1", "U2", "U3", "W1", "W2", "S1"]
+ULYSSES_IDS = ["U1", "U2", "U3"]
+STRICT_IDS = ["U1", "U2", "W2", "S1"]  # rows with mo_end_time present
+
+# interval_end per row, from the conftest table: mo_end_time, else
+# mo_start_time + 24 h (U3), else icme_start_time + 24 h (W1).
+INTERVAL_END = [
+    T("2000-01-15"),
+    T("2000-02-20"),
+    T("2000-03-22"),
+    T("2000-04-02"),
+    T("2000-05-04"),
+    T("2000-06-03"),
+]
+
+
+class TestCatalogFixture:
+    """The hand-built catalog separates the behaviors the tests rely on."""
+
+    def test_catalog_fixture_covers_every_interval_end_source(self, catalog):
+        """The catalog has a row for each interval_end source and mixed spellings.
+
+        Needs: mo_end_time present; mo_end_time missing with mo_start_time
+        present; both missing; more than one spacecraft; and a spacecraft
+        spelled differently from the caller's "Ulysses".
+
+        ON FAILURE: the fixture no longer separates the three interval_end
+        sources (or exact from case-insensitive spacecraft matching); fix the
+        fixture.
+        """
+        has_end = catalog["mo_end_time"].notna()
+        has_start = catalog["mo_start_time"].notna()
+        assert has_end.any()
+        assert (~has_end & has_start).any()
+        assert (~has_end & ~has_start).any()
+        assert catalog["sc_insitu"].nunique() > 1
+        assert "Ulysses" not in set(catalog["sc_insitu"])
+        assert "ulysses" in set(catalog["sc_insitu"].str.lower())
 
 
 class TestICMECATInitialization:
-    """Test ICMECAT class initialization."""
+    """ICMECAT() loads the catalog and optionally filters it."""
 
-    def test_init_downloads_data(self, mock_icmecat_csv_data):
-        """ICMECAT() downloads data on initialization."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_init_loads_every_catalog_row(self, serve_catalog):
+        """ICMECAT() loads every row of the catalog at ICMECAT_URL, in order.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert cat.data["icmecat_id"].tolist() == ALL_IDS
 
-            assert cat.data is not None
-            assert len(cat) > 0
+    def test_init_with_spacecraft_filters(self, serve_catalog):
+        """ICMECAT(spacecraft="Ulysses") keeps exactly the ULYSSES rows.
 
-    def test_init_with_spacecraft_filters(self, mock_icmecat_csv_data):
-        """ICMECAT(spacecraft='X') filters to that spacecraft."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        The catalog spells it "ULYSSES"; the match is case-insensitive and
+        the caller's spelling is kept for display.
 
-            cat = ICMECAT(spacecraft="Ulysses")
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT(spacecraft="Ulysses")
+        assert cat.spacecraft == "Ulysses"
+        assert cat.data["icmecat_id"].tolist() == ULYSSES_IDS
+        assert cat.intervals["icmecat_id"].tolist() == ULYSSES_IDS
 
-            assert cat.spacecraft == "Ulysses"
-            assert all(cat.data["sc_insitu"] == "Ulysses")
+    def test_init_without_spacecraft_keeps_all(self, serve_catalog):
+        """ICMECAT() without a spacecraft keeps every spacecraft.
 
-    def test_init_without_spacecraft_keeps_all(self, mock_icmecat_csv_data):
-        """ICMECAT() without spacecraft keeps all events."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            assert cat.spacecraft is None
-            assert len(cat.data["sc_insitu"].unique()) > 1
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert cat.spacecraft is None
+        assert set(cat.data["sc_insitu"]) == {"ULYSSES", "Wind", "STEREO-A"}
 
 
 class TestICMECATDataProperty:
-    """Test ICMECAT.data property."""
+    """ICMECAT.data is the catalog as read."""
 
-    def test_data_is_dataframe(self, mock_icmecat_csv_data):
-        """data property returns a DataFrame."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_data_values_match_catalog_file(self, serve_catalog, catalog):
+        """data holds the catalog's values, row for row.
 
-            cat = ICMECAT()
+        Dtypes are not compared: CSV parsing picks string and datetime units.
 
-            assert isinstance(cat.data, pd.DataFrame)
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        pd.testing.assert_frame_equal(
+            cat.data.reset_index(drop=True), catalog, check_dtype=False
+        )
 
-    def test_data_has_required_columns(self, mock_icmecat_csv_data):
-        """data has all required columns."""
-        required = ["icmecat_id", "sc_insitu", "icme_start_time", "mo_end_time"]
+    def test_data_has_catalog_columns(self, serve_catalog, catalog):
+        """data keeps every catalog column, including ones intervals drops.
 
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert cat.data.columns.tolist() == catalog.columns.tolist()
 
-            cat = ICMECAT()
+    def test_data_datetime_dtypes(self, serve_catalog):
+        """The three time columns parse from CSV text to datetime64.
 
-            for col in required:
-                assert col in cat.data.columns, f"Missing column: {col}"
-
-    def test_data_datetime_dtypes(self, mock_icmecat_csv_data):
-        """Datetime columns have datetime64 dtype."""
-        datetime_cols = ["icme_start_time", "mo_start_time", "mo_end_time"]
-
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            for col in datetime_cols:
-                assert pd.api.types.is_datetime64_any_dtype(
-                    cat.data[col]
-                ), f"{col} should be datetime64, got {cat.data[col].dtype}"
-
-    def test_data_shape_nonzero(self, mock_icmecat_csv_data):
-        """data has non-zero rows."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            assert cat.data.shape[0] > 0
-            assert cat.data.shape[1] >= 5
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        for col in ["icme_start_time", "mo_start_time", "mo_end_time"]:
+            assert pd.api.types.is_datetime64_any_dtype(
+                cat.data[col]
+            ), f"{col} should be datetime64, got {cat.data[col].dtype}"
 
 
 class TestICMECATIntervalsProperty:
-    """Test ICMECAT.intervals property."""
+    """ICMECAT.intervals carries a computed interval_end."""
 
-    def test_intervals_is_dataframe(self, mock_icmecat_csv_data):
-        """intervals property returns a DataFrame."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_intervals_has_documented_columns(self, serve_catalog):
+        """intervals carries the event id, the three times, and interval_end.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        required = {
+            "icmecat_id",
+            "icme_start_time",
+            "mo_start_time",
+            "mo_end_time",
+            "interval_end",
+        }
+        assert required <= set(cat.intervals.columns)
+        assert cat.intervals["icmecat_id"].tolist() == ALL_IDS
 
-            assert isinstance(cat.intervals, pd.DataFrame)
+    def test_interval_end_matches_hand_computed_fallbacks(self, serve_catalog):
+        """interval_end is mo_end, else mo_start + 24 h, else icme_start + 24 h.
 
-    def test_intervals_has_interval_end(self, mock_icmecat_csv_data):
-        """intervals has computed interval_end column."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        Expected values are hand-computed in the conftest table.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert cat.intervals["interval_end"].tolist() == INTERVAL_END
 
-            assert "interval_end" in cat.intervals.columns
+    def test_interval_end_dtype_datetime(self, serve_catalog):
+        """interval_end is datetime64.
 
-    def test_interval_end_no_nulls(self, mock_icmecat_csv_data):
-        """interval_end has no NaN values (fallbacks applied)."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            assert cat.intervals["interval_end"].notna().all()
-
-    def test_interval_end_dtype_datetime(self, mock_icmecat_csv_data):
-        """interval_end is datetime64."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            assert pd.api.types.is_datetime64_any_dtype(cat.intervals["interval_end"])
-
-    def test_interval_end_after_start(self, mock_icmecat_csv_data):
-        """interval_end >= icme_start_time for all events."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            assert all(
-                cat.intervals["interval_end"] >= cat.intervals["icme_start_time"]
-            )
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert pd.api.types.is_datetime64_any_dtype(cat.intervals["interval_end"])
 
 
 class TestICMECATIntervalFallbacks:
-    """Test interval_end fallback logic."""
+    """Each interval_end source in isolation, one event per catalog."""
 
-    def test_fallback_uses_mo_end_when_available(self, simple_icme_intervals):
-        """When mo_end_time exists, interval_end equals mo_end_time."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_fallback_uses_mo_end_when_available(self, serve_catalog, catalog):
+        """When mo_end_time exists, interval_end equals mo_end_time.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog(catalog.iloc[[0]])
+        cat = ICMECAT()
+        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-15")
 
-            # First event has mo_end_time
-            assert cat.intervals.iloc[0]["interval_end"] == pd.Timestamp("2000-01-15")
+    def test_fallback_mo_start_plus_24h(self, serve_catalog):
+        """mo_end_time missing: interval_end = mo_start_time + 24 h.
 
-    def test_fallback_mo_start_plus_24h(self):
-        """Fallback: mo_end_time missing -> mo_start_time + 24h."""
+        ON FAILURE: the code is wrong.
+        """
         data = pd.DataFrame(
             {
                 "icmecat_id": ["TEST"],
-                "sc_insitu": ["Ulysses"],
-                "icme_start_time": [pd.Timestamp("2000-01-01")],
-                "mo_start_time": [pd.Timestamp("2000-01-02")],
+                "sc_insitu": ["ULYSSES"],
+                "icme_start_time": [T("2000-01-01")],
+                "mo_start_time": [T("2000-01-02")],
                 "mo_end_time": [pd.NaT],
             }
         )
+        serve_catalog(data)
+        cat = ICMECAT()
+        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-03")
 
-        with patch("pandas.read_csv", return_value=data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_fallback_icme_start_plus_24h(self, serve_catalog):
+        """mo_end_time and mo_start_time missing: interval_end = icme_start + 24 h.
 
-            cat = ICMECAT()
-
-            expected = pd.Timestamp("2000-01-03")  # mo_start + 24h
-            assert cat.intervals.iloc[0]["interval_end"] == expected
-
-    def test_fallback_icme_start_plus_24h(self):
-        """Fallback: both missing -> icme_start_time + 24h."""
+        ON FAILURE: the code is wrong.
+        """
         data = pd.DataFrame(
             {
                 "icmecat_id": ["TEST"],
-                "sc_insitu": ["Ulysses"],
-                "icme_start_time": [pd.Timestamp("2000-01-01")],
+                "sc_insitu": ["ULYSSES"],
+                "icme_start_time": [T("2000-01-01")],
                 "mo_start_time": [pd.NaT],
                 "mo_end_time": [pd.NaT],
             }
         )
-
-        with patch("pandas.read_csv", return_value=data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            expected = pd.Timestamp("2000-01-02")  # icme_start + 24h
-            assert cat.intervals.iloc[0]["interval_end"] == expected
+        serve_catalog(data)
+        cat = ICMECAT()
+        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-02")
 
 
 class TestICMECATStrictIntervals:
-    """Test ICMECAT.strict_intervals property."""
+    """ICMECAT.strict_intervals keeps only events with a catalog mo_end_time."""
 
-    def test_strict_intervals_excludes_nat(self, mock_icmecat_csv_data):
-        """strict_intervals only includes events with valid mo_end_time."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_strict_intervals_excludes_nat(self, serve_catalog):
+        """strict_intervals is exactly the rows whose mo_end_time is present.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        assert cat.strict_intervals["icmecat_id"].tolist() == STRICT_IDS
 
-            # strict_intervals should have fewer rows if there are NaT values
-            assert cat.strict_intervals["mo_end_time"].notna().all()
+    def test_strict_intervals_rows_equal_their_intervals_rows(self, serve_catalog):
+        """Each strict row is the same row of intervals, unchanged.
 
-    def test_strict_intervals_is_subset(self, mock_icmecat_csv_data):
-        """strict_intervals is subset of intervals."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        strict = cat.strict_intervals
+        pd.testing.assert_frame_equal(strict, cat.intervals.loc[strict.index])
 
-            cat = ICMECAT()
+    def test_strict_intervals_returns_copy(self, serve_catalog):
+        """Writing to strict_intervals leaves intervals unchanged.
 
-            assert len(cat.strict_intervals) <= len(cat.intervals)
-
-    def test_strict_intervals_returns_copy(self, mock_icmecat_csv_data):
-        """strict_intervals returns a copy, not a view."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            strict = cat.strict_intervals
-            if len(strict) > 0:
-                original_id = cat.intervals.iloc[0]["icmecat_id"]
-                strict.iloc[0, strict.columns.get_loc("icmecat_id")] = "MODIFIED"
-                assert cat.intervals.iloc[0]["icmecat_id"] == original_id
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        strict = cat.strict_intervals
+        assert strict.iloc[0]["icmecat_id"] == "U1"
+        strict.iloc[0, strict.columns.get_loc("icmecat_id")] = "MODIFIED"
+        assert cat.intervals.iloc[0]["icmecat_id"] == "U1"
+        assert cat.strict_intervals.iloc[0]["icmecat_id"] == "U1"
 
 
 class TestICMECATFilter:
-    """Test ICMECAT.filter() method."""
+    """ICMECAT.filter() returns a new, filtered catalog."""
 
-    def test_filter_returns_new_instance(self, mock_icmecat_csv_data):
-        """filter() returns a new ICMECAT instance."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_filter_returns_new_instance(self, serve_catalog):
+        """filter() returns a different ICMECAT and leaves the original whole.
 
-            cat = ICMECAT()
-            filtered = cat.filter("Ulysses")
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        filtered = cat.filter("Ulysses")
+        assert isinstance(filtered, ICMECAT)
+        assert filtered is not cat
+        assert cat.data["icmecat_id"].tolist() == ALL_IDS
 
-            assert isinstance(filtered, ICMECAT)
-            assert filtered is not cat
+    def test_filter_sets_spacecraft(self, serve_catalog):
+        """filter() sets spacecraft on the new instance only.
 
-    def test_filter_sets_spacecraft(self, mock_icmecat_csv_data):
-        """filter() sets spacecraft property on new instance."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT()
+        filtered = cat.filter("Ulysses")
+        assert filtered.spacecraft == "Ulysses"
+        assert cat.spacecraft is None
 
-            cat = ICMECAT()
-            filtered = cat.filter("Ulysses")
+    def test_filter_only_includes_spacecraft(self, serve_catalog):
+        """filter("ulysses") keeps exactly the ULYSSES rows, in data and intervals.
 
-            assert filtered.spacecraft == "Ulysses"
-            assert cat.spacecraft is None  # Original unchanged
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        filtered = ICMECAT().filter("ulysses")
+        assert filtered.data["icmecat_id"].tolist() == ULYSSES_IDS
+        assert filtered.intervals["interval_end"].tolist() == INTERVAL_END[:3]
 
-    def test_filter_only_includes_spacecraft(self, mock_icmecat_csv_data):
-        """filter() only includes events from specified spacecraft."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_filter_unknown_spacecraft_empty(self, serve_catalog):
+        """filter() with a spacecraft absent from the catalog returns no events.
 
-            cat = ICMECAT()
-            filtered = cat.filter("Ulysses")
-
-            assert all(filtered.data["sc_insitu"] == "Ulysses")
-
-    def test_filter_unknown_spacecraft_empty(self, mock_icmecat_csv_data):
-        """filter() with unknown spacecraft returns empty catalog."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-            filtered = cat.filter("NONEXISTENT")
-
-            assert len(filtered) == 0
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        filtered = ICMECAT().filter("NONEXISTENT")
+        assert len(filtered) == 0
+        assert len(filtered.intervals) == 0
 
 
 class TestICMECATContains:
-    """Test ICMECAT.contains() method."""
+    """ICMECAT.contains() flags times inside strict intervals."""
 
-    def test_contains_returns_series(self, simple_icme_intervals):
-        """contains() returns a boolean Series."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_contains_returns_series(self, serve_catalog):
+        """contains() returns a bool Series.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        result = ICMECAT().contains(pd.Series([T("2000-01-12")]))
+        assert isinstance(result, pd.Series)
+        assert result.dtype == bool
+        assert result.tolist() == [True]
 
-            times = pd.Series([pd.Timestamp("2000-01-12")])
-            result = cat.contains(times)
+    def test_contains_preserves_index(self, serve_catalog):
+        """contains() returns the caller's index.
 
-            assert isinstance(result, pd.Series)
-            assert result.dtype == bool
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.Series([T("2000-01-12")], index=["custom_index"])
+        result = ICMECAT().contains(times)
+        assert result.index.tolist() == ["custom_index"]
 
-    def test_contains_preserves_index(self, simple_icme_intervals):
-        """contains() preserves input index."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_contains_true_inside_interval(self, serve_catalog):
+        """A time inside each strict interval is flagged, not just the first.
 
-            cat = ICMECAT()
+        Strict intervals (icme_start to mo_end): U1 01-10..01-15,
+        U2 02-15..02-20, W2 05-01..05-04, S1 06-01..06-03.
 
-            times = pd.Series([pd.Timestamp("2000-01-12")], index=["custom_index"])
-            result = cat.contains(times)
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.Series(
+            [T("2000-01-12"), T("2000-02-17"), T("2000-05-03"), T("2000-06-02")]
+        )
+        assert ICMECAT().contains(times).tolist() == [True, True, True, True]
 
-            assert result.index.tolist() == ["custom_index"]
+    def test_contains_false_outside_interval(self, serve_catalog):
+        """Times before, between, and after every interval are not flagged.
 
-    def test_contains_true_inside_interval(self, simple_icme_intervals):
-        """contains() returns True for times inside an interval."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.Series([T("2000-01-05"), T("2000-01-16"), T("2000-07-01")])
+        assert ICMECAT().contains(times).tolist() == [False, False, False]
 
-            cat = ICMECAT()
+    def test_contains_ignores_fallback_intervals(self, serve_catalog):
+        """Times inside only a fallback interval (U3, W1) are not flagged.
 
-            # 2000-01-12 is inside first interval (01-10 to 01-15)
-            times = pd.Series([pd.Timestamp("2000-01-12")])
-            result = cat.contains(times)
+        U3 spans 03-20..03-22 and W1 spans 04-01..04-02 only via the
+        24 h fallbacks; contains() uses strict intervals.
 
-            assert result.iloc[0]
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.Series([T("2000-03-21"), T("2000-04-01 12:00")])
+        assert ICMECAT().contains(times).tolist() == [False, False]
 
-    def test_contains_false_outside_interval(self, simple_icme_intervals):
-        """contains() returns False for times outside all intervals."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_contains_boundary_start_inclusive(self, serve_catalog):
+        """contains() includes the interval's icme_start_time.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().contains(pd.Series([T("2000-01-10")])).tolist() == [True]
 
-            # 2000-01-05 is before first interval
-            times = pd.Series([pd.Timestamp("2000-01-05")])
-            result = cat.contains(times)
+    def test_contains_boundary_end_inclusive(self, serve_catalog):
+        """contains() includes the interval's mo_end_time.
 
-            assert not result.iloc[0]
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().contains(pd.Series([T("2000-01-15")])).tolist() == [True]
 
-    def test_contains_boundary_start_inclusive(self, simple_icme_intervals):
-        """contains() includes interval start time."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_contains_accepts_datetimeindex(self, serve_catalog):
+        """contains() accepts a DatetimeIndex and flags it element by element.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.DatetimeIndex(["2000-01-12", "2000-01-05"])
+        result = ICMECAT().contains(times)
+        assert isinstance(result, pd.Series)
+        assert result.tolist() == [True, False]
 
-            # Exactly at start of first interval
-            times = pd.Series([pd.Timestamp("2000-01-10")])
-            result = cat.contains(times)
+    def test_contains_empty_input(self, serve_catalog):
+        """contains() on no times returns an empty bool Series.
 
-            assert result.iloc[0]
-
-    def test_contains_boundary_end_inclusive(self, simple_icme_intervals):
-        """contains() includes interval end time."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            # Exactly at end of first interval
-            times = pd.Series([pd.Timestamp("2000-01-15")])
-            result = cat.contains(times)
-
-            assert result.iloc[0]
-
-    def test_contains_accepts_datetimeindex(self, simple_icme_intervals):
-        """contains() accepts DatetimeIndex input."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            times = pd.DatetimeIndex(["2000-01-12", "2000-01-05"])
-            result = cat.contains(times)
-
-            assert isinstance(result, pd.Series)
-            assert len(result) == 2
-
-    def test_contains_empty_input(self, simple_icme_intervals):
-        """contains() handles empty input gracefully."""
-        with patch("pandas.read_csv", return_value=simple_icme_intervals):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT()
-
-            times = pd.Series([], dtype="datetime64[ns]")
-            result = cat.contains(times)
-
-            assert len(result) == 0
-            assert result.dtype == bool
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        result = ICMECAT().contains(pd.Series([], dtype="datetime64[ns]"))
+        assert len(result) == 0
+        assert result.dtype == bool
 
 
 class TestICMECATSummary:
-    """Test ICMECAT.summary() method."""
+    """ICMECAT.summary() reports counts, coverage and durations.
 
-    def test_summary_returns_dataframe(self, mock_icmecat_csv_data):
-        """summary() returns a DataFrame."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    Durations (interval_end - icme_start_time) from the conftest table, hours:
+    U1 120, U2 120, U3 48, W1 24, W2 72, S1 48.
+    """
 
-            cat = ICMECAT()
+    def test_summary_returns_dataframe(self, serve_catalog):
+        """summary() returns a one-row DataFrame.
 
-            result = cat.summary()
-            assert isinstance(result, pd.DataFrame)
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        result = ICMECAT().summary()
+        assert isinstance(result, pd.DataFrame)
+        assert len(result) == 1
 
-    def test_summary_has_event_count(self, mock_icmecat_csv_data):
-        """summary() includes event count."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_summary_has_event_count(self, serve_catalog):
+        """n_events is the number of catalog rows, 6.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().summary()["n_events"].iloc[0] == 6
 
-            result = cat.summary()
-            assert "n_events" in result.columns
-            assert result["n_events"].iloc[0] == len(cat)
+    def test_summary_has_strict_count(self, serve_catalog):
+        """n_strict is the number of rows with mo_end_time present, 4.
 
-    def test_summary_has_strict_count(self, mock_icmecat_csv_data):
-        """summary() includes strict event count."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().summary()["n_strict"].iloc[0] == 4
 
-            cat = ICMECAT()
+    def test_summary_has_duration_stats(self, serve_catalog):
+        """Duration statistics match the hand-computed hours.
 
-            result = cat.summary()
-            assert "n_strict" in result.columns
-            assert result["n_strict"].iloc[0] == len(cat.strict_intervals)
+        Sorted: 24, 48, 48, 72, 120, 120. Median (48 + 72) / 2 = 60;
+        mean 432 / 6 = 72; min 24; max 120.
 
-    def test_summary_has_duration_stats(self, mock_icmecat_csv_data):
-        """summary() includes duration statistics."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        row = ICMECAT().summary().iloc[0]
+        # Whole hours from whole-hour timestamps: exact up to float rounding.
+        assert row["duration_median_hours"] == pytest.approx(60.0, rel=1e-12, abs=0)
+        assert row["duration_mean_hours"] == pytest.approx(72.0, rel=1e-12, abs=0)
+        assert row["duration_min_hours"] == pytest.approx(24.0, rel=1e-12, abs=0)
+        assert row["duration_max_hours"] == pytest.approx(120.0, rel=1e-12, abs=0)
 
-            cat = ICMECAT()
+    def test_summary_date_range(self, serve_catalog):
+        """date_range runs from the first icme_start to the last interval_end.
 
-            result = cat.summary()
-            duration_cols = ["duration_median_hours", "duration_mean_hours"]
-            for col in duration_cols:
-                assert col in result.columns
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        row = ICMECAT().summary().iloc[0]
+        assert row["date_range_start"] == T("2000-01-10")
+        assert row["date_range_end"] == T("2000-06-03")
 
-    def test_summary_includes_spacecraft_when_filtered(self, mock_icmecat_csv_data):
-        """summary() includes spacecraft when filtered."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_summary_includes_spacecraft_when_filtered(self, serve_catalog):
+        """A filtered summary names the spacecraft and counts only its events.
 
-            cat = ICMECAT(spacecraft="Ulysses")
+        ULYSSES durations 120, 120, 48 hours: mean 96.
 
-            result = cat.summary()
-            assert "spacecraft" in result.columns
-            assert result["spacecraft"].iloc[0] == "Ulysses"
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        row = ICMECAT(spacecraft="Ulysses").summary().iloc[0]
+        assert row["spacecraft"] == "Ulysses"
+        assert row["n_events"] == 3
+        # Whole hours: exact up to float rounding.
+        assert row["duration_mean_hours"] == pytest.approx(96.0, rel=1e-12, abs=0)
 
 
 class TestICMECATDunderMethods:
-    """Test ICMECAT special methods (__len__, __repr__)."""
+    """len() and repr()."""
 
-    def test_len_returns_event_count(self, mock_icmecat_csv_data):
-        """len(ICMECAT) returns number of events."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_len_returns_event_count(self, serve_catalog):
+        """len(ICMECAT) is the number of events, 6.
 
-            cat = ICMECAT()
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert len(ICMECAT()) == 6
 
-            assert len(cat) == len(cat.data)
+    def test_repr_includes_class_name(self, serve_catalog):
+        """repr names the class.
 
-    def test_repr_includes_class_name(self, mock_icmecat_csv_data):
-        """repr includes class name."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert repr(ICMECAT()).startswith("ICMECAT(")
 
-            cat = ICMECAT()
+    def test_repr_includes_event_count(self, serve_catalog):
+        """repr reports the event count of this instance.
 
-            assert "ICMECAT" in repr(cat)
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert "n_events=6" in repr(ICMECAT())
+        assert "n_events=3" in repr(ICMECAT(spacecraft="Ulysses"))
 
-    def test_repr_includes_event_count(self, mock_icmecat_csv_data):
-        """repr includes event count."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_repr_includes_spacecraft_when_filtered(self, serve_catalog):
+        """repr names the spacecraft filter in the caller's spelling.
 
-            cat = ICMECAT()
-
-            assert str(len(cat)) in repr(cat)
-
-    def test_repr_includes_spacecraft_when_filtered(self, mock_icmecat_csv_data):
-        """repr includes spacecraft when filtered."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-            cat = ICMECAT(spacecraft="Ulysses")
-
-            assert "Ulysses" in repr(cat)
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert "'Ulysses'" in repr(ICMECAT(spacecraft="Ulysses"))
 
 
 class TestICMECATEdgeCases:
-    """Test edge cases and error handling."""
+    """Empty and degenerate catalogs."""
 
-    def test_empty_catalog_after_filter(self, mock_icmecat_csv_data):
-        """Handles filtering to zero events gracefully."""
-        with patch("pandas.read_csv", return_value=mock_icmecat_csv_data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_empty_catalog_after_filter(self, serve_catalog):
+        """Filtering to an absent spacecraft gives an empty, usable catalog.
 
-            cat = ICMECAT(spacecraft="NONEXISTENT")
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        cat = ICMECAT(spacecraft="NONEXISTENT")
+        assert len(cat) == 0
+        assert len(cat.intervals) == 0
+        assert len(cat.strict_intervals) == 0
+        times = pd.Series([T("2000-01-12")])
+        assert cat.contains(times).tolist() == [False]
+        row = cat.summary().iloc[0]
+        assert row["n_events"] == 0
+        assert np.isnan(row["duration_mean_hours"])
 
-            assert len(cat) == 0
-            assert len(cat.intervals) == 0
-            assert len(cat.strict_intervals) == 0
+    def test_all_mo_end_time_missing(self, serve_catalog):
+        """With every mo_end_time missing, all intervals use fallbacks; none is strict.
 
-    def test_all_mo_end_time_missing(self):
-        """Handles case where all mo_end_time are NaT."""
+        ON FAILURE: the code is wrong.
+        """
         data = pd.DataFrame(
             {
                 "icmecat_id": ["A", "B"],
-                "sc_insitu": ["Ulysses", "Ulysses"],
-                "icme_start_time": [
-                    pd.Timestamp("2000-01-01"),
-                    pd.Timestamp("2000-02-01"),
-                ],
-                "mo_start_time": [pd.Timestamp("2000-01-02"), pd.NaT],
+                "sc_insitu": ["ULYSSES", "ULYSSES"],
+                "icme_start_time": [T("2000-01-01"), T("2000-02-01")],
+                "mo_start_time": [T("2000-01-02"), pd.NaT],
                 "mo_end_time": [pd.NaT, pd.NaT],
             }
         )
+        serve_catalog(data)
+        cat = ICMECAT()
+        # A: mo_start + 24 h; B: icme_start + 24 h.
+        assert cat.intervals["interval_end"].tolist() == [
+            T("2000-01-03"),
+            T("2000-02-02"),
+        ]
+        assert len(cat.strict_intervals) == 0
 
-        with patch("pandas.read_csv", return_value=data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
+    def test_contains_with_no_strict_intervals(self, serve_catalog):
+        """contains() flags nothing when no event has a mo_end_time.
 
-            cat = ICMECAT()
+        2000-01-02 12:00 lies inside A's fallback interval (01-01..01-03).
 
-            assert cat.intervals["interval_end"].notna().all()
-            assert len(cat.strict_intervals) == 0
-
-    def test_contains_with_no_strict_intervals(self):
-        """contains() returns False when no strict intervals exist."""
+        ON FAILURE: the code is wrong.
+        """
         data = pd.DataFrame(
             {
                 "icmecat_id": ["A"],
-                "sc_insitu": ["Ulysses"],
-                "icme_start_time": [pd.Timestamp("2000-01-01")],
-                "mo_start_time": [pd.Timestamp("2000-01-02")],
+                "sc_insitu": ["ULYSSES"],
+                "icme_start_time": [T("2000-01-01")],
+                "mo_start_time": [T("2000-01-02")],
                 "mo_end_time": [pd.NaT],
             }
         )
+        serve_catalog(data)
+        result = ICMECAT().contains(pd.Series([T("2000-01-02 12:00")]))
+        assert result.tolist() == [False]
 
-        with patch("pandas.read_csv", return_value=data):
-            from solarwindpy.solar_activity.icme.icmecat import ICMECAT
 
-            cat = ICMECAT()
+CACHE_NEEDS_PARQUET_ENGINE = pytest.mark.xfail(
+    strict=True,
+    raises=ImportError,
+    reason=(
+        "ICMECAT(cache_dir=...) writes icmecat.parquet "
+        "(solarwindpy/solar_activity/icme/icmecat.py, _download/_read_cache) but "
+        "pyproject.toml declares no parquet engine; expected message 'Unable to "
+        "find a usable engine; tried using: 'pyarrow', 'fastparquet''; remove this "
+        "marker when pyarrow is a declared dependency or the cache stops using parquet"
+    ),
+)
 
-            times = pd.Series([pd.Timestamp("2000-01-05")])
-            result = cat.contains(times)
 
-            assert not result.iloc[0]
+class TestICMECATDownloadAndCache:
+    """Download failure and the on-disk cache."""
+
+    def test_download_failure_without_cache_raises(self):
+        """With no catalog at ICMECAT_URL and no cache, ICMECATDownloadError is raised.
+
+        The autouse ``_no_network`` fixture points ICMECAT_URL at a missing file.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ICMECATDownloadError, match="Failed to download ICMECAT"):
+            ICMECAT()
+
+    @CACHE_NEEDS_PARQUET_ENGINE
+    def test_fresh_cache_is_used_without_download(
+        self, serve_catalog, tmp_path, monkeypatch
+    ):
+        """A cache written by one load serves the next even when the URL is gone.
+
+        ON FAILURE: (unexpected pass) a parquet engine is now a declared
+        dependency or the cache no longer uses parquet; drop the xfail marker.
+        """
+        cache_dir = tmp_path / "cache"
+        serve_catalog()
+        ICMECAT(cache_dir=cache_dir)
+        monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
+        cat = ICMECAT(cache_dir=cache_dir)
+        assert cat.data["icmecat_id"].tolist() == ALL_IDS
+
+    @CACHE_NEEDS_PARQUET_ENGINE
+    def test_stale_cache_served_with_warning_when_download_fails(
+        self, serve_catalog, tmp_path, monkeypatch
+    ):
+        """A cache older than 30 days is served, with a warning, if download fails.
+
+        ON FAILURE: (unexpected pass) a parquet engine is now a declared
+        dependency or the cache no longer uses parquet; drop the xfail marker.
+        """
+        cache_dir = tmp_path / "cache"
+        serve_catalog()
+        ICMECAT(cache_dir=cache_dir)
+        forty_days_ago = time.time() - 40 * 86400
+        os.utime(cache_dir / "icmecat.parquet", (forty_days_ago, forty_days_ago))
+        monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
+        with pytest.warns(UserWarning, match="serving cached data that is 40 days old"):
+            cat = ICMECAT(cache_dir=cache_dir)
+        assert cat.data["icmecat_id"].tolist() == ALL_IDS
