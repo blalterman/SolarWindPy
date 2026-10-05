@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.icme.icmecat.ICMECAT &mdash; SolarWindPy 0.1.dev1+g624bbd0a1 documentation</title>
+  <title>solarwindpy.solar_activity.icme.icmecat.ICMECAT &mdash; SolarWindPy 0.1.dev1+g2de51e5b0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=531d369e"></script>
+      <script src="../_static/documentation_options.js?v=8f504270"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -324,9 +324,12 @@ citation and co-authorship terms.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>spacecraft</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If provided, filter catalog to this spacecraft on load.
-Valid names: Ulysses, Wind, ACE, STEREO-A, STEREO-B, etc.</p>
+Valid names are the <code class="docutils literal notranslate"><span class="pre">SPACECRAFT_NAMES</span></code> values, matched
+case-insensitively: BepiColombo, Juno, MAVEN, MESSENGER, PSP,
+SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 </dd>
-<dt><strong>cache_dir</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Directory for caching downloaded data. If None, no caching.</p>
+<dt><strong>cache_dir</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Directory for caching downloaded data, saved as <code class="docutils literal notranslate"><span class="pre">icmecat.csv</span></code>
+(the format the catalog downloads in). If None, no caching.</p>
 </dd>
 </dl>
 </dd>

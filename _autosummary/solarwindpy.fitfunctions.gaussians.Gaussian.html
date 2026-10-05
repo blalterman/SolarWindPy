@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians.Gaussian &mdash; SolarWindPy 0.1.dev1+g624bbd0a1 documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians.Gaussian &mdash; SolarWindPy 0.1.dev1+g2de51e5b0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=531d369e"></script>
+      <script src="../_static/documentation_options.js?v=8f504270"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -590,6 +590,16 @@ constraints are passed in __init__).</p>
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.Gaussian.rsq" title="Link to this definition"></a></dt>
 <dd><p>Coefficient of determination.</p>
 <p>Source: &lt;en.wikipedia.org/wiki/Coefficient_of_determination#Definitions&gt;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">SS_res</span> <span class="pre">/</span> <span class="pre">SS_tot</span></code>. When the used <code class="docutils literal notranslate"><span class="pre">y</span></code> have no spread (a single
+point, or constant data), <code class="docutils literal notranslate"><span class="pre">SS_tot</span> <span class="pre">=</span> <span class="pre">0</span></code> and R² is undefined, so
+<code class="docutils literal notranslate"><span class="pre">nan</span></code> is returned without a divide-by-zero warning.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+g624bbd0a1 documentation</title>
+  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+g2de51e5b0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=531d369e"></script>
+      <script src="../_static/documentation_options.js?v=8f504270"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -527,6 +527,11 @@ for setting of <cite>window_length</cite> and <cite>polyorder</cite> as kwargs. 
 10% of the number of observations (<cite>window_length</cite>) and 3 (<cite>polyorder</cite>).
 Note that because <cite>window_length</cite> must be odd, if the 10% value is even, we
 take 1-window_length.</p>
+</dd>
+<dt><strong>xlim, ylim: tuple of (float or None, float or None), optional</strong></dt><dd><p>Inclusive <code class="docutils literal notranslate"><span class="pre">(lower,</span> <span class="pre">upper)</span></code> limits, in data coordinates, on the edge
+vertices drawn. A vertex outside a limit is dropped; a vertex exactly
+on a limit is kept. <code class="docutils literal notranslate"><span class="pre">None</span></code> leaves that side unbounded. Default
+<code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None)</span></code>.</p>
 </dd>
 <dt><strong>kwargs:</strong></dt><dd><p>Passed to <cite>ax.plot</cite></p>
 </dd>

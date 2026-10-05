@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+g624bbd0a1 documentation</title>
+  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+g2de51e5b0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=531d369e"></script>
+      <script src="../../../../_static/documentation_options.js?v=8f504270"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -332,6 +332,9 @@
 
 <span class="n">_PINNED_VERSION</span> <span class="o">=</span> <span class="s2">"v23"</span>
 <span class="n">_CACHE_MAX_AGE_DAYS</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="c1"># The cache is CSV, the format the catalog downloads in, so caching needs no</span>
+<span class="c1"># dependency beyond pandas (parquet would need an undeclared engine).</span>
+<span class="n">_CACHE_FILENAME</span> <span class="o">=</span> <span class="s2">"icmecat.csv"</span>
 
 <span class="c1"># The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.</span>
 <span class="c1"># ACE and Cassini were previously (and wrongly) included: both have zero</span>
@@ -390,9 +393,12 @@
 <span class="sd">    ----------</span>
 <span class="sd">    spacecraft : str, optional</span>
 <span class="sd">        If provided, filter catalog to this spacecraft on load.</span>
-<span class="sd">        Valid names: Ulysses, Wind, ACE, STEREO-A, STEREO-B, etc.</span>
+<span class="sd">        Valid names are the ``SPACECRAFT_NAMES`` values, matched</span>
+<span class="sd">        case-insensitively: BepiColombo, Juno, MAVEN, MESSENGER, PSP,</span>
+<span class="sd">        SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</span>
 <span class="sd">    cache_dir : Path, optional</span>
-<span class="sd">        Directory for caching downloaded data. If None, no caching.</span>
+<span class="sd">        Directory for caching downloaded data, saved as ``icmecat.csv``</span>
+<span class="sd">        (the format the catalog downloads in). If None, no caching.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -565,12 +571,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
-        <span class="n">cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="s2">"icmecat.parquet"</span>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="n">_CACHE_FILENAME</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
         <span class="n">age_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">cache_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">86400</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">cache_path</span><span class="p">),</span> <span class="n">age_days</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">cache_path</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="n">_DATETIME_COLUMNS</span><span class="p">),</span> <span class="n">age_days</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_download</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Download ICMECAT from helioforecast.space."""</span>
@@ -592,8 +598,8 @@
         <span class="c1"># Save to cache if configured</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="s2">"icmecat.parquet"</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">cache_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">cache_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="n">_CACHE_FILENAME</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">cache_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Cached to </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">)</span>
 
     <span class="c1"># -------------------------------------------------------------------------</span>
