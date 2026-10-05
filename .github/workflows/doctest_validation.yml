@@ -36,6 +36,33 @@ jobs:
     - name: Run documentation examples
       run: pytest --doctest-glob='*.rst' docs/source -q
 
+  # README and the install/quickstart pages run under Sybil (configured in the
+  # root conftest.py), which asserts each example's shown output. Sybil is
+  # declared in the dev extra. The root conftest.py keeps each page's examples
+  # in line order under pytest-randomly; -p no:doctest stops pytest's doctest
+  # plugin collecting the named rst files a second time.
+  rst-examples:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.12'
+
+    - name: Install package and dev dependencies
+      run: |
+        pip install -e ".[dev]"
+
+    - name: Run rst examples under Sybil
+      run: >-
+        pytest -p no:doctest -q
+        README.rst docs/source/tutorial/quickstart.rst docs/source/installation.rst
+
   # Drift detection: asserts the external facts SolarWindPy pins (catalog
   # version, dependency resolution, toolchain pins, etc.) still hold. Opt-in
   # and network-dependent, so it only runs on schedule or on demand.
