@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../../../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -486,13 +486,18 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions.gaussians import Gaussian  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; x = np.linspace(-5, 5, 100)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; fit.make_fit()  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; print(f"Fitted mu: {fit.popt['mu']:.3f}")  # doctest: +SKIP</span>
+<span class="sd">        Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and</span>
+<span class="sd">        recover those parameters:</span>
+
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.fitfunctions.gaussians import Gaussian</span>
+<span class="sd">        &gt;&gt;&gt; rng = np.random.default_rng(0)</span>
+<span class="sd">        &gt;&gt;&gt; x = np.linspace(-5, 5, 100)</span>
+<span class="sd">        &gt;&gt;&gt; y = 3 * np.exp(-0.5 * ((x - 1) / 0.8) ** 2) + rng.normal(0, 0.1, 100)</span>
+<span class="sd">        &gt;&gt;&gt; fit = Gaussian(x, y, xmin=-3, xmax=4)</span>
+<span class="sd">        &gt;&gt;&gt; fit.make_fit()</span>
+<span class="sd">        &gt;&gt;&gt; {k: round(float(v), 1) for k, v in fit.popt.items()}</span>
+<span class="sd">        {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>

@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.solar_activity.icme.icmecat &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../../../../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -407,13 +407,46 @@
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
-<span class="sd">    &gt;&gt;&gt; cat = ICMECAT(spacecraft="Ulysses")  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; print(f"Found {len(cat)} Ulysses ICMEs")  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; intervals = cat.intervals  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; print(intervals[["icme_start_time", "mo_end_time", "interval_end"]])  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; # Check which observations fall within ICME intervals</span>
-<span class="sd">    &gt;&gt;&gt; in_icme = cat.contains(observations.index)  # doctest: +SKIP</span>
+<span class="sd">    In normal use ``ICMECAT(spacecraft="Ulysses")`` downloads the catalog</span>
+<span class="sd">    from ``ICMECAT_URL``. This example stays offline by pointing</span>
+<span class="sd">    ``ICMECAT_URL`` at a small local catalog in the same CSV layout.</span>
+
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.solar_activity.icme import icmecat</span>
+<span class="sd">    &gt;&gt;&gt; catalog = pd.DataFrame({</span>
+<span class="sd">    ...     "icmecat_id": ["ICME_ULYSSES_1", "ICME_ULYSSES_2", "ICME_Wind_1"],</span>
+<span class="sd">    ...     "sc_insitu": ["ULYSSES", "ULYSSES", "Wind"],</span>
+<span class="sd">    ...     "icme_start_time": ["1998-01-01 00:00", "1998-02-01 00:00",</span>
+<span class="sd">    ...                         "1998-03-01 00:00"],</span>
+<span class="sd">    ...     "mo_start_time": ["1998-01-01 06:00", "1998-02-01 06:00",</span>
+<span class="sd">    ...                       "1998-03-01 06:00"],</span>
+<span class="sd">    ...     "mo_end_time": ["1998-01-02 00:00", "", "1998-03-02 00:00"],</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; with tempfile.TemporaryDirectory() as d:</span>
+<span class="sd">    ...     local = Path(d) / "icmecat.csv"</span>
+<span class="sd">    ...     catalog.to_csv(local, index=False)</span>
+<span class="sd">    ...     original_url = icmecat.ICMECAT_URL</span>
+<span class="sd">    ...     icmecat.ICMECAT_URL = str(local)</span>
+<span class="sd">    ...     try:</span>
+<span class="sd">    ...         cat = ICMECAT(spacecraft="Ulysses")</span>
+<span class="sd">    ...     finally:</span>
+<span class="sd">    ...         icmecat.ICMECAT_URL = original_url</span>
+<span class="sd">    &gt;&gt;&gt; cat</span>
+<span class="sd">    ICMECAT(spacecraft='Ulysses', n_events=2)</span>
+
+<span class="sd">    The second event has no ``mo_end_time``, so its ``interval_end`` falls</span>
+<span class="sd">    back to ``mo_start_time`` + 24 h:</span>
+
+<span class="sd">    &gt;&gt;&gt; cat.intervals["interval_end"].dt.strftime("%Y-%m-%d %H:%M").tolist()</span>
+<span class="sd">    ['1998-01-02 00:00', '1998-02-02 06:00']</span>
+
+<span class="sd">    Check which observations fall within ICME intervals. Only events with a</span>
+<span class="sd">    valid ``mo_end_time`` count, so the second observation is outside:</span>
+
+<span class="sd">    &gt;&gt;&gt; observations = pd.DatetimeIndex(["1998-01-01 12:00", "1998-02-01 12:00"])</span>
+<span class="sd">    &gt;&gt;&gt; cat.contains(observations).tolist()</span>
+<span class="sd">    [True, False]</span>
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="ICMECAT.__init__">

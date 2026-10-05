@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../../../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -311,10 +311,6 @@
 <span class="sd"> an ion and return a new plasma without that ion in it. Well, either</span>
 <span class="sd"> mod or subtract. Subtract and add probably make more sense. (20180129)</span>
 
-<span class="sd">-See (https://drive.google.com/drive/folders/0ByIrJAE4KMTtaGhRcXkxNHhmY2M)</span>
-<span class="sd"> for the various methods that might be worth considering including __getattr__</span>
-<span class="sd"> vs __getattribute__, __hash__, __deepcopy__, __copy__, etc. (20180129)</span>
-
 <span class="sd">-Convert `Plasma.__call__` to `Plasma.__getitem__` and `Plasma.__iter__` to</span>
 <span class="sd"> to allow iterating over ions. (20180316)</span>
 <span class="sd"> N.B. This could have complicated results as to how we actually access the</span>
@@ -380,8 +376,8 @@
 <span class="sd">        labeled by ("M", "C", "S") for measurement, component, and species.</span>
 <span class="sd">    ions : pandas.Series of Ion objects</span>
 <span class="sd">        Dictionary-like access to individual ion species objects.</span>
-<span class="sd">    species : list of str</span>
-<span class="sd">        Available ion species identifiers in the plasma.</span>
+<span class="sd">    species : tuple of str</span>
+<span class="sd">        Available ion species identifiers in the plasma, sorted.</span>
 <span class="sd">    spacecraft : Spacecraft, optional</span>
 <span class="sd">        Spacecraft trajectory and velocity information.</span>
 <span class="sd">    auxiliary_data : pandas.DataFrame, optional</span>
@@ -412,7 +408,8 @@
 <span class="sd">    ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),</span>
 <span class="sd">    ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')</span>
 <span class="sd">    ... ], names=['M', 'C', 'S'])</span>
-<span class="sd">    &gt;&gt;&gt; data = pd.DataFrame(np.random.rand(3, len(columns)),</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.default_rng(0)</span>
+<span class="sd">    &gt;&gt;&gt; data = pd.DataFrame(rng.random((3, len(columns))),</span>
 <span class="sd">    ...                     index=epoch, columns=columns)</span>
 <span class="sd">    &gt;&gt;&gt; plasma = Plasma(data, 'p1', 'a')  # Protons and alphas</span>
 <span class="sd">    &gt;&gt;&gt; type(plasma.p1).__name__  # Proton ion object</span>
@@ -420,14 +417,16 @@
 
 <span class="sd">    Calculate plasma physics parameters:</span>
 
-<span class="sd">    &gt;&gt;&gt; beta = plasma.beta('p1')          # Plasma beta for protons  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; type(beta).__name__  # doctest: +SKIP</span>
-<span class="sd">    'Tensor'</span>
+<span class="sd">    &gt;&gt;&gt; beta = plasma.beta('p1')          # Plasma beta for protons</span>
+<span class="sd">    &gt;&gt;&gt; type(beta).__name__</span>
+<span class="sd">    'DataFrame'</span>
+<span class="sd">    &gt;&gt;&gt; beta.columns.tolist()</span>
+<span class="sd">    ['par', 'per', 'scalar']</span>
 
-<span class="sd">    Idenfity ion species in plasma:</span>
+<span class="sd">    Identify ion species in plasma (stored sorted, as a tuple):</span>
 
-<span class="sd">    &gt;&gt;&gt; plasma.species  # doctest: +SKIP</span>
-<span class="sd">    ['p1', 'a']</span>
+<span class="sd">    &gt;&gt;&gt; plasma.species</span>
+<span class="sd">    ('a', 'p1')</span>
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="Plasma.__init__">
@@ -537,9 +536,18 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; plasma.epoch  # doctest: +SKIP</span>
-<span class="sd">        DatetimeIndex(['1995-01-01', '2015-03-23', '2022-10-09'],</span>
-<span class="sd">                      dtype='datetime64[ns]', name='Epoch', freq=None)</span>
+<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
+<span class="sd">        ...                          name="Epoch")</span>
+<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
+<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
+<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
+<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
+<span class="sd">        ... ], names=["M", "C", "S"])</span>
+<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        &gt;&gt;&gt; plasma.epoch.equals(epoch)</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; plasma.epoch.name</span>
+<span class="sd">        'Epoch'</span>
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
 
@@ -604,8 +612,18 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
+<span class="sd">        ...                          name="Epoch")</span>
+<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
+<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
+<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
+<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
+<span class="sd">        ... ], names=["M", "C", "S"])</span>
+<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init</span>
 <span class="sd">        True</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_plasma_at_init</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
@@ -946,9 +964,25 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory_data)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.position  # Access trajectory data  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; from solarwindpy.core.spacecraft import Spacecraft</span>
+<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
+<span class="sd">        ...                          name="Epoch")</span>
+<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
+<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
+<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
+<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
+<span class="sd">        ... ], names=["M", "C", "S"])</span>
+<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        &gt;&gt;&gt; trajectory = pd.DataFrame(</span>
+<span class="sd">        ...     {("pos", "x"): [1.0, 2.0], ("pos", "y"): [0.0, 0.0],</span>
+<span class="sd">        ...      ("pos", "z"): [0.0, 0.0]}, index=epoch)</span>
+<span class="sd">        &gt;&gt;&gt; trajectory.columns.names = ["M", "C"]</span>
+<span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory, "PSP", "HCI")</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.name</span>
+<span class="sd">        'PSP'</span>
+<span class="sd">        &gt;&gt;&gt; plasma.spacecraft.position.data.loc[:, "x"].tolist()  # trajectory</span>
+<span class="sd">        [1.0, 2.0]</span>
 <span class="sd">        """</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">spacecraft</span><span class="o">.</span><span class="n">Spacecraft</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
@@ -990,10 +1024,20 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({'quality': [0, 1, 0]},  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
+<span class="sd">        ...                          name="Epoch")</span>
+<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
+<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
+<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
+<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
+<span class="sd">        ... ], names=["M", "C", "S"])</span>
+<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({("quality", "", ""): [0, 1]},</span>
 <span class="sd">        ...                              index=plasma.epoch)</span>
-<span class="sd">        &gt;&gt;&gt; plasma.set_auxiliary_data(quality_flags)  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; plasma.aux.quality  # Access auxiliary data  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; quality_flags.columns.names = ["M", "C", "S"]</span>
+<span class="sd">        &gt;&gt;&gt; plasma.set_auxiliary_data(quality_flags)</span>
+<span class="sd">        &gt;&gt;&gt; plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data</span>
+<span class="sd">        [0, 1]</span>
 <span class="sd">        """</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 

@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.icme &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.solar_activity.icme &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -331,10 +331,34 @@ DOI: 10.6084/m9.figshare.6356420</p>
 </section>
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.solar_activity.icme.icmecat</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICMECAT</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cat</span> <span class="o">=</span> <span class="n">ICMECAT</span><span class="p">(</span><span class="n">spacecraft</span><span class="o">=</span><span class="s2">"Ulysses"</span><span class="p">)</span>
+<p>In normal use <code class="docutils literal notranslate"><span class="pre">ICMECAT(spacecraft=&quot;Ulysses&quot;)</span></code> downloads the catalog from
+<code class="docutils literal notranslate"><span class="pre">icmecat.ICMECAT_URL</span></code>. This example stays offline by pointing that URL at a
+small local catalog in the same CSV layout.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.solar_activity.icme.icmecat</span><span class="w"> </span><span class="kn">import</span> <span class="n">ICMECAT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">catalog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s2">"icmecat_id"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ICME_ULYSSES_1"</span><span class="p">,</span> <span class="s2">"ICME_Wind_1"</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s2">"sc_insitu"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ULYSSES"</span><span class="p">,</span> <span class="s2">"Wind"</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s2">"icme_start_time"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"1998-01-01 00:00"</span><span class="p">,</span> <span class="s2">"1998-03-01 00:00"</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s2">"mo_start_time"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"1998-01-01 06:00"</span><span class="p">,</span> <span class="s2">"1998-03-01 06:00"</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s2">"mo_end_time"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"1998-01-02 00:00"</span><span class="p">,</span> <span class="s2">"1998-03-02 00:00"</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">d</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">local</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"icmecat.csv"</span>
+<span class="gp">... </span>    <span class="n">catalog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">original_url</span> <span class="o">=</span> <span class="n">icmecat</span><span class="o">.</span><span class="n">ICMECAT_URL</span>
+<span class="gp">... </span>    <span class="n">icmecat</span><span class="o">.</span><span class="n">ICMECAT_URL</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">local</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">cat</span> <span class="o">=</span> <span class="n">ICMECAT</span><span class="p">(</span><span class="n">spacecraft</span><span class="o">=</span><span class="s2">"Ulysses"</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">finally</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">icmecat</span><span class="o">.</span><span class="n">ICMECAT_URL</span> <span class="o">=</span> <span class="n">original_url</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span><span class="si">}</span><span class="s2"> Ulysses ICMEs"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">in_icme</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">observations</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="go">Found 1 Ulysses ICMEs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">observations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="s2">"1998-01-01 12:00"</span><span class="p">,</span> <span class="s2">"1998-03-01 12:00"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cat</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">observations</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[True, False]</span>
 </pre></div>
 </div>
 </section>

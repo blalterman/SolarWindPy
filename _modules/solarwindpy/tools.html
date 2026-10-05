@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.tools &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -314,14 +314,13 @@
 
 <span class="sd">Examples</span>
 <span class="sd">--------</span>
-<span class="sd">&gt;&gt;&gt; import pandas as pd  # doctest: +SKIP</span>
-<span class="sd">&gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
-<span class="sd">&gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP</span>
+<span class="sd">&gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">&gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
 <span class="sd">...     ('n', '', 'p1'), ('n', '', 'p2')</span>
 <span class="sd">... ], names=['M', 'C', 'S'])</span>
-<span class="sd">&gt;&gt;&gt; df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)  # doctest: +SKIP</span>
-<span class="sd">&gt;&gt;&gt; new_df, mask = swap_protons(df)  # doctest: +SKIP</span>
-<span class="sd">&gt;&gt;&gt; 'swapped_protons' in new_df.columns.get_level_values('M')  # doctest: +SKIP</span>
+<span class="sd">&gt;&gt;&gt; df = pd.DataFrame([[1, 0.1], [2, 0.2]], columns=columns)</span>
+<span class="sd">&gt;&gt;&gt; new_df, mask = swap_protons(df)</span>
+<span class="sd">&gt;&gt;&gt; 'swapped_protons' in new_df.columns.get_level_values('M')</span>
 <span class="sd">True</span>
 <span class="sd">"""</span>
 
@@ -359,15 +358,18 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; import pandas as pd  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
 <span class="sd">    ...     ('n', '', 'p1'), ('n', '', 'p2')</span>
 <span class="sd">    ... ], names=['M', 'C', 'S'])</span>
-<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame([[2, 1], [1, 2]], columns=columns)  # p1 &lt; p2 in first row  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; new_df, mask = swap_protons(df)  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; mask.iloc[0]  # First row should be swapped  # doctest: +SKIP</span>
-<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame([[1.0, 2.0], [2.0, 1.0]], columns=columns)  # p1 &lt; p2 in first row</span>
+<span class="sd">    &gt;&gt;&gt; new_df, mask = swap_protons(df)</span>
+<span class="sd">    &gt;&gt;&gt; mask.tolist()  # Only the first row is swapped</span>
+<span class="sd">    [True, False]</span>
+<span class="sd">    &gt;&gt;&gt; new_df.loc[:, ('n', '', 'p1')].tolist()</span>
+<span class="sd">    [2.0, 2.0]</span>
+<span class="sd">    &gt;&gt;&gt; new_df.loc[:, ('n', '', 'p2')].tolist()</span>
+<span class="sd">    [1.0, 1.0]</span>
 <span class="sd">    """</span>
     <span class="n">p1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"p1"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
     <span class="n">p2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"p2"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>

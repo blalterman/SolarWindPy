@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.abundances &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.core.abundances &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../../../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -367,16 +367,16 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; fe = ref.get_element("Fe")  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; print(f"Fe = {fe.Ab:.2f} ± {fe.Uncert:.2f}")  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; ref = ReferenceAbundances()</span>
+<span class="sd">    &gt;&gt;&gt; fe = ref.get_element("Fe")</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Fe = {fe.Ab:.2f} ± {fe.Uncert:.2f}")</span>
 <span class="sd">    Fe = 7.46 ± 0.04</span>
 
 <span class="sd">    Using 2009 data:</span>
 
-<span class="sd">    &gt;&gt;&gt; ref_2009 = ReferenceAbundances(year=2009)  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; fe_2009 = ref_2009.get_element("Fe")  # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; print(f"Fe (2009) = {fe_2009.Ab:.2f}")  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; ref_2009 = ReferenceAbundances(year=2009)</span>
+<span class="sd">    &gt;&gt;&gt; fe_2009 = ref_2009.get_element("Fe")</span>
+<span class="sd">    &gt;&gt;&gt; print(f"Fe (2009) = {fe_2009.Ab:.2f}")</span>
 <span class="sd">    Fe (2009) = 7.50</span>
 <span class="sd">    """</span>
 
@@ -464,12 +464,12 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; ref.get_element("Fe")  # doctest: +SKIP</span>
-<span class="sd">        Ab        7.46</span>
-<span class="sd">        Uncert    0.04</span>
-<span class="sd">        Name: 26, dtype: float64</span>
-<span class="sd">        &gt;&gt;&gt; ref.get_element(26)  # Same result using atomic number  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()</span>
+<span class="sd">        &gt;&gt;&gt; fe = ref.get_element("Fe")</span>
+<span class="sd">        &gt;&gt;&gt; float(fe.Ab), float(fe.Uncert)</span>
+<span class="sd">        (7.46, 0.04)</span>
+<span class="sd">        &gt;&gt;&gt; ref.get_element(26).equals(fe)  # Same values using atomic number</span>
+<span class="sd">        True</span>
 <span class="sd">        """</span>
         <span class="c1"># Handle backward compatibility alias</span>
         <span class="n">kind</span> <span class="o">=</span> <span class="n">_KIND_ALIASES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
@@ -520,10 +520,10 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; ref.get_comment("H")  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()</span>
+<span class="sd">        &gt;&gt;&gt; ref.get_comment("H")</span>
 <span class="sd">        'definition'</span>
-<span class="sd">        &gt;&gt;&gt; print(ref.get_comment("Fe"))  # Spectroscopic, no comment  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; print(ref.get_comment("Fe"))  # Spectroscopic, no comment</span>
 <span class="sd">        None</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -593,9 +593,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; fe_o = ref.abundance_ratio("Fe", "O")  # doctest: +SKIP</span>
-<span class="sd">        &gt;&gt;&gt; print(f"Fe/O = {fe_o.measurement:.4f} ± {fe_o.uncertainty:.4f}")  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; ref = ReferenceAbundances()</span>
+<span class="sd">        &gt;&gt;&gt; fe_o = ref.abundance_ratio("Fe", "O")</span>
+<span class="sd">        &gt;&gt;&gt; print(f"Fe/O = {fe_o.measurement:.4f} ± {fe_o.uncertainty:.4f}")</span>
 <span class="sd">        Fe/O = 0.0589 ± 0.0077</span>
 <span class="sd">        """</span>
         <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">numerator</span><span class="p">)</span>

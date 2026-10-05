@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g93549b69e documentation</title>
+  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g92a0c3540 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=12b555cc"></script>
+      <script src="../_static/documentation_options.js?v=ca41f6b9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -425,11 +425,11 @@ or “Meteorites” (alias for CI_chondrites).</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="n">ReferenceAbundances</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
-<span class="go">Ab        7.46</span>
-<span class="go">Uncert    0.04</span>
-<span class="go">Name: 26, dtype: float64</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="mi">26</span><span class="p">)</span>  <span class="c1"># Same result using atomic number</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fe</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="s2">"Fe"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">float</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">Ab</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">Uncert</span><span class="p">)</span>
+<span class="go">(7.46, 0.04)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="mi">26</span><span class="p">)</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>  <span class="c1"># Same values using atomic number</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>
