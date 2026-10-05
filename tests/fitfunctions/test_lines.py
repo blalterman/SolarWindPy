@@ -1,6 +1,7 @@
 """Tests for linear fit functions."""
 
 import inspect
+import warnings
 import numpy as np
 import pytest
 
@@ -280,7 +281,8 @@ def test_line_recovers_near_vertical_slope():
 def test_line_p0_is_none_with_duplicate_x_values(cls):
     """Repeated x leaves no slope estimate, so p0 is None, and the fit still runs.
 
-    The p0 docstring promises None for repeated ``x``. The data are
+    The p0 docstring promises None for repeated ``x``. The x-steps are checked
+    before dividing, so no divide-by-zero RuntimeWarning is emitted. The data are
     y = 2x + 0.05 +/- 0.05 at x in {1, 2}, whose least-squares line is
     m = 2, b = 0.05 (x0 = -0.025); residuals stay inside the Huber quadratic
     region, so the fit equals that line.
@@ -291,8 +293,8 @@ def test_line_p0_is_none_with_duplicate_x_values(cls):
     y = np.array([2.0, 2.1, 4.0, 4.1])
 
     obj = cls(x, y)
-    # The slope estimate divides by the zero x-steps before giving up.
-    with pytest.warns(RuntimeWarning, match="divide by zero"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
         assert obj.p0 is None
     obj.make_fit()
 

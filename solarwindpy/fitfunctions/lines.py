@@ -17,6 +17,41 @@ import numpy as np
 from .core import FitFunction
 
 
+def _median_slope_intercept(fitfunction):
+    r"""Estimate a line's slope and intercept from the used observations.
+
+    The slope is the median of the slopes between consecutive points and the
+    intercept the median of ``y - m x``. The x-steps are checked before any
+    division, so repeated or non-finite ``x`` returns ``None`` without a
+    divide-by-zero warning.
+
+    Parameters
+    ----------
+    fitfunction : FitFunction
+        The fit function whose used observations are estimated from.
+
+    Returns
+    -------
+    tuple of float or None
+        ``(m, b)``, or ``None`` if the slope cannot be estimated.
+    """
+    assert fitfunction.sufficient_data
+
+    x = fitfunction.observations.used.x
+    y = fitfunction.observations.used.y
+    dx = np.ediff1d(x)
+
+    if not (np.all(np.isfinite(dx)) and np.all(np.abs(dx) > 0)):
+        fitfunction.logger.warning(
+            f"Slope estimate failed (dx = {dx}).\nReturning None."
+        )
+        return None
+
+    m = np.median(np.ediff1d(y) / dx)
+    b = np.median(y - (m * x))
+    return m, b
+
+
 class Line(FitFunction):
     """Linear fit function for straight line relationships.
 
@@ -42,29 +77,17 @@ class Line(FitFunction):
         return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
         no initial guess.
 
-        Return
-        ------
-        p0 : list
+        Returns
+        -------
+        p0 : list or None
             The initial guesses as [m, b].
         """
-        assert self.sufficient_data
+        estimate = _median_slope_intercept(self)
+        if estimate is None:
+            return None
 
-        x = self.observations.used.x
-        y = self.observations.used.y
-        dy, dx = np.ediff1d(y), np.ediff1d(x)
-
-        m = dy / dx
-        m = np.median(m)
-        b = y - (m * x)
-        b = np.median(b)
-
-        p0 = [m, b]
-
-        if not (np.all(np.isfinite(dx)) and (np.all(np.abs(dx) > 0))):
-            self.logger.warning(f"Slope estimate failed (dx = {dx}).\nReturning None.")
-            p0 = None
-
-        return p0
+        m, b = estimate
+        return [m, b]
 
     @property
     def TeX_function(self):
@@ -116,30 +139,19 @@ class LineXintercept(FitFunction):
         return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
         no initial guess.
 
-        Return
-        ------
-        p0 : list
-            The initial guesses as [m, b].
+        Returns
+        -------
+        p0 : list or None
+            The initial guesses as [m, x0], where ``x0 = -b / m`` is the
+            x-intercept of the estimated line.
         """
-        assert self.sufficient_data
+        estimate = _median_slope_intercept(self)
+        if estimate is None:
+            return None
 
-        x = self.observations.used.x
-        y = self.observations.used.y
-        dy, dx = np.ediff1d(y), np.ediff1d(x)
-
-        m = dy / dx
-        m = np.median(m)
-        b = y - (m * x)
-        b = np.median(b)
-
+        m, b = estimate
         x0 = -b / m
-        p0 = [m, x0]
-
-        if not (np.all(np.isfinite(dx)) and (np.all(np.abs(dx) > 0))):
-            self.logger.warning(f"Slope estimate failed (dx = {dx}).\nReturning None.")
-            p0 = None
-
-        return p0
+        return [m, x0]
 
     @property
     def TeX_function(self):
