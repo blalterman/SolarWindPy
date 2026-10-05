@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g34ceb4224 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g6ed14f84f documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=f15ce3f6"></script>
+      <script src="../../../_static/documentation_options.js?v=ca1907ca"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -536,16 +536,11 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
-<span class="sd">        ...                          name="Epoch")</span>
-<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
-<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
-<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
-<span class="sd">        ... ], names=["M", "C", "S"])</span>
-<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
-<span class="sd">        &gt;&gt;&gt; plasma.epoch.equals(epoch)</span>
-<span class="sd">        True</span>
+<span class="sd">        ``plasma`` is a two-row, proton-only Plasma with epochs one minute</span>
+<span class="sd">        apart, supplied to docstring examples by the test configuration.</span>
+
+<span class="sd">        &gt;&gt;&gt; plasma.epoch.strftime("%Y-%m-%d %H:%M").tolist()</span>
+<span class="sd">        ['2023-01-01 00:00', '2023-01-01 00:01']</span>
 <span class="sd">        &gt;&gt;&gt; plasma.epoch.name</span>
 <span class="sd">        'Epoch'</span>
 <span class="sd">        """</span>
@@ -612,14 +607,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
-<span class="sd">        ...                          name="Epoch")</span>
-<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
-<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
-<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
-<span class="sd">        ... ], names=["M", "C", "S"])</span>
-<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring</span>
+<span class="sd">        examples by the test configuration.</span>
+
 <span class="sd">        &gt;&gt;&gt; plasma.log_plasma_at_init</span>
 <span class="sd">        False</span>
 <span class="sd">        &gt;&gt;&gt; plasma.set_log_plasma_stats(True)</span>
@@ -964,18 +954,13 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
+<span class="sd">        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring</span>
+<span class="sd">        examples by the test configuration.</span>
+
 <span class="sd">        &gt;&gt;&gt; from solarwindpy.core.spacecraft import Spacecraft</span>
-<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
-<span class="sd">        ...                          name="Epoch")</span>
-<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
-<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
-<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
-<span class="sd">        ... ], names=["M", "C", "S"])</span>
-<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
 <span class="sd">        &gt;&gt;&gt; trajectory = pd.DataFrame(</span>
 <span class="sd">        ...     {("pos", "x"): [1.0, 2.0], ("pos", "y"): [0.0, 0.0],</span>
-<span class="sd">        ...      ("pos", "z"): [0.0, 0.0]}, index=epoch)</span>
+<span class="sd">        ...      ("pos", "z"): [0.0, 0.0]}, index=plasma.epoch)</span>
 <span class="sd">        &gt;&gt;&gt; trajectory.columns.names = ["M", "C"]</span>
 <span class="sd">        &gt;&gt;&gt; sc = Spacecraft(trajectory, "PSP", "HCI")</span>
 <span class="sd">        &gt;&gt;&gt; plasma.set_spacecraft(sc)</span>
@@ -1024,14 +1009,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],</span>
-<span class="sd">        ...                          name="Epoch")</span>
-<span class="sd">        &gt;&gt;&gt; columns = pd.MultiIndex.from_tuples([</span>
-<span class="sd">        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),</span>
-<span class="sd">        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),</span>
-<span class="sd">        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),</span>
-<span class="sd">        ... ], names=["M", "C", "S"])</span>
-<span class="sd">        &gt;&gt;&gt; plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")</span>
+<span class="sd">        ``plasma`` is a two-row, proton-only Plasma, supplied to docstring</span>
+<span class="sd">        examples by the test configuration.</span>
+
 <span class="sd">        &gt;&gt;&gt; quality_flags = pd.DataFrame({("quality", "", ""): [0, 1]},</span>
 <span class="sd">        ...                              index=plasma.epoch)</span>
 <span class="sd">        &gt;&gt;&gt; quality_flags.columns.names = ["M", "C", "S"]</span>
