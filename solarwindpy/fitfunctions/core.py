@@ -163,13 +163,18 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Examples
         --------
-        >>> import numpy as np  # doctest: +SKIP
-        >>> from solarwindpy.fitfunctions.gaussians import Gaussian  # doctest: +SKIP
-        >>> x = np.linspace(-5, 5, 100)  # doctest: +SKIP
-        >>> y = 3 * np.exp(-0.5 * x**2) + np.random.normal(0, 0.1, 100)  # doctest: +SKIP
-        >>> fit = Gaussian(x, y, xmin=-3, xmax=3)  # doctest: +SKIP
-        >>> fit.make_fit()  # doctest: +SKIP
-        >>> print(f"Fitted mu: {fit.popt['mu']:.3f}")  # doctest: +SKIP
+        Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
+        recover those parameters:
+
+        >>> import numpy as np
+        >>> from solarwindpy.fitfunctions.gaussians import Gaussian
+        >>> rng = np.random.default_rng(0)
+        >>> x = np.linspace(-5, 5, 100)
+        >>> y = 3 * np.exp(-0.5 * ((x - 1) / 0.8) ** 2) + rng.normal(0, 0.1, 100)
+        >>> fit = Gaussian(x, y, xmin=-3, xmax=4)
+        >>> fit.make_fit()
+        >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
+        {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
 
         See Also
         --------

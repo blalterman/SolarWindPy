@@ -92,13 +92,46 @@ class ICMECAT:
 
     Example
     -------
-    >>> cat = ICMECAT(spacecraft="Ulysses")  # doctest: +SKIP
-    >>> print(f"Found {len(cat)} Ulysses ICMEs")  # doctest: +SKIP
-    >>> intervals = cat.intervals  # doctest: +SKIP
-    >>> print(intervals[["icme_start_time", "mo_end_time", "interval_end"]])  # doctest: +SKIP
-    >>>
-    >>> # Check which observations fall within ICME intervals
-    >>> in_icme = cat.contains(observations.index)  # doctest: +SKIP
+    In normal use ``ICMECAT(spacecraft="Ulysses")`` downloads the catalog
+    from ``ICMECAT_URL``. This example stays offline by pointing
+    ``ICMECAT_URL`` at a small local catalog in the same CSV layout.
+
+    >>> import tempfile
+    >>> from pathlib import Path
+    >>> from solarwindpy.solar_activity.icme import icmecat
+    >>> catalog = pd.DataFrame({
+    ...     "icmecat_id": ["ICME_ULYSSES_1", "ICME_ULYSSES_2", "ICME_Wind_1"],
+    ...     "sc_insitu": ["ULYSSES", "ULYSSES", "Wind"],
+    ...     "icme_start_time": ["1998-01-01 00:00", "1998-02-01 00:00",
+    ...                         "1998-03-01 00:00"],
+    ...     "mo_start_time": ["1998-01-01 06:00", "1998-02-01 06:00",
+    ...                       "1998-03-01 06:00"],
+    ...     "mo_end_time": ["1998-01-02 00:00", "", "1998-03-02 00:00"],
+    ... })
+    >>> with tempfile.TemporaryDirectory() as d:
+    ...     local = Path(d) / "icmecat.csv"
+    ...     catalog.to_csv(local, index=False)
+    ...     original_url = icmecat.ICMECAT_URL
+    ...     icmecat.ICMECAT_URL = str(local)
+    ...     try:
+    ...         cat = ICMECAT(spacecraft="Ulysses")
+    ...     finally:
+    ...         icmecat.ICMECAT_URL = original_url
+    >>> cat
+    ICMECAT(spacecraft='Ulysses', n_events=2)
+
+    The second event has no ``mo_end_time``, so its ``interval_end`` falls
+    back to ``mo_start_time`` + 24 h:
+
+    >>> cat.intervals["interval_end"].dt.strftime("%Y-%m-%d %H:%M").tolist()
+    ['1998-01-02 00:00', '1998-02-02 06:00']
+
+    Check which observations fall within ICME intervals. Only events with a
+    valid ``mo_end_time`` count, so the second observation is outside:
+
+    >>> observations = pd.DatetimeIndex(["1998-01-01 12:00", "1998-02-01 12:00"])
+    >>> cat.contains(observations).tolist()
+    [True, False]
     """
 
     def __init__(
