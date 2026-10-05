@@ -87,8 +87,25 @@ class Tensor(base.Base):
             raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     @property
-    def magnitude(self) -> pd.Series | pd.DataFrame:
-        """Calculate and return the magnitude of the tensor."""
-        return self.data.multiply({"par": 1 / 3, "per": 2 / 3}, axis=1, level="C").sum(
-            axis=1
-        )
+    def magnitude(self) -> pd.Series:
+        r"""Scalar magnitude of a thermal-speed tensor.
+
+        Returns
+        -------
+        pd.Series
+            Scalar thermal speed, in the units of the stored components.
+
+        Notes
+        -----
+        Thermal speeds combine through the temperatures. With
+        :math:`T = (T_\parallel + 2 T_\perp) / 3` and :math:`T \propto w^2`,
+
+        .. math::
+           w = \sqrt{\frac{w_\parallel^2 + 2 w_\perp^2}{3}}
+
+        This is the combination ``Plasma`` uses for the stored ``scalar`` thermal
+        speed; the ``scalar`` column itself is not read.
+        """
+        par = self.data.loc[:, "par"]
+        per = self.data.loc[:, "per"]
+        return par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
