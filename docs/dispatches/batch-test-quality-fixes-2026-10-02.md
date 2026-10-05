@@ -337,6 +337,21 @@ perpendicular parts with a NaN-skipping sum, so a time with both parts missing g
 NaN instead, matching the empty-sum rule (`min_count=1` or `skipna=False` as fits the formula).
 Control: a row with both parts missing gives NaN; the old code gives 0. CHANGELOG entry.
 
+### p0-simplify
+
+OWNS: solarwindpy/fitfunctions/ (all modules, CONTRIBUTING.md), tests/fitfunctions/, CLAUDE.md, CHANGELOG.md
+
+Runs after `tolerance-helpers` merges. Author decision: one concept, not two. A hinge class's
+`p0` returns its documented reference start itself (logging that the data gave no estimate)
+instead of returning None for an overridden `fallback_p0`; `HingeMax.p0` raises
+`NotImplementedError` in that branch. `fallback_p0` becomes private `_fallback_p0`, used only
+by the fitter for the generic in-bounds start when `p0` is None (no subclass overrides it).
+Update the base `p0` contract, CONTRIBUTING.md and the CHANGELOG. Also fix the stale CLAUDE.md
+pointer to a constructed example at `solarwindpy/core/plasma.py:102` (point to
+`swp.examples.load_plasma()`). Controls: each hinge class's impossible-estimate input gives
+the reference start from `p0` with the warning logged; `HingeMax` raises; a non-hinge class
+returning None still fits from the generic start.
+
 ## Long-running units
 
 ### mutation-recheck
