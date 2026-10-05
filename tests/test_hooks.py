@@ -69,6 +69,24 @@ def _hooks() -> dict:
     return json.loads(SETTINGS.read_text())["hooks"]
 
 
+_EXACT_MATCHER = re.compile(r"[A-Za-z0-9_\- ,|]*")
+
+
+def _matcher_matches(matcher, tool: str) -> bool:
+    """Whether a hook ``matcher`` selects ``tool``, by Claude Code's rules.
+
+    Per https://code.claude.com/docs/en/hooks: ``"*"``, ``""`` or an omitted
+    matcher matches every tool; a matcher of only letters, digits, ``_``,
+    ``-``, spaces, ``,`` and ``|`` is a list of exact names split on ``|`` or
+    ``,``; any other matcher is an unanchored regular expression.
+    """
+    if matcher in (None, "", "*"):
+        return True
+    if _EXACT_MATCHER.fullmatch(matcher):
+        return tool in {name.strip() for name in re.split(r"[|,]", matcher)}
+    return re.search(matcher, tool) is not None
+
+
 def test_mock_git_repo_leaves_the_callers_repository_untouched(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -152,11 +170,10 @@ def test_post_tool_use_hook_configured() -> None:
     """
     entries = _hooks()["PostToolUse"]
     for tool in ("Edit", "MultiEdit", "Write"):
-        # Claude Code matchers are regular expressions, e.g. "Edit|MultiEdit|Write".
         commands = [
             h["command"]
             for entry in entries
-            if re.fullmatch(entry["matcher"], tool)
+            if _matcher_matches(entry.get("matcher"), tool)
             for h in entry["hooks"]
         ]
         assert any(
