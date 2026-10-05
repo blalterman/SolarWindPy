@@ -75,26 +75,20 @@ the test predicts, computed independently (for example, smoothing checked agains
 
 ## Tolerances
 
-Every tolerance carries a one-line reason next to it.
+The tolerance rule is `tests/tolerances.py`: one function per kind of comparison, each giving
+its tolerance and the reason for it in its docstring.
 
-| Case | Tolerance |
+| Comparison | Helper |
 |---|---|
-| Exact SI constants and exact identities | `pytest.approx(x, rel=1e-12, abs=0)` |
-| A published value the package stores as printed | exact comparison |
-| A value the package computes and a source prints to d decimal places | half the last printed digit: `abs = 0.5 × 10^-d`, `rel=0` |
-| Noise-free fits | `rel=1e-6`: far above optimizer convergence, far below any real bug |
-| Noisy fits | fixed seed, and each parameter within 4 error bars |
+| Exact SI constants and identities, a published value the package stores as printed, a value recomputed from chosen inputs | `exact` |
+| A value the package computes and a source prints to d decimal places, on a linear or log scale | `printed(x, decimals=d)` |
+| A fit to noise-free data | `noise_free` |
+| A fit to noisy data with a fixed seed, or a sample statistic | `assert_within_error_bars` |
 
-The half-digit rule holds on linear and logarithmic scales alike: a source that prints
-log10 values to d decimal places is compared in log10 with `abs = 0.5 × 10^-d`.
-
-Set `abs=0` whenever values are small. `pytest.approx` otherwise allows an absolute margin of
-1e-12, which accepts any wrong value of order 1e-34.
-
-The fit functions wrap scipy; scipy owns fit accuracy. Low-noise recovery tests check that the
-wrappers pass data, weights and parameters through correctly. Noisy tests use a fixed seed so
-they never flicker, and 4 error bars so they pass for almost any seed (a joint false-alarm rate
-near 1 in 4000 for four parameters), not only a lucky one.
+A test file never writes its own tolerance keyword; `tests/test_tolerance_rule.py` fails when
+it does. The line holding an expected value says where that value comes from, never which
+tolerance applies. A comparison none of the helpers fits goes to the author, who decides
+whether the rule gains a kind.
 
 **Show it:** against the correct code the test passes; against a value shifted by a physically
 meaningful amount, it fails.
@@ -164,7 +158,7 @@ Stage explicit paths.
 2. Every fake is on the network, clock, or file boundary.
 3. Each expected value's source is on its line: chosen input, citation, hand calculation,
    identity, or recovery.
-4. Each tolerance has a reason, and small values use `abs=0`.
+4. Each tolerance comes from a helper in `tests/tolerances.py`.
 5. The name states the claim; the docstring ends with `ON FAILURE:`.
 6. You watched it fail against deliberately broken code.
 7. Physics you could not derive or cite, and label wording, went to the author.
