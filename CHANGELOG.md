@@ -224,6 +224,9 @@ These change computed values; rerun any analysis that used them.
 - `ReferenceAbundances.get_element` named its Series by the index level it did not
   search: `get_element("Fe")` was named 26 and `get_element(26)` was named `"Fe"`. Both
   are now named by the atomic number, 26.
+- `Plasma.vdf_ratio` is NaN where the beam drift cannot be projected onto b, e.g. where b
+  is missing. It previously dropped the drift term there and returned
+  ln(n2 w1^3 / n1 w2^3).
 
 ### Removed
 

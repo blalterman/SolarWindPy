@@ -2617,23 +2617,14 @@ def test_heat_flux_species_sum_is_nan_where_b_is_missing():
         )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=MissingFieldGaveNumber,
-    reason="Plasma.vdf_ratio sums (dv/w)^2 over par and per with "
-    "DataFrame.sum(axis=1), whose skipna turns the NaN projection into 0 and "
-    "returns ln(n2 w1^3 / n1 w2^3) (solarwindpy/core/plasma.py, vdf_ratio); "
-    "expected message 'vdf_ratio is -4.38... where b is missing'; remove this "
-    "marker when vdf_ratio sums with skipna=False",
-)
 def test_vdf_ratio_is_nan_where_b_is_missing():
     r"""Without b the beam drift has no par/per split, so ln(f2/f1) is NaN.
 
-    `Vector.project` returns NaN on rows missing from either vector (author
-    decision); row 0, with b, stays finite.
+    `Vector.project` returns NaN on rows missing from either vector, and
+    `vdf_ratio` propagates it rather than returning the drift-free value
+    ln(n2 w1^3 / n1 w2^3) (author decisions); row 0, with b, stays finite.
 
-    ON FAILURE: (unexpected pass) vdf_ratio sums with skipna=False; drop the xfail
-    marker.
+    ON FAILURE: the code is wrong.
     """
     f2f1 = _missing_b_plasma("p1", "p2").vdf_ratio()
     assert np.isfinite(f2f1.iloc[0])

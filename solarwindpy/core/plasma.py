@@ -1530,7 +1530,9 @@ species: {}
         Returns
         -------
         f2f1 : pd.Series
-            Natural logarithm of the beam to core VDF ratio.
+            Natural logarithm of the beam to core VDF ratio. NaN where the
+            beam drift cannot be projected onto the magnetic field, e.g. where
+            b is missing.
 
         Notes
         -----
@@ -1567,7 +1569,9 @@ species: {}
         w2_per = w.per.loc[:, beam]
 
         dv = self.dv(beam, core, project_m2q=True).project(self.b)
-        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1)
+        # skipna=False: where b is missing the projection is NaN, and the
+        # ratio must be NaN rather than the drift-free value ln(n2 w1^3 / n1 w2^3).
+        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1, skipna=False)
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
