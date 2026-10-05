@@ -327,6 +327,16 @@ data with `swp.examples.load_plasma()` (`plasma`, `plasma.p1`, `plasma.spacecraf
 building random or hand-typed frames, so the example CSVs are the single source. Docstrings
 only. Runs alongside `tolerance-helpers` (disjoint files).
 
+### scalar-w-nan
+
+OWNS: solarwindpy/core/plasma.py, tests/core/test_plasma.py, CHANGELOG.md
+
+Runs after `loader-examples` and `tolerance-helpers` merge (both touch these files). Author
+decision: `Plasma.set_data` builds each species' scalar thermal speed from its parallel and
+perpendicular parts with a NaN-skipping sum, so a time with both parts missing gets 0. It is
+NaN instead, matching the empty-sum rule (`min_count=1` or `skipna=False` as fits the formula).
+Control: a row with both parts missing gives NaN; the old code gives 0. CHANGELOG entry.
+
 ## Long-running units
 
 ### mutation-recheck
