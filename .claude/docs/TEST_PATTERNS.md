@@ -80,9 +80,13 @@ Every tolerance carries a one-line reason next to it.
 | Case | Tolerance |
 |---|---|
 | Exact SI constants and exact identities | `pytest.approx(x, rel=1e-12, abs=0)` |
-| Values published to N significant digits | `rel` ≈ 10^-(N-1), `abs=0` |
+| A published value the package stores as printed | exact comparison |
+| A value the package computes and a source prints to d decimal places | half the last printed digit: `abs = 0.5 × 10^-d`, `rel=0` |
 | Noise-free fits | `rel=1e-6`: far above optimizer convergence, far below any real bug |
 | Noisy fits | fixed seed, and each parameter within 4 error bars |
+
+The half-digit rule holds on linear and logarithmic scales alike: a source that prints
+log10 values to d decimal places is compared in log10 with `abs = 0.5 × 10^-d`.
 
 Set `abs=0` whenever values are small. `pytest.approx` otherwise allows an absolute margin of
 1e-12, which accepts any wrong value of order 1e-34.
