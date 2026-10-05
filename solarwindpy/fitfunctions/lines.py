@@ -135,9 +135,10 @@ class LineXintercept(FitFunction):
     def p0(self):
         r"""Calculate the initial guess for the line parameters.
 
-        If the slope cannot be estimated (non-finite or repeated ``x``),
-        return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
-        no initial guess.
+        If the slope cannot be estimated (non-finite or repeated ``x``), or
+        the estimated slope is zero (a flat line has no x-intercept), return
+        ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean no
+        initial guess. Neither case emits a divide-by-zero warning.
 
         Returns
         -------
@@ -150,8 +151,13 @@ class LineXintercept(FitFunction):
             return None
 
         m, b = estimate
-        x0 = -b / m
-        return [m, x0]
+        if m == 0:
+            self.logger.warning(
+                "Estimated slope is 0, so no x-intercept.\nReturning None."
+            )
+            return None
+
+        return [m, -b / m]
 
     @property
     def TeX_function(self):
