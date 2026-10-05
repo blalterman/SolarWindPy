@@ -15,14 +15,21 @@ The examples in the rst files listed in ``SYBIL_DOCUMENTS`` run under Sybil:
         docs/source/tutorial/quickstart.rst docs/source/installation.rst
 
 ``-p no:doctest`` stops pytest's own doctest plugin from collecting the same
-rst files a second time when they are named on the command line. Sybil is
+rst files a second time when they are named on the command line. Under
+``--doctest-glob='*.rst'`` the plugin collects them too; while Sybil is active
+those doctest items are deselected here, so each example runs once. Sybil is
 declared in the ``dev`` extra; without it no Sybil example is collected.
 
 A document's examples share one namespace and read as a sequence: README's
 later examples use the ``plasma`` its earlier ones build. pytest-randomly
 shuffles items before this file's ``pytest_collection_modifyitems`` runs, so
 that hook puts each document's examples back in line order.
+
+Docstring examples (``DoctestItem``) find a fresh ``plasma`` in their
+namespace, provided by the ``_doctest_plasma`` fixture.
 """
+
+from pathlib import Path
 
 import pytest
 
@@ -35,6 +42,7 @@ SYBIL_DOCUMENTS = [
     "docs/source/tutorial/quickstart.rst",
     "docs/source/installation.rst",
 ]
+_SYBIL_PATHS = {Path(__file__).parent / document for document in SYBIL_DOCUMENTS}
 
 try:
     from sybil import Sybil
@@ -54,6 +62,11 @@ else:
 
 def _restore_document_order(items):
     """Put Sybil examples back in document line order, in their own slots."""
+    # Sorts the Sybil items by (path, line), so within each document the
+    # examples run in line order, and writes them back into the positions Sybil
+    # items already held; every other item stays where it is. Assumes a single
+    # process: under pytest-xdist a document's examples could be split across
+    # workers, and no reordering here would keep their shared namespace intact.
     slots = [i for i, item in enumerate(items) if isinstance(item, SybilItem)]
     ordered = sorted(
         (items[i] for i in slots),
@@ -63,10 +76,59 @@ def _restore_document_order(items):
         items[i] = item
 
 
+def _deselect_doctest_duplicates(config, items):
+    """Deselect pytest's own doctest items for the documents Sybil runs."""
+    duplicates = [
+        item
+        for item in items
+        if isinstance(item, pytest.DoctestItem) and item.path in _SYBIL_PATHS
+    ]
+    if duplicates:
+        config.hook.pytest_deselected(items=duplicates)
+        items[:] = [item for item in items if item not in duplicates]
+
+
 def pytest_collection_modifyitems(config, items):
     for item in items:
         reason = DOCTEST_XFAIL.get(item.nodeid)
         if reason is not None:
             item.add_marker(pytest.mark.xfail(strict=True, reason=reason))
     if SybilItem is not None:
+        _deselect_doctest_duplicates(config, items)
         _restore_document_order(items)
+
+
+def _small_plasma():
+    """Build the two-row proton ``Plasma`` that docstring examples share.
+
+    The same setup the ``Plasma.epoch``, ``set_log_plasma_stats``,
+    ``set_spacecraft`` and ``set_auxiliary_data`` docstring examples build for
+    themselves: every value 1.0, two epochs one minute apart.
+    """
+    import pandas as pd
+
+    from solarwindpy.core.plasma import Plasma
+
+    epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"], name="Epoch")
+    columns = pd.MultiIndex.from_tuples(
+        [
+            ("b", "x", ""),
+            ("b", "y", ""),
+            ("b", "z", ""),
+            ("n", "", "p1"),
+            ("v", "x", "p1"),
+            ("v", "y", "p1"),
+            ("v", "z", "p1"),
+            ("w", "par", "p1"),
+            ("w", "per", "p1"),
+        ],
+        names=["M", "C", "S"],
+    )
+    return Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+
+
+@pytest.fixture(autouse=True)
+def _doctest_plasma(request):
+    """Give each docstring example a fresh ``plasma``; other tests get nothing."""
+    if isinstance(request.node, pytest.DoctestItem):
+        request.getfixturevalue("doctest_namespace")["plasma"] = _small_plasma()
