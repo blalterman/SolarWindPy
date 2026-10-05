@@ -1,81 +1,102 @@
-"""Shared fixtures for ICMECAT tests."""
+"""Shared fixtures for ICMECAT tests.
 
-import pytest
+The catalog download is the network boundary. Unit tests point the module's
+``ICMECAT_URL`` constant at a CSV written under ``tmp_path``, so the real
+``pandas.read_csv`` parses a real file exactly as it parses the HELIO4CAST one.
+No library function is replaced.
+"""
+
 import pandas as pd
-import numpy as np
+import pytest
 
+from solarwindpy.solar_activity.icme import icmecat
 
-@pytest.fixture
-def mock_icmecat_csv_data():
-    """Create mock ICMECAT CSV data matching real catalog structure.
+T = pd.Timestamp
+NaT = pd.NaT
 
-    Returns DataFrame with realistic column names and data types
-    matching HELIO4CAST ICMECAT v2.3 format.
-    """
-    np.random.seed(42)  # Reproducible
-    n_events = 50
-    base_date = pd.Timestamp("2000-01-01")
-
-    data = {
-        "icmecat_id": [f"ICME_{i:04d}" for i in range(n_events)],
-        "sc_insitu": np.random.choice(
-            ["Ulysses", "Wind", "STEREO-A", "STEREO-B", "ACE"], n_events
-        ),
+# Hand-built six-event catalog. Spacecraft use the catalog's own spellings
+# ("ULYSSES" is all caps in HELIO4CAST), so a caller's "Ulysses" exercises the
+# case-insensitive match. Each interval_end source appears:
+#
+#   id  sc_insitu  icme_start        mo_start          mo_end      interval_end  source
+#   U1  ULYSSES    2000-01-10        2000-01-11        2000-01-15  2000-01-15    mo_end
+#   U2  ULYSSES    2000-02-15        2000-02-16        2000-02-20  2000-02-20    mo_end
+#   U3  ULYSSES    2000-03-20        2000-03-21        NaT         2000-03-22    mo_start + 24 h
+#   W1  Wind       2000-04-01        NaT               NaT         2000-04-02    icme_start + 24 h
+#   W2  Wind       2000-05-01        2000-05-02        2000-05-04  2000-05-04    mo_end
+#   S1  STEREO-A   2000-06-01        2000-06-01 12:00  2000-06-03  2000-06-03    mo_end
+#
+# mo_bmax is a catalog column that ICMECAT.intervals does not carry.
+#
+# CATALOG is read-only shared state: tests receive copies through the
+# `catalog` and `serve_catalog` fixtures and never touch it directly.
+CATALOG = pd.DataFrame(
+    {
+        "icmecat_id": ["U1", "U2", "U3", "W1", "W2", "S1"],
+        "sc_insitu": ["ULYSSES", "ULYSSES", "ULYSSES", "Wind", "Wind", "STEREO-A"],
         "icme_start_time": [
-            base_date + pd.Timedelta(days=i * 30 + np.random.randint(0, 10))
-            for i in range(n_events)
+            T("2000-01-10"),
+            T("2000-02-15"),
+            T("2000-03-20"),
+            T("2000-04-01"),
+            T("2000-05-01"),
+            T("2000-06-01"),
         ],
         "mo_start_time": [
-            base_date + pd.Timedelta(days=i * 30 + np.random.randint(10, 15))
-            for i in range(n_events)
+            T("2000-01-11"),
+            T("2000-02-16"),
+            T("2000-03-21"),
+            NaT,
+            T("2000-05-02"),
+            T("2000-06-01 12:00"),
         ],
         "mo_end_time": [
-            (
-                base_date + pd.Timedelta(days=i * 30 + np.random.randint(15, 25))
-                if np.random.random() > 0.1
-                else pd.NaT
-            )  # 10% missing
-            for i in range(n_events)
+            T("2000-01-15"),
+            T("2000-02-20"),
+            NaT,
+            NaT,
+            T("2000-05-04"),
+            T("2000-06-03"),
         ],
-        "mo_sc_heliodistance": np.random.uniform(0.7, 5.4, n_events),
-        "mo_sc_lat_heeq": np.random.uniform(-80, 80, n_events),
-        "mo_sc_long_heeq": np.random.uniform(0, 360, n_events),
+        "mo_sc_heliodistance": [1.5, 2.5, 3.5, 1.0, 1.0, 0.75],
+        "mo_sc_lat_heeq": [10.0, -20.0, 30.0, 0.5, -0.5, 2.0],
+        "mo_sc_long_heeq": [100.0, 200.0, 300.0, 5.0, 6.0, 7.0],
+        "mo_bmax": [8.0, 9.0, 10.0, 11.0, 12.0, 13.0],
     }
-    return pd.DataFrame(data)
+)
+
+
+@pytest.fixture(autouse=True)
+def _no_network(request, tmp_path, monkeypatch):
+    """Point ``ICMECAT_URL`` at a missing local file unless the test is ``integration``.
+
+    A unit test that forgets ``serve_catalog`` then fails with
+    ``ICMECATDownloadError`` instead of silently reaching helioforecast.space.
+    """
+    if request.node.get_closest_marker("integration") is None:
+        monkeypatch.setattr(
+            icmecat, "ICMECAT_URL", str(tmp_path / "no-network-in-unit-tests.csv")
+        )
 
 
 @pytest.fixture
-def sample_observation_times():
-    """Create sample observation timestamps for containment testing."""
-    return pd.Series(
-        pd.date_range("2000-01-01", "2005-12-31", freq="4min"), name="time"
-    )
+def catalog():
+    """A fresh copy of the hand-built ``CATALOG`` table."""
+    return CATALOG.copy()
 
 
 @pytest.fixture
-def simple_icme_intervals():
-    """Simple, predictable ICME intervals for testing containment."""
-    return pd.DataFrame(
-        {
-            "icmecat_id": ["TEST_001", "TEST_002", "TEST_003"],
-            "sc_insitu": ["Ulysses", "Ulysses", "Ulysses"],
-            "icme_start_time": [
-                pd.Timestamp("2000-01-10"),
-                pd.Timestamp("2000-02-15"),
-                pd.Timestamp("2000-03-20"),
-            ],
-            "mo_start_time": [
-                pd.Timestamp("2000-01-11"),
-                pd.Timestamp("2000-02-16"),
-                pd.Timestamp("2000-03-21"),
-            ],
-            "mo_end_time": [
-                pd.Timestamp("2000-01-15"),
-                pd.Timestamp("2000-02-20"),
-                pd.NaT,  # Missing - will use fallback
-            ],
-            "mo_sc_heliodistance": [1.0, 2.0, 3.0],
-            "mo_sc_lat_heeq": [10.0, 20.0, 30.0],
-            "mo_sc_long_heeq": [100.0, 200.0, 300.0],
-        }
-    )
+def serve_catalog(tmp_path, monkeypatch):
+    """Return ``serve(frame)``: write ``frame`` as CSV and point ``ICMECAT_URL`` at it.
+
+    ``serve()`` with no argument serves ``CATALOG``. Returns the CSV path.
+    """
+
+    def _serve(frame=None):
+        frame = (CATALOG if frame is None else frame).copy()
+        path = tmp_path / "icmecat.csv"
+        frame.to_csv(path, index=False)
+        monkeypatch.setattr(icmecat, "ICMECAT_URL", str(path))
+        return path
+
+    return _serve

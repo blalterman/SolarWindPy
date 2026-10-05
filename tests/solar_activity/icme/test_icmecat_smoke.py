@@ -1,129 +1,35 @@
-"""Smoke tests for ICMECAT class.
+"""Offline checks on the ICMECAT module constants.
 
-Quick validation tests that can run without network access.
-Verify module imports, docstrings, and basic instantiation.
+Import paths are covered by ``tests/test_public_imports.py``; behavior by
+``test_icmecat.py``. The opt-in drift suite (``tests/drift/test_drift_icmecat.py``)
+checks these constants against the live catalog.
 """
 
-
-class TestModuleImports:
-    """Verify module can be imported and has expected attributes."""
-
-    def test_import_module(self):
-        """Module can be imported without errors."""
-        from solarwindpy.solar_activity import icme
-
-        assert icme is not None
-
-    def test_icmecat_class_exists(self):
-        """ICMECAT class is importable."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert ICMECAT is not None
-
-    def test_url_constant_defined(self):
-        """ICMECAT_URL constant is defined."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL
-
-        assert isinstance(ICMECAT_URL, str)
-        assert ICMECAT_URL.startswith("https://")
-        assert "helioforecast" in ICMECAT_URL
-
-    def test_spacecraft_names_defined(self):
-        """SPACECRAFT_NAMES constant is defined."""
-        from solarwindpy.solar_activity.icme.icmecat import SPACECRAFT_NAMES
-
-        assert "ULYSSES" in SPACECRAFT_NAMES
-        assert "SolarOrbiter" in SPACECRAFT_NAMES
-        assert "Wind" in SPACECRAFT_NAMES
+from solarwindpy.solar_activity.icme.icmecat import ICMECAT_URL, SPACECRAFT_NAMES
 
 
-class TestDocstrings:
-    """Verify docstrings are present and contain required information."""
+class TestModuleConstants:
+    """The pinned catalog source and its spacecraft spellings."""
 
-    def test_module_docstring_exists(self):
-        """Module has a docstring."""
-        from solarwindpy.solar_activity import icme
+    def test_url_constant_is_pinned_helio4cast_csv(self):
+        """ICMECAT_URL is the HELIO4CAST ICMECAT CSV over https.
 
-        assert icme.__doc__ is not None
-        assert len(icme.__doc__) > 100
+        ON FAILURE: the code is wrong, unless the author moved the pin to another
+        host; update this test with it.
+        """
+        assert ICMECAT_URL.startswith("https://helioforecast.space/")
+        assert "HELIO4CAST_ICMECAT_v" in ICMECAT_URL
+        assert ICMECAT_URL.endswith(".csv")
 
-    def test_module_docstring_has_url(self):
-        """Module docstring references helioforecast.space."""
-        from solarwindpy.solar_activity import icme
+    def test_spacecraft_names_use_catalog_spellings(self):
+        """SPACECRAFT_NAMES spells names as the v23 catalog's sc_insitu column does.
 
-        assert "helioforecast.space/icmecat" in icme.__doc__
+        The catalog writes "ULYSSES" (all caps) and "SolarOrbiter" (no space),
+        and has no ACE or Cassini events (see the comment above SPACECRAFT_NAMES
+        and tests/drift/test_drift_icmecat.py).
 
-    def test_module_docstring_has_rules_of_road(self):
-        """Module docstring includes rules of the road."""
-        from solarwindpy.solar_activity import icme
-
-        assert "rules of the road" in icme.__doc__.lower()
-        assert "co-authorship" in icme.__doc__.lower()
-
-    def test_module_docstring_has_citation(self):
-        """Module docstring includes citation info."""
-        from solarwindpy.solar_activity import icme
-
-        assert "Möstl" in icme.__doc__
-        assert "10.6084/m9.figshare.6356420" in icme.__doc__
-
-    def test_icmecat_class_docstring(self):
-        """ICMECAT class has a docstring."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert ICMECAT.__doc__ is not None
-
-    def test_icmecat_methods_have_docstrings(self):
-        """ICMECAT public methods have docstrings."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        methods = ["filter", "contains", "summary", "get_events_in_range"]
-        for method_name in methods:
-            method = getattr(ICMECAT, method_name)
-            assert method.__doc__ is not None, f"{method_name} missing docstring"
-
-
-class TestClassStructure:
-    """Verify class has expected properties and methods."""
-
-    def test_icmecat_has_data_property(self):
-        """ICMECAT has data property."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert hasattr(ICMECAT, "data")
-
-    def test_icmecat_has_intervals_property(self):
-        """ICMECAT has intervals property."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert hasattr(ICMECAT, "intervals")
-
-    def test_icmecat_has_strict_intervals_property(self):
-        """ICMECAT has strict_intervals property."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert hasattr(ICMECAT, "strict_intervals")
-
-    def test_icmecat_has_spacecraft_property(self):
-        """ICMECAT has spacecraft property."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert hasattr(ICMECAT, "spacecraft")
-
-    def test_icmecat_has_filter_method(self):
-        """ICMECAT has filter method."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert callable(getattr(ICMECAT, "filter", None))
-
-    def test_icmecat_has_contains_method(self):
-        """ICMECAT has contains method."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert callable(getattr(ICMECAT, "contains", None))
-
-    def test_icmecat_has_summary_method(self):
-        """ICMECAT has summary method."""
-        from solarwindpy.solar_activity.icme.icmecat import ICMECAT
-
-        assert callable(getattr(ICMECAT, "summary", None))
+        ON FAILURE: the code is wrong, unless the drift suite shows the catalog
+        changed; then external fact drifted; update SPACECRAFT_NAMES.
+        """
+        assert {"ULYSSES", "SolarOrbiter", "Wind"} <= SPACECRAFT_NAMES
+        assert not {"Ulysses", "Solar Orbiter", "ACE", "Cassini"} & SPACECRAFT_NAMES
