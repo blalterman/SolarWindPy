@@ -26,11 +26,12 @@ _XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
 def _author_start():
-    r"""The author's fallback hinge, shared by the hinge ``fallback_p0`` overrides.
+    r"""The author's reference hinge, shared by the hinge ``p0`` properties.
 
     When a hinge ``p0`` cannot estimate a start, the all-ones default is a
     singular point of these models (the two lines' intercepts coincide), so
-    the fit starts here instead: the hinge :math:`(x_h, y_h) = (433, 4.12)`,
+    ``p0`` returns this point instead, translated to the class's
+    parameters: the hinge :math:`(x_h, y_h) = (433, 4.12)`,
     the rising line's x-intercept :math:`x_1 = 250`, its slope
     :math:`m_1 = y_h / (x_h - x_1)`, and a small non-zero plateau slope
     :math:`m_2 = 0.01\,m_1`, as chosen by the package author.
@@ -53,8 +54,8 @@ def _undefined(fitfunction, reason, **estimates):
     A hinge ``p0`` estimates slopes from the points on each side of its
     hinge guess. A side with fewer than two points or repeated ``x`` has no
     slope, and a zero slope has no x-intercept. When any of the estimates
-    passed here is undefined for such a reason, this logs which ones and
-    ``reason``, and the caller's ``p0`` returns None.
+    passed here is undefined for such a reason, this logs a warning naming
+    them and ``reason``, and the caller's ``p0`` returns its reference start.
 
     Parameters
     ----------
@@ -73,7 +74,7 @@ def _undefined(fitfunction, reason, **estimates):
     bad = {k: v for k, v in estimates.items() if not np.isfinite(v)}
     if bad:
         fitfunction.logger.warning(
-            f"Undefined estimates {bad}: {reason}.\nReturning None."
+            f"The data gave no estimate. Undefined estimates {bad}: {reason}."
         )
     return bool(bad)
 
@@ -194,12 +195,13 @@ class HingeSaturation(FitFunction):
         - Estimated x1 from linear fit to rising region, or data minimum
         - Median slope in plateau region for m2
 
-        ``m2`` is undefined, and ``p0`` is None, when the plateau region
-        has repeated ``x``.
+        ``m2`` is undefined when the plateau region has repeated ``x``; ``p0``
+        then logs a warning and returns the reference start
+        (``_reference_start``).
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [xh, yh, x1, m2].
 
         Raises
@@ -238,19 +240,18 @@ class HingeSaturation(FitFunction):
             m2 = 0.0
 
         if _undefined(self, "the plateau region has repeated x", m2=m2):
-            return None
+            return self._reference_start()
 
         p0 = [xh, yh, x1, m2]
         return p0
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: ``[xh, yh, x1, m2]``.
+    def _reference_start(self):
+        r"""The start :attr:`p0` returns without an estimate: ``[xh, yh, x1, m2]``.
 
         The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
         rising line with x-intercept :math:`x_1 = 250` (so
         :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
-        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
-        not used: the start is the same point whatever the bounds.
+        :math:`m_2 = 0.01\,m_1`.
         """
         s = _author_start()
         return [s["xh"], s["yh"], s["x1"], s["m2"]]
@@ -445,11 +446,12 @@ class TwoLine(FitFunction):
 
         Each side of ``guess_xs`` needs at least two points with distinct
         ``x`` for a slope, and a nonzero slope for an x-intercept. Otherwise
-        an estimate is undefined and ``p0`` is None.
+        an estimate is undefined, and ``p0`` logs a warning and returns the
+        reference start (``_reference_start``).
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [x1, x2, m1, m2].
 
         Raises
@@ -489,19 +491,18 @@ class TwoLine(FitFunction):
             "and a nonzero slope for an x-intercept"
         )
         if _undefined(self, reason, x1=x1, x2=x2, m1=m1, m2=m2):
-            return None
+            return self._reference_start()
 
         p0 = [x1, x2, m1, m2]
         return p0
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: ``[x1, x2, m1, m2]``.
+    def _reference_start(self):
+        r"""The start :attr:`p0` returns without an estimate: ``[x1, x2, m1, m2]``.
 
         The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
         rising line with x-intercept :math:`x_1 = 250` (so
         :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
-        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
-        not used: the start is the same point whatever the bounds.
+        :math:`m_2 = 0.01\,m_1`.
 
         ``x2 = 433 - 4.12 / m2`` puts the second line through the hinge.
         """
@@ -705,11 +706,12 @@ class Saturation(FitFunction):
 
         Each side of ``xs`` needs at least two points with distinct ``x``
         for a slope, and the rising side a nonzero slope for ``x1``.
-        Otherwise an estimate is undefined and ``p0`` is None.
+        Otherwise an estimate is undefined, and ``p0`` logs a warning and
+        returns the reference start (``_reference_start``).
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [x1, xs, s, theta].
 
         Raises
@@ -753,19 +755,18 @@ class Saturation(FitFunction):
             "and the rising side a nonzero slope for x1"
         )
         if _undefined(self, reason, x1=x1, s=s, theta=theta):
-            return None
+            return self._reference_start()
 
         p0 = [x1, xs, s, theta]
         return p0
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: ``[x1, xs, s, theta]``.
+    def _reference_start(self):
+        r"""The start :attr:`p0` returns without an estimate: ``[x1, xs, s, theta]``.
 
         The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
         rising line with x-intercept :math:`x_1 = 250` (so
         :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
-        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
-        not used: the start is the same point whatever the bounds.
+        :math:`m_2 = 0.01\,m_1`.
 
         ``theta = arctan(m1) - arctan(m2)`` inverts the model's
         ``m2 = tan(arctan(m1) - theta)``.
@@ -951,11 +952,12 @@ class HingeMin(FitFunction):
         Each side of ``guess_h`` with two or more points needs distinct
         ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
         ``m1`` falls back to the slope across the x range, which needs
-        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+        distinct ``x``. Otherwise an estimate is undefined, and ``p0`` logs a
+        warning and returns the reference start (``_reference_start``).
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [m1, x1, x2, h].
 
         Raises
@@ -999,19 +1001,18 @@ class HingeMin(FitFunction):
             "and a nonzero slope for an x-intercept"
         )
         if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
-            return None
+            return self._reference_start()
 
         p0 = [m1, x1, x2, h]
         return p0
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: ``[m1, x1, x2, h]``.
+    def _reference_start(self):
+        r"""The start :attr:`p0` returns without an estimate: ``[m1, x1, x2, h]``.
 
         The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
         rising line with x-intercept :math:`x_1 = 250` (so
         :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
-        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
-        not used: the start is the same point whatever the bounds.
+        :math:`m_2 = 0.01\,m_1`.
 
         ``x2 = 433 - 4.12 / m2`` and ``h = 433``, so the model's
         ``m2 = m1 (h - x1) / (h - x2)`` recovers ``m2``.
@@ -1196,17 +1197,22 @@ class HingeMax(FitFunction):
         Each side of ``guess_h`` with two or more points needs distinct
         ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,
         ``m1`` falls back to the slope across the x range, which needs
-        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.
+        distinct ``x``. Otherwise an estimate is undefined, and ``p0`` logs a
+        warning and raises ``NotImplementedError``: the author has not yet
+        chosen a reference start for this shape.
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [m1, x1, x2, h].
 
         Raises
         ------
         ~solarwindpy.fitfunctions.core.InsufficientDataError
             If insufficient data for estimation.
+        NotImplementedError
+            If the data give no estimate. Pass ``p0=`` to
+            :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
 
         Notes
         -----
@@ -1244,25 +1250,14 @@ class HingeMax(FitFunction):
             "and a nonzero slope for an x-intercept"
         )
         if _undefined(self, reason, m1=m1, x1=x1, x2=x2):
-            return None
+            # The hinge maximum has a different shape from the other hinge
+            # models, and the author has not yet chosen its reference start.
+            raise NotImplementedError(
+                "HingeMax has no reference start defined yet; pass p0= to make_fit."
+            )
 
         p0 = [m1, x1, x2, h]
         return p0
-
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: not yet defined.
-
-        The hinge maximum has a different shape from the other hinge models,
-        and the author has not yet chosen its fallback start.
-
-        Raises
-        ------
-        NotImplementedError
-            Always, until a default start is defined.
-        """
-        raise NotImplementedError(
-            "HingeMax has no default start defined yet; pass p0= to make_fit."
-        )
 
     @property
     def TeX_function(self) -> str:
@@ -1419,11 +1414,12 @@ class HingeAtPoint(FitFunction):
         slopes from the data in regions separated by the hinge guess.
 
         A side of ``guess_xh`` with two or more points needs distinct ``x``
-        for a slope. Otherwise a slope is undefined and ``p0`` is None.
+        for a slope. Otherwise a slope is undefined, and ``p0`` logs a
+        warning and returns the reference start (``_reference_start``).
 
         Returns
         -------
-        list or None
+        list
             Initial guesses as [xh, yh, m1, m2].
 
         Raises
@@ -1464,19 +1460,18 @@ class HingeAtPoint(FitFunction):
             m2 = 0.0
 
         if _undefined(self, "each side of xh needs distinct x", m1=m1, m2=m2):
-            return None
+            return self._reference_start()
 
         p0 = [xh, yh, m1, m2]
         return p0
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
-        r"""The start used when :attr:`p0` is None: ``[xh, yh, m1, m2]``.
+    def _reference_start(self):
+        r"""The start :attr:`p0` returns without an estimate: ``[xh, yh, m1, m2]``.
 
         The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a
         rising line with x-intercept :math:`x_1 = 250` (so
         :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope
-        :math:`m_2 = 0.01\,m_1`. ``bounds`` is
-        not used: the start is the same point whatever the bounds.
+        :math:`m_2 = 0.01\,m_1`.
         """
         s = _author_start()
         return [s["xh"], s["yh"], s["m1"], s["m2"]]

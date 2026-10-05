@@ -266,10 +266,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             the data make a guess impossible (an empty region, an undefined
             slope, a zero total weight, and so on), ``p0`` returns ``None``
             rather than a guess holding NaN or infinity, and :meth:`make_fit`
-            starts from :meth:`fallback_p0`: by default the feasible start
-            for the bounds (ones when unbounded, as
-            :func:`scipy.optimize.curve_fit` does), unless the class
-            overrides it.
+            starts from the feasible start for the bounds (ones when
+            unbounded, as :func:`scipy.optimize.curve_fit` does). A class
+            whose model is singular at that start instead documents a
+            reference start of its own, and its ``p0`` returns that start,
+            logging a warning that the data gave no estimate; the hinge
+            classes in :mod:`~solarwindpy.fitfunctions.hinge` do this.
 
         Raises
         ------
@@ -333,7 +335,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         try:
             p0 = self.p0
             bounds = self.fit_bounds
-        except AttributeError:
+        except (AttributeError, NotImplementedError):
+            # NotImplementedError: a p0 with no estimate and no reference
+            # start (HingeMax) made no guess; the caller supplied the start.
             return None
         if p0 is None:
             return None
@@ -429,12 +433,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         if not self.sufficient_data:
             raise InsufficientDataError(_INSUFFICIENT_DATA)
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+    def _fallback_p0(self, bounds=(-np.inf, np.inf)):
         r"""The start :meth:`make_fit` uses when :attr:`p0` is None.
 
-        This is the one hook for a class-specific fallback start: a subclass
-        whose model is singular at the default overrides it. The default is
-        the feasible start :func:`scipy.optimize.curve_fit` chooses.
+        The feasible start :func:`scipy.optimize.curve_fit` chooses. It is the
+        same for every class: no subclass overrides it. A class that needs a
+        start of its own returns it from :attr:`p0` instead.
 
         Parameters
         ----------
@@ -481,7 +485,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         raise ValueError(
             f"{self.__class__.__name__} initial guess is not finite: {detail}. "
             "A p0 that cannot make a guess returns None, and the fit then "
-            "starts from fallback_p0()."
+            "starts from the feasible default."
         )
 
     @property
@@ -711,7 +715,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
     def _run_least_squares(self, **kwargs):
         """Execute :func:`scipy.optimize.least_squares` with defaults."""
 
-        p0 = kwargs.pop("p0", self.p0)
+        # Read self.p0 only when the caller gave no p0=: a p0 that cannot
+        # estimate may raise (HingeMax) or log, which a caller's start avoids.
+        p0 = kwargs.pop("p0") if "p0" in kwargs else self.p0
         bounds = kwargs.pop("bounds", (-np.inf, np.inf))
         method = kwargs.pop("method", "trf")
         loss = kwargs.pop("loss", "huber")
@@ -723,7 +729,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         # Adapted from `curve_fit` lines 704 and 715 (20200527)
         if p0 is None:
-            p0 = np.atleast_1d(np.asarray(self.fallback_p0(bounds), dtype=float))
+            p0 = np.atleast_1d(np.asarray(self._fallback_p0(bounds), dtype=float))
         else:
             p0 = np.atleast_1d(p0)
             self._reject_nonfinite_p0(p0)

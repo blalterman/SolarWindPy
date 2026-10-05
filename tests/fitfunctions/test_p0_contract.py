@@ -3,12 +3,15 @@
 """The ``p0`` contract shared by every fit function.
 
 A ``p0`` returns one finite guess per parameter, or None when the data make a
-guess impossible; the fit then starts from ``fallback_p0()`` (the feasible
-default, ones when unbounded, unless the class overrides it). ``make_fit`` rejects a guess holding NaN or infinity with a
+guess impossible; the fit then starts from the feasible default (ones when
+unbounded). A hinge class, singular at that default, instead logs a warning and
+returns its documented reference start; ``HingeMax`` has none yet and raises
+NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
 ``ValueError`` naming the class and the parameter. The contract is stated in
 ``FitFunction.p0``'s docstring.
 """
 
+import logging
 import subprocess
 import sys
 from pathlib import Path
@@ -300,6 +303,11 @@ IMPOSSIBLE = [
         {"guess_x0": -1.0},
         id="GaussianTimesHeavySidePlusHeavySide",
     ),
+]
+
+
+# Inputs for which each hinge class's estimate is impossible, and why.
+HINGE_IMPOSSIBLE = [
     # Default xs = 425 leaves no data on the upper side: no slope.
     _case(TwoLine, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="TwoLine"),
     _case(Saturation, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="Saturation"),
@@ -345,26 +353,21 @@ HINGE_START = {
 }
 
 
-def _start(cls, n):
-    """The start a None-p0 fit of ``cls`` should use: its hinge point, or ones."""
-    return np.array(HINGE_START.get(cls, np.ones(n)))
+NO_ESTIMATE = "The data gave no estimate"
 
 
 @pytest.mark.parametrize("cls, x, y, kwargs", IMPOSSIBLE)
-def test_impossible_estimate_gives_none_and_fits_from_the_fallback_start(
+def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     cls, x, y, kwargs
 ):
-    """An input with no estimate gives ``p0`` None, and the fit starts from the fallback.
+    """A non-hinge input with no estimate gives ``p0`` None and fits from ones.
 
-    The fallback is the author's hinge point for the hinge classes and ones
-    (the feasible default for unbounded parameters) otherwise. The fit with
-    ``p0`` None must end exactly as the fit given that start as ``p0=``, and is
-    never refused with the non-finite-guess ValueError. Whether the start
-    converges is scipy's business: all ones is singular for GaussianLn on
-    negative x, and scipy then reports "Residuals are not finite in the initial
-    point" on both routes alike. The hinge start is finite everywhere, so the
-    hinge fits never report that. HingeMax has no start yet and returns
-    NotImplementedError.
+    Ones is the feasible default for unbounded parameters. The fit with ``p0``
+    None must end exactly as the fit given ones as ``p0=``, and is never refused
+    with the non-finite-guess ValueError. Whether the start converges is
+    scipy's business: all ones is singular for GaussianLn on negative x, and
+    scipy then reports "Residuals are not finite in the initial point" on both
+    routes alike.
 
     ON FAILURE: the code is wrong.
     """
@@ -372,48 +375,82 @@ def test_impossible_estimate_gives_none_and_fits_from_the_fallback_start(
     assert fit.p0 is None, fit.p0
 
     got = fit.make_fit(return_exception=True)
-    if cls is HingeMax:
-        assert isinstance(got, NotImplementedError), got
-        return
-
     explicit = cls(x, y, **kwargs)
-    expected = explicit.make_fit(
-        return_exception=True, p0=_start(cls, len(fit.argnames))
-    )
+    expected = explicit.make_fit(return_exception=True, p0=np.ones(len(fit.argnames)))
     assert "initial guess is not finite" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
-    if cls in HINGE_START:
-        assert "Residuals are not finite" not in str(got), got
     if got is None:
         # Same start, same solver: identical results.
         assert fit.popt == explicit.popt
 
 
-@pytest.mark.parametrize("cls", list(HINGE_START), ids=lambda c: c.__name__)
-def test_hinge_fallback_start_is_the_authors_point(cls):
-    """Each hinge class's ``fallback_p0`` is the hand-translated author's point.
+@pytest.mark.parametrize(
+    "cls, x, y, kwargs",
+    [p for p in HINGE_IMPOSSIBLE if p.values[0] is not HingeMax],
+)
+def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, caplog):
+    """A hinge input with no estimate: ``p0`` is the author's point, with a warning.
 
-    The model evaluated there on x from 0 to 1000 is finite everywhere.
+    The start is the hand translation in ``HINGE_START``. The model evaluated
+    there on x from 0 to 1000 is finite everywhere, so the fit from it never
+    reports "Residuals are not finite in the initial point", as the all-ones
+    default did.
 
     ON FAILURE: the code is wrong, unless the author moved the reference hinge.
     """
-    fit = cls(np.arange(6.0), np.arange(6.0))
-    start = fit.fallback_p0()
+    fit = cls(x, y, **kwargs)
+    with caplog.at_level(logging.WARNING):
+        start = fit.p0
     assert start == exact(HINGE_START[cls]), start
+    assert NO_ESTIMATE in caplog.text, caplog.text
+
     with np.errstate(divide="raise", invalid="raise"):
         values = fit.function(np.linspace(0.0, 1000.0, 101), *start)
     assert np.all(np.isfinite(values)), values
 
+    got = fit.make_fit(return_exception=True)
+    assert "Residuals are not finite" not in str(got), got
+    assert "initial guess is not finite" not in str(got), got
 
-def test_hingemax_has_no_fallback_start_yet():
-    """``HingeMax.fallback_p0`` raises NotImplementedError until a point is chosen.
 
-    ON FAILURE: (unexpected pass) a HingeMax start has landed; update this test.
+def _hingemax_without_estimate():
+    (row,) = [p for p in HINGE_IMPOSSIBLE if p.values[0] is HingeMax]
+    cls, x, y, kwargs = row.values
+    return cls(x, y, **kwargs)
+
+
+def test_hingemax_without_estimate_raises_not_implemented(caplog):
+    """HingeMax has no reference start yet: ``p0`` logs, then raises.
+
+    ``make_fit`` returns the NotImplementedError under ``return_exception``.
+
+    ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
+    start; then test that start as the other hinge classes are tested.
     """
-    fit = HingeMax(np.arange(6.0), np.arange(6.0))
-    with pytest.raises(NotImplementedError, match="no default start defined yet"):
-        fit.fallback_p0()
+    fit = _hingemax_without_estimate()
+    with caplog.at_level(logging.WARNING):
+        with pytest.raises(NotImplementedError, match="no reference start"):
+            fit.p0
+    assert NO_ESTIMATE in caplog.text, caplog.text
+    got = fit.make_fit(return_exception=True)
+    assert isinstance(got, NotImplementedError), got
+
+
+def test_hingemax_without_estimate_fits_from_a_caller_start():
+    """With a caller's ``p0=``, HingeMax fits data that give no estimate.
+
+    ``make_fit`` must not read ``p0`` when the caller supplies one. The start
+    (m1, x1, x2, h) = (1, 0, 0.5, 2) is any finite point off the model's
+    singularity h = x2; the check is that the fit runs, not where it ends,
+    and that the class records no initial guess of its own.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _hingemax_without_estimate()
+    got = fit.make_fit(return_exception=True, p0=[1.0, 0.0, 0.5, 2.0])
+    assert not isinstance(got, NotImplementedError), got
+    assert fit.initial_guess_info is None
 
 
 S = np.sqrt(0.5)

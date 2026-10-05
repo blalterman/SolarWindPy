@@ -133,7 +133,7 @@ class GaussianPlusHeavySide(FitFunction):
         if p0 is None:
             # No estimate: scan from the feasible default the base fit uses.
             try:
-                p0 = self.fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+                p0 = self._fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
             except ValueError:
                 # Malformed bounds: the base fit reports them, honouring
                 # return_exception.
