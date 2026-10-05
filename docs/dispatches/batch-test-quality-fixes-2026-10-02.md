@@ -285,6 +285,18 @@ NaN or infinity with a `ValueError` naming the class and the parameter, instead 
 self.sufficient_data` (removed under `python -O`) with an explicit check. Controls: a guess
 with NaN raises the new error; a subclass returning `None` still fits.
 
+Author decisions after the first review:
+
+- A zero-width Gaussian is one narrower than the data can resolve: when the estimated width
+  is under half the smallest spacing between distinct x values, `p0` returns `None`.
+- When a hinge class's `p0` is `None`, its fit starts from the author's point (vs, As, x1,
+  m2) = (433, 4.12, 250, small), translated into each class's parameters, instead of the
+  all-ones default; "small" is 1% of the rising slope m1 = 4.12 / (433 − 250). `HingeMax`
+  has a different shape and will get its own point: until then its fallback raises
+  `NotImplementedError`.
+- `GaussianLn.p0` estimates in ln x: m and s are the y-weighted mean and standard deviation
+  of ln x, and A is the peak y (A is not logged in the model).
+
 ### tolerance-helpers
 
 OWNS: tests/ (all files), .claude/docs/TEST_PATTERNS.md
