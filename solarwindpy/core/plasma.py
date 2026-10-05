@@ -129,7 +129,6 @@ class Plasma(base.Base):
         *species,
         spacecraft=None,
         auxiliary_data=None,
-        log_plasma_stats=False,
     ):
         r"""Initialize a :class:`Plasma` instance.
 
@@ -150,8 +149,6 @@ class Plasma(base.Base):
         auxiliary_data : :class:`pandas.DataFrame`, optional
             Additional measurements to carry with the plasma, for example data
             quality flags. The column labelling scheme must match ``data``.
-        log_plasma_stats : bool, default ``False``
-            Log summary statistics when ``data`` is set.
 
         Notes
         -----
@@ -204,7 +201,6 @@ class Plasma(base.Base):
         """
         self._init_logger()
         self._set_species(*species)
-        self.set_log_plasma_stats(log_plasma_stats)
         super(Plasma, self).__init__(data)
         self._set_ions()
         self.set_spacecraft(spacecraft)
@@ -263,53 +259,6 @@ class Plasma(base.Base):
     def aux(self):
         r"""Shortcut to :py:attr:`auxiliary_data`."""
         return self.auxiliary_data
-
-    @property
-    def log_plasma_at_init(self):
-        """Flag indicating whether to log plasma statistics during initialization.
-
-        Returns
-        -------
-        bool
-            True if plasma statistics should be logged at initialization.
-
-        See Also
-        --------
-        set_log_plasma_stats : Method to modify this setting
-        """
-        return self._log_plasma_at_init
-
-    def set_log_plasma_stats(self, new):
-        """Set flag for logging plasma statistics during initialization.
-
-        Parameters
-        ----------
-        new : bool
-            Whether to enable logging of plasma statistics.
-
-        Notes
-        -----
-        When enabled, summary statistics including density ranges, velocity
-        distributions, and magnetic field statistics are logged during
-        plasma initialization.
-
-        Examples
-        --------
-        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
-        ...                          name="Epoch")
-        >>> columns = pd.MultiIndex.from_tuples([
-        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
-        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
-        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
-        ... ], names=["M", "C", "S"])
-        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
-        >>> plasma.log_plasma_at_init
-        False
-        >>> plasma.set_log_plasma_stats(True)
-        >>> plasma.log_plasma_at_init
-        True
-        """
-        self._log_plasma_at_init = bool(new)
 
     def save(
         self,
@@ -464,8 +413,7 @@ class Plasma(base.Base):
             )
             raise ValueError(msg)
 
-        log_at_init = kwargs.pop("log_plasma_stats", False)
-        plasma = cls(data, *species, log_plasma_stats=log_at_init, **kwargs)
+        plasma = cls(data, *species, **kwargs)
 
         plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey  :  %s\nshape : %s\nstart : %s\nstop  : %s",
@@ -609,7 +557,6 @@ class Plasma(base.Base):
             *remaining,
             spacecraft=self.spacecraft,
             auxiliary_data=aux,
-            log_plasma_stats=self.log_plasma_at_init,
         )
         return new
 
@@ -657,7 +604,7 @@ class Plasma(base.Base):
             # overlap even though they represent different quantities because
             # spacecraft only has a 2-level MultiIndex.
 
-        self._log_object_at_load(new.data if new is not None else new, "spacecraft")
+        self._log_if_missing(new, "spacecraft")
         self._spacecraft = new
 
     def set_auxiliary_data(self, new):
@@ -704,55 +651,16 @@ class Plasma(base.Base):
             if new.columns.isin(self.data.columns).any():
                 raise ValueError("Auxiliary data should not duplicate plasma data")
 
-        self._log_object_at_load(new, "auxiliary_data")
+        self._log_if_missing(new, "auxiliary_data")
         self._auxiliary_data = new
 
-    def _log_object_at_load(self, data, name):
-
-        if data is None:
+    def _log_if_missing(self, new, name):
+        """Log at INFO that the optional input ``name`` was not passed."""
+        if new is None:
             self.logger.info("No %s data passed to %s", name, self.__class__.__name__)
-            return None
-
-        elif self.log_plasma_at_init:
-
-            nan_frame = data.isna()
-            nan_info = pd.DataFrame(
-                {"count": nan_frame.sum(axis=0), "mean": nan_frame.mean(axis=0)}
-            )
-            # Log to DEBUG if no NaNs. Otherwise log to INFO.
-            if nan_info.any().any():
-                self.logger.info(
-                    "%s %.0f spectra contain at least one NaN",
-                    name,
-                    nan_info.any(axis=1).sum(),
-                )
-                self.logger.debug("%s NaN info\n%s", name, nan_info.to_string())
-            else:
-                self.logger.debug("%s does not contain NaNs", name)
-
-            pct = [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]
-            stats = (
-                pd.concat(
-                    {
-                        "lin": data.describe(percentiles=pct),
-                        "log": data.applymap(np.log10).describe(percentiles=pct),
-                    },
-                    axis=0,
-                )
-                .unstack(level=0)
-                .sort_index(axis=0)
-                .sort_index(axis=1)
-                .T
-            )
-            self.logger.debug(
-                "%s stats\n%s\n%s",
-                name,
-                stats.loc[:, ["count", "mean", "std"]].to_string(),
-                stats.drop(["count", "mean", "std"], axis=1).to_string(),
-            )
 
     def set_data(self, new):
-        r"""Set the data and log statistics about it."""
+        r"""Set the data, logging its shape and any columns dropped."""
         super(Plasma, self).set_data(new)
 
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
@@ -812,8 +720,6 @@ class Plasma(base.Base):
             self.logger.info("no columns dropped from plasma")
 
         self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
-
-        self._log_object_at_load(data, "plasma")
 
     @property
     def bfield(self):

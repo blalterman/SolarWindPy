@@ -1,17 +1,22 @@
 # Spent-When: PERMANENT(SolarWindPy stops shipping example data)
 # Supersedes: none
-"""The example ``Plasma`` that docstring examples load.
+"""The example ``Plasma`` that docstring examples load, and Plasma's input logging.
 
 Expected values are the example CSVs' own bytes (the chosen input):
 ``solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
 """
 
+import logging
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+import pandas as pd
+import pytest
+
+from solarwindpy.core.plasma import Plasma
 from solarwindpy.examples import load_plasma
 
 REPO = Path(__file__).resolve().parents[1]
@@ -95,3 +100,35 @@ def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
     assert sc.velocity.data.loc[:, "y"].tolist() == [-80.0, -70.0, -90.0]
     assert sc.carrington.loc[:, "lon"].tolist() == [-26.0, -36.0, -16.0]
     assert plasma.auxiliary_data is None
+
+
+def test_plasma_no_longer_accepts_log_plasma_stats():
+    """The removed ``log_plasma_stats`` argument raises ``TypeError``.
+
+    ON FAILURE: the code is wrong; the plasma-statistics logging was removed
+    and the argument must not be accepted silently.
+    """
+    data = load_plasma().data
+    with pytest.raises(TypeError, match="log_plasma_stats"):
+        Plasma(data, "p1", log_plasma_stats=True)
+
+
+def test_plasma_logs_each_optional_input_not_passed(caplog):
+    """Plasma logs "No <input> data passed to Plasma" for each None input only.
+
+    ON FAILURE: the code is wrong; the INFO message for a missing optional
+    input was lost, or is logged for an input that was passed.
+    """
+    plasma = load_plasma()
+    flags = pd.DataFrame({("quality", "", ""): [0, 1, 0]}, index=plasma.epoch)
+    flags.columns.names = ["M", "C", "S"]
+
+    with caplog.at_level(logging.INFO, logger="solarwindpy"):
+        Plasma(plasma.data, "p1")
+    assert "No spacecraft data passed to Plasma" in caplog.messages
+    assert "No auxiliary_data data passed to Plasma" in caplog.messages
+
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="solarwindpy"):
+        Plasma(plasma.data, "p1", spacecraft=plasma.spacecraft, auxiliary_data=flags)
+    assert not [m for m in caplog.messages if m.startswith("No ")]
