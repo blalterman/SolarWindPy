@@ -72,10 +72,11 @@ Verification
 
 To verify your installation, run:
 
-.. code-block:: python
-
-   import solarwindpy as swp
-   print(f"SolarWindPy version: {swp.__version__}")
+>>> import solarwindpy as swp
+>>> print(f"SolarWindPy version: {swp.__version__}")  # doctest: +ELLIPSIS
+SolarWindPy version: ...
+>>> swp.__version__ != "unknown"  # "unknown" means solarwindpy is not installed
+True
 
 Troubleshooting
 ---------------

@@ -7,10 +7,6 @@ Propoded Updates
  an ion and return a new plasma without that ion in it. Well, either
  mod or subtract. Subtract and add probably make more sense. (20180129)
 
--See (https://drive.google.com/drive/folders/0ByIrJAE4KMTtaGhRcXkxNHhmY2M)
- for the various methods that might be worth considering including __getattr__
- vs __getattribute__, __hash__, __deepcopy__, __copy__, etc. (20180129)
-
 -Convert `Plasma.__call__` to `Plasma.__getitem__` and `Plasma.__iter__` to
  to allow iterating over ions. (20180316)
  N.B. This could have complicated results as to how we actually access the
@@ -74,8 +70,8 @@ class Plasma(base.Base):
         labeled by ("M", "C", "S") for measurement, component, and species.
     ions : pandas.Series of Ion objects
         Dictionary-like access to individual ion species objects.
-    species : list of str
-        Available ion species identifiers in the plasma.
+    species : tuple of str
+        Available ion species identifiers in the plasma, sorted.
     spacecraft : Spacecraft, optional
         Spacecraft trajectory and velocity information.
     auxiliary_data : pandas.DataFrame, optional
@@ -106,7 +102,8 @@ class Plasma(base.Base):
     ...     ('w', 'par', 'p1'), ('w', 'per', 'p1'), ('w', 'par', 'a'), ('w', 'per', 'a'),
     ...     ('b', 'x', ''), ('b', 'y', ''), ('b', 'z', '')
     ... ], names=['M', 'C', 'S'])
-    >>> data = pd.DataFrame(np.random.rand(3, len(columns)),
+    >>> rng = np.random.default_rng(0)
+    >>> data = pd.DataFrame(rng.random((3, len(columns))),
     ...                     index=epoch, columns=columns)
     >>> plasma = Plasma(data, 'p1', 'a')  # Protons and alphas
     >>> type(plasma.p1).__name__  # Proton ion object
@@ -114,14 +111,16 @@ class Plasma(base.Base):
 
     Calculate plasma physics parameters:
 
-    >>> beta = plasma.beta('p1')          # Plasma beta for protons  # doctest: +SKIP
-    >>> type(beta).__name__  # doctest: +SKIP
-    'Tensor'
+    >>> beta = plasma.beta('p1')          # Plasma beta for protons
+    >>> type(beta).__name__
+    'DataFrame'
+    >>> beta.columns.tolist()
+    ['par', 'per', 'scalar']
 
-    Idenfity ion species in plasma:
+    Identify ion species in plasma (stored sorted, as a tuple):
 
-    >>> plasma.species  # doctest: +SKIP
-    ['p1', 'a']
+    >>> plasma.species
+    ('a', 'p1')
     """
 
     def __init__(
@@ -228,9 +227,18 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> plasma.epoch  # doctest: +SKIP
-        DatetimeIndex(['1995-01-01', '2015-03-23', '2022-10-09'],
-                      dtype='datetime64[ns]', name='Epoch', freq=None)
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+        >>> plasma.epoch.equals(epoch)
+        True
+        >>> plasma.epoch.name
+        'Epoch'
         """
         return self.data.index
 
@@ -293,8 +301,18 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> plasma.set_log_plasma_stats(True)  # doctest: +SKIP
-        >>> plasma.log_plasma_at_init  # doctest: +SKIP
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+        >>> plasma.log_plasma_at_init
+        False
+        >>> plasma.set_log_plasma_stats(True)
+        >>> plasma.log_plasma_at_init
         True
         """
         self._log_plasma_at_init = bool(new)
@@ -623,9 +641,25 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> sc = Spacecraft(trajectory_data)  # doctest: +SKIP
-        >>> plasma.set_spacecraft(sc)  # doctest: +SKIP
-        >>> plasma.spacecraft.position  # Access trajectory data  # doctest: +SKIP
+        >>> from solarwindpy.core.spacecraft import Spacecraft
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+        >>> trajectory = pd.DataFrame(
+        ...     {("pos", "x"): [1.0, 2.0], ("pos", "y"): [0.0, 0.0],
+        ...      ("pos", "z"): [0.0, 0.0]}, index=epoch)
+        >>> trajectory.columns.names = ["M", "C"]
+        >>> sc = Spacecraft(trajectory, "PSP", "HCI")
+        >>> plasma.set_spacecraft(sc)
+        >>> plasma.spacecraft.name
+        'PSP'
+        >>> plasma.spacecraft.position.data.loc[:, "x"].tolist()  # trajectory
+        [1.0, 2.0]
         """
         assert isinstance(new, spacecraft.Spacecraft) or new is None
 
@@ -664,10 +698,20 @@ class Plasma(base.Base):
 
         Examples
         --------
-        >>> quality_flags = pd.DataFrame({'quality': [0, 1, 0]},  # doctest: +SKIP
+        >>> epoch = pd.DatetimeIndex(["2023-01-01 00:00", "2023-01-01 00:01"],
+        ...                          name="Epoch")
+        >>> columns = pd.MultiIndex.from_tuples([
+        ...     ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+        ...     ("n", "", "p1"), ("v", "x", "p1"), ("v", "y", "p1"),
+        ...     ("v", "z", "p1"), ("w", "par", "p1"), ("w", "per", "p1"),
+        ... ], names=["M", "C", "S"])
+        >>> plasma = Plasma(pd.DataFrame(1.0, index=epoch, columns=columns), "p1")
+        >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1]},
         ...                              index=plasma.epoch)
-        >>> plasma.set_auxiliary_data(quality_flags)  # doctest: +SKIP
-        >>> plasma.aux.quality  # Access auxiliary data  # doctest: +SKIP
+        >>> quality_flags.columns.names = ["M", "C", "S"]
+        >>> plasma.set_auxiliary_data(quality_flags)
+        >>> plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data
+        [0, 1]
         """
         assert isinstance(new, pd.DataFrame) or new is None
 

@@ -13,8 +13,7 @@ Installation
 Basic Usage
 -----------
 
-.. code-block:: python
-
-   import solarwindpy as sw
-   sw.__version__
+>>> import solarwindpy as sw
+>>> sw.__version__ != "unknown"  # "unknown" means solarwindpy is not installed
+True
 

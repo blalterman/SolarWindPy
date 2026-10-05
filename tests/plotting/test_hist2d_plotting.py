@@ -25,6 +25,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
@@ -203,14 +204,30 @@ class TestContourGrid:
 class TestPlotHistWithContours:
     """Tests for plot_hist_with_contours method."""
 
-    # --- Smoke Tests (execution) ---
+    def test_returns_its_axes_the_mesh_colorbar_and_the_contours_drawn(
+        self, known_hist
+    ):
+        """The documented ``(ax, cbar, qset, lbls)`` are the objects on the plot.
 
-    def test_returns_expected_tuple(self, hist2d_instance):
-        """Returns (ax, cbar, qset, lbls) tuple."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours()
-        assert ax is not None
-        assert cbar is not None
-        assert qset is not None
+        ``ax`` is the Axes supplied, ``cbar`` colours the mesh under the
+        contours and carries ``labels.z``, ``qset`` is the contour set drawn on
+        ``ax`` at the requested levels, and ``lbls`` is None because
+        ``label_levels`` defaults to False.
+
+        ON FAILURE: the code is wrong, or the documented return contract
+        changed.
+        """
+        known_hist.set_axnorm("t")
+        _, supplied = plt.subplots()
+        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(
+            ax=supplied, levels=[0.3, 0.6]
+        )
+        assert ax is supplied
+        assert cbar.mappable is _quadmesh(ax)
+        assert cbar.ax.get_ylabel() == str(known_hist.labels.z)
+        assert qset in ax.collections
+        np.testing.assert_array_equal(qset.levels, [0.3, 0.6])
+        assert lbls is None
         plt.close("all")
 
     def test_no_labels_returns_none(self, hist2d_instance):
@@ -221,13 +238,17 @@ class TestPlotHistWithContours:
         assert lbls is None
         plt.close("all")
 
-    def test_contourf_parameter(self, hist2d_instance):
-        """use_contourf parameter switches between contour and contourf."""
-        ax1, _, qset1, _ = hist2d_instance.plot_hist_with_contours(use_contourf=True)
-        ax2, _, qset2, _ = hist2d_instance.plot_hist_with_contours(use_contourf=False)
-        # Both should work without error
-        assert qset1 is not None
-        assert qset2 is not None
+    def test_use_contourf_switches_between_filled_and_line_contours(
+        self, hist2d_instance
+    ):
+        """``use_contourf=True`` draws filled contours; False draws lines.
+
+        ON FAILURE: the code is wrong.
+        """
+        _, _, filled, _ = hist2d_instance.plot_hist_with_contours(use_contourf=True)
+        _, _, lines, _ = hist2d_instance.plot_hist_with_contours(use_contourf=False)
+        assert filled.filled is True
+        assert lines.filled is False
         plt.close("all")
 
     # --- Integration Tests (correctness) ---
@@ -296,12 +317,49 @@ class TestPlotHistWithContours:
         )
         plt.close("all")
 
-    def test_nan_aware_filter_works(self, hist2d_instance):
-        """nan_aware_filter=True should run without error."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours(
-            gaussian_filter_std=1, nan_aware_filter=True
+    def test_nan_aware_filter_contours_the_normalised_convolution(
+        self, known_hist, known_counts
+    ):
+        """With ``nan_aware_filter`` the contours trace the normalised convolution.
+
+        ``KNOWN_COUNTS`` leaves bins empty, so the grid has NaN gaps. The
+        expectation is computed here from the algorithm the docstring names
+        (Knutsson & Westin 1993, normalised convolution): smooth the grid with
+        gaps set to 0, divide by the smoothed validity mask, and keep the gaps
+        blank. Contouring that grid at the same levels must reproduce the
+        overlay vertex for vertex.
+
+        ON FAILURE: the code is wrong.
+        """
+        levels = [0.2, 0.4, 0.6]
+        sigma = 1.0
+        known_hist.set_axnorm("t")
+        _, _, qset, _ = known_hist.plot_hist_with_contours(
+            cbar=False,
+            levels=levels,
+            use_contourf=True,
+            gaussian_filter_std=sigma,
+            nan_aware_filter=True,
         )
-        assert qset is not None
+
+        # axnorm "t" divides every bin by the largest bin count in the grid.
+        grid = _expected_grid(known_counts) / known_counts.max()
+        valid = ~np.isnan(grid)
+        smoothed = gaussian_filter(np.where(valid, grid, 0.0), sigma) / gaussian_filter(
+            valid.astype(float), sigma
+        )
+        smoothed[~valid] = np.nan
+        XX, YY = np.meshgrid(_bin_centers(XEDGES), _bin_centers(YEDGES))
+        _, ref_ax = plt.subplots()
+        expected = ref_ax.contourf(XX, YY, np.ma.masked_invalid(smoothed), levels)
+
+        assert sum(len(segs) for segs in expected.allsegs) > 0  # contours exist
+        assert len(qset.allsegs) == len(expected.allsegs)
+        for got_at_level, want_at_level in zip(qset.allsegs, expected.allsegs):
+            assert len(got_at_level) == len(want_at_level)
+            for got, want in zip(got_at_level, want_at_level):
+                # rtol=1e-10: the same float operations in a different order.
+                np.testing.assert_allclose(got, want, rtol=1e-10)
         plt.close("all")
 
 
@@ -344,16 +402,29 @@ class TestPlotContours:
         assert qset.filled is False
         plt.close("all")
 
-    def test_cbar_true_returns_colorbar(self, hist2d_instance):
-        """With cbar=True, mappable should be a Colorbar instance."""
+    def test_cbar_true_returns_the_colorbar_of_the_contours(self, hist2d_instance):
+        """With cbar=True the third value is a colorbar of the drawn contours.
+
+        It colours ``qset``, the contour set on ``ax``, and carries
+        ``labels.z``, as the ``cbar`` parameter documents.
+
+        ON FAILURE: the code is wrong.
+        """
         ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=True)
         assert isinstance(mappable, matplotlib.colorbar.Colorbar)
+        assert mappable.mappable is qset
+        assert qset in ax.collections
+        assert mappable.ax.get_ylabel() == str(hist2d_instance.labels.z)
         plt.close("all")
 
-    def test_cbar_false_returns_contourset(self, hist2d_instance):
-        """With cbar=False, mappable should be the QuadContourSet."""
+    def test_cbar_false_returns_the_contour_set_itself(self, hist2d_instance):
+        """With cbar=False the third value is the contour set drawn on ``ax``.
+
+        ON FAILURE: the code is wrong.
+        """
         ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=False)
-        assert isinstance(mappable, matplotlib.contour.QuadContourSet)
+        assert mappable is qset
+        assert qset in ax.collections
         plt.close("all")
 
 
@@ -643,24 +714,29 @@ class TestMakePlot:
         np.testing.assert_allclose(coords[:, 0, 1], yedges)
         plt.close("all")
 
-    def test_returns_colorbar_when_requested(self, known_hist):
-        """`cbar=True` returns the Colorbar, per the documented return value.
+    def test_returns_colorbar_of_the_mesh_when_requested(self, known_hist):
+        """`cbar=True` returns the Colorbar of the drawn mesh, labelled `labels.z`.
+
+        The documented return is the colorbar; the `cbar` parameter documents
+        its label.
 
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
         ax, returned = known_hist.make_plot(cbar=True)
         assert isinstance(returned, matplotlib.colorbar.Colorbar)
+        assert returned.mappable is _quadmesh(ax)
+        assert returned.ax.get_ylabel() == str(known_hist.labels.z)
         plt.close("all")
 
-    def test_returns_the_mappable_when_no_colorbar(self, known_hist):
-        """`cbar=False` returns the QuadMesh, per the documented return value.
+    def test_returns_the_drawn_mesh_when_no_colorbar(self, known_hist):
+        """`cbar=False` returns the QuadMesh on `ax`, per the documented return.
 
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
         ax, returned = known_hist.make_plot(cbar=False)
-        assert isinstance(returned, matplotlib.collections.QuadMesh)
+        assert returned is _quadmesh(ax)
         plt.close("all")
 
     def test_draws_on_the_axes_it_is_given(self, known_hist):
@@ -797,12 +873,18 @@ class TestDefaultNorm:
     @pytest.mark.parametrize("method", METHODS)
     @pytest.mark.parametrize("axnorm", ["d", "cd", "rd"])
     def test_densities_get_a_log_norm(self, method, axnorm):
-        """Densities span decades, so every plot colours them on a log scale.
+        """Densities span decades, so every plot colours them on a clipped log scale.
+
+        `Hist2D._default_norm` documents a clipped `LogNorm` for densities, so
+        values outside the colour range take the end colours instead of the
+        over/under colours.
 
         ON FAILURE: the code is wrong, unless the author has chosen a linear
-        default for densities again.
+        or unclipped default for densities again.
         """
-        assert isinstance(_norm_of(method, axnorm), matplotlib.colors.LogNorm)
+        norm = _norm_of(method, axnorm)
+        assert isinstance(norm, matplotlib.colors.LogNorm)
+        assert norm.clip is True
         plt.close("all")
 
     def test_default_density_contour_levels_suit_a_log_norm(self):
@@ -1118,7 +1200,11 @@ class TestPlotEdges:
         plt.close("all")
 
     def test_limits_drop_vertices_outside_them(self, known_hist):
-        """`xlim`/`ylim` keep only vertices inside the closed range.
+        """`xlim`/`ylim` keep vertices inside the range and drop those outside.
+
+        The limits sit between vertices. Whether a vertex exactly on a limit is
+        kept is not stated by any docstring or document, so it is not asserted
+        here; it is an open question for the author.
 
         ON FAILURE: the code is wrong.
         """

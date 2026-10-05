@@ -61,16 +61,16 @@ class ReferenceAbundances:
 
     Examples
     --------
-    >>> ref = ReferenceAbundances()  # doctest: +SKIP
-    >>> fe = ref.get_element("Fe")  # doctest: +SKIP
-    >>> print(f"Fe = {fe.Ab:.2f} ± {fe.Uncert:.2f}")  # doctest: +SKIP
+    >>> ref = ReferenceAbundances()
+    >>> fe = ref.get_element("Fe")
+    >>> print(f"Fe = {fe.Ab:.2f} ± {fe.Uncert:.2f}")
     Fe = 7.46 ± 0.04
 
     Using 2009 data:
 
-    >>> ref_2009 = ReferenceAbundances(year=2009)  # doctest: +SKIP
-    >>> fe_2009 = ref_2009.get_element("Fe")  # doctest: +SKIP
-    >>> print(f"Fe (2009) = {fe_2009.Ab:.2f}")  # doctest: +SKIP
+    >>> ref_2009 = ReferenceAbundances(year=2009)
+    >>> fe_2009 = ref_2009.get_element("Fe")
+    >>> print(f"Fe (2009) = {fe_2009.Ab:.2f}")
     Fe (2009) = 7.50
     """
 
@@ -153,12 +153,12 @@ class ReferenceAbundances:
 
         Examples
         --------
-        >>> ref = ReferenceAbundances()  # doctest: +SKIP
-        >>> ref.get_element("Fe")  # doctest: +SKIP
-        Ab        7.46
-        Uncert    0.04
-        Name: 26, dtype: float64
-        >>> ref.get_element(26)  # Same result using atomic number  # doctest: +SKIP
+        >>> ref = ReferenceAbundances()
+        >>> fe = ref.get_element("Fe")
+        >>> float(fe.Ab), float(fe.Uncert)
+        (7.46, 0.04)
+        >>> ref.get_element(26).equals(fe)  # Same values using atomic number
+        True
         """
         # Handle backward compatibility alias
         kind = _KIND_ALIASES.get(kind, kind)
@@ -206,10 +206,10 @@ class ReferenceAbundances:
 
         Examples
         --------
-        >>> ref = ReferenceAbundances()  # doctest: +SKIP
-        >>> ref.get_comment("H")  # doctest: +SKIP
+        >>> ref = ReferenceAbundances()
+        >>> ref.get_comment("H")
         'definition'
-        >>> print(ref.get_comment("Fe"))  # Spectroscopic, no comment  # doctest: +SKIP
+        >>> print(ref.get_comment("Fe"))  # Spectroscopic, no comment
         None
         """
         if self._comments is None:
@@ -276,9 +276,9 @@ class ReferenceAbundances:
 
         Examples
         --------
-        >>> ref = ReferenceAbundances()  # doctest: +SKIP
-        >>> fe_o = ref.abundance_ratio("Fe", "O")  # doctest: +SKIP
-        >>> print(f"Fe/O = {fe_o.measurement:.4f} ± {fe_o.uncertainty:.4f}")  # doctest: +SKIP
+        >>> ref = ReferenceAbundances()
+        >>> fe_o = ref.abundance_ratio("Fe", "O")
+        >>> print(f"Fe/O = {fe_o.measurement:.4f} ± {fe_o.uncertainty:.4f}")
         Fe/O = 0.0589 ± 0.0077
         """
         top = self.get_element(numerator)

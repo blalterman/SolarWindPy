@@ -11,6 +11,15 @@ import pytest
 
 from solarwindpy.plotting.hist2d import Hist2D
 
+# A hand-built grid for column normalisation. counts[i, j]: y-bin i, x-bin j.
+# Three y-bins by two x-bins, so a transpose cannot pass.
+COLUMN_X_EDGES = np.array([0.0, 1.0, 2.0])
+COLUMN_Y_EDGES = np.array([0.0, 1.0, 2.0, 3.0])
+COLUMN_COUNTS = np.array([[1, 6], [2, 0], [4, 3]])
+# Column peaks are 4 and 6 (row peaks would be 6, 2, 4). By hand:
+# 1/4, 6/6; 2/4, empty; 4/4, 3/6.
+COLUMN_NORMALIZED_BY_HAND = np.array([[0.25, 1.0], [0.5, np.nan], [1.0, 0.5]])
+
 
 class TestHist2DPandasCompatibility:
     """Test pandas 2.3.1+ compatibility for Hist2D axis normalization."""
@@ -294,23 +303,34 @@ class TestHist2DPandasCompatibility:
             assert (non_nan_values >= 0).all(), "Found negative values with NaN input"
             assert (non_nan_values <= 1.0001).all(), "Found values > 1 with NaN input"
 
-    def test_count_aggregation_with_column_normalize(self):
-        """Test column normalize with count aggregation (no z values)."""
-        # Create hist2d without z values (count aggregation)
-        hist = Hist2D(self.x_data, self.y_data, nbins=10)
-        hist.set_axnorm("c")
+    def test_count_column_normalize_divides_each_column_by_its_peak(self):
+        """Without z, ``axnorm="c"`` gives each bin's count over its column's peak.
 
-        # Get normalized aggregation
-        agg = hist.agg()
-        agg_unstacked = agg.unstack("x")
+        The grid is built from ``COLUMN_COUNTS``, so the expected values are
+        written by hand next to it. The two columns peak at different counts,
+        and the column peaks differ from the row peaks, so dividing by the
+        wrong maximum (or by none) changes the grid. Empty bins stay NaN.
 
-        # Check that max value in each column is 1.0 (or NaN)
-        for col in agg_unstacked.columns:
-            col_max = agg_unstacked[col].max()
-            if not pd.isna(col_max):
-                assert np.isclose(
-                    col_max, 1.0, atol=1e-10
-                ), f"Column {col} max is {col_max}, expected 1.0"
+        ON FAILURE: the code is wrong.
+        """
+        xc = 0.5 * (COLUMN_X_EDGES[:-1] + COLUMN_X_EDGES[1:])
+        yc = 0.5 * (COLUMN_Y_EDGES[:-1] + COLUMN_Y_EDGES[1:])
+        xs, ys = [], []
+        for i in range(COLUMN_COUNTS.shape[0]):
+            for j in range(COLUMN_COUNTS.shape[1]):
+                xs.extend([xc[j]] * COLUMN_COUNTS[i, j])
+                ys.extend([yc[i]] * COLUMN_COUNTS[i, j])
+
+        hist = Hist2D(
+            pd.Series(xs, dtype=float),
+            pd.Series(ys, dtype=float),
+            axnorm="c",
+            nbins=[COLUMN_X_EDGES, COLUMN_Y_EDGES],
+        )
+        grid = hist.agg().unstack("x").values
+
+        # rel=1e-12: one division of small integers.
+        np.testing.assert_allclose(grid, COLUMN_NORMALIZED_BY_HAND, rtol=1e-12, atol=0)
 
     def test_log_scale_with_normalization(self):
         """Test normalization with log-scaled data."""

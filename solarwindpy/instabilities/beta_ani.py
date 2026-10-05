@@ -24,8 +24,17 @@ class BetaRPlot(Hist2D):
 
     Examples
     --------
-    >>> br = BetaRPlot(beta, ani, "p")  # doctest: +SKIP
-    >>> ax, cbar = br.make_plot()  # doctest: +SKIP
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import matplotlib.pyplot as plt
+    >>> rng = np.random.default_rng(0)
+    >>> beta = pd.Series(10.0 ** rng.uniform(-1, 1, 500), name="beta")
+    >>> ani = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="ani")
+    >>> br = BetaRPlot(beta, ani, "p")
+    >>> ax, cbar = br.make_plot()
+    >>> ax.get_xscale(), ax.get_yscale()
+    ('log', 'log')
+    >>> plt.close("all")
     """
 
     def __init__(self, beta, ani, species, **kwargs):

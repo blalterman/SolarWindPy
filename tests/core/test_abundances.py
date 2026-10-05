@@ -115,6 +115,68 @@ ELEMENTS_WITHOUT_PHOTOSPHERE = [
     "U",
 ]
 
+# CI chondrite (Ab, Uncert) for the first five ELEMENTS_WITHOUT_PHOTOSPHERE,
+# identical in Asplund+2009 Table 1 (doi:10.1146/annurev.astro.46.060407.145222)
+# and Asplund+2021 Table 2 (doi:10.1051/0004-6361/202140445).
+PUBLISHED_CI_WITHOUT_PHOTOSPHERE = {
+    "As": (2.30, 0.04),
+    "Se": (3.34, 0.03),
+    "Br": (2.54, 0.06),
+    "Cd": (1.71, 0.03),
+    "Sb": (1.01, 0.06),
+}
+
+
+class SeriesNameMismatch(AssertionError):
+    """``get_element`` names a Series differently for symbol and Z lookups."""
+
+
+class PublishedTableMismatch(AssertionError):
+    """A shipped abundance disagrees with the published Asplund table."""
+
+
+def exact(x):
+    """``pytest.approx`` for a value shipped verbatim or computed from verbatim inputs.
+
+    Tolerance rel=1e-12, abs=0: the CSVs carry the tables' decimals unchanged,
+    so only float parsing or rounding may differ.
+    """
+    return pytest.approx(x, rel=1e-12, abs=0)
+
+
+# Fe (CI Ab, CI Uncert, Photosphere Ab, Photosphere Uncert) by year.
+PUBLISHED_FE = {
+    2009: (
+        7.45,
+        0.01,
+        7.50,
+        0.04,
+    ),  # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
+    2021: (
+        7.46,
+        0.02,
+        7.46,
+        0.04,
+    ),  # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
+}
+
+# O photosphere (Ab, Uncert) by year.
+PUBLISHED_O_PHOTOSPHERE = {
+    2009: (
+        8.69,
+        0.05,
+    ),  # Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222
+    2021: (8.69, 0.04),  # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
+}
+
+# Fe/O photosphere (ratio, uncertainty) by hand, to 5 significant digits:
+# 10**(Fe-O) and ratio x ln10 x hypot(sigma_Fe, sigma_O).
+HAND_FE_O = {
+    2009: (0.064565, 0.0095194),  # 10**-1.19; hypot(.04, .05)
+    2021: (0.058884, 0.0076699),  # 10**-1.23; hypot(.04, .04)
+}
+
+
 # Expected abundance ratios computed from published values
 # Format: (expected_ratio, sigma_numerator, sigma_denominator)
 EXPECTED_RATIOS: Dict[int, Dict[tuple, tuple]] = {
@@ -212,11 +274,22 @@ class TestDataLoading:
 class TestDataStructure:
     """Unit tests for DataFrame structure: shape, dtype, index."""
 
-    def test_data_is_dataframe(self, ref_any_year):
-        """Data property returns pandas DataFrame."""
-        assert isinstance(
-            ref_any_year.data, pd.DataFrame
-        ), f"Expected pd.DataFrame, got {type(ref_any_year.data).__name__}"
+    def test_data_fe_row_matches_published_table(self, ref_with_year):
+        """``data`` holds the published Fe row (PUBLISHED_FE), addressed by (Z, Symbol).
+
+        Tolerance is ``exact``, not the significant-digit rule, which would
+        accept 7.50 for 7.46.
+
+        ON FAILURE: the code is wrong, unless the author rejects the cited
+        table value.
+        """
+        ref, year = ref_with_year
+        ci_ab, ci_uncert, ph_ab, ph_uncert = PUBLISHED_FE[year]
+        row = ref.data.loc[(26, "Fe")]
+        assert row[("CI_chondrites", "Ab")] == exact(ci_ab)
+        assert row[("CI_chondrites", "Uncert")] == exact(ci_uncert)
+        assert row[("Photosphere", "Ab")] == exact(ph_ab)
+        assert row[("Photosphere", "Uncert")] == exact(ph_uncert)
 
     def test_data_has_83_elements(self, ref_any_year):
         """Both Asplund 2009 and 2021 have 83 elements."""
@@ -251,14 +324,23 @@ class TestDataStructure:
         ), f"Expected at least 2 column levels, got {ref_any_year.data.columns.nlevels}"
 
     def test_abundance_values_are_float64(self, ref_any_year):
-        """All Ab and Uncert columns are float64."""
-        for col in ref_any_year.data.columns:
-            # Check columns that contain abundance data
-            if len(col) >= 2 and col[1] in ["Ab", "Uncert"]:
-                dtype = ref_any_year.data[col].dtype
-                assert (
-                    dtype == np.float64
-                ), f"Column {col} has dtype {dtype}, expected float64"
+        """``data`` columns are exactly (CI_chondrites, Photosphere) x (Ab, Uncert), all float64.
+
+        The column set is the one the ``data`` docstring promises. Naming it
+        exactly means the dtype check cannot pass over an empty selection, as
+        a filter on ``col[1] in ("Ab", "Uncert")`` did when no column matched.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = ref_any_year.data
+        expected = [
+            ("CI_chondrites", "Ab"),
+            ("CI_chondrites", "Uncert"),
+            ("Photosphere", "Ab"),
+            ("Photosphere", "Uncert"),
+        ]
+        assert sorted(data.columns.tolist()) == expected
+        assert data.dtypes.to_dict() == {col: np.dtype(np.float64) for col in expected}
 
     @pytest.mark.parametrize("z", [1, 26, 92])
     def test_key_z_values_present(self, ref_any_year, z):
@@ -381,12 +463,6 @@ class TestColumnNaming:
 class TestCommentsColumn:
     """Unit tests for Comments metadata column (2021 only)."""
 
-    def test_2021_has_get_comment_method(self, ref_2021):
-        """2021 instance has get_comment method."""
-        assert hasattr(
-            ref_2021, "get_comment"
-        ), "ReferenceAbundances should have get_comment method"
-
     @pytest.mark.parametrize(
         "symbol,expected_comment",
         [
@@ -407,13 +483,19 @@ class TestCommentsColumn:
             comment == expected_comment
         ), f"{symbol} comment: expected '{expected_comment}', got '{comment}'"
 
+    # Comments column blank for these in Asplund+2021 Table 2,
+    # doi:10.1051/0004-6361/202140445
     @pytest.mark.parametrize("symbol", ["C", "O", "Fe", "Si", "N"])
     def test_spectroscopic_elements_have_no_comment(self, ref_2021, symbol):
-        """Elements with spectroscopic measurements have empty/None comment."""
+        """``get_comment`` returns None where Table 2 has no comment.
+
+        The ``get_comment`` docstring promises None for a spectroscopic
+        measurement; an empty string or NaN is not None.
+
+        ON FAILURE: the code is wrong.
+        """
         comment = ref_2021.get_comment(symbol)
-        assert (
-            comment is None or comment == "" or pd.isna(comment)
-        ), f"{symbol} should have no comment (spectroscopic), got '{comment}'"
+        assert comment is None, f"{symbol}: expected None, got {comment!r}"
 
     def test_2009_get_comment_returns_none(self, ref_2009):
         """2009 data get_comment returns None (no comments in 2009)."""
@@ -429,10 +511,50 @@ class TestCommentsColumn:
 class TestGetElement:
     """Unit tests for element lookup by symbol and Z."""
 
-    def test_get_by_symbol_returns_series(self, ref_any_year):
-        """get_element('Fe') returns pd.Series."""
-        fe = ref_any_year.get_element("Fe")
-        assert isinstance(fe, pd.Series), f"Expected pd.Series, got {type(fe).__name__}"
+    @pytest.mark.parametrize("key", ["Fe", 26], ids=["symbol", "z"])
+    def test_get_element_returns_published_fe_photosphere(self, ref_with_year, key):
+        """``get_element`` by symbol or by Z is the published Fe photosphere Series.
+
+        Expected values: PUBLISHED_FE.
+
+        ON FAILURE: the code is wrong, unless the author rejects the cited
+        table value.
+        """
+        ref, year = ref_with_year
+        _, _, ab, uncert = PUBLISHED_FE[year]
+        fe = ref.get_element(key)
+        assert isinstance(fe, pd.Series)
+        assert fe.index.tolist() == ["Ab", "Uncert"]
+        assert fe["Ab"] == exact(ab)
+        assert fe["Uncert"] == exact(uncert)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=SeriesNameMismatch,
+        reason=(
+            "ReferenceAbundances.get_element (solarwindpy/core/abundances.py) "
+            "names its Series by the level it did not search: get_element('Fe') "
+            "is named 26, get_element(26) is named 'Fe', although its docstring "
+            "calls the Z lookup 'Same result'; expected message: 'get_element "
+            "Series names differ'; remove this marker when get_element returns "
+            "the same Series name for a symbol and its atomic number"
+        ),
+    )
+    def test_symbol_and_z_lookups_return_same_series_name(self, ref_2021):
+        """``get_element('Fe')`` and ``get_element(26)`` carry the same name.
+
+        The ``get_element`` docstring shows ``Name: 26`` for the symbol lookup
+        and calls the atomic-number lookup the "Same result".
+
+        ON FAILURE: (unexpected pass) a fix making the names agree has
+        landed; drop the xfail marker.
+        """
+        by_symbol = ref_2021.get_element("Fe")
+        by_z = ref_2021.get_element(26)
+        if by_symbol.name != by_z.name:
+            raise SeriesNameMismatch(
+                f"get_element Series names differ: {by_symbol.name!r} != {by_z.name!r}"
+            )
 
     def test_get_by_symbol_series_has_correct_shape(self, ref_any_year):
         """get_element returns Series with shape (2,) for [Ab, Uncert]."""
@@ -451,11 +573,6 @@ class TestGetElement:
         """get_element returns Series with float64 dtype."""
         fe = ref_any_year.get_element("Fe")
         assert fe.dtype == np.float64, f"Expected dtype float64, got {fe.dtype}"
-
-    def test_get_by_z_returns_series(self, ref_any_year):
-        """get_element(26) returns pd.Series."""
-        fe = ref_any_year.get_element(26)
-        assert isinstance(fe, pd.Series), f"Expected pd.Series, got {type(fe).__name__}"
 
     def test_symbol_and_z_return_equal_values(self, ref_any_year):
         """get_element('Fe') equals get_element(26) in values."""
@@ -510,11 +627,18 @@ class TestMissingPhotosphereData:
 
     @pytest.mark.parametrize("symbol", ELEMENTS_WITHOUT_PHOTOSPHERE[:5])
     def test_missing_photosphere_has_ci_chondrites(self, ref_any_year, symbol):
-        """Elements without photosphere DO have CI chondrite values."""
+        """Elements without a photospheric value carry the published CI value.
+
+        Expected values: PUBLISHED_CI_WITHOUT_PHOTOSPHERE (Asplund 2009
+        Table 1 and 2021 Table 2, same in both).
+
+        ON FAILURE: the code is wrong, unless the author rejects the cited
+        table value.
+        """
+        ab, uncert = PUBLISHED_CI_WITHOUT_PHOTOSPHERE[symbol]
         element = ref_any_year.get_element(symbol, kind="CI_chondrites")
-        assert not np.isnan(
-            element.Ab
-        ), f"{symbol} CI chondrites Ab should NOT be NaN, got {element.Ab}"
+        assert element.Ab == exact(ab)
+        assert element.Uncert == exact(uncert)
 
     def test_h_photosphere_ab_is_12(self, ref_any_year):
         """H photosphere Ab is 12.00 (by definition)."""
@@ -615,6 +739,65 @@ class TestValueValidation:
                 f"expected {expected.ci_chondrites_uncert}, got {element.Uncert}"
             )
 
+    @pytest.mark.xfail(
+        strict=True,
+        raises=PublishedTableMismatch,
+        reason=(
+            "solarwindpy/core/data/asplund2009.csv gives Ar CI_chondrites Ab "
+            "-0.05; Asplund+2009 Table 1 prints -0.50; expected message: "
+            "'Ar CI_chondrites Ab'; remove this marker when the 2009 CSV "
+            "carries -0.50 for Ar"
+        ),
+    )
+    def test_2009_argon_ci_chondrites_matches_table_1(self, ref_2009):
+        """2009 Ar CI chondrite abundance is the Table 1 value, -0.50.
+
+        Source: Asplund+2009 Table 1, doi:10.1146/annurev.astro.46.060407.145222.
+
+        ON FAILURE: (unexpected pass) the 2009 CSV now carries -0.50 for Ar;
+        drop the xfail marker.
+        """
+        ab = ref_2009.get_element("Ar", kind="CI_chondrites").Ab
+        if ab != exact(-0.50):
+            raise PublishedTableMismatch(
+                f"Ar CI_chondrites Ab: expected -0.50, got {ab}"
+            )
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=PublishedTableMismatch,
+        reason=(
+            "solarwindpy/core/data/asplund2021.csv leaves CI_chondrites Ab "
+            "blank (NaN) for Ne, Ar, Kr, Xe while keeping their 0.18 "
+            "uncertainty; Asplund+2021 Table 2 prints -1.12, -0.50, -2.27, "
+            "-1.95; expected message: 'CI_chondrites Ab'; remove this marker "
+            "when the 2021 CSV carries those values"
+        ),
+    )
+    @pytest.mark.parametrize(
+        "symbol,ab",
+        [
+            # Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445
+            ("Ne", -1.12),
+            ("Ar", -0.50),
+            ("Kr", -2.27),
+            ("Xe", -1.95),
+        ],
+    )
+    def test_2021_noble_gas_ci_chondrites_match_table_2(self, ref_2021, symbol, ab):
+        """2021 noble-gas CI chondrite abundances are the Table 2 values.
+
+        Source: Asplund+2021 Table 2, doi:10.1051/0004-6361/202140445.
+
+        ON FAILURE: (unexpected pass) the 2021 CSV now carries the noble-gas
+        CI values; drop the xfail marker.
+        """
+        got = ref_2021.get_element(symbol, kind="CI_chondrites").Ab
+        if got != exact(ab):
+            raise PublishedTableMismatch(
+                f"{symbol} CI_chondrites Ab: expected {ab}, got {got}"
+            )
+
 
 # =============================================================================
 # Integration Tests: Abundance Ratio
@@ -624,38 +807,35 @@ class TestValueValidation:
 class TestAbundanceRatio:
     """Integration tests for abundance ratio calculations."""
 
-    def test_returns_abundance_namedtuple(self, ref_any_year):
-        """abundance_ratio returns Abundance namedtuple."""
-        result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(
-            result, Abundance
-        ), f"Expected Abundance namedtuple, got {type(result).__name__}"
+    def test_fe_o_ratio_is_abundance_of_published_values(self, ref_with_year):
+        """``abundance_ratio('Fe', 'O')`` is Abundance(10**(Fe-O), ratio ln10 sqrt(sFe^2+sO^2)).
 
-    def test_abundance_has_measurement_and_uncertainty(self, ref_any_year):
-        """Abundance namedtuple has measurement and uncertainty attributes."""
-        result = ref_any_year.abundance_ratio("Fe", "O")
-        assert hasattr(result, "measurement"), "Missing 'measurement' attribute"
-        assert hasattr(result, "uncertainty"), "Missing 'uncertainty' attribute"
+        Unpacking yields (measurement, uncertainty) in that order. Expected
+        values follow the propagation stated in the ``abundance_ratio``
+        docstring Notes, from the published dex values (PUBLISHED_FE,
+        PUBLISHED_O_PHOTOSPHERE), plus the independent hand-computed HAND_FE_O
+        so a formula wrong in both places still fails.
 
-    def test_measurement_is_float(self, ref_any_year):
-        """measurement attribute is float."""
-        result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(
-            result.measurement, (float, np.floating)
-        ), f"measurement should be float, got {type(result.measurement).__name__}"
+        ON FAILURE: the code is wrong, unless the author rejects the cited
+        table values or the stated error propagation.
+        """
+        ref, year = ref_with_year
+        _, _, fe, sigma_fe = PUBLISHED_FE[year]
+        o, sigma_o = PUBLISHED_O_PHOTOSPHERE[year]
+        hand_ratio, hand_uncert = HAND_FE_O[year]
 
-    def test_uncertainty_is_float(self, ref_any_year):
-        """uncertainty attribute is float."""
-        result = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(
-            result.uncertainty, (float, np.floating)
-        ), f"uncertainty should be float, got {type(result.uncertainty).__name__}"
+        result = ref.abundance_ratio("Fe", "O")
+        assert isinstance(result, Abundance)
+        measurement, uncertainty = result
+        assert (measurement, uncertainty) == (result.measurement, result.uncertainty)
 
-    def test_ratio_can_be_destructured(self, ref_any_year):
-        """Abundance namedtuple can be destructured."""
-        measurement, uncertainty = ref_any_year.abundance_ratio("Fe", "O")
-        assert isinstance(measurement, (float, np.floating))
-        assert isinstance(uncertainty, (float, np.floating))
+        ratio = 10.0 ** (fe - o)
+        uncert = ratio * np.log(10) * np.hypot(sigma_fe, sigma_o)
+        assert measurement == exact(ratio)
+        assert uncertainty == exact(uncert)
+        # Hand values written to 5 significant digits.
+        assert measurement == pytest.approx(hand_ratio, rel=1e-4, abs=0)
+        assert uncertainty == pytest.approx(hand_uncert, rel=1e-4, abs=0)
 
     @pytest.mark.parametrize(
         "year,numerator,denominator",
@@ -735,26 +915,6 @@ class TestBackwardCompatibility:
         assert np.isclose(
             result.measurement, expected, rtol=0.01
         ), f"2009 C/O ratio: expected {expected:.4f}, got {result.measurement:.4f}"
-
-    def test_abundance_ratio_method_exists(self, ref_any_year):
-        """abundance_ratio method exists and is callable."""
-        assert hasattr(
-            ref_any_year, "abundance_ratio"
-        ), "Missing abundance_ratio method"
-        assert callable(
-            ref_any_year.abundance_ratio
-        ), "abundance_ratio should be callable"
-
-    def test_data_property_returns_dataframe(self, ref_any_year):
-        """data property returns DataFrame as in original API."""
-        assert isinstance(
-            ref_any_year.data, pd.DataFrame
-        ), f"data property should return DataFrame, got {type(ref_any_year.data)}"
-
-    def test_get_element_method_exists(self, ref_any_year):
-        """get_element method exists and is callable."""
-        assert hasattr(ref_any_year, "get_element"), "Missing get_element method"
-        assert callable(ref_any_year.get_element), "get_element should be callable"
 
 
 # =============================================================================
