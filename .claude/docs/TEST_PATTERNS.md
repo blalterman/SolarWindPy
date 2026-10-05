@@ -47,6 +47,10 @@ Errors are part of the contract: `pytest.raises(ExpectedError, match="...")`.
 Plots: use the Agg backend and assert the data handed to matplotlib (mesh values, cell
 coordinates, line vertices). Close figures with `plt.close("all")`.
 
+Docstring examples built from `swp.examples.load_plasma()` print values pinned to the example
+CSVs in `solarwindpy/core/data/`. Editing those CSVs means updating every docstring example
+whose output changes; the doctests do not flag it.
+
 **Show it:** for each expected value, a reader can name its source from the line it is on.
 
 ## Inputs and fixtures
