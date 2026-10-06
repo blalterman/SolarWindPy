@@ -390,6 +390,18 @@ with `HingeMin`. The module-level `_author_start` and the five copied docstring 
 Author decision after the second #496 review: fix the class docstrings of every `FitFunction`
 subclass losing their Parameters section through docstring inheritance, in this PR.
 
+Author decisions after the third #496 review:
+
+- Remove `Hinge.__init_subclass__` and the per-class `p0` it builds. Each hinge class
+  describes how its `p0` estimates in its class docstring (which docstring inheritance
+  merges); `p0` is one inherited `Hinge` property with a generic docstring that points to
+  the class description. No subclass defines `p0`.
+- The reference-hinge numbers (433, 4.12, 250) are written once, in the `Hinge` class Notes,
+  and a test fails if those numbers and the stored constants disagree.
+- `HingeMax` with no estimate raises its `NotImplementedError` without logging the
+  "data gave no estimate" warning first; the other hinge classes still warn, then return
+  the reference start.
+
 ### warning-fixes
 
 OWNS: solarwindpy/core/alfvenic_turbulence.py, solarwindpy/fitfunctions/power_laws.py, solarwindpy/fitfunctions/gaussians.py, solarwindpy/fitfunctions/hinge.py, solarwindpy/instabilities/verscharen2016.py, and their test files
