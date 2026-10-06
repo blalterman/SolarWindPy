@@ -337,6 +337,22 @@ perpendicular parts with a NaN-skipping sum, so a time with both parts missing g
 NaN instead, matching the empty-sum rule (`min_count=1` or `skipna=False` as fits the formula).
 Control: a row with both parts missing gives NaN; the old code gives 0. CHANGELOG entry.
 
+Author decisions after PR #494's review (the missing-data rule, two levels):
+
+- Within one species, any missing component makes that species' value NaN: a time with
+  only w∥ or only w⊥ has no scalar thermal speed (one component alone is unphysical).
+- Across species, a total is the sum of the species present at that time and NaN only
+  when none is: protons without alphas still give a valid total temperature or pressure.
+  Thermal speeds do not add across species (`thermal_speed("a+p1")` already raises);
+  only temperatures and pressures do.
+- Apply the rule to every species or component sum in `plasma.py`: `thermal_speed`, `pth`
+  and `temperature` for one species (a missing row is 0 today); `pdynamic`'s sum over
+  components (within-species rule); `velocity`, `afsq` and `estimate_electrons` (across-species
+  rule). A species with no velocity at a time also leaves the density weights in `velocity`
+  and `estimate_electrons`.
+- Document the rule once, with an ASCII diagram of the two levels for temperature and
+  pressure, and point the `temperature` and `pth` docstrings to it.
+
 ### p0-simplify
 
 OWNS: solarwindpy/fitfunctions/ (all modules, CONTRIBUTING.md), tests/fitfunctions/, CLAUDE.md, CHANGELOG.md
@@ -351,6 +367,34 @@ pointer to a constructed example at `solarwindpy/core/plasma.py:102` (point to
 `swp.examples.load_plasma()`). Controls: each hinge class's impossible-estimate input gives
 the reference start from `p0` with the warning logged; `HingeMax` raises; a non-hinge class
 returning None still fits from the generic start.
+
+Author decision after PR #496's review: the six hinge classes (`HingeSaturation`, `TwoLine`,
+`Saturation`, `HingeMin`, `HingeMax`, `HingeAtPoint`) inherit from one `Hinge(FitFunction)`
+parent, not exported, that holds the reference hinge, the estimate-or-reference control flow
+in `p0`, and the shared docstring text (through docstring inheritance). Each child writes
+only its model, its estimate, and its parameter translation; `HingeMax` shares what it can
+with `HingeMin`. The module-level `_author_start` and the five copied docstring paragraphs go.
+
+### warning-fixes
+
+OWNS: solarwindpy/core/alfvenic_turbulence.py, solarwindpy/fitfunctions/power_laws.py, solarwindpy/fitfunctions/gaussians.py, solarwindpy/fitfunctions/hinge.py, solarwindpy/instabilities/verscharen2016.py, and their test files
+
+Runs after `p0-simplify` merges. Author decisions: `logger.warn` becomes `logger.warning`;
+`PowerLawOffCenter` bounds x0 below the smallest x (the model is defined only for x > x0);
+`GaussianLn` raises `ValueError` when built with any x ≤ 0 (ln x is undefined; no absolute
+value); the verscharen2016 table legend fills cells for unplotted instabilities with its
+blank rectangle so the table keeps its layout (the table form is intentional); the hinge
+`p0` estimates check before dividing (the divide-by-zero rule). Control for each: the warning
+it removes is gone from `pytest -rw`, and a test fails on the old behavior.
+
+### hist2d-no-clabel
+
+OWNS: solarwindpy/plotting/hist2d.py, tests/plotting/
+
+Runs after `approx-default` (PR #495) merges, since both edit
+`tests/plotting/test_hist2d_plotting.py`. Author decision: remove contour labeling. Drop `label_levels`, `clabel_kwargs` and
+`skip_max_clbl` and the labels in the return values from both contour methods, with no
+deprecation; this also removes matplotlib 3.11's filled-contour `clabel` deprecation warning.
 
 ## Long-running units
 
