@@ -13,6 +13,7 @@ NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
 
 import inspect
 import logging
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -423,9 +424,11 @@ def _hingemax_without_estimate():
 
 
 def test_hingemax_without_estimate_raises_not_implemented(caplog):
-    """HingeMax has no reference start yet: ``p0`` logs, then raises.
+    """HingeMax has no reference start yet: ``p0`` raises without a warning.
 
-    ``make_fit`` returns the NotImplementedError under ``return_exception``.
+    The "data gave no estimate" warning announces a reference start, which
+    HingeMax does not return. ``make_fit`` returns the NotImplementedError
+    under ``return_exception``.
 
     ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
     start; then test that start as the other hinge classes are tested.
@@ -434,7 +437,7 @@ def test_hingemax_without_estimate_raises_not_implemented(caplog):
     with caplog.at_level(logging.WARNING):
         with pytest.raises(NotImplementedError, match="no reference start"):
             fit.p0
-    assert NO_ESTIMATE in caplog.text, caplog.text
+    assert NO_ESTIMATE not in caplog.text, caplog.text
     got = fit.make_fit(return_exception=True)
     assert isinstance(got, NotImplementedError), got
 
@@ -500,22 +503,74 @@ def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
         assert fit.p0 == exact(HINGE_START[cls]), fit.p0
 
 
-@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
-def test_each_hinge_p0_docstring_has_its_estimate_and_the_shared_sections(cls):
-    """A hinge class's ``p0`` docstring is its own estimate text plus Hinge's.
+def _notes(doc):
+    """The first paragraph of a docstring's Notes section, on one line."""
+    _, _, rest = doc.partition("\nNotes\n-----\n")
+    assert rest, doc
+    return " ".join(rest.split("\n\n", 1)[0].split())
 
-    docstring-inheritance does not merge property docstrings, so
-    ``Hinge.__init_subclass__`` builds each one. It starts with the class's
-    ``_estimate`` prose and keeps ``Hinge.p0``'s Returns, Raises and Notes.
+
+@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
+def test_each_hinge_class_describes_its_estimate_and_inherits_p0(cls):
+    """A hinge class's Notes describe its estimate; its ``p0`` is ``Hinge.p0``.
+
+    ``Hinge.p0`` is the one ``p0`` property, and its docstring points to the
+    class description. The merged class docstring's Notes therefore name the
+    class's parameters in ``argnames`` order (the estimate) and its start
+    when the data give none (the reference hinge, or NotImplementedError).
 
     ON FAILURE: the code is wrong; a hinge class's help() and API page lost
-    its estimate description or the shared contract.
+    its estimate description, or a hinge class defines ``p0`` itself.
     """
-    doc = cls.p0.__doc__
-    assert doc.startswith(inspect.getdoc(cls._estimate)), doc
-    assert inspect.getdoc(cls._reference_start) in doc, doc
-    for section in ("Returns", "Raises", "Notes"):
-        assert f"\n{section}\n" in doc, (section, doc)
+    assert "p0" not in vars(cls), cls
+    assert inspect.getattr_static(cls, "p0") is vars(Hinge)["p0"]
+    argnames = cls(np.arange(5.0), np.arange(5.0)).argnames
+    notes = _notes(inspect.getdoc(cls))
+    assert f"``p0`` estimates ``[{', '.join(argnames)}]``" in notes, notes
+    start = "NotImplementedError" if cls is HingeMax else "reference hinge"
+    assert start in notes, notes
+
+
+def _reference_hinge_in_hinge_notes():
+    """The reference-hinge numbers as written in ``Hinge``'s class Notes."""
+    notes = _notes(inspect.getdoc(Hinge))
+    number = r"(-?[0-9.]+)"
+    patterns = {
+        "xh, yh": rf"\(x_h, y_h\) = \({number}, {number}\)",
+        "x1": rf"x_1 = {number}`",
+        "m1": rf"m_1 = y_h / \(x_h - x_1\) = {number} / {number}`",
+        "m2": rf"m_2 = {number}\\,m_1",
+        "x2": rf"x_2 = x_h - y_h / m_2 = {number}`",
+    }
+    found = {}
+    for name, pattern in patterns.items():
+        match = re.search(pattern, notes)
+        assert match, (name, notes)
+        found[name] = [float(g) for g in match.groups()]
+    return found
+
+
+def test_the_hinge_notes_state_the_stored_reference_hinge():
+    """The numbers in ``Hinge``'s Notes are the stored reference hinge.
+
+    The Notes are the one place the reference hinge is written for readers;
+    ``_XH``, ``_YH``, ``_X1``, ``_M1``, ``_M2`` and ``_X2`` are what ``p0``
+    returns. m1 is written as yh / (xh - x1), m2 as a multiple of m1.
+
+    ON FAILURE: the Notes and the constants disagree. The author decides which
+    is right; update the other.
+    """
+    found = _reference_hinge_in_hinge_notes()
+    assert found["xh, yh"] == [Hinge._XH, Hinge._YH], found
+    assert found["x1"] == [Hinge._X1], found
+    yh, run = found["m1"]
+    assert yh == Hinge._YH, found
+    assert run == Hinge._XH - Hinge._X1, found
+    assert yh / run == exact(Hinge._M1), found
+    (factor,) = found["m2"]
+    assert factor * Hinge._M1 == exact(Hinge._M2), found
+    (x2,) = found["x2"]
+    assert x2 == exact(Hinge._X2), found
 
 
 S = np.sqrt(0.5)

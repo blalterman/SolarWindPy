@@ -190,14 +190,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   m_1 = 4.12 / 183 and m_2 = 0.01 m_1, translated to each class's parameters. They
   previously returned NaN or infinite guesses, and the all-ones default is a singular
   point of these models ("Residuals are not finite in the initial point"). `HingeMax`
-  has no reference start yet: in that case its `p0` raises `NotImplementedError`, which
+  has no reference start yet: in that case its `p0` raises `NotImplementedError`, without
+  the warning, which
   `make_fit` returns under `return_exception=True`; pass `p0=` to fit it.
 - The six hinge classes subclass one parent, `solarwindpy.fitfunctions.hinge.Hinge` (not
   exported), which holds the reference hinge, the estimate-or-reference control flow of
   `p0` and the shared help text; each class writes its model, its estimate and its
   translation of the reference hinge. `HingeMax` subclasses `HingeMin`, differing in its
-  model (`np.maximum`) and in having no reference start. Each class's `p0` help text
-  describes its own estimate and translation.
+  model (`np.maximum`) and in having no reference start. Every hinge class inherits
+  `Hinge.p0`; each class's help text describes its own estimate and translation in
+  its Notes.
 - Every fit function's class help (`help(cls)` and the API pages) lists its constructor
   arguments again: docstring inheritance had deleted each class docstring's Parameters
   section. `FitFunction`'s arguments (`xmin`, `weights`, `logy` and the rest) are
