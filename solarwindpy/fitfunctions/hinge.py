@@ -164,7 +164,8 @@ class HingeSaturation(Hinge):
     guess_yh : float, optional
         Initial guess for hinge y-coordinate. Default is 0.5.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -337,7 +338,8 @@ class TwoLine(Hinge):
     guess_xs : float, optional
         Initial guess for saturation x-coordinate. Default is 425.0.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -556,7 +558,8 @@ class Saturation(Hinge):
     guess_s : float, optional
         Initial guess for saturation y-value. Default is 0.5.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -787,7 +790,8 @@ class HingeMin(Hinge):
     guess_h : float, optional
         Initial guess for hinge x-coordinate. Default is 400.0.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -1070,7 +1074,8 @@ class HingeAtPoint(Hinge):
     guess_yh : float, optional
         Initial guess for hinge y-coordinate. Default is 0.5.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------

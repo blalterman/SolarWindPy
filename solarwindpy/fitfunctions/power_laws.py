@@ -22,10 +22,6 @@ class PowerLaw(FitFunction):
     Parameters are ``A`` (amplitude) and ``b`` (exponent).
     """
 
-    def __init__(self, xobs, yobs, **kwargs):
-        """Initialize a power-law fit to the observations."""
-        super().__init__(xobs, yobs, **kwargs)
-
     @property
     def function(self):
         r"""The model :math:`A x^b` as ``f(x, A, b)``."""
@@ -57,19 +53,6 @@ class PowerLawPlusC(FitFunction):
     Parameters are ``A`` (amplitude), ``b`` (exponent) and ``c`` (offset).
     """
 
-    def __init__(self, xobs, yobs, **kwargs):
-        """Initialize a power law with constant offset.
-
-        Parameters
-        ----------
-        xobs, yobs : array-like
-            Observed values to fit.
-        **kwargs : dict
-            Forwarded to :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-        """
-
-        super().__init__(xobs, yobs, **kwargs)
-
     @property
     def function(self):
         r"""The model :math:`A x^b + c` as ``f(x, A, b, c)``."""
@@ -100,10 +83,6 @@ class PowerLawOffCenter(FitFunction):
 
     Parameters are ``A`` (amplitude), ``b`` (exponent) and ``x0`` (origin).
     """
-
-    def __init__(self, xobs, yobs, **kwargs):
-        r"""Initialize a power law centered at ``x - x_0`` without offset."""
-        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):

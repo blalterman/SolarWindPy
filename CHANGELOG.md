@@ -198,6 +198,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   translation of the reference hinge. `HingeMax` subclasses `HingeMin`, differing in its
   model (`np.maximum`) and in having no reference start. Each class's `p0` help text
   describes its own estimate and translation.
+- Every fit function's class help (`help(cls)` and the API pages) lists its constructor
+  arguments again: docstring inheritance had deleted each class docstring's Parameters
+  section. `FitFunction`'s arguments (`xmin`, `weights`, `logy` and the rest) are
+  documented in its class docstring and inherited by every fit function, and
+  `FitFunction.__init__` no longer carries a docstring of its own. `Exponential`,
+  `ExponentialPlusC`, `ExponentialCDF`, `Gaussian`, `GaussianNormalized`, `Line`,
+  `LineXintercept`, `PowerLaw`, `PowerLawPlusC` and `PowerLawOffCenter` no longer define
+  an `__init__` that only forwarded `xobs`, `yobs` and `**kwargs`; their signatures now
+  show every `FitFunction` argument.
 - `make_fit` reads the class's `p0` only when the caller passes no `p0=`.
 - `GaussianLn.p0` estimates in ln x, the space of its model: `m` and `s` are the
   y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).

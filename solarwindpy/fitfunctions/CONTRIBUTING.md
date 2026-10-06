@@ -54,15 +54,6 @@ class MyFunction(FitFunction):
     .. math::
 
         f(x) = m \cdot x + b
-
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    **kwargs
-        Additional arguments passed to :class:`FitFunction`.
     """
 
     @property
@@ -151,7 +142,17 @@ m1 = 0.0163  # Kasper 2007 value
 
 ### 3.3 Optional Overrides
 
-**Custom `__init__` with guess parameters:**
+Constructor parameters are documented in the class docstring, never on `__init__`.
+`FitFunctionMeta` merges a class docstring with `FitFunction`'s against the class's
+`__init__` signature, so a class with no `__init__` of its own (the minimal example
+above) shows every `FitFunction` argument without writing a Parameters section. Do
+not write an `__init__` that only calls `super().__init__`: it narrows the signature
+and hides those arguments from `help()`.
+
+**Custom `__init__` with guess parameters:** give `__init__` no docstring, and
+document in the class docstring's Parameters section each argument it adds,
+`**kwargs` included ("Additional arguments passed to FitFunction."). `xobs` and
+`yobs` are inherited.
 
 ```python
 def __init__(

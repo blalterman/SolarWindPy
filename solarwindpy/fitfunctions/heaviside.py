@@ -46,7 +46,8 @@ class HeavySide(FitFunction):
         Initial guess for step height. If not provided, estimated
         from data below and above the transition.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------

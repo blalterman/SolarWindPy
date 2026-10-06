@@ -48,7 +48,8 @@ class GaussianPlusHeavySide(FitFunction):
     yobs : array-like
         Dependent variable observations.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -308,7 +309,8 @@ class GaussianTimesHeavySide(FitFunction):
         Initial guess for the transition x-coordinate. If None, must be
         provided for fitting to work properly.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -478,7 +480,8 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
         Initial guess for the transition x-coordinate. If None, must be
         provided for fitting to work properly.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------

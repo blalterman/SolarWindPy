@@ -84,10 +84,6 @@ class Gaussian(FitFunction):
     Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)
     """
 
-    def __init__(self, xobs, yobs, **kwargs):
-        """Initialize a Gaussian fit to the observations."""
-        super().__init__(xobs, yobs, **kwargs)
-
     @property
     def function(self):
         r"""The model as ``f(x, mu, sigma, A)``."""
@@ -144,18 +140,13 @@ class GaussianNormalized(FitFunction):
     """Normalized Gaussian distribution where integral equals n.
 
     Fits data to the form: (n / (sqrt(2*pi) * sigma)) * exp(-0.5 * ((x - mu) / sigma)^2)
+
+    Notes
+    -----
+    The normalization parameter n represents the total area under
+    the Gaussian curve, useful for fitting probability distributions
+    or particle count distributions.
     """
-
-    def __init__(self, xobs, yobs, **kwargs):
-        """Initialize normalized Gaussian fit.
-
-        Notes
-        -----
-        The normalization parameter n represents the total area under
-        the Gaussian curve, useful for fitting probability distributions
-        or particle count distributions.
-        """
-        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -213,21 +204,25 @@ class GaussianLn(FitFunction):
     Fits a Gaussian in logarithmic space where :math:`\ln(x)` follows
     a normal distribution.
 
+    Parameters
+    ----------
+    **kwargs
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
+
+    Notes
+    -----
+    xobs must be positive for log transformation.
+    This distribution is commonly used for particle size distributions
+    and velocity distributions in solar wind where values are
+    positively skewed.
+
     References
     ----------
     .. [1] https://mathworld.wolfram.com/LogNormalDistribution.html
     """
 
     def __init__(self, xobs, yobs, **kwargs):
-        """Initialize log-normal Gaussian fit.
-
-        Notes
-        -----
-        xobs must be positive for log transformation.
-        This distribution is commonly used for particle size distributions
-        and velocity distributions in solar wind where values are
-        positively skewed.
-        """
         super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
 
