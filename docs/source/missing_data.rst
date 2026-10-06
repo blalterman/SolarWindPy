@@ -8,13 +8,18 @@ missing value as NaN and never as zero, with one rule at each of two levels.
 Within a species
 ----------------
 
-A species' value at a time needs every component it is built from. If any
-component is missing, that species' value is NaN at that time. A scalar thermal
-speed, temperature or pressure needs both the parallel and the perpendicular
-component, because one component alone does not describe the distribution. A
-species' differential flow speed in
-:py:meth:`~solarwindpy.core.plasma.Plasma.pdynamic` needs all three velocity
-components, and the field strength in
+A species' moments stand or fall together. If any of its density, velocity
+components or thermal-speed components is missing at a time, every measurement
+of that species is invalid then. When the data are set,
+:py:class:`~solarwindpy.core.plasma.Plasma` masks that species to NaN at that
+time and logs a warning with the number of times it masked. A species therefore
+never has a density without a velocity, or one thermal-speed component without
+the other.
+
+A species' value at a time needs every component it is built from. A scalar
+thermal speed, temperature or pressure needs both the parallel and the
+perpendicular component, because one component alone does not describe the
+distribution. The field strength in
 :py:meth:`~solarwindpy.core.plasma.Plasma.afsq` needs all three field
 components.
 
@@ -23,14 +28,16 @@ Across species
 
 A total over species, such as ``"a+p1"``, uses the species present at that time.
 It is NaN only when no species is present. Protons measured without alphas still
-give a total temperature and a total pressure.
+give a total density, temperature and pressure. Weighted means, such as the
+center-of-mass velocity (:py:meth:`~solarwindpy.core.plasma.Plasma.velocity`)
+and the electron velocity
+(:py:meth:`~solarwindpy.core.plasma.Plasma.estimate_electrons`), likewise
+average over the species present.
 
-Weighted means follow the same rule. In the center-of-mass velocity
-(:py:meth:`~solarwindpy.core.plasma.Plasma.velocity`) and the electron velocity
-(:py:meth:`~solarwindpy.core.plasma.Plasma.estimate_electrons`), a species
-without a velocity at a time leaves the density weights as well as the weighted
-sum. The electron density still counts every species with a density, because
-quasi-neutrality does not depend on the ion velocities.
+A quantity built from a pair of species needs both. The combined thermal speed
+and the mass-density ratio in :py:meth:`~solarwindpy.core.plasma.Plasma.nuc`,
+and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdynamic`, are
+NaN at a time when either species is missing.
 
 Thermal speeds do not add across species, so
 :py:meth:`~solarwindpy.core.plasma.Plasma.thermal_speed` raises for a total such
@@ -40,7 +47,8 @@ The two levels
 --------------
 
 For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.temperature`),
-``ok`` marks a value present and ``NaN`` a value missing:
+``ok`` marks a measured value present and ``NaN`` one missing. A species missing
+either component is masked as a whole at that time, so its result there is NaN:
 
 .. code-block:: text
 

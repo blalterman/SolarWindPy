@@ -2706,17 +2706,18 @@ def test_velocity_species_sum_weights_only_species_with_a_velocity():
     assert v.iloc[3].isna().all()
 
 
-def test_estimate_electrons_weights_only_species_with_a_velocity():
-    r"""v_e weights z_s n_s over species with a velocity; n_e counts every density.
+def test_estimate_electrons_sums_over_the_valid_species():
+    r"""n_e and v_e sum z_s n_s over the species valid at each time.
 
     p1: 4 cm^-3 at (400, 0, 0); alphas: 0.5 cm^-3 (z = 2) at (500, 0, 0) km/s, so
     n_e = 4 + 2 * 0.5 = 5 cm^-3. By hand: row 0 v_e = (1600 + 500) / 5 = 420.
-    Row 1 alphas have a density but no velocity: n_e stays 5 (quasi-neutrality)
-    and v_e = 1600 / 4 = 400; keeping the alpha weight gives 1600 / 5 = 320.
+    Row 1 alphas have a density but no velocity, so per the author the alphas are
+    invalid there (docs page `missing_data`): n_e = 4 and v_e = 1600 / 4 = 400.
+    Counting the alpha density gives n_e = 5; also weighting it gives v_e = 320.
     Row 2 has no species, so n_e and v_e are NaN.
 
-    ON FAILURE: the code is wrong, unless the author revises the across-species
-    missing-data rule (docs page `missing_data`).
+    ON FAILURE: the code is wrong, unless the author revises the species-validity
+    or across-species missing-data rule (docs page `missing_data`).
     """
     nan3 = (np.nan, np.nan, np.nan)
     rows = [
@@ -2732,7 +2733,7 @@ def test_estimate_electrons_weights_only_species_with_a_velocity():
     ]
     e = _hand_plasma(rows, "p1", "a").estimate_electrons()
 
-    assert e.n.iloc[:2].to_numpy() == exact([5.0, 5.0])
+    assert e.n.iloc[:2].to_numpy() == exact([5.0, 4.0])
     assert e.v.cartesian.loc[:, "x"].iloc[:2].to_numpy() == exact([420.0, 400.0])
     assert np.isnan(e.n.iloc[2])
     assert e.v.cartesian.iloc[2].isna().all()
@@ -2811,6 +2812,93 @@ def test_pdynamic_follows_the_two_level_missing_data_rule():
     m2q = p.pdynamic("p1", "p2", project_m2q=True)
     assert m2q.iloc[0] == exact(row0)
     assert m2q.iloc[1:].isna().all()
+
+
+def test_species_missing_any_moment_is_masked_at_that_time(caplog):
+    r"""A species missing n, a v component or a w component is NaN in every column then.
+
+    Row 0 holds complete protons and alphas. The alphas lack v_y on row 1, n on
+    row 2 and w_per on row 3; the protons are complete throughout. Per the author
+    (docs page `missing_data`), a species' moments stand or fall together, so the
+    alphas' n, v_x, v_y, v_z, w_par, w_per and w_scalar are all NaN on rows 1-3, the
+    protons are untouched, and one warning reports the alphas masked at 3 of 4
+    times. Without masking, the alpha density survives on rows 1 and 3.
+
+    ON FAILURE: the code is wrong, unless the author revises the species-validity
+    rule.
+    """
+    proton = (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+    rows = [
+        {"p1": proton, "a": (0.2, (450.0, 10.0, 20.0), 40.0, 50.0)},
+        {"p1": proton, "a": (0.2, (450.0, np.nan, 20.0), 40.0, 50.0)},
+        {"p1": proton, "a": (np.nan, (450.0, 10.0, 20.0), 40.0, 50.0)},
+        {"p1": proton, "a": (0.2, (450.0, 10.0, 20.0), 40.0, np.nan)},
+    ]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = _hand_plasma(rows, "a", "p1")
+
+    alpha = p.data.xs("a", axis=1, level="S")
+    assert alpha.shape[1] == 7  # n, v x/y/z, w par/per/scalar
+    assert alpha.iloc[0].to_numpy() == exact(
+        [0.2, 450.0, 10.0, 20.0, 40.0, 50.0, np.sqrt((40.0**2 + 2 * 50.0**2) / 3)]
+    )
+    assert alpha.iloc[1:].isna().all().all()
+    assert p.data.xs("p1", axis=1, level="S").notna().all().all()
+
+    masked = [r.getMessage() for r in caplog.records if "masked species" in r.message]
+    assert masked == [
+        "masked species a at 3 of 4 times: a density, velocity or thermal speed "
+        "component is missing"
+    ]
+
+
+def test_density_totals_are_nan_where_no_species_is_present():
+    r"""`n("a+p1")` and `rho("a+p1")` are partial sums, NaN where no species is present.
+
+    Row 0 has protons only at 5 cm^-3; row 1 has no species. Per the author, row 0
+    of each total is the proton value alone, n = 5 cm^-3 and rho = 5 m_p cm^-3 (the
+    mass-density unit), and row 1 is NaN. A NaN-skipping sum gives 0 on row 1.
+
+    ON FAILURE: the code is wrong, unless the author revises the across-species
+    missing-data rule (docs page `missing_data`).
+    """
+    p = _hand_plasma(
+        [
+            {"a": _MISSING_ROW, "p1": _PROTON_ROW},
+            {"a": _MISSING_ROW, "p1": _MISSING_ROW},
+        ],
+        "a",
+        "p1",
+    )
+    for total in (p.number_density("a+p1"), p.mass_density("a+p1")):
+        assert total.iloc[0] == exact(5.0)
+        assert np.isnan(total.iloc[1])
+
+
+def test_pair_quantities_are_nan_where_either_species_is_missing():
+    r"""`nuc` and `pdynamic(project_m2q=True)` need both species at a time.
+
+    Row 0 is `NUC_ROWS[0]`; on row 1 the alphas lack w_par, so per the author
+    the alphas are invalid there and every pair quantity is NaN: `nuc`'s
+    W_ab = sqrt(w_a^2 + w_b^2) and rho_a / rho_b, and the reduced mass
+    rho_a rho_b / (rho_a + rho_b) in `pdynamic` (docs page `missing_data`). Row 0
+    stays finite. Without species masking, `pdynamic` ignores the missing w_par
+    and returns a number on row 1. Once the alphas are masked, other factors (lnL,
+    the drift) also carry their NaN, so this pins the result rather than
+    isolating the pair sums.
+
+    ON FAILURE: the code is wrong, unless the author revises the pair rule.
+    """
+    rows = [NUC_ROWS[0], {**NUC_ROWS[0], "a": (0.2, (450.0, 0.0, 0.0), np.nan, 40.0)}]
+    p = _hand_plasma(rows, "a", "p1")
+
+    for result in (
+        p.nuc("a", "p1", both_species=False),
+        p.nuc("a", "p1", both_species=True),
+        p.pdynamic("a", "p1", project_m2q=True),
+    ):
+        assert np.isfinite(result.iloc[0])
+        assert np.isnan(result.iloc[1])
 
 
 def test_heat_flux_matches_its_docstring_formula():
