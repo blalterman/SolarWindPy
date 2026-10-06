@@ -353,6 +353,18 @@ Author decisions after PR #494's review (the missing-data rule, two levels):
 - Document the rule once, with an ASCII diagram of the two levels for temperature and
   pressure, and point the `temperature` and `pth` docstrings to it.
 
+Author decisions after the second #494 review:
+
+- A species' moments stand or fall together: if any of its density, velocity components or
+  thermal-speed components is missing at a time, every measurement of that species at that
+  time is invalid. `Plasma` masks the species to NaN at that time when the data are set and
+  logs how many times it masked. A density without a velocity cannot occur afterwards.
+- A pair quantity needs both species: `nuc`'s combined thermal speed and mass-density ratio
+  and `pdynamic`'s reduced mass are NaN when either species is missing (`skipna=False`).
+- `number_density` and `mass_density` totals are NaN when no species is present (`min_count=1`).
+- `afsq` and `caani` docstrings state how the pressure enters; `afsq` may return to
+  `pth` since species masking makes the two forms equal.
+
 ### p0-simplify
 
 OWNS: solarwindpy/fitfunctions/ (all modules, CONTRIBUTING.md), tests/fitfunctions/, CLAUDE.md, CHANGELOG.md
@@ -374,6 +386,9 @@ parent, not exported, that holds the reference hinge, the estimate-or-reference 
 in `p0`, and the shared docstring text (through docstring inheritance). Each child writes
 only its model, its estimate, and its parameter translation; `HingeMax` shares what it can
 with `HingeMin`. The module-level `_author_start` and the five copied docstring paragraphs go.
+
+Author decision after the second #496 review: fix the class docstrings of every `FitFunction`
+subclass losing their Parameters section through docstring inheritance, in this PR.
 
 ### warning-fixes
 
