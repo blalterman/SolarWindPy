@@ -192,6 +192,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   point of these models ("Residuals are not finite in the initial point"). `HingeMax`
   has no reference start yet: in that case its `p0` raises `NotImplementedError`, which
   `make_fit` returns under `return_exception=True`; pass `p0=` to fit it.
+- The six hinge classes subclass one parent, `solarwindpy.fitfunctions.hinge.Hinge` (not
+  exported), which holds the reference hinge, the estimate-or-reference control flow of
+  `p0` and the shared help text; each class writes its model, its estimate and its
+  translation of the reference hinge. `HingeMax` subclasses `HingeMin`, differing in its
+  model (`np.maximum`) and in having no reference start. Each class's `p0` help text
+  describes its own estimate and translation.
 - `make_fit` reads the class's `p0` only when the caller passes no `p0=`.
 - `GaussianLn.p0` estimates in ln x, the space of its model: `m` and `s` are the
   y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).

@@ -104,6 +104,14 @@ Initial parameter guesses MUST be data-driven. Hardcoded domain values are prohi
   logs a warning that the data gave no estimate and returns a reference start that the
   class documents (the hinge classes return the author's reference hinge). A class with
   no reference start yet raises `NotImplementedError` there (`HingeMax`).
+- A new hinge model subclasses `Hinge` in `hinge.py` (not exported). `Hinge.p0` holds
+  the estimate-or-reference control flow and `Hinge` the reference hinge; the subclass
+  writes `function`, `TeX_function`, `_estimate` (its estimate, in `argnames` order, NaN
+  or infinite where the data give none) and `_reference_start` (the reference hinge in
+  its parameters). Docstring inheritance does not merge property docstrings, so
+  `Hinge.__init_subclass__` builds the subclass's `p0` docstring from the prose of
+  `_estimate` and `_reference_start` and `Hinge.p0`'s sections: write those two
+  docstrings as prose, without numpydoc sections.
 - Never return NaN or infinity, and never substitute a stand-in value for an estimate
   that failed unless the docstring documents it as the estimate. `make_fit` rejects a
   non-finite guess with a `ValueError` naming the class and parameter.

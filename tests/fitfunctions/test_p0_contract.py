@@ -11,6 +11,7 @@ NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
 ``FitFunction.p0``'s docstring.
 """
 
+import inspect
 import logging
 import subprocess
 import sys
@@ -29,6 +30,7 @@ from solarwindpy.fitfunctions.core import FitFunction, InsufficientDataError
 from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
 from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.hinge import (
+    Hinge,
     HingeAtPoint,
     HingeMax,
     HingeMin,
@@ -451,6 +453,69 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     got = fit.make_fit(return_exception=True, p0=[1.0, 0.0, 0.5, 2.0])
     assert not isinstance(got, NotImplementedError), got
     assert fit.initial_guess_info is None
+
+
+def _concrete_hinge_classes():
+    """Every concrete class below ``Hinge``, found by walking its subclasses."""
+    found, stack = set(), [Hinge]
+    while stack:
+        for sub in stack.pop().__subclasses__():
+            found.add(sub)
+            stack.append(sub)
+    return {cls for cls in found if not inspect.isabstract(cls)}
+
+
+def test_the_hinge_cases_cover_every_hinge_class():
+    """``HINGE_IMPOSSIBLE`` has one row for each concrete ``Hinge`` subclass.
+
+    Guards the parametrized hinge tests against passing vacuously, and puts a
+    new hinge class under them.
+
+    ON FAILURE: a hinge class has no impossible-estimate row, or one of the six
+    no longer subclasses Hinge; add the row, or restore the parent.
+    """
+    covered = {p.values[0] for p in HINGE_IMPOSSIBLE}
+    six = {HingeSaturation, TwoLine, Saturation, HingeMin, HingeMax, HingeAtPoint}
+    assert covered == _concrete_hinge_classes() == six, covered
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
+def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
+    cls, x, y, kwargs
+):
+    """Each hinge class subclasses ``Hinge``; with no estimate ``p0`` is its start.
+
+    The start is the hand translation in ``HINGE_START``; HingeMax has none and
+    raises NotImplementedError.
+
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge
+    or chose a HingeMax start; then update ``HINGE_START``.
+    """
+    assert issubclass(cls, Hinge), cls.__mro__
+    fit = cls(x, y, **kwargs)
+    if cls is HingeMax:
+        with pytest.raises(NotImplementedError, match="no reference start"):
+            fit.p0
+    else:
+        assert fit.p0 == exact(HINGE_START[cls]), fit.p0
+
+
+@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
+def test_each_hinge_p0_docstring_has_its_estimate_and_the_shared_sections(cls):
+    """A hinge class's ``p0`` docstring is its own estimate text plus Hinge's.
+
+    docstring-inheritance does not merge property docstrings, so
+    ``Hinge.__init_subclass__`` builds each one. It starts with the class's
+    ``_estimate`` prose and keeps ``Hinge.p0``'s Returns, Raises and Notes.
+
+    ON FAILURE: the code is wrong; a hinge class's help() and API page lost
+    its estimate description or the shared contract.
+    """
+    doc = cls.p0.__doc__
+    assert doc.startswith(inspect.getdoc(cls._estimate)), doc
+    assert inspect.getdoc(cls._reference_start) in doc, doc
+    for section in ("Returns", "Raises", "Notes"):
+        assert f"\n{section}\n" in doc, (section, doc)
 
 
 S = np.sqrt(0.5)
