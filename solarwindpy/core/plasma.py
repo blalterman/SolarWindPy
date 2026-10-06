@@ -694,8 +694,9 @@ class Plasma(base.Base):
             .multiply(coeff, axis=1, level="C")
         )
 
-        # min_count=1: a time with both parts missing is NaN, not 0.
-        w = w.T.groupby("S").sum(min_count=1).T.pow(0.5)
+        # skipna=False: within a species, a time missing either part has no
+        # scalar thermal speed (docs page `missing_data`).
+        w = w.T.groupby("S").sum(skipna=False).T.pow(0.5)
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
@@ -823,7 +824,8 @@ class Plasma(base.Base):
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            w = w.T.groupby(level="C").sum().T
+            # min_count=1: a time where the species is missing stays NaN.
+            w = w.T.groupby(level="C").sum(min_count=1).T
 
         return w
 
@@ -846,6 +848,12 @@ class Plasma(base.Base):
         -------
         pth: pd.Series or pd.DataFrame
             See Parameters for more info.
+
+        Notes
+        -----
+        A species missing a thermal speed component at a time has no scalar
+        pressure then, and a species sum adds the species present, NaN only
+        where none is: see :doc:`/missing_data`.
         """
         slist = self._chk_species(*species)
         include_dynamic = False
@@ -857,7 +865,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("C").sum().T
+            pth = pth.T.groupby("C").sum(min_count=1).T
         return pth
 
     def temperature(self, *species):
@@ -875,6 +883,12 @@ class Plasma(base.Base):
         -------
         temp: pd.Series or pd.DataFrame
             See Parameters for more info.
+
+        Notes
+        -----
+        A species missing a thermal speed component at a time has no scalar
+        temperature then, and a species sum adds the species present, NaN only
+        where none is: see :doc:`/missing_data`.
         """
         slist = self._chk_species(*species)
         temp = {s: self.ions.loc[s].temperature for s in slist}
@@ -882,7 +896,7 @@ class Plasma(base.Base):
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            temp = temp.T.groupby("C").sum().T
+            temp = temp.T.groupby("C").sum(min_count=1).T
         return temp
 
     def beta(self, *species):
@@ -1021,11 +1035,36 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                rv = v.multiply(rhos, axis=1, level="S").T.groupby(level="C").sum().T
-                v = rv.divide(rhos.sum(axis=1), axis=0)
-                v = vector.Vector(v)
+                v = vector.Vector(self._species_weighted_mean(v, rhos))
 
         return v
+
+    @staticmethod
+    def _species_weighted_mean(vectors, weights):
+        r"""Weighted mean of vectors over the species present at each time.
+
+        A species is present at a time when its weight and every vector
+        component are; one that is absent leaves both the weighted sum and the
+        sum of weights. A time with no species present is NaN. See
+        :doc:`/missing_data`.
+
+        Parameters
+        ----------
+        vectors : pd.DataFrame
+            Cartesian components with column levels ``("S", "C")``.
+        weights : pd.DataFrame
+            One column per species, e.g. mass or charge density.
+
+        Returns
+        -------
+        mean : pd.DataFrame
+            One column per component.
+        """
+        present = vectors.notna().T.groupby(level="S").all().T & weights.notna()
+        weights = weights.where(present)
+        weighted = vectors.multiply(weights, axis=1, level="S")
+        total = weighted.T.groupby(level="C").sum(min_count=1).T
+        return total.divide(weights.sum(axis=1, min_count=1), axis=0)
 
     def v(self, *species, project_m2q=False):
         r"""Shortcut to `velocity`."""
@@ -1107,14 +1146,18 @@ species: {}
                 names="S",
                 sort=True,
             )
-            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum().T
+            # Within a species, a missing component makes dv^2 NaN; across
+            # species, the sum keeps the species present (docs `missing_data`).
+            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum(skipna=False).T
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-            pdv = dvsq_rho_i.sum(axis=1)
+            pdv = dvsq_rho_i.sum(axis=1, min_count=1)
 
         elif len(stuple) == 2:
             # Can only have 2 species with `project_m2q`.
             dvsq = (
-                self.dv(*stuple, project_m2q=project_m2q).cartesian.pow(2).sum(axis=1)
+                self.dv(*stuple, project_m2q=project_m2q)
+                .cartesian.pow(2)
+                .sum(axis=1, skipna=False)
             )
             rho_i = self.mass_density(*stuple)
             mu = rho_i.product(axis=1).divide(rho_i.sum(axis=1), axis=0)
@@ -1222,27 +1265,22 @@ species: {}
                 "that dynamic pressure is probably not useful."
             )
 
-        # The following is used to specifiy whether column levels
-        # need to be aligned when multiple species are present.
-        multi_species = len(species) > 1
+        stuple = self._chk_species(*species)
 
-        bsq = self.bfield.cartesian.pow(2.0).sum(axis=1)
+        # A missing field component leaves B^2 unknown.
+        bsq = self.bfield.cartesian.pow(2.0).sum(axis=1, skipna=False)
 
-        pth = self.pth(*species)
-        pth = pth.drop("scalar", axis=1)
+        # p_per - p_par for each species: NaN where either component is
+        # missing. A species sum then adds the species present, NaN only where
+        # none is (docs `missing_data`). Dynamic pressure, if ever included,
+        # would be subtracted here with the species aligned.
+        pth = pd.concat(
+            {s: self.ions.loc[s].pth for s in stuple}, axis=1, names=["S"], sort=True
+        )
+        dp = pth.xs("per", axis=1, level="C").subtract(pth.xs("par", axis=1, level="C"))
 
-        sum_coeff = pd.Series({"per": 1, "par": -1})
-        dp = pth.multiply(sum_coeff, axis=1, level="C" if multi_species else None)
-
-        # The following level kwarg controls returning a DataFrame
-        # of the various species or a single result for one species.
-        # My guess is that following this line, we'd insert the subtraction
-        # of the dynamic pressure with the appropriate alignment of the
-        # species as necessary.
-        if multi_species:
-            dp = dp.T.groupby(level="S").sum().T
-        else:
-            dp = dp.sum(axis=1)
+        if len(species) == 1:
+            dp = dp.sum(axis=1, min_count=1)
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
@@ -1635,16 +1673,16 @@ species: {}
             vi = vi.cartesian
             niqi = ni.multiply(qi)
             ne = niqi
-            niqivi = vi.multiply(niqi, axis=0)
+            ve = vi.multiply(niqi, axis=0).divide(ne, axis=0)
         else:
             vi = pd.concat(
                 vi.apply(lambda x: x.cartesian).to_dict(), axis=1, names="S", sort=True
             )
             niqi = ni.multiply(qi, axis=1, level="S")
-            ne = niqi.sum(axis=1)
-            niqivi = vi.multiply(niqi, axis=1, level="S").T.groupby(level="C").sum().T
-
-        ve = niqivi.divide(ne, axis=0)
+            # Quasi-neutrality counts every species with a density; the
+            # zero-current velocity weights only species with a velocity.
+            ne = niqi.sum(axis=1, min_count=1)
+            ve = self._species_weighted_mean(vi, niqi)
 
         # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
         wp = self.w(tkw).loc[:, "scalar"]

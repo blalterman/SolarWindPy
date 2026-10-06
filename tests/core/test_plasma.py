@@ -2540,26 +2540,277 @@ def test_Wk_species_sum_is_nan_where_no_species_is_present():
         assert np.isnan(total.iloc[1])
 
 
-def test_scalar_thermal_speed_is_nan_where_par_and_per_are_missing():
-    r"""`w.scalar` is NaN on a row whose parallel and perpendicular parts are both missing.
+def test_scalar_thermal_speed_is_nan_where_any_component_is_missing():
+    r"""`w.scalar` is NaN on a row missing w_par, w_per, or both.
 
     Row 0 has w_par = 10 and w_per = 110 km/s, so the scalar moment identity
     w^2 = (w_par^2 + 2 w_per^2) / 3 gives (100 + 24200) / 3 = 8100, w = 90 km/s by
-    hand. Row 1 has neither part; per the author, an empty sum is NaN, not 0.
+    hand. Rows 1-3 lack w_per, w_par, and both. Per the author, one component
+    alone is unphysical, so within a species any missing component gives NaN
+    (docs page `missing_data`). A NaN-skipping sum gives sqrt(100 / 3) on row 1,
+    sqrt(24200 / 3) on row 2, and 0 on row 3.
 
-    ON FAILURE: the code is wrong.
+    ON FAILURE: the code is wrong, unless the author revises the within-species
+    missing-data rule.
     """
+    v = (400.0, 0.0, 0.0)
     p = _hand_plasma(
         [
-            {"p1": (5.0, (400.0, 0.0, 0.0), 10.0, 110.0)},
-            {"p1": (5.0, (400.0, 0.0, 0.0), np.nan, np.nan)},
+            {"p1": (5.0, v, 10.0, 110.0)},
+            {"p1": (5.0, v, 10.0, np.nan)},
+            {"p1": (5.0, v, np.nan, 110.0)},
+            {"p1": (5.0, v, np.nan, np.nan)},
         ],
         "p1",
     )
     w = p.data.xs(("w", "scalar", "p1"), axis=1)
 
     assert w.iloc[0] == exact(90.0)
-    assert np.isnan(w.iloc[1])
+    assert np.isnan(w.iloc[1:]).all()
+
+
+def test_thermal_speed_of_one_species_stays_nan_where_it_is_missing():
+    r"""`thermal_speed("p1")` keeps a missing row NaN in every component.
+
+    Row 0 is isotropic at 30 km/s; row 1 has no thermal speed. A NaN-skipping
+    sum over the one species turns row 1 into 0.
+
+    ON FAILURE: the code is wrong, unless the author revises the missing-data
+    rule (docs page `missing_data`).
+    """
+    p = _hand_plasma(
+        [{"p1": _PROTON_ROW}, {"p1": (5.0, (400.0, 0.0, 0.0), np.nan, np.nan)}],
+        "p1",
+    )
+    w = p.thermal_speed("p1")
+
+    assert w.loc[:, ["par", "per", "scalar"]].iloc[0].to_numpy() == exact([30.0] * 3)
+    assert w.loc[:, ["par", "per", "scalar"]].iloc[1].isna().all()
+
+
+# The temperature and pressure layout of the docs page `missing_data`: protons
+# isotropic at 30 km/s, alphas isotropic at 40 km/s.
+#   t0: both species complete           -> total = p1 + a
+#   t1: p1 lacks w_per                  -> total = a only
+#   t2: a lacks both components         -> total = p1 only
+#   t3: each species lacks w_par        -> total NaN
+_TWO_LEVEL_ROWS = [
+    {
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        "a": (0.2, (450.0, 0.0, 0.0), 40.0, 40.0),
+    },
+    {
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, np.nan),
+        "a": (0.2, (450.0, 0.0, 0.0), 40.0, 40.0),
+    },
+    {
+        "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        "a": (0.2, (450.0, 0.0, 0.0), np.nan, np.nan),
+    },
+    {
+        "p1": (5.0, (400.0, 0.0, 0.0), np.nan, 30.0),
+        "a": (0.2, (450.0, 0.0, 0.0), np.nan, 40.0),
+    },
+]
+
+
+def _assert_two_level_scalar(each, total, expected):
+    """Check per-species and "a+p1" scalar values against the `_TWO_LEVEL_ROWS` layout."""
+    for s, rows in (("p1", [0, 2]), ("a", [0, 1])):
+        col = each.loc[:, ("scalar", s)]
+        assert col.iloc[rows].to_numpy() / expected[s] == printed(
+            1.0, decimals=CODATA_JOINT_DECIMALS
+        )
+        assert col.drop(col.index[rows]).isna().all()
+
+    scalar = total.loc[:, "scalar"]
+    hand = np.array(
+        [expected["p1"] + expected["a"], expected["a"], expected["p1"]]
+    )  # species present per row
+    assert scalar.iloc[:3].to_numpy() / hand == printed(
+        1.0, decimals=CODATA_JOINT_DECIMALS
+    )
+    assert np.isnan(scalar.iloc[3])
+    # No species has w_par at t3, so the total parallel component is NaN, not 0.
+    assert np.isnan(total.loc[:, "par"].iloc[3])
+
+
+def test_temperature_follows_the_two_level_missing_data_rule():
+    r"""Per-species T is NaN where a component is missing; "a+p1" sums the species present.
+
+    With m w^2 = 2 k T, isotropic protons at 30 km/s have T_p1 = m_p (30 km/s)^2 / 2k
+    and alphas at 40 km/s T_a = m_alpha (40 km/s)^2 / 2k, in units of 1e5 K. Per the
+    author (docs page `missing_data`): t0 gives T_p1 + T_a, t1 gives T_a alone, t2
+    T_p1 alone, t3 NaN. A NaN-skipping sum instead forms a scalar from one
+    component and turns t3's empty total into 0.
+
+    ON FAILURE: the code is wrong, unless the author revises the two-level
+    missing-data rule.
+    """
+    p = _hand_plasma(_TWO_LEVEL_ROWS, "a", "p1")
+    expected = {
+        "p1": M_P * (30.0 * KM) ** 2 / (2.0 * constants.k) / 1e5,
+        "a": M_ALPHA * (40.0 * KM) ** 2 / (2.0 * constants.k) / 1e5,
+    }
+
+    _assert_two_level_scalar(p.temperature("a", "p1"), p.temperature("a+p1"), expected)
+    one = p.temperature("p1").loc[:, "scalar"]
+    assert one.iloc[[1, 3]].isna().all()
+
+
+def test_pth_follows_the_two_level_missing_data_rule():
+    r"""Per-species p_th is NaN where a component is missing; "a+p1" sums the species present.
+
+    p_th = rho w^2 / 2: protons at 5 cm^-3 and 30 km/s, alphas at 0.2 cm^-3 and
+    40 km/s, in units of 1e-12 Pa. The rows follow the docs page `missing_data`:
+    t0 gives p_p1 + p_a, t1 p_a alone, t2 p_p1 alone, t3 NaN.
+
+    ON FAILURE: the code is wrong, unless the author revises the two-level
+    missing-data rule.
+    """
+    p = _hand_plasma(_TWO_LEVEL_ROWS, "a", "p1")
+    expected = {
+        "p1": 0.5 * 5.0 * PER_CC * M_P * (30.0 * KM) ** 2 / 1e-12,
+        "a": 0.5 * 0.2 * PER_CC * M_ALPHA * (40.0 * KM) ** 2 / 1e-12,
+    }
+
+    _assert_two_level_scalar(p.pth("a", "p1"), p.pth("a+p1"), expected)
+    one = p.pth("p1").loc[:, "scalar"]
+    assert one.iloc[[1, 3]].isna().all()
+
+
+def test_velocity_species_sum_weights_only_species_with_a_velocity():
+    r"""`velocity("p1+p2")` is the mass-weighted mean over species with a full velocity.
+
+    p1: 3 cm^-3 at (400, 0, 0); p2: 1 cm^-3 at (600, 0, 0) km/s, both of proton
+    mass. By hand: row 0 (3 * 400 + 600) / 4 = 450; row 1 (p2 lacks v_y) and row 2
+    (p2 has a density but no velocity) leave p2 out of both sums, giving 400;
+    row 3 has no velocity, giving NaN. Keeping p2's density in the weights gives
+    300 on row 2 and 0 on row 3; keeping p2's v_x on row 1 gives 450.
+
+    ON FAILURE: the code is wrong, unless the author revises the across-species
+    missing-data rule (docs page `missing_data`).
+    """
+    nan3 = (np.nan, np.nan, np.nan)
+    p1 = (3.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+    rows = [
+        {"p1": p1, "p2": (1.0, (600.0, 0.0, 0.0), 30.0, 30.0)},
+        {"p1": p1, "p2": (1.0, (600.0, np.nan, 0.0), 30.0, 30.0)},
+        {"p1": p1, "p2": (1.0, nan3, 30.0, 30.0)},
+        {"p1": (3.0, nan3, 30.0, 30.0), "p2": (1.0, nan3, 30.0, 30.0)},
+    ]
+    v = _hand_plasma(rows, "p1", "p2").velocity("p1+p2").cartesian
+
+    assert v.loc[:, "x"].iloc[:3].to_numpy() == exact([450.0, 400.0, 400.0])
+    assert (v.loc[:, ["y", "z"]].iloc[:3].to_numpy() == 0.0).all()
+    assert v.iloc[3].isna().all()
+
+
+def test_estimate_electrons_weights_only_species_with_a_velocity():
+    r"""v_e weights z_s n_s over species with a velocity; n_e counts every density.
+
+    p1: 4 cm^-3 at (400, 0, 0); alphas: 0.5 cm^-3 (z = 2) at (500, 0, 0) km/s, so
+    n_e = 4 + 2 * 0.5 = 5 cm^-3. By hand: row 0 v_e = (1600 + 500) / 5 = 420.
+    Row 1 alphas have a density but no velocity: n_e stays 5 (quasi-neutrality)
+    and v_e = 1600 / 4 = 400; keeping the alpha weight gives 1600 / 5 = 320.
+    Row 2 has no species, so n_e and v_e are NaN.
+
+    ON FAILURE: the code is wrong, unless the author revises the across-species
+    missing-data rule (docs page `missing_data`).
+    """
+    nan3 = (np.nan, np.nan, np.nan)
+    rows = [
+        {
+            "p1": (4.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+            "a": (0.5, (500.0, 0.0, 0.0), 40.0, 40.0),
+        },
+        {
+            "p1": (4.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+            "a": (0.5, nan3, 40.0, 40.0),
+        },
+        {"p1": _MISSING_ROW, "a": _MISSING_ROW},
+    ]
+    e = _hand_plasma(rows, "p1", "a").estimate_electrons()
+
+    assert e.n.iloc[:2].to_numpy() == exact([5.0, 5.0])
+    assert e.v.cartesian.loc[:, "x"].iloc[:2].to_numpy() == exact([420.0, 400.0])
+    assert np.isnan(e.n.iloc[2])
+    assert e.v.cartesian.iloc[2].isna().all()
+
+
+def _afsq_term(n, wpar, wper, b=5.0):
+    """mu0 (p_per - p_par) / B^2 for one proton-mass species, p = rho w^2 / 2 (SI)."""
+    dp = 0.5 * n * PER_CC * M_P * ((wper * KM) ** 2 - (wpar * KM) ** 2)
+    return constants.mu_0 * dp / (b * 1e-9) ** 2
+
+
+def test_afsq_follows_the_two_level_missing_data_rule():
+    r"""AF^2 = 1 + mu0 sum_s (p_per,s - p_par,s) / B^2 over species with both components.
+
+    p1: 5 cm^-3, w_par = 30, w_per = 40; p2: 1 cm^-3, w_par = 50, w_per = 60 km/s;
+    B = 5 nT. Row 0 holds both; row 1 p2 lacks w_per; row 2 neither species has a
+    thermal speed; row 3 lacks B_z. By hand, row 0 is 1 + t_p1 + t_p2 and row 1 is
+    1 + t_p1, with t_s = mu0 rho_s (w_per^2 - w_par^2) / 2B^2. Rows 2 and 3 are NaN.
+    A NaN-skipping sum subtracts p2's p_par on row 1, gives 1 on row 2, and uses
+    B_x^2 + B_y^2 on row 3.
+
+    ON FAILURE: the code is wrong, unless the author revises the two-level
+    missing-data rule (docs page `missing_data`).
+    """
+    v = (400.0, 0.0, 0.0)
+    p1 = (5.0, v, 30.0, 40.0)
+    p2 = (1.0, v, 50.0, 60.0)
+    rows = [
+        {"p1": p1, "p2": p2},
+        {"p1": p1, "p2": (1.0, v, 50.0, np.nan)},
+        {"p1": (5.0, v, np.nan, np.nan), "p2": (1.0, v, np.nan, np.nan)},
+        {"p1": p1, "p2": p2},
+    ]
+    b = [(5.0, 0.0, 0.0)] * 3 + [(5.0, 0.0, np.nan)]
+    p = _hand_plasma(rows, "p1", "p2", b=b)
+    t_p1, t_p2 = _afsq_term(5.0, 30.0, 40.0), _afsq_term(1.0, 50.0, 60.0)
+
+    total = p.afsq("p1+p2")
+    assert total.iloc[:2].to_numpy() == exact([1.0 + t_p1 + t_p2, 1.0 + t_p1])
+    assert total.iloc[2:].isna().all()
+
+    each = p.afsq("p1", "p2")
+    assert each.loc[:, "p1"].iloc[:2].to_numpy() == exact([1.0 + t_p1] * 2)
+    assert each.loc[:, "p2"].iloc[0] == exact(1.0 + t_p2)
+    assert each.loc[:, "p2"].iloc[1:].isna().all()
+
+
+def test_pdynamic_follows_the_two_level_missing_data_rule():
+    r"""p_dyn = 1/2 sum_s rho_s |v_s - v_cm|^2 over species with a full velocity.
+
+    p1: 3 cm^-3 at (400, 0, 0); p2: 1 cm^-3 at (600, 0, 0) km/s, both of proton
+    mass, so v_cm = 450 and sum rho dv^2 = 3 * 50^2 + 1 * 150^2 = 30000
+    m_p cm^-3 km^2 s^-2 on row 0. Row 1 p2 lacks v_y, so p2 drops out, v_cm = 400
+    and p_dyn = 0. Row 2 has no velocity: NaN. With `project_m2q` the two-body
+    form 1/2 mu |v_1 - v_2|^2, mu = 3/4 m_p cm^-3, gives the same row 0 and NaN on
+    row 1. A NaN-skipping sum keeps p2's v_x on row 1 and gives 0 on row 2.
+
+    ON FAILURE: the code is wrong, unless the author revises the two-level
+    missing-data rule (docs page `missing_data`).
+    """
+    nan3 = (np.nan, np.nan, np.nan)
+    p1 = (3.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+    rows = [
+        {"p1": p1, "p2": (1.0, (600.0, 0.0, 0.0), 30.0, 30.0)},
+        {"p1": p1, "p2": (1.0, (600.0, np.nan, 0.0), 30.0, 30.0)},
+        {"p1": (3.0, nan3, 30.0, 30.0), "p2": (1.0, nan3, 30.0, 30.0)},
+    ]
+    p = _hand_plasma(rows, "p1", "p2")
+    row0 = 0.5 * 30000.0 * PER_CC * M_P * KM**2 / 1e-12  # in 1e-12 Pa
+
+    pdv = p.pdynamic("p1", "p2")
+    assert pdv.iloc[0] == exact(row0)
+    assert pdv.iloc[1] == 0.0
+    assert np.isnan(pdv.iloc[2])
+
+    m2q = p.pdynamic("p1", "p2", project_m2q=True)
+    assert m2q.iloc[0] == exact(row0)
+    assert m2q.iloc[1:].isna().all()
 
 
 def test_heat_flux_matches_its_docstring_formula():
