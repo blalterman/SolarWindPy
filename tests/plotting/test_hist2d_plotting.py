@@ -650,8 +650,8 @@ class TestAggregatedValues:
         h = Hist2D(x, y, nbins=[XEDGES, YEDGES])
         grid = h.agg().unstack("x")
 
-        assert grid.columns[0].right == pytest.approx(0.25)
-        assert grid.index[0].right == pytest.approx(0.2)
+        assert grid.columns[0].right == exact(XEDGES[1])
+        assert grid.index[0].right == exact(YEDGES[1])
         assert grid.iloc[0, 0] == 3
 
 

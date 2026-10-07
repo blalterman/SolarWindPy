@@ -4,11 +4,15 @@
 
 A test file that writes its own tolerance keyword (``rel``, ``abs``, ``rtol``
 or ``atol`` followed by ``=``, in code or in a comment) restates or bends the
-rule, so ``test_no_test_file_writes_a_tolerance_keyword`` fails on it. The
+rule, so ``test_no_test_file_writes_a_tolerance_keyword`` fails on it. A test
+file that calls ``approx`` with neither ``rel`` nor ``abs`` takes pytest's
+default tolerance without saying so, so
+``test_no_test_file_calls_approx_without_a_tolerance`` fails on it. The
 remaining tests show each helper accepts a value inside its tolerance and
 rejects one shifted past it.
 """
 
+import ast
 import re
 from pathlib import Path
 
@@ -52,6 +56,68 @@ def test_no_test_file_writes_a_tolerance_keyword():
         for n, line in tolerance_keywords(path.read_text(encoding="utf-8"))
     ]
     assert not found, "hand-written tolerances:\n" + "\n".join(found)
+
+
+def bare_approx_calls(text):
+    """Return ``(line number, line)`` for each ``approx`` call without a tolerance.
+
+    A call is bare when it passes neither ``rel`` nor ``abs``, so pytest's
+    default tolerance applies unstated. Calls are found in the syntax tree, so
+    ``approx`` inside a string or comment is not a call.
+    """
+    lines = text.splitlines()
+    found = []
+    for node in ast.walk(ast.parse(text)):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        name = (
+            func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+        )
+        if name != "approx":
+            continue
+        if {"rel", "abs"} & {k.arg for k in node.keywords}:
+            continue
+        found.append((node.lineno, lines[node.lineno - 1].strip()))
+    return sorted(found)
+
+
+def test_no_test_file_calls_approx_without_a_tolerance():
+    """No test file outside ``tests/tolerances.py`` calls a bare ``approx``.
+
+    ON FAILURE: replace the call with ``exact``, ``printed``, ``noise_free``
+    or ``assert_within_error_bars`` from ``tests/tolerances.py``; if none fits,
+    the author decides whether the rule gains a kind.
+    """
+    found = [
+        f"{path.relative_to(TESTS.parent)}:{n}: {line}"
+        for path in sorted(TESTS.rglob("*.py"))
+        if path != HELPER
+        for n, line in bare_approx_calls(path.read_text(encoding="utf-8"))
+    ]
+    assert not found, "approx with pytest's default tolerance:\n" + "\n".join(found)
+
+
+def test_scanner_finds_a_bare_approx():
+    """The scanner reports ``pytest.approx(y)`` and ``approx(y)`` with no tolerance.
+
+    ON FAILURE: the scanner no longer separates a bare ``approx`` from a call
+    that sets a tolerance or from text that only mentions ``approx``; fix
+    ``bare_approx_calls``.
+    """
+    qualified = "assert x == pytest.approx(y)"
+    imported = "assert x == approx([1.0, 2.0], nan_ok=True)"
+    multiline = "assert x == pytest.approx(\n    y,\n)"
+    clean = (
+        "assert x == exact(y)\n"
+        "assert x == pytest.approx(y, " + "rel" + "=1e-3)\n"
+        "assert x == pytest.approx(y, " + "abs" + "=1e-3)\n"
+        "s = 'pytest.approx(y)'  # pytest.approx(y)"
+    )
+    assert bare_approx_calls(qualified) == [(1, qualified)]
+    assert bare_approx_calls(imported) == [(1, imported)]
+    assert bare_approx_calls(multiline) == [(1, "assert x == pytest.approx(")]
+    assert bare_approx_calls(clean) == []
 
 
 @pytest.mark.parametrize("name", ["rel", "abs", "rtol", "atol"])
