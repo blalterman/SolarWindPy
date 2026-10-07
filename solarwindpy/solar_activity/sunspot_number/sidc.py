@@ -484,7 +484,13 @@ class SIDC(ActivityIndicator):
     run_normalization.__doc__ = ActivityIndicator.run_normalization.__doc__
 
     def cut_spec_by_ssn_band(self, key="ssn", dssn=2.0):
-        r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn."""
+        r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn.
+
+        Raises
+        ------
+        KeyError
+            If :attr:`interpolated` has no ``key`` column, naming it.
+        """
 
         dssn = float(dssn)
         if (key == "nssn") and (dssn >= 1):
@@ -498,24 +504,13 @@ class SIDC(ActivityIndicator):
         intervals = [pd.Interval(ll, rr) for ll, rr in zip(left, right)]
         intervals = pd.IntervalIndex(intervals, name="ssn_intervals")
         try:
-            cut = pd.cut(
-                self.interpolated.loc[:, key],  # TODO: Fix this generalized hack
-                intervals,
-            )
+            values = self.interpolated.loc[:, key]  # TODO: generalize this hack
         except KeyError as e:
-            if np.isnan(e.args[0]):
-                # Check that intervals don't overlap.
-                for ll, rr in zip(intervals[:-1], intervals[1:]):
-                    l_upper = ll.right
-                    r_lower = rr.left
-                    if l_upper > r_lower:
-                        msg = f"""Your intervals can't overlap.
-Interval 0: {ll}
-Interval 1: {rr}
-It causes a KeyError in `pd.cut`."""
-                        raise ValueError(msg)
-            else:
-                raise
+            raise KeyError(
+                f"`interpolated` has no column {key!r}; interpolate it with "
+                f"interpolate_data(..., key={key!r}) first."
+            ) from e
+        cut = pd.cut(values, intervals)
 
         cut.name = f"{key}_band"
         self._spec_by_ssn_band = cut

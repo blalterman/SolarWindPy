@@ -803,29 +803,16 @@ def test_normalized_bands_accept_widths_below_one_only(ramp_sidc):
     assert [(i.left, i.right) for i in intervals] == [(-0.5, 0.5)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason=(
-        "SIDC.cut_spec_by_ssn_band (solarwindpy/solar_activity/sunspot_number/"
-        "sidc.py) catches the KeyError for a column missing from "
-        "`interpolated` and calls np.isnan on its argument, the column name, "
-        "which raises TypeError \"ufunc 'isnan' not supported for the input "
-        'types"; remove this marker when a non-NaN KeyError is re-raised'
-    ),
-)
 def test_ssn_bands_for_a_column_never_interpolated_raise_key_error(ramp_sidc):
     """Banding ``nssn`` when only ``ssn`` was interpolated raises KeyError naming it.
 
-    The ``except KeyError`` branch re-raises any KeyError it does not handle
-    (its ``else: raise``), so the caller should see the missing column.
+    The message names the missing column and that ``interpolated`` lacks it.
 
-    ON FAILURE: (unexpected pass) the KeyError is re-raised; drop the xfail
-    marker.
+    ON FAILURE: the code is wrong.
     """
     ramp_sidc.run_normalization(norm_by="max")
     ramp_sidc.interpolate_data(at_days(50, 250), key="ssn")
-    with pytest.raises(KeyError, match="nssn"):
+    with pytest.raises(KeyError, match="`interpolated` has no column 'nssn'"):
         ramp_sidc.cut_spec_by_ssn_band(key="nssn", dssn=0.5)
 
 
