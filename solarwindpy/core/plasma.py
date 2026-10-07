@@ -139,22 +139,38 @@ class Plasma(base.Base):
         data : :class:`pandas.DataFrame`
             Contains the magnetic field and core ion moments. Columns are a
             three-level :class:`~pandas.MultiIndex` labelled ``("M", "C", "S")``
-            for measurement, component, and species. The index should contain
-            datetime information, for example ``Epoch`` when loading from a CDF
-            file.
+            for measurement, component, and species; the levels may come in
+            any order. The index should contain datetime information, for
+            example ``Epoch`` when loading from a CDF file. Rows out of time
+            order are sorted with a warning (see Notes).
         *species : str
             Iterable of species contained in ``data``.
         spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
-            Spacecraft trajectory and velocity information. If ``None``, the
-            Coulomb number :py:meth:`~Plasma.nc` method will raise a
-            :class:`ValueError`.
+            Spacecraft trajectory and velocity information, on the same time
+            index as ``data``, with column levels named exactly ``("M", "C")``
+            in that order. If ``None``, the Coulomb number
+            :py:meth:`~Plasma.nc` method will raise a :class:`ValueError`.
         auxiliary_data : :class:`pandas.DataFrame`, optional
             Additional measurements to carry with the plasma, for example data
-            quality flags. The column labelling scheme must match ``data``.
+            quality flags, on the same time index as ``data``. Its column
+            levels must be named exactly ``("M", "C", "S")`` in that order.
+
+        Raises
+        ------
+        TypeError
+            If ``data`` is not a :class:`pandas.DataFrame`.
 
         Notes
         -----
         Thermal speeds assume :math:`mw^2 = 2kT`.
+
+        The data are put in time order once, here, and every method may assume
+        sorted data afterwards. Rows earlier than the row before them are
+        counted and located in a warning, then sorted with a stable sort, so
+        rows sharing a timestamp keep their order. Spacecraft and auxiliary
+        data on the same index as ``data`` are sorted the same way. Repeated
+        timestamps log a warning and are kept. Missing timestamps (``NaT``)
+        log a warning and are kept; a sort places them last.
 
         Examples
         --------
@@ -202,6 +218,13 @@ class Plasma(base.Base):
         >>> plasma = Plasma(data, "a", "p1")
         """
         self._init_logger()
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(
+                f"Plasma data must be a pandas DataFrame, not {type(data).__name__}"
+            )
+        data, spacecraft, auxiliary_data = self._sort_by_time(
+            data, spacecraft, auxiliary_data
+        )
         self._set_species(*species)
         super(Plasma, self).__init__(data)
         self._set_ions()
@@ -209,10 +232,20 @@ class Plasma(base.Base):
         self.set_auxiliary_data(auxiliary_data)
 
     def __getattr__(self, attr):
-        if attr in self.ions.index:
-            return self.ions.loc[attr]
-        else:
-            return super(Plasma, self).__getattr__(attr)
+        r"""Return the :class:`~solarwindpy.core.ions.Ion` named ``attr``.
+
+        Python calls this only after normal lookup fails, so ``plasma.p1`` is
+        the proton ion. Any other name raises :class:`AttributeError` naming
+        it, so :func:`hasattr` and :func:`getattr` with a default work.
+        """
+        # Read `_ions` from the instance dict: before `_set_ions` runs, going
+        # through the `ions` property would re-enter this method.
+        ions_ = self.__dict__.get("_ions")
+        if ions_ is not None and attr in ions_.index:
+            return ions_.loc[attr]
+        raise AttributeError(
+            f"{self.__class__.__name__!r} object has no attribute {attr!r}"
+        )
 
     @property
     def epoch(self):
@@ -509,8 +542,6 @@ class Plasma(base.Base):
 
     def _set_ions(self):
         species = self.species
-        if len(species) == 1:
-            species = species[0].split(",")
         assert np.all(
             ["+" not in s for s in species]
         ), "Plasma.species can't contain '+'."
@@ -575,8 +606,9 @@ class Plasma(base.Base):
 
         Raises
         ------
-        AssertionError
-            If spacecraft index does not match plasma data index.
+        ValueError
+            If the spacecraft index differs from the plasma data's, or its
+            column levels are not named exactly ``("M", "C")``, in that order.
 
         Notes
         -----
@@ -605,8 +637,8 @@ class Plasma(base.Base):
 
         if new is not None:
             assert isinstance(new.data.index, pd.DatetimeIndex)
-            assert new.data.index.equals(self.data.index)
-            assert new.data.columns.names == ("M", "C")
+            self._require_plasma_index(new.data.index, "Spacecraft data")
+            self._require_level_names(new.data.columns, ("M", "C"), "Spacecraft data")
             # Don't test spacecraft data duplicating plasma data b/c labels will
             # overlap even though they represent different quantities because
             # spacecraft only has a 2-level MultiIndex.
@@ -626,8 +658,10 @@ class Plasma(base.Base):
 
         Raises
         ------
-        AssertionError
-            If auxiliary data index does not match plasma data index.
+        ValueError
+            If the auxiliary data's index differs from the plasma data's, its
+            column levels are not named exactly ``("M", "C", "S")`` in that
+            order, or it duplicates a plasma data column.
 
         Notes
         -----
@@ -653,8 +687,8 @@ class Plasma(base.Base):
 
         if new is not None:
             assert isinstance(new.index, pd.DatetimeIndex)
-            assert new.index.equals(self.data.index)
-            assert new.columns.names == ("M", "C", "S")
+            self._require_plasma_index(new.index, "Auxiliary data")
+            self._require_level_names(new.columns, ("M", "C", "S"), "Auxiliary data")
             if new.columns.isin(self.data.columns).any():
                 raise ValueError("Auxiliary data should not duplicate plasma data")
 
@@ -666,12 +700,146 @@ class Plasma(base.Base):
         if new is None:
             self.logger.info("No %s data passed to %s", name, self.__class__.__name__)
 
+    @staticmethod
+    def _require_level_names(columns, expected, what, any_order=False):
+        r"""Raise :class:`ValueError` unless ``columns``' levels are named ``expected``.
+
+        Parameters
+        ----------
+        columns : pd.MultiIndex
+            The columns to check.
+        expected : tuple of str
+            The required level names.
+        what : str
+            Names the checked frame in the error message.
+        any_order : bool, optional
+            Accept ``expected`` in any order.
+        """
+        # Compare as lists: pandas 3 makes a FrozenList both == and != a tuple.
+        names = list(columns.names)
+        want = list(expected)
+        if any_order:
+            names, want = sorted(names, key=str), sorted(want)
+        if names != want:
+            order = " in any order" if any_order else ""
+            raise ValueError(
+                f"{what} columns must have levels named {tuple(expected)}{order}, "
+                f"not {tuple(columns.names)}"
+            )
+
+    def _require_plasma_index(self, index, what):
+        r"""Raise :class:`ValueError` unless ``index`` equals the plasma data's.
+
+        Parameters
+        ----------
+        index : pd.Index
+            The time index to check.
+        what : str
+            Names the checked frame in the error message.
+        """
+        expected = self.data.index
+        if index.equals(expected):
+            return
+        if len(index) != len(expected):
+            detail = f"it has {len(index)} rows, the plasma data {len(expected)}"
+        else:
+            differs = ~(
+                (index.to_numpy() == expected.to_numpy())
+                | (index.isna() & expected.isna())
+            )
+            row = int(np.flatnonzero(differs)[0])
+            detail = f"first difference at row {row}: {index[row]} vs {expected[row]}"
+        raise ValueError(
+            f"{what} index must equal the plasma data's time index; {detail}"
+        )
+
+    def _sort_by_time(self, data, sc, aux):
+        r"""Put ``data`` in time order, with ``sc`` and ``aux`` on its index.
+
+        Rows earlier than the row before them (comparing only rows with a
+        timestamp) are counted and located in one warning, then sorted with a
+        stable sort, so rows sharing a timestamp keep their order and rows
+        without one (``NaT``) go last. ``sc`` and ``aux`` are sorted the same
+        way when their index equals ``data``'s; otherwise they are returned
+        unchanged for the setters to refuse. Missing and repeated timestamps
+        each log a warning and are kept. The constructor calls this once, and
+        every method may assume sorted data afterwards.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Plasma data indexed by time.
+        sc : Spacecraft or None
+            Spacecraft data from the same source.
+        aux : pd.DataFrame or None
+            Auxiliary data from the same source.
+
+        Returns
+        -------
+        tuple
+            ``(data, sc, aux)``, each the input itself when already in order.
+        """
+        index = data.index
+        valid = ~np.asarray(index.isna())
+        missing = int((~valid).sum())
+        if missing:
+            self.logger.warning(
+                "%d of %d rows have no timestamp (NaT); keeping them",
+                missing,
+                len(index),
+            )
+
+        timed = np.flatnonzero(valid)
+        values = index.to_numpy()[timed]
+        behind = timed[1:][values[1:] < values[:-1]]
+        if len(behind):
+            self.logger.warning(
+                "%d of %d rows are earlier than the row before them, first at "
+                "rows %s (times %s); sorting the data by time",
+                len(behind),
+                len(index),
+                behind[:5].tolist(),
+                [str(t) for t in index[behind[:5]]],
+            )
+            order = np.concatenate(
+                [timed[np.argsort(values, kind="stable")], np.flatnonzero(~valid)]
+            )
+            if sc is not None and sc.data.index.equals(index):
+                sc = spacecraft.Spacecraft(sc.data.iloc[order], sc.name, sc.frame)
+            if aux is not None and aux.index.equals(index):
+                aux = aux.iloc[order]
+            data = data.iloc[order]
+            index = data.index
+
+        repeated = index.duplicated(keep="first") & ~np.asarray(index.isna())
+        if repeated.any():
+            rows = np.flatnonzero(repeated)
+            self.logger.warning(
+                "%d of %d rows repeat an earlier timestamp, first at rows %s "
+                "(times %s); keeping them",
+                len(rows),
+                len(index),
+                rows[:5].tolist(),
+                [str(t) for t in index[rows[:5]]],
+            )
+        return data, sc, aux
+
     def set_data(self, new):
-        r"""Set the data, logging its shape and any columns dropped."""
+        r"""Set the data, logging its shape and any columns dropped.
+
+        The constructor sorts the data by time before calling this.
+
+        Raises
+        ------
+        ValueError
+            If the column levels are not named ``"M"``, ``"C"`` and ``"S"``.
+        """
         super(Plasma, self).set_data(new)
 
+        self._require_level_names(
+            new.columns, ("M", "C", "S"), "Plasma data", any_order=True
+        )
         new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
-        assert new.columns.names == ["M", "C", "S"]
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
@@ -1084,6 +1252,10 @@ species: {}
         component are; one that is absent leaves both the weighted sum and the
         sum of weights. A time with no species present is NaN. See
         :doc:`/missing_data`.
+
+        This relies on species masking when the data are set: a species'
+        density and velocity are missing together, so a weight never pairs
+        with a missing velocity, nor a velocity with a missing weight.
 
         Parameters
         ----------
