@@ -552,3 +552,8 @@ logs a warning (how many rows, and where), then sorts the data by time; methods 
 sorted data. This replaces the "never sort" decision above. `_species_weighted_mean` (added in
 #494) stays, with a docstring line that it relies on species masking. Remove the dead comma
 split in `Plasma._set_ions`; leave `build_alfvenic_turbulence`'s comma split unless shown dead.
+
+Author correction (2026-10-07): `clip_data` clips the lower ("l") or upper ("u") tail on its own,
+True clips both. Store `clip` as given in `Hist1D` and in the plotting base class (only None
+becomes False); this reverses the earlier "store clip as a bool" decision and fixes Hist2D's
+one-sided clipping, which the base class's `bool()` had broken.
