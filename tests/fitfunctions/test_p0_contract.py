@@ -16,6 +16,7 @@ import logging
 import re
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -413,6 +414,26 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
     got = fit.make_fit(return_exception=True)
     assert "Residuals are not finite" not in str(got), got
     assert "initial guess is not finite" not in str(got), got
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
+def test_hinge_without_estimate_checks_before_dividing(cls, x, y, kwargs):
+    """An undefined hinge estimate comes from a check, not a numpy warning.
+
+    Each input divides by a repeated x or a zero slope, or takes the median of
+    no slopes. numpy's divide-by-zero, invalid-value, All-NaN and empty-mean
+    RuntimeWarnings are errors here; ``p0`` still falls back as before.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = cls(x, y, **kwargs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        if cls is HingeMax:
+            with pytest.raises(NotImplementedError, match="no reference start"):
+                fit.p0
+        else:
+            assert fit.p0 == exact(HINGE_START[cls])
 
 
 def _hingemax_without_estimate():
