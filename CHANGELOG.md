@@ -176,22 +176,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an x-intercept of -inf or NaN, and a NaN initial guess made `make_fit` fail.
 - Every fit function's `p0` follows one contract, stated in `FitFunction.p0`: it returns
   one finite guess per parameter, or `None` when the data make a guess impossible, and
-  `make_fit` then starts from `fallback_p0()` (by default the feasible start, ones when
-  unbounded). `None` replaces NaN or infinite guesses in the Gaussian, Heaviside, composite and hinge fit functions
-  (for example, `y` summing to zero, no data on one side of a step or hinge, or a zero
-  slope where an x-intercept is needed). `HeavySide.p0` no longer substitutes the mean `y`
+  `make_fit` then starts from the feasible start (ones when unbounded), as `curve_fit`
+  does. `None` replaces NaN or infinite guesses in the Gaussian, Heaviside and composite
+  fit functions (for example, `y` summing to zero, or no data on one side of a step). `HeavySide.p0` no longer substitutes the mean `y`
   or a zero step for a level it cannot estimate, and
   `GaussianTimesHeavySidePlusHeavySide.p0` no longer substitutes 0 for `y1`; both return
   `None`. `GaussianTimesHeavySide` with no data above `guess_x0` no longer raises
   `ValueError: There is no maximum of a zero-size array`.
-- `FitFunction.fallback_p0(bounds)` is the start `make_fit` uses when `p0` is `None`;
-  by default the feasible start (ones when unbounded). `HingeSaturation`, `TwoLine`,
-  `Saturation`, `HingeMin` and `HingeAtPoint` override it with the author's reference
-  hinge, (x_h, y_h) = (433, 4.12) with x-intercept x_1 = 250, m_1 = 4.12 / 183 and
-  m_2 = 0.01 m_1, translated to each class's parameters; all ones was a singular point
-  of these models ("Residuals are not finite in the initial point"). `HingeMax` has no
-  fallback start yet: with `p0` `None`, its fit raises `NotImplementedError` (returned
-  under `return_exception=True`).
+- When the data give no estimate (no data on one side of the hinge, repeated `x`, or a
+  zero slope where an x-intercept is needed), `HingeSaturation`, `TwoLine`,
+  `Saturation`, `HingeMin` and `HingeAtPoint` log a warning and their `p0` returns the
+  author's reference hinge, (x_h, y_h) = (433, 4.12) with x-intercept x_1 = 250,
+  m_1 = 4.12 / 183 and m_2 = 0.01 m_1, translated to each class's parameters. They
+  previously returned NaN or infinite guesses, and the all-ones default is a singular
+  point of these models ("Residuals are not finite in the initial point"). `HingeMax`
+  has no reference start yet: in that case its `p0` raises `NotImplementedError`, without
+  the warning, which
+  `make_fit` returns under `return_exception=True`; pass `p0=` to fit it.
+- The six hinge classes subclass one parent, `solarwindpy.fitfunctions.hinge.Hinge` (not
+  exported), which holds the reference hinge, the estimate-or-reference control flow of
+  `p0` and the shared help text; each class writes its model, its estimate and its
+  translation of the reference hinge. `HingeMax` subclasses `HingeMin`, differing in its
+  model (`np.maximum`) and in having no reference start. Every hinge class inherits
+  `Hinge.p0`; each class's help text describes its own estimate and translation in
+  its Notes.
+- Every fit function's class help (`help(cls)` and the API pages) lists its constructor
+  arguments again: docstring inheritance had deleted each class docstring's Parameters
+  section. `FitFunction`'s arguments (`xmin`, `weights`, `logy` and the rest) are
+  documented in its class docstring and inherited by every fit function, and
+  `FitFunction.__init__` no longer carries a docstring of its own. `Exponential`,
+  `ExponentialPlusC`, `ExponentialCDF`, `Gaussian`, `GaussianNormalized`, `Line`,
+  `LineXintercept`, `PowerLaw`, `PowerLawPlusC` and `PowerLawOffCenter` no longer define
+  an `__init__` that only forwarded `xobs`, `yobs` and `**kwargs`; their signatures now
+  show every `FitFunction` argument.
+- `make_fit` reads the class's `p0` only when the caller passes no `p0=`.
 - `GaussianLn.p0` estimates in ln x, the space of its model: `m` and `s` are the
   y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).
   It previously returned the logs of the mean and variance of `x` and of the peak, which
@@ -203,7 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `make_fit` fail with "Residuals are not finite in the initial point".
 - `make_fit` rejects an initial guess holding NaN or infinity, from `p0` or the caller's
   `p0=`, with `ValueError: <Class> initial guess is not finite: <name>=<value>. A p0 that
-  cannot make a guess returns None, and the fit then starts from fallback_p0().`
+  cannot make a guess returns None, and the fit then starts from the feasible default.`
   scipy previously reported it as "Initial guess is outside of provided bounds".
 - Too little data for an initial guess raises `InsufficientDataError` under `python -O`
   as well; the check was an `assert`, which `-O` removes.

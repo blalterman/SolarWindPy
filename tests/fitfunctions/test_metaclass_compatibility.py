@@ -1,7 +1,8 @@
 """Metaclass compatibility regression tests for FitFunctionMeta.
 
 These tests prevent Method Resolution Order (MRO) conflicts between
-NumpyDocstringInheritanceMeta and ABCMeta that could break fitfunction imports.
+NumpyDocstringInheritanceInitMeta and ABCMeta that could break fitfunction
+imports.
 
 Critical for maintaining compatibility across docstring-inheritance versions.
 """
@@ -14,13 +15,17 @@ class TestMetaclassMRO:
     """Test Method Resolution Order compatibility."""
 
     def test_metaclass_mro_valid(self):
-        """Verify FitFunctionMeta MRO includes both parent metaclasses."""
+        """Verify FitFunctionMeta MRO includes both parent metaclasses.
+
+        ON FAILURE: FitFunctionMeta lost a parent metaclass; the ``Init``
+        variant is the one that keeps class docstrings' Parameters sections.
+        """
         mro_names = [c.__name__ for c in FitFunctionMeta.__mro__]
 
         # Should include docstring inheritance metaclass
         assert (
-            "NumpyDocstringInheritanceMeta" in mro_names
-        ), "FitFunctionMeta must include NumpyDocstringInheritanceMeta in MRO"
+            "NumpyDocstringInheritanceInitMeta" in mro_names
+        ), "FitFunctionMeta must include NumpyDocstringInheritanceInitMeta in MRO"
 
         # Should include ABC metaclass
         assert (
@@ -114,14 +119,19 @@ class TestDocstringInheritance:
         assert len(ChildFit.__doc__) > 0
 
     def test_inherited_method_docstrings(self):
-        """Verify method docstrings are inherited."""
-        from solarwindpy.fitfunctions.gaussians import Gaussian
+        """Verify method docstrings are inherited.
 
-        # Gaussian should have inherited __init__ docstring from FitFunction
-        init_doc = Gaussian.__init__.__doc__
-        assert (
-            init_doc is not None
-        ), "Docstring inheritance should provide __init__ docs"
+        ON FAILURE: a subclass method that writes no docstring no longer
+        shows its parent's; check that docstring inheritance is switched on.
+        """
+        from solarwindpy.fitfunctions.lines import Line
+
+        class ChildFit(Line):
+            def make_fit(self, return_exception=False, **kwargs):
+                return super().make_fit(return_exception, **kwargs)
+
+        summary = FitFunction.make_fit.__doc__.strip().splitlines()[0]
+        assert summary in ChildFit.make_fit.__doc__
 
 
 class TestAllFitFunctionsInstantiate:

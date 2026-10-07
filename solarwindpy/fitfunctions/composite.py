@@ -48,7 +48,8 @@ class GaussianPlusHeavySide(FitFunction):
     yobs : array-like
         Dependent variable observations.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -133,7 +134,7 @@ class GaussianPlusHeavySide(FitFunction):
         if p0 is None:
             # No estimate: scan from the feasible default the base fit uses.
             try:
-                p0 = self.fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+                p0 = self._fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
             except ValueError:
                 # Malformed bounds: the base fit reports them, honouring
                 # return_exception.
@@ -308,7 +309,8 @@ class GaussianTimesHeavySide(FitFunction):
         Initial guess for the transition x-coordinate. If None, must be
         provided for fitting to work properly.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------
@@ -478,7 +480,8 @@ class GaussianTimesHeavySidePlusHeavySide(FitFunction):
         Initial guess for the transition x-coordinate. If None, must be
         provided for fitting to work properly.
     **kwargs
-        Additional arguments passed to :class:`FitFunction`.
+        Additional arguments passed to
+        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
     Attributes
     ----------

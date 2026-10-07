@@ -166,7 +166,7 @@ nitpick_ignore = [
     # Base of fitfunctions.core.FitFunctionMeta. docstring-inheritance publishes
     # no Sphinx inventory: its documentation site returns 404 for objects.inv.
     # 3.x defines the class in its private ``_internal`` module.
-    ("py:class", "docstring_inheritance._internal.NumpyDocstringInheritanceMeta"),
+    ("py:class", "docstring_inheritance._internal.NumpyDocstringInheritanceInitMeta"),
     # Private mixin base of plotting.hist2d.Hist2D, scatter.Scatter and
     # spiral.SpiralPlot2D. Private names are not documented, so the
     # show-inheritance line cannot link it.

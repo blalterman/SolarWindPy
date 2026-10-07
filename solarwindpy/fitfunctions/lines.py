@@ -58,10 +58,6 @@ class Line(FitFunction):
     Fits data to the form: y = m*x + b
     """
 
-    def __init__(self, xobs, yobs, **kwargs):
-        # Docstring inherited from FitFunction
-        super().__init__(xobs, yobs, **kwargs)
-
     @property
     def function(self):
         def line(x, m, b):
@@ -111,18 +107,13 @@ class LineXintercept(FitFunction):
 
     Fits data to the form: y = m * (x - x0)
     where x0 is the x-intercept.
+
+    Notes
+    -----
+    This parameterization is useful when fitting data where the
+    x-intercept has physical meaning, such as threshold energies
+    or cutoff velocities in solar wind measurements.
     """
-
-    def __init__(self, xobs, yobs, **kwargs):
-        """Initialize linear fit with x-intercept parameterization.
-
-        Notes
-        -----
-        This parameterization is useful when fitting data where the
-        x-intercept has physical meaning, such as threshold energies
-        or cutoff velocities in solar wind measurements.
-        """
-        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):

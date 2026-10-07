@@ -25,7 +25,7 @@ import pandas as pd
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from inspect import getfullargspec
-from docstring_inheritance import NumpyDocstringInheritanceMeta
+from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
 from scipy.optimize import least_squares, OptimizeWarning
 
@@ -80,23 +80,102 @@ class InvalidParameterError(FitFunctionError):
 
 
 # Combine ABC and docstring inheritance metaclasses. ABCMeta comes first:
-# docstring-inheritance 3.x binds NumpyDocstringInheritanceMeta to plain
-# ``type`` when its switch is off, and ``type`` may not precede its subclass
-# ABCMeta in a list of bases.
-class FitFunctionMeta(type(ABC), NumpyDocstringInheritanceMeta):
-    """Metaclass combining ABC and docstring inheritance."""
+# docstring-inheritance 3.x binds its metaclasses to plain ``type`` when its
+# switch is off, and ``type`` may not precede its subclass ABCMeta in a list of
+# bases. The ``Init`` variant merges a class docstring against the signature of
+# the class's ``__init__``; the plain variant merges it against an empty
+# signature and so deletes every class docstring's Parameters section.
+class FitFunctionMeta(type(ABC), NumpyDocstringInheritanceInitMeta):
+    """Metaclass combining ABC and docstring inheritance.
+
+    Constructor parameters are documented in the class docstring, which a
+    subclass's class docstring inherits; ``__init__`` carries no docstring.
+    """
 
     pass
 
 
 class FitFunction(ABC, metaclass=FitFunctionMeta):
-    r"""Assuming that you don't want special formatting, call order is:
+    r"""Fit a model to observed data: the base class of every fit function.
 
-        fit_function = FitFunction(function, TeX_string)
-        fit_function.make_fit()
+    A subclass defines the model (``function`` and ``TeX_function``) and its
+    initial guess (``p0``); ``make_fit`` runs the fit. Instances are callable.
+    If the fit fails, calling the instance will return an array of NaNs the
+    same shape as the x-values.
 
-    Instances are callable. If the fit fails, calling the instance will return
-    an array of NaNs the same shape as the x-values.
+    Parameters
+    ----------
+    xobs : array-like
+        Observed x values (independent variable).
+        Shape must match yobs.
+    yobs : array-like
+        Observed y values (dependent variable).
+        Shape must match xobs.
+    xmin : float, optional
+        Lower limit on x used in fitting. Smaller x values are
+        excluded from the fit. The boundary is inclusive (>=).
+    xmax : float, optional
+        Upper limit on x used in fitting. Larger x values are
+        excluded from the fit. The boundary is inclusive (<=).
+    xoutside : tuple(float, float), optional
+        Include only data outside this range in the fit.
+        Useful for excluding a central region. Format: (lower, upper)
+        where lower < upper.
+    ymin : float, optional
+        Lower limit on y used in fitting, inclusive (>=).
+    ymax : float, optional
+        Upper limit on y used in fitting, inclusive (<=).
+    youtside : tuple(float, float), optional
+        Include only data outside this range.
+        Format: (lower, upper) where lower < upper.
+    weights : array-like, optional
+        Uncertainties (1-sigma) associated with y values.
+        Used for weighted least squares fitting. If 1-d array,
+        interpreted as diagonal covariance matrix. If 2-d,
+        must be positive definite covariance matrix.
+    wmin : float, optional
+        Lower weight limit. Observations with smaller weights
+        are excluded from the fit.
+    wmax : float, optional
+        Upper weight limit. Observations with larger weights
+        are excluded from the fit.
+    logx : bool, default False
+        Whether to interpret x on a log10 scale.
+    logy : bool, default False
+        Whether to interpret y on a log10 scale. Weight selection
+        then uses w/(y*ln(10)) for proper error propagation in
+        log space.
+
+    Notes
+    -----
+    The fitting procedure uses scipy.optimize.least_squares
+    with robust loss functions (Huber by default) to handle
+    outliers. The initial parameter guess is provided by the
+    p0 property, which must be implemented by subclasses.
+
+    All subclasses inherit this documentation automatically
+    through the docstring-inheritance metaclass.
+
+    Examples
+    --------
+    Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
+    recover those parameters:
+
+    >>> import numpy as np
+    >>> from solarwindpy.fitfunctions.gaussians import Gaussian
+    >>> rng = np.random.default_rng(0)
+    >>> x = np.linspace(-5, 5, 100)
+    >>> y = 3 * np.exp(-0.5 * ((x - 1) / 0.8) ** 2) + rng.normal(0, 0.1, 100)
+    >>> fit = Gaussian(x, y, xmin=-3, xmax=4)
+    >>> fit.make_fit()
+    >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
+    {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
+
+    See Also
+    --------
+    make_fit : Execute the fitting procedure
+    popt : Access optimized parameters
+    rsq : Calculate coefficient of determination
     """
 
     def __init__(
@@ -115,75 +194,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         logx=False,
         logy=False,
     ):
-        """Initialize fit function with observed data.
-
-        Parameters
-        ----------
-        xobs : array-like
-            Observed x values (independent variable).
-            Shape must match yobs.
-        yobs : array-like
-            Observed y values (dependent variable).
-            Shape must match xobs.
-        xmin, xmax : float, optional
-            Range limits for x used in fitting. Values outside
-            this range are excluded from the fit. All boundaries
-            are inclusive (>= or <=).
-        xoutside : tuple(float, float), optional
-            Include only data outside this range in the fit.
-            Useful for excluding a central region. Format: (lower, upper)
-            where lower < upper.
-        ymin, ymax : float, optional
-            Range limits for y used in fitting. Values outside
-            this range are excluded from the fit.
-        youtside : tuple(float, float), optional
-            Include only data outside this range.
-            Format: (lower, upper) where lower < upper.
-        weights : array-like, optional
-            Uncertainties (1-sigma) associated with y values.
-            Used for weighted least squares fitting. If 1-d array,
-            interpreted as diagonal covariance matrix. If 2-d,
-            must be positive definite covariance matrix.
-        wmin, wmax : float, optional
-            Weight limits. Observations with weights outside
-            this range are excluded from the fit.
-        logx, logy : bool, default False
-            Whether to interpret x or y on a log10 scale.
-            If logy=True, weight selection uses w/(y*ln(10))
-            for proper error propagation in log space.
-
-        Notes
-        -----
-        The fitting procedure uses scipy.optimize.least_squares
-        with robust loss functions (Huber by default) to handle
-        outliers. The initial parameter guess is provided by the
-        p0 property, which must be implemented by subclasses.
-
-        All subclasses inherit this documentation automatically
-        through the docstring-inheritance metaclass.
-
-        Examples
-        --------
-        Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
-        recover those parameters:
-
-        >>> import numpy as np
-        >>> from solarwindpy.fitfunctions.gaussians import Gaussian
-        >>> rng = np.random.default_rng(0)
-        >>> x = np.linspace(-5, 5, 100)
-        >>> y = 3 * np.exp(-0.5 * ((x - 1) / 0.8) ** 2) + rng.normal(0, 0.1, 100)
-        >>> fit = Gaussian(x, y, xmin=-3, xmax=4)
-        >>> fit.make_fit()
-        >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
-        {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
-
-        See Also
-        --------
-        make_fit : Execute the fitting procedure
-        popt : Access optimized parameters
-        rsq : Calculate coefficient of determination
-        """
-
+        # Documented in the class docstring (see FitFunctionMeta).
         self._init_logger()
         self._set_argnames()
 
@@ -266,10 +277,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             the data make a guess impossible (an empty region, an undefined
             slope, a zero total weight, and so on), ``p0`` returns ``None``
             rather than a guess holding NaN or infinity, and :meth:`make_fit`
-            starts from :meth:`fallback_p0`: by default the feasible start
-            for the bounds (ones when unbounded, as
-            :func:`scipy.optimize.curve_fit` does), unless the class
-            overrides it.
+            starts from the feasible start for the bounds (ones when
+            unbounded, as :func:`scipy.optimize.curve_fit` does). A class
+            whose model is singular at that start instead documents a
+            reference start of its own, and its ``p0`` returns that start,
+            logging a warning that the data gave no estimate; the hinge
+            classes in :mod:`~solarwindpy.fitfunctions.hinge` do this.
 
         Raises
         ------
@@ -333,7 +346,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         try:
             p0 = self.p0
             bounds = self.fit_bounds
-        except AttributeError:
+        except (AttributeError, NotImplementedError):
+            # NotImplementedError: a p0 with no estimate and no reference
+            # start (HingeMax) made no guess; the caller supplied the start.
             return None
         if p0 is None:
             return None
@@ -429,12 +444,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         if not self.sufficient_data:
             raise InsufficientDataError(_INSUFFICIENT_DATA)
 
-    def fallback_p0(self, bounds=(-np.inf, np.inf)):
+    def _fallback_p0(self, bounds=(-np.inf, np.inf)):
         r"""The start :meth:`make_fit` uses when :attr:`p0` is None.
 
-        This is the one hook for a class-specific fallback start: a subclass
-        whose model is singular at the default overrides it. The default is
-        the feasible start :func:`scipy.optimize.curve_fit` chooses.
+        The feasible start :func:`scipy.optimize.curve_fit` chooses. It is the
+        same for every class: no subclass overrides it. A class that needs a
+        start of its own returns it from :attr:`p0` instead.
 
         Parameters
         ----------
@@ -481,7 +496,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         raise ValueError(
             f"{self.__class__.__name__} initial guess is not finite: {detail}. "
             "A p0 that cannot make a guess returns None, and the fit then "
-            "starts from fallback_p0()."
+            "starts from the feasible default."
         )
 
     @property
@@ -711,7 +726,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
     def _run_least_squares(self, **kwargs):
         """Execute :func:`scipy.optimize.least_squares` with defaults."""
 
-        p0 = kwargs.pop("p0", self.p0)
+        # Read self.p0 only when the caller gave no p0=: a p0 that cannot
+        # estimate may raise (HingeMax) or log, which a caller's start avoids.
+        p0 = kwargs.pop("p0") if "p0" in kwargs else self.p0
         bounds = kwargs.pop("bounds", (-np.inf, np.inf))
         method = kwargs.pop("method", "trf")
         loss = kwargs.pop("loss", "huber")
@@ -723,7 +740,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         # Adapted from `curve_fit` lines 704 and 715 (20200527)
         if p0 is None:
-            p0 = np.atleast_1d(np.asarray(self.fallback_p0(bounds), dtype=float))
+            p0 = np.atleast_1d(np.asarray(self._fallback_p0(bounds), dtype=float))
         else:
             p0 = np.atleast_1d(p0)
             self._reject_nonfinite_p0(p0)
