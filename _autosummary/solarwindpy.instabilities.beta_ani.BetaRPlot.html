@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.beta_ani.BetaRPlot &mdash; SolarWindPy 0.1.dev1+gb8439d96b documentation</title>
+  <title>solarwindpy.instabilities.beta_ani.BetaRPlot &mdash; SolarWindPy 0.1.dev1+gb747d38b7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=3f129dd7"></script>
+      <script src="../_static/documentation_options.js?v=71c15f2e"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -782,8 +782,10 @@ is shared by the mesh and the contours.</p>
 to the <a class="reference internal" href="solarwindpy.plotting.hist1d.Hist1D.html#solarwindpy.plotting.hist1d.Hist1D" title="solarwindpy.plotting.hist1d.Hist1D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hist1D</span></code></a>.</p>
 </dd>
 <dt><strong>project_counts: bool</strong></dt><dd><p>If True, only send the variable plotted along <cite>axis</cite> to
-<a class="reference internal" href="solarwindpy.plotting.hist1d.Hist1D.html#solarwindpy.plotting.hist1d.Hist1D" title="solarwindpy.plotting.hist1d.Hist1D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hist1D</span></code></a>.
-Otherwise, send both axes (but not z-values).</p>
+<a class="reference internal" href="solarwindpy.plotting.hist1d.Hist1D.html#solarwindpy.plotting.hist1d.Hist1D" title="solarwindpy.plotting.hist1d.Hist1D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hist1D</span></code></a>, which then counts it.
+Otherwise, also send the values to aggregate: the z-values when the
+histogram has them, else the other axis, NaN wherever the
+histogram does not bin that axis’s value.</p>
 </dd>
 <dt><strong>kwargs:</strong></dt><dd><p>Passed to <cite>Hist1D</cite>. Primarily to allow specifying <cite>bin_precision</cite>.</p>
 </dd>
@@ -926,20 +928,28 @@ use <code class="docutils literal notranslate"><span class="pre">Path(new)</span
 and values used to get the top and bottom bounds for the data.</p>
 </dd>
 <dt><strong>get_x_bounds: function</strong></dt><dd><p>First argument is one key of <cite>ranges_by_x</cite> and returns <cite>left, right</cite>.
-Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
-to whether or not the keys are <span class="math notranslate nohighlight">\(log(x)\)</span> or <span class="math notranslate nohighlight">\(x\)</span> in a manner
-that matches data stored in Hist2D.</p>
+The keyword argument <cite>expected_logx</cite> is the bool <code class="docutils literal notranslate"><span class="pre">self.log.x</span></code>, so
+the returned values can be <span class="math notranslate nohighlight">\(log(x)\)</span> or <span class="math notranslate nohighlight">\(x\)</span> to match the
+data stored in Hist2D.</p>
 </dd>
-<dt><strong>get_y_bounds: functions</strong></dt><dd><p>Takes on value of <cite>ranges_by_x</cite> and returns <cite>top, bottom</cite>. Second argument
-Second argument is a kwarg (<cite>expected_logx</cite>) boolean to transform the returned values according
-to whether or not the keys are <span class="math notranslate nohighlight">\(log(y)\)</span> or <span class="math notranslate nohighlight">\(y\)</span> in a manner
-that matches data stored in Hist2D.</p>
+<dt><strong>get_y_bounds: functions</strong></dt><dd><p>First argument is one row of <cite>ranges_by_x</cite> and returns
+<cite>bottom, top</cite>. The keyword argument <cite>expected_logy</cite> is the bool
+<code class="docutils literal notranslate"><span class="pre">self.log.y</span></code>, so the returned values can be <span class="math notranslate nohighlight">\(log(y)\)</span> or
+<span class="math notranslate nohighlight">\(y\)</span> to match the data stored in Hist2D.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>taken: <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></a> 1D</dt><dd><p>Array of indices for selecting data in interval.</p>
+<dt>taken: <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></a> 1D</dt><dd><p>Array of indices for selecting data in interval: the points with
+<code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">&lt;</span> <span class="pre">x</span> <span class="pre">&lt;=</span> <span class="pre">right</span></code> and <code class="docutils literal notranslate"><span class="pre">bottom</span> <span class="pre">&lt;</span> <span class="pre">y</span> <span class="pre">&lt;=</span> <span class="pre">top</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If a range has <code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">&gt;=</span> <span class="pre">right</span></code> or <code class="docutils literal notranslate"><span class="pre">bottom</span> <span class="pre">&gt;=</span> <span class="pre">top</span></code>, or if
+<cite>ranges_by_x</cite> names x-bins the histogram does not have.</p>
 </dd>
 </dl>
 </dd>

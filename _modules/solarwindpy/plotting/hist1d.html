@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist1d &mdash; SolarWindPy 0.1.dev1+gb8439d96b documentation</title>
+  <title>solarwindpy.plotting.hist1d &mdash; SolarWindPy 0.1.dev1+gb747d38b7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=3f129dd7"></script>
+      <script src="../../../_static/documentation_options.js?v=71c15f2e"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -362,9 +362,10 @@
 <span class="sd">        axnorm : {"t", "d", None}, optional</span>
 <span class="sd">            Normalisation applied to the histogram. ``"t"`` divides by the</span>
 <span class="sd">            maximum (peak equals 1) and ``"d"`` yields a density.</span>
-<span class="sd">        clip_data : bool, optional</span>
-<span class="sd">            Remove extreme values at the 0.001 and 0.999 percentiles before</span>
-<span class="sd">            binning or aggregation.</span>
+<span class="sd">        clip_data : bool or str, optional</span>
+<span class="sd">            If True, clip x to its 0.01st and 99.99th percentiles before</span>
+<span class="sd">            binning; ``"l"`` or ``"u"`` clips only the lower or upper tail</span>
+<span class="sd">            (see ``AggPlot.clip_data``). None is stored as False.</span>
 <span class="sd">        nbins : int or array-like, optional</span>
 <span class="sd">            Binning strategy passed to :func:`numpy.histogram_bin_edges` or</span>
 <span class="sd">            :func:`pandas.cut` depending on the input type.</span>
@@ -419,7 +420,7 @@
         <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"y"</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_clip</span> <span class="o">=</span> <span class="n">clip</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clip</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">clip</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">clip</span></div>
 
 
 <div class="viewcode-block" id="Hist1D.set_axnorm">

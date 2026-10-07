@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gb8439d96b documentation</title>
+  <title>solarwindpy.plotting.hist2d &mdash; SolarWindPy 0.1.dev1+gb747d38b7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=3f129dd7"></script>
+      <script src="../../../_static/documentation_options.js?v=71c15f2e"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -343,10 +343,11 @@
 <span class="sd">        Normalization of the aggregated values; see ``set_axnorm`` for the keys.</span>
 <span class="sd">    logx, logy : bool</span>
 <span class="sd">        If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.</span>
-<span class="sd">    clip_data : bool</span>
+<span class="sd">    clip_data : bool or str</span>
 <span class="sd">        If True, clip x and y to their 0.01st and 99.99th percentiles</span>
 <span class="sd">        (``AggPlot.clip_data``) when assigning points to bins; the bin edges</span>
-<span class="sd">        are computed from the unclipped data.</span>
+<span class="sd">        are computed from the unclipped data. ``"l"`` or ``"u"`` clips only</span>
+<span class="sd">        the lower or upper tail.</span>
 <span class="sd">    nbins : int or str or tuple</span>
 <span class="sd">        Bin specification passed to ``calc_bins_intervals``.</span>
 <span class="sd">    bin_precision : int, optional</span>
@@ -1150,8 +1151,10 @@
 <span class="sd">            to the :class:`~solarwindpy.plotting.hist1d.Hist1D`.</span>
 <span class="sd">        project_counts: bool</span>
 <span class="sd">            If True, only send the variable plotted along `axis` to</span>
-<span class="sd">            :class:`~solarwindpy.plotting.hist1d.Hist1D`.</span>
-<span class="sd">            Otherwise, send both axes (but not z-values).</span>
+<span class="sd">            :class:`~solarwindpy.plotting.hist1d.Hist1D`, which then counts it.</span>
+<span class="sd">            Otherwise, also send the values to aggregate: the z-values when the</span>
+<span class="sd">            histogram has them, else the other axis, NaN wherever the</span>
+<span class="sd">            histogram does not bin that axis's value.</span>
 <span class="sd">        kwargs:</span>
 <span class="sd">            Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.</span>
 
@@ -1165,7 +1168,8 @@
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="c1"># Either all 1 or 1 and NaN.</span>
+            <span class="c1"># Without z every point stores z = 1, so two or more distinct values</span>
+            <span class="c1"># (two included) mean the caller passed z.</span>
             <span class="n">other</span> <span class="o">=</span> <span class="s2">"z"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">possible_axes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">}</span>
@@ -1181,10 +1185,10 @@
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">other</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">project_counts</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">logy</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Defined b/c project_counts option.</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">other</span> <span class="o">==</span> <span class="s2">"y"</span><span class="p">):</span>
-            <span class="c1"># Only select y-values plotted.</span>
+            <span class="c1"># Only select y-values plotted: those the histogram puts in a y-bin,</span>
+            <span class="c1"># which respects whether the bins are closed left or right.</span>
             <span class="n">logy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()[</span><span class="n">other</span><span class="p">]</span>
-            <span class="n">yedges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">other</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">yedges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">yedges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cut</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">other</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
                 <span class="n">y</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">y</span>
 
@@ -1360,20 +1364,27 @@
 
 <span class="sd">        get_x_bounds: function</span>
 <span class="sd">            First argument is one key of `ranges_by_x` and returns `left, right`.</span>
-<span class="sd">            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according</span>
-<span class="sd">            to whether or not the keys are :math:`log(x)` or :math:`x` in a manner</span>
-<span class="sd">            that matches data stored in Hist2D.</span>
+<span class="sd">            The keyword argument `expected_logx` is the bool ``self.log.x``, so</span>
+<span class="sd">            the returned values can be :math:`log(x)` or :math:`x` to match the</span>
+<span class="sd">            data stored in Hist2D.</span>
 
 <span class="sd">        get_y_bounds: functions</span>
-<span class="sd">            Takes on value of `ranges_by_x` and returns `top, bottom`. Second argument</span>
-<span class="sd">            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according</span>
-<span class="sd">            to whether or not the keys are :math:`log(y)` or :math:`y` in a manner</span>
-<span class="sd">            that matches data stored in Hist2D.</span>
+<span class="sd">            First argument is one row of `ranges_by_x` and returns</span>
+<span class="sd">            `bottom, top`. The keyword argument `expected_logy` is the bool</span>
+<span class="sd">            ``self.log.y``, so the returned values can be :math:`log(y)` or</span>
+<span class="sd">            :math:`y` to match the data stored in Hist2D.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        taken: np.ndarray 1D</span>
-<span class="sd">            Array of indices for selecting data in interval.</span>
+<span class="sd">            Array of indices for selecting data in interval: the points with</span>
+<span class="sd">            ``left &lt; x &lt;= right`` and ``bottom &lt; y &lt;= top``.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If a range has ``left &gt;= right`` or ``bottom &gt;= top``, or if</span>
+<span class="sd">            `ranges_by_x` names x-bins the histogram does not have.</span>
 <span class="sd">        """</span>
 
         <span class="n">available_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span>
@@ -1397,8 +1408,10 @@
             <span class="n">l</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">get_x_bounds</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">expected_logx</span><span class="o">=</span><span class="n">logx</span><span class="p">)</span>
             <span class="n">b</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">get_y_bounds</span><span class="p">(</span><span class="n">at_x</span><span class="p">,</span> <span class="n">expected_logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
 
-            <span class="k">assert</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="n">r</span>
-            <span class="k">assert</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">t</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Need left &lt; right for x-bin </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">, got (</span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Need bottom &lt; top for x-bin </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">, got (</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
 
             <span class="n">tkx</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">&lt;</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="p">)</span>
             <span class="n">tky</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">&lt;</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">)</span>
