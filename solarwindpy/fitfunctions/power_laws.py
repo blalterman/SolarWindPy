@@ -4,7 +4,9 @@ r"""Power-law fit functions.
 This module provides :class:`~solarwindpy.fitfunctions.core.FitFunction`
 subclasses for power laws of the form :math:`f(x) = A x^b`, with an
 optional additive constant or a shifted origin. Their initial guesses are
-fixed values, not estimated from the data.
+fixed values, not estimated from the data, except that
+:class:`PowerLawOffCenter` starts ``x0`` below the data when any used ``x`` is
+not positive.
 """
 
 __all__ = [
@@ -14,7 +16,6 @@ __all__ = [
 ]
 
 import numpy as np
-from scipy.optimize._lsq.least_squares import prepare_bounds
 
 from .core import FitFunction
 
@@ -99,19 +100,36 @@ class PowerLawOffCenter(FitFunction):
         The upper bound on ``x0`` is the largest float below the smallest used
         ``x``, or the caller's upper bound if that is lower. Otherwise as
         :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
+
+        Raises
+        ------
+        ValueError
+            If the caller's lower bound on ``x0`` leaves it no room below the
+            smallest used ``x``. Returned instead when ``return_exception``.
         """
         x = self.observations.used.x
+        n = len(self.argnames)
         try:
             bounds = self._bounds_array(kwargs.get("bounds", (-np.inf, np.inf)))
-            lb, ub = prepare_bounds(bounds, len(self.argnames))
-        except ValueError:
+            lb, ub = (
+                np.broadcast_to(np.asarray(b, dtype=float), (n,)).copy() for b in bounds
+            )
+        except (TypeError, ValueError):
             # Malformed bounds: the base fit reports them, honouring
             # return_exception.
             lb = None
         if x.size and lb is not None:
-            ub = np.array(ub, dtype=float)
             i = self.argnames.index("x0")
             ub[i] = min(ub[i], np.nextafter(x.min(), -np.inf))
+            if lb[i] >= ub[i]:
+                e = ValueError(
+                    f"{type(self).__name__} needs x0 below the smallest used x "
+                    f"({x.min()}), where the model is defined, but the lower "
+                    f"bound on x0 is {lb[i]}."
+                )
+                if return_exception:
+                    return e
+                raise e
             kwargs["bounds"] = (lb, ub)
         return super().make_fit(return_exception=return_exception, **kwargs)
 
@@ -127,10 +145,23 @@ class PowerLawOffCenter(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, b, x0]`` for the fit."""
+        r"""Return initial guesses ``[A, b, x0]`` for the fit.
+
+        ``A`` and ``b`` start at 1. ``x0`` starts at 0 when every used ``x``
+        is positive; otherwise it starts below the smallest used ``x`` by the
+        range of the used ``x`` (by 1 when they are all equal), inside the
+        bound :meth:`make_fit` places on ``x0``.
+        """
         self._require_sufficient_data()
 
-        p0 = [1, 1, 0]
+        x = self.observations.used.x
+        xmin = x.min()
+        if xmin > 0:
+            x0 = 0.0
+        else:
+            span = x.max() - xmin
+            x0 = xmin - (span if span > 0 else 1.0)
+        p0 = [1, 1, x0]
         return p0
 
     @property

@@ -207,10 +207,12 @@ class HingeSaturation(Hinge):
     -----
     ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``(xh, yh)`` is
     ``saturation_guess``; ``x1`` comes from a linear fit to the rising region
-    (x < xh), or is the data minimum; ``m2`` is the median slope in the
-    plateau region (x >= xh), and is undefined when the plateau region has
-    repeated ``x``. When an estimate is undefined, ``p0`` returns the
-    reference hinge of :class:`Hinge` as ``[xh, yh, x1, m2]``.
+    (x < xh), or is the data minimum when that region has fewer than two
+    points or the fit is flat, and is undefined when the region's points
+    share one ``x`` (no slope); ``m2`` is the median slope in the plateau
+    region (x >= xh), and is undefined when the plateau region has repeated
+    ``x``. When an estimate is undefined, ``p0`` returns the reference hinge
+    of :class:`Hinge` as ``[xh, yh, x1, m2]``.
 
     Examples
     --------
@@ -294,12 +296,16 @@ class HingeSaturation(Hinge):
         if rising_mask.sum() >= 2:
             x_rising = x[rising_mask]
             y_rising = y[rising_mask]
-            # Simple linear regression to estimate slope m1
-            m1_est = np.polyfit(x_rising, y_rising, 1)[0]
-            if abs(m1_est) > 1e-10:
-                x1 = xh - yh / m1_est
+            if np.unique(x_rising).size < 2:
+                # Repeated x has no slope: polyfit would raise or warn.
+                x1 = np.nan
             else:
-                x1 = x.min()
+                # Simple linear regression to estimate slope m1
+                m1_est = np.polyfit(x_rising, y_rising, 1)[0]
+                if abs(m1_est) > 1e-10:
+                    x1 = xh - yh / m1_est
+                else:
+                    x1 = x.min()
         else:
             # Fall back to minimum x value
             x1 = x.min()

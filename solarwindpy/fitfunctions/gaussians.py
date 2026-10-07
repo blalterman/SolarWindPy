@@ -213,7 +213,10 @@ class GaussianLn(FitFunction):
     Raises
     ------
     ValueError
-        If any used x is not positive, where :math:`\ln x` is undefined.
+        If any used x is not positive, where :math:`\ln x` is undefined, at
+        construction or when
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.set_fit_obs` selects
+        new observations.
 
     Notes
     -----
@@ -228,13 +231,16 @@ class GaussianLn(FitFunction):
 
     def __init__(self, xobs, yobs, **kwargs):
         super().__init__(xobs, yobs, **kwargs)
-        x = self.observations.used.x
+        self.set_TeX_report_normal_parameters(False)
+
+    def _check_used_obs(self, used):
+        r"""Raise ``ValueError`` if any used x is not positive: ln x is undefined."""
+        x = used.x
         if np.any(x <= 0):
             raise ValueError(
                 f"GaussianLn needs every used x > 0: ln x is undefined at "
                 f"{np.sum(x <= 0)} of {x.size}."
             )
-        self.set_TeX_report_normal_parameters(False)
 
     @property
     def function(self):
@@ -279,15 +285,10 @@ class GaussianLn(FitFunction):
     def TeX_function(self):
         r"""LaTeX form of the model."""
         TeX = (
-            r"f(x) = A \cdot  "
-            r"\mathrm{exp}\left[-\frac{1}{2}  "
-            r"(\frac{\mathrm{ln}(x)-m}{s})^2\right]"
-        )
-        TeX = (
             r"f(x) ="
             r"A \cdot"
             r"\exp\left["
-            r"\frac{\left(\ln x - m\right)^2}{2 s^2}"
+            r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
             r"\right]"
         )
         return TeX

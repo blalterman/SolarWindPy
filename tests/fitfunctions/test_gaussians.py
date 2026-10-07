@@ -111,10 +111,14 @@ def test_p0_estimation(cls, params):
         ),
         (
             GaussianLn,
+            # A exp[-(ln x - m)^2 / (2 s^2)]: the exponent of the log-normal
+            # density on the class's reference,
+            # https://mathworld.wolfram.com/LogNormalDistribution.html, with
+            # the normalization replaced by A, as GaussianLn.function computes.
             (
                 r"f(x) =A \cdot"
                 r"\exp\left["
-                r"\frac{\left(\ln x - m\right)^2}{2 s^2}"
+                r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
                 r"\right]"
             ),
         ),
@@ -306,3 +310,25 @@ def test_gaussian_ln_accepts_x_excluded_from_the_fit():
     x = np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
     obj = GaussianLn(x, np.array([5.0, 5.0, 1.0, 2.0, 1.0]), xmin=0.5)
     assert obj.observations.used.x.tolist() == [1.0, 2.0, 3.0]
+
+
+def test_gaussian_ln_set_fit_obs_refuses_x_without_a_logarithm():
+    """Widening the used data to x <= 0 with ``set_fit_obs`` raises ValueError.
+
+    The positive control narrows the same data to x > 0 and is accepted. A
+    refused selection keeps the previous used data.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
+    y = np.array([5.0, 5.0, 1.0, 2.0, 1.0])
+    obj = GaussianLn(x, y, xmin=0.5)
+
+    obj.set_fit_obs(x, y, None, xmin=1.5)
+    assert obj.observations.used.x.tolist() == [2.0, 3.0]
+
+    with pytest.raises(
+        ValueError, match=r"every used x > 0: ln x is undefined at 2 of 5"
+    ):
+        obj.set_fit_obs(x, y, None)
+    assert obj.observations.used.x.tolist() == [2.0, 3.0]

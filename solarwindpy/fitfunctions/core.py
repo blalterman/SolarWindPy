@@ -719,9 +719,24 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             weights = weights_raw[mask]
 
         used = _Observations(xobs, yobs, weights)
+        self._check_used_obs(used)
         raw = _Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = _UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
+
+    def _check_used_obs(self, used):
+        r"""Raise if the model cannot use these observations; no check by default.
+
+        :meth:`set_fit_obs` calls it, at construction and on every later call,
+        before it stores the observations, so a refused selection leaves the
+        previous one in place. A class whose model is undefined for some
+        observations overrides it.
+
+        Parameters
+        ----------
+        used : _Observations
+            The ``(x, y, w)`` selected for the fit.
+        """
 
     def _run_least_squares(self, **kwargs):
         """Execute :func:`scipy.optimize.least_squares` with defaults."""

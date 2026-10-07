@@ -12,6 +12,7 @@ The fit parameters are:
 """
 
 import inspect
+import warnings
 
 import numpy as np
 import pytest
@@ -2429,3 +2430,38 @@ def test_hingeatpoint_psigma_values_are_positive(noisy_hingeatpoint_data):
 
     for param, sigma in obj.psigma.items():
         assert sigma > 0, f"psigma['{param}'] = {sigma} should be positive"
+
+
+@pytest.mark.parametrize(
+    "x_rising, expected",
+    [
+        # Two points at one x: no slope, so the Hinge reference start
+        # (433, 4.12, 250, 1% of m1 = 4.12 / (433 - 250)), from the Hinge Notes.
+        pytest.param(
+            [1.0, 1.0],
+            [433.0, 4.12, 250.0, 0.01 * 4.12 / (433.0 - 250.0)],
+            id="one-distinct-x",
+        ),
+        # Positive control: rising slope 1 through (1, 2) and (2, 3), so
+        # x1 = xh - yh / m1 = 5 - 10 / 1 = -5; the flat plateau gives m2 = 0.
+        pytest.param([1.0, 2.0], [5.0, 10.0, -5.0, 0.0], id="two-distinct-x"),
+    ],
+)
+def test_hinge_saturation_rising_region_without_a_slope_gives_reference_start(
+    x_rising, expected
+):
+    """A rising region whose points share one x gives no x1 estimate.
+
+    ``np.polyfit`` on one distinct x raises LinAlgError or warns RankWarning
+    with an arbitrary slope; both are errors here. ``p0`` then returns the
+    reference start, as for repeated x in the plateau.
+
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge.
+    """
+    x = np.array(x_rising + [6.0, 7.0, 8.0])
+    y = np.array([2.0, 3.0, 10.0, 10.0, 10.0])
+    obj = HingeSaturation(x, y, guess_xh=5.0, guess_yh=10.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        p0 = obj.p0
+    assert p0 == noise_free(expected)
