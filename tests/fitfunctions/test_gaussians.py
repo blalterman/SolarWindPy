@@ -28,13 +28,19 @@ from tests.tolerances import exact, noise_free
 def test_function_signature_and_output(
     cls, expected_params, sample_args, expected_output
 ):
-    x = np.linspace(-1.0, 1.0, 5)
+    """``function`` takes x then the parameters, and evaluates at the peak.
+
+    The data are positive x only because GaussianLn refuses x <= 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.linspace(0.5, 2.5, 5)
     y = np.ones_like(x)
     obj = cls(x, y)
     sig = inspect.signature(obj.function)
     assert tuple(sig.parameters.keys()) == expected_params
     xval, *params = sample_args
-    assert np.allclose(obj.function(xval, *params), expected_output)
+    assert obj.function(xval, *params) == exact(expected_output)
 
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized, GaussianLn])
@@ -115,7 +121,13 @@ def test_p0_estimation(cls, params):
     ],
 )
 def test_TeX_function_strings(cls, expected):
-    x = np.linspace(0.0, 1.0, 5)
+    """``TeX_function`` is the class's LaTeX string.
+
+    The data are positive x only because GaussianLn refuses x <= 0.
+
+    ON FAILURE: the code is wrong, unless the author changed the string.
+    """
+    x = np.linspace(0.25, 1.25, 5)
     y = np.ones_like(x)
     obj = cls(x, y)
     assert obj.TeX_function == expected
@@ -266,3 +278,31 @@ class TestGaussianLn:
         assert obj.popt["m"] == noise_free(params["m"])
         assert np.abs(obj.popt["s"]) == noise_free(params["s"])
         assert obj.popt["A"] == noise_free(params["A"])
+
+
+@pytest.mark.parametrize(
+    "x",
+    [
+        pytest.param([0.0, 1.0, 2.0], id="zero"),
+        pytest.param([-1.0, 1.0, 2.0], id="negative"),
+    ],
+)
+def test_gaussian_ln_refuses_x_without_a_logarithm(x):
+    """GaussianLn built on any used x <= 0 raises ValueError: ln x is undefined there.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(
+        ValueError, match=r"every used x > 0: ln x is undefined at 1 of 3"
+    ):
+        GaussianLn(np.array(x), np.array([1.0, 2.0, 1.0]))
+
+
+def test_gaussian_ln_accepts_x_excluded_from_the_fit():
+    """An x <= 0 that ``xmin`` leaves out of the used data does not refuse the fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
+    obj = GaussianLn(x, np.array([5.0, 5.0, 1.0, 2.0, 1.0]), xmin=0.5)
+    assert obj.observations.used.x.tolist() == [1.0, 2.0, 3.0]

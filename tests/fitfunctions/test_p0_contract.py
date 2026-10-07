@@ -276,8 +276,8 @@ IMPOSSIBLE = [
     # y sums to zero: no weighted mean.
     _case(Gaussian, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="Gaussian"),
     _case(GaussianNormalized, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="GaussianNorm"),
-    # Weighted mean -2 has no logarithm.
-    _case(GaussianLn, [-3.0, -2, -1], [1.0, 2, 1], {}, id="GaussianLn"),
+    # y sums to zero: no weighted mean of ln x.
+    _case(GaussianLn, np.exp([0.0, 1, 2, 3]), [1.0, -1, 1, -1], {}, id="GaussianLn"),
     # No data above guess_x0 = 20.
     _case(
         HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {"guess_x0": 20.0}, id="Step"
@@ -368,9 +368,7 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     Ones is the feasible default for unbounded parameters. The fit with ``p0``
     None must end exactly as the fit given ones as ``p0=``, and is never refused
     with the non-finite-guess ValueError. Whether the start converges is
-    scipy's business: all ones is singular for GaussianLn on negative x, and
-    scipy then reports "Residuals are not finite in the initial point" on both
-    routes alike.
+    scipy's business: when it fails, it must fail alike on both routes.
 
     ON FAILURE: the code is wrong.
     """
