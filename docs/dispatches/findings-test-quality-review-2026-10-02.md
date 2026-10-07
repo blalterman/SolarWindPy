@@ -251,7 +251,7 @@ docstring). Neither checks behaviour a code mutant changes. Controls: with no mu
 every module's recheck targets pass; a mutant mutmut killed (`Plasma.__init__` mutant 1)
 reads killed in the recheck.
 
-Remaining: 1,377 survivors after recheck, 1,160 of them in `plasma.py`, `hist2d.py` and
+Remaining: 1,377 survivors after recheck, 1,139 of them in `plasma.py`, `hist2d.py` and
 `sidc.py`. Some are unkillable by construction (unit factors of 1.0; `nuc` in the fixture's
 high-drift regime, see Mutation sample). The rest are behaviours with no test that fails when
 they break, the gap the review's Governing Property names.
