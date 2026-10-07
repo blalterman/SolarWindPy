@@ -15,6 +15,7 @@ not enough. What is asserted about a plot is the data handed to matplotlib
 """
 
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -826,7 +827,6 @@ class TestPlotContours:
     def _contour(self, splot, **kwargs):
         _, ax = plt.subplots()
         kwargs.setdefault("cbar", False)
-        kwargs.setdefault("label_levels", False)
         kwargs.setdefault("grid_resolution", self.RES)
         return splot.plot_contours(ax=ax, levels=self.LEVELS, **kwargs)
 
@@ -853,7 +853,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1, log=log)
-        _, _, _, qset = self._contour(splot, method="tricontour")
+        _, _, qset = self._contour(splot, method="tricontour")
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
         _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
@@ -865,7 +865,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, _, qset = self._contour(
+        _, _, qset = self._contour(
             splot, method="grid", interpolation="linear", gaussian_filter_std=0
         )
         x, y, z = _occupied_centers(splot)
@@ -882,7 +882,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, _, qset = self._contour(
+        _, _, qset = self._contour(
             splot,
             method="grid",
             interpolation="linear",
@@ -904,7 +904,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, _, qset = self._contour(
+        _, _, qset = self._contour(
             splot,
             method="grid",
             interpolation="nearest",
@@ -926,7 +926,7 @@ class TestPlotContours:
         """
         splot = _plot(1)
         params = {"neighbors": 5, "smoothing": 0.5, "kernel": "cubic"}
-        _, _, _, qset = self._contour(
+        _, _, qset = self._contour(
             splot,
             method="rbf",
             rbf_neighbors=params["neighbors"],
@@ -950,9 +950,9 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, _, default = self._contour(splot)
-        _, _, _, rbf = self._contour(splot, method="rbf")
-        _, _, _, grid = self._contour(splot, method="grid")
+        _, _, default = self._contour(splot)
+        _, _, rbf = self._contour(splot, method="rbf")
+        _, _, grid = self._contour(splot, method="grid")
         _assert_same_segments(default, rbf)
         assert _segments_differ(default, grid)
 
@@ -962,7 +962,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, _, qset = self._contour(
+        _, _, qset = self._contour(
             splot,
             method="grid",
             interpolation="linear",
@@ -981,25 +981,42 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        ax, _, cbar, qset = self._contour(splot, cbar=True)
+        ax, cbar, qset = self._contour(splot, cbar=True)
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
-        _, _, mappable, qset = self._contour(splot, cbar=False)
+        _, mappable, qset = self._contour(splot, cbar=False)
         assert mappable is qset
 
-    @pytest.mark.parametrize("skip_max", [True, False])
-    def test_top_level_is_labelled_only_when_not_skipped(self, skip_max):
-        """Labels mark the given levels; ``skip_max_clbl`` leaves the top one bare.
+    @pytest.mark.parametrize("method", ["tricontour", "grid"])
+    @pytest.mark.parametrize(
+        "keyword", ["label_levels", "clabel_kwargs", "skip_max_clbl"]
+    )
+    def test_removed_labelling_keywords_are_rejected(self, method, keyword):
+        """A removed labelling keyword fails loudly instead of being ignored.
 
-        ON FAILURE: the code is wrong.
+        Unknown keywords are forwarded to matplotlib's contour call, whose
+        ``Artist.set`` raises ``AttributeError`` naming the keyword.
+
+        ON FAILURE: the code is wrong -- ``plot_contours`` accepts a labelling
+        keyword again, or swallows unknown keywords silently.
         """
-        splot = _plot(1)
-        _, lbls, _, _ = self._contour(
-            splot, method="tricontour", label_levels=True, skip_max_clbl=skip_max
-        )
-        labelled = {float(t.get_text()) for t in lbls}
-        assert labelled == set(self.LEVELS[:-1] if skip_max else self.LEVELS)
-        _, none, _, _ = self._contour(splot, method="tricontour", label_levels=False)
-        assert none is None
+        with pytest.raises(AttributeError, match=keyword):
+            self._contour(_plot(1), method=method, **{keyword: True})
+
+    @pytest.mark.parametrize("method", ["tricontour", "grid"])
+    def test_filled_contours_draw_no_labels_and_no_deprecation(self, method):
+        """Filled contours draw no text and emit no ``MatplotlibDeprecationWarning``.
+
+        Matplotlib deprecated ``clabel`` on filled contours in 3.11; the old
+        default ``label_levels=True`` labelled ``contourf`` output and warned.
+
+        ON FAILURE: the code is wrong -- something labels the filled contours
+        again, or calls another deprecated matplotlib API.
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
+            ax, _, qset = self._contour(_plot(1), method=method, use_contourf=True)
+        assert qset.filled
+        assert len(ax.texts) == 0
 
     def test_unknown_method_is_rejected(self):
         """A method other than rbf, grid or tricontour raises ValueError.
