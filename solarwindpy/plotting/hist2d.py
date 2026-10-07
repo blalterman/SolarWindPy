@@ -864,7 +864,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             y=y,
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
-            nbins=self.edges[axis].values,
+            nbins=self.intervals[axis],  # Keeps which side each bin closes on.
             **kwargs,
         )
 

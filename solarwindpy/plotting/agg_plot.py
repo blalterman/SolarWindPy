@@ -199,6 +199,9 @@ class AggPlot(base.Base):
             to calculate optimal bin widths.
             If str and nbins != "knuth", use `np.histogram(data, bins=nbins)`
             to calculate bins.
+            If a :class:`pandas.IntervalIndex` of contiguous intervals, use
+            those bins and the side they are closed on, e.g. another
+            histogram's ``intervals``.
             If array-like, treat as bins.
 
         precision: int or None
@@ -208,8 +211,10 @@ class AggPlot(base.Base):
         -----
         Edges from an integer ``nbins`` follow :func:`numpy.histogram`: the
         outer edges are rounded outward so they enclose every sample, and each
-        bin is closed on the left, the last bin also on the right. Other
-        ``nbins`` give right-closed bins, ``(a, b]``.
+        bin is closed on the left, the last bin also on the right. An
+        ``IntervalIndex`` keeps its closure, and a left-closed one also closes
+        its last bin on the right, so another histogram's intervals reproduce
+        its bins. Other ``nbins`` give right-closed bins, ``(a, b]``.
         """
         data = self.data
         bins = {}
@@ -220,7 +225,7 @@ class AggPlot(base.Base):
 
         gb_axes = self._gb_axes
 
-        if isinstance(nbins, (str, int)) or (
+        if isinstance(nbins, (str, int, pd.IntervalIndex)) or (
             hasattr(nbins, "__iter__") and len(nbins) != len(gb_axes)
         ):
             # Single paramter for `nbins`.
@@ -246,7 +251,17 @@ class AggPlot(base.Base):
             # Edges from an integer bin count follow `np.histogram`'s convention.
             from_count = isinstance(b, Integral) and not isinstance(b, bool)
 
-            if isinstance(b, str) and b == "knuth":
+            closed = "right"
+            if isinstance(b, pd.IntervalIndex):
+                # Keep the given bins and the side they close on.
+                if not (
+                    b.is_monotonic_increasing and (b.left[1:] == b.right[:-1]).all()
+                ):
+                    raise ValueError(f"Need contiguous, increasing intervals, got {b}.")
+                closed = b.closed
+                b = np.append(b.left.to_numpy(), b.right[-1])
+
+            elif isinstance(b, str) and b == "knuth":
                 try:
                     assert knuth_bin_width
                 except NameError:
@@ -270,7 +285,6 @@ class AggPlot(base.Base):
             except TypeError:
                 assert not b.isna().any()
 
-            closed = "right"
             if from_count:
                 # Round the outer edges outward so they enclose every sample.
                 scale = 10.0**precision

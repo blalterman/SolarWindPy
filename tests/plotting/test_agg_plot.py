@@ -12,7 +12,7 @@ enclose every sample and the bins are closed on the left, the last also on the
 right (``tests/plotting/test_hist2d_plotting.py``, ``test_edges_span_the_data``,
 ``test_auto_bins_retain_every_observation``). Explicit edges give right-closed
 bins, so tests here that count observations use explicit edges that bracket
-the data.
+the data. An ``IntervalIndex`` keeps the side its bins close on.
 """
 
 import numpy as np
@@ -143,6 +143,30 @@ class TestBinEdges:
         x = pd.Series([0.0, 2.0, 4.0, np.inf, -np.inf, np.nan])
         h = Hist1D(x, nbins=2)
         np.testing.assert_array_equal(h.edges["x"], [0.0, 2.0, 4.0])
+
+    def test_interval_index_keeps_the_bins_it_was_built_from(self):
+        """An integer-nbins histogram's intervals rebuild its left-closed bins.
+
+        Samples sit on all three edges [0, 2, 4]; numpy.histogram counts them.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        parent = Hist1D(x, nbins=2)
+
+        rebuilt = Hist1D(x, nbins=parent.intervals["x"])
+
+        assert rebuilt.intervals["x"].equals(parent.intervals["x"])
+        expected = np.histogram(x, bins=[0.0, 2.0, 4.0])[0]
+        assert rebuilt.agg().to_numpy() == exact(expected.astype(float))
+
+    def test_non_contiguous_interval_index_is_rejected(self):
+        """Intervals with a gap between them are not a set of bins.
+
+        ON FAILURE: the code is wrong.
+        """
+        gapped = pd.IntervalIndex.from_tuples([(0.0, 1.0), (2.0, 3.0)])
+        with pytest.raises(ValueError, match="contiguous"):
+            Hist1D(pd.Series([0.5, 2.5]), nbins=gapped)
 
     def test_intervals_run_between_consecutive_edges(self, xyz):
         """Interval k spans edges[k] to edges[k + 1] on each axis.
