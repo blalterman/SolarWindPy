@@ -270,4 +270,4 @@ in `fitfunctions/core.py` (654 to 640), the dead band-overlap check in `sidc.py`
 Remaining across all nine modules: 1,138 survivors after recheck. By kind, they are mutants
 no test can kill (behaviour-identical changes), plotting appearance, error and log wording,
 the two mutmut-excluded docstring functions, and the `hist2d` data paths and remaining
-`plasma.py` physics that need a mutant-by-mutant look; GitHub issue tracks them.
+`plasma.py` physics that need a mutant-by-mutant look; GitHub issue #507 tracks them.
