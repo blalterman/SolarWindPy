@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.lines.LineXintercept &mdash; SolarWindPy 0.1.dev1+g5fbb35221 documentation</title>
+  <title>solarwindpy.fitfunctions.lines.LineXintercept &mdash; SolarWindPy 0.1.dev1+gf75f81cf7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=672eaa73"></script>
+      <script src="../_static/documentation_options.js?v=15197aea"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -360,10 +360,10 @@ where lower &lt; upper.</p>
 <dt><strong>youtside</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>(<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>), optional</span></dt><dd><p>Include only data outside this range.
 Format: (lower, upper) where lower &lt; upper.</p>
 </dd>
-<dt><strong>weights</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a>, optional</span></dt><dd><p>Uncertainties (1-sigma) associated with y values.
-Used for weighted least squares fitting. If 1-d array,
-interpreted as diagonal covariance matrix. If 2-d,
-must be positive definite covariance matrix.</p>
+<dt><strong>weights</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a>, optional</span></dt><dd><p>1-sigma uncertainties of the y values, used for weighted
+least squares fitting: one per observation, in xobs’s
+shape. A covariance matrix is not supported; weights of
+any other shape raise InvalidParameterError.</p>
 </dd>
 <dt><strong>wmin</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Lower weight limit. Observations with smaller weights
 are excluded from the fit.</p>

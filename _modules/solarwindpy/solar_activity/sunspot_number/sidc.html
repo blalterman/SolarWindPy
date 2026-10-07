@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+g5fbb35221 documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc &mdash; SolarWindPy 0.1.dev1+gf75f81cf7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=672eaa73"></script>
+      <script src="../../../../_static/documentation_options.js?v=15197aea"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -838,7 +838,13 @@
 <div class="viewcode-block" id="SIDC.cut_spec_by_ssn_band">
 <a class="viewcode-back" href="../../../../_autosummary/solarwindpy.solar_activity.sunspot_number.sidc.SIDC.html#solarwindpy.solar_activity.sunspot_number.sidc.SIDC.cut_spec_by_ssn_band">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">cut_spec_by_ssn_band</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"ssn"</span><span class="p">,</span> <span class="n">dssn</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Cut the sunspot number at each spectrum in intervals of width +/- dssn."""</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Cut the sunspot number at each spectrum in intervals of width +/- dssn.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If :attr:`interpolated` has no ``key`` column, naming it.</span>
+<span class="sd">        """</span>
 
         <span class="n">dssn</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dssn</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s2">"nssn"</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dssn</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">):</span>
@@ -847,29 +853,19 @@
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">]</span>
         <span class="n">mids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">dssn</span><span class="p">)</span>
 
-        <span class="n">left</span> <span class="o">=</span> <span class="n">mids</span> <span class="o">-</span> <span class="n">dssn</span>
-        <span class="n">right</span> <span class="o">=</span> <span class="n">mids</span> <span class="o">+</span> <span class="n">dssn</span>
-        <span class="n">intervals</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="n">ll</span><span class="p">,</span> <span class="n">rr</span><span class="p">)</span> <span class="k">for</span> <span class="n">ll</span><span class="p">,</span> <span class="n">rr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)]</span>
-        <span class="n">intervals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"ssn_intervals"</span><span class="p">)</span>
+        <span class="c1"># Neighbouring bands share one edge. Computed separately, mids + dssn</span>
+        <span class="c1"># can exceed the next mids - dssn by rounding, and pd.cut refuses</span>
+        <span class="c1"># overlapping bins.</span>
+        <span class="n">breaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mids</span> <span class="o">-</span> <span class="n">dssn</span><span class="p">,</span> <span class="n">mids</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">dssn</span><span class="p">)</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">IntervalIndex</span><span class="o">.</span><span class="n">from_breaks</span><span class="p">(</span><span class="n">breaks</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"ssn_intervals"</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">cut</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">interpolated</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">],</span>  <span class="c1"># TODO: Fix this generalized hack</span>
-                <span class="n">intervals</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolated</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">key</span><span class="p">]</span>  <span class="c1"># TODO: generalize this hack</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="c1"># Check that intervals don't overlap.</span>
-                <span class="k">for</span> <span class="n">ll</span><span class="p">,</span> <span class="n">rr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">intervals</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-                    <span class="n">l_upper</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">right</span>
-                    <span class="n">r_lower</span> <span class="o">=</span> <span class="n">rr</span><span class="o">.</span><span class="n">left</span>
-                    <span class="k">if</span> <span class="n">l_upper</span> <span class="o">&gt;</span> <span class="n">r_lower</span><span class="p">:</span>
-                        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""Your intervals can't overlap.</span>
-<span class="s2">Interval 0: </span><span class="si">{</span><span class="n">ll</span><span class="si">}</span>
-<span class="s2">Interval 1: </span><span class="si">{</span><span class="n">rr</span><span class="si">}</span>
-<span class="s2">It causes a KeyError in `pd.cut`."""</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"`interpolated` has no column </span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">; interpolate it with "</span>
+                <span class="sa">f</span><span class="s2">"interpolate_data(..., key=</span><span class="si">{</span><span class="n">key</span><span class="si">!r}</span><span class="s2">) first."</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="n">cut</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">intervals</span><span class="p">)</span>
 
         <span class="n">cut</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_band"</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spec_by_ssn_band</span> <span class="o">=</span> <span class="n">cut</span>
