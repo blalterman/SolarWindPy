@@ -16,6 +16,7 @@ from scipy.special import erf
 
 from . import test_base as base
 
+import solarwindpy as swp
 from solarwindpy.core import vector
 from solarwindpy.core import ions
 from solarwindpy.core import plasma
@@ -3257,3 +3258,353 @@ def test_estimate_electrons_refuses_both_p_and_p1():
         ValueError, match=r"cannot contain protons \(p\) and core protons \(p1\)"
     ):
         p.estimate_electrons()
+
+
+# ---------------------------------------------------------------------------
+# Construction, species handling and container behaviour.
+# ---------------------------------------------------------------------------
+
+
+def _protons_at(times):
+    """Proton-only plasma data whose density on row i is i + 1 cm^-3, indexed by ``times``.
+
+    The densities record each row's input position, so a test can see where
+    every row ended up.
+    """
+    rows = [{"p1": (i + 1.0, (400.0, 0.0, 0.0), 30.0, 30.0)} for i in range(len(times))]
+    data = _hand_plasma(rows, "p1").data
+    data.index = pd.DatetimeIndex(times, name="Epoch")
+    return data
+
+
+def _warnings(caplog, text):
+    return [r.getMessage() for r in caplog.records if text in r.getMessage()]
+
+
+def test_out_of_order_times_are_logged_then_sorted(caplog):
+    r"""Rows out of time order log a warning with count and positions; the data are sorted.
+
+    Input times 12:02, 12:00, 12:03, 12:01 carry densities 1-4. Rows 1 and 3 are
+    earlier than the row before them, so the warning reports 2 of 4 rows at rows
+    [1, 3], and the stored data run 12:00-12:03 with densities 2, 4, 1, 3 (each
+    row moved with its time). Per the author, `Plasma` sorts once at construction.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = [
+        "2020-01-01 12:02",
+        "2020-01-01 12:00",
+        "2020-01-01 12:03",
+        "2020-01-01 12:01",
+    ]
+    data = _protons_at(times)
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(data, "p1")
+
+    (message,) = _warnings(caplog, "earlier than the row before")
+    assert "2 of 4 rows" in message and "[1, 3]" in message
+    assert p.data.index.equals(pd.DatetimeIndex(sorted(times), name="Epoch"))
+    assert p.n("p1").to_numpy() == exact([2.0, 4.0, 1.0, 3.0])
+    assert p.p1.n.to_numpy() == exact([2.0, 4.0, 1.0, 3.0])
+
+
+def test_repeated_times_are_logged_and_kept_in_input_order(caplog):
+    r"""A repeated timestamp logs a warning and both rows stay, in input order.
+
+    Input times 12:01, 12:00, 12:01 carry densities 1-3. Sorting must be stable:
+    the stored data are 12:00, 12:01, 12:01 with densities 2, 1, 3, and the
+    warning reports 1 of 3 rows repeating an earlier time, at row 2.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = ["2020-01-01 12:01", "2020-01-01 12:00", "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(_protons_at(times), "p1")
+
+    (message,) = _warnings(caplog, "repeat an earlier timestamp")
+    assert "1 of 3 rows" in message and "[2]" in message
+    assert p.n("p1").to_numpy() == exact([2.0, 1.0, 3.0])
+
+
+def test_ordered_unique_times_log_no_order_warning(caplog):
+    r"""Data already in time order with unique times log neither warning.
+
+    ON FAILURE: the code is wrong; the order check fires on clean data.
+    """
+    times = ["2020-01-01 12:00", "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        plasma.Plasma(_protons_at(times), "p1")
+    assert not _warnings(caplog, "earlier than the row before")
+    assert not _warnings(caplog, "repeat an earlier timestamp")
+
+
+def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
+    r"""Out-of-order plasma, spacecraft and aux data on one index come out sorted and aligned.
+
+    The example plasma's three rows are passed in order 2, 0, 1, with its
+    spacecraft and an auxiliary column (0, 1, 2 in time order) on that same
+    index. Per the author, all three come from one source, so all three are
+    sorted the same way: the index is the example's sorted epoch, the
+    spacecraft x position is the example's [-42, -22, -34], the auxiliary
+    column reads 0, 1, 2, and one order warning is logged.
+
+    ON FAILURE: the code is wrong.
+    """
+    ref = swp.examples.load_plasma()
+    perm = [2, 0, 1]
+    data = ref.data.iloc[perm]
+    sc = spacecraft.Spacecraft(ref.spacecraft.data.iloc[perm], "PSP", "HCI")
+    aux = pd.DataFrame(
+        {("q", "", ""): [0.0, 1.0, 2.0]},
+        index=ref.epoch,
+    ).iloc[perm]
+    aux.columns.names = ["M", "C", "S"]
+
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(data, *ref.species, spacecraft=sc, auxiliary_data=aux)
+
+    assert len(_warnings(caplog, "earlier than the row before")) == 1
+    assert p.data.index.equals(ref.epoch)
+    assert p.spacecraft.data.index.equals(ref.epoch)
+    assert p.auxiliary_data.index.equals(ref.epoch)
+    assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
+        [-42.0, -22.0, -34.0]
+    )
+    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+
+
+def test_setters_refuse_a_mismatched_index_with_value_error():
+    r"""Spacecraft or auxiliary data on a different time index raise ValueError.
+
+    Each frame's times are shifted one minute from the plasma's, a genuine
+    mismatch rather than a reordering, so the error names the index.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    shifted = p.epoch + pd.Timedelta("1min")
+    aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=shifted)
+    aux.columns.names = ["M", "C", "S"]
+    with pytest.raises(ValueError, match="index"):
+        p.set_auxiliary_data(aux)
+
+    sc_data = p.spacecraft.data.set_axis(shifted, axis=0)
+    with pytest.raises(ValueError, match="index"):
+        p.set_spacecraft(spacecraft.Spacecraft(sc_data, "PSP", "HCI"))
+
+
+def test_missing_timestamps_are_logged_and_kept(caplog):
+    r"""NaT in the time index logs a warning with its count, and the row stays.
+
+    Times 12:00, NaT, 12:01 are otherwise in order: one warning reports 1 of 3
+    rows without a timestamp, all three rows remain, and no order warning
+    fires.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = ["2020-01-01 12:00", None, "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(_protons_at(times), "p1")
+
+    (message,) = _warnings(caplog, "no timestamp")
+    assert "1 of 3 rows" in message
+    assert len(p.data) == 3
+    assert not _warnings(caplog, "earlier than the row before")
+
+
+def test_order_warning_counts_only_real_out_of_order_rows_beside_nat(caplog):
+    r"""With a NaT between them, 12:02 then 12:01 is still one out-of-order row.
+
+    Comparisons with NaT are False, so a pairwise check would report 0 rows.
+    Per the author, only real out-of-order rows count: 1 of 3, at row 2.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = ["2020-01-01 12:02", None, "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(_protons_at(times), "p1")
+
+    (message,) = _warnings(caplog, "earlier than the row before")
+    assert "1 of 3 rows" in message and "[2]" in message
+    assert p.n("p1").to_numpy() == exact([3.0, 1.0, 2.0])
+
+
+def test_plasma_refuses_data_that_is_not_a_dataframe():
+    r"""Data that is not a DataFrame raises TypeError naming the expected type.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match="DataFrame"):
+        plasma.Plasma([1.0, 2.0], "p1")
+
+
+def test_nuc_refuses_a_combined_species_on_either_side():
+    r"""`nuc` takes one species per side: "a+p1" as `sa` or `sb` raises.
+
+    ON FAILURE: the code is wrong; a summed species would be read as its first
+    member and give a rate for the wrong pair.
+    """
+    p = _hand_plasma(NUC_ROWS, "a", "p1")
+    with pytest.raises(ValueError, match="individual"):
+        p.nuc("a+p1", "p1")
+    with pytest.raises(ValueError, match="individual"):
+        p.nuc("p1", "a+p1")
+
+
+def test_nc_defaults_to_both_species():
+    r"""`nc(sa, sb)` is `nc(sa, sb, both_species=True)`, named "sa+sb".
+
+    The signature and `nuc` give `both_species=True` as the default.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    default = p.nc("p1", "a")
+    assert default.name == "p1+a"
+    pdt.assert_series_equal(default, p.nc("p1", "a", both_species=True))
+
+
+def test_number_density_total_skips_a_missing_species_unless_skipna_is_false():
+    r"""`n("p1+p2")` and `number_density("p1+p2")` add the species present.
+
+    Row 0 holds 5 cm^-3 protons and 0.5 cm^-3 beam protons; on row 1 the beam is
+    missing. The default total is 5.5 then 5.0 (the proton density alone, the
+    across-species rule); with `skipna=False` row 1 is NaN.
+
+    ON FAILURE: the code is wrong, unless the author revises the across-species
+    missing-data rule (docs page `missing_data`).
+    """
+    beam = (0.5, (450.0, 0.0, 0.0), 20.0, 20.0)
+    p = _hand_plasma(
+        [{"p1": _PROTON_ROW, "p2": beam}, {"p1": _PROTON_ROW, "p2": _MISSING_ROW}],
+        "p1",
+        "p2",
+    )
+    for method in (p.n, p.number_density):
+        assert method("p1+p2").to_numpy() == exact([5.5, 5.0])
+        assert method("p1+p2", skipna=False).to_numpy() == exact(
+            [5.5, np.nan], nan_ok=True
+        )
+
+
+def test_kinetic_energy_flux_per_species_columns_are_named_S():
+    r"""Several species give one column per species, on a column level named "S".
+
+    ON FAILURE: the code is wrong; callers select species with `xs(..., level="S")`.
+    """
+    beam = (0.5, (450.0, 0.0, 0.0), 20.0, 20.0)
+    p = _hand_plasma([{"p1": _PROTON_ROW, "p2": beam}], "p1", "p2")
+    wk = p.kinetic_energy_flux("p1", "p2")
+    assert list(wk.columns.names) == ["S"]
+    assert list(wk.columns) == ["p1", "p2"]
+
+
+def _example_with_species_aux():
+    """The example plasma with a shared auxiliary column and one per species."""
+    p = swp.examples.load_plasma()
+    cols = [("q", "", "")] + [("q", "", s) for s in p.species]
+    aux = pd.DataFrame(
+        np.arange(3.0 * len(cols)).reshape(3, len(cols)),
+        index=p.epoch,
+        columns=pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"]),
+    )
+    p.set_auxiliary_data(aux)
+    return p
+
+
+@pytest.mark.parametrize(
+    "dropped, kept", [(("a",), ("e", "p1", "p2")), (("a", "e"), ("p1", "p2"))]
+)
+def test_drop_species_keeps_shared_and_remaining_species_auxiliary_columns(
+    dropped, kept
+):
+    r"""After `drop_species`, the auxiliary data hold the shared and kept species' columns.
+
+    The example plasma (a, e, p1, p2) carries ("q", "", "") plus ("q", "", s) for
+    each species; dropping `dropped` leaves exactly ("q", "", "") and one column
+    per species in `kept`, with their values unchanged.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _example_with_species_aux()
+    result = p.drop_species(*dropped)
+    expected_cols = [("q", "", "")] + [("q", "", s) for s in kept]
+    assert list(result.auxiliary_data.columns) == expected_cols
+    pdt.assert_frame_equal(
+        result.auxiliary_data, p.auxiliary_data.loc[:, expected_cols]
+    )
+
+
+def test_drop_species_keeps_the_spacecraft():
+    r"""The plasma `drop_species` returns carries the original's spacecraft.
+
+    ON FAILURE: the code is wrong; the trajectory is lost and `nc` stops working.
+    """
+    p = swp.examples.load_plasma()
+    result = p.drop_species("a")
+    assert result.spacecraft is not None
+    assert result.spacecraft == p.spacecraft
+
+
+def test_missing_attribute_raises_attribute_error_naming_it():
+    r"""An unknown attribute raises AttributeError naming it; `hasattr`/`getattr` work.
+
+    Species remain attributes (`plasma.p1`), so only names that are neither
+    attributes nor species raise.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    assert not hasattr(p, "not_an_attr")
+    sentinel = object()
+    assert getattr(p, "not_an_attr", sentinel) is sentinel
+    with pytest.raises(AttributeError, match="not_an_attr"):
+        p.not_an_attr
+    assert p.p1 is p.ions.loc["p1"]
+
+
+def test_species_string_with_whitespace_is_unavailable():
+    r"""A species string containing a space, "a e", is not a species and raises.
+
+    Species combine only with "+"; the example plasma holds both "a" and "e", so
+    splitting on whitespace would wrongly accept it.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    with pytest.raises(ValueError, match="unavailable"):
+        p.number_density("a e")
+
+
+def test_auxiliary_data_with_wrong_level_names_raises_value_error():
+    r"""Auxiliary columns must be levels named ("M", "C", "S"); others raise ValueError.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    aux = pd.DataFrame({("quality", "", ""): [0, 1, 0]}, index=p.epoch)
+    aux.columns.names = ["M", "C", "X"]
+    with pytest.raises(ValueError, match="levels named"):
+        p.set_auxiliary_data(aux)
+
+
+def test_spacecraft_with_wrong_level_names_raises_value_error():
+    r"""Spacecraft columns must be levels named ("M", "C"); others raise ValueError.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    sc_data = p.spacecraft.data.rename_axis(columns=["M", "X"])
+    sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
+    with pytest.raises(ValueError, match="levels named"):
+        p.set_spacecraft(sc)
+
+
+def test_plasma_data_with_wrong_level_names_raises_value_error():
+    r"""Plasma data columns must be levels named "M", "C", "S"; others raise ValueError.
+
+    ON FAILURE: the code is wrong.
+    """
+    data = swp.examples.load_plasma().data.rename_axis(columns=["M", "C", "X"])
+    with pytest.raises(ValueError, match="levels named"):
+        plasma.Plasma(data, "p1")
