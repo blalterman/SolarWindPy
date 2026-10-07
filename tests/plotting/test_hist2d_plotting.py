@@ -30,7 +30,12 @@ from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
+
+
+class _ProjectionMovesEdgeSamples(AssertionError):
+    """Raised when a projection's counts differ from numpy.histogram's."""
 
 
 @pytest.fixture
@@ -313,6 +318,23 @@ class TestPlotHistWithContours:
         )
         plt.close("all")
 
+    def test_mesh_aggregates_with_the_callers_fcn(self, z_valued_hist):
+        """``fcn`` reaches the mesh: with ``"count"`` it shows counts, not means.
+
+        The fixture's per-bin mean is ``7 - count``, so the default mean and the
+        requested count differ in every occupied bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist, counts, _ = z_valued_hist
+        ax, _, _ = hist.plot_hist_with_contours(fcn="count", cbar=False)
+        values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
+        expected = _expected_grid(counts)  # empty bins are blank
+        assert np.asarray(values.reshape(expected.shape)) == exact(
+            expected, nan_ok=True
+        )
+        plt.close("all")
+
     def test_nan_aware_filter_contours_the_normalised_convolution(
         self, known_hist, known_counts
     ):
@@ -562,6 +584,56 @@ class TestBinContract:
         )
         assert h.edges["x"].size == 7
         assert h.edges["y"].size == 14
+
+
+class TestClipData:
+    """``clip_data`` clips the tails it names when points are binned."""
+
+    # One low and one high x outlier. Clipping to the 0.01st percentile moves
+    # -1000 to about -999.1 and clipping to the 99.99th moves 1000 to about
+    # 999.1, each from an outer x-bin into the middle one (-999.5, 999.5].
+    # y is constant, so clipping leaves it alone.
+    X = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
+    XEDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
+
+    @pytest.mark.parametrize(
+        "clip_data, expected",
+        [
+            (None, [1, 8, 1]),  # nothing moves
+            (False, [1, 8, 1]),
+            (True, [0, 10, 0]),  # both outliers move to the middle bin
+            ("l", [0, 9, 1]),  # only the low outlier moves
+            ("u", [1, 9, 0]),  # only the high outlier moves
+        ],
+    )
+    def test_clip_data_clips_the_tails_it_names(self, clip_data, expected):
+        """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
+
+        ON FAILURE: the code is wrong.
+        """
+        y = pd.Series(0.5, index=self.X.index)
+        h = Hist2D(
+            self.X,
+            y,
+            clip_data=clip_data,
+            nbins=[self.XEDGES, np.array([0.0, 1.0])],
+        )
+        grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
+        counts = grid.fillna(0).sum(axis=0)  # empty x-bins count 0
+        assert counts.to_numpy() == exact(expected)
+
+    @pytest.mark.parametrize(
+        "given, expected",
+        [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
+    )
+    def test_clip_stores_clip_data_with_none_as_false(self, given, expected):
+        """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+
+        ON FAILURE: the code is wrong.
+        """
+        clip = Hist2D(self.X, self.X, clip_data=given).clip
+        assert clip == expected
+        assert type(clip) is type(expected)
 
 
 class TestAggregatedValues:
@@ -1411,6 +1483,218 @@ class TestProject1D:
         ]
         np.testing.assert_allclose(projected.values, expected)
 
+    def test_only_plotted_projection_honours_the_count_limits(
+        self, known_hist, known_counts
+    ):
+        """By default the marginal counts only the bins ``clim`` keeps.
+
+        A lower count limit of 2 blanks the bins holding one observation, so
+        they are not plotted and the default ``only_plotted=True`` leaves them
+        out of the projection.
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_clim(2, None)
+        projected = known_hist.project_1d("x", project_counts=True).agg()
+        kept = np.where(known_counts >= 2, known_counts, 0)  # the bins clim keeps
+        assert projected.to_numpy() == exact(kept.sum(axis=0))
+
+    def test_two_valued_z_is_aggregated_as_data(self):
+        """A z taking exactly two values is data: the marginal is its mean per x-bin.
+
+        numpy computes each expected mean from the same inputs.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
+        z = pd.Series(np.where(np.arange(x.size) % 3 == 0, 10.0, 0.0), name="z")
+        assert z.unique().size == 2
+
+        h = Hist2D(x, y, z, nbins=[XEDGES, YEDGES])
+        projected = h.project_1d("x").agg()
+
+        expected = [
+            np.mean(z.values[((lo < x) & (x <= hi)).values])
+            for lo, hi in zip(XEDGES[:-1], XEDGES[1:])
+        ]
+        assert projected.to_numpy() == exact(expected)
+
+    def test_projection_without_z_aggregates_the_other_axis(self):
+        """Without z and counts, the x marginal is the mean of y per x-bin.
+
+        The y-values sit in the first and last y-bins and exactly on the top
+        edge, which the right-closed last bin ``(0.8, 1.0]`` holds. numpy
+        computes each expected mean from the same inputs.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.125, 0.125, 0.375, 0.375, 0.625, 0.875, 0.875])
+        y = pd.Series([0.1, 1.0, 0.95, 0.3, 0.5, 0.1, 0.7])
+        h = Hist2D(x, y, nbins=[XEDGES, YEDGES])
+
+        projected = h.project_1d("x", project_counts=False).agg()
+
+        expected = [
+            np.mean(y.values[((lo < x) & (x <= hi)).values])
+            for lo, hi in zip(XEDGES[:-1], XEDGES[1:])
+        ]
+        assert projected.to_numpy() == exact(expected)
+
+    def test_y_outside_the_edges_is_nan_in_the_projection(self):
+        """With ``only_plotted=False``, y outside the parent's y-edges is NaN.
+
+        The y-edges ``[0.2, 0.4, 0.6]`` are narrower than the data, so 0.1 and
+        0.9 lie outside every y-bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.125, 0.375, 0.625, 0.875])
+        y = pd.Series([0.1, 0.3, 0.5, 0.9])
+        h = Hist2D(x, y, nbins=[XEDGES, np.array([0.2, 0.4, 0.6])])
+
+        projected = h.project_1d("x", only_plotted=False)
+
+        expected = [np.nan, 0.3, 0.5, np.nan]  # outside, inside, inside, outside
+        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+
+    @pytest.mark.parametrize(
+        "y, nbins, expected",
+        [
+            # Explicit edges give right-closed bins (0.2, 0.4], (0.4, 0.6]:
+            # 0.2 is in no bin, 0.6 is in the last one.
+            (
+                [0.2, 0.3, 0.6, 0.7],
+                [XEDGES, np.array([0.2, 0.4, 0.6])],
+                [np.nan, 0.3, 0.6, np.nan],
+            ),
+            # An integer bin count gives numpy's bins [0, 2), [2, 4]: both
+            # outer edges are inside.
+            ([0.0, 1.0, 2.0, 4.0], 2, [0.0, 1.0, 2.0, 4.0]),
+        ],
+        ids=["right-closed", "left-closed"],
+    )
+    def test_projection_keeps_exactly_the_y_values_the_parent_bins(
+        self, y, nbins, expected
+    ):
+        """A y on an outer y-edge is kept exactly when the parent bins it.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.125, 0.375, 0.625, 0.875])
+        h = Hist2D(x, pd.Series(y), nbins=nbins)
+
+        projected = h.project_1d("x", only_plotted=False)
+
+        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+
+    def test_log_axes_round_trip_through_the_projection(self):
+        """A log-log projection stores the caller's x and y and stays log-log.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([2.0, 3.0, 20.0, 50.0])
+        y = pd.Series([5.0, 500.0, 50.0, 2000.0])
+        h = Hist2D(
+            x,
+            y,
+            logx=True,
+            logy=True,
+            nbins=[np.array([0.0, 1.0, 2.0]), np.array([0.0, 2.0, 4.0])],
+        )
+
+        projected = h.project_1d("x")
+
+        assert projected.log == (True, True)
+        assert (10.0**projected.data.x).to_numpy() == exact(x.to_numpy())
+        assert projected.data.y.to_numpy() == exact(y.to_numpy())
+
+    def test_count_projection_of_a_linear_histogram_is_linear(self, known_hist):
+        """Projected counts of a linear histogram have linear axes.
+
+        ON FAILURE: the code is wrong.
+        """
+        projected = known_hist.project_1d("x", project_counts=True)
+        assert projected.log == (False, False)
+
+    def test_bin_precision_reaches_the_projection(self, known_hist):
+        """``bin_precision`` is passed to ``Hist1D``, which rounds the edges.
+
+        numpy rounds the parent's edges to one decimal place for the
+        expectation.
+
+        ON FAILURE: the code is wrong.
+        """
+        projected = known_hist.project_1d("x", project_counts=True, bin_precision=1)
+        assert projected.edges["x"].to_numpy() == exact(np.round(XEDGES, 1))
+
+    def test_projection_does_not_clip_an_outlier_into_another_bin(self):
+        """An x outlier keeps its bin: the marginal equals the parent's columns.
+
+        Clipping to the 99.99th percentile would move x = 1000 to about 999.1,
+        out of the last bin ``(999.5, 1000]`` and into ``(0.5, 999.5]``.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9, 0.95, 1000.0])
+        y = pd.Series(0.5, index=x.index)
+        xedges = np.array([0.0, 0.5, 999.5, 1000.0])
+        h = Hist2D(x, y, nbins=[xedges, np.array([0.0, 1.0])])
+
+        projected = h.project_1d("x", project_counts=True).agg()
+
+        assert projected.to_numpy() == exact([4, 5, 1])  # x-values per x-bin
+
+    @pytest.mark.parametrize("axis, other", [("x", "y"), ("y", "x")])
+    def test_projection_carries_the_parent_labels(self, known_hist, axis, other):
+        """The projection's x and y labels are the parent's projected and other axes.
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_labels(x="speed", y="density")
+        projected = known_hist.project_1d(axis, project_counts=False)
+        assert projected.labels.x == known_hist.labels._asdict()[axis]
+        assert projected.labels.y == known_hist.labels._asdict()[other]
+
+    @pytest.mark.parametrize("axis", ["x", "y"])
+    def test_count_projection_labels_y_as_a_count(self, known_hist, axis):
+        """Projected counts keep the parent's axis label and label y a Count.
+
+        ON FAILURE: the code is wrong.
+        """
+        known_hist.set_labels(x="speed", y="density")
+        projected = known_hist.project_1d(axis, project_counts=True)
+        assert projected.labels.x == known_hist.labels._asdict()[axis]
+        assert isinstance(projected.labels.y, Count)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=_ProjectionMovesEdgeSamples,
+        reason=(
+            "project_1d rebins on the parent's edges as explicit edges, which "
+            "AggPlot.calc_bins_intervals (solarwindpy/plotting/agg_plot.py) makes "
+            "right-closed, while an integer-nbins parent is left-closed like numpy, "
+            "so a sample on an edge changes bin or is dropped; remove this marker "
+            "when explicit edges can keep the parent's closure"
+        ),
+    )
+    def test_integer_bin_projection_keeps_samples_on_bin_edges(self):
+        """Projected counts of an integer-nbins histogram match numpy.histogram.
+
+        The edges are [0, 2, 4]; samples sit on all three of them.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        y = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 2.0])
+        h = Hist2D(x, y, nbins=2)
+        assert h.edges["x"].to_numpy() == exact([0.0, 2.0, 4.0])
+
+        projected = h.project_1d("x", project_counts=True).agg().to_numpy()
+
+        expected = np.histogram(x, bins=[0.0, 2.0, 4.0])[0]
+        if not np.array_equal(projected, expected):
+            raise _ProjectionMovesEdgeSamples(f"{projected} != {expected}")
+
     def test_unknown_axis_is_rejected(self, known_hist):
         """Only "x" and "y" can be projected.
 
@@ -1563,12 +1847,93 @@ class TestTakeDataInYRangeAcrossX:
         """
         columns = known_hist.agg().unstack("x").columns
         ranges = pd.DataFrame({"bottom": 0.9, "top": 0.1}, index=columns)
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError, match="Need bottom < top"):
             known_hist.take_data_in_yrange_across_x(
                 ranges,
                 lambda key, expected_logx=False: (key.left, key.right),
                 lambda row, expected_logy=False: (row.bottom, row.top),
             )
+
+    @pytest.mark.parametrize(
+        "get_x_bounds, get_y_bounds, match",
+        [
+            (
+                lambda key, expected_logx: (key.left, key.left),
+                lambda row, expected_logy: (0.0, 1.0),
+                "Need left < right",
+            ),
+            (
+                lambda key, expected_logx: (key.left, key.right),
+                lambda row, expected_logy: (0.5, 0.5),
+                "Need bottom < top",
+            ),
+        ],
+        ids=["x", "y"],
+    )
+    def test_zero_width_ranges_are_rejected(
+        self, known_hist, get_x_bounds, get_y_bounds, match
+    ):
+        """A range of zero width is a ValueError, not an empty selection.
+
+        ON FAILURE: the code is wrong.
+        """
+        columns = known_hist.agg().unstack("x").columns
+        ranges = pd.DataFrame({"bottom": 0.0, "top": 1.0}, index=columns)
+        with pytest.raises(ValueError, match=match):
+            known_hist.take_data_in_yrange_across_x(ranges, get_x_bounds, get_y_bounds)
+
+    @pytest.mark.parametrize("logx, logy", [(True, False), (False, True)])
+    def test_callbacks_receive_the_log_flags_as_bools(self, logx, logy):
+        """Each callback gets its axis's log flag, as a bool, by keyword.
+
+        The two axes differ in each case, so swapped flags fail too.
+
+        ON FAILURE: the code is wrong.
+        """
+        values = pd.Series([1.0, 10.0, 100.0, 1000.0])
+        h = Hist2D(values, values[::-1].reset_index(drop=True), logx=logx, logy=logy)
+        ranges = pd.DataFrame(
+            {"bottom": -np.inf, "top": np.inf}, index=h.agg().unstack("x").columns
+        )
+        x_flags, y_flags = [], []
+
+        def get_x_bounds(key, **flags):
+            x_flags.append(flags)
+            return key.left, key.right
+
+        def get_y_bounds(row, **flags):
+            y_flags.append(flags)
+            return row.bottom, row.top
+
+        h.take_data_in_yrange_across_x(ranges, get_x_bounds, get_y_bounds)
+
+        assert x_flags == [{"expected_logx": logx}] * ranges.shape[0]
+        assert y_flags == [{"expected_logy": logy}] * ranges.shape[0]
+        assert all(type(f["expected_logx"]) is bool for f in x_flags)
+        assert all(type(f["expected_logy"]) is bool for f in y_flags)
+
+    def test_range_bounds_are_open_below_and_closed_above(self):
+        """A point is taken when left < x <= right and bottom < y <= top.
+
+        Integer data on a grid put points exactly on all four bounds.
+
+        ON FAILURE: the code is wrong.
+        """
+        xx, yy = np.meshgrid(np.arange(5.0), np.arange(5.0))
+        x, y = pd.Series(xx.ravel()), pd.Series(yy.ravel())
+        h = Hist2D(x, y, nbins=[np.array([1.0, 3.0]), np.array([-1.0, 5.0])])
+        ranges = pd.DataFrame(
+            {"bottom": [1.0], "top": [3.0]}, index=h.agg().unstack("x").columns
+        )
+
+        taken = h.take_data_in_yrange_across_x(
+            ranges,
+            lambda key, expected_logx: (key.left, key.right),
+            lambda row, expected_logy: (row.bottom, row.top),
+        )
+
+        expected = np.flatnonzero((1 < x) & (x <= 3) & (1 < y) & (y <= 3))
+        np.testing.assert_array_equal(taken, expected)
 
 
 def _contour_levels(hist, levels=None):
