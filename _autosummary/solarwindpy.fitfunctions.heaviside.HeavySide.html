@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.heaviside.HeavySide &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.heaviside.HeavySide &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../_static/documentation_options.js?v=65f15681"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -342,8 +342,28 @@
 <li><p>For x == x0: <span class="math notranslate nohighlight">\(f(x) = y_1 \cdot \tfrac{1}{2}(y_0 + y_1) + y_0\)</span></p></li>
 </ul>
 <dl class="field-list">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
+<dt><strong>xobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Independent variable observations.</p>
+</dd>
+<dt><strong>yobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Dependent variable observations.</p>
+</dd>
+<dt><strong>guess_x0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Initial guess for transition x-coordinate. If not provided,
+estimated as the midpoint of the x data range.</p>
+</dd>
+<dt><strong>guess_y0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Initial guess for baseline level (value for x &gt; x0). If not
+provided, estimated from data above the transition.</p>
+</dd>
+<dt><strong>guess_y1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Initial guess for step height. If not provided, estimated
+from data below and above the transition.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>Additional arguments passed to
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
 <dt><strong>x0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Step transition x-coordinate (fitted parameter).</p>
 </dd>
 <dt><strong>y0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Baseline level for x &gt; x0 (fitted parameter).</p>
@@ -353,6 +373,17 @@
 </dl>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.make_fit" title="solarwindpy.fitfunctions.heaviside.HeavySide.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.popt" title="solarwindpy.fitfunctions.heaviside.HeavySide.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+</dd>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.rsq" title="solarwindpy.fitfunctions.heaviside.HeavySide.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+</dd>
+</dl>
+</div>
 <p class="rubric">Notes</p>
 <p>The initial parameter estimation (p0) uses heuristics based on
 the data distribution. For best results with noisy or complex
@@ -372,60 +403,7 @@ make_fit() is recommended.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.heaviside.HeavySide.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_y1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/heaviside.html#HeavySide.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.heaviside.HeavySide.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize fit function with observed data.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>xobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed x values (independent variable).
-Shape must match yobs.</p>
-</dd>
-<dt><strong>yobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed y values (dependent variable).
-Shape must match xobs.</p>
-</dd>
-<dt><strong>guess_x0</strong></dt><dd><p>The description is missing.</p>
-</dd>
-<dt><strong>guess_y0</strong></dt><dd><p>The description is missing.</p>
-</dd>
-<dt><strong>guess_y1</strong></dt><dd><p>The description is missing.</p>
-</dd>
-<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.make_fit" title="solarwindpy.fitfunctions.heaviside.HeavySide.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
-</dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.popt" title="solarwindpy.fitfunctions.heaviside.HeavySide.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
-</dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.rsq" title="solarwindpy.fitfunctions.heaviside.HeavySide.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
-</dd>
-</dl>
-</div>
-<p class="rubric">Notes</p>
-<p>The fitting procedure uses scipy.optimize.least_squares
-with robust loss functions (Huber by default) to handle
-outliers. The initial parameter guess is provided by the
-p0 property, which must be implemented by subclasses.</p>
-<p>All subclasses inherit this documentation automatically
-through the docstring-inheritance metaclass.</p>
-<p class="rubric">Examples</p>
-<p>Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
-recover those parameters:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.gaussians</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<span class="go">{'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
-</pre></div>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.heaviside.HeavySide.function">
@@ -530,30 +508,6 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.heaviside.HeavySide.dof">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.heaviside.HeavySide.dof" title="Link to this definition"></a></dt>
 <dd><p>Degrees of freedom in the fit.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.heaviside.HeavySide.fallback_p0">
-<span class="sig-name descname"><span class="pre">fallback_p0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-inf,</span> <span class="pre">inf)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.heaviside.HeavySide.fallback_p0" title="Link to this definition"></a></dt>
-<dd><p>The start <a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.make_fit" title="solarwindpy.fitfunctions.heaviside.HeavySide.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a> uses when <a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.p0" title="solarwindpy.fitfunctions.heaviside.HeavySide.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is None.</p>
-<p>This is the one hook for a class-specific fallback start: a subclass
-whose model is singular at the default overrides it. The default is
-the feasible start <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html#scipy.optimize.curve_fit" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit()</span></code></a> chooses.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>bounds</strong><span class="classifier">2-tuple or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>As accepted by <a class="reference internal" href="#solarwindpy.fitfunctions.heaviside.HeavySide.make_fit" title="solarwindpy.fitfunctions.heaviside.HeavySide.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>One value per parameter: ones when unbounded, otherwise a point
-inside the bounds.</p>
-</dd>
-</dl>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">

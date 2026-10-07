@@ -24,6 +24,7 @@ solarwindpy.fitfunctions.hinge
       :toctree:
       :template: class.rst
    
+      Hinge
       HingeAtPoint
       HingeMax
       HingeMin

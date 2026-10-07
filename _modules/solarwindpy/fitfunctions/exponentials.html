@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.exponentials &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../../../_static/documentation_options.js?v=65f15681"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -332,13 +332,6 @@
 <span class="sd">    Parameters are ``c`` (rate) and ``A`` (amplitude at ``x = 0``).</span>
 <span class="sd">    """</span>
 
-<div class="viewcode-block" id="Exponential.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.Exponential.html#solarwindpy.fitfunctions.exponentials.Exponential.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Fit ``A * exp(-c x)`` to the data."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`A e^{-c x}` as ``f(x, c, A)``."""</span>
@@ -377,13 +370,6 @@
 
 <span class="sd">    Parameters are ``c`` (rate), ``A`` (amplitude) and ``d`` (offset).</span>
 <span class="sd">    """</span>
-
-<div class="viewcode-block" id="ExponentialPlusC.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialPlusC.html#solarwindpy.fitfunctions.exponentials.ExponentialPlusC.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Fit ``A * exp(-c x) + d`` to the data."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -427,13 +413,6 @@
 <span class="sd">    which must be called before :meth:`make_fit`; otherwise the fit</span>
 <span class="sd">    raises ``AttributeError``.</span>
 <span class="sd">    """</span>
-
-<div class="viewcode-block" id="ExponentialCDF.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.exponentials.ExponentialCDF.html#solarwindpy.fitfunctions.exponentials.ExponentialCDF.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Fit an exponential cumulative distribution function."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

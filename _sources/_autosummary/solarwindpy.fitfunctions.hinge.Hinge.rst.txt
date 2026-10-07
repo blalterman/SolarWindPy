@@ -1,0 +1,6 @@
+solarwindpy.fitfunctions.hinge.Hinge
+====================================
+
+.. currentmodule:: solarwindpy.fitfunctions.hinge
+
+.. autoclass:: Hinge

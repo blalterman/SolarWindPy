@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,13 +16,13 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../_static/documentation_options.js?v=65f15681"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.fitfunctions.hinge.HingeAtPoint" href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html" />
+    <link rel="next" title="solarwindpy.fitfunctions.hinge.Hinge" href="solarwindpy.fitfunctions.hinge.Hinge.html" />
     <link rel="prev" title="solarwindpy.fitfunctions.heaviside.HeavySide" href="solarwindpy.fitfunctions.heaviside.HeavySide.html" />
    
   <style>
@@ -327,26 +327,30 @@
 <span id="solarwindpy-fitfunctions-hinge"></span><h1>solarwindpy.fitfunctions.hinge<a class="headerlink" href="#module-solarwindpy.fitfunctions.hinge" title="Link to this heading"></a></h1>
 <p>Hinge (piecewise linear) fit functions.</p>
 <p>This module provides fit functions for piecewise linear models with a
-hinge point, commonly used for modeling saturation behavior.</p>
+hinge point, commonly used for modeling saturation behavior. Each is a
+subclass of <a class="reference internal" href="solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge" title="solarwindpy.fitfunctions.hinge.Hinge"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hinge</span></code></a>, which holds what they share.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint" title="solarwindpy.fitfunctions.hinge.HingeAtPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeAtPoint</span></code></a>(xobs, yobs[, guess_xh, guess_yh])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge" title="solarwindpy.fitfunctions.hinge.Hinge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hinge</span></code></a>(xobs, yobs[, xmin, xmax, xoutside, ...])</p></td>
+<td><p>Two lines that meet at a hinge: the parent of the hinge fit functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint" title="solarwindpy.fitfunctions.hinge.HingeAtPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeAtPoint</span></code></a>(xobs, yobs[, guess_xh, guess_yh])</p></td>
 <td><p>Piecewise linear function passing through a specified hinge point.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax" title="solarwindpy.fitfunctions.hinge.HingeMax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeMax</span></code></a>(xobs, yobs[, guess_h])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax" title="solarwindpy.fitfunctions.hinge.HingeMax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeMax</span></code></a>(xobs, yobs[, guess_h])</p></td>
 <td><p>Piecewise linear function with hinge point using maximum.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeMin</span></code></a>(xobs, yobs[, guess_h])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeMin</span></code></a>(xobs, yobs[, guess_h])</p></td>
 <td><p>Piecewise linear function with hinge point using minimum.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation" title="solarwindpy.fitfunctions.hinge.HingeSaturation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeSaturation</span></code></a>(xobs, yobs[, guess_xh, guess_yh])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation" title="solarwindpy.fitfunctions.hinge.HingeSaturation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HingeSaturation</span></code></a>(xobs, yobs[, guess_xh, guess_yh])</p></td>
 <td><p>Piecewise linear function with hinge point for saturation modeling.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation" title="solarwindpy.fitfunctions.hinge.Saturation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Saturation</span></code></a>(xobs, yobs[, guess_xs, guess_s])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation" title="solarwindpy.fitfunctions.hinge.Saturation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Saturation</span></code></a>(xobs, yobs[, guess_xs, guess_s])</p></td>
 <td><p>Piecewise linear function reparameterized for saturation analysis.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine" title="solarwindpy.fitfunctions.hinge.TwoLine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TwoLine</span></code></a>(xobs, yobs[, guess_xs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine" title="solarwindpy.fitfunctions.hinge.TwoLine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TwoLine</span></code></a>(xobs, yobs[, guess_xs])</p></td>
 <td><p>Piecewise linear function with two intersecting lines using minimum.</p></td>
 </tr>
 </tbody>
@@ -358,7 +362,7 @@ hinge point, commonly used for modeling saturation behavior.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="solarwindpy.fitfunctions.heaviside.HeavySide.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.heaviside.HeavySide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.hinge.HingeAtPoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.fitfunctions.hinge.Hinge.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.hinge.Hinge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../../../_static/documentation_options.js?v=65f15681"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -391,13 +391,6 @@
 <span class="sd">    Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)</span>
 <span class="sd">    """</span>
 
-<div class="viewcode-block" id="Gaussian.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.gaussians.Gaussian.html#solarwindpy.fitfunctions.gaussians.Gaussian.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Initialize a Gaussian fit to the observations."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The model as ``f(x, mu, sigma, A)``."""</span>
@@ -460,21 +453,13 @@
 <span class="w">    </span><span class="sd">"""Normalized Gaussian distribution where integral equals n.</span>
 
 <span class="sd">    Fits data to the form: (n / (sqrt(2*pi) * sigma)) * exp(-0.5 * ((x - mu) / sigma)^2)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The normalization parameter n represents the total area under</span>
+<span class="sd">    the Gaussian curve, useful for fitting probability distributions</span>
+<span class="sd">    or particle count distributions.</span>
 <span class="sd">    """</span>
-
-<div class="viewcode-block" id="GaussianNormalized.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.gaussians.GaussianNormalized.html#solarwindpy.fitfunctions.gaussians.GaussianNormalized.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Initialize normalized Gaussian fit.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        The normalization parameter n represents the total area under</span>
-<span class="sd">        the Gaussian curve, useful for fitting probability distributions</span>
-<span class="sd">        or particle count distributions.</span>
-<span class="sd">        """</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -538,6 +523,19 @@
 <span class="sd">    Fits a Gaussian in logarithmic space where :math:`\ln(x)` follows</span>
 <span class="sd">    a normal distribution.</span>
 
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    xobs must be positive for log transformation.</span>
+<span class="sd">    This distribution is commonly used for particle size distributions</span>
+<span class="sd">    and velocity distributions in solar wind where values are</span>
+<span class="sd">    positively skewed.</span>
+
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] https://mathworld.wolfram.com/LogNormalDistribution.html</span>
@@ -546,15 +544,6 @@
 <div class="viewcode-block" id="GaussianLn.__init__">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.gaussians.GaussianLn.html#solarwindpy.fitfunctions.gaussians.GaussianLn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Initialize log-normal Gaussian fit.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        xobs must be positive for log transformation.</span>
-<span class="sd">        This distribution is commonly used for particle size distributions</span>
-<span class="sd">        and velocity distributions in solar wind where values are</span>
-<span class="sd">        positively skewed.</span>
-<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_TeX_report_normal_parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 

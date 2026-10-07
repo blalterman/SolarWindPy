@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../../../_static/documentation_options.js?v=65f15681"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -306,7 +306,8 @@
 <span></span><span class="sa">r</span><span class="sd">"""Hinge (piecewise linear) fit functions.</span>
 
 <span class="sd">This module provides fit functions for piecewise linear models with a</span>
-<span class="sd">hinge point, commonly used for modeling saturation behavior.</span>
+<span class="sd">hinge point, commonly used for modeling saturation behavior. Each is a</span>
+<span class="sd">subclass of :class:`Hinge`, which holds what they share.</span>
 <span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
@@ -320,6 +321,7 @@
     <span class="s2">"HingeAtPoint"</span><span class="p">,</span>
 <span class="p">]</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -330,62 +332,102 @@
 <span class="n">_XIntercepts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"_XIntercepts"</span><span class="p">,</span> <span class="s2">"x1,x2"</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_author_start</span><span class="p">():</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""The author's fallback hinge, shared by the hinge ``fallback_p0`` overrides.</span>
+<div class="viewcode-block" id="Hinge">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Hinge</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Two lines that meet at a hinge: the parent of the hinge fit functions.</span>
 
-<span class="sd">    When a hinge ``p0`` cannot estimate a start, the all-ones default is a</span>
-<span class="sd">    singular point of these models (the two lines' intercepts coincide), so</span>
-<span class="sd">    the fit starts here instead: the hinge :math:`(x_h, y_h) = (433, 4.12)`,</span>
-<span class="sd">    the rising line's x-intercept :math:`x_1 = 250`, its slope</span>
-<span class="sd">    :math:`m_1 = y_h / (x_h - x_1)`, and a small non-zero plateau slope</span>
-<span class="sd">    :math:`m_2 = 0.01\,m_1`, as chosen by the package author.</span>
+<span class="sd">    A subclass writes its model (``function`` and ``TeX_function``), its</span>
+<span class="sd">    estimate (``_estimate``) and the translation of the reference hinge to its</span>
+<span class="sd">    parameters (``_reference_start``), and describes both in its class Notes.</span>
+<span class="sd">    ``p0`` is shared: it returns the estimate, or the reference start when the</span>
+<span class="sd">    data give no estimate.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    dict</span>
-<span class="sd">        ``xh``, ``yh``, ``x1``, ``m1``, ``m2`` and the plateau line's</span>
-<span class="sd">        x-intercept ``x2 = xh - yh / m2``.</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    When the data give no estimate, the all-ones default start is a singular</span>
+<span class="sd">    point of these models (the two lines' intercepts coincide), so ``p0``</span>
+<span class="sd">    logs a warning and returns the package author's reference hinge instead,</span>
+<span class="sd">    translated to the class's parameters: the hinge</span>
+<span class="sd">    :math:`(x_h, y_h) = (433, 4.12)`, the rising line's x-intercept</span>
+<span class="sd">    :math:`x_1 = 250`, its slope :math:`m_1 = y_h / (x_h - x_1) = 4.12 / 183`,</span>
+<span class="sd">    a small non-zero plateau slope :math:`m_2 = 0.01\,m_1`, and the plateau</span>
+<span class="sd">    line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that</span>
+<span class="sd">    line through the hinge.</span>
 <span class="sd">    """</span>
-    <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="mf">433.0</span><span class="p">,</span> <span class="mf">4.12</span><span class="p">,</span> <span class="mf">250.0</span>
-    <span class="n">m1</span> <span class="o">=</span> <span class="n">yh</span> <span class="o">/</span> <span class="p">(</span><span class="n">xh</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
-    <span class="n">m2</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">m1</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">xh</span><span class="o">=</span><span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="o">=</span><span class="n">yh</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">m1</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="n">m2</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="n">xh</span> <span class="o">-</span> <span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
 
+    <span class="c1"># The author's reference hinge, described in the class Notes.</span>
+    <span class="n">_XH</span> <span class="o">=</span> <span class="mf">433.0</span>
+    <span class="n">_YH</span> <span class="o">=</span> <span class="mf">4.12</span>
+    <span class="n">_X1</span> <span class="o">=</span> <span class="mf">250.0</span>
+    <span class="n">_M1</span> <span class="o">=</span> <span class="n">_YH</span> <span class="o">/</span> <span class="p">(</span><span class="n">_XH</span> <span class="o">-</span> <span class="n">_X1</span><span class="p">)</span>
+    <span class="n">_M2</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">_M1</span>
+    <span class="n">_X2</span> <span class="o">=</span> <span class="n">_XH</span> <span class="o">-</span> <span class="n">_YH</span> <span class="o">/</span> <span class="n">_M2</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_undefined</span><span class="p">(</span><span class="n">fitfunction</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="o">**</span><span class="n">estimates</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Whether any named estimate is undefined (NaN or infinite).</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The initial guess: the estimate from the data, or the reference start.</span>
 
-<span class="sd">    A hinge ``p0`` estimates slopes from the points on each side of its</span>
-<span class="sd">    hinge guess. A side with fewer than two points or repeated ``x`` has no</span>
-<span class="sd">    slope, and a zero slope has no x-intercept. When any of the estimates</span>
-<span class="sd">    passed here is undefined for such a reason, this logs which ones and</span>
-<span class="sd">    ``reason``, and the caller's ``p0`` returns None.</span>
+<span class="sd">        ``p0`` returns the class's estimate from the used observations, or,</span>
+<span class="sd">        when the data give no estimate, the class's reference start. The</span>
+<span class="sd">        class description (its Notes) states how the class estimates, when an</span>
+<span class="sd">        estimate is undefined, and what its reference start is.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    fitfunction : FitFunction</span>
-<span class="sd">        Whose logger records the undefined estimates.</span>
-<span class="sd">    reason : str</span>
-<span class="sd">        Why those estimates can be undefined.</span>
-<span class="sd">    **estimates : float</span>
-<span class="sd">        The estimates to check, by parameter name.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of float</span>
+<span class="sd">            One finite guess per parameter, in :attr:`argnames` order. When</span>
+<span class="sd">            the data give no estimate (an estimate is NaN or infinite),</span>
+<span class="sd">            ``p0`` logs a warning naming the undefined estimates and returns</span>
+<span class="sd">            the class's reference start instead. It never returns None.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    bool</span>
-<span class="sd">        True when at least one estimate is undefined.</span>
-<span class="sd">    """</span>
-    <span class="n">bad</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">estimates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">v</span><span class="p">)}</span>
-    <span class="k">if</span> <span class="n">bad</span><span class="p">:</span>
-        <span class="n">fitfunction</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"Undefined estimates </span><span class="si">{</span><span class="n">bad</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">Returning None."</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
+<span class="sd">            If fewer observations are used than the model has parameters.</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            If the data give no estimate and the class has no reference start</span>
+<span class="sd">            yet (:class:`HingeMax`); no warning is logged first. Pass ``p0=``</span>
+<span class="sd">            to :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
+        <span class="n">estimate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimate</span><span class="p">()</span>
+        <span class="n">bad</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">,</span> <span class="n">estimate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">bad</span><span class="p">:</span>
+            <span class="c1"># A class with no reference start raises here, before the warning.</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reference_start</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"The data gave no estimate. Undefined estimates </span><span class="si">{</span><span class="n">bad</span><span class="si">}</span><span class="s2">; "</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> class description states when an "</span>
+                <span class="s2">"estimate is undefined."</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">start</span>
+        <span class="k">return</span> <span class="n">estimate</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Estimate every parameter from the used observations.</span>
+
+<span class="sd">        The estimates are in ``argnames`` order; one the data cannot give is</span>
+<span class="sd">        NaN or infinite. The class Notes describe the estimate.</span>
+<span class="sd">        """</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return the reference hinge in the class's parameters, in ``argnames`` order.</span>
+
+<span class="sd">        The class Notes give the translation.</span>
+<span class="sd">        """</span></div>
+
 
 
 <div class="viewcode-block" id="HingeSaturation">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HingeSaturation</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HingeSaturation</span><span class="p">(</span><span class="n">Hinge</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point for saturation modeling.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point (xh, yh):</span>
@@ -409,7 +451,8 @@
 <span class="sd">    guess_yh : float, optional</span>
 <span class="sd">        Initial guess for hinge y-coordinate. Default is 0.5.</span>
 <span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -421,6 +464,15 @@
 <span class="sd">        x-intercept of rising line (fitted parameter).</span>
 <span class="sd">    m2 : float</span>
 <span class="sd">        Slope of plateau region (fitted parameter). m2=0 gives constant saturation.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``(xh, yh)`` is</span>
+<span class="sd">    ``saturation_guess``; ``x1`` comes from a linear fit to the rising region</span>
+<span class="sd">    (x &lt; xh), or is the data minimum; ``m2`` is the median slope in the</span>
+<span class="sd">    plateau region (x &gt;= xh), and is undefined when the plateau region has</span>
+<span class="sd">    repeated ``x``. When an estimate is undefined, ``p0`` returns the</span>
+<span class="sd">    reference hinge of :class:`Hinge` as ``[xh, yh, x1, m2]``.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -495,30 +547,7 @@
 
         <span class="k">return</span> <span class="n">hinge_saturation</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess is derived from:</span>
-<span class="sd">        - ``saturation_guess`` for (xh, yh)</span>
-<span class="sd">        - Estimated x1 from linear fit to rising region, or data minimum</span>
-<span class="sd">        - Median slope in plateau region for m2</span>
-
-<span class="sd">        ``m2`` is undefined, and ``p0`` is None, when the plateau region</span>
-<span class="sd">        has repeated ``x``.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [xh, yh, x1, m2].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">xh</span><span class="p">,</span> <span class="n">yh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saturation_guess</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
@@ -547,26 +576,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">m2</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"the plateau region has repeated x"</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="n">m2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="HingeSaturation.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeSaturation.html#solarwindpy.fitfunctions.hinge.HingeSaturation.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: ``[xh, yh, x1, m2]``.</span>
-
-<span class="sd">        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a</span>
-<span class="sd">        rising line with x-intercept :math:`x_1 = 250` (so</span>
-<span class="sd">        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope</span>
-<span class="sd">        :math:`m_2 = 0.01\,m_1`. ``bounds`` is</span>
-<span class="sd">        not used: the start is the same point whatever the bounds.</span>
-<span class="sd">        """</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">_author_start</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">"xh"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"yh"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]]</span></div>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_XH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_YH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -591,7 +604,7 @@
 
 <div class="viewcode-block" id="TwoLine">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">TwoLine</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TwoLine</span><span class="p">(</span><span class="n">Hinge</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with two intersecting lines using minimum.</span>
 
 <span class="sd">    The model consists of two linear segments:</span>
@@ -619,7 +632,8 @@
 <span class="sd">    guess_xs : float, optional</span>
 <span class="sd">        Initial guess for saturation x-coordinate. Default is 425.0.</span>
 <span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -637,6 +651,15 @@
 <span class="sd">        y-coordinate of intersection point (derived property).</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Angle between the two lines in radians (derived property).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[x1, x2, m1, m2]`` from the data on each side of</span>
+<span class="sd">    ``guess_xs``. Each side needs at least two points with distinct ``x`` for</span>
+<span class="sd">    a slope, and a nonzero slope for an x-intercept; otherwise an estimate is</span>
+<span class="sd">    undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as</span>
+<span class="sd">    ``[x1, x2, m1, m2]``. The default ``guess_xs=425`` is appropriate for</span>
+<span class="sd">    solar wind speed analysis.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -755,35 +778,7 @@
         <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess is derived from the data by estimating slopes</span>
-<span class="sd">        and intercepts in regions separated by ``guess_xs``.</span>
-
-<span class="sd">        Each side of ``guess_xs`` needs at least two points with distinct</span>
-<span class="sd">        ``x`` for a slope, and a nonzero slope for an x-intercept. Otherwise</span>
-<span class="sd">        an estimate is undefined and ``p0`` is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [x1, x2, m1, m2].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        Uses hardcoded xs=425 as the default separation point, which is</span>
-<span class="sd">        appropriate for solar wind speed analysis.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
@@ -803,32 +798,10 @@
         <span class="n">x1</span><span class="p">,</span> <span class="n">m1</span> <span class="o">=</span> <span class="n">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
         <span class="n">x2</span><span class="p">,</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">~</span><span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span>
 
-        <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">"each side of xs needs two points with distinct x for a slope, "</span>
-            <span class="s2">"and a nonzero slope for an x-intercept"</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">m1</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="n">m2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="TwoLine.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: ``[x1, x2, m1, m2]``.</span>
-
-<span class="sd">        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a</span>
-<span class="sd">        rising line with x-intercept :math:`x_1 = 250` (so</span>
-<span class="sd">        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope</span>
-<span class="sd">        :math:`m_2 = 0.01\,m_1`. ``bounds`` is</span>
-<span class="sd">        not used: the start is the same point whatever the bounds.</span>
-
-<span class="sd">        ``x2 = 433 - 4.12 / m2`` puts the second line through the hinge.</span>
-<span class="sd">        """</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">_author_start</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]]</span></div>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_X1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -851,7 +824,7 @@
 
 <div class="viewcode-block" id="Saturation">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Saturation</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Saturation</span><span class="p">(</span><span class="n">Hinge</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function reparameterized for saturation analysis.</span>
 
 <span class="sd">    This is an alternative parameterization of :class:`TwoLine` where the</span>
@@ -885,7 +858,8 @@
 <span class="sd">    guess_s : float, optional</span>
 <span class="sd">        Initial guess for saturation y-value. Default is 0.5.</span>
 <span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -903,6 +877,18 @@
 <span class="sd">        Slope of plateau line (derived property).</span>
 <span class="sd">    x2 : float</span>
 <span class="sd">        x-intercept of plateau line (derived property).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[x1, xs, s, theta]`` from the data on each side of</span>
+<span class="sd">    ``xs``, the first element of ``saturation_guess``. Each side needs at</span>
+<span class="sd">    least two points with distinct ``x`` for a slope, and the rising side a</span>
+<span class="sd">    nonzero slope for ``x1``; otherwise an estimate is undefined, and ``p0``</span>
+<span class="sd">    returns the reference hinge of :class:`Hinge` as</span>
+<span class="sd">    ``[x1, xs, s, theta] = [x1, xh, yh, theta]``, where</span>
+<span class="sd">    :math:`\theta = \arctan(m_1) - \arctan(m_2)` inverts the model's</span>
+<span class="sd">    :math:`m_2 = \tan(\arctan(m_1) - \theta)`. The default ``guess_xs=425``</span>
+<span class="sd">    is appropriate for solar wind speed analysis.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1024,35 +1010,7 @@
         <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span>
         <span class="k">return</span> <span class="n">xs</span> <span class="o">-</span> <span class="p">(</span><span class="n">s</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess is derived from the data by estimating slopes</span>
-<span class="sd">        and intercepts in regions separated by the saturation guess.</span>
-
-<span class="sd">        Each side of ``xs`` needs at least two points with distinct ``x``</span>
-<span class="sd">        for a slope, and the rising side a nonzero slope for ``x1``.</span>
-<span class="sd">        Otherwise an estimate is undefined and ``p0`` is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [x1, xs, s, theta].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        Uses hardcoded xs=425 as the default separation point, which is</span>
-<span class="sd">        appropriate for solar wind speed analysis.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">estimate_line</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tk</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">tk</span><span class="p">]</span>
@@ -1076,34 +1034,11 @@
         <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">([</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">])</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">))</span>
 
-        <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">"each side of xs needs two points with distinct x for a slope, "</span>
-            <span class="s2">"and the rising side a nonzero slope for x1"</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="p">]</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="Saturation.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.Saturation.html#solarwindpy.fitfunctions.hinge.Saturation.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: ``[x1, xs, s, theta]``.</span>
-
-<span class="sd">        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a</span>
-<span class="sd">        rising line with x-intercept :math:`x_1 = 250` (so</span>
-<span class="sd">        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope</span>
-<span class="sd">        :math:`m_2 = 0.01\,m_1`. ``bounds`` is</span>
-<span class="sd">        not used: the start is the same point whatever the bounds.</span>
-
-<span class="sd">        ``theta = arctan(m1) - arctan(m2)`` inverts the model's</span>
-<span class="sd">        ``m2 = tan(arctan(m1) - theta)``.</span>
-<span class="sd">        """</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">_author_start</span><span class="p">()</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">])</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"xh"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"yh"</span><span class="p">],</span> <span class="n">theta</span><span class="p">]</span></div>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_M1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_M2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_X1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_XH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_YH</span><span class="p">,</span> <span class="n">theta</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1129,7 +1064,7 @@
 
 <div class="viewcode-block" id="HingeMin">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HingeMin</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HingeMin</span><span class="p">(</span><span class="n">Hinge</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point using minimum.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point:</span>
@@ -1159,7 +1094,8 @@
 <span class="sd">    guess_h : float, optional</span>
 <span class="sd">        Initial guess for hinge x-coordinate. Default is 400.0.</span>
 <span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -1176,6 +1112,18 @@
 <span class="sd">    theta : float</span>
 <span class="sd">        Angle between the two lines in radians (derived property).</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[m1, x1, x2, h]`` from the data on each side of</span>
+<span class="sd">    ``guess_h``, with ``h = guess_h``. Each side with two or more points</span>
+<span class="sd">    needs distinct ``x`` for a slope and a nonzero slope for an x-intercept;</span>
+<span class="sd">    with fewer, ``m1`` falls back to the slope across the x range, which</span>
+<span class="sd">    needs distinct ``x``. Otherwise an estimate is undefined, and ``p0``</span>
+<span class="sd">    returns the reference hinge of :class:`Hinge` as ``[m1, x1, x2, h]``</span>
+<span class="sd">    with ``h = xh``; the model's :math:`m_2 = m_1 (h - x_1) / (h - x_2)`</span>
+<span class="sd">    then recovers the reference :math:`m_2`. The default ``guess_h=400`` is</span>
+<span class="sd">    appropriate for solar wind speed analysis.</span>
+
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
@@ -1187,6 +1135,9 @@
 <span class="sd">    &gt;&gt;&gt; print(f"Hinge at x={fit.popt['h']:.2f}")</span>
 <span class="sd">    Hinge at x=5.00</span>
 <span class="sd">    """</span>
+
+    <span class="c1"># The model combines the two lines with this; HingeMax uses np.maximum.</span>
+    <span class="n">_combine</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HingeMin.__init__">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin.__init__">[docs]</a>
@@ -1208,16 +1159,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge minimum function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge function.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        callable</span>
 <span class="sd">            Function with signature ``f(x, m1, x1, x2, h)``.</span>
 <span class="sd">        """</span>
+        <span class="n">combine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">hinge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge minimum model.</span>
+<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate the hinge model.</span>
 
 <span class="sd">            Parameters</span>
 <span class="sd">            ----------</span>
@@ -1240,7 +1192,7 @@
             <span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
             <span class="n">l1</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
             <span class="n">l2</span> <span class="o">=</span> <span class="n">m2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">combine</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">out</span>
 
         <span class="k">return</span> <span class="n">hinge</span>
@@ -1278,35 +1230,7 @@
         <span class="n">bottom</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess estimates slopes and intercepts from the data</span>
-<span class="sd">        in regions separated by the hinge guess.</span>
-
-<span class="sd">        Each side of ``guess_h`` with two or more points needs distinct</span>
-<span class="sd">        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,</span>
-<span class="sd">        ``m1`` falls back to the slope across the x range, which needs</span>
-<span class="sd">        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [m1, x1, x2, h].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        Default guess_h=400 is appropriate for solar wind speed analysis.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span>
@@ -1331,33 +1255,10 @@
             <span class="n">m2</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">x2</span> <span class="o">=</span> <span class="n">h</span>
 
-        <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">"each side of h needs distinct x for a slope, "</span>
-            <span class="s2">"and a nonzero slope for an x-intercept"</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">m1</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="n">x2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="HingeMin.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: ``[m1, x1, x2, h]``.</span>
-
-<span class="sd">        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a</span>
-<span class="sd">        rising line with x-intercept :math:`x_1 = 250` (so</span>
-<span class="sd">        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope</span>
-<span class="sd">        :math:`m_2 = 0.01\,m_1`. ``bounds`` is</span>
-<span class="sd">        not used: the start is the same point whatever the bounds.</span>
-
-<span class="sd">        ``x2 = 433 - 4.12 / m2`` and ``h = 433``, so the model's</span>
-<span class="sd">        ``m2 = m1 (h - x1) / (h - x2)`` recovers ``m2``.</span>
-<span class="sd">        """</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">_author_start</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"xh"</span><span class="p">]]</span></div>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_M1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_XH</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1380,7 +1281,7 @@
 
 <div class="viewcode-block" id="HingeMax">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HingeMax</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HingeMax</span><span class="p">(</span><span class="n">HingeMin</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function with hinge point using maximum.</span>
 
 <span class="sd">    The model consists of two linear segments joined at a hinge point:</span>
@@ -1401,34 +1302,19 @@
 
 <span class="sd">        m_2 = m_1 \frac{h - x_1}{h - x_2}</span>
 
-<span class="sd">    This is the same as :class:`HingeMin` but uses ``np.maximum`` instead</span>
-<span class="sd">    of ``np.minimum``, suitable for V-shaped patterns opening upward.</span>
+<span class="sd">    This is :class:`HingeMin` with ``np.maximum`` instead of ``np.minimum``,</span>
+<span class="sd">    suitable for V-shaped patterns opening upward. It shares HingeMin's</span>
+<span class="sd">    parameters, estimate and derived properties.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    xobs : array-like</span>
-<span class="sd">        Independent variable observations.</span>
-<span class="sd">    yobs : array-like</span>
-<span class="sd">        Dependent variable observations.</span>
-<span class="sd">    guess_h : float, optional</span>
-<span class="sd">        Initial guess for hinge x-coordinate. Default is 400.0.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
-
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    m1 : float</span>
-<span class="sd">        Slope of first line (fitted parameter).</span>
-<span class="sd">    x1 : float</span>
-<span class="sd">        x-intercept of first line (fitted parameter).</span>
-<span class="sd">    x2 : float</span>
-<span class="sd">        x-intercept of second line (fitted parameter).</span>
-<span class="sd">    h : float</span>
-<span class="sd">        x-coordinate of hinge point (fitted parameter).</span>
-<span class="sd">    m2 : float</span>
-<span class="sd">        Slope of second line (derived property).</span>
-<span class="sd">    theta : float</span>
-<span class="sd">        Angle between the two lines in radians (derived property).</span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[m1, x1, x2, h]`` as :class:`HingeMin` does, and an</span>
+<span class="sd">    estimate is undefined in the same cases. HingeMax has no reference start</span>
+<span class="sd">    yet: its shape differs from the reference hinge of :class:`Hinge` that</span>
+<span class="sd">    the other hinge classes start from when the data give no estimate, and</span>
+<span class="sd">    the author has not chosen one. In that case ``p0`` raises</span>
+<span class="sd">    ``NotImplementedError`` without logging a warning; pass ``p0=`` to</span>
+<span class="sd">    :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1442,176 +1328,12 @@
 <span class="sd">    Hinge at x=5.00</span>
 <span class="sd">    """</span>
 
-<div class="viewcode-block" id="HingeMax.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">xobs</span><span class="p">,</span>
-        <span class="n">yobs</span><span class="p">,</span>
-        <span class="n">guess_h</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">400.0</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span> <span class="o">=</span> <span class="n">guess_h</span></div>
+    <span class="n">_combine</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">guess_h</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess for hinge x-coordinate used in p0 calculation."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The hinge maximum function.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        callable</span>
-<span class="sd">            Function with signature ``f(x, m1, x1, x2, h)``.</span>
-<span class="sd">        """</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">hinge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">            </span><span class="sa">r</span><span class="sd">"""Evaluate hinge maximum model.</span>
-
-<span class="sd">            Parameters</span>
-<span class="sd">            ----------</span>
-<span class="sd">            x : array-like</span>
-<span class="sd">                Independent variable values.</span>
-<span class="sd">            m1 : float</span>
-<span class="sd">                Slope of first line.</span>
-<span class="sd">            x1 : float</span>
-<span class="sd">                x-intercept of first line.</span>
-<span class="sd">            x2 : float</span>
-<span class="sd">                x-intercept of second line.</span>
-<span class="sd">            h : float</span>
-<span class="sd">                x-coordinate of hinge point.</span>
-
-<span class="sd">            Returns</span>
-<span class="sd">            -------</span>
-<span class="sd">            numpy.ndarray</span>
-<span class="sd">                Model values at x.</span>
-<span class="sd">            """</span>
-            <span class="n">m2</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
-            <span class="n">l1</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span>
-            <span class="n">l2</span> <span class="o">=</span> <span class="n">m2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">out</span>
-
-        <span class="k">return</span> <span class="n">hinge</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">m2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Slope of the second line.</span>
-
-<span class="sd">        Derived from the constraint that both lines pass through the hinge:</span>
-
-<span class="sd">        .. math::</span>
-
-<span class="sd">            m_2 = m_1 \frac{h - x_1}{h - x_2}</span>
-<span class="sd">        """</span>
-        <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"h"</span><span class="p">]</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
-        <span class="n">x1</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x1"</span><span class="p">]</span>
-        <span class="n">x2</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="s2">"x2"</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">m1</span> <span class="o">*</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Angle between the two lines in radians.</span>
-
-<span class="sd">        Calculated using arctan2 for proper quadrant handling:</span>
-
-<span class="sd">        .. math::</span>
-
-<span class="sd">            \theta = \arctan2(m_1 - m_2, 1 + m_1 m_2)</span>
-<span class="sd">        """</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">]</span>
-        <span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m2</span>
-        <span class="n">top</span> <span class="o">=</span> <span class="n">m1</span> <span class="o">-</span> <span class="n">m2</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">m1</span> <span class="o">*</span> <span class="n">m2</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess estimates slopes and intercepts from the data</span>
-<span class="sd">        in regions separated by the hinge guess.</span>
-
-<span class="sd">        Each side of ``guess_h`` with two or more points needs distinct</span>
-<span class="sd">        ``x`` for a slope and a nonzero slope for an x-intercept; with fewer,</span>
-<span class="sd">        ``m1`` falls back to the slope across the x range, which needs</span>
-<span class="sd">        distinct ``x``. Otherwise an estimate is undefined and ``p0`` is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [m1, x1, x2, h].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        Default guess_h=400 is appropriate for solar wind speed analysis.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_h</span>
-
-        <span class="c1"># Estimate m1 and x1 from region below hinge</span>
-        <span class="n">tk_below</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">h</span>
-        <span class="k">if</span> <span class="n">tk_below</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">m1_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">tk_below</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">tk_below</span><span class="p">])</span>
-            <span class="n">m1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">m1_set</span><span class="p">)</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">tk_below</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">tk_below</span><span class="p">]</span> <span class="o">/</span> <span class="n">m1</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Fall back to simple estimate</span>
-            <span class="n">m1</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-            <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-
-        <span class="c1"># Estimate m2 and x2 from plateau region</span>
-        <span class="n">tk_above</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">h</span>
-        <span class="k">if</span> <span class="n">tk_above</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">m2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">tk_above</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">tk_above</span><span class="p">]))</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">tk_above</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">tk_above</span><span class="p">]</span> <span class="o">/</span> <span class="n">m2</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">m2</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="n">x2</span> <span class="o">=</span> <span class="n">h</span>
-
-        <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">"each side of h needs distinct x for a slope, "</span>
-            <span class="s2">"and a nonzero slope for an x-intercept"</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">m1</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="o">=</span><span class="n">x2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">m1</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="HingeMax.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: not yet defined.</span>
-
-<span class="sd">        The hinge maximum has a different shape from the other hinge models,</span>
-<span class="sd">        and the author has not yet chosen its fallback start.</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        NotImplementedError</span>
-<span class="sd">            Always, until a default start is defined.</span>
-<span class="sd">        """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">"HingeMax has no default start defined yet; pass p0= to make_fit."</span>
-        <span class="p">)</span></div>
-
+            <span class="s2">"HingeMax has no reference start defined yet; pass p0= to make_fit."</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1634,7 +1356,7 @@
 
 <div class="viewcode-block" id="HingeAtPoint">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HingeAtPoint</span><span class="p">(</span><span class="n">FitFunction</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HingeAtPoint</span><span class="p">(</span><span class="n">Hinge</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Piecewise linear function passing through a specified hinge point.</span>
 
 <span class="sd">    The model consists of two linear segments that both pass through the</span>
@@ -1660,7 +1382,8 @@
 <span class="sd">    guess_yh : float, optional</span>
 <span class="sd">        Initial guess for hinge y-coordinate. Default is 0.5.</span>
 <span class="sd">    **kwargs</span>
-<span class="sd">        Additional arguments passed to :class:`FitFunction`.</span>
+<span class="sd">        Additional arguments passed to</span>
+<span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
@@ -1674,6 +1397,16 @@
 <span class="sd">        Slope of second line (fitted parameter).</span>
 <span class="sd">    x_intercepts : tuple</span>
 <span class="sd">        Named tuple with x1 and x2 attributes (derived property).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    ``p0`` estimates ``[xh, yh, m1, m2]`` from the data on each side of</span>
+<span class="sd">    ``xh``, the first element of ``hinge_guess``: ``yh`` is the ``y`` at the</span>
+<span class="sd">    observation nearest ``xh``, and the slopes come from each side of it. A</span>
+<span class="sd">    side with two or more points needs distinct ``x`` for a slope; otherwise</span>
+<span class="sd">    a slope is undefined, and ``p0`` returns the reference hinge of</span>
+<span class="sd">    :class:`Hinge` as ``[xh, yh, m1, m2]``. The defaults ``guess_xh=400``</span>
+<span class="sd">    and ``guess_yh=0.5`` are appropriate for solar wind speed analysis.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1766,34 +1499,7 @@
         <span class="n">x2</span> <span class="o">=</span> <span class="n">xh</span> <span class="o">-</span> <span class="p">(</span><span class="n">yh</span> <span class="o">/</span> <span class="n">m2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_XIntercepts</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate initial parameter guess.</span>
-
-<span class="sd">        The initial guess uses the hinge_guess for (xh, yh) and estimates</span>
-<span class="sd">        slopes from the data in regions separated by the hinge guess.</span>
-
-<span class="sd">        A side of ``guess_xh`` with two or more points needs distinct ``x``</span>
-<span class="sd">        for a slope. Otherwise a slope is undefined and ``p0`` is None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        list or None</span>
-<span class="sd">            Initial guesses as [xh, yh, m1, m2].</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        ~solarwindpy.fitfunctions.core.InsufficientDataError</span>
-<span class="sd">            If insufficient data for estimation.</span>
-
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)</span>
-<span class="sd">        Default guess_xh=400 and guess_yh=0.5 are appropriate for solar</span>
-<span class="sd">        wind speed analysis.</span>
-<span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">xh</span><span class="p">,</span> <span class="n">yh_guess</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hinge_guess</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
@@ -1818,26 +1524,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">m2</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="k">if</span> <span class="n">_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"each side of xh needs distinct x"</span><span class="p">,</span> <span class="n">m1</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="o">=</span><span class="n">m2</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="n">xh</span><span class="p">,</span> <span class="n">yh</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">p0</span>
-
-<div class="viewcode-block" id="HingeAtPoint.fallback_p0">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.hinge.HingeAtPoint.html#solarwindpy.fitfunctions.hinge.HingeAtPoint.fallback_p0">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">fallback_p0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start used when :attr:`p0` is None: ``[xh, yh, m1, m2]``.</span>
-
-<span class="sd">        The author's reference hinge: :math:`(x_h, y_h) = (433, 4.12)`, a</span>
-<span class="sd">        rising line with x-intercept :math:`x_1 = 250` (so</span>
-<span class="sd">        :math:`m_1 = 4.12 / 183`) and a small non-zero plateau slope</span>
-<span class="sd">        :math:`m_2 = 0.01\,m_1`. ``bounds`` is</span>
-<span class="sd">        not used: the start is the same point whatever the bounds.</span>
-<span class="sd">        """</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">_author_start</span><span class="p">()</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">"xh"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"yh"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s2">"m2"</span><span class="p">]]</span></div>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reference_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_XH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_YH</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M2</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

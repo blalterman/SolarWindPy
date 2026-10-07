@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.lines.Line &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge.Hinge &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -24,8 +24,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="solarwindpy.fitfunctions.lines.LineXintercept" href="solarwindpy.fitfunctions.lines.LineXintercept.html" />
-    <link rel="prev" title="solarwindpy.fitfunctions.lines" href="solarwindpy.fitfunctions.lines.html" />
+    <link rel="next" title="solarwindpy.fitfunctions.hinge.HingeAtPoint" href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html" />
+    <link rel="prev" title="solarwindpy.fitfunctions.hinge" href="solarwindpy.fitfunctions.hinge.html" />
    
   <style>
     .sidebar-custom-info {
@@ -93,8 +93,8 @@
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.exponentials.html">solarwindpy.fitfunctions.exponentials</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.gaussians.html">solarwindpy.fitfunctions.gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.heaviside.html">solarwindpy.fitfunctions.heaviside</a></li>
-<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="solarwindpy.fitfunctions.hinge.html">solarwindpy.fitfunctions.hinge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.lines.html">solarwindpy.fitfunctions.lines</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.plots.html">solarwindpy.fitfunctions.plots</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.power_laws.html">solarwindpy.fitfunctions.power_laws</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solarwindpy.fitfunctions.tex_info.html">solarwindpy.fitfunctions.tex_info</a></li>
@@ -150,7 +150,7 @@
         
         
         <li class="breadcrumb-item active" aria-current="page">
-          <span>solarwindpy.fitfunctions.lines.Line</span>
+          <span>solarwindpy.fitfunctions.hinge.Hinge</span>
         </li>
       </ol>
     </nav>
@@ -325,14 +325,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="solarwindpy-fitfunctions-lines-line">
-<h1>solarwindpy.fitfunctions.lines.Line<a class="headerlink" href="#solarwindpy-fitfunctions-lines-line" title="Link to this heading"></a></h1>
+  <section id="solarwindpy-fitfunctions-hinge-hinge">
+<h1>solarwindpy.fitfunctions.hinge.Hinge<a class="headerlink" href="#solarwindpy-fitfunctions-hinge-hinge" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/lines.html#Line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Hinge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/hinge.html#Hinge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
-<p>Linear fit function for straight line relationships.</p>
-<p>Fits data to the form: y = m*x + b</p>
+<p>Two lines that meet at a hinge: the parent of the hinge fit functions.</p>
+<p>A subclass writes its model (<code class="docutils literal notranslate"><span class="pre">function</span></code> and <code class="docutils literal notranslate"><span class="pre">TeX_function</span></code>), its
+estimate (<code class="docutils literal notranslate"><span class="pre">_estimate</span></code>) and the translation of the reference hinge to its
+parameters (<code class="docutils literal notranslate"><span class="pre">_reference_start</span></code>), and describes both in its class Notes.
+<code class="docutils literal notranslate"><span class="pre">p0</span></code> is shared: it returns the estimate, or the reference start when the
+data give no estimate.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -382,21 +386,24 @@ log space.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.lines.Line.make_fit" title="solarwindpy.fitfunctions.lines.Line.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.make_fit" title="solarwindpy.fitfunctions.hinge.Hinge.make_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_fit</span></code></a></dt><dd><p>Execute the fitting procedure</p>
 </dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.lines.Line.popt" title="solarwindpy.fitfunctions.lines.Line.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.popt" title="solarwindpy.fitfunctions.hinge.Hinge.popt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">popt</span></code></a></dt><dd><p>Access optimized parameters</p>
 </dd>
-<dt><a class="reference internal" href="#solarwindpy.fitfunctions.lines.Line.rsq" title="solarwindpy.fitfunctions.lines.Line.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
+<dt><a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.rsq" title="solarwindpy.fitfunctions.hinge.Hinge.rsq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rsq</span></code></a></dt><dd><p>Calculate coefficient of determination</p>
 </dd>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>The fitting procedure uses scipy.optimize.least_squares
-with robust loss functions (Huber by default) to handle
-outliers. The initial parameter guess is provided by the
-p0 property, which must be implemented by subclasses.</p>
-<p>All subclasses inherit this documentation automatically
-through the docstring-inheritance metaclass.</p>
+<p>When the data give no estimate, the all-ones default start is a singular
+point of these models (the two lines’ intercepts coincide), so <code class="docutils literal notranslate"><span class="pre">p0</span></code>
+logs a warning and returns the package author’s reference hinge instead,
+translated to the class’s parameters: the hinge
+<span class="math notranslate nohighlight">\((x_h, y_h) = (433, 4.12)\)</span>, the rising line’s x-intercept
+<span class="math notranslate nohighlight">\(x_1 = 250\)</span>, its slope <span class="math notranslate nohighlight">\(m_1 = y_h / (x_h - x_1) = 4.12 / 183\)</span>,
+a small non-zero plateau slope <span class="math notranslate nohighlight">\(m_2 = 0.01\,m_1\)</span>, and the plateau
+line’s x-intercept <span class="math notranslate nohighlight">\(x_2 = x_h - y_h / m_2 = -17867\)</span>, which puts that
+line through the hinge.</p>
 <p class="rubric">Examples</p>
 <p>Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
 recover those parameters:</p>
@@ -412,25 +419,30 @@ recover those parameters:</p>
 </pre></div>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.function">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.function" title="Link to this definition"></a></dt>
-<dd><p>Get the function that`curve_fit` fits.</p>
-<p>The function is set at instantiation. It doesn’t make sense to change
-it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
-kwarg.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.p0">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.p0" title="Link to this definition"></a></dt>
-<dd><p>Calculate the initial guess for the line parameters.</p>
-<p>If the slope cannot be estimated (non-finite or repeated <code class="docutils literal notranslate"><span class="pre">x</span></code>),
-return <code class="docutils literal notranslate"><span class="pre">None</span></code>, which <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html#scipy.optimize.curve_fit" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit()</span></code></a> also takes to mean
-no initial guess.</p>
-<dl class="field-list">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.p0">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.p0" title="Link to this definition"></a></dt>
+<dd><p>The initial guess: the estimate from the data, or the reference start.</p>
+<p><code class="docutils literal notranslate"><span class="pre">p0</span></code> returns the class’s estimate from the used observations, or,
+when the data give no estimate, the class’s reference start. The
+class description (its Notes) states how the class estimates, when an
+estimate is undefined, and what its reference start is.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>p0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The initial guesses as [m, b].</p>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p>One finite guess per parameter, in <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.argnames" title="solarwindpy.fitfunctions.hinge.Hinge.argnames"><code class="xref py py-attr docutils literal notranslate"><span class="pre">argnames</span></code></a> order. When
+the data give no estimate (an estimate is NaN or infinite),
+<code class="docutils literal notranslate"><span class="pre">p0</span></code> logs a warning naming the undefined estimates and returns
+the class’s reference start instead. It never returns None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html#solarwindpy.fitfunctions.core.InsufficientDataError" title="solarwindpy.fitfunctions.core.InsufficientDataError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InsufficientDataError</span></code></a></dt><dd><p>If fewer observations are used than the model has parameters.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a></dt><dd><p>If the data give no estimate and the class has no reference start
+yet (<a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMax.html#solarwindpy.fitfunctions.hinge.HingeMax" title="solarwindpy.fitfunctions.hinge.HingeMax"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMax</span></code></a>); no warning is logged first. Pass <code class="docutils literal notranslate"><span class="pre">p0=</span></code>
+to <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -438,61 +450,47 @@ no initial guess.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.TeX_function">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.TeX_function" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.TeX_function">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.TeX_function" title="Link to this definition"></a></dt>
 <dd><p>Function written in LaTeX.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.x_intercept">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">x_intercept</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.x_intercept" title="Link to this definition"></a></dt>
-<dd><p>Calculate the x-intercept of the fitted line.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p>The x value where the line crosses y=0.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.TeX_info">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.TeX_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.TeX_info">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.TeX_info" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.argnames">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">argnames</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.argnames" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.argnames">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">argnames</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.argnames" title="Link to this definition"></a></dt>
 <dd><p>The names of the actual function arguments pulled by getfullargspec.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.build_TeX_info">
-<span class="sig-name descname"><span class="pre">build_TeX_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.build_TeX_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.build_TeX_info">
+<span class="sig-name descname"><span class="pre">build_TeX_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.build_TeX_info" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.build_plotter">
-<span class="sig-name descname"><span class="pre">build_plotter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.build_plotter" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.build_plotter">
+<span class="sig-name descname"><span class="pre">build_plotter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.build_plotter" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.chisq_dof">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">chisq_dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.chisq_dof" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.chisq_dof">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">chisq_dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.chisq_dof" title="Link to this definition"></a></dt>
 <dd><p>Chisq per degree of freedom <span class="math notranslate nohighlight">\(\chi^2_\nu\)</span>.</p>
 <p>If None, not calculated by <cite>make_fit_old</cite>. If <cite>np.nan</cite>, fit failed.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.combined_popt_psigma">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">combined_popt_psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.combined_popt_psigma" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.combined_popt_psigma">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">combined_popt_psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.combined_popt_psigma" title="Link to this definition"></a></dt>
 <dd><p>Return optimized parameters and uncertainties as a DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -506,25 +504,34 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.dof">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.dof" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.dof">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.dof" title="Link to this definition"></a></dt>
 <dd><p>Degrees of freedom in the fit.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.fit_bounds">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_bounds</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.fit_bounds" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.fit_bounds">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_bounds</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.fit_bounds" title="Link to this definition"></a></dt>
 <dd><p>Bounds used when running the fit.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.fit_result">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_result</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.fit_result" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.fit_result">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fit_result</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.fit_result" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.initial_guess_info">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.initial_guess_info" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.function">
+<span class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.function" title="Link to this definition"></a></dt>
+<dd><p>Get the function that`curve_fit` fits.</p>
+<p>The function is set at instantiation. It doesn’t make sense to change
+it unless you redefine the entire FitFunction, so there is no <cite>new</cite>
+kwarg.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.initial_guess_info">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.initial_guess_info" title="Link to this definition"></a></dt>
 <dd><p>Initial guess and bounds for each parameter, or None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -538,13 +545,13 @@ guess was made (<code class="docutils literal notranslate"><span class="pre">p0<
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.logger">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.logger" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.logger">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.logger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.make_fit">
-<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.make_fit" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.make_fit">
+<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.make_fit" title="Link to this definition"></a></dt>
 <dd><p>Fit the function with the independent <cite>xobs</cite> and dependent <cite>yobs</cite>.</p>
 <p>Uses <cite>least_squares</cite> and returns the <cite>OptimizeResult</cite> object, but
 treats weights as in <cite>curve_fit</cite>.</p>
@@ -563,41 +570,41 @@ identify failed fits after the fact.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.nobs">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nobs</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.nobs" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.nobs">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nobs</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.nobs" title="Link to this definition"></a></dt>
 <dd><p>The total number of observations used in the fit.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.observations">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.observations" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.observations">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.observations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.pcov">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pcov</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.pcov" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.pcov">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pcov</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.pcov" title="Link to this definition"></a></dt>
 <dd><p>Returns a copy so that the matrix isn’t accidentally edited.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.plotter">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">plotter</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.plotter" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.plotter">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">plotter</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.plotter" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.popt">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.popt" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.popt">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">popt</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.popt" title="Link to this definition"></a></dt>
 <dd><p>Optimized fit parameters.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.psigma">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.psigma" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.psigma">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">psigma</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.psigma" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.residuals">
-<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.residuals" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.residuals">
+<span class="sig-name descname"><span class="pre">residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.residuals" title="Link to this definition"></a></dt>
 <dd><p>Calculate fit residuals.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -651,8 +658,8 @@ constraints are passed in __init__).</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.rsq">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.rsq" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.rsq">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rsq</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.rsq" title="Link to this definition"></a></dt>
 <dd><p>Coefficient of determination.</p>
 <p>Source: &lt;en.wikipedia.org/wiki/Coefficient_of_determination#Definitions&gt;</p>
 <dl class="field-list simple">
@@ -668,8 +675,8 @@ point, or constant data), <code class="docutils literal notranslate"><span class
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.set_fit_obs">
-<span class="sig-name descname"><span class="pre">set_fit_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.set_fit_obs" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.set_fit_obs">
+<span class="sig-name descname"><span class="pre">set_fit_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xoutside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">youtside</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.set_fit_obs" title="Link to this definition"></a></dt>
 <dd><p>Set the observed values we’ll actually use in the fit.</p>
 <p>By applying limits to xobs_raw and yobs_raw and checking for finite values.</p>
 <p>All boundaries are inclusive &lt;= or &gt;=.</p>
@@ -709,8 +716,8 @@ point, or constant data), <code class="docutils literal notranslate"><span class
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.lines.Line.sufficient_data">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.lines.Line.sufficient_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.sufficient_data">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.sufficient_data" title="Link to this definition"></a></dt>
 <dd><p>Ensure that we can fit the data before doing any computations.</p>
 </dd></dl>
 
@@ -722,8 +729,8 @@ point, or constant data), <code class="docutils literal notranslate"><span class
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="solarwindpy.fitfunctions.lines.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.lines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="solarwindpy.fitfunctions.lines.LineXintercept.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.lines.LineXintercept" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="solarwindpy.fitfunctions.hinge.html" class="btn btn-neutral float-left" title="solarwindpy.fitfunctions.hinge" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solarwindpy.fitfunctions.hinge.HingeAtPoint.html" class="btn btn-neutral float-right" title="solarwindpy.fitfunctions.hinge.HingeAtPoint" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

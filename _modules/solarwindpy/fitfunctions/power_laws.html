@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../../../_static/documentation_options.js?v=65f15681"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -329,13 +329,6 @@
 <span class="sd">    Parameters are ``A`` (amplitude) and ``b`` (exponent).</span>
 <span class="sd">    """</span>
 
-<div class="viewcode-block" id="PowerLaw.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.power_laws.PowerLaw.html#solarwindpy.fitfunctions.power_laws.PowerLaw.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Initialize a power-law fit to the observations."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`A x^b` as ``f(x, A, b)``."""</span>
@@ -370,22 +363,6 @@
 <span class="sd">    Parameters are ``A`` (amplitude), ``b`` (exponent) and ``c`` (offset).</span>
 <span class="sd">    """</span>
 
-<div class="viewcode-block" id="PowerLawPlusC.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.power_laws.PowerLawPlusC.html#solarwindpy.fitfunctions.power_laws.PowerLawPlusC.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Initialize a power law with constant offset.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        xobs, yobs : array-like</span>
-<span class="sd">            Observed values to fit.</span>
-<span class="sd">        **kwargs : dict</span>
-<span class="sd">            Forwarded to :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
-<span class="sd">        """</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""The model :math:`A x^b + c` as ``f(x, A, b, c)``."""</span>
@@ -419,13 +396,6 @@
 
 <span class="sd">    Parameters are ``A`` (amplitude), ``b`` (exponent) and ``x0`` (origin).</span>
 <span class="sd">    """</span>
-
-<div class="viewcode-block" id="PowerLawOffCenter.__init__">
-<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.html#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initialize a power law centered at ``x - x_0`` without offset."""</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

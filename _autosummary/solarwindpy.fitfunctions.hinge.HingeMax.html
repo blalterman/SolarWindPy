@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge.HingeMax &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge.HingeMax &mdash; SolarWindPy 0.1.dev1+g9e11466a8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="../_static/documentation_options.js?v=65f15681"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -330,7 +330,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HingeMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">400.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/hinge.html#HingeMax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMin</span></code></a></p>
 <p>Piecewise linear function with hinge point using maximum.</p>
 <p>The model consists of two linear segments joined at a hinge point:</p>
 <div class="math notranslate nohighlight">
@@ -344,11 +344,25 @@
 <span class="math notranslate nohighlight">\(y_h = m_1 (h - x_1)\)</span>. The second slope is constrained by:</p>
 <div class="math notranslate nohighlight">
 \[m_2 = m_1 \frac{h - x_1}{h - x_2}\]</div>
-<p>This is the same as <a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMin</span></code></a> but uses <code class="docutils literal notranslate"><span class="pre">np.maximum</span></code> instead
-of <code class="docutils literal notranslate"><span class="pre">np.minimum</span></code>, suitable for V-shaped patterns opening upward.</p>
+<p>This is <a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMin</span></code></a> with <code class="docutils literal notranslate"><span class="pre">np.maximum</span></code> instead of <code class="docutils literal notranslate"><span class="pre">np.minimum</span></code>,
+suitable for V-shaped patterns opening upward. It shares HingeMin’s
+parameters, estimate and derived properties.</p>
 <dl class="field-list">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
+<dt><strong>xobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Independent variable observations.</p>
+</dd>
+<dt><strong>yobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Dependent variable observations.</p>
+</dd>
+<dt><strong>guess_h</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, optional</span></dt><dd><p>Initial guess for hinge x-coordinate. Default is 400.0.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>Additional arguments passed to
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
 <dt><strong>m1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Slope of first line (fitted parameter).</p>
 </dd>
 <dt><strong>x1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>x-intercept of first line (fitted parameter).</p>
@@ -360,37 +374,6 @@ of <code class="docutils literal notranslate"><span class="pre">np.minimum</span
 <dt><a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax.m2" title="solarwindpy.fitfunctions.hinge.HingeMax.m2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m2</span></code></a><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Slope of the second line.</p>
 </dd>
 <dt><a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax.theta" title="solarwindpy.fitfunctions.hinge.HingeMax.theta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">theta</span></code></a><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Angle between the two lines in radians.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.hinge</span><span class="w"> </span><span class="kn">import</span> <span class="n">HingeMax</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># V-shape with vertex at (5, -10)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">HingeMax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guess_h</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hinge at x=</span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">'h'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="go">Hinge at x=5.00</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">400.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/hinge.html#HingeMax.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize fit function with observed data.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>xobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed x values (independent variable).
-Shape must match yobs.</p>
-</dd>
-<dt><strong>yobs</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a></span></dt><dd><p>Observed y values (dependent variable).
-Shape must match xobs.</p>
-</dd>
-<dt><strong>guess_h</strong></dt><dd><p>The description is missing.</p>
-</dd>
-<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
 </dd>
 </dl>
 </dd>
@@ -407,124 +390,24 @@ Shape must match xobs.</p>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>The fitting procedure uses scipy.optimize.least_squares
-with robust loss functions (Huber by default) to handle
-outliers. The initial parameter guess is provided by the
-p0 property, which must be implemented by subclasses.</p>
-<p>All subclasses inherit this documentation automatically
-through the docstring-inheritance metaclass.</p>
+<p><code class="docutils literal notranslate"><span class="pre">p0</span></code> estimates <code class="docutils literal notranslate"><span class="pre">[m1,</span> <span class="pre">x1,</span> <span class="pre">x2,</span> <span class="pre">h]</span></code> as <a class="reference internal" href="solarwindpy.fitfunctions.hinge.HingeMin.html#solarwindpy.fitfunctions.hinge.HingeMin" title="solarwindpy.fitfunctions.hinge.HingeMin"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMin</span></code></a> does, and an
+estimate is undefined in the same cases. HingeMax has no reference start
+yet: its shape differs from the reference hinge of <a class="reference internal" href="solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge" title="solarwindpy.fitfunctions.hinge.Hinge"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hinge</span></code></a> that
+the other hinge classes start from when the data give no estimate, and
+the author has not chosen one. In that case <code class="docutils literal notranslate"><span class="pre">p0</span></code> raises
+<code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> without logging a warning; pass <code class="docutils literal notranslate"><span class="pre">p0=</span></code> to
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
 <p class="rubric">Examples</p>
-<p>Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
-recover those parameters:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.gaussians</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.hinge</span><span class="w"> </span><span class="kn">import</span> <span class="n">HingeMax</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">10</span><span class="p">))</span>  <span class="c1"># V-shape with vertex at (5, -10)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">HingeMax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guess_h</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<span class="go">{'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hinge at x=</span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="p">[</span><span class="s1">'h'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">Hinge at x=5.00</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.guess_h">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">guess_h</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.guess_h" title="Link to this definition"></a></dt>
-<dd><p>Initial guess for hinge x-coordinate used in p0 calculation.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.function">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.function" title="Link to this definition"></a></dt>
-<dd><p>The hinge maximum function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a></dt><dd><p>Function with signature <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">m1,</span> <span class="pre">x1,</span> <span class="pre">x2,</span> <span class="pre">h)</span></code>.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.m2">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">m2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.m2" title="Link to this definition"></a></dt>
-<dd><p>Slope of the second line.</p>
-<p>Derived from the constraint that both lines pass through the hinge:</p>
-<div class="math notranslate nohighlight">
-\[m_2 = m_1 \frac{h - x_1}{h - x_2}\]</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.theta">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.theta" title="Link to this definition"></a></dt>
-<dd><p>Angle between the two lines in radians.</p>
-<p>Calculated using arctan2 for proper quadrant handling:</p>
-<div class="math notranslate nohighlight">
-\[\theta = \arctan2(m_1 - m_2, 1 + m_1 m_2)\]</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.p0">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.p0" title="Link to this definition"></a></dt>
-<dd><p>Calculate initial parameter guess.</p>
-<p>The initial guess estimates slopes and intercepts from the data
-in regions separated by the hinge guess.</p>
-<p>Each side of <code class="docutils literal notranslate"><span class="pre">guess_h</span></code> with two or more points needs distinct
-<code class="docutils literal notranslate"><span class="pre">x</span></code> for a slope and a nonzero slope for an x-intercept; with fewer,
-<code class="docutils literal notranslate"><span class="pre">m1</span></code> falls back to the slope across the x range, which needs
-distinct <code class="docutils literal notranslate"><span class="pre">x</span></code>. Otherwise an estimate is undefined and <code class="docutils literal notranslate"><span class="pre">p0</span></code> is None.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>Initial guesses as [m1, x1, x2, h].</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html#solarwindpy.fitfunctions.core.InsufficientDataError" title="solarwindpy.fitfunctions.core.InsufficientDataError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InsufficientDataError</span></code></a></dt><dd><p>If insufficient data for estimation.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p># TODO: Convert to data-driven p0 estimation (see GH issue #XX)
-Default guess_h=400 is appropriate for solar wind speed analysis.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.fallback_p0">
-<span class="sig-name descname"><span class="pre">fallback_p0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-inf,</span> <span class="pre">inf)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/hinge.html#HingeMax.fallback_p0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.fallback_p0" title="Link to this definition"></a></dt>
-<dd><p>The start used when <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax.p0" title="solarwindpy.fitfunctions.hinge.HingeMax.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is None: not yet defined.</p>
-<p>The hinge maximum has a different shape from the other hinge models,
-and the author has not yet chosen its fallback start.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>bounds</strong><span class="classifier">2-tuple or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>As accepted by <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax.make_fit" title="solarwindpy.fitfunctions.hinge.HingeMax.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>One value per parameter: ones when unbounded, otherwise a point
-inside the bounds.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a></dt><dd><p>Always, until a default start is defined.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.TeX_function">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.TeX_function" title="Link to this definition"></a></dt>
@@ -542,6 +425,11 @@ inside the bounds.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.TeX_info">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.TeX_info" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yobs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">400.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -600,6 +488,26 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 <dd></dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.function">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.function" title="Link to this definition"></a></dt>
+<dd><p>The hinge function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a></dt><dd><p>Function with signature <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">m1,</span> <span class="pre">x1,</span> <span class="pre">x2,</span> <span class="pre">h)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.guess_h">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">guess_h</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.guess_h" title="Link to this definition"></a></dt>
+<dd><p>Initial guess for hinge x-coordinate used in p0 calculation.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.initial_guess_info">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.initial_guess_info" title="Link to this definition"></a></dt>
 <dd><p>Initial guess and bounds for each parameter, or None.</p>
@@ -618,6 +526,15 @@ guess was made (<code class="docutils literal notranslate"><span class="pre">p0<
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.logger">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.logger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.m2">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">m2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.m2" title="Link to this definition"></a></dt>
+<dd><p>Slope of the second line.</p>
+<p>Derived from the constraint that both lines pass through the hinge:</p>
+<div class="math notranslate nohighlight">
+\[m_2 = m_1 \frac{h - x_1}{h - x_2}\]</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.make_fit">
@@ -649,6 +566,37 @@ identify failed fits after the fact.</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.observations">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">observations</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.observations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.p0">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.p0" title="Link to this definition"></a></dt>
+<dd><p>The initial guess: the estimate from the data, or the reference start.</p>
+<p><code class="docutils literal notranslate"><span class="pre">p0</span></code> returns the class’s estimate from the used observations, or,
+when the data give no estimate, the class’s reference start. The
+class description (its Notes) states how the class estimates, when an
+estimate is undefined, and what its reference start is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p>One finite guess per parameter, in <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax.argnames" title="solarwindpy.fitfunctions.hinge.HingeMax.argnames"><code class="xref py py-attr docutils literal notranslate"><span class="pre">argnames</span></code></a> order. When
+the data give no estimate (an estimate is NaN or infinite),
+<code class="docutils literal notranslate"><span class="pre">p0</span></code> logs a warning naming the undefined estimates and returns
+the class’s reference start instead. It never returns None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference internal" href="solarwindpy.fitfunctions.core.InsufficientDataError.html#solarwindpy.fitfunctions.core.InsufficientDataError" title="solarwindpy.fitfunctions.core.InsufficientDataError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InsufficientDataError</span></code></a></dt><dd><p>If fewer observations are used than the model has parameters.</p>
+</dd>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a></dt><dd><p>If the data give no estimate and the class has no reference start
+yet (<a class="reference internal" href="#solarwindpy.fitfunctions.hinge.HingeMax" title="solarwindpy.fitfunctions.hinge.HingeMax"><code class="xref py py-class docutils literal notranslate"><span class="pre">HingeMax</span></code></a>); no warning is logged first. Pass <code class="docutils literal notranslate"><span class="pre">p0=</span></code>
+to <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.pcov">
@@ -789,6 +737,15 @@ point, or constant data), <code class="docutils literal notranslate"><span class
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.sufficient_data">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sufficient_data</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.sufficient_data" title="Link to this definition"></a></dt>
 <dd><p>Ensure that we can fit the data before doing any computations.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.HingeMax.theta">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.HingeMax.theta" title="Link to this definition"></a></dt>
+<dd><p>Angle between the two lines in radians.</p>
+<p>Calculated using arctan2 for proper quadrant handling:</p>
+<div class="math notranslate nohighlight">
+\[\theta = \arctan2(m_1 - m_2, 1 + m_1 m_2)\]</div>
 </dd></dl>
 
 </dd></dl>
