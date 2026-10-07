@@ -50,9 +50,13 @@ jobs:
       
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
+        # A dead runner mirror once hung this step for 25+ minutes; fail fast instead.
+        timeout-minutes: 5
+        env:
+          APT_OPTIONS: -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libhdf5-dev pkg-config
+          sudo apt-get $APT_OPTIONS update
+          sudo apt-get $APT_OPTIONS install -y libhdf5-dev pkg-config
       
       - name: Install dependencies
         run: |

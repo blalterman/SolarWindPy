@@ -14,7 +14,7 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Features**:
 - Matrix testing across multiple Python versions and operating systems
-- Automatic system dependency installation (HDF5 libraries on Linux)
+- No system packages: PyTables and h5py install from wheels that bundle HDF5
 - Enhanced pytables installation with verbose debugging
 - Dependency caching for faster builds
 - Code linting with flake8
@@ -30,7 +30,6 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 
 **Recent Enhancements** (August 2025):
 - ✅ Fixed deprecated upload-artifact@v3 → v4 (resolves workflow blocking)
-- ✅ Added system dependency management for pytables (HDF5 libraries)
 - ✅ Expanded Python support to include 3.12 (Ubuntu 24.04 default)
 - ✅ Enhanced artifact management with comprehensive debugging data
 - ✅ Leveraged unlimited public repository storage for extensive test artifacts
@@ -49,7 +48,6 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 - Multiple report formats (JSON for automation, text for humans)
 - Organized report structure in `security-results/` directory
 - Critical vulnerability detection with build failure
-- Automatic system dependency installation for complete scans
 
 **Success Criteria**: No high-severity vulnerabilities detected
 
@@ -62,7 +60,6 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 **Features**:
 - Documentation build testing on all branches
 - Deployment to GitHub Pages from master (Python 3.12)
-- Automatic system dependency installation for complete builds
 - Dependency caching for faster builds
 - Link checking with sphinx-link-checker (non-blocking)
 - Documentation coverage reporting with summary generation
@@ -81,6 +78,7 @@ This repository uses a comprehensive set of GitHub Actions workflows to ensure c
 **Features**:
 - Tag format verification (v*.*.* pattern)
 - Full test suite execution before publishing
+- Linux matrix cells still install `libhdf5-dev pkg-config` with apt, bounded by `timeout-minutes: 5` and `-o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20`, so an unreachable mirror fails the step quickly instead of hanging the job
 - Package verification with twine
 - TestPyPI deployment for release candidates (RC tags)
 - Production PyPI deployment for stable releases
@@ -236,7 +234,7 @@ When branch protection is enabled for master:
 3. **Test failures**: Run tests locally, check for platform-specific issues
 4. **pytables installation failures**: 
    - **Error**: "Failed building wheel for tables" or "HDF5 library not found"
-   - **Solution**: Workflow automatically installs `libhdf5-dev pkg-config` on Linux
+   - **Cause**: pip is building PyTables or h5py from source, which needs the HDF5 headers. Only publish.yml's Linux cells install `libhdf5-dev pkg-config`; the other workflows dropped that apt step because PyTables and h5py now ship wheels that bundle HDF5 for Python 3.12 to 3.14, and the jobs install no other compiled package. A source build in CI means a wheel is missing for that Python or platform.
    - **Local fix**: `sudo apt-get install libhdf5-dev pkg-config` (Ubuntu/Debian)
 5. **Deprecated action warnings**:
    - **Error**: "This request has been automatically failed because it uses a deprecated version"
