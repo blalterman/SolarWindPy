@@ -643,6 +643,193 @@ def test_ssn_bands_reject_a_width_that_spans_the_normalized_range(sidc):
 
 
 # ---------------------------------------------------------------------------
+# Small hand-built series: a ramp across the cycle 23/24 boundary.
+# ---------------------------------------------------------------------------
+# Monthly epochs 2008-01-01 .. 2009-12-01 (700 days; 2008 is a leap year)
+# straddle the shipped extrema table's cycle 23/24 boundary at 2008-12-01.
+# SSN = 1 + 0.01 * (days since 2008-01-01) runs from 1.0 to 8.0 and is linear
+# in time, so any interpolator returns the same line at an interior epoch.
+RAMP_START = pd.Timestamp("2008-01-01")
+
+
+def ramp_ssn(index):
+    """SSN of the hand-built ramp at ``index``."""
+    days = (index - RAMP_START).total_seconds().to_numpy() / 86400.0
+    return 1.0 + 0.01 * days
+
+
+@pytest.fixture
+def ramp_index():
+    """Monthly epochs of the hand-built ramp."""
+    return pd.date_range(RAMP_START, "2009-12-01", freq="MS")
+
+
+@pytest.fixture
+def ramp_sidc(fake_home, ramp_index):
+    """A real ``SIDC`` whose cached series is the hand-built ramp.
+
+    ``std`` is constant, so interpolating it gives a different answer than
+    interpolating ``ssn``.
+    """
+    frame = pd.DataFrame(
+        {"ssn": ramp_ssn(ramp_index), "std": 5.0, "n_obs": 25}, index=ramp_index
+    )
+    seed_cache(fake_home, "m13", frame)
+    return SIDC("m13")
+
+
+def at_days(*days):
+    """Epochs ``days`` after the ramp's start."""
+    return pd.DatetimeIndex([RAMP_START + pd.Timedelta(days=d) for d in days])
+
+
+def test_ramp_fixture_straddles_two_cycles(ramp_sidc, extrema):
+    """The ramp's epochs fall in cycles 23 and 24 of the shipped table.
+
+    ON FAILURE: the fixture no longer separates per-cycle from whole-series
+    normalization; fix the fixture.
+    """
+    cycles = extrema.cycle_intervals.loc[:, "Cycle"]
+    found = {
+        number
+        for timestamp in ramp_sidc.data.index
+        for number, interval in cycles.items()
+        if timestamp in interval
+    }
+    assert found == {23, 24}
+
+
+def test_interpolate_data_defaults_to_the_ssn_column(ramp_sidc):
+    """With no ``key``, ``interpolate_data`` interpolates ``ssn`` and stores it.
+
+    At 50, 250 and 450 days the ramp reads 1.5, 3.5 and 5.5 (hand-computed);
+    the constant ``std`` column would read 5 everywhere.
+
+    ON FAILURE: the code is wrong.
+    """
+    target = at_days(50, 250, 450)
+    interpolated = ramp_sidc.interpolate_data(target)
+
+    assert list(interpolated.columns) == ["ssn"]
+    assert interpolated.loc[:, "ssn"].to_numpy() == exact([1.5, 3.5, 5.5])
+    assert ramp_sidc.interpolated is interpolated
+
+
+def test_interpolate_data_skips_a_missing_month(fake_home, ramp_index):
+    """A NaN month is dropped before interpolating, not propagated.
+
+    The remaining months still lie on the ramp, so the value at the missing
+    epoch is the ramp's own (hand-computed from its definition).
+
+    ON FAILURE: the code is wrong.
+    """
+    ssn = ramp_ssn(ramp_index)
+    ssn[10] = np.nan
+    frame = pd.DataFrame({"ssn": ssn, "std": 5.0, "n_obs": 25}, index=ramp_index)
+    seed_cache(fake_home, "m13", frame)
+    indicator = SIDC("m13")
+
+    target = ramp_index[8:13]
+    interpolated = indicator.interpolate_data(target, key="ssn")
+    assert interpolated.loc[:, "ssn"].to_numpy() == exact(ramp_ssn(target))
+
+
+def test_run_normalization_also_normalizes_the_interpolated_series(ramp_sidc, extrema):
+    """After ``interpolate_data``, ``run_normalization`` adds ``nssn`` to the interpolation.
+
+    Each interpolated value is divided by the largest interpolated value in
+    its own cycle. Expected values come from the ramp's definition and the
+    shipped cycle intervals, not from SIDC: the target grid crosses the
+    cycle 23/24 boundary, so per-cycle and whole-series maxima differ.
+
+    ON FAILURE: the code is wrong.
+    """
+    target = pd.date_range(RAMP_START, "2009-12-01", freq="10D")
+    ramp_sidc.interpolate_data(target, key="ssn")
+    ramp_sidc.run_normalization(norm_by="max")
+
+    cycles = extrema.cycle_intervals.loc[:, "Cycle"]
+    cycle_of = pd.Series(
+        [next(n for n, interval in cycles.items() if t in interval) for t in target],
+        index=target,
+    )
+    values = pd.Series(ramp_ssn(target), index=target)
+    expected = values / values.groupby(cycle_of).transform("max")
+
+    assert set(cycle_of) == {23, 24}
+    nssn = ramp_sidc.interpolated.loc[:, "nssn"]
+    assert nssn.to_numpy() == exact(expected.to_numpy())
+
+
+def test_ssn_bands_default_to_half_width_two_centred_on_zero(ramp_sidc):
+    """With no arguments the bands are (-2, 2], (2, 6], ... up to the series maximum.
+
+    The defaults are key="ssn" and dssn=2.0: band centres run 0, 4, ... below
+    the measured maximum of 8.0, i.e. centres 0 and 4. Hand-labelled:
+    interpolated SSN 1.5 lands in (-2, 2], 3.5 and 5.5 in (2, 6], and 7.5 lies
+    above the last band, so it is unlabelled.
+
+    ON FAILURE: the code is wrong.
+    """
+    target = at_days(50, 250, 450, 650)
+    ramp_sidc.interpolate_data(target)
+    cut = ramp_sidc.cut_spec_by_ssn_band()
+
+    intervals = ramp_sidc.ssn_band_intervals
+    assert [(i.left, i.right) for i in intervals] == [(-2.0, 2.0), (2.0, 6.0)]
+    assert intervals.name == "ssn_intervals"
+
+    labelled = [None if pd.isna(v) else (v.left, v.right) for v in cut]
+    assert labelled == [(-2.0, 2.0), (2.0, 6.0), (2.0, 6.0), None]
+    assert ramp_sidc.spec_by_ssn_band is cut
+
+
+def test_normalized_bands_accept_widths_below_one_only(ramp_sidc):
+    """For ``nssn`` a half-width of exactly 1 is refused and 0.5 is accepted.
+
+    The documented condition is dssn < 1, so the boundary value 1 itself
+    must raise. With dssn = 0.5 and the per-cycle maximum of 1.0, the only
+    band centre below the maximum is 0, so the band is (-0.5, 0.5].
+
+    ON FAILURE: the code is wrong.
+    """
+    ramp_sidc.run_normalization(norm_by="max")
+    with pytest.raises(ValueError, match="dssn < 1"):
+        ramp_sidc.cut_spec_by_ssn_band(key="nssn", dssn=1.0)
+
+    ramp_sidc.interpolate_data(at_days(50, 250), key="nssn")
+    ramp_sidc.cut_spec_by_ssn_band(key="nssn", dssn=0.5)
+    intervals = ramp_sidc.ssn_band_intervals
+    assert [(i.left, i.right) for i in intervals] == [(-0.5, 0.5)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason=(
+        "SIDC.cut_spec_by_ssn_band (solarwindpy/solar_activity/sunspot_number/"
+        "sidc.py) catches the KeyError for a column missing from "
+        "`interpolated` and calls np.isnan on its argument, the column name, "
+        "which raises TypeError \"ufunc 'isnan' not supported for the input "
+        'types"; remove this marker when a non-NaN KeyError is re-raised'
+    ),
+)
+def test_ssn_bands_for_a_column_never_interpolated_raise_key_error(ramp_sidc):
+    """Banding ``nssn`` when only ``ssn`` was interpolated raises KeyError naming it.
+
+    The ``except KeyError`` branch re-raises any KeyError it does not handle
+    (its ``else: raise``), so the caller should see the missing column.
+
+    ON FAILURE: (unexpected pass) the KeyError is re-raised; drop the xfail
+    marker.
+    """
+    ramp_sidc.run_normalization(norm_by="max")
+    ramp_sidc.interpolate_data(at_days(50, 250), key="ssn")
+    with pytest.raises(KeyError, match="nssn"):
+        ramp_sidc.cut_spec_by_ssn_band(key="nssn", dssn=0.5)
+
+
+# ---------------------------------------------------------------------------
 # Plotting on a colour bar.
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("vertical", [True, False])
