@@ -559,3 +559,12 @@ becomes False); this reverses the earlier "store clip as a bool" decision and fi
 one-sided clipping, which the base class's `bool()` had broken.
 
 Author decision (2026-10-07): duplicate timestamps also log a warning when a `Plasma` is built.
+
+### projection-bin-edges
+
+OWNS: solarwindpy/plotting/agg_plot.py, solarwindpy/plotting/hist2d.py, tests/plotting/test_hist2d_plotting.py, tests/plotting/test_agg_plot.py
+
+Runs after PR #508 merges. Author decision: a 1-D projection of a 2-D histogram keeps the
+parent's bins, including which edge each bin closes on, so a sample on a bin edge lands in the
+same bin as in the parent and is never dropped. Retire #508's strict xfail
+`test_integer_bin_projection_keeps_samples_on_bin_edges`.
