@@ -166,8 +166,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   measurement of that species to NaN at that time and logs a warning with the count per
   species. The new User Guide page "Missing data" states the missing-data rules.
 - `GaussianLn` raises `ValueError` when any used x is ≤ 0 (ln x is undefined there), at
-  construction and when `set_fit_obs` selects new observations, instead of returning
-  `p0` None and fitting.
+  construction and when `set_fit_obs` selects new observations, instead of fitting
+  with `p0` None.
 
 ### Changed
 
