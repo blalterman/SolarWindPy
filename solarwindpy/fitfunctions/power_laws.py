@@ -108,7 +108,8 @@ class PowerLawOffCenter(FitFunction):
         ValueError
             If the caller's lower bound on ``x0`` leaves it no room below the
             smallest used ``x``, or the caller's ``p0`` starts ``x0`` outside
-            its bounds. Returned instead when ``return_exception``.
+            its bounds or at NaN or infinity. Returned instead when
+            ``return_exception``.
         """
         x = self.observations.used.x
         n = len(self.argnames)
@@ -132,7 +133,9 @@ class PowerLawOffCenter(FitFunction):
                 except (TypeError, ValueError):
                     # Malformed p0: the base fit reports it.
                     p0 = None
-                if p0 is not None and p0.size == n and p0[i] > ub[i]:
+                if p0 is not None and p0.size == n and not np.isfinite(p0[i]):
+                    e = f"the initial guess p0 starts x0 at {p0[i]}, not a finite number"
+                elif p0 is not None and p0.size == n and p0[i] > ub[i]:
                     e = (
                         f"the initial guess p0 starts x0 at {p0[i]}, above its "
                         f"upper bound {ub[i]}"

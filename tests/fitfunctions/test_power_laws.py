@@ -442,6 +442,37 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
 
 
+@pytest.mark.parametrize("x0_start", [np.nan, np.inf, -np.inf])
+def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
+    """A caller's ``p0`` starting ``x0`` at NaN or infinity raises ValueError.
+
+    The error names ``x0``, the smallest used x and the start, and
+    ``return_exception`` returns it. The positive control fits the same data
+    from a finite start.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
+    p0 = [1.0, 1.0, x0_start]
+    match = (
+        r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
+        + re.escape(str(x0_start))
+        + ", not a finite number"
+    )
+
+    with pytest.raises(ValueError, match=match):
+        obj.make_fit(p0=p0)
+    got = obj.make_fit(return_exception=True, p0=p0)
+    assert isinstance(got, ValueError) and re.search(match, str(got))
+
+    # Positive control: a finite start below the data fits.
+    p0[2] = -1.0
+    obj.make_fit(p0=p0)
+    # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
+    assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
+
+
 @pytest.mark.parametrize(
     "x0_bounds, x0, start",
     [

@@ -129,6 +129,9 @@ def _in_numpydoc_section_order(doc):
     if not doc:
         return doc
     lines = cleandoc(doc).splitlines()
+    # A section header is a non-indented line followed by a rule of dashes at
+    # least as long as the title, as numpydoc parses one. An unindented dashed
+    # underline inside a section body would be misread as a header.
     starts = [
         i
         for i, (title, rule) in enumerate(zip(lines, lines[1:]))

@@ -299,7 +299,10 @@ class TestInitialGuessInfoBeforeFit:
     """Test initial_guess_info property returns None before fit (lines 301-302)."""
 
     def test_initial_guess_info_returns_none_before_fit(self, simple_linear_data):
-        """Verify initial_guess_info returns None when fit_bounds not set."""
+        """``initial_guess_info`` is None on a fresh object that has not been fitted.
+
+        ON FAILURE: the code is wrong -- an unfitted object reports a start.
+        """
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
         assert lf.initial_guess_info is None

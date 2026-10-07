@@ -1757,7 +1757,7 @@ class TestNoContourLabels:
     def test_filled_contours_emit_no_matplotlib_deprecation_warning(self, known_hist):
         """A filled-contour plot draws no text and triggers no deprecation.
 
-        Matplotlib deprecated `clabel` on filled contours in 3.1; labelling
+        Matplotlib deprecated `clabel` on filled contours in 3.11; labelling
         `contourf` output emitted `MatplotlibDeprecationWarning`.
 
         ON FAILURE: the code is wrong -- something labels the filled contours
