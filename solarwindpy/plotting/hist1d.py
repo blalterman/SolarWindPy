@@ -104,7 +104,7 @@ class Hist1D(AggPlot):
         data.loc[:, "y"] = y
 
         self._data = data
-        self._clip = clip
+        self._clip = bool(clip)
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.

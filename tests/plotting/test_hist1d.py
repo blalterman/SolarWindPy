@@ -551,6 +551,18 @@ class TestConstructCdf:
         )
 
 
+@pytest.mark.parametrize(
+    "given, expected", [(0, False), (1, True), ("", False), (None, False)]
+)
+def test_clip_is_the_truth_value_of_clip_data(xy, given, expected):
+    """``clip`` stores ``bool(clip_data)``, as the base class's ``clip`` does.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, _ = xy
+    assert Hist1D(x, clip_data=given).clip is expected
+
+
 def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
     """Each x bin keeps the samples whose y lies in that bin's (bottom, top].
 
