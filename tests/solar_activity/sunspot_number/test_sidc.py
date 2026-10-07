@@ -826,6 +826,20 @@ def test_narrow_normalized_bands_touch_without_overlapping(ramp_sidc):
     assert all(band.left < v <= band.right for v, band in zip(values, cut))
 
 
+def test_ssn_bands_of_an_all_zero_series_are_empty(fake_home, ramp_index):
+    """A series whose maximum is 0 has no band centres below it: every label is NaN.
+
+    ON FAILURE: the code is wrong.
+    """
+    frame = pd.DataFrame({"ssn": 0.0, "std": 5.0, "n_obs": 25}, index=ramp_index)
+    seed_cache(fake_home, "m13", frame)
+    indicator = SIDC("m13")
+    indicator.interpolate_data(at_days(50, 250))
+
+    assert indicator.cut_spec_by_ssn_band().isna().all()
+    assert len(indicator.ssn_band_intervals) == 0
+
+
 def test_ssn_bands_for_a_column_never_interpolated_raise_key_error(ramp_sidc):
     """Banding ``nssn`` when only ``ssn`` was interpolated raises KeyError naming it.
 
