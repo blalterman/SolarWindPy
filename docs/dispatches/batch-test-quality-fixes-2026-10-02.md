@@ -546,3 +546,9 @@ OWNS: tests/core/test_plasma.py
 Runs after the remaining `plasma.py` survivors are sorted. Known gaps: `nuc` refuses combined
 species on either side (author confirmed; mutants 6, 8, 10, 11, 17); `nc` defaults to
 `both_species=True` (mutant 1); `Plasma` keeps the input row order (`set_data` mutant 116).
+
+Author decision revised (2026-10-07): when a `Plasma` is built from out-of-order timestamps it
+logs a warning (how many rows, and where), then sorts the data by time; methods may assume
+sorted data. This replaces the "never sort" decision above. `_species_weighted_mean` (added in
+#494) stays, with a docstring line that it relies on species masking. Remove the dead comma
+split in `Plasma._set_ions`; leave `build_alfvenic_turbulence`'s comma split unless shown dead.
