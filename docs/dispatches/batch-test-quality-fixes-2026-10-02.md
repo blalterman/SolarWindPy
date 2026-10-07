@@ -557,3 +557,5 @@ Author correction (2026-10-07): `clip_data` clips the lower ("l") or upper ("u")
 True clips both. Store `clip` as given in `Hist1D` and in the plotting base class (only None
 becomes False); this reverses the earlier "store clip as a bool" decision and fixes Hist2D's
 one-sided clipping, which the base class's `bool()` had broken.
+
+Author decision (2026-10-07): duplicate timestamps also log a warning when a `Plasma` is built.
