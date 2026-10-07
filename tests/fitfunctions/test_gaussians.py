@@ -116,7 +116,7 @@ def test_p0_estimation(cls, params):
             # https://mathworld.wolfram.com/LogNormalDistribution.html, with
             # the normalization replaced by A, as GaussianLn.function computes.
             (
-                r"f(x) = A \cdot"
+                r"f(x) = A \cdot "
                 r"\exp\left["
                 r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
                 r"\right]"

@@ -286,7 +286,7 @@ class GaussianLn(FitFunction):
         r"""LaTeX form of the model."""
         TeX = (
             r"f(x) = "
-            r"A \cdot"
+            r"A \cdot "
             r"\exp\left["
             r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
             r"\right]"
