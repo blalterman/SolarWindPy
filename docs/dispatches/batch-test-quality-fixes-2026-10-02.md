@@ -570,3 +570,9 @@ same bin as in the parent and is never dropped. Retire #508's strict xfail
 `test_integer_bin_projection_keeps_samples_on_bin_edges`.
 Also from #508's review: reword `take_data_in_yrange_across_x`'s `Raises` docstring to say the
 `ValueError` is for a `ranges_by_x` entry naming an x-bin the histogram does not have.
+
+Author decisions for `plasma-survivor-tests` (2026-10-07): remove the dead comma split in
+`Plasma._set_ions`; a missing attribute raises `AttributeError` naming it; the column-name checks
+in `set_auxiliary_data` (and siblings) raise `ValueError`, not `assert`; log wording is not tested.
+OWNS for that unit grows to solarwindpy/core/plasma.py, tests/core/test_plasma.py,
+tests/core/test_plasma_io.py.
