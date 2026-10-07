@@ -514,3 +514,10 @@ whitened with its Cholesky factor), retiring the GLS xfail; (2) `SIDC.cut_spec_b
 re-raises a clear `KeyError` naming a column `interpolated` lacks, retiring that xfail, and its
 dead band-overlap check is removed. `SIDC.run_normalization`'s column order stays unpromised.
 CHANGELOG lines go in the PR body.
+
+Author decision revised after PR #505 (2026-10-07): the author has never fit with correlated
+errors, so `weights` is a 1-d array of 1-sigma uncertainties only. Revert #505's covariance
+support; delete the unreachable covariance (Cholesky) branch in the fit; state in the
+`weights` docstring that a 2-d array is refused; replace the GLS strict xfail with a test that
+a 2-d `weights` raises `InvalidParameterError` with a clear message. Results for 1-d weights
+and for no weights are unchanged. The `cut_spec_by_ssn_band` fixes stand.
