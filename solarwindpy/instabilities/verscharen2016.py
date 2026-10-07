@@ -571,8 +571,14 @@ class StabilityContours(object):
             (0, 0), 1, 1, fc="w", fill=False, edgecolor="none", linewidth=0
         )
 
+        def handle(gamma, itype):
+            """The curve plotted for ``(gamma, itype)``, or the blank cell."""
+            image = images.loc[gamma, itype]
+            return extra if pd.isna(image) else image
+
         # Create organized list containing all handles for table.
-        # Extra represent empty space. Within each column, handles follow
+        # Extra represent empty space, including the cell of an instability
+        # not plotted, so the table keeps its layout. Within each column, handles follow
         # the row labels below: AIC, FMW, MM, OFI.
         legend_handles = [
             extra,
@@ -581,20 +587,20 @@ class StabilityContours(object):
             extra,
             extra,
             extra,
-            images.loc[-2, "AIC"],
-            images.loc[-2, "FMW"],
-            images.loc[-2, "MM"],
-            images.loc[-2, "OFI"],
+            handle(-2, "AIC"),
+            handle(-2, "FMW"),
+            handle(-2, "MM"),
+            handle(-2, "OFI"),
             extra,
-            images.loc[-3, "AIC"],
-            images.loc[-3, "FMW"],
-            images.loc[-3, "MM"],
-            images.loc[-3, "OFI"],
+            handle(-3, "AIC"),
+            handle(-3, "FMW"),
+            handle(-3, "MM"),
+            handle(-3, "OFI"),
             extra,
-            images.loc[-4, "AIC"],
-            images.loc[-4, "FMW"],
-            images.loc[-4, "MM"],
-            images.loc[-4, "OFI"],
+            handle(-4, "AIC"),
+            handle(-4, "FMW"),
+            handle(-4, "MM"),
+            handle(-4, "OFI"),
         ]
 
         # Define the labels
