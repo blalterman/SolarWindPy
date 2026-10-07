@@ -450,7 +450,7 @@ Re-run Sphinx linkcheck (network required) after the `docstring-examples` unit l
 
 ### plotting-and-docstring-cleanup
 
-OWNS: solarwindpy/plotting/spiral.py, solarwindpy/plotting/hist2d.py, solarwindpy/fitfunctions/core.py, solarwindpy/fitfunctions/hinge.py, tests/plotting/test_spiral.py, tests/fitfunctions/
+OWNS: solarwindpy/plotting/spiral.py, solarwindpy/plotting/hist2d.py, solarwindpy/fitfunctions/core.py, solarwindpy/fitfunctions/hinge.py, tests/plotting/test_spiral.py, tests/fitfunctions/, tests/test_tolerance_rule.py
 
 Runs after PRs #498 and #499 merge (both touch these files). Author decisions: remove
 contour labelling from `SpiralPlot2D` as #498 did for `Hist2D` (parameters, `clabel` code,
@@ -458,7 +458,10 @@ labels in return values, docstring examples), with no deprecation; replace the l
 `{self.plot_edges!s}` placeholder in the `hist2d.py` docstring with a working reference; in
 merged fit-function class docstrings, put Attributes in numpydoc order, before See Also; give
 `Hinge` a hinge example (or none) in place of the Gaussian example it inherits from
-`FitFunction`.
+`FitFunction`. Also from PR #495's review: the bare-approx scanner in
+`tests/test_tolerance_rule.py` follows aliased imports (`from pytest import approx as ap`,
+`import pytest as pt`), and its docstring states that `approx(x, **tol)` is flagged
+(fail-closed). Add `tests/test_tolerance_rule.py` to OWNS.
 
 `HingeMax` keeps raising `NotImplementedError` in its no-estimate branch: the author does not
 yet have a good initial guess for it. The `hingemax-point` step stays parked, not blocking
