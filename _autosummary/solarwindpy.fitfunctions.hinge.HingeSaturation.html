@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge.HingeSaturation &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.hinge.HingeSaturation &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../_static/documentation_options.js?v=af9508de"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -385,10 +385,12 @@
 <p class="rubric">Notes</p>
 <p><code class="docutils literal notranslate"><span class="pre">p0</span></code> estimates <code class="docutils literal notranslate"><span class="pre">[xh,</span> <span class="pre">yh,</span> <span class="pre">x1,</span> <span class="pre">m2]</span></code> from the data. <code class="docutils literal notranslate"><span class="pre">(xh,</span> <span class="pre">yh)</span></code> is
 <code class="docutils literal notranslate"><span class="pre">saturation_guess</span></code>; <code class="docutils literal notranslate"><span class="pre">x1</span></code> comes from a linear fit to the rising region
-(x &lt; xh), or is the data minimum; <code class="docutils literal notranslate"><span class="pre">m2</span></code> is the median slope in the
-plateau region (x &gt;= xh), and is undefined when the plateau region has
-repeated <code class="docutils literal notranslate"><span class="pre">x</span></code>. When an estimate is undefined, <code class="docutils literal notranslate"><span class="pre">p0</span></code> returns the
-reference hinge of <a class="reference internal" href="solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge" title="solarwindpy.fitfunctions.hinge.Hinge"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hinge</span></code></a> as <code class="docutils literal notranslate"><span class="pre">[xh,</span> <span class="pre">yh,</span> <span class="pre">x1,</span> <span class="pre">m2]</span></code>.</p>
+(x &lt; xh), or is the data minimum when that region has fewer than two
+points or the fit is flat, and is undefined when the region’s points
+share one <code class="docutils literal notranslate"><span class="pre">x</span></code> (no slope); <code class="docutils literal notranslate"><span class="pre">m2</span></code> is the median slope in the plateau
+region (x &gt;= xh), and is undefined when the plateau region has repeated
+<code class="docutils literal notranslate"><span class="pre">x</span></code>. When an estimate is undefined, <code class="docutils literal notranslate"><span class="pre">p0</span></code> returns the reference hinge
+of <a class="reference internal" href="solarwindpy.fitfunctions.hinge.Hinge.html#solarwindpy.fitfunctions.hinge.Hinge" title="solarwindpy.fitfunctions.hinge.Hinge"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hinge</span></code></a> as <code class="docutils literal notranslate"><span class="pre">[xh,</span> <span class="pre">yh,</span> <span class="pre">x1,</span> <span class="pre">m2]</span></code>.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.hinge</span><span class="w"> </span><span class="kn">import</span> <span class="n">HingeSaturation</span>

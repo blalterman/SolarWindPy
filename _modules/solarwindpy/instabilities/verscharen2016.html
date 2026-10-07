@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.instabilities.verscharen2016 &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../../../_static/documentation_options.js?v=af9508de"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -905,8 +905,14 @@
             <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">"w"</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span>
         <span class="p">)</span>
 
+        <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">itype</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">"""The curve plotted for ``(gamma, itype)``, or the blank cell."""</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">gamma</span><span class="p">,</span> <span class="n">itype</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">extra</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">else</span> <span class="n">image</span>
+
         <span class="c1"># Create organized list containing all handles for table.</span>
-        <span class="c1"># Extra represent empty space. Within each column, handles follow</span>
+        <span class="c1"># Extra represent empty space, including the cell of an instability</span>
+        <span class="c1"># not plotted, so the table keeps its layout. Within each column, handles follow</span>
         <span class="c1"># the row labels below: AIC, FMW, MM, OFI.</span>
         <span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">extra</span><span class="p">,</span>
@@ -915,20 +921,20 @@
             <span class="n">extra</span><span class="p">,</span>
             <span class="n">extra</span><span class="p">,</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">),</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">),</span>
             <span class="n">extra</span><span class="p">,</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">],</span>
-            <span class="n">images</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">],</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"AIC"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"FMW"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"MM"</span><span class="p">),</span>
+            <span class="n">handle</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"OFI"</span><span class="p">),</span>
         <span class="p">]</span>
 
         <span class="c1"># Define the labels</span>

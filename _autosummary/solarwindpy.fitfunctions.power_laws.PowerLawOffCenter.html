@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.power_laws.PowerLawOffCenter &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.power_laws.PowerLawOffCenter &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../_static/documentation_options.js?v=af9508de"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -391,12 +391,9 @@ log space.</p>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>The fitting procedure uses scipy.optimize.least_squares
-with robust loss functions (Huber by default) to handle
-outliers. The initial parameter guess is provided by the
-p0 property, which must be implemented by subclasses.</p>
-<p>All subclasses inherit this documentation automatically
-through the docstring-inheritance metaclass.</p>
+<p>The model is defined only for <span class="math notranslate nohighlight">\(x &gt; x_0\)</span>: a negative base has no
+real non-integer power. <a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit" title="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a> therefore bounds <code class="docutils literal notranslate"><span class="pre">x0</span></code> below
+the smallest used <code class="docutils literal notranslate"><span class="pre">x</span></code>, within any bounds the caller passes.</p>
 <p class="rubric">Examples</p>
 <p>Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
 recover those parameters:</p>
@@ -411,6 +408,37 @@ recover those parameters:</p>
 <span class="go">{'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit">
+<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/fitfunctions/power_laws.html#PowerLawOffCenter.make_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit" title="Link to this definition"></a></dt>
+<dd><p>Fit with <code class="docutils literal notranslate"><span class="pre">x0</span></code> bounded below the smallest used <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p>The upper bound on <code class="docutils literal notranslate"><span class="pre">x0</span></code> is the largest float below the smallest used
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, or the caller’s upper bound if that is lower. When the caller
+passes no <code class="docutils literal notranslate"><span class="pre">p0</span></code>, the <a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.p0" title="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> start for <code class="docutils literal notranslate"><span class="pre">x0</span></code> is clipped into the
+bounds on <code class="docutils literal notranslate"><span class="pre">x0</span></code>. Otherwise as
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>return_exception: bool</strong></dt><dd><p>If True, return exceptions from fitting routine, instead of raising.
+This is useful when looping through many fits and wanting to
+identify failed fits after the fact.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the caller’s lower bound on <code class="docutils literal notranslate"><span class="pre">x0</span></code> leaves it no room below the
+smallest used <code class="docutils literal notranslate"><span class="pre">x</span></code>, or the caller’s <code class="docutils literal notranslate"><span class="pre">p0</span></code> starts <code class="docutils literal notranslate"><span class="pre">x0</span></code> above
+its upper bound. Returned instead when <code class="docutils literal notranslate"><span class="pre">return_exception</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.function">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">function</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.function" title="Link to this definition"></a></dt>
@@ -421,6 +449,10 @@ recover those parameters:</p>
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.p0">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.p0" title="Link to this definition"></a></dt>
 <dd><p>Return initial guesses <code class="docutils literal notranslate"><span class="pre">[A,</span> <span class="pre">b,</span> <span class="pre">x0]</span></code> for the fit.</p>
+<p><code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> start at 1. <code class="docutils literal notranslate"><span class="pre">x0</span></code> starts at 0 when every used <code class="docutils literal notranslate"><span class="pre">x</span></code>
+is positive; otherwise it starts below the smallest used <code class="docutils literal notranslate"><span class="pre">x</span></code> by the
+range of the used <code class="docutils literal notranslate"><span class="pre">x</span></code> (by 1 when they are all equal), inside the
+bound <a class="reference internal" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit" title="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a> places on <code class="docutils literal notranslate"><span class="pre">x0</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -513,26 +545,6 @@ guess was made (<code class="docutils literal notranslate"><span class="pre">p0<
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.logger">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.logger" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit">
-<span class="sig-name descname"><span class="pre">make_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit" title="Link to this definition"></a></dt>
-<dd><p>Fit the function with the independent <cite>xobs</cite> and dependent <cite>yobs</cite>.</p>
-<p>Uses <cite>least_squares</cite> and returns the <cite>OptimizeResult</cite> object, but
-treats weights as in <cite>curve_fit</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>return_exception: bool</strong></dt><dd><p>If True, return exceptions from fitting routine, instead of raising.
-This is useful when looping through many fits and wanting to
-identify failed fits after the fact.</p>
-</dd>
-<dt><strong>**kwargs</strong></dt><dd><p>The description is missing.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.nobs">

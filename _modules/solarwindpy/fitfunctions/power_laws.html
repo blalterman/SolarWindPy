@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../../../_static/documentation_options.js?v=af9508de"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -309,7 +309,9 @@
 <span class="sd">This module provides :class:`~solarwindpy.fitfunctions.core.FitFunction`</span>
 <span class="sd">subclasses for power laws of the form :math:`f(x) = A x^b`, with an</span>
 <span class="sd">optional additive constant or a shifted origin. Their initial guesses are</span>
-<span class="sd">fixed values, not estimated from the data.</span>
+<span class="sd">fixed values, not estimated from the data, except that</span>
+<span class="sd">:class:`PowerLawOffCenter` starts ``x0`` below the data when any used ``x`` is</span>
+<span class="sd">not positive.</span>
 <span class="sd">"""</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -318,7 +320,9 @@
     <span class="s2">"PowerLawOffCenter"</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FitFunction</span><span class="p">,</span> <span class="n">InsufficientDataError</span>
 
 
 <div class="viewcode-block" id="PowerLaw">
@@ -395,7 +399,79 @@
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Power law about a shifted origin, :math:`f(x) = A (x - x_0)^b`.</span>
 
 <span class="sd">    Parameters are ``A`` (amplitude), ``b`` (exponent) and ``x0`` (origin).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The model is defined only for :math:`x &gt; x_0`: a negative base has no</span>
+<span class="sd">    real non-integer power. :meth:`make_fit` therefore bounds ``x0`` below</span>
+<span class="sd">    the smallest used ``x``, within any bounds the caller passes.</span>
 <span class="sd">    """</span>
+
+<div class="viewcode-block" id="PowerLawOffCenter.make_fit">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.html#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.make_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_exception</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Fit with ``x0`` bounded below the smallest used ``x``.</span>
+
+<span class="sd">        The upper bound on ``x0`` is the largest float below the smallest used</span>
+<span class="sd">        ``x``, or the caller's upper bound if that is lower. When the caller</span>
+<span class="sd">        passes no ``p0``, the :attr:`p0` start for ``x0`` is clipped into the</span>
+<span class="sd">        bounds on ``x0``. Otherwise as</span>
+<span class="sd">        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the caller's lower bound on ``x0`` leaves it no room below the</span>
+<span class="sd">            smallest used ``x``, or the caller's ``p0`` starts ``x0`` above</span>
+<span class="sd">            its upper bound. Returned instead when ``return_exception``.</span>
+<span class="sd">        """</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds_lower_upper</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bounds"</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)),</span> <span class="n">n</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="c1"># Malformed bounds: the base fit reports them, honouring</span>
+            <span class="c1"># return_exception.</span>
+            <span class="n">lb</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">"x0"</span><span class="p">)</span>
+            <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nextafter</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">lb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"the lower bound on x0 is </span><span class="si">{</span><span class="n">lb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"p0"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">"p0"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                    <span class="c1"># Malformed p0: the base fit reports it.</span>
+                    <span class="n">p0</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"the initial guess p0 starts x0 at </span><span class="si">{</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">, above its "</span>
+                        <span class="sa">f</span><span class="s2">"upper bound </span><span class="si">{</span><span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">"p0"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">InsufficientDataError</span><span class="p">:</span>
+                    <span class="c1"># The base fit reports it, honouring return_exception.</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lb</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"p0"</span><span class="p">]</span> <span class="o">=</span> <span class="n">p0</span>
+            <span class="k">if</span> <span class="n">e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> needs x0 below the smallest used x "</span>
+                    <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">), where the model is defined, but </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">."</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">return_exception</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">e</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"bounds"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">make_fit</span><span class="p">(</span><span class="n">return_exception</span><span class="o">=</span><span class="n">return_exception</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -409,10 +485,23 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">p0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return initial guesses ``[A, b, x0]`` for the fit."""</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return initial guesses ``[A, b, x0]`` for the fit.</span>
+
+<span class="sd">        ``A`` and ``b`` start at 1. ``x0`` starts at 0 when every used ``x``</span>
+<span class="sd">        is positive; otherwise it starts below the smallest used ``x`` by the</span>
+<span class="sd">        range of the used ``x`` (by 1 when they are all equal), inside the</span>
+<span class="sd">        bound :meth:`make_fit` places on ``x0``.</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
-        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">xmin</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">xmin</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">span</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">xmin</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">xmin</span> <span class="o">-</span> <span class="p">(</span><span class="n">span</span> <span class="k">if</span> <span class="n">span</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">p0</span>
 
     <span class="nd">@property</span>

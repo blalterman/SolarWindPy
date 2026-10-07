@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../../../_static/documentation_options.js?v=af9508de"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -529,9 +529,16 @@
 <span class="sd">        Additional arguments passed to</span>
 <span class="sd">        :class:`~solarwindpy.fitfunctions.core.FitFunction`.</span>
 
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If any used x is not positive, where :math:`\ln x` is undefined, at</span>
+<span class="sd">        construction or when</span>
+<span class="sd">        :meth:`~solarwindpy.fitfunctions.core.FitFunction.set_fit_obs` selects</span>
+<span class="sd">        new observations.</span>
+
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    xobs must be positive for log transformation.</span>
 <span class="sd">    This distribution is commonly used for particle size distributions</span>
 <span class="sd">    and velocity distributions in solar wind where values are</span>
 <span class="sd">    positively skewed.</span>
@@ -547,6 +554,15 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xobs</span><span class="p">,</span> <span class="n">yobs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_TeX_report_normal_parameters</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_used_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">used</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise ``ValueError`` if any used x is not positive: ln x is undefined."""</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">used</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"GaussianLn needs every used x &gt; 0: ln x is undefined at "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">."</span>
+            <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -572,20 +588,12 @@
 <span class="sd">        :math:`\ln x`: ``m`` and ``s`` are the mean and standard deviation of</span>
 <span class="sd">        :math:`\ln x` weighted by ``y``, and ``A`` is the largest ``y`` (``A``</span>
 <span class="sd">        multiplies the model directly and is not logged). ``p0`` is None when</span>
-<span class="sd">        any used ``x`` is not positive (no logarithm), or when the weighted</span>
-<span class="sd">        moments of :math:`\ln x` give no estimate, under the same rules as</span>
-<span class="sd">        :attr:`Gaussian.p0` applied to :math:`\ln x`.</span>
+<span class="sd">        the weighted moments of :math:`\ln x` give no estimate, under the same</span>
+<span class="sd">        rules as :attr:`Gaussian.p0` applied to :math:`\ln x`.</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_require_sufficient_data</span><span class="p">()</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">y</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> used x are not positive, so ln x is undefined."</span>
-                <span class="s2">"</span><span class="se">\n</span><span class="s2">Returning None."</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">moments</span> <span class="o">=</span> <span class="n">_weighted_moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">moments</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -599,15 +607,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">TeX_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""LaTeX form of the model."""</span>
         <span class="n">TeX</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">r</span><span class="s2">"f(x) = A \cdot  "</span>
-            <span class="sa">r</span><span class="s2">"\mathrm</span><span class="si">{exp}</span><span class="s2">\left[-\frac</span><span class="si">{1}{2}</span><span class="s2">  "</span>
-            <span class="sa">r</span><span class="s2">"(\frac{\mathrm</span><span class="si">{ln}</span><span class="s2">(x)-m}</span><span class="si">{s}</span><span class="s2">)^2\right]"</span>
-        <span class="p">)</span>
-        <span class="n">TeX</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">r</span><span class="s2">"f(x) ="</span>
+            <span class="sa">r</span><span class="s2">"f(x) = "</span>
             <span class="sa">r</span><span class="s2">"A \cdot"</span>
             <span class="sa">r</span><span class="s2">"\exp\left["</span>
-            <span class="sa">r</span><span class="s2">"\frac{\left(\ln x - m\right)^2}{2 s^2}"</span>
+            <span class="sa">r</span><span class="s2">"-\frac{\left(\ln x - m\right)^2}{2 s^2}"</span>
             <span class="sa">r</span><span class="s2">"\right]"</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">TeX</span>

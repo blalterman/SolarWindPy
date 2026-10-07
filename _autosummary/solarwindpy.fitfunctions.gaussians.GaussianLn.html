@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians.GaussianLn &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians.GaussianLn &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../_static/documentation_options.js?v=af9508de"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -348,6 +348,15 @@ Shape must match xobs.</p>
 </dd>
 </dl>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If any used x is not positive, where <span class="math notranslate nohighlight">\(\ln x\)</span> is undefined, at
+construction or when
+<a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.set_fit_obs" title="solarwindpy.fitfunctions.core.FitFunction.set_fit_obs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_fit_obs()</span></code></a> selects
+new observations.</p>
+</dd>
+</dl>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -361,8 +370,7 @@ Shape must match xobs.</p>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>xobs must be positive for log transformation.
-This distribution is commonly used for particle size distributions
+<p>This distribution is commonly used for particle size distributions
 and velocity distributions in solar wind where values are
 positively skewed.</p>
 <p class="rubric">References</p>
@@ -405,9 +413,8 @@ recover those parameters:</p>
 <span class="math notranslate nohighlight">\(\ln x\)</span>: <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">s</span></code> are the mean and standard deviation of
 <span class="math notranslate nohighlight">\(\ln x\)</span> weighted by <code class="docutils literal notranslate"><span class="pre">y</span></code>, and <code class="docutils literal notranslate"><span class="pre">A</span></code> is the largest <code class="docutils literal notranslate"><span class="pre">y</span></code> (<code class="docutils literal notranslate"><span class="pre">A</span></code>
 multiplies the model directly and is not logged). <code class="docutils literal notranslate"><span class="pre">p0</span></code> is None when
-any used <code class="docutils literal notranslate"><span class="pre">x</span></code> is not positive (no logarithm), or when the weighted
-moments of <span class="math notranslate nohighlight">\(\ln x\)</span> give no estimate, under the same rules as
-<a class="reference internal" href="solarwindpy.fitfunctions.gaussians.Gaussian.html#solarwindpy.fitfunctions.gaussians.Gaussian.p0" title="solarwindpy.fitfunctions.gaussians.Gaussian.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Gaussian.p0</span></code></a> applied to <span class="math notranslate nohighlight">\(\ln x\)</span>.</p>
+the weighted moments of <span class="math notranslate nohighlight">\(\ln x\)</span> give no estimate, under the same
+rules as <a class="reference internal" href="solarwindpy.fitfunctions.gaussians.Gaussian.html#solarwindpy.fitfunctions.gaussians.Gaussian.p0" title="solarwindpy.fitfunctions.gaussians.Gaussian.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Gaussian.p0</span></code></a> applied to <span class="math notranslate nohighlight">\(\ln x\)</span>.</p>
 </dd></dl>
 
 <dl class="py property">

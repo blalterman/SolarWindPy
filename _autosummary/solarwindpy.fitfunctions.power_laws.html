@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+g7d818d82f documentation</title>
+  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+gf816447b4 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=7ce3fbf2"></script>
+      <script src="../_static/documentation_options.js?v=af9508de"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -331,7 +331,9 @@
 <p>This module provides <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction" title="solarwindpy.fitfunctions.core.FitFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FitFunction</span></code></a>
 subclasses for power laws of the form <span class="math notranslate nohighlight">\(f(x) = A x^b\)</span>, with an
 optional additive constant or a shifted origin. Their initial guesses are
-fixed values, not estimated from the data.</p>
+fixed values, not estimated from the data, except that
+<a class="reference internal" href="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter.html#solarwindpy.fitfunctions.power_laws.PowerLawOffCenter" title="solarwindpy.fitfunctions.power_laws.PowerLawOffCenter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PowerLawOffCenter</span></code></a> starts <code class="docutils literal notranslate"><span class="pre">x0</span></code> below the data when any used <code class="docutils literal notranslate"><span class="pre">x</span></code> is
+not positive.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
