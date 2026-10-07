@@ -3338,6 +3338,106 @@ def test_ordered_unique_times_log_no_order_warning(caplog):
     assert not _warnings(caplog, "repeat an earlier timestamp")
 
 
+def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
+    r"""Out-of-order plasma, spacecraft and aux data on one index come out sorted and aligned.
+
+    The example plasma's three rows are passed in order 2, 0, 1, with its
+    spacecraft and an auxiliary column (0, 1, 2 in time order) on that same
+    index. Per the author, all three come from one source, so all three are
+    sorted the same way: the index is the example's sorted epoch, the
+    spacecraft x position is the example's [-42, -22, -34], the auxiliary
+    column reads 0, 1, 2, and one order warning is logged.
+
+    ON FAILURE: the code is wrong.
+    """
+    ref = swp.examples.load_plasma()
+    perm = [2, 0, 1]
+    data = ref.data.iloc[perm]
+    sc = spacecraft.Spacecraft(ref.spacecraft.data.iloc[perm], "PSP", "HCI")
+    aux = pd.DataFrame(
+        {("q", "", ""): [0.0, 1.0, 2.0]},
+        index=ref.epoch,
+    ).iloc[perm]
+    aux.columns.names = ["M", "C", "S"]
+
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(data, *ref.species, spacecraft=sc, auxiliary_data=aux)
+
+    assert len(_warnings(caplog, "earlier than the row before")) == 1
+    assert p.data.index.equals(ref.epoch)
+    assert p.spacecraft.data.index.equals(ref.epoch)
+    assert p.auxiliary_data.index.equals(ref.epoch)
+    assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
+        [-42.0, -22.0, -34.0]
+    )
+    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+
+
+def test_setters_refuse_a_mismatched_index_with_value_error():
+    r"""Spacecraft or auxiliary data on a different time index raise ValueError.
+
+    Each frame's times are shifted one minute from the plasma's, a genuine
+    mismatch rather than a reordering, so the error names the index.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    shifted = p.epoch + pd.Timedelta("1min")
+    aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=shifted)
+    aux.columns.names = ["M", "C", "S"]
+    with pytest.raises(ValueError, match="index"):
+        p.set_auxiliary_data(aux)
+
+    sc_data = p.spacecraft.data.set_axis(shifted, axis=0)
+    with pytest.raises(ValueError, match="index"):
+        p.set_spacecraft(spacecraft.Spacecraft(sc_data, "PSP", "HCI"))
+
+
+def test_missing_timestamps_are_logged_and_kept(caplog):
+    r"""NaT in the time index logs a warning with its count, and the row stays.
+
+    Times 12:00, NaT, 12:01 are otherwise in order: one warning reports 1 of 3
+    rows without a timestamp, all three rows remain, and no order warning
+    fires.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = ["2020-01-01 12:00", None, "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(_protons_at(times), "p1")
+
+    (message,) = _warnings(caplog, "no timestamp")
+    assert "1 of 3 rows" in message
+    assert len(p.data) == 3
+    assert not _warnings(caplog, "earlier than the row before")
+
+
+def test_order_warning_counts_only_real_out_of_order_rows_beside_nat(caplog):
+    r"""With a NaT between them, 12:02 then 12:01 is still one out-of-order row.
+
+    Comparisons with NaT are False, so a pairwise check would report 0 rows.
+    Per the author, only real out-of-order rows count: 1 of 3, at row 2.
+
+    ON FAILURE: the code is wrong.
+    """
+    times = ["2020-01-01 12:02", None, "2020-01-01 12:01"]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p = plasma.Plasma(_protons_at(times), "p1")
+
+    (message,) = _warnings(caplog, "earlier than the row before")
+    assert "1 of 3 rows" in message and "[2]" in message
+    assert p.n("p1").to_numpy() == exact([3.0, 1.0, 2.0])
+
+
+def test_plasma_refuses_data_that_is_not_a_dataframe():
+    r"""Data that is not a DataFrame raises TypeError naming the expected type.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match="DataFrame"):
+        plasma.Plasma([1.0, 2.0], "p1")
+
+
 def test_nuc_refuses_a_combined_species_on_either_side():
     r"""`nuc` takes one species per side: "a+p1" as `sa` or `sb` raises.
 
