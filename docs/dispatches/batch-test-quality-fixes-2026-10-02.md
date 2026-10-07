@@ -502,3 +502,15 @@ the covariance-shape check and the Cholesky factor's orientation), `FitFunction.
 `FitFunction._calc_popt_pcov_psigma_chisq`, and in `SIDC.cut_spec_by_ssn_band`,
 `SIDC.run_normalization` and `SIDC.interpolate_data`. `SIDCLoader.download_data` stays
 offline (the existing `no_download` guard).
+
+### survivor-defect-fixes
+
+OWNS: solarwindpy/fitfunctions/core.py, solarwindpy/solar_activity/sunspot_number/sidc.py, tests/fitfunctions/test_core.py, tests/solar_activity/sunspot_number/test_sidc.py
+
+Runs after PR #504 merges (it holds the two strict xfails). Author decisions: (1) a 2-d
+covariance matrix passed as `weights` works as `FitFunction` documents (correlated errors:
+`_clean_raw_obs` accepts it, `set_fit_obs` keeps its rows and columns, and the residuals are
+whitened with its Cholesky factor), retiring the GLS xfail; (2) `SIDC.cut_spec_by_ssn_band`
+re-raises a clear `KeyError` naming a column `interpolated` lacks, retiring that xfail, and its
+dead band-overlap check is removed. `SIDC.run_normalization`'s column order stays unpromised.
+CHANGELOG lines go in the PR body.
