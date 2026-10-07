@@ -377,11 +377,8 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         fcn=None,
         # Contour-specific parameters
         levels=None,
-        label_levels=False,
         use_contourf=True,
         contour_kwargs=None,
-        clabel_kwargs=None,
-        skip_max_clbl=True,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
         nan_aware_filter=False,
@@ -404,16 +401,10 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             Aggregation function. If None, automatically select.
         levels : array-like, int, None
             Contour levels. If None, automatically determined.
-        label_levels : bool
-            If True, add labels to contours with `ax.clabel`.
         use_contourf : bool
             If True, use filled contours. Else use line contours.
         contour_kwargs : dict, None
             Additional kwargs passed to contour/contourf (e.g., linestyles, colors).
-        clabel_kwargs : dict, None
-            Kwargs passed to `ax.clabel`.
-        skip_max_clbl : bool
-            If True, don't label the maximum contour level.
         gaussian_filter_std : int
             If > 0, apply Gaussian filter to contour data.
         gaussian_filter_kwargs : dict, None
@@ -431,8 +422,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         cbar_or_mappable : colorbar.Colorbar or QuadMesh
         qset : QuadContourSet
             The contour set from the overlay.
-        lbls : list or None
-            Contour labels if label_levels is True.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -508,46 +497,16 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             *args, linestyles=linestyles, cmap=cmap, norm=norm, **contour_kwargs
         )
 
-        # --- 3. Contour labels ---
-        lbls = None
-        if label_levels:
-            if clabel_kwargs is None:
-                clabel_kwargs = {}
-
-            inline = clabel_kwargs.pop("inline", True)
-            inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
-            fmt = clabel_kwargs.pop("fmt", "%s")
-
-            class nf(float):
-                r"""Float whose repr drops trailing zeros, for contour labels."""
-
-                def __repr__(self):
-                    return float.__repr__(self).rstrip("0")
-
-            try:
-                clabel_args = (qset, levels[:-1] if skip_max_clbl else levels)
-            except TypeError:
-                clabel_args = (qset,)
-
-            qset.levels = [nf(level) for level in qset.levels]
-            lbls = ax.clabel(
-                *clabel_args,
-                inline=inline,
-                inline_spacing=inline_spacing,
-                fmt=fmt,
-                **clabel_kwargs,
-            )
-
-        # --- 4. Colorbar ---
+        # --- 3. Colorbar ---
         cbar_or_mappable = pc
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
             cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
 
-        # --- 5. Format axis ---
+        # --- 4. Format axis ---
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset, lbls
+        return ax, cbar_or_mappable, qset
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -690,28 +649,21 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return levels
 
-    def _verify_contour_passthrough_kwargs(
-        self, ax, clabel_kwargs, edges_kwargs, cbar_kwargs
-    ):
-        if clabel_kwargs is None:
-            clabel_kwargs = dict()
+    def _verify_contour_passthrough_kwargs(self, ax, edges_kwargs, cbar_kwargs):
         if edges_kwargs is None:
             edges_kwargs = dict()
         cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
-        return clabel_kwargs, edges_kwargs, cbar_kwargs
+        return edges_kwargs, cbar_kwargs
 
     def plot_contours(
         self,
         ax=None,
-        label_levels=True,
         cbar=True,
         cbar_kwargs=None,
         fcn=None,
         plot_edges=False,
         edges_kwargs=None,
-        clabel_kwargs=None,
-        skip_max_clbl=True,
         use_contourf=False,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
@@ -725,8 +677,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
-        label_levels: bool
-            If True, add labels to contours with `ax.clabel`.
         cbar: bool
             If True, create color bar with `labels.z`.
         cbar_kwargs: dict, None
@@ -737,11 +687,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             If True, plot the smoothed, extreme edges of the 2D histogram.
         edges_kwargs: None, dict
             Passed to {self.plot_edges!s}.
-        clabel_kwargs: None, dict
-            If not None, dictionary of kwargs passed to `ax.clabel`.
-        skip_max_clbl: bool
-            If True, don't label the maximum contour. Primarily used when the maximum
-            contour is, effectively, a point.
         use_contourf: bool
             If True, use `ax.contourf`. Else use `ax.contour`.
         gaussian_filter_std: int
@@ -761,6 +706,13 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             colour bands on [0, 1] for row or column normalized data and to a
             `LogNorm` for densities ("d", "cd", "rd"); otherwise, with at
             least two levels, to a `BoundaryNorm` on the levels.
+
+        Returns
+        -------
+        ax : mpl.axes.Axes
+        cbar_or_mappable : colorbar.Colorbar or QuadContourSet
+            The colorbar if `cbar` is True, else the contour set.
+        qset : QuadContourSet
         """
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
@@ -781,17 +733,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         if ax is None:
             fig, ax = plt.subplots()
 
-        (
-            clabel_kwargs,
-            edges_kwargs,
-            cbar_kwargs,
-        ) = self._verify_contour_passthrough_kwargs(
-            ax, clabel_kwargs, edges_kwargs, cbar_kwargs
+        edges_kwargs, cbar_kwargs = self._verify_contour_passthrough_kwargs(
+            ax, edges_kwargs, cbar_kwargs
         )
-
-        inline = clabel_kwargs.pop("inline", True)
-        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
-        fmt = clabel_kwargs.pop("fmt", "%s")
 
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.intervals["x"].mid
@@ -826,15 +770,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         assert XX.shape == C.shape
         assert YY.shape == C.shape
 
-        class nf(float):
-            # Source: https://matplotlib.org/3.1.0/gallery/images_contours_and_fields/contour_label_demo.html
-            # Define a class that forces representation of float to look a certain way
-            # This remove trailing zero so '1.0' becomes '1'
-            r"""Float whose repr drops trailing zeros, for contour labels."""
-
-            def __repr__(self):
-                return float.__repr__(self).rstrip("0")
-
         levels = self._get_contour_levels(levels)
 
         if (norm is None) and (levels is not None) and (len(levels) >= 2):
@@ -851,23 +786,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
 
-        try:
-            args = (qset, levels[:-1] if skip_max_clbl else levels)
-        except TypeError:
-            # None can't be subscripted.
-            args = (qset,)
-
-        lbls = None
-        if label_levels:
-            qset.levels = [nf(level) for level in qset.levels]
-            lbls = ax.clabel(
-                *args,
-                inline=inline,
-                inline_spacing=inline_spacing,
-                fmt=fmt,
-                **clabel_kwargs,
-            )
-
         if plot_edges:
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
@@ -879,7 +797,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         self._format_axis(ax)
 
-        return ax, lbls, cbar_or_mappable, qset
+        return ax, cbar_or_mappable, qset
 
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         """Make a ``Hist1D`` from the data stored in this ``Hist2D``.
