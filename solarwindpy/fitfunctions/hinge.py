@@ -754,7 +754,9 @@ class Saturation(Hinge):
         if not (np.isfinite(m1) and np.isfinite(m2)):
             theta = np.nan
         elif 1 + m1 * m2 == 0:
-            # Perpendicular lines: the arctan argument is infinite.
+            # Perpendicular lines: the arctan argument is infinite. The exact
+            # test is intentional, not an isclose candidate: near-perpendicular
+            # lines give a large finite argument, which arctan handles.
             theta = np.copysign(np.pi / 2, m1 - m2)
         else:
             theta = np.arctan((m1 - m2) / (1 + m1 * m2))

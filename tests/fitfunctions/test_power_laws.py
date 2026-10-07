@@ -383,6 +383,65 @@ def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_low
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
 
 
+@pytest.mark.parametrize("x0_start", [1.0, 2.0])
+def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
+    """A caller's ``p0`` starting ``x0`` at or above the smallest x raises ValueError.
+
+    The error names ``x0``, the smallest used x and the start, in place of
+    scipy's "x0 is infeasible", and ``return_exception`` returns it. The
+    positive control fits the same data from a start below the data.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
+    p0 = [1.0, 1.0, x0_start]
+    match = (
+        r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
+        + re.escape(str(x0_start))
+    )
+
+    with pytest.raises(ValueError, match=match):
+        obj.make_fit(p0=p0)
+    assert re.search(match, str(obj.make_fit(return_exception=True, p0=p0)))
+
+    # Positive control: a start below the data fits.
+    p0[2] = -1.0
+    obj.make_fit(p0=p0)
+    # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
+    assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
+
+
+@pytest.mark.parametrize(
+    "x0_bounds, x0",
+    [
+        # p0 starts x0 at 0, below the caller's lower bound 0.5.
+        pytest.param((0.5, 10.0), 0.75, id="start-below-lower-bound"),
+        # p0 starts x0 at 0, above the caller's upper bound -1.
+        pytest.param((-3.0, -1.0), -1.5, id="start-above-upper-bound"),
+        # Positive control: the start 0 is already inside the bounds.
+        pytest.param((-3.0, 10.0), 0.5, id="start-inside-bounds"),
+    ],
+)
+def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0):
+    """``make_fit`` clips the :attr:`p0` start for ``x0`` into the caller's bounds.
+
+    Without the clip, a start outside ``[lb, ub]`` makes scipy refuse the fit
+    ("x0 is infeasible").
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    y = 4.0 * (x - x0) ** 2  # A = 4, b = 2
+    obj = PowerLawOffCenter(x, y)
+    assert obj.p0[2] == exact(0.0)
+
+    obj.make_fit(bounds=([0.0, -5.0, x0_bounds[0]], [100.0, 5.0, x0_bounds[1]]))
+    assert obj.popt["A"] == noise_free(4.0)
+    assert obj.popt["b"] == noise_free(2.0)
+    assert obj.popt["x0"] == noise_free(x0)
+
+
 def test_power_law_with_weights():
     """Weights are 1-sigma errors: the fit equals scipy's weighted ``curve_fit``.
 

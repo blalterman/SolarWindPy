@@ -285,7 +285,7 @@ class GaussianLn(FitFunction):
     def TeX_function(self):
         r"""LaTeX form of the model."""
         TeX = (
-            r"f(x) ="
+            r"f(x) = "
             r"A \cdot"
             r"\exp\left["
             r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"

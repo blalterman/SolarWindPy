@@ -17,7 +17,7 @@ __all__ = [
 
 import numpy as np
 
-from .core import FitFunction
+from .core import FitFunction, InsufficientDataError
 
 
 class PowerLaw(FitFunction):
@@ -98,21 +98,23 @@ class PowerLawOffCenter(FitFunction):
         r"""Fit with ``x0`` bounded below the smallest used ``x``.
 
         The upper bound on ``x0`` is the largest float below the smallest used
-        ``x``, or the caller's upper bound if that is lower. Otherwise as
+        ``x``, or the caller's upper bound if that is lower. When the caller
+        passes no ``p0``, the :attr:`p0` start for ``x0`` is clipped into the
+        bounds on ``x0``. Otherwise as
         :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
 
         Raises
         ------
         ValueError
             If the caller's lower bound on ``x0`` leaves it no room below the
-            smallest used ``x``. Returned instead when ``return_exception``.
+            smallest used ``x``, or the caller's ``p0`` starts ``x0`` above
+            its upper bound. Returned instead when ``return_exception``.
         """
         x = self.observations.used.x
         n = len(self.argnames)
         try:
-            bounds = self._bounds_array(kwargs.get("bounds", (-np.inf, np.inf)))
-            lb, ub = (
-                np.broadcast_to(np.asarray(b, dtype=float), (n,)).copy() for b in bounds
+            lb, ub = self._bounds_lower_upper(
+                kwargs.get("bounds", (-np.inf, np.inf)), n
             )
         except (TypeError, ValueError):
             # Malformed bounds: the base fit reports them, honouring
@@ -121,11 +123,33 @@ class PowerLawOffCenter(FitFunction):
         if x.size and lb is not None:
             i = self.argnames.index("x0")
             ub[i] = min(ub[i], np.nextafter(x.min(), -np.inf))
+            e = None
             if lb[i] >= ub[i]:
+                e = f"the lower bound on x0 is {lb[i]}"
+            elif kwargs.get("p0") is not None:
+                try:
+                    p0 = np.atleast_1d(np.asarray(kwargs["p0"], dtype=float))
+                except (TypeError, ValueError):
+                    # Malformed p0: the base fit reports it.
+                    p0 = None
+                if p0 is not None and p0.size == n and p0[i] > ub[i]:
+                    e = (
+                        f"the initial guess p0 starts x0 at {p0[i]}, above its "
+                        f"upper bound {ub[i]}"
+                    )
+            elif "p0" not in kwargs:
+                try:
+                    p0 = list(self.p0)
+                except InsufficientDataError:
+                    # The base fit reports it, honouring return_exception.
+                    pass
+                else:
+                    p0[i] = float(np.clip(p0[i], lb[i], ub[i]))
+                    kwargs["p0"] = p0
+            if e is not None:
                 e = ValueError(
                     f"{type(self).__name__} needs x0 below the smallest used x "
-                    f"({x.min()}), where the model is defined, but the lower "
-                    f"bound on x0 is {lb[i]}."
+                    f"({x.min()}), where the model is defined, but {e}."
                 )
                 if return_exception:
                     return e
