@@ -14,6 +14,8 @@ here independently of the module:
   instabilities; R_p < 1 drives the FM/W and oblique firehose (OFI) instabilities.
 """
 
+import warnings
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -420,18 +422,32 @@ class LegendTableMismatch(AssertionError):
     """A table-legend handle sits in a row or column that does not describe it."""
 
 
-def test_table_legend_rows_and_columns_describe_their_curves():
+@pytest.mark.parametrize(
+    "tk_kind, plotted",
+    [
+        (None, INSTABILITIES),
+        ("mm", ["MM"]),
+        (["aic", "OFI"], ["AIC", "OFI"]),
+    ],
+    ids=["all", "one-kind", "two-kinds"],
+)
+def test_table_legend_rows_and_columns_describe_their_curves(tk_kind, plotted):
     """Each legend handle sits in the row of its instability and column of its gamma.
 
     Rows and columns are read from where matplotlib draws them. A handle belongs
     to row X when it matches (colour, linestyle) of a plotted curve labelled X, and
-    to column 10^g when that curve's data is Eq. (5) with Table 1 at 10^g.
+    to column 10^g when that curve's data is Eq. (5) with Table 1 at 10^g. When
+    ``tk_kind`` leaves instabilities out, their cells are blank and the table
+    keeps its layout; matplotlib's warning about a handle it cannot draw is an
+    error here.
 
     ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
-    sc.plot_contours(ax)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", UserWarning)
+        sc.plot_contours(ax, tk_kind=tk_kind)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     legend = ax.get_legend()
@@ -458,8 +474,10 @@ def test_table_legend_rows_and_columns_describe_their_curves():
         g = _matching_growth_rates(label, FINITE_BETA, line.get_ydata())
         curves.setdefault(key, set()).update((label, gg) for gg in g)
 
+    # Five label cells per column (header plus four rows), four columns.
+    assert len(legend.legend_handles) == 20
     handles = [h for h in legend.legend_handles if isinstance(h, Line2D)]
-    assert len(handles) == len(ROWS)
+    assert len(handles) == len(GROWTH_RATES) * len(plotted)
     mismatches = []
     for handle in handles:
         x, y = centre(handle)

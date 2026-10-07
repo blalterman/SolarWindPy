@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import logging
+import warnings
 import pytest
 
 import pandas.testing as pdt
@@ -399,20 +400,30 @@ def test_set_data_requires_datetimeindex():
         turb.AlfvenicTurbulence(v, b, rho, "p1")
 
 
-def test_set_data_warns_on_mismatched_index(caplog):
-    """Mismatched indices trigger a warning."""
+@pytest.mark.parametrize("shifted", ["b", "rho"])
+def test_set_data_warns_on_mismatched_index(shifted, caplog):
+    """Mismatched indices log a warning through ``Logger.warning``.
+
+    The deprecated ``Logger.warn`` alias also logs, but raises a
+    DeprecationWarning, which this test makes an error.
+
+    ON FAILURE: the code is wrong.
+    """
 
     v_idx = pd.date_range("2020-01-01", periods=3, freq="h")
-    b_idx = pd.date_range("2020-01-02", periods=3, freq="h")
+    shifted_idx = pd.date_range("2020-01-02", periods=3, freq="h")
+    b_idx = shifted_idx if shifted == "b" else v_idx
+    rho_idx = shifted_idx if shifted == "rho" else v_idx
     v = pd.DataFrame(np.arange(9).reshape(3, 3), index=v_idx, columns=["x", "y", "z"])
     b = pd.DataFrame(
         np.arange(9).reshape(3, 3) / 10.0, index=b_idx, columns=["x", "y", "z"]
     )
-    rho = pd.Series(np.arange(3), index=v_idx)
+    rho = pd.Series(np.arange(3), index=rho_idx)
 
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.WARNING), warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
         turb.AlfvenicTurbulence(v, b, rho, "p1")
-    assert "v and b have unequal indices" in caplog.text
+    assert f"v and {shifted} have unequal indices" in caplog.text
 
 
 def _small_turbulence(species):

@@ -341,6 +341,53 @@ class TestBoundsDictHandling:
         assert tuple(lf.fit_bounds["b"]) == (-5.0, 5.0)
 
 
+class TestBoundsLowerUpper:
+    """``_bounds_lower_upper`` broadcasts bounds with public NumPy, not scipy's private helper."""
+
+    @pytest.mark.parametrize(
+        "bounds, lower, upper",
+        [
+            pytest.param((-np.inf, np.inf), [-np.inf] * 2, [np.inf] * 2, id="scalar"),
+            pytest.param(([0.0, -1.0], [2.0, 3.0]), [0.0, -1.0], [2.0, 3.0], id="list"),
+            pytest.param(
+                {"m": (0.0, 2.0), "b": (-1.0, 3.0)}, [0.0, -1.0], [2.0, 3.0], id="dict"
+            ),
+        ],
+    )
+    def test_bounds_broadcast_to_one_value_per_parameter(self, bounds, lower, upper):
+        """Each form ``make_fit`` accepts gives writable lower and upper arrays of length n.
+
+        ON FAILURE: the code is wrong.
+        """
+        lf = LinearFit(np.arange(5.0), np.arange(5.0))
+        lb, ub = lf._bounds_lower_upper(bounds, 2)
+        assert lb == exact(lower)
+        assert ub == exact(upper)
+        # Writable copies: PowerLawOffCenter.make_fit edits the upper bound.
+        lb[0] = 7.0
+        assert lb[0] == exact(7.0)
+
+    def test_bound_of_the_wrong_length_raises(self):
+        """A bound that does not broadcast to n values raises ValueError.
+
+        ON FAILURE: the code is wrong.
+        """
+        lf = LinearFit(np.arange(5.0), np.arange(5.0))
+        with pytest.raises(ValueError):
+            lf._bounds_lower_upper(([0.0, 1.0, 2.0], np.inf), 2)
+
+    def test_core_does_not_use_the_private_scipy_bounds_helper(self):
+        """``core`` no longer imports ``scipy.optimize._lsq``'s ``prepare_bounds``.
+
+        A private SciPy module can move or be renamed in any release.
+
+        ON FAILURE: the code is wrong.
+        """
+        import solarwindpy.fitfunctions.core as core
+
+        assert not hasattr(core, "prepare_bounds")
+
+
 class TestCallableJacobian:
     """A callable jacobian is used in place of finite differences."""
 

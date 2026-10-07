@@ -16,6 +16,7 @@ import logging
 import re
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -276,8 +277,8 @@ IMPOSSIBLE = [
     # y sums to zero: no weighted mean.
     _case(Gaussian, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="Gaussian"),
     _case(GaussianNormalized, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="GaussianNorm"),
-    # Weighted mean -2 has no logarithm.
-    _case(GaussianLn, [-3.0, -2, -1], [1.0, 2, 1], {}, id="GaussianLn"),
+    # y sums to zero: no weighted mean of ln x.
+    _case(GaussianLn, np.exp([0.0, 1, 2, 3]), [1.0, -1, 1, -1], {}, id="GaussianLn"),
     # No data above guess_x0 = 20.
     _case(
         HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {"guess_x0": 20.0}, id="Step"
@@ -368,9 +369,7 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     Ones is the feasible default for unbounded parameters. The fit with ``p0``
     None must end exactly as the fit given ones as ``p0=``, and is never refused
     with the non-finite-guess ValueError. Whether the start converges is
-    scipy's business: all ones is singular for GaussianLn on negative x, and
-    scipy then reports "Residuals are not finite in the initial point" on both
-    routes alike.
+    scipy's business: when it fails, it must fail alike on both routes.
 
     ON FAILURE: the code is wrong.
     """
@@ -415,6 +414,26 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
     got = fit.make_fit(return_exception=True)
     assert "Residuals are not finite" not in str(got), got
     assert "initial guess is not finite" not in str(got), got
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
+def test_hinge_without_estimate_checks_before_dividing(cls, x, y, kwargs):
+    """An undefined hinge estimate comes from a check, not a numpy warning.
+
+    Each input divides by a repeated x or a zero slope, or takes the median of
+    no slopes. numpy's divide-by-zero, invalid-value, All-NaN and empty-mean
+    RuntimeWarnings are errors here; ``p0`` still falls back as before.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = cls(x, y, **kwargs)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        if cls is HingeMax:
+            with pytest.raises(NotImplementedError, match="no reference start"):
+                fit.p0
+        else:
+            assert fit.p0 == exact(HINGE_START[cls])
 
 
 def _hingemax_without_estimate():

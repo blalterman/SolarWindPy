@@ -16,6 +16,7 @@ import inspect
 import subprocess
 import sys
 import textwrap
+import warnings
 
 import pytest
 import numpy as np
@@ -189,9 +190,7 @@ class TestContourGrid:
         x_mid = 0.5 * (XEDGES[1:] + XEDGES[:-1])
         y_mid = 0.5 * (YEDGES[1:] + YEDGES[:-1])
         fig, ax = plt.subplots()
-        *_, qset = known_hist.plot_contours(
-            ax=ax, label_levels=False, cbar=False, levels=[0.5, 1.5, 2.5]
-        )
+        *_, qset = known_hist.plot_contours(ax=ax, cbar=False, levels=[0.5, 1.5, 2.5])
         vertices = np.concatenate([seg for segs in qset.allsegs for seg in segs])
         plt.close(fig)
         assert vertices.size  # the fixture: the chosen levels draw contours
@@ -207,19 +206,19 @@ class TestPlotHistWithContours:
     def test_returns_its_axes_the_mesh_colorbar_and_the_contours_drawn(
         self, known_hist
     ):
-        """The documented ``(ax, cbar, qset, lbls)`` are the objects on the plot.
+        """The documented ``(ax, cbar, qset)`` are the objects on the plot.
 
         ``ax`` is the Axes supplied, ``cbar`` colours the mesh under the
-        contours and carries ``labels.z``, ``qset`` is the contour set drawn on
-        ``ax`` at the requested levels, and ``lbls`` is None because
-        ``label_levels`` defaults to False.
+        contours and carries ``labels.z``, and ``qset`` is the contour set
+        drawn on ``ax`` at the requested levels. No text is drawn: the method
+        does not label contours.
 
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
         known_hist.set_axnorm("t")
         _, supplied = plt.subplots()
-        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(
+        ax, cbar, qset = known_hist.plot_hist_with_contours(
             ax=supplied, levels=[0.3, 0.6]
         )
         assert ax is supplied
@@ -227,15 +226,7 @@ class TestPlotHistWithContours:
         assert cbar.ax.get_ylabel() == str(known_hist.labels.z)
         assert qset in ax.collections
         np.testing.assert_array_equal(qset.levels, [0.3, 0.6])
-        assert lbls is None
-        plt.close("all")
-
-    def test_no_labels_returns_none(self, hist2d_instance):
-        """With label_levels=False, lbls is None."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours(
-            label_levels=False
-        )
-        assert lbls is None
+        assert len(ax.texts) == 0
         plt.close("all")
 
     def test_use_contourf_switches_between_filled_and_line_contours(
@@ -245,8 +236,8 @@ class TestPlotHistWithContours:
 
         ON FAILURE: the code is wrong.
         """
-        _, _, filled, _ = hist2d_instance.plot_hist_with_contours(use_contourf=True)
-        _, _, lines, _ = hist2d_instance.plot_hist_with_contours(use_contourf=False)
+        _, _, filled = hist2d_instance.plot_hist_with_contours(use_contourf=True)
+        _, _, lines = hist2d_instance.plot_hist_with_contours(use_contourf=False)
         assert filled.filled is True
         assert lines.filled is False
         plt.close("all")
@@ -254,8 +245,12 @@ class TestPlotHistWithContours:
     # --- Integration Tests (correctness) ---
 
     def test_contour_levels_correct_for_axnorm_t(self, hist2d_instance):
-        """Contour levels should match expected values for axnorm='t'."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours()
+        """Contour levels should match expected values for axnorm='t'.
+
+        ON FAILURE: the code is wrong, or the author changed the "t" defaults
+        in `_get_contour_levels`.
+        """
+        ax, cbar, qset = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t", default levels are [0.01, 0.1, 0.3, 0.7, 0.99]
         expected_levels = [0.01, 0.1, 0.3, 0.7, 0.99]
         np.testing.assert_allclose(
@@ -266,25 +261,27 @@ class TestPlotHistWithContours:
         plt.close("all")
 
     def test_colorbar_range_valid_for_normalized_data(self, hist2d_instance):
-        """Colorbar range should be within [0, 1] for normalized data."""
-        ax, cbar, qset, lbls = hist2d_instance.plot_hist_with_contours()
+        """Colorbar range should be within [0, 1] for normalized data.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, cbar, qset = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t" (total normalized), values should be in [0, 1]
         assert cbar.vmin >= 0, "Colorbar vmin should be >= 0"
         assert cbar.vmax <= 1, "Colorbar vmax should be <= 1"
         plt.close("all")
 
     def test_gaussian_filter_changes_contour_data(self, hist2d_instance):
-        """Gaussian filtering should produce different contours than unfiltered."""
+        """Gaussian filtering should produce different contours than unfiltered.
+
+        ON FAILURE: the code is wrong.
+        """
         # Get unfiltered contours
-        ax1, _, qset1, _ = hist2d_instance.plot_hist_with_contours(
-            gaussian_filter_std=0
-        )
+        ax1, _, qset1 = hist2d_instance.plot_hist_with_contours(gaussian_filter_std=0)
         unfiltered_data = qset1.allsegs
 
         # Get filtered contours
-        ax2, _, qset2, _ = hist2d_instance.plot_hist_with_contours(
-            gaussian_filter_std=2
-        )
+        ax2, _, qset2 = hist2d_instance.plot_hist_with_contours(gaussian_filter_std=2)
         filtered_data = qset2.allsegs
 
         # The contour paths should differ (filtering smooths the data)
@@ -308,7 +305,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm("t")
-        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(label_levels=False)
+        ax, cbar, qset = known_hist.plot_hist_with_contours()
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         expected = _expected_grid(known_counts) / known_counts.max()
         assert np.asarray(values.reshape(expected.shape)) == exact(
@@ -333,7 +330,7 @@ class TestPlotHistWithContours:
         levels = [0.2, 0.4, 0.6]
         sigma = 1.0
         known_hist.set_axnorm("t")
-        _, _, qset, _ = known_hist.plot_hist_with_contours(
+        _, _, qset = known_hist.plot_hist_with_contours(
             cbar=False,
             levels=levels,
             use_contourf=True,
@@ -372,43 +369,52 @@ class TestPlotContours:
         Note: cbar=False is required because matplotlib's colorbar also requires 2+ levels.
 
         Regression test for: ValueError: You must provide at least 2 boundaries
+
+        ON FAILURE: the code is wrong.
         """
-        ax, lbls, mappable, qset = hist2d_instance.plot_contours(
-            levels=[0.5], cbar=False
-        )
+        ax, mappable, qset = hist2d_instance.plot_contours(levels=[0.5], cbar=False)
         assert len(qset.levels) == 1
         assert qset.levels[0] == 0.5
         plt.close("all")
 
     def test_multiple_levels_preserved(self, hist2d_instance):
-        """Multiple levels should be preserved in returned contour set."""
+        """Multiple levels should be preserved in returned contour set.
+
+        ON FAILURE: the code is wrong.
+        """
         levels = [0.3, 0.5, 0.7]
-        ax, lbls, mappable, qset = hist2d_instance.plot_contours(levels=levels)
+        ax, mappable, qset = hist2d_instance.plot_contours(levels=levels)
         assert len(qset.levels) == 3
         np.testing.assert_allclose(qset.levels, levels)
         plt.close("all")
 
     def test_use_contourf_true_returns_filled_contours(self, hist2d_instance):
-        """use_contourf=True should return filled QuadContourSet."""
-        ax, _, _, qset = hist2d_instance.plot_contours(use_contourf=True)
+        """use_contourf=True should return filled QuadContourSet.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _, qset = hist2d_instance.plot_contours(use_contourf=True)
         assert qset.filled is True
         plt.close("all")
 
     def test_use_contourf_false_returns_line_contours(self, hist2d_instance):
-        """use_contourf=False should return unfilled QuadContourSet."""
-        ax, _, _, qset = hist2d_instance.plot_contours(use_contourf=False)
+        """use_contourf=False should return unfilled QuadContourSet.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _, qset = hist2d_instance.plot_contours(use_contourf=False)
         assert qset.filled is False
         plt.close("all")
 
     def test_cbar_true_returns_the_colorbar_of_the_contours(self, hist2d_instance):
-        """With cbar=True the third value is a colorbar of the drawn contours.
+        """With cbar=True the second value is a colorbar of the drawn contours.
 
         It colours ``qset``, the contour set on ``ax``, and carries
         ``labels.z``, as the ``cbar`` parameter documents.
 
         ON FAILURE: the code is wrong.
         """
-        ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=True)
+        ax, mappable, qset = hist2d_instance.plot_contours(cbar=True)
         assert isinstance(mappable, matplotlib.colorbar.Colorbar)
         assert mappable.mappable is qset
         assert qset in ax.collections
@@ -416,11 +422,11 @@ class TestPlotContours:
         plt.close("all")
 
     def test_cbar_false_returns_the_contour_set_itself(self, hist2d_instance):
-        """With cbar=False the third value is the contour set drawn on ``ax``.
+        """With cbar=False the second value is the contour set drawn on ``ax``.
 
         ON FAILURE: the code is wrong.
         """
-        ax, lbls, mappable, qset = hist2d_instance.plot_contours(cbar=False)
+        ax, mappable, qset = hist2d_instance.plot_contours(cbar=False)
         assert mappable is qset
         assert qset in ax.collections
         plt.close("all")
@@ -826,7 +832,7 @@ class TestQuantileAlimInPlots:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_alim(0.01, 0.99, kind="quantile")
-        ax, _, _, _ = known_hist.plot_hist_with_contours(cbar=False)
+        ax, _, _ = known_hist.plot_hist_with_contours(cbar=False)
         values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
         np.testing.assert_array_equal(
             values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
@@ -842,10 +848,10 @@ def _norm_of(method, axnorm):
         ax, _ = h.make_plot(cbar=False)
         return _quadmesh(ax).norm
     if method == "plot_hist_with_contours":
-        ax, _, qset, _ = h.plot_hist_with_contours(cbar=False)
+        ax, _, qset = h.plot_hist_with_contours(cbar=False)
         assert qset.norm is _quadmesh(ax).norm
         return qset.norm
-    _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+    _, _, qset = h.plot_contours(cbar=False)
     return qset.norm
 
 
@@ -892,7 +898,7 @@ class TestDefaultNorm:
         """
         x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
         h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm="d")
-        _, _, _, qset = h.plot_contours(cbar=False, label_levels=False)
+        _, _, qset = h.plot_contours(cbar=False)
         # The defaults written in `_get_contour_levels` for axnorm "d".
         expected = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
         np.testing.assert_array_equal(qset.levels, expected)
@@ -909,11 +915,11 @@ class TestPlotSignatures:
             ("make_plot", ["ax", "cbar", "cbar_kwargs", "fcn", "alpha_fcn"]),
             (
                 "plot_hist_with_contours",
-                ["ax", "cbar", "cbar_kwargs", "fcn", "levels", "label_levels"],
+                ["ax", "cbar", "cbar_kwargs", "fcn", "levels", "use_contourf"],
             ),
             (
                 "plot_contours",
-                ["ax", "label_levels", "cbar", "cbar_kwargs", "fcn", "plot_edges"],
+                ["ax", "cbar", "cbar_kwargs", "fcn", "plot_edges", "edges_kwargs"],
             ),
         ],
     )
@@ -939,9 +945,7 @@ class TestPlotSignatures:
         assert names[-1] == "levels"
         assert params["levels"].default is None
         levels = [1.5, 2.5, 4.5]  # chosen inside the 1..6 counts of KNOWN_COUNTS
-        _, _, _, qset = known_hist.plot_contours(
-            levels=levels, cbar=False, label_levels=False
-        )
+        _, _, qset = known_hist.plot_contours(levels=levels, cbar=False)
         np.testing.assert_array_equal(qset.levels, levels)
         plt.close("all")
 
@@ -1571,9 +1575,7 @@ def _contour_levels(hist, levels=None):
     """Levels of the contour set ``plot_contours`` draws for ``hist``."""
     fig, ax = plt.subplots()
     try:
-        *_, qset = hist.plot_contours(
-            ax=ax, label_levels=False, cbar=False, levels=levels
-        )
+        *_, qset = hist.plot_contours(ax=ax, cbar=False, levels=levels)
         return np.asarray(qset.levels, dtype=float)
     finally:
         plt.close(fig)
@@ -1676,9 +1678,7 @@ class TestColorScale:
         """
         known_hist.set_axnorm("t")
         requested = matplotlib.colors.Normalize(vmin=0.0, vmax=1.0)
-        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(
-            cbar=False, norm=requested
-        )
+        ax, cbar, qset = known_hist.plot_hist_with_contours(cbar=False, norm=requested)
 
         assert _quadmesh(ax).norm is requested
         assert qset.norm is requested
@@ -1717,14 +1717,12 @@ class TestContourFiltering:
             gaussian_filter_std=1.5,
             nan_aware_filter=False,
             cbar=False,
-            label_levels=False,
-        )[3]
+        )[2]
         nan_aware = complete_hist.plot_contours(
             gaussian_filter_std=1.5,
             nan_aware_filter=True,
             cbar=False,
-            label_levels=False,
-        )[3]
+        )[2]
 
         assert len(plain.allsegs) == len(nan_aware.allsegs)
         for at_plain, at_nan_aware in zip(plain.allsegs, nan_aware.allsegs):
@@ -1734,59 +1732,45 @@ class TestContourFiltering:
         plt.close("all")
 
 
-class TestContourLabels:
-    """The text `clabel` writes onto the contours."""
+class TestNoContourLabels:
+    """The contour plots draw no labels and accept no labelling keywords."""
 
-    def test_labels_name_only_levels_that_were_asked_for(self, known_hist):
-        """Every label reads back as one of the requested contour levels.
+    @pytest.mark.parametrize("method", ["plot_contours", "plot_hist_with_contours"])
+    @pytest.mark.parametrize(
+        "keyword", ["label_levels", "clabel_kwargs", "skip_max_clbl"]
+    )
+    def test_removed_labelling_keywords_are_rejected(self, known_hist, method, keyword):
+        """A removed labelling keyword fails loudly instead of being ignored.
 
-        ON FAILURE: the code is wrong -- a contour would be annotated with a
-        value it does not represent.
+        Both methods forward unknown keywords to matplotlib (`ax.contour` or
+        `ax.pcolormesh`), whose `Artist.set` raises `AttributeError` naming
+        the keyword.
+
+        ON FAILURE: the code is wrong -- a contour method accepts a labelling
+        keyword again, or swallows unknown keywords silently.
         """
         known_hist.set_axnorm("t")
-        levels = [0.1, 0.3, 0.5, 0.7]
-        ax, lbls, cbar, qset = known_hist.plot_contours(
-            levels=levels, label_levels=True, cbar=False
-        )
-
-        assert lbls is not None
-        for text in lbls:
-            assert float(text.get_text()) in levels
+        with pytest.raises(AttributeError, match=keyword):
+            getattr(known_hist, method)(cbar=False, **{keyword: True})
         plt.close("all")
 
-    def test_the_maximum_level_is_left_unlabelled_by_default(self, known_hist):
-        """`skip_max_clbl` defaults to True, so the top contour gets no text.
+    def test_filled_contours_emit_no_matplotlib_deprecation_warning(self, known_hist):
+        """A filled-contour plot draws no text and triggers no deprecation.
 
-        The documented reason is that the maximum contour is "effectively, a
-        point", which a label would cover entirely.
+        Matplotlib deprecated `clabel` on filled contours in 3.1; labelling
+        `contourf` output emitted `MatplotlibDeprecationWarning`.
 
-        ON FAILURE: the code is wrong, or the default changed.
+        ON FAILURE: the code is wrong -- something labels the filled contours
+        again, or calls another deprecated matplotlib API.
         """
         known_hist.set_axnorm("t")
-        levels = [0.1, 0.3, 0.5, 0.7]
-        ax, lbls, cbar, qset = known_hist.plot_contours(
-            levels=levels, label_levels=True, cbar=False
-        )
-
-        labelled = {float(text.get_text()) for text in lbls}
-        assert max(levels) not in labelled
-        plt.close("all")
-
-    def test_combined_plot_labels_its_contours_on_request(self, known_hist):
-        """`plot_hist_with_contours(label_levels=True)` returns the labels.
-
-        ON FAILURE: the code is wrong -- the documented return value is
-        missing.
-        """
-        known_hist.set_axnorm("t")
-        levels = [0.1, 0.3, 0.5, 0.7]
-        ax, cbar, qset, lbls = known_hist.plot_hist_with_contours(
-            levels=levels, label_levels=True, cbar=False
-        )
-
-        assert lbls is not None
-        for text in lbls:
-            assert float(text.get_text()) in levels
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
+            ax, _, qset = known_hist.plot_contours(
+                use_contourf=True, cbar=False, levels=[0.1, 0.3, 0.5, 0.7]
+            )
+        assert qset.filled is True
+        assert len(ax.texts) == 0
         plt.close("all")
 
 

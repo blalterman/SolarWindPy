@@ -41,7 +41,6 @@ except ImportError:  # pragma: no cover - fall back for older SciPy versions
         _wrap_jac,
         _initialize_feasible,
     )
-from scipy.optimize._lsq.least_squares import prepare_bounds
 from scipy.linalg import svd, cholesky, LinAlgError
 
 from .tex_info import TeXinfo
@@ -466,8 +465,36 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         n = len(self.argnames)
         if n < 1:
             raise ValueError("Unable to determine number of fit parameters.")
-        lb, ub = prepare_bounds(self._bounds_array(bounds), n)
+        lb, ub = self._bounds_lower_upper(bounds, n)
         return _initialize_feasible(lb, ub)
+
+    def _bounds_lower_upper(self, bounds, n):
+        r"""Return ``bounds`` as lower and upper float arrays of ``n`` values.
+
+        Parameters
+        ----------
+        bounds : 2-tuple or dict
+            As accepted by :meth:`make_fit`. A scalar bound applies to every
+            parameter.
+        n : int
+            Number of fit parameters.
+
+        Returns
+        -------
+        lower, upper : numpy.ndarray
+            Writable copies, one value per parameter.
+
+        Raises
+        ------
+        ValueError
+            If ``bounds`` is not a lower and an upper bound, or a bound does
+            not broadcast to ``n`` values.
+        """
+        lower, upper = self._bounds_array(bounds)
+        return tuple(
+            np.broadcast_to(np.asarray(b, dtype=float), (n,)).copy()
+            for b in (lower, upper)
+        )
 
     def _bounds_array(self, bounds):
         r"""Convert ``bounds`` stored as ``{name: (lower, upper)}`` to an array."""
@@ -719,9 +746,24 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             weights = weights_raw[mask]
 
         used = _Observations(xobs, yobs, weights)
+        self._check_used_obs(used)
         raw = _Observations(xobs_raw, yobs_raw, weights_raw)
         usedrawobs = _UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
+
+    def _check_used_obs(self, used):
+        r"""Raise if the model cannot use these observations; no check by default.
+
+        :meth:`set_fit_obs` calls it, at construction and on every later call,
+        before it stores the observations, so a refused selection leaves the
+        previous one in place. A class whose model is undefined for some
+        observations overrides it.
+
+        Parameters
+        ----------
+        used : _Observations
+            The ``(x, y, w)`` selected for the fit.
+        """
 
     def _run_least_squares(self, **kwargs):
         """Execute :func:`scipy.optimize.least_squares` with defaults."""
@@ -745,7 +787,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             p0 = np.atleast_1d(p0)
             self._reject_nonfinite_p0(p0)
 
-        lb, ub = prepare_bounds(bounds, p0.size)
+        lb, ub = self._bounds_lower_upper(bounds, p0.size)
 
         if "args" in kwargs:
             raise ValueError(

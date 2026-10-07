@@ -210,9 +210,16 @@ class GaussianLn(FitFunction):
         Additional arguments passed to
         :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
+    Raises
+    ------
+    ValueError
+        If any used x is not positive, where :math:`\ln x` is undefined, at
+        construction or when
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.set_fit_obs` selects
+        new observations.
+
     Notes
     -----
-    xobs must be positive for log transformation.
     This distribution is commonly used for particle size distributions
     and velocity distributions in solar wind where values are
     positively skewed.
@@ -225,6 +232,15 @@ class GaussianLn(FitFunction):
     def __init__(self, xobs, yobs, **kwargs):
         super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
+
+    def _check_used_obs(self, used):
+        r"""Raise ``ValueError`` if any used x is not positive: ln x is undefined."""
+        x = used.x
+        if np.any(x <= 0):
+            raise ValueError(
+                f"GaussianLn needs every used x > 0: ln x is undefined at "
+                f"{np.sum(x <= 0)} of {x.size}."
+            )
 
     @property
     def function(self):
@@ -250,20 +266,12 @@ class GaussianLn(FitFunction):
         :math:`\ln x`: ``m`` and ``s`` are the mean and standard deviation of
         :math:`\ln x` weighted by ``y``, and ``A`` is the largest ``y`` (``A``
         multiplies the model directly and is not logged). ``p0`` is None when
-        any used ``x`` is not positive (no logarithm), or when the weighted
-        moments of :math:`\ln x` give no estimate, under the same rules as
-        :attr:`Gaussian.p0` applied to :math:`\ln x`.
+        the weighted moments of :math:`\ln x` give no estimate, under the same
+        rules as :attr:`Gaussian.p0` applied to :math:`\ln x`.
         """
         self._require_sufficient_data()
 
         x, y = self.observations.used.x, self.observations.used.y
-
-        if not np.all(x > 0):
-            self.logger.warning(
-                f"{np.sum(x <= 0)} used x are not positive, so ln x is undefined."
-                "\nReturning None."
-            )
-            return None
 
         moments = _weighted_moments(self, np.log(x), y)
         if moments is None:
@@ -277,15 +285,10 @@ class GaussianLn(FitFunction):
     def TeX_function(self):
         r"""LaTeX form of the model."""
         TeX = (
-            r"f(x) = A \cdot  "
-            r"\mathrm{exp}\left[-\frac{1}{2}  "
-            r"(\frac{\mathrm{ln}(x)-m}{s})^2\right]"
-        )
-        TeX = (
-            r"f(x) ="
+            r"f(x) = "
             r"A \cdot"
             r"\exp\left["
-            r"\frac{\left(\ln x - m\right)^2}{2 s^2}"
+            r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
             r"\right]"
         )
         return TeX
