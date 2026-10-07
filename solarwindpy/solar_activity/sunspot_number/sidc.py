@@ -499,10 +499,11 @@ class SIDC(ActivityIndicator):
         data = self.data.loc[:, key]
         mids = np.arange(0, data.max(), 2.0 * dssn)
 
-        left = mids - dssn
-        right = mids + dssn
-        intervals = [pd.Interval(ll, rr) for ll, rr in zip(left, right)]
-        intervals = pd.IntervalIndex(intervals, name="ssn_intervals")
+        # Neighbouring bands share one edge. Computed separately, mids + dssn
+        # can exceed the next mids - dssn by rounding, and pd.cut refuses
+        # overlapping bins.
+        breaks = np.append(mids - dssn, mids[-1:] + dssn)
+        intervals = pd.IntervalIndex.from_breaks(breaks, name="ssn_intervals")
         try:
             values = self.interpolated.loc[:, key]  # TODO: generalize this hack
         except KeyError as e:

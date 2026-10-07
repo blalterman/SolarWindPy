@@ -803,6 +803,29 @@ def test_normalized_bands_accept_widths_below_one_only(ramp_sidc):
     assert [(i.left, i.right) for i in intervals] == [(-0.5, 0.5)]
 
 
+def test_narrow_normalized_bands_touch_without_overlapping(ramp_sidc):
+    """Half-width 0.05 on ``nssn`` gives ten touching bands, and pd.cut accepts them.
+
+    Band centres run 0, 0.1, ..., 0.9 below the per-cycle maximum of 1.0, so
+    the edges are -0.05, 0.05, ..., 0.95 and each band's right edge is the
+    next band's left edge. Each interpolated value lies inside its label.
+
+    ON FAILURE: the code is wrong.
+    """
+    ramp_sidc.run_normalization(norm_by="max")
+    ramp_sidc.interpolate_data(at_days(50, 250, 450), key="nssn")
+    cut = ramp_sidc.cut_spec_by_ssn_band(key="nssn", dssn=0.05)
+
+    intervals = ramp_sidc.ssn_band_intervals
+    assert len(intervals) == 10
+    assert intervals.left.to_numpy() == exact(np.arange(10) / 10 - 0.05)
+    assert intervals.right[-1] == exact(0.95)
+    assert (intervals.right[:-1] == intervals.left[1:]).all()
+
+    values = ramp_sidc.interpolated.loc[:, "nssn"]
+    assert all(band.left < v <= band.right for v, band in zip(values, cut))
+
+
 def test_ssn_bands_for_a_column_never_interpolated_raise_key_error(ramp_sidc):
     """Banding ``nssn`` when only ``ssn`` was interpolated raises KeyError naming it.
 
