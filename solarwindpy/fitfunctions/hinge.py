@@ -27,6 +27,54 @@ from .core import FitFunction
 _XIntercepts = namedtuple("_XIntercepts", "x1,x2")
 
 
+def _slopes(x, y):
+    r"""Slopes between consecutive points, checked before dividing.
+
+    Where ``x`` repeats, the slope is infinite in the sign of the rise (a
+    vertical step), or NaN when ``y`` repeats too (no line).
+    """
+    dx = np.ediff1d(x)
+    dy = np.ediff1d(y)
+    out = np.where(dy == 0, np.nan, np.copysign(np.inf, dy))
+    np.divide(dy, dx, out=out, where=dx != 0)
+    return out
+
+
+def _median_slope(x, y, skip_nan=True):
+    r"""The median of :func:`_slopes`, or NaN when it is undefined.
+
+    With ``skip_nan``, slopes between repeated points are left out; without
+    it, any one makes the median undefined. The median is also undefined
+    when there is no slope, or when the middle two are vertical steps in
+    opposite directions. A vertical step at the middle otherwise gives an
+    infinite median.
+    """
+    slopes = _slopes(x, y)
+    nan = np.isnan(slopes)
+    if skip_nan:
+        slopes = slopes[~nan]
+    elif nan.any():
+        return np.nan
+    if not slopes.size:
+        return np.nan
+    slopes = np.sort(slopes)
+    lo, hi = slopes[(slopes.size - 1) // 2], slopes[slopes.size // 2]
+    if np.isinf(lo) and np.isinf(hi) and lo != hi:
+        return np.nan
+    return np.median(slopes)
+
+
+def _x_intercept(x, y, m):
+    r"""The median x-intercept of lines of slope ``m`` through each point.
+
+    NaN when ``m`` is zero or NaN: a flat line has no x-intercept. For an
+    infinite ``m`` (vertical lines) it is the median ``x``.
+    """
+    if m == 0 or np.isnan(m):
+        return np.nan
+    return np.median(x - (y / m))
+
+
 class Hinge(FitFunction):
     r"""Two lines that meet at a hinge: the parent of the hinge fit functions.
 
@@ -159,10 +207,12 @@ class HingeSaturation(Hinge):
     -----
     ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``(xh, yh)`` is
     ``saturation_guess``; ``x1`` comes from a linear fit to the rising region
-    (x < xh), or is the data minimum; ``m2`` is the median slope in the
-    plateau region (x >= xh), and is undefined when the plateau region has
-    repeated ``x``. When an estimate is undefined, ``p0`` returns the
-    reference hinge of :class:`Hinge` as ``[xh, yh, x1, m2]``.
+    (x < xh), or is the data minimum when that region has fewer than two
+    points or the fit is flat, and is undefined when the region's points
+    share one ``x`` (no slope); ``m2`` is the median slope in the plateau
+    region (x >= xh), and is undefined when the plateau region has repeated
+    ``x``. When an estimate is undefined, ``p0`` returns the reference hinge
+    of :class:`Hinge` as ``[xh, yh, x1, m2]``.
 
     Examples
     --------
@@ -246,12 +296,16 @@ class HingeSaturation(Hinge):
         if rising_mask.sum() >= 2:
             x_rising = x[rising_mask]
             y_rising = y[rising_mask]
-            # Simple linear regression to estimate slope m1
-            m1_est = np.polyfit(x_rising, y_rising, 1)[0]
-            if abs(m1_est) > 1e-10:
-                x1 = xh - yh / m1_est
+            if np.unique(x_rising).size < 2:
+                # Repeated x has no slope: polyfit would raise or warn.
+                x1 = np.nan
             else:
-                x1 = x.min()
+                # Simple linear regression to estimate slope m1
+                m1_est = np.polyfit(x_rising, y_rising, 1)[0]
+                if abs(m1_est) > 1e-10:
+                    x1 = xh - yh / m1_est
+                else:
+                    x1 = x.min()
         else:
             # Fall back to minimum x value
             x1 = x.min()
@@ -259,7 +313,7 @@ class HingeSaturation(Hinge):
         # Estimate m2 from slope in plateau region
         plateau_mask = x >= xh
         if plateau_mask.sum() >= 2:
-            m2 = np.median(np.ediff1d(y[plateau_mask]) / np.ediff1d(x[plateau_mask]))
+            m2 = _median_slope(x[plateau_mask], y[plateau_mask], skip_nan=False)
         else:
             m2 = 0.0
 
@@ -460,15 +514,6 @@ class TwoLine(Hinge):
         return np.arctan(m1) - np.arctan(m2)
 
     def _estimate(self):
-        def estimate_line(x, y, tk, xs):
-            x = x[tk]
-            y = y[tk]
-
-            m_set = np.ediff1d(y) / np.ediff1d(x)
-            m = np.nanmedian(m_set)
-            x0 = np.nanmedian(x - (y / m))
-            return x0, m
-
         x = self.observations.used.x
         y = self.observations.used.y
 
@@ -476,8 +521,10 @@ class TwoLine(Hinge):
         xs = self._guess_xs
         tk = x <= xs
 
-        x1, m1 = estimate_line(x, y, tk, xs)
-        x2, m2 = estimate_line(x, y, ~tk, xs)
+        m1 = _median_slope(x[tk], y[tk])
+        x1 = _x_intercept(x[tk], y[tk], m1)
+        m2 = _median_slope(x[~tk], y[~tk])
+        x2 = _x_intercept(x[~tk], y[~tk], m2)
 
         return [x1, x2, m1, m2]
 
@@ -686,14 +733,11 @@ class Saturation(Hinge):
         return xs - (s / m2)
 
     def _estimate(self):
-        def estimate_line(x, y, tk, xs):
-            x = x[tk]
-            y = y[tk]
-
-            m_set = np.ediff1d(y) / np.ediff1d(x)
-            m = np.nanmedian(m_set)
-            x0 = np.nanmedian(x - (y / m))
-            s = m * (xs - x0)
+        def estimate_line(x, y):
+            m = _median_slope(x, y)
+            x0 = _x_intercept(x, y, m)
+            # A vertical line (infinite m) gives no saturation value.
+            s = m * (xs - x0) if np.isfinite(m) else np.nan
             return x0, m, s
 
         x = self.observations.used.x
@@ -703,11 +747,19 @@ class Saturation(Hinge):
         xs, _ = self.saturation_guess
         tk = x <= xs
 
-        x1, m1, s1 = estimate_line(x, y, tk, xs)
-        x2, m2, s2 = estimate_line(x, y, ~tk, xs)
+        x1, m1, s1 = estimate_line(x[tk], y[tk])
+        x2, m2, s2 = estimate_line(x[~tk], y[~tk])
 
-        s = np.nanmedian([s1, s2])
-        theta = np.arctan((m1 - m2) / (1 + m1 * m2))
+        s = np.nan if np.isnan([s1, s2]).all() else np.nanmedian([s1, s2])
+        if not (np.isfinite(m1) and np.isfinite(m2)):
+            theta = np.nan
+        elif 1 + m1 * m2 == 0:
+            # Perpendicular lines: the arctan argument is infinite. The exact
+            # test is intentional, not an isclose candidate: near-perpendicular
+            # lines give a large finite argument, which arctan handles.
+            theta = np.copysign(np.pi / 2, m1 - m2)
+        else:
+            theta = np.arctan((m1 - m2) / (1 + m1 * m2))
 
         return [x1, xs, s, theta]
 
@@ -907,19 +959,20 @@ class HingeMin(Hinge):
         # Estimate m1 and x1 from region below hinge
         tk_below = x < h
         if tk_below.sum() >= 2:
-            m1_set = np.ediff1d(y[tk_below]) / np.ediff1d(x[tk_below])
-            m1 = np.nanmedian(m1_set)
-            x1 = np.nanmedian(x[tk_below] - (y[tk_below] / m1))
+            m1 = _median_slope(x[tk_below], y[tk_below])
+            x1 = _x_intercept(x[tk_below], y[tk_below], m1)
         else:
             # Fall back to simple estimate
-            m1 = (y.max() - y.min()) / (x.max() - x.min())
+            m1 = _median_slope(
+                np.array([x.min(), x.max()]), np.array([y.min(), y.max()])
+            )
             x1 = x.min()
 
         # Estimate m2 and x2 from plateau region
         tk_above = x >= h
         if tk_above.sum() >= 2:
-            m2 = np.median(np.ediff1d(y[tk_above]) / np.ediff1d(x[tk_above]))
-            x2 = np.median(x[tk_above] - (y[tk_above] / m2))
+            m2 = _median_slope(x[tk_above], y[tk_above], skip_nan=False)
+            x2 = _x_intercept(x[tk_above], y[tk_above], m2)
         else:
             m2 = 0.0
             x2 = h
@@ -1171,8 +1224,7 @@ class HingeAtPoint(Hinge):
         # Estimate m1 from region below hinge
         tk_below = x < xh
         if tk_below.sum() >= 2:
-            m1_set = np.ediff1d(y[tk_below]) / np.ediff1d(x[tk_below])
-            m1 = np.nanmedian(m1_set)
+            m1 = _median_slope(x[tk_below], y[tk_below])
         else:
             # Fall back to simple estimate
             m1 = yh / (xh - x.min()) if xh > x.min() else 1.0
@@ -1180,7 +1232,7 @@ class HingeAtPoint(Hinge):
         # Estimate m2 from region above hinge
         tk_above = x >= xh
         if tk_above.sum() >= 2:
-            m2 = np.median(np.ediff1d(y[tk_above]) / np.ediff1d(x[tk_above]))
+            m2 = _median_slope(x[tk_above], y[tk_above], skip_nan=False)
         else:
             m2 = 0.0
 

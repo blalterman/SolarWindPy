@@ -325,9 +325,11 @@ class AlfvenicTurbulence(base.Core):
             raise TypeError
 
         if not v_in.index.equals(b_in.index):
-            self.logger.warn("v and b have unequal indices. Results may be unexpected.")
+            self.logger.warning(
+                "v and b have unequal indices. Results may be unexpected."
+            )
         if not v_in.index.equals(rho.index):
-            self.logger.warn("""v and rho have unequal indices. Results may be
+            self.logger.warning("""v and rho have unequal indices. Results may be
 unexpected.""")
         # Convert b -> Alfven units before averaging as in Bruno and Carbone
         # [2013], Section B.3.1.
