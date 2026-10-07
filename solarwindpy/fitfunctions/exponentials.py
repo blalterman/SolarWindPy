@@ -25,10 +25,6 @@ class Exponential(FitFunction):
     Parameters are ``c`` (rate) and ``A`` (amplitude at ``x = 0``).
     """
 
-    def __init__(self, xobs, yobs, **kwargs):
-        """Fit ``A * exp(-c x)`` to the data."""
-        super().__init__(xobs, yobs, **kwargs)
-
     @property
     def function(self):
         r"""The model :math:`A e^{-c x}` as ``f(x, c, A)``."""
@@ -64,10 +60,6 @@ class ExponentialPlusC(FitFunction):
 
     Parameters are ``c`` (rate), ``A`` (amplitude) and ``d`` (offset).
     """
-
-    def __init__(self, xobs, yobs, **kwargs):
-        """Fit ``A * exp(-c x) + d`` to the data."""
-        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):
@@ -108,10 +100,6 @@ class ExponentialCDF(FitFunction):
     which must be called before :meth:`make_fit`; otherwise the fit
     raises ``AttributeError``.
     """
-
-    def __init__(self, xobs, yobs, **kwargs):
-        """Fit an exponential cumulative distribution function."""
-        super().__init__(xobs, yobs, **kwargs)
 
     @property
     def function(self):

@@ -17,7 +17,8 @@ MultiIndex named `M`, `C`, `S`:
 - `C` — component (e.g. `x`, `y`, `z`, or empty for scalars)
 - `S` — species (e.g. `p1`, `p2`, `a`, or empty for spacecraft-frame quantities)
 
-See the docstring at `solarwindpy/core/plasma.py:102` for a constructed example.
+For a populated example, load one with `swp.examples.load_plasma()`
+(`solarwindpy/examples/__init__.py`).
 
 **Access columns with `.xs()`, and do not `.copy(deep=True)`.** The codebase
 relies on `.xs()` returning a view to keep memory down; this is stated at

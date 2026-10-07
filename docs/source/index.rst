@@ -25,6 +25,7 @@ scientific accuracy.
    installation
    usage
    tutorial
+   missing_data
 
 .. toctree::
    :maxdepth: 4

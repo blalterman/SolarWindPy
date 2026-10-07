@@ -3,12 +3,17 @@
 """The ``p0`` contract shared by every fit function.
 
 A ``p0`` returns one finite guess per parameter, or None when the data make a
-guess impossible; the fit then starts from ``fallback_p0()`` (the feasible
-default, ones when unbounded, unless the class overrides it). ``make_fit`` rejects a guess holding NaN or infinity with a
+guess impossible; the fit then starts from the feasible default (ones when
+unbounded). A hinge class, singular at that default, instead logs a warning and
+returns its documented reference start; ``HingeMax`` has none yet and raises
+NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
 ``ValueError`` naming the class and the parameter. The contract is stated in
 ``FitFunction.p0``'s docstring.
 """
 
+import inspect
+import logging
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -26,6 +31,7 @@ from solarwindpy.fitfunctions.core import FitFunction, InsufficientDataError
 from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
 from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.hinge import (
+    Hinge,
     HingeAtPoint,
     HingeMax,
     HingeMin,
@@ -300,6 +306,11 @@ IMPOSSIBLE = [
         {"guess_x0": -1.0},
         id="GaussianTimesHeavySidePlusHeavySide",
     ),
+]
+
+
+# Inputs for which each hinge class's estimate is impossible, and why.
+HINGE_IMPOSSIBLE = [
     # Default xs = 425 leaves no data on the upper side: no slope.
     _case(TwoLine, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="TwoLine"),
     _case(Saturation, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="Saturation"),
@@ -345,26 +356,21 @@ HINGE_START = {
 }
 
 
-def _start(cls, n):
-    """The start a None-p0 fit of ``cls`` should use: its hinge point, or ones."""
-    return np.array(HINGE_START.get(cls, np.ones(n)))
+NO_ESTIMATE = "The data gave no estimate"
 
 
 @pytest.mark.parametrize("cls, x, y, kwargs", IMPOSSIBLE)
-def test_impossible_estimate_gives_none_and_fits_from_the_fallback_start(
+def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     cls, x, y, kwargs
 ):
-    """An input with no estimate gives ``p0`` None, and the fit starts from the fallback.
+    """A non-hinge input with no estimate gives ``p0`` None and fits from ones.
 
-    The fallback is the author's hinge point for the hinge classes and ones
-    (the feasible default for unbounded parameters) otherwise. The fit with
-    ``p0`` None must end exactly as the fit given that start as ``p0=``, and is
-    never refused with the non-finite-guess ValueError. Whether the start
-    converges is scipy's business: all ones is singular for GaussianLn on
-    negative x, and scipy then reports "Residuals are not finite in the initial
-    point" on both routes alike. The hinge start is finite everywhere, so the
-    hinge fits never report that. HingeMax has no start yet and returns
-    NotImplementedError.
+    Ones is the feasible default for unbounded parameters. The fit with ``p0``
+    None must end exactly as the fit given ones as ``p0=``, and is never refused
+    with the non-finite-guess ValueError. Whether the start converges is
+    scipy's business: all ones is singular for GaussianLn on negative x, and
+    scipy then reports "Residuals are not finite in the initial point" on both
+    routes alike.
 
     ON FAILURE: the code is wrong.
     """
@@ -372,48 +378,199 @@ def test_impossible_estimate_gives_none_and_fits_from_the_fallback_start(
     assert fit.p0 is None, fit.p0
 
     got = fit.make_fit(return_exception=True)
-    if cls is HingeMax:
-        assert isinstance(got, NotImplementedError), got
-        return
-
     explicit = cls(x, y, **kwargs)
-    expected = explicit.make_fit(
-        return_exception=True, p0=_start(cls, len(fit.argnames))
-    )
+    expected = explicit.make_fit(return_exception=True, p0=np.ones(len(fit.argnames)))
     assert "initial guess is not finite" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
-    if cls in HINGE_START:
-        assert "Residuals are not finite" not in str(got), got
     if got is None:
         # Same start, same solver: identical results.
         assert fit.popt == explicit.popt
 
 
-@pytest.mark.parametrize("cls", list(HINGE_START), ids=lambda c: c.__name__)
-def test_hinge_fallback_start_is_the_authors_point(cls):
-    """Each hinge class's ``fallback_p0`` is the hand-translated author's point.
+@pytest.mark.parametrize(
+    "cls, x, y, kwargs",
+    [p for p in HINGE_IMPOSSIBLE if p.values[0] is not HingeMax],
+)
+def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, caplog):
+    """A hinge input with no estimate: ``p0`` is the author's point, with a warning.
 
-    The model evaluated there on x from 0 to 1000 is finite everywhere.
+    The start is the hand translation in ``HINGE_START``. The model evaluated
+    there on x from 0 to 1000 is finite everywhere, so the fit from it never
+    reports "Residuals are not finite in the initial point", as the all-ones
+    default did.
 
     ON FAILURE: the code is wrong, unless the author moved the reference hinge.
     """
-    fit = cls(np.arange(6.0), np.arange(6.0))
-    start = fit.fallback_p0()
+    fit = cls(x, y, **kwargs)
+    with caplog.at_level(logging.WARNING):
+        start = fit.p0
     assert start == exact(HINGE_START[cls]), start
+    assert NO_ESTIMATE in caplog.text, caplog.text
+
     with np.errstate(divide="raise", invalid="raise"):
         values = fit.function(np.linspace(0.0, 1000.0, 101), *start)
     assert np.all(np.isfinite(values)), values
 
+    got = fit.make_fit(return_exception=True)
+    assert "Residuals are not finite" not in str(got), got
+    assert "initial guess is not finite" not in str(got), got
 
-def test_hingemax_has_no_fallback_start_yet():
-    """``HingeMax.fallback_p0`` raises NotImplementedError until a point is chosen.
 
-    ON FAILURE: (unexpected pass) a HingeMax start has landed; update this test.
+def _hingemax_without_estimate():
+    (row,) = [p for p in HINGE_IMPOSSIBLE if p.values[0] is HingeMax]
+    cls, x, y, kwargs = row.values
+    return cls(x, y, **kwargs)
+
+
+def test_hingemax_without_estimate_raises_not_implemented(caplog):
+    """HingeMax has no reference start yet: ``p0`` raises without a warning.
+
+    The "data gave no estimate" warning announces a reference start, which
+    HingeMax does not return. ``make_fit`` returns the NotImplementedError
+    under ``return_exception``.
+
+    ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
+    start; then test that start as the other hinge classes are tested.
     """
-    fit = HingeMax(np.arange(6.0), np.arange(6.0))
-    with pytest.raises(NotImplementedError, match="no default start defined yet"):
-        fit.fallback_p0()
+    fit = _hingemax_without_estimate()
+    with caplog.at_level(logging.WARNING):
+        with pytest.raises(NotImplementedError, match="no reference start"):
+            fit.p0
+    assert NO_ESTIMATE not in caplog.text, caplog.text
+    got = fit.make_fit(return_exception=True)
+    assert isinstance(got, NotImplementedError), got
+
+
+def test_hingemax_without_estimate_fits_from_a_caller_start():
+    """With a caller's ``p0=``, HingeMax fits data that give no estimate.
+
+    ``make_fit`` must not read ``p0`` when the caller supplies one. The start
+    (m1, x1, x2, h) = (1, 0, 0.5, 2) is any finite point off the model's
+    singularity h = x2; the check is that the fit runs, not where it ends,
+    and that the class records no initial guess of its own.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _hingemax_without_estimate()
+    got = fit.make_fit(return_exception=True, p0=[1.0, 0.0, 0.5, 2.0])
+    assert not isinstance(got, NotImplementedError), got
+    assert fit.initial_guess_info is None
+
+
+def _concrete_hinge_classes():
+    """Every concrete class below ``Hinge``, found by walking its subclasses."""
+    found, stack = set(), [Hinge]
+    while stack:
+        for sub in stack.pop().__subclasses__():
+            found.add(sub)
+            stack.append(sub)
+    return {cls for cls in found if not inspect.isabstract(cls)}
+
+
+def test_the_hinge_cases_cover_every_hinge_class():
+    """``HINGE_IMPOSSIBLE`` has one row for each concrete ``Hinge`` subclass.
+
+    Guards the parametrized hinge tests against passing vacuously, and puts a
+    new hinge class under them.
+
+    ON FAILURE: a hinge class has no impossible-estimate row, or one of the six
+    no longer subclasses Hinge; add the row, or restore the parent.
+    """
+    covered = {p.values[0] for p in HINGE_IMPOSSIBLE}
+    six = {HingeSaturation, TwoLine, Saturation, HingeMin, HingeMax, HingeAtPoint}
+    assert covered == _concrete_hinge_classes() == six, covered
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
+def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
+    cls, x, y, kwargs
+):
+    """Each hinge class subclasses ``Hinge``; with no estimate ``p0`` is its start.
+
+    The start is the hand translation in ``HINGE_START``; HingeMax has none and
+    raises NotImplementedError.
+
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge
+    or chose a HingeMax start; then update ``HINGE_START``.
+    """
+    assert issubclass(cls, Hinge), cls.__mro__
+    fit = cls(x, y, **kwargs)
+    if cls is HingeMax:
+        with pytest.raises(NotImplementedError, match="no reference start"):
+            fit.p0
+    else:
+        assert fit.p0 == exact(HINGE_START[cls]), fit.p0
+
+
+def _notes(doc):
+    """The first paragraph of a docstring's Notes section, on one line."""
+    _, _, rest = doc.partition("\nNotes\n-----\n")
+    assert rest, doc
+    return " ".join(rest.split("\n\n", 1)[0].split())
+
+
+@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
+def test_each_hinge_class_describes_its_estimate_and_inherits_p0(cls):
+    """A hinge class's Notes describe its estimate; its ``p0`` is ``Hinge.p0``.
+
+    ``Hinge.p0`` is the one ``p0`` property, and its docstring points to the
+    class description. The merged class docstring's Notes therefore name the
+    class's parameters in ``argnames`` order (the estimate) and its start
+    when the data give none (the reference hinge, or NotImplementedError).
+
+    ON FAILURE: the code is wrong; a hinge class's help() and API page lost
+    its estimate description, or a hinge class defines ``p0`` itself.
+    """
+    assert "p0" not in vars(cls), cls
+    assert inspect.getattr_static(cls, "p0") is vars(Hinge)["p0"]
+    argnames = cls(np.arange(5.0), np.arange(5.0)).argnames
+    notes = _notes(inspect.getdoc(cls))
+    assert f"``p0`` estimates ``[{', '.join(argnames)}]``" in notes, notes
+    start = "NotImplementedError" if cls is HingeMax else "reference hinge"
+    assert start in notes, notes
+
+
+def _reference_hinge_in_hinge_notes():
+    """The reference-hinge numbers as written in ``Hinge``'s class Notes."""
+    notes = _notes(inspect.getdoc(Hinge))
+    number = r"(-?[0-9.]+)"
+    patterns = {
+        "xh, yh": rf"\(x_h, y_h\) = \({number}, {number}\)",
+        "x1": rf"x_1 = {number}`",
+        "m1": rf"m_1 = y_h / \(x_h - x_1\) = {number} / {number}`",
+        "m2": rf"m_2 = {number}\\,m_1",
+        "x2": rf"x_2 = x_h - y_h / m_2 = {number}`",
+    }
+    found = {}
+    for name, pattern in patterns.items():
+        match = re.search(pattern, notes)
+        assert match, (name, notes)
+        found[name] = [float(g) for g in match.groups()]
+    return found
+
+
+def test_the_hinge_notes_state_the_stored_reference_hinge():
+    """The numbers in ``Hinge``'s Notes are the stored reference hinge.
+
+    The Notes are the one place the reference hinge is written for readers;
+    ``_XH``, ``_YH``, ``_X1``, ``_M1``, ``_M2`` and ``_X2`` are what ``p0``
+    returns. m1 is written as yh / (xh - x1), m2 as a multiple of m1.
+
+    ON FAILURE: the Notes and the constants disagree. The author decides which
+    is right; update the other.
+    """
+    found = _reference_hinge_in_hinge_notes()
+    assert found["xh, yh"] == [Hinge._XH, Hinge._YH], found
+    assert found["x1"] == [Hinge._X1], found
+    yh, run = found["m1"]
+    assert yh == Hinge._YH, found
+    assert run == Hinge._XH - Hinge._X1, found
+    assert yh / run == exact(Hinge._M1), found
+    (factor,) = found["m2"]
+    assert factor * Hinge._M1 == exact(Hinge._M2), found
+    (x2,) = found["x2"]
+    assert x2 == exact(Hinge._X2), found
 
 
 S = np.sqrt(0.5)
