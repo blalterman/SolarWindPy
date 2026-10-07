@@ -24,7 +24,7 @@ import pandas as pd
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from inspect import getfullargspec
+from inspect import cleandoc, getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
 from scipy.optimize import least_squares, OptimizeWarning
@@ -89,9 +89,73 @@ class FitFunctionMeta(type(ABC), NumpyDocstringInheritanceInitMeta):
 
     Constructor parameters are documented in the class docstring, which a
     subclass's class docstring inherits; ``__init__`` carries no docstring.
+    The merged class docstring is put in numpydoc's section order.
     """
 
-    pass
+    def __init__(cls, name, bases, namespace, **kwargs):
+        super().__init__(name, bases, namespace, **kwargs)
+        cls.__doc__ = _in_numpydoc_section_order(cls.__doc__)
+
+
+# The section order of the numpydoc docstring standard, which numpydoc also
+# renders in: https://numpydoc.readthedocs.io/en/latest/format.html#sections
+_NUMPYDOC_SECTIONS = (
+    "Parameters",
+    "Attributes",
+    "Methods",
+    "Returns",
+    "Yields",
+    "Receives",
+    "Other Parameters",
+    "Raises",
+    "Warns",
+    "Warnings",
+    "See Also",
+    "Notes",
+    "References",
+    "Examples",
+)
+
+
+def _in_numpydoc_section_order(doc):
+    r"""Return ``doc`` with its sections in numpydoc's order.
+
+    docstring-inheritance builds a merged docstring in the parent's section
+    order and appends the sections only the child writes, so a child's
+    ``Attributes`` would follow the parent's ``See Also`` in ``help()``. A
+    section numpydoc does not name keeps its place after the section it
+    followed. ``doc`` is returned unchanged when already in order.
+    """
+    if not doc:
+        return doc
+    lines = cleandoc(doc).splitlines()
+    # A section header is a non-indented line followed by a rule of dashes at
+    # least as long as the title, as numpydoc parses one. An unindented dashed
+    # underline inside a section body would be misread as a header.
+    starts = [
+        i
+        for i, (title, rule) in enumerate(zip(lines, lines[1:]))
+        if title.strip()
+        and not title[0].isspace()
+        and set(rule.strip()) == {"-"}
+        and len(rule.strip()) >= len(title.strip())
+    ]
+    if not starts:
+        return doc
+    blocks = [lines[s:e] for s, e in zip(starts, starts[1:] + [len(lines)])]
+    ranks = []
+    rank = -1
+    for block in blocks:
+        title = block[0].strip()
+        if title in _NUMPYDOC_SECTIONS:
+            rank = _NUMPYDOC_SECTIONS.index(title)
+        ranks.append(rank)
+    if ranks == sorted(ranks):
+        return doc
+    ordered = [b for _, b in sorted(zip(ranks, blocks), key=lambda rb: rb[0])]
+    head = "\n".join(lines[: starts[0]]).rstrip()
+    body = "\n\n".join("\n".join(b).rstrip() for b in ordered)
+    return f"{head}\n\n{body}\n" if head else f"\n{body}\n"
 
 
 class FitFunction(ABC, metaclass=FitFunctionMeta):
@@ -145,6 +209,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         then uses w/(y*ln(10)) for proper error propagation in
         log space.
 
+    See Also
+    --------
+    make_fit : Execute the fitting procedure
+    popt : Access optimized parameters
+    rsq : Calculate coefficient of determination
+
     Notes
     -----
     The fitting procedure uses scipy.optimize.least_squares
@@ -169,12 +239,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     >>> fit.make_fit()
     >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
     {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
-
-    See Also
-    --------
-    make_fit : Execute the fitting procedure
-    popt : Access optimized parameters
-    rsq : Calculate coefficient of determination
     """
 
     def __init__(
@@ -334,22 +398,23 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def initial_guess_info(self):
-        r"""Initial guess and bounds for each parameter, or None.
+        r"""The start and bounds of the last successful fit, per parameter, or None.
+
+        The start is the one :func:`scipy.optimize.least_squares` began from:
+        the caller's ``p0``, the class's :attr:`p0` as a subclass's
+        ``make_fit`` adjusted it, or the feasible default when :attr:`p0` is
+        None.
 
         Returns
         -------
         dict or None
-            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial
-            guess was made (``p0`` is None) or no fit has set the bounds.
+            ``{name: _InitialGuessInfo(p0, bounds)}``, or None before a fit
+            succeeds.
         """
         try:
-            p0 = self.p0
+            p0 = self._fit_p0
             bounds = self.fit_bounds
-        except (AttributeError, NotImplementedError):
-            # NotImplementedError: a p0 with no estimate and no reference
-            # start (HingeMax) made no guess; the caller supplied the start.
-            return None
-        if p0 is None:
+        except AttributeError:
             return None
 
         names = self.argnames
@@ -955,6 +1020,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self._pcov = pcov
         self._chisq_dof = all_chisq
         self._fit_result = res
+        self._fit_p0 = tuple(p0)
 
         self.build_TeX_info()
         self.build_plotter()

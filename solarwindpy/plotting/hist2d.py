@@ -686,7 +686,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         plot_edges: bool
             If True, plot the smoothed, extreme edges of the 2D histogram.
         edges_kwargs: None, dict
-            Passed to {self.plot_edges!s}.
+            Passed to :py:meth:`plot_edges`.
         use_contourf: bool
             If True, use `ax.contourf`. Else use `ax.contour`.
         gaussian_filter_std: int

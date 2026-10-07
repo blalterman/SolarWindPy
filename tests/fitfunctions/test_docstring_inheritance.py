@@ -18,6 +18,8 @@ import sys
 import pytest
 
 from solarwindpy.fitfunctions import _fit_function_classes
+from solarwindpy.fitfunctions.core import _in_numpydoc_section_order
+from solarwindpy.fitfunctions.hinge import Hinge
 from solarwindpy.fitfunctions.lines import Line
 
 _PARAMETERS_HEADER = re.compile(r"^Parameters\n-{10}$", re.M)
@@ -53,6 +55,86 @@ def test_class_help_documents_every_constructor_argument(cls):
     doc = inspect.getdoc(cls)
     assert _PARAMETERS_HEADER.search(doc), doc
     assert _MISSING not in doc, doc
+
+
+# The numpydoc standard's section order, written out here rather than imported
+# from the package: https://numpydoc.readthedocs.io/en/latest/format.html
+_NUMPYDOC_ORDER = [
+    "Parameters",
+    "Attributes",
+    "Methods",
+    "Returns",
+    "Yields",
+    "Receives",
+    "Other Parameters",
+    "Raises",
+    "Warns",
+    "Warnings",
+    "See Also",
+    "Notes",
+    "References",
+    "Examples",
+]
+_SECTION_HEADER = re.compile(r"^(\S[^\n]*)\n-{3,}$", re.M)
+
+
+@pytest.mark.parametrize("cls", _fit_function_classes(), ids=lambda c: c.__name__)
+def test_class_help_sections_are_in_numpydoc_order(cls):
+    """The merged class docstring lists its sections in numpydoc's order.
+
+    docstring-inheritance appends a section only the child writes after the
+    parent's sections, which put a child's ``Attributes`` after FitFunction's
+    ``See Also`` and ``Examples`` in ``help()``.
+
+    ON FAILURE: the code is wrong -- check that ``FitFunctionMeta`` reorders
+    the merged class docstring.
+    """
+    found = _SECTION_HEADER.findall(inspect.getdoc(cls))
+    assert set(found) <= set(_NUMPYDOC_ORDER), found
+    assert found == sorted(found, key=_NUMPYDOC_ORDER.index)
+
+
+def _sections(doc):
+    """Split ``doc`` into its text before the first header and its section blocks."""
+    starts = [m.start() for m in _SECTION_HEADER.finditer(doc)]
+    head = doc[: starts[0]].rstrip()
+    blocks = [doc[s:e].rstrip() for s, e in zip(starts, starts[1:] + [len(doc)])]
+    return head, blocks
+
+
+@pytest.mark.parametrize("cls", _fit_function_classes(), ids=lambda c: c.__name__)
+def test_reordering_keeps_every_section_and_only_moves_them(cls):
+    """Reordering a scrambled merged docstring restores it section for section.
+
+    Each class's merged docstring has its sections reversed, then put back in
+    numpydoc order by ``_in_numpydoc_section_order``: the result has the
+    same summary and the same sections, each with its text unchanged, in
+    numpydoc order. A dashed line misread as a header would split a section
+    and change the set.
+
+    ON FAILURE: the code is wrong -- ``_in_numpydoc_section_order`` drops,
+    splits or edits a section; check its header rule.
+    """
+    head, blocks = _sections(inspect.getdoc(cls))
+    scrambled = head + "\n\n" + "\n\n".join(reversed(blocks)) + "\n"
+    got_head, got_blocks = _sections(_in_numpydoc_section_order(scrambled))
+    titles = [b.split("\n", 1)[0] for b in got_blocks]
+    assert got_head == head
+    assert sorted(got_blocks) == sorted(blocks)
+    assert titles == sorted(titles, key=_NUMPYDOC_ORDER.index)
+
+
+def test_hinge_examples_show_a_hinge_fit_function():
+    """``Hinge`` writes its own Examples instead of inheriting FitFunction's Gaussian.
+
+    The example itself runs under ``pytest --doctest-modules``.
+
+    ON FAILURE: the Examples section of ``help(Hinge)`` shows another family's
+    fit function; restore the Examples section in the ``Hinge`` docstring.
+    """
+    examples = inspect.getdoc(Hinge).split("Examples\n--------\n", 1)[1]
+    assert "from solarwindpy.fitfunctions.hinge import" in examples
+    assert "Gaussian" not in examples
 
 
 def test_import_order_that_disables_inheritance_warns():

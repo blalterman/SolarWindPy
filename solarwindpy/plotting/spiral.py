@@ -879,17 +879,6 @@ data : {z.size}
 
         return ax, cbar_or_mappable
 
-    def _verify_contour_passthrough_kwargs(
-        self, ax, clabel_kwargs, edges_kwargs, cbar_kwargs
-    ):
-        if clabel_kwargs is None:
-            clabel_kwargs = dict()
-        if edges_kwargs is None:
-            edges_kwargs = dict()
-        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
-        return clabel_kwargs, edges_kwargs, cbar_kwargs
-
     def _interpolate_to_grid(self, x, y, z, resolution=100, method="cubic"):
         r"""Interpolate scattered data to a regular grid.
 
@@ -987,12 +976,9 @@ data : {z.size}
         interpolation="cubic",
         nan_aware_filter=True,
         # Common params
-        label_levels=True,
         cbar=True,
         cbar_kwargs=None,
         fcn=None,
-        clabel_kwargs=None,
-        skip_max_clbl=True,
         use_contourf=False,
         **kwargs,
     ):
@@ -1038,18 +1024,12 @@ data : {z.size}
 
         Common Parameters
         -----------------
-        label_levels : bool
-            If True, add labels to contours with ``ax.clabel``. Default is True.
         cbar : bool
             If True, create a colorbar. Default is True.
         cbar_kwargs : dict, None
             Keyword arguments passed to ``self._make_cbar``.
         fcn : callable, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
-        clabel_kwargs : dict, None
-            Keyword arguments passed to ``ax.clabel``.
-        skip_max_clbl : bool
-            If True, don't label the maximum contour level. Default is True.
         use_contourf : bool
             If True, use filled contours. Default is False.
         **kwargs
@@ -1060,8 +1040,6 @@ data : {z.size}
         -------
         ax : mpl.axes.Axes
             The axes containing the plot.
-        lbls : list or None
-            Contour labels if ``label_levels=True``, else None.
         cbar_or_mappable : Colorbar or QuadContourSet
             The colorbar if ``cbar=True``, else the contour set.
         qset : QuadContourSet
@@ -1081,17 +1059,17 @@ data : {z.size}
         >>> splot.build_grouped()
 
         >>> # Default: sparse RBF (fastest)
-        >>> ax, lbls, cbar, qset = splot.plot_contours()
+        >>> ax, cbar, qset = splot.plot_contours()
 
         >>> # Grid interpolation with Gaussian smoothing
-        >>> ax, lbls, cbar, qset = splot.plot_contours(
+        >>> ax, cbar, qset = splot.plot_contours(
         ...     method='grid',
         ...     grid_resolution=100,
         ...     gaussian_filter_std=2.0
         ... )
 
         >>> # Debug: see raw triangulation
-        >>> ax, lbls, cbar, qset = splot.plot_contours(method='tricontour')
+        >>> ax, cbar, qset = splot.plot_contours(method='tricontour')
         """
         from .tools import nan_gaussian_filter
 
@@ -1123,18 +1101,7 @@ data : {z.size}
         if ax is None:
             fig, ax = plt.subplots()
 
-        # Setup kwargs for clabel and cbar
-        (
-            clabel_kwargs,
-            _edges_kwargs,
-            cbar_kwargs,
-        ) = self._verify_contour_passthrough_kwargs(
-            ax, clabel_kwargs, None, cbar_kwargs
-        )
-
-        inline = clabel_kwargs.pop("inline", True)
-        inline_spacing = clabel_kwargs.pop("inline_spacing", -3)
-        fmt = clabel_kwargs.pop("fmt", "%s")
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
@@ -1214,30 +1181,6 @@ data : {z.size}
                 *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
             )
 
-        # Handle contour labels
-        try:
-            label_args = (qset, levels[:-1] if skip_max_clbl else levels)
-        except TypeError:
-            label_args = (qset,)
-
-        class _NumericFormatter(float):
-            """Format float without trailing zeros for contour labels."""
-
-            def __repr__(self):
-                # Use float's repr to avoid recursion (str(self) calls __repr__)
-                return float.__repr__(self).rstrip("0").rstrip(".")
-
-        lbls = None
-        if label_levels and len(qset.levels) > 0:
-            qset.levels = [_NumericFormatter(level) for level in qset.levels]
-            lbls = ax.clabel(
-                *label_args,
-                inline=inline,
-                inline_spacing=inline_spacing,
-                fmt=fmt,
-                **clabel_kwargs,
-            )
-
         # Add colorbar
         cbar_or_mappable = qset
         if cbar:
@@ -1246,4 +1189,4 @@ data : {z.size}
 
         self._format_axis(ax)
 
-        return ax, lbls, cbar_or_mappable, qset
+        return ax, cbar_or_mappable, qset

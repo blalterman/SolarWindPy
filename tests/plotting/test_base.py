@@ -488,7 +488,7 @@ CBAR_PLOTS = {
     ],
     "SpiralPlot2D.plot_contours": lambda ax, kw: _spiral().plot_contours(
         ax=ax, cbar_kwargs=kw, levels=LEVELS, method="tricontour"
-    )[2],
+    )[1],
 }
 
 

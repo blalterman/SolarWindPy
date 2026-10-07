@@ -216,13 +216,17 @@ def test_overflowing_weighted_moments_give_no_gaussian_guess(x, y):
 def test_a_none_guess_fits_from_the_feasible_default():
     """``p0`` None still fits: the exact line is recovered and dof counts parameters.
 
+    ``initial_guess_info`` reports the start the fit used: the feasible
+    default, all ones for unbounded parameters.
+
     ON FAILURE: the code is wrong.
     """
     fit = _NoGuessLine(LINE_X, LINE_Y)
     assert fit.make_fit() is None
     assert fit.popt == noise_free({"m": 2.0, "b": 1.0})
     assert fit.dof == LINE_X.size - 2
-    assert fit.initial_guess_info is None
+    start = {k: v.p0 for k, v in fit.initial_guess_info.items()}
+    assert start == exact({"m": 1.0, "b": 1.0})
 
 
 def test_a_none_guess_starts_inside_dict_bounds():
@@ -467,14 +471,15 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     ``make_fit`` must not read ``p0`` when the caller supplies one. The start
     (m1, x1, x2, h) = (1, 0, 0.5, 2) is any finite point off the model's
     singularity h = x2; the check is that the fit runs, not where it ends,
-    and that the class records no initial guess of its own.
+    and that ``initial_guess_info`` reports the caller's start.
 
     ON FAILURE: the code is wrong.
     """
     fit = _hingemax_without_estimate()
-    got = fit.make_fit(return_exception=True, p0=[1.0, 0.0, 0.5, 2.0])
+    start = [1.0, 0.0, 0.5, 2.0]
+    got = fit.make_fit(return_exception=True, p0=start)
     assert not isinstance(got, NotImplementedError), got
-    assert fit.initial_guess_info is None
+    assert [v.p0 for v in fit.initial_guess_info.values()] == exact(start)
 
 
 def _concrete_hinge_classes():

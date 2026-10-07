@@ -64,17 +64,33 @@ def bare_approx_calls(text):
     A call is bare when it passes neither ``rel`` nor ``abs``, so pytest's
     default tolerance applies unstated. Calls are found in the syntax tree, so
     ``approx`` inside a string or comment is not a call.
+
+    A call counts as ``approx`` when it is ``approx(...)``, any
+    ``<name>.approx(...)`` (so ``import pytest as pt`` then ``pt.approx(...)``),
+    or a name bound by ``from pytest import approx as <name>``.
+
+    ``approx(x, **tol)`` is flagged on purpose: the scanner cannot see whether
+    ``tol`` holds ``rel`` or ``abs``, so it fails closed rather than trust it.
     """
+    tree = ast.parse(text)
+    aliases = {"approx"} | {
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module == "pytest"
+        for alias in node.names
+        if alias.name == "approx"
+    }
     lines = text.splitlines()
     found = []
-    for node in ast.walk(ast.parse(text)):
+    for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
         func = node.func
-        name = (
-            func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
-        )
-        if name != "approx":
+        if isinstance(func, ast.Attribute):
+            is_approx = func.attr == "approx"
+        else:
+            is_approx = getattr(func, "id", None) in aliases
+        if not is_approx:
             continue
         if {"rel", "abs"} & {k.arg for k in node.keywords}:
             continue
@@ -118,6 +134,38 @@ def test_scanner_finds_a_bare_approx():
     assert bare_approx_calls(imported) == [(1, imported)]
     assert bare_approx_calls(multiline) == [(1, "assert x == pytest.approx(")]
     assert bare_approx_calls(clean) == []
+
+
+def test_scanner_follows_aliased_approx_imports():
+    """The scanner reports a bare ``approx`` reached through an import alias.
+
+    ``from pytest import approx as ap`` then ``ap(y)``, and ``import pytest as
+    pt`` then ``pt.approx(y)``, are bare calls; ``ap`` given a tolerance is not, and
+    neither is a call to an unrelated ``ap``.
+
+    ON FAILURE: the scanner misses a renamed ``approx``; fix
+    ``bare_approx_calls``.
+    """
+    renamed = "from pytest import approx as ap\nassert x == ap(y)"
+    module = "import pytest as pt\nassert x == pt.approx(y)"
+    with_tolerance = (
+        "from pytest import approx as ap\nassert x == ap(y, " + "rel" + "=1)"
+    )
+    unrelated = "from mylib import ap\nassert x == ap(y)"
+    assert bare_approx_calls(renamed) == [(2, "assert x == ap(y)")]
+    assert bare_approx_calls(module) == [(2, "assert x == pt.approx(y)")]
+    assert bare_approx_calls(with_tolerance) == []
+    assert bare_approx_calls(unrelated) == []
+
+
+def test_scanner_flags_approx_with_unpacked_keywords():
+    """``approx(y, **tol)`` is reported: the scanner fails closed.
+
+    ON FAILURE: the scanner trusts a ``**`` mapping it cannot read; fix
+    ``bare_approx_calls``.
+    """
+    unpacked = "assert x == pytest.approx(y, **tol)"
+    assert bare_approx_calls(unpacked) == [(1, unpacked)]
 
 
 @pytest.mark.parametrize("name", ["rel", "abs", "rtol", "atol"])
