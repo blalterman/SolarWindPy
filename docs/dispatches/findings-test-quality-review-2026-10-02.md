@@ -204,3 +204,54 @@ links are DOIs whose publisher landing pages return 403 to the checker (Wiley/AG
 `10.1029/JA090iA11p11062`, A&A `10.1051/0004-6361/202140445`, Annual Reviews
 `10.1146/annurev.astro.46.060407.145222`, OUP `10.1093/mnrasl/slw135`); reading them as
 bot-blocks rather than dead links is an inference, not checked in a browser. No new broken link.
+
+### Mutation
+
+Re-run on 2026-10-07, after the fix program merged through PR #501:
+`bash tmp/test-quality-review/mutmut/run_mutmut-2026-10-07-ff2.sh <module>` (results in
+`tmp/test-quality-review/mutmut/<slug>/results.txt`), then a whole-file recheck of every
+survivor with `tmp/test-quality-review/mutmut/recheck_survivors-2026-10-07.sh` (verdicts in
+`tmp/test-quality-review/mutants_recheck.csv`). The 2026-10-02 inputs are kept beside them as
+`*-2026-10-02.*`. `fitfunctions/core.py` was measured on master at 87f23f80 (#501 merged); the
+other eight modules on master after #494 to #496 and, for `hist2d.py`, #498.
+
+| Module | 2026-10-02 killed / survived | Score | 2026-10-07 killed / survived | Score | Recheck flips | Survivors after recheck |
+|---|---|---|---|---|---|---|
+| plotting/hist2d.py | 896 / 488 | 0.65 | 872 / 406 | 0.68 | 0 | 406 |
+| core/plasma.py | 1384 / 729 | 0.65 | 1544 / 548 | 0.74 | 0 | 548 |
+| core/ions.py | 62 / 10 | 0.86 | 62 / 10 | 0.86 | 0 | 10 |
+| core/vector.py | 55 / 13 | 0.80 | 70 / 10 | 0.86 | 0 | 10 |
+| fitfunctions/core.py | 397 / 131 | 0.75 | 470 / 184 | 0.72 | 13 | 171 |
+| fitfunctions/lines.py | 9 / 1 | 0.90 | 19 / 2 | 0.90 | 0 | 2 |
+| instabilities/beta_ani.py | 78 / 12 | 0.87 | 78 / 12 | 0.87 | 0 | 12 |
+| sunspot_number/sidc.py | 496 / 186 | 0.73 | 497 / 185 | 0.73 | 0 | 185 |
+| tools/__init__.py | 199 / 33 | 0.86 | 199 / 33 | 0.86 | 0 | 33 |
+
+Scores are killed over all mutants, including "no tests" (26 for plasma on 2026-10-02, 1 for
+vector on both dates). Mutant counts changed where the code changed: `plasma.py` gained the
+species-validity masking, `fitfunctions/core.py` the shared bounds helper and the recorded
+fit start, `hist2d.py` lost contour labelling.
+
+What moved: `plasma.py` survivors fell from 729 to 548 and `vector.py` from 13 to 10, from the
+missing-data and pair rules (#494) and the hand cases added through the program.
+`fitfunctions/core.py` grew by 126 mutants and its score fell from 0.75 to 0.72: the new code
+in #499 and #501 is less covered than the old. `sidc.py`, `tools`, `ions` and `beta_ani` are
+unchanged; no unit owned them.
+
+The whole-file recheck flipped 13 survivors, all in `fitfunctions/core.py`, against 11 in
+`plasma.py` on 2026-10-02; reading the plasma difference as the rewritten tests no longer
+relying on class-scoped setup is an inference, not checked mutant by mutant.
+
+Two tests cannot run inside mutmut's instrumented copy and are excluded from both runs:
+`tests/test_examples.py::test_load_plasma_finds_its_data_through_the_package` (it imports a
+copy of the package from an empty directory, where mutmut's trampoline cannot find its
+configuration), and the fit-function docstring tests (`-k "not docstring and not
+describes_its_estimate and not notes_state"`; mutmut's rewrite replaces `FitFunction`'s class
+docstring). Neither checks behaviour a code mutant changes. Controls: with no mutant active,
+every module's recheck targets pass; a mutant mutmut killed (`Plasma.__init__` mutant 1)
+reads killed in the recheck.
+
+Remaining: 1,377 survivors after recheck, 1,160 of them in `plasma.py`, `hist2d.py` and
+`sidc.py`. Some are unkillable by construction (unit factors of 1.0; `nuc` in the fixture's
+high-drift regime, see Mutation sample). The rest are behaviours with no test that fails when
+they break, the gap the review's Governing Property names.
