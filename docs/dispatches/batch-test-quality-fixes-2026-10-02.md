@@ -450,7 +450,7 @@ Re-run Sphinx linkcheck (network required) after the `docstring-examples` unit l
 
 ### plotting-and-docstring-cleanup
 
-OWNS: solarwindpy/plotting/spiral.py, solarwindpy/plotting/hist2d.py, solarwindpy/fitfunctions/core.py, solarwindpy/fitfunctions/hinge.py, tests/plotting/test_spiral.py, tests/fitfunctions/, tests/test_tolerance_rule.py
+OWNS: solarwindpy/plotting/spiral.py, solarwindpy/plotting/hist2d.py, solarwindpy/fitfunctions/core.py, solarwindpy/fitfunctions/hinge.py, tests/plotting/test_spiral.py, tests/fitfunctions/, tests/test_tolerance_rule.py, solarwindpy/fitfunctions/power_laws.py, solarwindpy/fitfunctions/gaussians.py
 
 Runs after PRs #498 and #499 merge (both touch these files). Author decisions: remove
 contour labelling from `SpiralPlot2D` as #498 did for `Hist2D` (parameters, `clabel` code,
@@ -462,6 +462,10 @@ merged fit-function class docstrings, put Attributes in numpydoc order, before S
 `tests/test_tolerance_rule.py` follows aliased imports (`from pytest import approx as ap`,
 `import pytest as pt`), and its docstring states that `approx(x, **tol)` is flagged
 (fail-closed). Add `tests/test_tolerance_rule.py` to OWNS.
+Also from PR #499's last review: `PowerLawOffCenter.make_fit` rejects a caller `p0` whose x0
+is below the caller's lower bound with the same clear error it gives above the upper bound;
+`initial_guess_info` reports the start the fit actually used after clipping; and
+`GaussianLn.TeX_function` puts a space between `\cdot` and `\exp`.
 
 `HingeMax` keeps raising `NotImplementedError` in its no-estimate branch: the author does not
 yet have a good initial guess for it. The `hingemax-point` step stays parked, not blocking
