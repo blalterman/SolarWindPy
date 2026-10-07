@@ -414,6 +414,16 @@ blank rectangle so the table keeps its layout (the table form is intentional); t
 `p0` estimates check before dividing (the divide-by-zero rule). Control for each: the warning
 it removes is gone from `pytest -rw`, and a test fails on the old behavior.
 
+Author decision after PR #499's review: fold these fixes into #499. Replace the private
+`scipy.optimize._lsq` `prepare_bounds` import with public NumPy broadcasting of the bounds.
+`PowerLawOffCenter` starts x0 below the smallest used x, and a caller bound that leaves x0 no
+room below the data raises a clear `ValueError`. `GaussianLn` checks for used x ≤ 0 wherever
+the used observations are set (construction and `set_fit_obs`), not only at construction.
+`GaussianLn.TeX_function` returns the formula with its minus sign, with the dead first
+assignment and the test asserting the wrong string fixed. `HingeSaturation._estimate`
+treats a rising region with fewer than two distinct x as no estimate (the existing
+repeated-x rule), so `p0` returns the reference start.
+
 ### hist2d-no-clabel
 
 OWNS: solarwindpy/plotting/hist2d.py, tests/plotting/
