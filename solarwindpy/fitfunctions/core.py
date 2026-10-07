@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover - fall back for older SciPy versions
         _wrap_jac,
         _initialize_feasible,
     )
-from scipy.linalg import svd, cholesky, LinAlgError
+from scipy.linalg import svd
 
 from .tex_info import TeXinfo
 from .plots import FFPlot
@@ -192,10 +192,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Include only data outside this range.
         Format: (lower, upper) where lower < upper.
     weights : array-like, optional
-        Uncertainties (1-sigma) associated with y values.
-        Used for weighted least squares fitting. If 1-d array,
-        interpreted as diagonal covariance matrix. If 2-d,
-        must be positive definite covariance matrix.
+        1-sigma uncertainties of the y values, used for weighted
+        least squares fitting: a 1-d array of the same shape as
+        xobs. A 2-d array (such as a covariance matrix) is
+        refused with InvalidParameterError.
     wmin : float, optional
         Lower weight limit. Observations with smaller weights
         are excluded from the fit.
@@ -609,8 +609,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             raise InvalidParameterError(f"""xobs and yobs must have the same shape.
 xobs: {xobs.shape}, yobs: {yobs.shape}""")
 
-        if weights is not None and weights.shape != xobs.shape:
-            raise InvalidParameterError(f"""weights and xobs must have the same shape.
+        if weights is not None and (weights.ndim != 1 or weights.shape != xobs.shape):
+            raise InvalidParameterError(f"""weights and xobs must have the same shape: \
+weights is a 1-d array of 1-sigma uncertainties, and a 2-d array is refused.
 weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return xobs, yobs, weights
@@ -863,24 +864,17 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         ydata = self.observations.used.y
         sigma = self.observations.used.w
 
-        # Copied from `curve_fit` line 749 (20200527)
-        # Determine type of sigma
+        # Adapted from `curve_fit` line 749 (20200527): 1-sigma uncertainties
+        # weight the residuals by 1/sigma. _clean_raw_obs refuses any other
+        # weights, so this shape check only guards a changed selection.
         if sigma is not None:
             sigma = np.asarray(sigma)
-
-            # if 1-d, sigma are errors, define transform = 1/sigma
-            if sigma.shape == (ydata.size,):
-                transform = 1.0 / sigma
-            # if 2-d, sigma is the covariance matrix,
-            # define transform = L such that L L^T = C
-            elif sigma.shape == (ydata.size, ydata.size):
-                try:
-                    # scipy.linalg.cholesky requires lower=True to return L L^T = A
-                    transform = cholesky(sigma, lower=True)
-                except LinAlgError:
-                    raise ValueError("`sigma` must be positive definite.")
-            else:
-                raise ValueError("`sigma` has incorrect shape.")
+            if sigma.shape != (ydata.size,):
+                raise ValueError(
+                    f"`sigma` must be 1-d with one uncertainty per used "
+                    f"observation, shape ({ydata.size},); got {sigma.shape}."
+                )
+            transform = 1.0 / sigma
         else:
             transform = None
 

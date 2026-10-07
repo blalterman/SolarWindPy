@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scipy.linalg import cholesky, solve_triangular
 from scipy.optimize import OptimizeResult, OptimizeWarning, curve_fit, least_squares
 
 from solarwindpy.fitfunctions.core import (
@@ -889,89 +888,24 @@ def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
 
 
 # ============================================================================
-# Correlated uncertainties: a full covariance matrix as ``weights``
+# Weights are 1-d uncertainties: a 2-d array is refused
 # ============================================================================
 
 
-@pytest.fixture
-def correlated_line():
-    """Six samples of y = 2x + 1 with fixed offsets and a full covariance matrix.
+def test_a_2d_weights_array_is_refused():
+    """A 6 x 6 covariance matrix as ``weights`` for six samples raises.
 
-    Variances grow along x and neighbours correlate as 0.6^|i - j|, so the
-    lower and upper Cholesky factors whiten the residuals differently.
+    ``weights`` holds one 1-sigma uncertainty per observation; the author has
+    decided a 2-d array is refused, not fit as correlated errors.
+
+    ON FAILURE: the code is wrong, unless the author now accepts a covariance
+    matrix as ``weights``.
     """
     x = np.arange(6.0)
-    y = 2.0 * x + 1.0 + np.array([0.3, -0.2, 0.5, -0.4, 0.1, 0.2])
-    sd = 0.5 + 0.2 * x
-    lag = np.abs(np.subtract.outer(np.arange(6), np.arange(6)))
-    cov = np.outer(sd, sd) * 0.6**lag
-    return x, y, cov
-
-
-def _gls(x, y, cov):
-    """Generalised least squares (A^T C^-1 A)^-1 A^T C^-1 y and its r^T C^-1 r."""
-    a = np.column_stack([x, np.ones_like(x)])
-    cinv = np.linalg.inv(cov)
-    beta = np.linalg.solve(a.T @ cinv @ a, a.T @ cinv @ y)
-    r = a @ beta - y
-    return beta, r @ cinv @ r
-
-
-def _whitened_by(factor, lower, x, y):
-    """Least squares on the line after solving ``factor z = r`` for the residuals."""
-    a = np.column_stack([x, np.ones_like(x)])
-    aw = solve_triangular(factor, a, lower=lower)
-    yw = solve_triangular(factor, y, lower=lower)
-    return np.linalg.lstsq(aw, yw, rcond=None)[0]
-
-
-def test_correlated_fixture_separates_the_cholesky_orientations(correlated_line):
-    """Whitening by L (L L^T = C) gives the GLS answer; whitening by U (U^T U = C) does not.
-
-    Without this separation the covariance-weights test below could not tell
-    the two orientations apart.
-
-    ON FAILURE: the fixture no longer separates the lower from the upper
-    Cholesky factor; fix the fixture.
-    """
-    x, y, cov = correlated_line
-    gls, _ = _gls(x, y, cov)
-    by_lower = _whitened_by(cholesky(cov, lower=True), True, x, y)
-    by_upper = _whitened_by(cholesky(cov, lower=False), False, x, y)
-    assert by_lower == noise_free(gls)
-    assert np.max(np.abs(by_upper / gls - 1)) > 1e4 * NOISE_FREE_REL
-
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=InvalidParameterError,
-    reason=(
-        "FitFunction documents a 2-d `weights` as a covariance matrix, but "
-        "_clean_raw_obs (solarwindpy/fitfunctions/core.py) requires "
-        "weights.shape == xobs.shape; 'weights and xobs must have the same "
-        "shape'. Behind it, set_fit_obs selects rows only (weights_raw[mask]) "
-        "and _calc_popt_pcov_psigma_chisq divides residuals by the matrix "
-        "(r /= sigma raises ValueError). Remove this marker when FitFunction "
-        "accepts an (n, n) covariance for n observations through all three."
-    ),
-)
-def test_a_covariance_matrix_as_weights_gives_the_gls_fit(correlated_line):
-    """A full covariance matrix as ``weights`` fits as generalised least squares.
-
-    The class docstring: "If 2-d, must be positive definite covariance
-    matrix." With loss="linear" the fit must equal the closed-form GLS
-    estimate (A^T C^-1 A)^-1 A^T C^-1 y; pcov must equal curve_fit's with
-    the same full ``sigma``; the linear chi^2/dof is r^T C^-1 r / dof.
-
-    ON FAILURE: (unexpected pass) FitFunction now accepts a covariance
-    matrix; drop the xfail marker.
-    """
-    x, y, cov = correlated_line
-    gls, chisq = _gls(x, y, cov)
-    lf = LinearFit(x, y, weights=cov)
-    lf.make_fit(loss="linear")
-
-    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(gls)
-    _, pcov = curve_fit(linear_function, x, y, sigma=cov)
-    assert lf.pcov == noise_free(pcov)
-    assert lf.chisq_dof.linear == noise_free(chisq / (x.size - 2))
+    cov = np.diag(0.5 + 0.2 * x) ** 2
+    with pytest.raises(
+        InvalidParameterError,
+        match="weights is a 1-d array of 1-sigma uncertainties, and a 2-d "
+        "array is refused",
+    ):
+        LinearFit(x, 2.0 * x + 1.0, weights=cov)
