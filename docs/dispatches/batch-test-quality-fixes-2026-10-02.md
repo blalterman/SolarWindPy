@@ -526,3 +526,23 @@ Author decision (2026-10-07, from the survivor sort): `Plasma` keeps the caller'
 never sorts by time. Out-of-order timestamps flag a timestamp encoding error that the author's
 upstream data cuts drop; sorting would hide it. Pin it with a test that out-of-order input keeps
 its order (kills `Plasma.set_data` mutant 116).
+
+### hist2d-projection-tests
+
+OWNS: solarwindpy/plotting/hist2d.py, solarwindpy/plotting/hist1d.py, tests/plotting/test_hist2d_plotting.py, tests/plotting/test_hist1d.py
+
+From the 2026-10-07 survivor sort (42 real gaps in `Hist2D.project_1d`,
+`take_data_in_yrange_across_x` and `_prep_agg_for_plot`). Author decisions: label-only changes
+to a projected histogram count as gaps; `_prep_agg_for_plot` defaults are tested only through
+the public plotting path; `Hist1D` stores `clip` as a bool, as its base class does; a `z` with
+exactly two distinct values is data, not counts (fix the stale comment); the log flag handed
+to `take_data_in_yrange_across_x` callbacks is a strict bool; a zero-width range raises
+`ValueError`, not `assert`.
+
+### plasma-survivor-tests
+
+OWNS: tests/core/test_plasma.py
+
+Runs after the remaining `plasma.py` survivors are sorted. Known gaps: `nuc` refuses combined
+species on either side (author confirmed; mutants 6, 8, 10, 11, 17); `nc` defaults to
+`both_species=True` (mutant 1); `Plasma` keeps the input row order (`set_data` mutant 116).
