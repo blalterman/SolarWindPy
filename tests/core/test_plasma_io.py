@@ -23,6 +23,11 @@ def _example_plasma():
     stop date in 2022 keeps a known subset of rows.
     """
     p = swp.examples.load_plasma()
+    # What the tests below assume of the example data.
+    assert p.species == ("a", "e", "p1", "p2"), "example plasma species changed"
+    assert "carr" in p.spacecraft.data.columns.get_level_values(
+        "M"
+    ), "example spacecraft no longer has Carrington coordinates"
     aux = pd.DataFrame(
         {("quality", "", ""): [0, 1, 0], ("chisq", "", "p1"): [1.5, 2.5, 3.5]},
         index=p.epoch,
@@ -98,30 +103,37 @@ def test_save_writes_data_spacecraft_and_aux_at_the_default_keys(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "start, stop, rows",
+    "start, stop",
     [
-        ("2022-01-01", None, [1, 2]),
-        (None, "2022-06-01", [0, 1]),
-        ("2000-01-01", "2022-06-01", [1]),
+        ("2022-01-01", None),
+        (None, "2022-06-01"),
+        ("2000-01-01", "2022-06-01"),
     ],
     ids=["start-only", "stop-only", "start-and-stop"],
 )
-def test_load_from_file_keeps_only_rows_between_start_and_stop(
-    tmp_path, start, stop, rows
-):
+def test_load_from_file_keeps_only_rows_between_start_and_stop(tmp_path, start, stop):
     """`start` and `stop` each bound the loaded rows, alone or together.
 
     The spacecraft and auxiliary data are cut to the same rows as the data.
 
-    ON FAILURE: the code is wrong.
+    ON FAILURE: the code is wrong, unless the sanity assertion on the example
+    epochs fails; then the example data changed and the bounds need new dates.
     """
     p = _example_plasma()
+    # Rows of the plasma's epochs inside the closed interval [start, stop].
+    rows = pd.Series(True, index=p.epoch)
+    if start is not None:
+        rows &= p.epoch >= pd.Timestamp(start)
+    if stop is not None:
+        rows &= p.epoch <= pd.Timestamp(stop)
+    rows = rows.to_numpy()
+    assert 0 < rows.sum() < len(rows), "bounds must keep some, not all, example rows"
+
     fname = tmp_path / "plasma.h5"
     p.save(fname)
     loaded = plasma.Plasma.load_from_file(
         fname, sc_name=SC_NAME, sc_frame=SC_FRAME, start=start, stop=stop
     )
-    # Rows of the example epochs that fall inside [start, stop].
     _assert_same_frame(loaded.data, p.data.iloc[rows])
     _assert_same_frame(loaded.spacecraft.data, p.spacecraft.data.iloc[rows])
     _assert_same_frame(loaded.auxiliary_data, p.auxiliary_data.iloc[rows])
@@ -162,29 +174,45 @@ def test_save_rejects_a_modifier_that_is_not_a_function(tmp_path, kwarg):
     """A modifier must be a plain function; another callable raises TypeError.
 
     `functools.partial` is callable and would work if called, so the error
-    comes from the type check alone.
+    comes from the type check alone. The other two modifiers are valid
+    functions, so a check that inspects the wrong parameter does not raise.
+    The message names the rejected type, not the parameter.
 
     ON FAILURE: the code is wrong.
     """
     p = _example_plasma()
-    with pytest.raises(TypeError):
-        p.save(tmp_path / "plasma.h5", **{kwarg: functools.partial(_identity)})
+    modifiers = {
+        "data_modifier_fcn": _identity,
+        "sc_modifier_fcn": _identity,
+        "aux_modifier_fcn": _identity,
+    }
+    modifiers[kwarg] = functools.partial(_identity)
+    with pytest.raises(TypeError, match="partial"):
+        p.save(tmp_path / "plasma.h5", **modifiers)
 
 
 @pytest.mark.parametrize(
-    "sc_name, sc_frame",
-    [(None, SC_FRAME), (SC_NAME, None), (None, None)],
+    "sc_name, sc_frame, missing",
+    [
+        (None, SC_FRAME, r"name : None\nframe: HCI"),
+        (SC_NAME, None, r"name : PSP\nframe: None"),
+        (None, None, r"name : None\nframe: None"),
+    ],
     ids=["no-name", "no-frame", "neither"],
 )
-def test_load_from_file_needs_spacecraft_name_and_frame(tmp_path, sc_name, sc_frame):
+def test_load_from_file_needs_spacecraft_name_and_frame(
+    tmp_path, sc_name, sc_frame, missing
+):
     """Loading spacecraft data without both its name and frame raises ValueError.
+
+    The message reports each parameter's value, so the missing one reads None.
 
     ON FAILURE: the code is wrong.
     """
     p = _example_plasma()
     fname = tmp_path / "plasma.h5"
     p.save(fname)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=missing):
         plasma.Plasma.load_from_file(fname, sc_name=sc_name, sc_frame=sc_frame)
 
 
