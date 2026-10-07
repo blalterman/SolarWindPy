@@ -3338,6 +3338,114 @@ def test_ordered_unique_times_log_no_order_warning(caplog):
     assert not _warnings(caplog, "repeat an earlier timestamp")
 
 
+def test_nuc_refuses_a_combined_species_on_either_side():
+    r"""`nuc` takes one species per side: "a+p1" as `sa` or `sb` raises.
+
+    ON FAILURE: the code is wrong; a summed species would be read as its first
+    member and give a rate for the wrong pair.
+    """
+    p = _hand_plasma(NUC_ROWS, "a", "p1")
+    with pytest.raises(ValueError, match="individual"):
+        p.nuc("a+p1", "p1")
+    with pytest.raises(ValueError, match="individual"):
+        p.nuc("p1", "a+p1")
+
+
+def test_nc_defaults_to_both_species():
+    r"""`nc(sa, sb)` is `nc(sa, sb, both_species=True)`, named "sa+sb".
+
+    The signature and `nuc` give `both_species=True` as the default.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    default = p.nc("p1", "a")
+    assert default.name == "p1+a"
+    pdt.assert_series_equal(default, p.nc("p1", "a", both_species=True))
+
+
+def test_number_density_total_skips_a_missing_species_unless_skipna_is_false():
+    r"""`n("p1+p2")` and `number_density("p1+p2")` add the species present.
+
+    Row 0 holds 5 cm^-3 protons and 0.5 cm^-3 beam protons; on row 1 the beam is
+    missing. The default total is 5.5 then 5.0 (the proton density alone, the
+    across-species rule); with `skipna=False` row 1 is NaN.
+
+    ON FAILURE: the code is wrong, unless the author revises the across-species
+    missing-data rule (docs page `missing_data`).
+    """
+    beam = (0.5, (450.0, 0.0, 0.0), 20.0, 20.0)
+    p = _hand_plasma(
+        [{"p1": _PROTON_ROW, "p2": beam}, {"p1": _PROTON_ROW, "p2": _MISSING_ROW}],
+        "p1",
+        "p2",
+    )
+    for method in (p.n, p.number_density):
+        assert method("p1+p2").to_numpy() == exact([5.5, 5.0])
+        assert method("p1+p2", skipna=False).to_numpy() == exact(
+            [5.5, np.nan], nan_ok=True
+        )
+
+
+def test_kinetic_energy_flux_per_species_columns_are_named_S():
+    r"""Several species give one column per species, on a column level named "S".
+
+    ON FAILURE: the code is wrong; callers select species with `xs(..., level="S")`.
+    """
+    beam = (0.5, (450.0, 0.0, 0.0), 20.0, 20.0)
+    p = _hand_plasma([{"p1": _PROTON_ROW, "p2": beam}], "p1", "p2")
+    wk = p.kinetic_energy_flux("p1", "p2")
+    assert list(wk.columns.names) == ["S"]
+    assert list(wk.columns) == ["p1", "p2"]
+
+
+def _example_with_species_aux():
+    """The example plasma with a shared auxiliary column and one per species."""
+    p = swp.examples.load_plasma()
+    cols = [("q", "", "")] + [("q", "", s) for s in p.species]
+    aux = pd.DataFrame(
+        np.arange(3.0 * len(cols)).reshape(3, len(cols)),
+        index=p.epoch,
+        columns=pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"]),
+    )
+    p.set_auxiliary_data(aux)
+    return p
+
+
+@pytest.mark.parametrize(
+    "dropped, kept", [(("a",), ("e", "p1", "p2")), (("a", "e"), ("p1", "p2"))]
+)
+def test_drop_species_keeps_shared_and_remaining_species_auxiliary_columns(
+    dropped, kept
+):
+    r"""After `drop_species`, the auxiliary data hold the shared and kept species' columns.
+
+    The example plasma (a, e, p1, p2) carries ("q", "", "") plus ("q", "", s) for
+    each species; dropping `dropped` leaves exactly ("q", "", "") and one column
+    per species in `kept`, with their values unchanged.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _example_with_species_aux()
+    result = p.drop_species(*dropped)
+    expected_cols = [("q", "", "")] + [("q", "", s) for s in kept]
+    assert list(result.auxiliary_data.columns) == expected_cols
+    pdt.assert_frame_equal(
+        result.auxiliary_data, p.auxiliary_data.loc[:, expected_cols]
+    )
+
+
+def test_drop_species_keeps_the_spacecraft():
+    r"""The plasma `drop_species` returns carries the original's spacecraft.
+
+    ON FAILURE: the code is wrong; the trajectory is lost and `nc` stops working.
+    """
+    p = swp.examples.load_plasma()
+    result = p.drop_species("a")
+    assert result.spacecraft is not None
+    assert result.spacecraft == p.spacecraft
+
+
 def test_missing_attribute_raises_attribute_error_naming_it():
     r"""An unknown attribute raises AttributeError naming it; `hasattr`/`getattr` work.
 
@@ -3353,6 +3461,19 @@ def test_missing_attribute_raises_attribute_error_naming_it():
     with pytest.raises(AttributeError, match="not_an_attr"):
         p.not_an_attr
     assert p.p1 is p.ions.loc["p1"]
+
+
+def test_species_string_with_whitespace_is_unavailable():
+    r"""A species string containing a space, "a e", is not a species and raises.
+
+    Species combine only with "+"; the example plasma holds both "a" and "e", so
+    splitting on whitespace would wrongly accept it.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    with pytest.raises(ValueError, match="unavailable"):
+        p.number_density("a e")
 
 
 def test_auxiliary_data_with_wrong_level_names_raises_value_error():
