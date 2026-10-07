@@ -1,6 +1,7 @@
 """`Plasma.save` and `Plasma.load_from_file`: the HDF5 round trip."""
 
 import functools
+import re
 
 import pandas as pd
 import pandas.testing as pdt
@@ -25,6 +26,7 @@ def _example_plasma():
     p = swp.examples.load_plasma()
     # What the tests below assume of the example data.
     assert p.species == ("a", "e", "p1", "p2"), "example plasma species changed"
+    # test_save_applies_each_modifier_function_before_writing drops "carr".
     assert "carr" in p.spacecraft.data.columns.get_level_values(
         "M"
     ), "example spacecraft no longer has Carrington coordinates"
@@ -194,8 +196,8 @@ def test_save_rejects_a_modifier_that_is_not_a_function(tmp_path, kwarg):
 @pytest.mark.parametrize(
     "sc_name, sc_frame, missing",
     [
-        (None, SC_FRAME, r"name : None\nframe: HCI"),
-        (SC_NAME, None, r"name : PSP\nframe: None"),
+        (None, SC_FRAME, rf"name : None\nframe: {re.escape(SC_FRAME)}"),
+        (SC_NAME, None, rf"name : {re.escape(SC_NAME)}\nframe: None"),
         (None, None, r"name : None\nframe: None"),
     ],
     ids=["no-name", "no-frame", "neither"],
