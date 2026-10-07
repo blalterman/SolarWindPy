@@ -34,10 +34,6 @@ from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
 
-class _ProjectionMovesEdgeSamples(AssertionError):
-    """Raised when a projection's counts differ from numpy.histogram's."""
-
-
 @pytest.fixture
 def hist2d_instance():
     """Create a Hist2D instance for testing."""
@@ -1666,34 +1662,53 @@ class TestProject1D:
         assert projected.labels.x == known_hist.labels._asdict()[axis]
         assert isinstance(projected.labels.y, Count)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=_ProjectionMovesEdgeSamples,
-        reason=(
-            "project_1d rebins on the parent's edges as explicit edges, which "
-            "AggPlot.calc_bins_intervals (solarwindpy/plotting/agg_plot.py) makes "
-            "right-closed, while an integer-nbins parent is left-closed like numpy, "
-            "so a sample on an edge changes bin or is dropped; remove this marker "
-            "when explicit edges can keep the parent's closure"
-        ),
+    @pytest.mark.parametrize(
+        "x, logx, nbins, expected",
+        [
+            # Integer nbins: numpy's bins [0, 2), [2, 4] on edges [0, 2, 4].
+            (
+                [0.0, 1.0, 2.0, 3.0, 4.0, 4.0],
+                False,
+                2,
+                np.histogram([0.0, 1.0, 2.0, 3.0, 4.0, 4.0], bins=[0.0, 2.0, 4.0])[0],
+            ),
+            # Explicit edges: right-closed bins (0, 2], (2, 4] drop x = 0 and
+            # put x = 2 in the first bin (hand count).
+            (
+                [0.0, 1.0, 2.0, 3.0, 4.0, 4.0],
+                False,
+                [np.array([0.0, 2.0, 4.0]), np.array([-1.0, 5.0])],
+                [2, 3],
+            ),
+            # Integer nbins on log10(x): numpy's bins on decade edges [0, 2, 4].
+            (
+                [1.0, 10.0, 100.0, 1000.0, 1e4, 1e4],
+                True,
+                2,
+                np.histogram([0.0, 1.0, 2.0, 3.0, 4.0, 4.0], bins=[0.0, 2.0, 4.0])[0],
+            ),
+        ],
+        ids=["integer-left-closed", "explicit-right-closed", "log-integer"],
     )
-    def test_integer_bin_projection_keeps_samples_on_bin_edges(self):
-        """Projected counts of an integer-nbins histogram match numpy.histogram.
+    def test_projection_keeps_samples_on_bin_edges_in_the_parent_bins(
+        self, x, logx, nbins, expected
+    ):
+        """Projected counts put each sample on an edge in the parent's bin.
 
-        The edges are [0, 2, 4]; samples sit on all three of them.
+        Samples sit on every x-edge; the projection must close each bin on the
+        same side as the parent, so none moves or is dropped.
 
         ON FAILURE: the code is wrong.
         """
-        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        x = pd.Series(x)
         y = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 2.0])
-        h = Hist2D(x, y, nbins=2)
+        h = Hist2D(x, y, logx=logx, nbins=nbins)
         assert h.edges["x"].to_numpy() == exact([0.0, 2.0, 4.0])
 
-        projected = h.project_1d("x", project_counts=True).agg().to_numpy()
+        projected = h.project_1d("x", project_counts=True)
 
-        expected = np.histogram(x, bins=[0.0, 2.0, 4.0])[0]
-        if not np.array_equal(projected, expected):
-            raise _ProjectionMovesEdgeSamples(f"{projected} != {expected}")
+        assert projected.agg().to_numpy() == exact(np.asarray(expected, dtype=float))
+        assert projected.intervals["x"].equals(h.intervals["x"])
 
     def test_unknown_axis_is_rejected(self, known_hist):
         """Only "x" and "y" can be projected.

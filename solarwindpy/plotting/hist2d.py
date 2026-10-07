@@ -864,7 +864,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             y=y,
             logx=logx,
             clip_data=False,  # Any clipping will be addressed by bins.
-            nbins=self.edges[axis].values,
+            nbins=self.intervals[axis],  # Keeps which side each bin closes on.
             **kwargs,
         )
 
@@ -1035,8 +1035,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         Raises
         ------
         ValueError
-            If a range has ``left >= right`` or ``bottom >= top``, or if
-            `ranges_by_x` names x-bins the histogram does not have.
+            If a range has ``left >= right`` or ``bottom >= top``, or if an
+            entry of `ranges_by_x` names an x-bin the histogram does not have.
+            Histogram x-bins that `ranges_by_x` omits only log a warning.
         """
 
         available_x = self.agg().unstack("x").columns

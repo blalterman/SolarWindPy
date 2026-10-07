@@ -12,7 +12,7 @@ enclose every sample and the bins are closed on the left, the last also on the
 right (``tests/plotting/test_hist2d_plotting.py``, ``test_edges_span_the_data``,
 ``test_auto_bins_retain_every_observation``). Explicit edges give right-closed
 bins, so tests here that count observations use explicit edges that bracket
-the data.
+the data. An ``IntervalIndex`` keeps the side its bins close on.
 """
 
 import numpy as np
@@ -143,6 +143,87 @@ class TestBinEdges:
         x = pd.Series([0.0, 2.0, 4.0, np.inf, -np.inf, np.nan])
         h = Hist1D(x, nbins=2)
         np.testing.assert_array_equal(h.edges["x"], [0.0, 2.0, 4.0])
+
+    def test_interval_index_keeps_the_bins_it_was_built_from(self):
+        """An integer-nbins histogram's intervals rebuild its left-closed bins.
+
+        Samples sit on all three edges [0, 2, 4]; numpy.histogram counts them.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        parent = Hist1D(x, nbins=2)
+
+        rebuilt = Hist1D(x, nbins=parent.intervals["x"])
+
+        assert rebuilt.intervals["x"].equals(parent.intervals["x"])
+        expected = np.histogram(x, bins=[0.0, 2.0, 4.0])[0]
+        assert rebuilt.agg().to_numpy() == exact(expected.astype(float))
+
+    def test_right_closed_interval_index_keeps_its_bins(self):
+        """A right-closed IntervalIndex bins on (0, 2], (2, 4].
+
+        Samples sit on all three edges: x = 0 is in no bin, x = 2 is in the
+        first (hand count).
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        given = pd.IntervalIndex.from_breaks([0.0, 2.0, 4.0], closed="right")
+
+        h = Hist1D(x, nbins=given)
+
+        assert h.intervals["x"].equals(given)
+        assert h.agg().to_numpy() == exact([2.0, 3.0])
+
+    def test_interval_index_edges_are_not_rounded_by_default(self):
+        """Without ``bin_precision``, an IntervalIndex keeps edges finer than 5 places.
+
+        ON FAILURE: the code is wrong.
+        """
+        given = pd.IntervalIndex.from_breaks([0.0, 0.1234567, 1.0])
+
+        h = Hist1D(pd.Series([0.05, 0.5]), nbins=given)
+
+        assert h.edges["x"].to_numpy() == exact([0.0, 0.1234567, 1.0])
+
+    def test_hist2d_takes_one_interval_index_per_axis(self):
+        """Each axis keeps its own IntervalIndex and closure.
+
+        x bins [0, 2), [2, 4]; y bins (0, 2], (2, 4]. Hand count of the points
+        (0, 0) dropped (y = 0 is in no y-bin), (1, 1), (2, 2), (3, 3), (4, 4),
+        (4, 2): one in the first x-bin, two and two in the second.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 4.0])
+        y = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, 2.0])
+        edges = np.array([0.0, 2.0, 4.0])
+        ix = pd.IntervalIndex.from_breaks(edges, closed="left")
+        iy = pd.IntervalIndex.from_breaks(edges, closed="right")
+
+        h = Hist2D(x, y, nbins=(ix, iy))
+
+        assert h.intervals["x"].equals(ix)
+        assert h.intervals["y"].equals(iy)
+        expected = np.array([[1.0, np.nan], [2.0, 2.0]])  # hand count, rows x-bins
+        assert _grid(h.agg(), edges, edges) == exact(expected, nan_ok=True)
+
+    @pytest.mark.parametrize(
+        "given, match",
+        [
+            (pd.IntervalIndex.from_tuples([(0.0, 1.0), (2.0, 3.0)]), "contiguous"),
+            (pd.IntervalIndex.from_tuples([(2.0, 4.0), (0.0, 2.0)]), "contiguous"),
+            (pd.IntervalIndex.from_breaks([], closed="right"), "contiguous"),
+            (pd.IntervalIndex.from_breaks([0.0, 1.0], closed="both"), "'both'"),
+            (pd.IntervalIndex.from_breaks([0.0, 1.0], closed="neither"), "'neither'"),
+        ],
+        ids=["gap", "non-monotonic", "empty", "closed-both", "closed-neither"],
+    )
+    def test_interval_index_that_is_not_a_set_of_bins_is_rejected(self, given, match):
+        """Only contiguous, increasing, non-empty, left- or right-closed intervals bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=match):
+            Hist1D(pd.Series([0.5, 2.5]), nbins=given)
 
     def test_intervals_run_between_consecutive_edges(self, xyz):
         """Interval k spans edges[k] to edges[k + 1] on each axis.
