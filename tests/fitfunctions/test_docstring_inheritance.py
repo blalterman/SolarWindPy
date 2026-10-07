@@ -55,6 +55,43 @@ def test_class_help_documents_every_constructor_argument(cls):
     assert _MISSING not in doc, doc
 
 
+# The numpydoc standard's section order, written out here rather than imported
+# from the package: https://numpydoc.readthedocs.io/en/latest/format.html
+_NUMPYDOC_ORDER = [
+    "Parameters",
+    "Attributes",
+    "Methods",
+    "Returns",
+    "Yields",
+    "Receives",
+    "Other Parameters",
+    "Raises",
+    "Warns",
+    "Warnings",
+    "See Also",
+    "Notes",
+    "References",
+    "Examples",
+]
+_SECTION_HEADER = re.compile(r"^(\S[^\n]*)\n-{3,}$", re.M)
+
+
+@pytest.mark.parametrize("cls", _fit_function_classes(), ids=lambda c: c.__name__)
+def test_class_help_sections_are_in_numpydoc_order(cls):
+    """The merged class docstring lists its sections in numpydoc's order.
+
+    docstring-inheritance appends a section only the child writes after the
+    parent's sections, which put a child's ``Attributes`` after FitFunction's
+    ``See Also`` and ``Examples`` in ``help()``.
+
+    ON FAILURE: the code is wrong -- check that ``FitFunctionMeta`` reorders
+    the merged class docstring.
+    """
+    found = _SECTION_HEADER.findall(inspect.getdoc(cls))
+    assert set(found) <= set(_NUMPYDOC_ORDER), found
+    assert found == sorted(found, key=_NUMPYDOC_ORDER.index)
+
+
 def test_import_order_that_disables_inheritance_warns():
     """Importing docstring_inheritance first, with its switch unset, draws a warning.
 
