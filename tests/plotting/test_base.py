@@ -482,7 +482,7 @@ CBAR_PLOTS = {
     )[1],
     "Hist2D.plot_contours": lambda ax, kw: _hist2d().plot_contours(
         ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[2],
+    )[1],
     "SpiralPlot2D.make_plot": lambda ax, kw: _spiral().make_plot(ax=ax, cbar_kwargs=kw)[
         1
     ],
