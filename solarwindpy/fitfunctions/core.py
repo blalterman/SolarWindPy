@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover - fall back for older SciPy versions
         _wrap_jac,
         _initialize_feasible,
     )
-from scipy.linalg import svd, cholesky, solve_triangular, LinAlgError
+from scipy.linalg import svd, cholesky, LinAlgError
 
 from .tex_info import TeXinfo
 from .plots import FFPlot
@@ -52,54 +52,6 @@ _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
-
-
-def _is_covariance(xobs, weights):
-    r"""Whether ``weights`` is an ``(n, n)`` covariance matrix for 1-d ``xobs``."""
-    return xobs.ndim == 1 and weights.shape == (xobs.size, xobs.size)
-
-
-def _sigma_transform(sigma, n):
-    r"""The transform that whitens the residuals of ``n`` observations.
-
-    As :func:`scipy.optimize.curve_fit` defines it: ``1 / sigma`` for 1-d
-    uncertainties, and for an ``(n, n)`` covariance matrix ``C`` its lower
-    Cholesky factor ``L`` (``L L^T = C``), so that solving ``L z = r`` gives
-    ``z^T z = r^T C^-1 r``. None when there are no weights.
-
-    Raises
-    ------
-    ValueError
-        If ``sigma`` has neither shape, or a covariance matrix is not
-        positive definite.
-    """
-    if sigma is None:
-        return None
-    sigma = np.asarray(sigma)
-
-    # Copied from `curve_fit` line 749 (20200527)
-    if sigma.shape == (n,):
-        return 1.0 / sigma
-    if sigma.shape == (n, n):
-        try:
-            # scipy.linalg.cholesky requires lower=True to return L L^T = A
-            return cholesky(sigma, lower=True)
-        except LinAlgError:
-            raise ValueError("`sigma` must be positive definite.")
-    raise ValueError("`sigma` has incorrect shape.")
-
-
-def _whiten(r, transform):
-    r"""Apply ``transform`` from :func:`_sigma_transform` to residuals ``r``.
-
-    The same operation the residual function handed to
-    :func:`scipy.optimize.least_squares` applies.
-    """
-    if transform is None:
-        return r
-    if transform.ndim == 1:
-        return transform * r
-    return solve_triangular(transform, r, lower=True)
 
 
 class FitFunctionError(Exception):
@@ -240,23 +192,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Include only data outside this range.
         Format: (lower, upper) where lower < upper.
     weights : array-like, optional
-        Uncertainties associated with y values, used for weighted
-        least squares fitting. An array of xobs's shape holds
-        1-sigma uncertainties (a diagonal covariance matrix). An
-        (n, n) array for n observations is their covariance matrix,
-        which must be positive definite: correlated errors are fit
-        by generalised least squares, the residuals whitened by the
-        matrix's lower Cholesky factor as in
-        :func:`scipy.optimize.curve_fit`. The observations selected
-        for the fit keep their rows and columns of the matrix.
+        Uncertainties (1-sigma) associated with y values.
+        Used for weighted least squares fitting. If 1-d array,
+        interpreted as diagonal covariance matrix. If 2-d,
+        must be positive definite covariance matrix.
     wmin : float, optional
         Lower weight limit. Observations with smaller weights
-        are excluded from the fit. For a covariance matrix, an
-        observation's weight is its 1-sigma uncertainty, the
-        square root of its variance.
+        are excluded from the fit.
     wmax : float, optional
         Upper weight limit. Observations with larger weights
-        are excluded from the fit, compared as for wmin.
+        are excluded from the fit.
     logx : bool, default False
         Whether to interpret x on a log10 scale.
     logy : bool, default False
@@ -664,19 +609,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             raise InvalidParameterError(f"""xobs and yobs must have the same shape.
 xobs: {xobs.shape}, yobs: {yobs.shape}""")
 
-        if weights is None:
-            return xobs, yobs, weights
-
-        if weights.shape != xobs.shape and not _is_covariance(xobs, weights):
-            raise InvalidParameterError(f"""weights and xobs must have the same shape, \
-or weights must be an (n, n) covariance matrix for n observations.
+        if weights is not None and weights.shape != xobs.shape:
+            raise InvalidParameterError(f"""weights and xobs must have the same shape.
 weights: {weights.shape}, xobs: {xobs.shape}""")
-
-        if _is_covariance(xobs, weights) and np.any(np.diag(weights) < 0):
-            raise InvalidParameterError(
-                "A covariance matrix's diagonal holds variances, which cannot be "
-                f"negative: {np.diag(weights)}"
-            )
 
         return xobs, yobs, weights
 
@@ -859,12 +794,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         yout_mask = self._build_outside_mask("yobs", yobs_raw, youtside)
 
         mask = xmask & ymask & xout_mask & yout_mask
-        covariance = weights_raw is not None and _is_covariance(xobs_raw, weights_raw)
         if weights_raw is not None:
             weights_for_mask = weights_raw
-            if covariance:
-                # Each observation's 1-sigma uncertainty: the root of its variance.
-                weights_for_mask = np.sqrt(np.diag(weights_raw))
 
             if logy:
                 # Enables picking weights based on normalized scale for log stuff
@@ -876,10 +807,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         xobs = xobs_raw[mask]
         yobs = yobs_raw[mask]
         weights = None
-        if covariance:
-            # The used observations' covariance: their rows and their columns.
-            weights = weights_raw[np.ix_(mask, mask)]
-        elif weights_raw is not None:
+        if weights_raw is not None:
             weights = weights_raw[mask]
 
         used = _Observations(xobs, yobs, weights)
@@ -933,7 +861,28 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         xdata = self.observations.used.x
         ydata = self.observations.used.y
-        transform = _sigma_transform(self.observations.used.w, ydata.size)
+        sigma = self.observations.used.w
+
+        # Copied from `curve_fit` line 749 (20200527)
+        # Determine type of sigma
+        if sigma is not None:
+            sigma = np.asarray(sigma)
+
+            # if 1-d, sigma are errors, define transform = 1/sigma
+            if sigma.shape == (ydata.size,):
+                transform = 1.0 / sigma
+            # if 2-d, sigma is the covariance matrix,
+            # define transform = L such that L L^T = C
+            elif sigma.shape == (ydata.size, ydata.size):
+                try:
+                    # scipy.linalg.cholesky requires lower=True to return L L^T = A
+                    transform = cholesky(sigma, lower=True)
+                except LinAlgError:
+                    raise ValueError("`sigma` must be positive definite.")
+            else:
+                raise ValueError("`sigma` has incorrect shape.")
+        else:
+            transform = None
 
         # Copied from `curve_fit` line 769 (20200527)
         loss_func = _wrap_func(self.function, xdata, ydata, transform)
@@ -968,6 +917,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         xdata = self.observations.used.x
         ydata = self.observations.used.y
+        sigma = self.observations.used.w
 
         # The following is from `curve_fit` line 801 and following. (20200625)
         # `cost` is the robust loss, i.e. residuals passed through loss funciton.
@@ -975,13 +925,13 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         cost = 2 * res.cost  # res.cost is half sum of squares!
         popt = res.x
 
-        # Linear chisq_dof value: the residuals whitened as the fit whitened
-        # them, so with a covariance matrix C the sum is r^T C^-1 r.
+        # Linear chisq_dof value.
         dof = ydata.size - len(p0)
         chisq_dof = np.inf  # Divide by zero => infinity
         if dof:
             r = self.function(xdata, *popt) - ydata
-            r = _whiten(r, _sigma_transform(self.observations.used.w, ydata.size))
+            if sigma is not None:
+                r /= sigma
             chisq_dof = (r**2).sum() / dof
 
         # Do Moore-Penrose inverse discarding zero singular values.

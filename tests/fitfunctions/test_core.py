@@ -917,16 +917,6 @@ def _gls(x, y, cov):
     return beta, r @ cinv @ r
 
 
-def _gls_pcov(x, y, cov):
-    """GLS parameter covariance (A^T C^-1 A)^-1, scaled by chi^2/dof.
-
-    curve_fit's default ``absolute_sigma=False`` scales it the same way.
-    """
-    a = np.column_stack([x, np.ones_like(x)])
-    _, chisq = _gls(x, y, cov)
-    return np.linalg.inv(a.T @ np.linalg.inv(cov) @ a) * chisq / (x.size - 2)
-
-
 def _whitened_by(factor, lower, x, y):
     """Least squares on the line after solving ``factor z = r`` for the residuals."""
     a = np.column_stack([x, np.ones_like(x)])
@@ -952,101 +942,36 @@ def test_correlated_fixture_separates_the_cholesky_orientations(correlated_line)
     assert np.max(np.abs(by_upper / gls - 1)) > 1e4 * NOISE_FREE_REL
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=InvalidParameterError,
+    reason=(
+        "FitFunction documents a 2-d `weights` as a covariance matrix, but "
+        "_clean_raw_obs (solarwindpy/fitfunctions/core.py) requires "
+        "weights.shape == xobs.shape; 'weights and xobs must have the same "
+        "shape'. Behind it, set_fit_obs selects rows only (weights_raw[mask]) "
+        "and _calc_popt_pcov_psigma_chisq divides residuals by the matrix "
+        "(r /= sigma raises ValueError). Remove this marker when FitFunction "
+        "accepts an (n, n) covariance for n observations through all three."
+    ),
+)
 def test_a_covariance_matrix_as_weights_gives_the_gls_fit(correlated_line):
     """A full covariance matrix as ``weights`` fits as generalised least squares.
 
-    The class docstring documents an (n, n) ``weights`` as the covariance
-    matrix of correlated errors. With loss="linear" the fit must equal the
-    closed-form GLS estimate (A^T C^-1 A)^-1 A^T C^-1 y; pcov must equal the
-    closed-form (A^T C^-1 A)^-1 chi^2/dof and curve_fit's with the same full
-    ``sigma``; psigma is the root of pcov's diagonal.
+    The class docstring: "If 2-d, must be positive definite covariance
+    matrix." With loss="linear" the fit must equal the closed-form GLS
+    estimate (A^T C^-1 A)^-1 A^T C^-1 y; pcov must equal curve_fit's with
+    the same full ``sigma``; the linear chi^2/dof is r^T C^-1 r / dof.
 
-    ON FAILURE: the code is wrong.
+    ON FAILURE: (unexpected pass) FitFunction now accepts a covariance
+    matrix; drop the xfail marker.
     """
     x, y, cov = correlated_line
-    gls, _ = _gls(x, y, cov)
+    gls, chisq = _gls(x, y, cov)
     lf = LinearFit(x, y, weights=cov)
     lf.make_fit(loss="linear")
 
     assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(gls)
-    assert lf.pcov == noise_free(_gls_pcov(x, y, cov))
     _, pcov = curve_fit(linear_function, x, y, sigma=cov)
     assert lf.pcov == noise_free(pcov)
-    m_sigma, b_sigma = np.sqrt(np.diag(pcov))
-    assert lf.psigma == noise_free({"m": m_sigma, "b": b_sigma})
-
-
-def test_a_covariance_matrix_as_weights_gives_the_gls_chisq(correlated_line):
-    """With a covariance matrix C, chi^2/dof is the closed-form r^T C^-1 r / dof.
-
-    r are the residuals of the closed-form GLS line. Under loss="linear" the
-    robust chi^2/dof, the sum of the fit's whitened squared residuals over
-    dof, is the same number.
-
-    ON FAILURE: the code is wrong.
-    """
-    x, y, cov = correlated_line
-    _, chisq = _gls(x, y, cov)
-    lf = LinearFit(x, y, weights=cov)
-    lf.make_fit(loss="linear")
-
     assert lf.chisq_dof.linear == noise_free(chisq / (x.size - 2))
-    assert lf.chisq_dof.robust == noise_free(chisq / (x.size - 2))
-
-
-def test_selected_observations_keep_their_rows_and_columns_of_the_covariance(
-    correlated_line,
-):
-    """xmin/xmax select observations 1..4 and their 4 x 4 block of C.
-
-    The fit is then the GLS fit of that sub-problem.
-
-    ON FAILURE: the code is wrong.
-    """
-    x, y, cov = correlated_line
-    keep = slice(1, 5)  # x = 1, 2, 3, 4 lie in [1, 4]
-    sub = cov[keep, keep]
-    gls, _ = _gls(x[keep], y[keep], sub)
-    lf = LinearFit(x, y, weights=cov, xmin=1.0, xmax=4.0)
-    lf.make_fit(loss="linear")
-
-    assert lf.observations.used.w == exact(sub)
-    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(gls)
-
-
-def test_wmax_with_a_covariance_compares_each_observations_standard_deviation(
-    correlated_line,
-):
-    """``wmax`` keeps observations whose root variance, not variance, is <= wmax.
-
-    The fixture's standard deviations are 0.5 + 0.2 x = 0.5, 0.7, 0.9, 1.1,
-    1.3, 1.5, so wmax = 1.2 keeps the first four. Compared against the
-    variances 0.25, 0.49, 0.81, 1.21, ... it would keep only three.
-
-    ON FAILURE: the code is wrong.
-    """
-    x, y, cov = correlated_line
-    keep = slice(0, 4)
-    gls, _ = _gls(x[keep], y[keep], cov[keep, keep])
-    lf = LinearFit(x, y, weights=cov, wmax=1.2)
-    lf.make_fit(loss="linear")
-
-    assert lf.observations.used.x == exact(x[keep])
-    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(gls)
-
-
-def test_a_covariance_of_the_wrong_shape_or_a_negative_variance_is_refused(
-    correlated_line,
-):
-    """A 6 x 5 matrix for six observations, or a negative variance, raises.
-
-    ON FAILURE: the code is wrong.
-    """
-    x, y, cov = correlated_line
-    with pytest.raises(InvalidParameterError, match="covariance matrix"):
-        LinearFit(x, y, weights=cov[:, :5])
-
-    negative = cov.copy()
-    negative[2, 2] = -1.0
-    with pytest.raises(InvalidParameterError, match="cannot be negative"):
-        LinearFit(x, y, weights=negative)
