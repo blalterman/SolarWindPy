@@ -95,6 +95,25 @@ class Hinge(FitFunction):
     a small non-zero plateau slope :math:`m_2 = 0.01\,m_1`, and the plateau
     line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that
     line through the hinge.
+
+    Examples
+    --------
+    Every hinge fit function shares ``p0``, shown here with :class:`TwoLine`,
+    whose parameters are ``[x1, x2, m1, m2]``. Two lines meeting at (5, 10),
+    with data on both sides of ``guess_xs``, give the estimate:
+
+    >>> import numpy as np
+    >>> from solarwindpy.fitfunctions.hinge import TwoLine
+    >>> x = np.linspace(0, 15, 100)
+    >>> y = np.minimum(2 * x, -(x - 15))
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=5.0).p0]
+    ['0', '15', '2', '-1']
+
+    With ``guess_xs`` past every point, the second line has no data and no
+    estimate, so ``p0`` logs a warning and returns the reference hinge:
+
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=20.0).p0]
+    ['250', '-1.787e+04', '0.02251', '0.0002251']
     """
 
     # The author's reference hinge, described in the class Notes.

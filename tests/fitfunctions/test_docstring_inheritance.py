@@ -18,6 +18,7 @@ import sys
 import pytest
 
 from solarwindpy.fitfunctions import _fit_function_classes
+from solarwindpy.fitfunctions.hinge import Hinge
 from solarwindpy.fitfunctions.lines import Line
 
 _PARAMETERS_HEADER = re.compile(r"^Parameters\n-{10}$", re.M)
@@ -90,6 +91,19 @@ def test_class_help_sections_are_in_numpydoc_order(cls):
     found = _SECTION_HEADER.findall(inspect.getdoc(cls))
     assert set(found) <= set(_NUMPYDOC_ORDER), found
     assert found == sorted(found, key=_NUMPYDOC_ORDER.index)
+
+
+def test_hinge_examples_show_a_hinge_fit_function():
+    """``Hinge`` writes its own Examples instead of inheriting FitFunction's Gaussian.
+
+    The example itself runs under ``pytest --doctest-modules``.
+
+    ON FAILURE: the Examples section of ``help(Hinge)`` shows another family's
+    fit function; restore the Examples section in the ``Hinge`` docstring.
+    """
+    examples = inspect.getdoc(Hinge).split("Examples\n--------\n", 1)[1]
+    assert "from solarwindpy.fitfunctions.hinge import" in examples
+    assert "Gaussian" not in examples
 
 
 def test_import_order_that_disables_inheritance_warns():
