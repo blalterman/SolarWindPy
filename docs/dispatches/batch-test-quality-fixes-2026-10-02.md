@@ -568,3 +568,5 @@ Runs after PR #508 merges. Author decision: a 1-D projection of a 2-D histogram 
 parent's bins, including which edge each bin closes on, so a sample on a bin edge lands in the
 same bin as in the parent and is never dropped. Retire #508's strict xfail
 `test_integer_bin_projection_keeps_samples_on_bin_edges`.
+Also from #508's review: reword `take_data_in_yrange_across_x`'s `Raises` docstring to say the
+`ValueError` is for a `ranges_by_x` entry naming an x-bin the histogram does not have.
