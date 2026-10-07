@@ -139,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     was unused.
   - Removing `limit_color_norm` moves every later positional parameter of those
     methods one slot left, e.g. `make_plot(ax, cbar, cbar_kwargs, fcn, alpha_fcn)` and
-    `plot_contours(ax, label_levels, cbar, cbar_kwargs, fcn, ...)`. Pass them by
+    `plot_contours(ax, cbar, cbar_kwargs, fcn, plot_edges, ...)`. Pass them by
     keyword to be safe. `plot_contours` takes `levels` as a named last parameter.
   - `Hist1D` and `OrbitHist1D` no longer have `alim` or `set_alim`; they never applied
     it. `SpiralPlot2D` gains `alim`.
@@ -160,6 +160,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`>=3.0,<4`). Importing `solarwindpy` sets `DOCSTRING_INHERITANCE_ENABLE=1` unless
   the variable is already set, and warns if `docstring_inheritance` was imported
   earlier with inheritance off.
+- A species' moments stand or fall together: where any of its density, velocity
+  components or thermal-speed components is missing, `Plasma.set_data` masks every
+  measurement of that species to NaN at that time and logs a warning with the count per
+  species. The new User Guide page "Missing data" states the missing-data rules.
+- `GaussianLn` raises `ValueError` when any used x is ≤ 0 (ln x is undefined there), at
+  construction and when `set_fit_obs` selects new observations, instead of returning
+  `p0` None and fitting.
 
 ### Changed
 
@@ -213,7 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GaussianLn.p0` estimates in ln x, the space of its model: `m` and `s` are the
   y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).
   It previously returned the logs of the mean and variance of `x` and of the peak, which
-  match none of the model's parameters. `p0` is `None` when any used `x` is not positive.
+  match none of the model's parameters.
 - The Gaussian fit functions (`Gaussian`, `GaussianNormalized`, `GaussianLn` and the
   composite Gaussian-plus-step models) return `p0 = None` when the estimated width is
   under half the smallest spacing between distinct `x`, including all the weight at one
@@ -231,6 +238,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the heat flux tensor in the center-of-mass frame of the requested species,
   rho (U^3 + 3/2 U w_par^2) for a drifting bi-Maxwellian. It is not the total energy
   flux along the field. Behaviour is unchanged.
+- `FitFunction.initial_guess_info` reports the start the last fit used: a caller's `p0`,
+  the class `p0` as `make_fit` adjusted it, or the feasible default when `p0` is None. It
+  previously returned None for a caller's `p0` and for `p0` None; it is None only before
+  a fit succeeds.
+- Fit-function class docstrings list their sections in numpydoc order in `help()`, and
+  `Hinge` has its own example.
 
 ### Added
 
@@ -294,6 +307,35 @@ These change computed values; rerun any analysis that used them.
 - `Plasma.vdf_ratio` is NaN where the beam drift cannot be projected onto b, e.g. where b
   is missing. It previously dropped the drift term there and returned
   ln(n2 w1^3 / n1 w2^3).
+- Missing data in `Plasma` gives NaN where it used to give 0 or a partial sum. Any
+  missing component makes a value NaN: the scalar thermal speed where w_par or w_per is
+  missing, a missing species' `thermal_speed`, `pth` and `temperature` (were 0),
+  `pdynamic`'s dv^2 and `afsq`'s B^2.
+- `Plasma` totals over species (`number_density`, `mass_density`, `pth`, `temperature`,
+  `pdynamic`) sum the species present at a time and are NaN only where none is (were 0);
+  `velocity` and `estimate_electrons` average over the species present.
+- Pair quantities need both species: `nuc` and the reduced mass of
+  `pdynamic(project_m2q=True)` are NaN where either species is missing.
+- `AlfvenicTurbulence` logs its unequal-index warnings with `Logger.warning`, not the
+  deprecated `Logger.warn`.
+- `PowerLawOffCenter.make_fit` bounds `x0` below the smallest used x, where the model is
+  defined, within any caller bounds; a caller bound or `p0` that leaves `x0` no room below
+  the data, or a `p0` whose `x0` is below its lower bound or not finite, raises `ValueError`.
+- `PowerLawOffCenter.p0` starts `x0` below the smallest used x when any used x is ≤ 0, and
+  `make_fit` clips that start into the caller's bounds on `x0`, so such data and bounds fit
+  instead of starting outside the `x0` bound.
+- `fitfunctions` no longer imports scipy's private `prepare_bounds`; bounds are broadcast
+  with public NumPy.
+- `GaussianLn.TeX_function` includes the exponent's minus sign and spaces `\cdot` from
+  `\exp`: A exp[-(ln x - m)^2 / (2 s^2)].
+- `StabilityContours.plot_contours` with `tk_kind` keeps the table legend's layout: cells
+  of unplotted instabilities are blank instead of dropped with a matplotlib warning.
+- Hinge fit functions estimate `p0` without numpy divide-by-zero or invalid-value
+  warnings; undefined estimates are NaN and `p0` falls back on the same data as before.
+- `HingeSaturation.p0` returns the reference start when the rising region's points share
+  one x, instead of raising `LinAlgError` or using an arbitrary slope.
+- The `Hist2D.plot_contours` docstring links to `plot_edges` instead of printing a
+  literal method repr.
 
 ### Removed
 
@@ -321,6 +363,12 @@ These change computed values; rerun any analysis that used them.
   (`DataFrame.applymap` is gone). Passing `log_plasma_stats=` raises `TypeError`. `Plasma`
   still logs "No spacecraft data passed to Plasma" (and likewise for `auxiliary_data`) at
   INFO when that input is `None`.
+- Contour labelling is removed from `Hist2D.plot_contours`,
+  `Hist2D.plot_hist_with_contours` and `SpiralPlot2D.plot_contours`: the `label_levels`,
+  `clabel_kwargs` and `skip_max_clbl` parameters are gone, and the methods now return
+  `(ax, cbar_or_mappable, qset)` with no labels. Passing a removed keyword raises
+  `AttributeError` from matplotlib. Filled contours no longer emit matplotlib's `clabel`
+  deprecation warning.
 
 ## [0.3.0] - 2025-12-24
 
