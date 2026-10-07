@@ -1,8 +1,11 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from scipy.optimize import OptimizeResult, least_squares
+from scipy.linalg import cholesky, solve_triangular
+from scipy.optimize import OptimizeResult, OptimizeWarning, curve_fit, least_squares
 
 from solarwindpy.fitfunctions.core import (
     FitFunction,
@@ -533,3 +536,438 @@ class TestResidualsAllOptions:
 
         r_all_pct = lf.residuals(use_all=True, pct=True)
         assert len(r_all_pct) == len(x)
+
+
+# ============================================================================
+# set_fit_obs selection edges
+# ============================================================================
+
+
+@pytest.mark.parametrize(
+    "limits, expected",
+    [
+        ({"ymin": 20.0}, [1.0, 2.0, 3.0]),
+        ({"ymax": 20.0}, [0.0, 1.0]),
+        ({"youtside": (10.0, 30.0)}, [0.0, 2.0, 3.0]),
+    ],
+    ids=["ymin-only", "ymax-only", "youtside"],
+)
+def test_y_limits_select_the_used_observations(limits, expected):
+    """``ymin``/``ymax`` keep ``ymin <= y <= ymax``; ``youtside`` drops the open interval.
+
+    y = [10, 20, 30, 40] at x = [0, 1, 2, 3]. Each limit sits on a sample, so
+    an ignored limit or an exclusive bound changes which x are used: ymin=20
+    keeps y = 20, 30, 40; ymax=20 keeps y = 10, 20; youtside=(10, 30) drops
+    only y = 20, the endpoints staying (class docstring: bounds inclusive).
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0, 3.0])
+    y = np.array([10.0, 20.0, 30.0, 40.0])
+    lf = LinearFit(x, y, **limits)
+    assert np.array_equal(lf.observations.used.x, np.array(expected))
+
+
+def test_wmin_alone_drops_smaller_weights():
+    """``wmin`` with no ``wmax`` keeps ``w >= wmin``.
+
+    w = [1, 2, 3, 4] with wmin=2: the sample with w = 1 is dropped and the
+    one on the bound stays.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(4.0)
+    lf = LinearFit(x, x, weights=np.array([1.0, 2.0, 3.0, 4.0]), wmin=2.0)
+    assert np.array_equal(lf.observations.used.x, np.array([1.0, 2.0, 3.0]))
+
+
+def test_logy_selects_on_the_uncertainty_of_log10_y():
+    """With ``logy`` the weight limits apply to ``w / (y ln 10)``.
+
+    ``w / (y ln 10)`` is the one-sigma uncertainty of log10(y) propagated from
+    a one-sigma ``w`` on ``y`` (d log10 y = dy / (y ln 10)), as the class
+    docstring states. With y = 1 and w = ln(10) * [0.5, 0.97, 1.0, 1.03, 2.0]
+    that uncertainty is [0.5, 0.97, 1.0, 1.03, 2.0], so wmin=0.99, wmax=1.01
+    keep only the middle sample. Any other logarithm base moves 1.0 out of
+    the window (ln 10 / ln 11 = 0.96).
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    y = np.ones(5)
+    w = np.log(10.0) * np.array([0.5, 0.97, 1.0, 1.03, 2.0])
+    lf = LinearFit(x, y, weights=w, wmin=0.99, wmax=1.01, logy=True)
+    assert np.array_equal(lf.observations.used.x, np.array([2.0]))
+
+
+def test_set_fit_obs_selects_on_raw_weights_unless_logy_is_given():
+    """Called without ``logy``, ``set_fit_obs`` applies ``wmin`` to the weights as given.
+
+    y = 10 and w = [1, 2, 3] with wmin=1.5 keep w = 2 and 3. Under log
+    selection the compared values would be w / (10 ln 10) < 0.14 and nothing
+    would be kept, so the default is observable.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(3.0)
+    y = np.full(3, 10.0)
+    w = np.array([1.0, 2.0, 3.0])
+    lf = LinearFit(x, y, weights=w)
+    lf.set_fit_obs(x, y, w, wmin=1.5)
+    assert np.array_equal(lf.observations.used.w, np.array([2.0, 3.0]))
+
+
+# ============================================================================
+# make_fit passes the caller's keywords to scipy
+# ============================================================================
+
+
+def test_make_fit_passes_the_method_to_scipy(line_with_outlier):
+    """``method`` reaches least_squares, and "lm" fits as scipy's own "lm" does.
+
+    scipy's "lm" accepts only loss="linear", so make_fit(method="lm") with the
+    default huber loss must come back with scipy's refusal; with
+    loss="linear" the result equals scipy's least_squares(method="lm") on the
+    same weighted problem.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    lf = LinearFit(x, y, weights=w)
+    with pytest.raises(ValueError, match="'lm'"):
+        lf.make_fit(method="lm")
+
+    lf.make_fit(method="lm", loss="linear")
+    expected = _direct_least_squares(x, y, w, np.array(lf.p0), method="lm")
+    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(expected)
+
+
+def test_make_fit_passes_f_scale_to_scipy(line_with_outlier):
+    """A caller's ``f_scale`` replaces the documented default of 0.1.
+
+    The independent route is scipy's least_squares with the documented
+    defaults and f_scale=1.0. The outlier makes the huber solution depend on
+    f_scale (slope moves ~3%), so a dropped f_scale fails the comparison.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    lf = LinearFit(x, y, weights=w)
+    lf.make_fit(f_scale=1.0)
+    p0 = np.array(lf.p0)
+    defaults = dict(method="trf", loss="huber", max_nfev=10000)
+    expected = _direct_least_squares(x, y, w, p0, f_scale=1.0, **defaults)
+    default = _direct_least_squares(x, y, w, p0, f_scale=0.1, **defaults)
+
+    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(expected)
+    # The fixture must separate f_scale=1 from 0.1, else the check is idle.
+    assert np.max(np.abs(expected / default - 1)) > 1e4 * NOISE_FREE_REL
+
+
+def test_make_fit_passes_other_keywords_to_scipy(line_with_outlier):
+    """Keywords make_fit does not name (here the three tolerances) reach least_squares.
+
+    Tolerances of 0.5 stop scipy after a few evaluations, far from the
+    converged solution (the intercept moves by about 200%). make_fit's result
+    equals scipy's least_squares with the documented defaults and the same
+    tolerances.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    loose = dict(ftol=0.5, xtol=0.5, gtol=0.5)
+    lf = LinearFit(x, y, weights=w)
+    lf.make_fit(**loose)
+    p0 = np.array(lf.p0)
+    defaults = dict(method="trf", loss="huber", max_nfev=10000, f_scale=0.1)
+    expected = _direct_least_squares(x, y, w, p0, **defaults, **loose)
+    converged = _direct_least_squares(x, y, w, p0, **defaults)
+
+    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(expected)
+    # The fixture must separate loose from default tolerances.
+    assert np.max(np.abs(expected / converged - 1)) > 1e4 * NOISE_FREE_REL
+
+
+# ============================================================================
+# Covariance, parameter uncertainty and chi-square
+# ============================================================================
+
+
+def test_linear_loss_statistics_match_a_hand_computed_weighted_line():
+    """Weighted least squares on four points gives the hand-computed popt, pcov and chi^2.
+
+    x = [0, 1, 2, 3], y = [0, 1, 1, 3], every w = 2, loss="linear". By hand:
+    xbar = 1.5, Sxx = 5, Sxy = 4.5, so m = 0.9 and b = 1.25 - 1.35 = -0.1.
+    The residuals y - (m x + b) are [0.1, 0.2, -0.7, 0.4]; their sum of
+    squares is 0.7, so with 2 degrees of freedom
+    chi^2/dof = 0.7 / 2^2 / 2 = 0.0875, and with the linear loss the robust
+    value 2 cost / dof is the same number. The covariance is
+    (J^T J)^-1 s^2 with J = [x, 1] / w and s^2 = 0.0875 (curve_fit's
+    absolute_sigma=False convention): (A^T A)^-1 = [[0.2, -0.3], [-0.3, 0.7]]
+    times 4 x 0.0875 = 0.35, i.e. [[0.07, -0.105], [-0.105, 0.245]].
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0, 3.0])
+    y = np.array([0.0, 1.0, 1.0, 3.0])
+    lf = LinearFit(x, y, weights=np.full(4, 2.0))
+    lf.make_fit(loss="linear")
+
+    assert lf.popt == noise_free({"m": 0.9, "b": -0.1})
+    assert lf.chisq_dof.linear == noise_free(0.0875)
+    assert lf.chisq_dof.robust == noise_free(0.0875)
+    assert lf.pcov == noise_free(np.array([[0.07, -0.105], [-0.105, 0.245]]))
+    assert lf.psigma == noise_free({"m": np.sqrt(0.07), "b": np.sqrt(0.245)})
+
+
+def test_huber_statistics_match_curve_fit_and_the_huber_cost(line_with_outlier):
+    """With the default huber loss, pcov equals curve_fit's and chi^2 follows its definitions.
+
+    scipy.optimize.curve_fit with the same sigma, loss and f_scale is the
+    independent route to pcov (it scales by the robust cost, as make_fit
+    documents). The robust chi^2/dof is 2 cost / dof, where scipy defines the
+    huber cost as 0.5 f_scale^2 sum(rho(z)), z = (r / f_scale)^2,
+    rho(z) = z for z <= 1 and 2 sqrt(z) - 1 otherwise. The linear chi^2/dof
+    is sum((f(x) - y) / w)^2 / dof.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    lf = LinearFit(x, y, weights=w)
+    lf.make_fit()
+    p0 = np.array(lf.p0)
+    _, pcov = curve_fit(
+        linear_function,
+        x,
+        y,
+        p0=p0,
+        sigma=w,
+        method="trf",
+        loss="huber",
+        f_scale=0.1,
+        max_nfev=10000,
+    )
+    assert lf.pcov == noise_free(pcov)
+    expected_psigma = {"m": np.sqrt(pcov[0, 0]), "b": np.sqrt(pcov[1, 1])}
+    assert lf.psigma == noise_free(expected_psigma)
+
+    r = (linear_function(x, lf.popt["m"], lf.popt["b"]) - y) / w
+    dof = x.size - 2
+    z = (r / 0.1) ** 2
+    rho = np.where(z <= 1, z, 2 * np.sqrt(z) - 1)
+    assert lf.chisq_dof.linear == noise_free((r**2).sum() / dof)
+    assert lf.chisq_dof.robust == noise_free(0.1**2 * rho.sum() / dof)
+
+
+def _sum_slope(x, a, b):
+    return (a + b) * x
+
+
+def _sum_slope_jac(x, a, b):
+    return np.column_stack([x, x])
+
+
+class SumSlopeFit(FitFunction):
+    """A model whose two parameters enter only as their sum: rank-deficient."""
+
+    @property
+    def function(self):
+        return _sum_slope
+
+    @property
+    def p0(self):
+        return [1.0, 2.0]
+
+    @property
+    def TeX_function(self):
+        return "(a + b) x"
+
+
+def test_degenerate_parameters_get_the_pseudo_inverse_covariance():
+    """A rank-1 jacobian gives the Moore-Penrose covariance, not a huge one.
+
+    f = (a + b) x with the exact jacobian [x, x]. Its second singular value
+    is zero up to rounding and must be discarded. Keeping only
+    s0 = sqrt(2 sum x^2) with right vector (1, 1)/sqrt(2) gives
+    pcov = s^2 [[1, 1], [1, 1]] / (4 sum x^2). By hand, in units of 1e3:
+    x = [1, 2, 3, 4], y = [3, 6.5, 8.5, 12.5], best a + b = 91.5 / 30 = 3.05,
+    residuals [-0.05, 0.4, -0.65, 0.3], sum of squares 0.675e6,
+    s^2 = 0.675e6 / 2, and pcov = 0.3375e6 / 120e6 = 0.0028125 everywhere.
+    curve_fit, given the same jacobian, agrees. The large x makes the first
+    singular value large, so a threshold that does not scale with it would
+    keep the rounding-level second one.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = 1e3 * np.array([1.0, 2.0, 3.0, 4.0])
+    y = 1e3 * np.array([3.0, 6.5, 8.5, 12.5])
+    fit = SumSlopeFit(x, y)
+    fit.make_fit(loss="linear", jac=_sum_slope_jac)
+
+    assert fit.pcov == noise_free(np.full((2, 2), 0.0028125))
+    _, pcov = curve_fit(
+        _sum_slope, x, y, p0=[1.0, 2.0], jac=_sum_slope_jac, method="trf"
+    )
+    assert fit.pcov == noise_free(pcov)
+
+
+def _ignores_parameters(x, a, b):
+    return x + 0.0 * a + 0.0 * b
+
+
+class FlatModelFit(FitFunction):
+    """A model that does not depend on its parameters: an all-zero jacobian."""
+
+    @property
+    def function(self):
+        return _ignores_parameters
+
+    @property
+    def p0(self):
+        return [1.0, 2.0]
+
+    @property
+    def TeX_function(self):
+        return "x"
+
+
+def test_zero_singular_values_are_discarded():
+    """A jacobian of zeros has only zero singular values, all discarded: pcov is 0.
+
+    The code documents its covariance as the Moore-Penrose inverse
+    "discarding zero singular values"; the pseudo-inverse of a zero matrix is
+    zero. curve_fit, on the same model, returns the same zero matrix.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    y = x + np.array([0.0, 1.0, 0.0, 1.0, 0.0])
+    fit = FlatModelFit(x, y)
+    fit.make_fit()
+
+    _, pcov = curve_fit(_ignores_parameters, x, y, p0=[1.0, 2.0], method="trf")
+    assert pcov == exact(np.zeros((2, 2)), scale=1.0)
+    assert fit.pcov == exact(pcov, scale=1.0)
+
+
+def test_a_well_posed_fit_emits_no_optimize_warning(line_with_outlier):
+    """More samples than parameters: make_fit raises no OptimizeWarning.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y, w = line_with_outlier
+    lf = LinearFit(x, y, weights=w)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", OptimizeWarning)
+        lf.make_fit()
+    assert np.isfinite(lf.pcov).all()
+
+
+def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
+    """Two samples for two parameters: pcov and psigma are +inf, with an OptimizeWarning.
+
+    With no degree of freedom the residual variance is undefined. curve_fit's
+    convention, which make_fit follows, fills pcov with +inf and warns; the
+    linear chi^2/dof is +inf (division by zero dof) and the robust one NaN.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0])
+    lf = LinearFit(x, 2.0 * x + 1.0)
+    with pytest.warns(OptimizeWarning, match="could not be estimated"):
+        lf.make_fit()
+
+    assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
+    assert np.all(lf.pcov == np.inf)
+    assert lf.psigma == {"m": np.inf, "b": np.inf}
+    assert lf.chisq_dof.linear == np.inf
+    assert np.isnan(lf.chisq_dof.robust)
+
+
+# ============================================================================
+# Correlated uncertainties: a full covariance matrix as ``weights``
+# ============================================================================
+
+
+@pytest.fixture
+def correlated_line():
+    """Six samples of y = 2x + 1 with fixed offsets and a full covariance matrix.
+
+    Variances grow along x and neighbours correlate as 0.6^|i - j|, so the
+    lower and upper Cholesky factors whiten the residuals differently.
+    """
+    x = np.arange(6.0)
+    y = 2.0 * x + 1.0 + np.array([0.3, -0.2, 0.5, -0.4, 0.1, 0.2])
+    sd = 0.5 + 0.2 * x
+    lag = np.abs(np.subtract.outer(np.arange(6), np.arange(6)))
+    cov = np.outer(sd, sd) * 0.6**lag
+    return x, y, cov
+
+
+def _gls(x, y, cov):
+    """Generalised least squares (A^T C^-1 A)^-1 A^T C^-1 y and its r^T C^-1 r."""
+    a = np.column_stack([x, np.ones_like(x)])
+    cinv = np.linalg.inv(cov)
+    beta = np.linalg.solve(a.T @ cinv @ a, a.T @ cinv @ y)
+    r = a @ beta - y
+    return beta, r @ cinv @ r
+
+
+def _whitened_by(factor, lower, x, y):
+    """Least squares on the line after solving ``factor z = r`` for the residuals."""
+    a = np.column_stack([x, np.ones_like(x)])
+    aw = solve_triangular(factor, a, lower=lower)
+    yw = solve_triangular(factor, y, lower=lower)
+    return np.linalg.lstsq(aw, yw, rcond=None)[0]
+
+
+def test_correlated_fixture_separates_the_cholesky_orientations(correlated_line):
+    """Whitening by L (L L^T = C) gives the GLS answer; whitening by U (U^T U = C) does not.
+
+    Without this separation the covariance-weights test below could not tell
+    the two orientations apart.
+
+    ON FAILURE: the fixture no longer separates the lower from the upper
+    Cholesky factor; fix the fixture.
+    """
+    x, y, cov = correlated_line
+    gls, _ = _gls(x, y, cov)
+    by_lower = _whitened_by(cholesky(cov, lower=True), True, x, y)
+    by_upper = _whitened_by(cholesky(cov, lower=False), False, x, y)
+    assert by_lower == noise_free(gls)
+    assert np.max(np.abs(by_upper / gls - 1)) > 1e4 * NOISE_FREE_REL
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=InvalidParameterError,
+    reason=(
+        "FitFunction documents a 2-d `weights` as a covariance matrix, but "
+        "_clean_raw_obs (solarwindpy/fitfunctions/core.py) requires "
+        "weights.shape == xobs.shape; 'weights and xobs must have the same "
+        "shape'. Behind it, set_fit_obs selects rows only (weights_raw[mask]) "
+        "and _calc_popt_pcov_psigma_chisq divides residuals by the matrix "
+        "(r /= sigma raises ValueError). Remove this marker when FitFunction "
+        "accepts an (n, n) covariance for n observations through all three."
+    ),
+)
+def test_a_covariance_matrix_as_weights_gives_the_gls_fit(correlated_line):
+    """A full covariance matrix as ``weights`` fits as generalised least squares.
+
+    The class docstring: "If 2-d, must be positive definite covariance
+    matrix." With loss="linear" the fit must equal the closed-form GLS
+    estimate (A^T C^-1 A)^-1 A^T C^-1 y; pcov must equal curve_fit's with
+    the same full ``sigma``; the linear chi^2/dof is r^T C^-1 r / dof.
+
+    ON FAILURE: (unexpected pass) FitFunction now accepts a covariance
+    matrix; drop the xfail marker.
+    """
+    x, y, cov = correlated_line
+    gls, chisq = _gls(x, y, cov)
+    lf = LinearFit(x, y, weights=cov)
+    lf.make_fit(loss="linear")
+
+    assert np.array([lf.popt["m"], lf.popt["b"]]) == noise_free(gls)
+    _, pcov = curve_fit(linear_function, x, y, sigma=cov)
+    assert lf.pcov == noise_free(pcov)
+    assert lf.chisq_dof.linear == noise_free(chisq / (x.size - 2))
