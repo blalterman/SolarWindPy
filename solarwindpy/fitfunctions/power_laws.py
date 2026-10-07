@@ -13,6 +13,9 @@ __all__ = [
     "PowerLawOffCenter",
 ]
 
+import numpy as np
+from scipy.optimize._lsq.least_squares import prepare_bounds
+
 from .core import FitFunction
 
 
@@ -82,7 +85,35 @@ class PowerLawOffCenter(FitFunction):
     r"""Power law about a shifted origin, :math:`f(x) = A (x - x_0)^b`.
 
     Parameters are ``A`` (amplitude), ``b`` (exponent) and ``x0`` (origin).
+
+    Notes
+    -----
+    The model is defined only for :math:`x > x_0`: a negative base has no
+    real non-integer power. :meth:`make_fit` therefore bounds ``x0`` below
+    the smallest used ``x``, within any bounds the caller passes.
     """
+
+    def make_fit(self, return_exception=False, **kwargs):
+        r"""Fit with ``x0`` bounded below the smallest used ``x``.
+
+        The upper bound on ``x0`` is the largest float below the smallest used
+        ``x``, or the caller's upper bound if that is lower. Otherwise as
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
+        """
+        x = self.observations.used.x
+        try:
+            bounds = self._bounds_array(kwargs.get("bounds", (-np.inf, np.inf)))
+            lb, ub = prepare_bounds(bounds, len(self.argnames))
+        except ValueError:
+            # Malformed bounds: the base fit reports them, honouring
+            # return_exception.
+            lb = None
+        if x.size and lb is not None:
+            ub = np.array(ub, dtype=float)
+            i = self.argnames.index("x0")
+            ub[i] = min(ub[i], np.nextafter(x.min(), -np.inf))
+            kwargs["bounds"] = (lb, ub)
+        return super().make_fit(return_exception=return_exception, **kwargs)
 
     @property
     def function(self):

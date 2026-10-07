@@ -1,6 +1,8 @@
 """Tests for power law fit functions."""
 
 import inspect
+import warnings
+
 import numpy as np
 import pytest
 from scipy.optimize import curve_fit
@@ -279,6 +281,49 @@ def test_str_and_call_methods(cls, offset):
     x_test = np.array([0.5, 3.0, 16.0])
     expected = np.array([64.0, 16.0 / 9.0, 0.0625]) + offset
     assert obj(x_test) == noise_free(expected)
+
+
+def test_power_law_off_center_bounds_x0_below_the_data():
+    """``make_fit`` keeps ``x0`` below the smallest used x, where the model is defined.
+
+    Unbounded, the fit to 16 / x^2 on x = 1, 2, 4, 8 steps ``x0`` above 1
+    during its search, and numpy warns "invalid value encountered in power"
+    (a negative base has no real non-integer power). This test makes that
+    warning an error.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        obj.make_fit()
+
+    # The largest float below 1: x0 < x for every used x.
+    assert obj.fit_bounds["x0"].upper == np.nextafter(1.0, -np.inf)
+    assert obj.fit_bounds["x0"].lower == -np.inf
+    assert obj.popt["x0"] < 1.0
+
+
+@pytest.mark.parametrize(
+    "x0_upper, expected",
+    [
+        pytest.param(0.5, 0.5, id="caller-bound-below-data-kept"),
+        pytest.param(5.0, np.nextafter(1.0, -np.inf), id="caller-bound-above-data-cut"),
+    ],
+)
+def test_power_law_off_center_bound_respects_the_caller(x0_upper, expected):
+    """A caller's bounds are kept, with the upper bound on ``x0`` cut below the data.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
+    obj.make_fit(bounds=([0.0, -5.0, -3.0], [100.0, 5.0, x0_upper]))
+
+    assert obj.fit_bounds["A"] == (0.0, 100.0)
+    assert obj.fit_bounds["b"] == (-5.0, 5.0)
+    assert obj.fit_bounds["x0"] == (-3.0, expected)
 
 
 def test_power_law_with_weights():
