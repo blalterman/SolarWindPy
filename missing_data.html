@@ -1,0 +1,406 @@
+
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Missing data &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5d14453b" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8ab3b138"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api_reference.html" />
+    <link rel="prev" title="Quickstart" href="tutorial/quickstart.html" />
+   
+  <style>
+    .sidebar-custom-info {
+      background-color: #34495e;
+      color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    
+    .sidebar-subtitle {
+      font-size: 12px;
+      margin: 0;
+      opacity: 0.8;
+    }
+  </style>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SolarWindPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Missing data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#within-a-species">Within a species</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#across-species">Across species</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-two-levels">The two levels</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="documentation_review.html">Documentation Review Plan</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SolarWindPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          
+
+<div class="rst-breadcrumbs-aside">
+  <div class="scientific-breadcrumbs">
+    
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a href="index.html">SolarWindPy</a>
+        </li>
+        
+        
+        
+        
+        
+        
+        <li class="breadcrumb-item active" aria-current="page">
+          <span>Missing data</span>
+        </li>
+      </ol>
+    </nav>
+
+    
+    
+
+    
+    <div class="breadcrumb-actions">
+      
+      
+      
+        <a href="index.html" class="action-btn home-btn" title="Back to Home">
+          🏠 Home
+        </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+
+<style>
+.scientific-breadcrumbs {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.breadcrumb-nav {
+  margin-bottom: 8px;
+}
+
+.breadcrumb-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-item + .breadcrumb-item:before {
+  content: "›";
+  color: #6c757d;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.breadcrumb-item a {
+  color: #2980b9;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.breadcrumb-item a:hover {
+  background-color: #e3f2fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active span {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.module-hierarchy {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.hierarchy-label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #2c3e50;
+}
+
+.module-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-separator {
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.current-module {
+  color: #2c3e50;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.api-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-color: #bbdefb;
+}
+
+.home-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border-color: #e1bee7;
+}
+
+.github-btn {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-decoration: none;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .scientific-breadcrumbs {
+    padding: 8px 12px;
+  }
+  
+  .breadcrumb-list {
+    font-size: 12px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item:before {
+    margin: 0 4px;
+  }
+  
+  .breadcrumb-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+</style>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="missing-data">
+<h1>Missing data<a class="headerlink" href="#missing-data" title="Link to this heading"></a></h1>
+<p>Measurements drop out: an instrument misses a component, or a species is not
+resolved at some times. <a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a> treats a
+missing value as NaN and never as zero, with one rule at each of two levels.</p>
+<section id="within-a-species">
+<h2>Within a species<a class="headerlink" href="#within-a-species" title="Link to this heading"></a></h2>
+<p>A species’ moments stand or fall together. If any of its density, velocity
+components or thermal-speed components is missing at a time, every measurement
+of that species is invalid then. When the data are set,
+<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a> masks that species to NaN at that
+time and logs a warning with the number of times it masked. A species therefore
+never has a density without a velocity, or one thermal-speed component without
+the other.</p>
+<p>A species’ value at a time needs every component it is built from. A scalar
+thermal speed, temperature or pressure needs both the parallel and the
+perpendicular component, because one component alone does not describe the
+distribution. The field strength in
+<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.afsq" title="solarwindpy.core.plasma.Plasma.afsq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">afsq()</span></code></a> needs all three field
+components.</p>
+</section>
+<section id="across-species">
+<h2>Across species<a class="headerlink" href="#across-species" title="Link to this heading"></a></h2>
+<p>A total over species, such as <code class="docutils literal notranslate"><span class="pre">&quot;a+p1&quot;</span></code>, uses the species present at that time.
+It is NaN only when no species is present. Protons measured without alphas still
+give a total density, temperature and pressure. Weighted means, such as the
+center-of-mass velocity (<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.velocity" title="solarwindpy.core.plasma.Plasma.velocity"><code class="xref py py-meth docutils literal notranslate"><span class="pre">velocity()</span></code></a>)
+and the electron velocity
+(<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.estimate_electrons" title="solarwindpy.core.plasma.Plasma.estimate_electrons"><code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_electrons()</span></code></a>), likewise
+average over the species present.</p>
+<p>A quantity built from a pair of species needs both. The combined thermal speed
+and the mass-density ratio in <a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.nuc" title="solarwindpy.core.plasma.Plasma.nuc"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nuc()</span></code></a>,
+and the reduced mass in <a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.pdynamic" title="solarwindpy.core.plasma.Plasma.pdynamic"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pdynamic()</span></code></a>, are
+NaN at a time when either species is missing.</p>
+<p>Thermal speeds do not add across species, so
+<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.thermal_speed" title="solarwindpy.core.plasma.Plasma.thermal_speed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">thermal_speed()</span></code></a> raises for a total such
+as <code class="docutils literal notranslate"><span class="pre">&quot;a+p1&quot;</span></code>. Only temperatures and pressures form totals.</p>
+</section>
+<section id="the-two-levels">
+<h2>The two levels<a class="headerlink" href="#the-two-levels" title="Link to this heading"></a></h2>
+<p>For temperature (<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.temperature" title="solarwindpy.core.plasma.Plasma.temperature"><code class="xref py py-meth docutils literal notranslate"><span class="pre">temperature()</span></code></a>),
+<code class="docutils literal notranslate"><span class="pre">ok</span></code> marks a measured value present and <code class="docutils literal notranslate"><span class="pre">NaN</span></code> one missing. A species missing
+either component is masked as a whole at that time, so its result there is NaN:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>          protons (p1)                   alphas (a)                     total "a+p1"
+time   T_par   T_perp  -&gt;  T_p1      T_par   T_perp  -&gt;  T_a
+t0      ok      ok     -&gt;  ok         ok      ok     -&gt;  ok      -&gt;   p1 + a
+t1      ok      NaN    -&gt;  NaN        ok      ok     -&gt;  ok      -&gt;   a only
+t2      ok      ok     -&gt;  ok         NaN     NaN    -&gt;  NaN     -&gt;   p1 only
+t3      NaN     ok     -&gt;  NaN        NaN     ok     -&gt;  NaN     -&gt;   NaN
+</pre></div>
+</div>
+<p>Pressure (<a class="reference internal" href="_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.pth" title="solarwindpy.core.plasma.Plasma.pth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code></a>) follows the same
+pattern:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>          protons (p1)                   alphas (a)                     total "a+p1"
+time   p_par   p_perp  -&gt;  p_p1      p_par   p_perp  -&gt;  p_a
+t0      ok      ok     -&gt;  ok         ok      ok     -&gt;  ok      -&gt;   p1 + a
+t1      ok      NaN    -&gt;  NaN        ok      ok     -&gt;  ok      -&gt;   a only
+t2      ok      ok     -&gt;  ok         NaN     NaN    -&gt;  NaN     -&gt;   p1 only
+t3      NaN     ok     -&gt;  NaN        NaN     ok     -&gt;  NaN     -&gt;   NaN
+</pre></div>
+</div>
+<p>The per-species result at each time is the within-species rule; the total is the
+across-species rule applied to those results.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial/quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api_reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, B. L. Alterman.
+      <span class="commit">Revision <code>master</code>.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+   
+  <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
+    <p>
+      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+    </p>
+    <p style="font-size: 0.9em;">
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
+      Hosted on <a href="https://readthedocs.org/">Read the Docs</a> |
+      <a href="https://github.com/blalterman/SolarWindPy">View on GitHub</a>
+    </p>
+  </div>
+
+
+</body>
+</html>

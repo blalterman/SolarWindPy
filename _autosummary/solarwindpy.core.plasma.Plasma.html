@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+g946d49292 documentation</title>
+  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4c59bb11"></script>
+      <script src="../_static/documentation_options.js?v=8ab3b138"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../missing_data.html">Missing data</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -836,6 +837,10 @@ returned as a pd.DataFrame.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>A species missing a thermal speed component at a time has no scalar
+pressure then, and a species sum adds the species present, NaN only
+where none is: see <a class="reference internal" href="../missing_data.html"><span class="doc">Missing data</span></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -859,6 +864,10 @@ returned as a pd.DataFrame.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>A species missing a thermal speed component at a time has no scalar
+temperature then, and a species sum adds the species present, NaN only
+where none is: see <a class="reference internal" href="../missing_data.html"><span class="doc">Missing data</span></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1077,8 +1086,11 @@ two species to be passed and takes the differential flow between them.</p>
 <span class="sig-name descname"><span class="pre">afsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdynamic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.afsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.afsq" title="Link to this definition"></a></dt>
 <dd><p>Calculate the square of anisotropy factor.</p>
 <blockquote>
-<div><p><span class="math notranslate nohighlight">\(AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)\)</span></p>
+<div><p><span class="math notranslate nohighlight">\(AF^2 = 1 + \frac{\mu_0}{B^2}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)\)</span></p>
 </div></blockquote>
+<p>The pressures come from <a class="reference internal" href="#solarwindpy.core.plasma.Plasma.pth" title="solarwindpy.core.plasma.Plasma.pth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code></a>, so a species sum adds
+<span class="math notranslate nohighlight">\(p_\perp - p_\parallel\)</span> over the species present at each time
+(see <a class="reference internal" href="../missing_data.html"><span class="doc">Missing data</span></a>).</p>
 <dl>
 <dt>N.B. Because of the <span class="math notranslate nohighlight">\(1 +\)</span>, afsq(s0, s1).sum(axis=1) is not the</dt><dd><p>same as afsq(s0+s1). The two are related by:</p>
 <blockquote>
@@ -1118,9 +1130,9 @@ calculating <span class="math notranslate nohighlight">\(p_{\tilde{v}}\)</span>.
 <dd class="field-odd"><dl class="simple">
 <dt><strong>species: str</strong></dt><dd><p>Each species is a string. If only one string is passed, it can
 contain “+”. In either case, all species are summed over and
-a pd.Series is returned. This addresses complications from the
-<cite>stuple = self._chk_species(*species)</cite> mass densities in Ca and AFSQ,
-the latter via <a class="reference internal" href="#solarwindpy.core.plasma.Plasma.pth" title="solarwindpy.core.plasma.Plasma.pth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code></a>.</p>
+a pd.Series is returned. This addresses complications from
+combining the mass density in <a class="reference internal" href="#solarwindpy.core.plasma.Plasma.ca" title="solarwindpy.core.plasma.Plasma.ca"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ca()</span></code></a> with the pressures in
+<a class="reference internal" href="#solarwindpy.core.plasma.Plasma.afsq" title="solarwindpy.core.plasma.Plasma.afsq"><code class="xref py py-meth docutils literal notranslate"><span class="pre">afsq()</span></code></a>, the latter via <a class="reference internal" href="#solarwindpy.core.plasma.Plasma.pth" title="solarwindpy.core.plasma.Plasma.pth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pth()</span></code></a>.</p>
 </dd>
 <dt><strong>pdynamic: bool, str</strong></dt><dd><p>If str, the component of the dynamic pressure to use when
 calculating <span class="math notranslate nohighlight">\(p_{\tilde{v}}\)</span>.</p>

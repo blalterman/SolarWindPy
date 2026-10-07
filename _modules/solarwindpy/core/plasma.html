@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g946d49292 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gfe9459432 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4c59bb11"></script>
+      <script src="../../../_static/documentation_options.js?v=8ab3b138"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -70,6 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../missing_data.html">Missing data</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -1011,6 +1012,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">tk_plasma</span><span class="p">]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">dropped</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mask_invalid_species</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="n">coeff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">"per"</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">})</span> <span class="o">/</span> <span class="mf">3.0</span>
 
@@ -1020,13 +1022,9 @@
             <span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c1"># TODO: test `skipna=False` to ensure we don't accidentially create valid data</span>
-        <span class="c1">#       where there is none. Actually, not possible as we are combining along</span>
-        <span class="c1">#       "S".</span>
-
-        <span class="c1"># Workaround for `skipna=False` bug. (20200814)</span>
-        <span class="c1"># Changed to new groupby method (20250611)</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="c1"># skipna=False: within a species, a time missing either part has no</span>
+        <span class="c1"># scalar thermal speed (docs page `missing_data`).</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
 
         <span class="c1"># TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`</span>
         <span class="n">w</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="s2">"w"</span><span class="p">,</span> <span class="s2">"scalar"</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
@@ -1054,6 +1052,40 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bfield</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">BField</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">))</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mask_invalid_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set a species to NaN at every time any of its moments is missing.</span>
+
+<span class="sd">        A species' density, velocity components and thermal-speed components</span>
+<span class="sd">        stand or fall together: if any is missing at a time, every measurement</span>
+<span class="sd">        of that species is invalid then (docs page :doc:`/missing_data`).</span>
+<span class="sd">        ``data`` is modified in place, and a warning logs how many times each</span>
+<span class="sd">        species lost.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : pd.DataFrame</span>
+<span class="sd">            Plasma data with column levels ``("M", "C", "S")``.</span>
+<span class="sd">        """</span>
+        <span class="n">moments</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">:,</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">IndexSlice</span><span class="p">[</span>
+                <span class="p">[</span><span class="s2">"n"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">],</span> <span class="p">[</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">,</span> <span class="s2">"per"</span><span class="p">],</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
+            <span class="p">],</span>
+        <span class="p">]</span>
+        <span class="n">invalid</span> <span class="o">=</span> <span class="n">moments</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">"S"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">missing</span> <span class="ow">in</span> <span class="n">invalid</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">missing</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">missing</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">species</span> <span class="o">==</span> <span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"masked species </span><span class="si">%s</span><span class="s2"> at </span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> times: a density, velocity or "</span>
+                    <span class="s2">"thermal speed component is missing"</span><span class="p">,</span>
+                    <span class="n">s</span><span class="p">,</span>
+                    <span class="n">count</span><span class="p">,</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">),</span>
+                <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bfield</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1093,7 +1125,8 @@
         <span class="n">n</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"S"</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="n">skipna</span><span class="p">)</span>
+            <span class="c1"># min_count=1: a total with no species present is NaN, not 0.</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="n">skipna</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">n</span></div>
@@ -1130,7 +1163,8 @@
         <span class="n">rho</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"S"</span><span class="p">],</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># min_count=1: a total with no species present is NaN, not 0.</span>
+            <span class="n">rho</span> <span class="o">=</span> <span class="n">rho</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">rho</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">rho</span></div>
 
@@ -1169,7 +1203,8 @@
         <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="c1"># min_count=1: a time where the species is missing stays NaN.</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">return</span> <span class="n">w</span></div>
 
@@ -1198,6 +1233,12 @@
 <span class="sd">        -------</span>
 <span class="sd">        pth: pd.Series or pd.DataFrame</span>
 <span class="sd">            See Parameters for more info.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        A species missing a thermal speed component at a time has no scalar</span>
+<span class="sd">        pressure then, and a species sum adds the species present, NaN only</span>
+<span class="sd">        where none is: see :doc:`/missing_data`.</span>
 <span class="sd">        """</span>
         <span class="n">slist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
         <span class="n">include_dynamic</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1209,7 +1250,7 @@
         <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="k">return</span> <span class="n">pth</span></div>
 
 
@@ -1230,6 +1271,12 @@
 <span class="sd">        -------</span>
 <span class="sd">        temp: pd.Series or pd.DataFrame</span>
 <span class="sd">            See Parameters for more info.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        A species missing a thermal speed component at a time has no scalar</span>
+<span class="sd">        temperature then, and a species sum adds the species present, NaN only</span>
+<span class="sd">        where none is: see :doc:`/missing_data`.</span>
 <span class="sd">        """</span>
         <span class="n">slist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">temperature</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">slist</span><span class="p">}</span>
@@ -1237,7 +1284,7 @@
         <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
         <span class="k">return</span> <span class="n">temp</span></div>
 
 
@@ -1385,12 +1432,37 @@
                     <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">"S"</span><span class="p">],</span>
                     <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">rv</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rhos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rhos</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_species_weighted_mean</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">rhos</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">v</span></div>
 
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_species_weighted_mean</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Weighted mean of vectors over the species present at each time.</span>
+
+<span class="sd">        A species is present at a time when its weight and every vector</span>
+<span class="sd">        component are; one that is absent leaves both the weighted sum and the</span>
+<span class="sd">        sum of weights. A time with no species present is NaN. See</span>
+<span class="sd">        :doc:`/missing_data`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vectors : pd.DataFrame</span>
+<span class="sd">            Cartesian components with column levels ``("S", "C")``.</span>
+<span class="sd">        weights : pd.DataFrame</span>
+<span class="sd">            One column per species, e.g. mass or charge density.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mean : pd.DataFrame</span>
+<span class="sd">            One column per component.</span>
+<span class="sd">        """</span>
+        <span class="n">present</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">T</span> <span class="o">&amp;</span> <span class="n">weights</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">present</span><span class="p">)</span>
+        <span class="n">weighted</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">weighted</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">total</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Plasma.v">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.v">[docs]</a>
@@ -1480,17 +1552,24 @@
                 <span class="n">names</span><span class="o">=</span><span class="s2">"S"</span><span class="p">,</span>
                 <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">dvsq_i</span> <span class="o">=</span> <span class="n">dv_i</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+            <span class="c1"># Within a species, a missing component makes dv^2 NaN; across</span>
+            <span class="c1"># species, the sum keeps the species present (docs `missing_data`).</span>
+            <span class="n">dvsq_i</span> <span class="o">=</span> <span class="n">dv_i</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
             <span class="n">dvsq_rho_i</span> <span class="o">=</span> <span class="n">dvsq_i</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
-            <span class="n">pdv</span> <span class="o">=</span> <span class="n">dvsq_rho_i</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">pdv</span> <span class="o">=</span> <span class="n">dvsq_rho_i</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">stuple</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># Can only have 2 species with `project_m2q`.</span>
             <span class="n">dvsq</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dv</span><span class="p">(</span><span class="o">*</span><span class="n">stuple</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="n">project_m2q</span><span class="p">)</span><span class="o">.</span><span class="n">cartesian</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dv</span><span class="p">(</span><span class="o">*</span><span class="n">stuple</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="n">project_m2q</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">cartesian</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">rho_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">(</span><span class="o">*</span><span class="n">stuple</span><span class="p">)</span>
-            <span class="n">mu</span> <span class="o">=</span> <span class="n">rho_i</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rho_i</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># skipna=False: the reduced mass needs both species.</span>
+            <span class="n">mu</span> <span class="o">=</span> <span class="n">rho_i</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span>
+                <span class="n">rho_i</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
             <span class="n">pdv</span> <span class="o">=</span> <span class="n">dvsq</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="n">pdv</span> <span class="o">=</span> <span class="n">pdv</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
@@ -1581,7 +1660,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">afsq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">species</span><span class="p">,</span> <span class="n">pdynamic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Calculate the square of anisotropy factor.</span>
 
-<span class="sd">            :math:`AF^2 = 1 + \frac{\mu_0}{B^s}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`</span>
+<span class="sd">            :math:`AF^2 = 1 + \frac{\mu_0}{B^2}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`</span>
+
+<span class="sd">        The pressures come from :py:meth:`pth`, so a species sum adds</span>
+<span class="sd">        :math:`p_\perp - p_\parallel` over the species present at each time</span>
+<span class="sd">        (see :doc:`/missing_data`).</span>
 
 <span class="sd">        N.B. Because of the :math:`1 +`, afsq(s0, s1).sum(axis=1) is not the</span>
 <span class="sd">             same as afsq(s0+s1). The two are related by:</span>
@@ -1610,27 +1693,16 @@
                 <span class="s2">"that dynamic pressure is probably not useful."</span>
             <span class="p">)</span>
 
-        <span class="c1"># The following is used to specifiy whether column levels</span>
-        <span class="c1"># need to be aligned when multiple species are present.</span>
-        <span class="n">multi_species</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="c1"># A missing field component leaves B^2 unknown.</span>
+        <span class="n">bsq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bfield</span><span class="o">.</span><span class="n">cartesian</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">bsq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bfield</span><span class="o">.</span><span class="n">cartesian</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
+        <span class="c1"># A species is masked as a whole where any moment is missing, so its</span>
+        <span class="c1"># p_per and p_par are present together and the species sum of</span>
+        <span class="c1"># p_per - p_par equals summed p_per minus summed p_par (docs</span>
+        <span class="c1"># `missing_data`). Dynamic pressure, if ever included, would be</span>
+        <span class="c1"># subtracted here with the species aligned.</span>
         <span class="n">pth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pth</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
-        <span class="n">pth</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"scalar"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="n">sum_coeff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">"per"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"par"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">})</span>
-        <span class="n">dp</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">sum_coeff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"C"</span> <span class="k">if</span> <span class="n">multi_species</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-
-        <span class="c1"># The following level kwarg controls returning a DataFrame</span>
-        <span class="c1"># of the various species or a single result for one species.</span>
-        <span class="c1"># My guess is that following this line, we'd insert the subtraction</span>
-        <span class="c1"># of the dynamic pressure with the appropriate alignment of the</span>
-        <span class="c1"># species as necessary.</span>
-        <span class="k">if</span> <span class="n">multi_species</span><span class="p">:</span>
-            <span class="n">dp</span> <span class="o">=</span> <span class="n">dp</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dp</span> <span class="o">=</span> <span class="n">dp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">pth</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"per"</span><span class="p">]</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">pth</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"par"</span><span class="p">])</span>
 
         <span class="n">mu0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">mu0</span>
         <span class="n">coeff</span> <span class="o">=</span> <span class="n">mu0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">pth</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
@@ -1656,9 +1728,9 @@
 <span class="sd">        species: str</span>
 <span class="sd">            Each species is a string. If only one string is passed, it can</span>
 <span class="sd">            contain "+". In either case, all species are summed over and</span>
-<span class="sd">            a pd.Series is returned. This addresses complications from the</span>
-<span class="sd">            `stuple = self._chk_species(*species)` mass densities in Ca and AFSQ,</span>
-<span class="sd">            the latter via :py:meth:`pth`.</span>
+<span class="sd">            a pd.Series is returned. This addresses complications from</span>
+<span class="sd">            combining the mass density in :py:meth:`ca` with the pressures in</span>
+<span class="sd">            :py:meth:`afsq`, the latter via :py:meth:`pth`.</span>
 <span class="sd">        pdynamic: bool, str</span>
 <span class="sd">            If str, the component of the dynamic pressure to use when</span>
 <span class="sd">            calculating :math:`p_{\tilde{v}}`.</span>
@@ -1811,7 +1883,8 @@
         <span class="n">w</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
             <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">par</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">]},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
-        <span class="n">wab</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">w</span>
+        <span class="c1"># skipna=False: W_ab needs both species' thermal speeds.</span>
+        <span class="n">wab</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">w</span>
 
         <span class="n">dv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dv</span><span class="p">(</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">dv</span>
         <span class="n">dvw</span> <span class="o">=</span> <span class="n">dv</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">wab</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1831,7 +1904,8 @@
             <span class="n">rho_ratio</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
                 <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_density</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">sa</span><span class="p">,</span> <span class="n">sb</span><span class="p">]},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
-            <span class="n">rho_ratio</span> <span class="o">=</span> <span class="n">rho_ratio</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># skipna=False: the ratio needs both species.</span>
+            <span class="n">rho_ratio</span> <span class="o">=</span> <span class="n">rho_ratio</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">nuba</span> <span class="o">=</span> <span class="n">nuab</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_ratio</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">nu</span> <span class="o">=</span> <span class="n">nuab</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nuba</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">nu</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sa</span><span class="si">}</span><span class="s2">+</span><span class="si">{</span><span class="n">sb</span><span class="si">}</span><span class="s2">"</span>
@@ -2041,16 +2115,16 @@
             <span class="n">vi</span> <span class="o">=</span> <span class="n">vi</span><span class="o">.</span><span class="n">cartesian</span>
             <span class="n">niqi</span> <span class="o">=</span> <span class="n">ni</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span>
             <span class="n">ne</span> <span class="o">=</span> <span class="n">niqi</span>
-            <span class="n">niqivi</span> <span class="o">=</span> <span class="n">vi</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">niqi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ve</span> <span class="o">=</span> <span class="n">vi</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">niqi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">vi</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
                 <span class="n">vi</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cartesian</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">"S"</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="n">niqi</span> <span class="o">=</span> <span class="n">ni</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">qi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span>
-            <span class="n">ne</span> <span class="o">=</span> <span class="n">niqi</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">niqivi</span> <span class="o">=</span> <span class="n">vi</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">niqi</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">"C"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
-
-        <span class="n">ve</span> <span class="o">=</span> <span class="n">niqivi</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">ne</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># Both sums run over the species present at each time; species</span>
+            <span class="c1"># masking in `set_data` keeps a density from outliving its velocity.</span>
+            <span class="n">ne</span> <span class="o">=</span> <span class="n">niqi</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_species_weighted_mean</span><span class="p">(</span><span class="n">vi</span><span class="p">,</span> <span class="n">niqi</span><span class="p">)</span>
 
         <span class="c1"># T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.</span>
         <span class="n">wp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="n">tkw</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"scalar"</span><span class="p">]</span>
