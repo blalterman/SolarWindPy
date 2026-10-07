@@ -866,18 +866,10 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         sigma = self.observations.used.w
 
         # Adapted from `curve_fit` line 749 (20200527): 1-sigma uncertainties
-        # weight the residuals by 1/sigma. _clean_raw_obs refuses any other
-        # weights, so this shape check only guards a changed selection.
-        if sigma is not None:
-            sigma = np.asarray(sigma)
-            if sigma.shape != (ydata.size,):
-                raise ValueError(
-                    f"`sigma` must be 1-d with one uncertainty per used "
-                    f"observation, shape ({ydata.size},); got {sigma.shape}."
-                )
-            transform = 1.0 / sigma
-        else:
-            transform = None
+        # weight the residuals by 1/sigma. set_fit_obs selects x, y and w with
+        # one mask after _clean_raw_obs made their shapes equal, so sigma is
+        # 1-d with one entry per used observation.
+        transform = None if sigma is None else 1.0 / np.asarray(sigma)
 
         # Copied from `curve_fit` line 769 (20200527)
         loss_func = _wrap_func(self.function, xdata, ydata, transform)
