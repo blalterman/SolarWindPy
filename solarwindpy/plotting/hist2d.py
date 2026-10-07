@@ -811,8 +811,10 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             to the :class:`~solarwindpy.plotting.hist1d.Hist1D`.
         project_counts: bool
             If True, only send the variable plotted along `axis` to
-            :class:`~solarwindpy.plotting.hist1d.Hist1D`.
-            Otherwise, send both axes (but not z-values).
+            :class:`~solarwindpy.plotting.hist1d.Hist1D`, which then counts it.
+            Otherwise, also send the values to aggregate: the z-values when the
+            histogram has them, else the other axis, NaN wherever the
+            histogram does not bin that axis's value.
         kwargs:
             Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
 
@@ -826,7 +828,8 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         data = self.data
 
         if data.loc[:, "z"].unique().size >= 2:
-            # Either all 1 or 1 and NaN.
+            # Without z every point stores z = 1, so two or more distinct values
+            # (two included) mean the caller passed z.
             other = "z"
         else:
             possible_axes = {"x", "y"}
@@ -842,10 +845,10 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         y = self.data.loc[:, other] if not project_counts else None
         logy = False  # Defined b/c project_counts option.
         if y is not None and (other == "y"):
-            # Only select y-values plotted.
+            # Only select y-values plotted: those the histogram puts in a y-bin,
+            # which respects whether the bins are closed left or right.
             logy = self.log._asdict()[other]
-            yedges = self.edges[other].values
-            y = y.where((yedges[0] <= y) & (y <= yedges[-1]))
+            y = y.where(self.cut.loc[:, other].notna())
             if logy:
                 y = 10.0**y
 
@@ -1012,20 +1015,27 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         get_x_bounds: function
             First argument is one key of `ranges_by_x` and returns `left, right`.
-            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
-            to whether or not the keys are :math:`log(x)` or :math:`x` in a manner
-            that matches data stored in Hist2D.
+            The keyword argument `expected_logx` is the bool ``self.log.x``, so
+            the returned values can be :math:`log(x)` or :math:`x` to match the
+            data stored in Hist2D.
 
         get_y_bounds: functions
-            Takes on value of `ranges_by_x` and returns `top, bottom`. Second argument
-            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
-            to whether or not the keys are :math:`log(y)` or :math:`y` in a manner
-            that matches data stored in Hist2D.
+            First argument is one row of `ranges_by_x` and returns
+            `bottom, top`. The keyword argument `expected_logy` is the bool
+            ``self.log.y``, so the returned values can be :math:`log(y)` or
+            :math:`y` to match the data stored in Hist2D.
 
         Returns
         -------
         taken: np.ndarray 1D
-            Array of indices for selecting data in interval.
+            Array of indices for selecting data in interval: the points with
+            ``left < x <= right`` and ``bottom < y <= top``.
+
+        Raises
+        ------
+        ValueError
+            If a range has ``left >= right`` or ``bottom >= top``, or if
+            `ranges_by_x` names x-bins the histogram does not have.
         """
 
         available_x = self.agg().unstack("x").columns
@@ -1049,8 +1059,10 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             l, r = get_x_bounds(x, expected_logx=logx)
             b, t = get_y_bounds(at_x, expected_logy=logy)
 
-            assert l < r
-            assert b < t
+            if not l < r:
+                raise ValueError(f"Need left < right for x-bin {x}, got ({l}, {r}).")
+            if not b < t:
+                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
 
             tkx = (l < data.x) & (data.x <= r)
             tky = (b < data.y) & (data.y <= t)
