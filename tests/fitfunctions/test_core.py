@@ -625,16 +625,18 @@ def test_set_fit_obs_selects_on_raw_weights_unless_logy_is_given():
 def test_make_fit_passes_the_method_to_scipy(line_with_outlier):
     """``method`` reaches least_squares, and "lm" fits as scipy's own "lm" does.
 
-    scipy's "lm" accepts only loss="linear", so make_fit(method="lm") with the
-    default huber loss must come back with scipy's refusal; with
-    loss="linear" the result equals scipy's least_squares(method="lm") on the
-    same weighted problem.
+    scipy's "lm" accepts only loss="linear", so with the default huber loss
+    method="lm" must raise ValueError while method="trf" on the same problem
+    does not; only the method differs, so the error shows it reached scipy.
+    With loss="linear" the result equals scipy's least_squares(method="lm")
+    on the same weighted problem.
 
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
     lf = LinearFit(x, y, weights=w)
-    with pytest.raises(ValueError, match="'lm'"):
+    lf.make_fit(method="trf")
+    with pytest.raises(ValueError):
         lf.make_fit(method="lm")
 
     lf.make_fit(method="lm", loss="linear")
@@ -802,6 +804,8 @@ def test_degenerate_parameters_get_the_pseudo_inverse_covariance():
     x = 1e3 * np.array([1.0, 2.0, 3.0, 4.0])
     y = 1e3 * np.array([3.0, 6.5, 8.5, 12.5])
     fit = SumSlopeFit(x, y)
+    # Killing the `eps / m` threshold mutant relies on a rounding-level second
+    # singular value; that may not hold on another BLAS or platform.
     fit.make_fit(loss="linear", jac=_sum_slope_jac)
 
     assert fit.pcov == noise_free(np.full((2, 2), 0.0028125))
