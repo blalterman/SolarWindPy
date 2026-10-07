@@ -470,3 +470,35 @@ is below the caller's lower bound with the same clear error it gives above the u
 `HingeMax` keeps raising `NotImplementedError` in its no-estimate branch: the author does not
 yet have a good initial guess for it. The `hingemax-point` step stays parked, not blocking
 the track's close.
+
+## Survivor units
+
+Author decision after the 2026-10-07 mutation re-measurement (findings, `### Mutation`): kill
+the survivors that are real behaviour gaps with two test-only units, then close the track
+with the rest named in the findings and a GitHub issue. Not targeted: survivors that cannot
+be killed (behaviour-identical mutants such as dropped `sort=True` on sorted data, library
+defaults, unit factors of 1.0), plotting appearance (figure size, line style, ticks), error
+and log message wording, the two mutmut-excluded docstring functions, `hist2d` data paths and
+the remaining `plasma.py` physics (these need a mutant-by-mutant look first). A defect a new
+test exposes becomes a strict xfail naming what retires it; package code is not changed.
+Survivor list: `tmp/test-quality-review/mutants_survivors.csv`, minus the rows
+`tmp/test-quality-review/mutants_recheck.csv` marks killed.
+
+### plasma-io-electrons
+
+OWNS: tests/core/test_plasma_io.py, tests/core/test_plasma.py
+
+Kill the behaviour survivors in `Plasma.save` and `Plasma.load_from_file` (a full save-then-load
+round trip with spacecraft and auxiliary data, the default HDF5 keys, `start`/`stop` slicing,
+the modifier-function checks) and in `Plasma.estimate_electrons` (the species guards: electrons
+already present, `p` versus `p1`).
+
+### fit-and-sidc-gaps
+
+OWNS: tests/fitfunctions/test_core.py, tests/solar_activity/sunspot_number/test_sidc.py
+
+Kill the behaviour survivors in `FitFunction._run_least_squares` (the correlated-sigma path:
+the covariance-shape check and the Cholesky factor's orientation), `FitFunction.set_fit_obs`,
+`FitFunction._calc_popt_pcov_psigma_chisq`, and in `SIDC.cut_spec_by_ssn_band`,
+`SIDC.run_normalization` and `SIDC.interpolate_data`. `SIDCLoader.download_data` stays
+offline (the existing `no_download` guard).
