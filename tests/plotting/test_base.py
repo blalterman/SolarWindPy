@@ -203,13 +203,21 @@ def test_set_data_with_only_nan_rows_raises_value_error_naming_the_class():
         LinePlot(nan, pd.Series([1.0, 2.0]))
 
 
-@pytest.mark.parametrize("given, expected", [(0, False), (1, True), ("", False)])
-def test_clip_is_the_truth_value_of_clip_data(given, expected):
-    """``clip`` stores ``bool(clip_data)``.
+@pytest.mark.parametrize(
+    "given, expected",
+    [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
+)
+def test_clip_stores_clip_data_with_none_as_false(given, expected):
+    """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+
+    ``"l"`` and ``"u"`` select one tail in ``AggPlot.clip_data``, so they must
+    survive storage.
 
     ON FAILURE: the code is wrong.
     """
-    assert LinePlot(X, Y, clip_data=given).clip is expected
+    clip = LinePlot(X, Y, clip_data=given).clip
+    assert clip == expected
+    assert type(clip) is type(expected)
 
 
 # ---------------------------------------------------------------------------

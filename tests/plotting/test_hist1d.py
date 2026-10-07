@@ -551,6 +551,45 @@ class TestConstructCdf:
         )
 
 
+@pytest.mark.parametrize(
+    "given, expected",
+    [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
+)
+def test_clip_stores_clip_data_with_none_as_false(xy, given, expected):
+    """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, _ = xy
+    clip = Hist1D(x, clip_data=given).clip
+    assert clip == expected
+    assert type(clip) is type(expected)
+
+
+# One low and one high outlier. Clipping to the 0.01st percentile moves -1000
+# to about -999.1 and clipping to the 99.99th moves 1000 to about 999.1, each
+# from an outer bin into the middle bin (-999.5, 999.5].
+CLIP_X = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
+CLIP_EDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
+CLIP_CASES = [
+    (None, [1, 8, 1]),  # nothing moves
+    (False, [1, 8, 1]),
+    (True, [0, 10, 0]),  # both outliers move to the middle bin
+    ("l", [0, 9, 1]),  # only the low outlier moves
+    ("u", [1, 9, 0]),  # only the high outlier moves
+]
+
+
+@pytest.mark.parametrize("clip_data, expected", CLIP_CASES)
+def test_clip_data_clips_the_tails_it_names(clip_data, expected):
+    """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
+
+    ON FAILURE: the code is wrong.
+    """
+    hist = Hist1D(CLIP_X, clip_data=clip_data, nbins=CLIP_EDGES)
+    assert hist.agg().fillna(0).to_numpy() == exact(expected)
+
+
 def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
     """Each x bin keeps the samples whose y lies in that bin's (bottom, top].
 
