@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 """Tests for the :class:`Plasma` container."""
 
+import re
 import pandas as pd
 import numpy as np
 import itertools
+import pytest
 import pandas.testing as pdt
 
 from abc import ABC, abstractproperty, abstractmethod
@@ -1322,8 +1324,9 @@ class PlasmaTestBase(ABC):
         if "p" not in self.stuple and "p1" not in self.stuple:
             with self.assertRaisesRegex(
                 ValueError,
-                # Match this sentence at start of string.
-                r"^Plasma must contain \(core\) protons to estimate electrons.",
+                # Match this sentence at start of string, then the species held.
+                r"^Plasma must contain \(core\) protons to estimate electrons.\n"
+                r"Available species: " + re.escape(str(tuple(stuple))),
             ):
                 self.object_testing.estimate_electrons()
 
@@ -3184,3 +3187,73 @@ def test_estimate_electrons_inplace_adds_the_estimate_as_species_e():
     pdt.assert_frame_equal(held, estimate.data, check_like=True)
     assert p.ions.loc["e"].n.iloc[0] == exact(5.4)
     pdt.assert_frame_equal(p.data.drop(columns="e", level="S"), before)
+
+
+def test_estimate_electrons_refuses_a_plasma_that_already_holds_electrons():
+    r"""A plasma that holds species "e" cannot estimate electrons.
+
+    The method raises NotImplementedError rather than overwrite or duplicate
+    the measured electrons.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [
+        {
+            "e": (5.0, (400.0, 0.0, 0.0), 1000.0, 1000.0),
+            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+        }
+    ]
+    p = _hand_plasma(rows, "e", "p1")
+    with pytest.raises(NotImplementedError):
+        p.estimate_electrons()
+
+
+def test_estimate_electrons_takes_the_proton_temperature_from_p():
+    r"""Without core protons "p1", T_e = T_p comes from the protons "p".
+
+    Same rows as
+    `test_estimate_electrons_temperature_equals_proton_scalar_temperature`
+    with the protons labelled "p": n_e = 5 + 2 * 0.2 = 5.4 cm^-3, and the
+    anisotropic protons give w_p^2 = (900 + 2 * 576) / 3 = 684 km^2/s^2, so
+    w_e = sqrt(684 * 1836.152673426) = 1120.6821 km/s (CODATA 2022 m_p / m_e).
+    The alphas' w = 40 km/s would give a different w_e.
+
+    ON FAILURE: the code is wrong, unless the author rejects T_e = T_p as the
+    electron estimate.
+    """
+    rows = [
+        {
+            "a": (0.2, (450.0, 30.0, 0.0), 40.0, 40.0),
+            "p": (5.0, (400.0, 0.0, 0.0), 30.0, 24.0),
+        }
+    ]
+    e = _hand_plasma(rows, "p", "a").estimate_electrons()
+    # Sum of chosen inputs.
+    assert e.n.iloc[0] == exact(5.4)
+    mp_me = 1.0 / physical_constants["electron-proton mass ratio"][0]
+    expected = np.sqrt(684.0 * mp_me)  # km/s, w_e^2 = (m_p / m_e) w_p^2
+    for c in ("par", "per"):
+        we = e.w.data.loc[:, c].iloc[0]
+        assert we == exact(expected)
+        assert we == printed(1120.6821, decimals=4)
+
+
+def test_estimate_electrons_refuses_both_p_and_p1():
+    r"""A plasma holding both "p" and "p1" has no single proton temperature.
+
+    `estimate_electrons` raises the ValueError that names the conflict, not a
+    generic one.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [
+        {
+            "p": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
+            "p1": (4.0, (410.0, 0.0, 0.0), 25.0, 25.0),
+        }
+    ]
+    p = _hand_plasma(rows, "p", "p1")
+    with pytest.raises(
+        ValueError, match=r"cannot contain protons \(p\) and core protons \(p1\)"
+    ):
+        p.estimate_electrons()
