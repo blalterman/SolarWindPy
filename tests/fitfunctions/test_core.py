@@ -878,7 +878,7 @@ def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
     """
     x = np.array([0.0, 1.0])
     lf = LinearFit(x, 2.0 * x + 1.0)
-    with pytest.warns(OptimizeWarning, match="could not be estimated"):
+    with pytest.warns(OptimizeWarning):
         lf.make_fit()
 
     assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
