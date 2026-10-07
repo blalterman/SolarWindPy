@@ -190,6 +190,29 @@ class AggPlot(base.Base):
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
 
+    @staticmethod
+    def _edges_from_intervals(intervals):
+        """Return the edges of contiguous bins and the side they close on.
+
+        Raises
+        ------
+        ValueError
+            If the intervals are empty, not contiguous and increasing, or
+            closed on neither or both sides.
+        """
+        if intervals.closed not in ("left", "right"):
+            raise ValueError(
+                f"Need intervals closed on the left or right, got {intervals.closed!r}."
+            )
+        if (
+            intervals.empty
+            or not intervals.is_monotonic_increasing
+            or not (intervals.left[1:] == intervals.right[:-1]).all()
+        ):
+            raise ValueError(f"Need contiguous, increasing intervals, got {intervals}.")
+        edges = np.append(intervals.left.to_numpy(), intervals.right[-1])
+        return edges, intervals.closed
+
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.
 
@@ -199,13 +222,15 @@ class AggPlot(base.Base):
             to calculate optimal bin widths.
             If str and nbins != "knuth", use `np.histogram(data, bins=nbins)`
             to calculate bins.
-            If a :class:`pandas.IntervalIndex` of contiguous intervals, use
-            those bins and the side they are closed on, e.g. another
-            histogram's ``intervals``.
+            If a :class:`pandas.IntervalIndex` of contiguous intervals closed
+            on the left or right, use those bins and that side, e.g. another
+            histogram's ``intervals``. Its edges are rounded only when
+            ``precision`` is given.
             If array-like, treat as bins.
 
         precision: int or None
-            Decimal places to which bin edges are rounded. If None, 5.
+            Decimal places to which bin edges are rounded. If None, 5, except
+            that an ``IntervalIndex`` keeps its edges.
 
         Notes
         -----
@@ -220,6 +245,8 @@ class AggPlot(base.Base):
         bins = {}
         intervals = {}
 
+        # An `IntervalIndex` keeps its edges unless the caller sets a precision.
+        round_intervals = precision is not None
         if precision is None:
             precision = 5
 
@@ -252,14 +279,9 @@ class AggPlot(base.Base):
             from_count = isinstance(b, Integral) and not isinstance(b, bool)
 
             closed = "right"
-            if isinstance(b, pd.IntervalIndex):
-                # Keep the given bins and the side they close on.
-                if not (
-                    b.is_monotonic_increasing and (b.left[1:] == b.right[:-1]).all()
-                ):
-                    raise ValueError(f"Need contiguous, increasing intervals, got {b}.")
-                closed = b.closed
-                b = np.append(b.left.to_numpy(), b.right[-1])
+            given_intervals = isinstance(b, pd.IntervalIndex)
+            if given_intervals:
+                b, closed = self._edges_from_intervals(b)
 
             elif isinstance(b, str) and b == "knuth":
                 try:
@@ -294,7 +316,7 @@ class AggPlot(base.Base):
                 b[0] = lo if lo <= d.min() else lo - 1 / scale
                 b[-1] = hi if hi >= d.max() else hi + 1 / scale
                 closed = "left"
-            else:
+            elif round_intervals or not given_intervals:
                 b = b.round(precision)
 
             zipped = zip(b[:-1], b[1:])
