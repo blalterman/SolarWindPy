@@ -576,3 +576,8 @@ Author decisions for `plasma-survivor-tests` (2026-10-07): remove the dead comma
 in `set_auxiliary_data` (and siblings) raise `ValueError`, not `assert`; log wording is not tested.
 OWNS for that unit grows to solarwindpy/core/plasma.py, tests/core/test_plasma.py,
 tests/core/test_plasma_io.py.
+
+Author decisions (2026-10-07, PR #510): spacecraft and auxiliary data come from the same source
+as the plasma data and are sorted the same way at construction, under the same warning; the
+index-equality checks raise ValueError for genuinely mismatched indices. Missing timestamps
+(NaT) log a warning with their count, and the rows are kept.
