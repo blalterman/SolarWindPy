@@ -193,9 +193,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Format: (lower, upper) where lower < upper.
     weights : array-like, optional
         1-sigma uncertainties of the y values, used for weighted
-        least squares fitting: a 1-d array of the same shape as
-        xobs. A 2-d array (such as a covariance matrix) is
-        refused with InvalidParameterError.
+        least squares fitting: one per observation, in xobs's
+        shape. A covariance matrix is not supported; weights of
+        any other shape raise InvalidParameterError.
     wmin : float, optional
         Lower weight limit. Observations with smaller weights
         are excluded from the fit.
@@ -609,9 +609,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             raise InvalidParameterError(f"""xobs and yobs must have the same shape.
 xobs: {xobs.shape}, yobs: {yobs.shape}""")
 
-        if weights is not None and (weights.ndim != 1 or weights.shape != xobs.shape):
+        if weights is not None and weights.shape != xobs.shape:
             raise InvalidParameterError(f"""weights and xobs must have the same shape: \
-weights is a 1-d array of 1-sigma uncertainties, and a 2-d array is refused.
+weights holds one 1-sigma uncertainty per observation, in xobs's shape, and a \
+covariance matrix is not supported.
 weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return xobs, yobs, weights

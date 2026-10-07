@@ -888,15 +888,15 @@ def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
 
 
 # ============================================================================
-# Weights are 1-d uncertainties: a 2-d array is refused
+# Weights are uncertainties in xobs's shape: a covariance matrix is refused
 # ============================================================================
 
 
-def test_a_2d_weights_array_is_refused():
+def test_a_covariance_matrix_as_weights_is_refused():
     """A 6 x 6 covariance matrix as ``weights`` for six samples raises.
 
-    ``weights`` holds one 1-sigma uncertainty per observation; the author has
-    decided a 2-d array is refused, not fit as correlated errors.
+    ``weights`` holds one 1-sigma uncertainty per observation, in xobs's
+    shape; the author has decided a covariance matrix is not supported.
 
     ON FAILURE: the code is wrong, unless the author now accepts a covariance
     matrix as ``weights``.
@@ -905,7 +905,24 @@ def test_a_2d_weights_array_is_refused():
     cov = np.diag(0.5 + 0.2 * x) ** 2
     with pytest.raises(
         InvalidParameterError,
-        match="weights is a 1-d array of 1-sigma uncertainties, and a 2-d "
-        "array is refused",
+        match="weights holds one 1-sigma uncertainty per observation, in "
+        "xobs's shape, and a covariance matrix is not supported",
     ):
         LinearFit(x, 2.0 * x + 1.0, weights=cov)
+
+
+def test_weights_in_the_shape_of_2d_xobs_are_accepted():
+    """2 x 3 x, y and weights pass the shape check and fit y = 2x + 1.
+
+    The shape rule is ``weights.shape == xobs.shape``, whatever the
+    dimension; the used observations are the flattened finite samples.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(6.0).reshape(2, 3)
+    w = np.full((2, 3), 0.5)
+    lf = LinearFit(x, 2.0 * x + 1.0, weights=w)
+    lf.make_fit()
+
+    assert lf.observations.used.w == exact(w.ravel())
+    assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
