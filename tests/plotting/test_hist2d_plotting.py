@@ -586,6 +586,56 @@ class TestBinContract:
         assert h.edges["y"].size == 14
 
 
+class TestClipData:
+    """``clip_data`` clips the tails it names when points are binned."""
+
+    # One low and one high x outlier. Clipping to the 0.01st percentile moves
+    # -1000 to about -999.1 and clipping to the 99.99th moves 1000 to about
+    # 999.1, each from an outer x-bin into the middle one (-999.5, 999.5].
+    # y is constant, so clipping leaves it alone.
+    X = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
+    XEDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
+
+    @pytest.mark.parametrize(
+        "clip_data, expected",
+        [
+            (None, [1, 8, 1]),  # nothing moves
+            (False, [1, 8, 1]),
+            (True, [0, 10, 0]),  # both outliers move to the middle bin
+            ("l", [0, 9, 1]),  # only the low outlier moves
+            ("u", [1, 9, 0]),  # only the high outlier moves
+        ],
+    )
+    def test_clip_data_clips_the_tails_it_names(self, clip_data, expected):
+        """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
+
+        ON FAILURE: the code is wrong.
+        """
+        y = pd.Series(0.5, index=self.X.index)
+        h = Hist2D(
+            self.X,
+            y,
+            clip_data=clip_data,
+            nbins=[self.XEDGES, np.array([0.0, 1.0])],
+        )
+        grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
+        counts = grid.fillna(0).sum(axis=0)  # empty x-bins count 0
+        assert counts.to_numpy() == exact(expected)
+
+    @pytest.mark.parametrize(
+        "given, expected",
+        [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
+    )
+    def test_clip_stores_clip_data_with_none_as_false(self, given, expected):
+        """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+
+        ON FAILURE: the code is wrong.
+        """
+        clip = Hist2D(self.X, self.X, clip_data=given).clip
+        assert clip == expected
+        assert type(clip) is type(expected)
+
+
 class TestAggregatedValues:
     """The aggregation reproduces a grid the test populated itself."""
 

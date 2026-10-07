@@ -53,9 +53,10 @@ class Hist1D(AggPlot):
         axnorm : {"t", "d", None}, optional
             Normalisation applied to the histogram. ``"t"`` divides by the
             maximum (peak equals 1) and ``"d"`` yields a density.
-        clip_data : bool, optional
-            Remove extreme values at the 0.001 and 0.999 percentiles before
-            binning or aggregation.
+        clip_data : bool or str, optional
+            If True, clip x to its 0.01st and 99.99th percentiles before
+            binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
+            (see ``AggPlot.clip_data``). None is stored as False.
         nbins : int or array-like, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
             :func:`pandas.cut` depending on the input type.
@@ -104,7 +105,7 @@ class Hist1D(AggPlot):
         data.loc[:, "y"] = y
 
         self._data = data
-        self._clip = bool(clip)
+        self._clip = False if clip is None else clip
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.

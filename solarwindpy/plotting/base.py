@@ -427,8 +427,10 @@ class PlotWithZdata(Base):
             Coordinates of each point.
         z : pd.Series, optional
             Value at each point. If None, every point gets ``z = 1``.
-        clip_data : bool, optional
-            Stored as ``self.clip``.
+        clip_data : bool or str, optional
+            Stored as ``self.clip``, None as False. True clips both tails;
+            ``"l"`` or ``"u"`` clips only the lower or upper tail (see
+            ``AggPlot.clip_data``).
 
         Raises
         ------
@@ -448,7 +450,7 @@ class PlotWithZdata(Base):
                 % self.__class__.__name__
             )
         self._data = data
-        self._clip = bool(clip_data)
+        self._clip = False if clip_data is None else clip_data
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.

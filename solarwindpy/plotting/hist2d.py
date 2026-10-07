@@ -36,10 +36,11 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         Normalization of the aggregated values; see ``set_axnorm`` for the keys.
     logx, logy : bool
         If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.
-    clip_data : bool
+    clip_data : bool or str
         If True, clip x and y to their 0.01st and 99.99th percentiles
         (``AggPlot.clip_data``) when assigning points to bins; the bin edges
-        are computed from the unclipped data.
+        are computed from the unclipped data. ``"l"`` or ``"u"`` clips only
+        the lower or upper tail.
     nbins : int or str or tuple
         Bin specification passed to ``calc_bins_intervals``.
     bin_precision : int, optional
