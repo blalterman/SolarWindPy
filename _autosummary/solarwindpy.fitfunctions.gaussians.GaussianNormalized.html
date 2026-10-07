@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.gaussians.GaussianNormalized &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.fitfunctions.gaussians.GaussianNormalized &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -512,12 +512,16 @@ Relative uncertainty can be computed as: df[‘psigma’] / df[‘popt’]</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.gaussians.GaussianNormalized.initial_guess_info">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.initial_guess_info" title="Link to this definition"></a></dt>
-<dd><p>Initial guess and bounds for each parameter, or None.</p>
+<dd><p>The start and bounds of the last successful fit, per parameter, or None.</p>
+<p>The start is the one <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html#scipy.optimize.least_squares" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.least_squares()</span></code></a> began from:
+the caller’s <code class="docutils literal notranslate"><span class="pre">p0</span></code>, the class’s <a class="reference internal" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0" title="solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> as a subclass’s
+<code class="docutils literal notranslate"><span class="pre">make_fit</span></code> adjusted it, or the feasible default when <a class="reference internal" href="#solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0" title="solarwindpy.fitfunctions.gaussians.GaussianNormalized.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is
+None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None when no initial
-guess was made (<code class="docutils literal notranslate"><span class="pre">p0</span></code> is None) or no fit has set the bounds.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None before a fit
+succeeds.</p>
 </dd>
 </dl>
 </dd>

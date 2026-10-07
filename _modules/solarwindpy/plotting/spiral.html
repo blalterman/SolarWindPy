@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.plotting.spiral &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../../../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -1246,17 +1246,6 @@
         <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cbar_or_mappable</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_verify_contour_passthrough_kwargs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
-    <span class="p">):</span>
-        <span class="k">if</span> <span class="n">clabel_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">clabel_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">edges_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="n">edges_kwargs</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_interpolate_to_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Interpolate scattered data to a regular grid.</span>
 
@@ -1356,12 +1345,9 @@
         <span class="n">interpolation</span><span class="o">=</span><span class="s2">"cubic"</span><span class="p">,</span>
         <span class="n">nan_aware_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="c1"># Common params</span>
-        <span class="n">label_levels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">cbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">cbar_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">clabel_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">skip_max_clbl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">use_contourf</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1407,18 +1393,12 @@
 
 <span class="sd">        Common Parameters</span>
 <span class="sd">        -----------------</span>
-<span class="sd">        label_levels : bool</span>
-<span class="sd">            If True, add labels to contours with ``ax.clabel``. Default is True.</span>
 <span class="sd">        cbar : bool</span>
 <span class="sd">            If True, create a colorbar. Default is True.</span>
 <span class="sd">        cbar_kwargs : dict, None</span>
 <span class="sd">            Keyword arguments passed to ``self._make_cbar``.</span>
 <span class="sd">        fcn : callable, None</span>
 <span class="sd">            Aggregation function. If None, automatically select in :py:meth:`agg`.</span>
-<span class="sd">        clabel_kwargs : dict, None</span>
-<span class="sd">            Keyword arguments passed to ``ax.clabel``.</span>
-<span class="sd">        skip_max_clbl : bool</span>
-<span class="sd">            If True, don't label the maximum contour level. Default is True.</span>
 <span class="sd">        use_contourf : bool</span>
 <span class="sd">            If True, use filled contours. Default is False.</span>
 <span class="sd">        **kwargs</span>
@@ -1429,8 +1409,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        ax : mpl.axes.Axes</span>
 <span class="sd">            The axes containing the plot.</span>
-<span class="sd">        lbls : list or None</span>
-<span class="sd">            Contour labels if ``label_levels=True``, else None.</span>
 <span class="sd">        cbar_or_mappable : Colorbar or QuadContourSet</span>
 <span class="sd">            The colorbar if ``cbar=True``, else the contour set.</span>
 <span class="sd">        qset : QuadContourSet</span>
@@ -1450,17 +1428,17 @@
 <span class="sd">        &gt;&gt;&gt; splot.build_grouped()</span>
 
 <span class="sd">        &gt;&gt;&gt; # Default: sparse RBF (fastest)</span>
-<span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours()</span>
+<span class="sd">        &gt;&gt;&gt; ax, cbar, qset = splot.plot_contours()</span>
 
 <span class="sd">        &gt;&gt;&gt; # Grid interpolation with Gaussian smoothing</span>
-<span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours(</span>
+<span class="sd">        &gt;&gt;&gt; ax, cbar, qset = splot.plot_contours(</span>
 <span class="sd">        ...     method='grid',</span>
 <span class="sd">        ...     grid_resolution=100,</span>
 <span class="sd">        ...     gaussian_filter_std=2.0</span>
 <span class="sd">        ... )</span>
 
 <span class="sd">        &gt;&gt;&gt; # Debug: see raw triangulation</span>
-<span class="sd">        &gt;&gt;&gt; ax, lbls, cbar, qset = splot.plot_contours(method='tricontour')</span>
+<span class="sd">        &gt;&gt;&gt; ax, cbar, qset = splot.plot_contours(method='tricontour')</span>
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">nan_gaussian_filter</span>
 
@@ -1492,18 +1470,7 @@
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
-        <span class="c1"># Setup kwargs for clabel and cbar</span>
-        <span class="p">(</span>
-            <span class="n">clabel_kwargs</span><span class="p">,</span>
-            <span class="n">_edges_kwargs</span><span class="p">,</span>
-            <span class="n">cbar_kwargs</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_contour_passthrough_kwargs</span><span class="p">(</span>
-            <span class="n">ax</span><span class="p">,</span> <span class="n">clabel_kwargs</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cbar_kwargs</span>
-        <span class="p">)</span>
-
-        <span class="n">inline</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">inline_spacing</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"inline_spacing"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="n">clabel_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"fmt"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">cbar_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_cbar_kwargs</span><span class="p">(</span><span class="n">cbar_kwargs</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
         <span class="c1"># Get aggregated data and mesh cell centers</span>
         <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">fcn</span><span class="o">=</span><span class="n">fcn</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
@@ -1583,30 +1550,6 @@
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">linestyles</span><span class="o">=</span><span class="n">linestyles</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
 
-        <span class="c1"># Handle contour labels</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">label_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,</span> <span class="n">levels</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">skip_max_clbl</span> <span class="k">else</span> <span class="n">levels</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="n">label_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">qset</span><span class="p">,)</span>
-
-        <span class="k">class</span><span class="w"> </span><span class="nc">_NumericFormatter</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">"""Format float without trailing zeros for contour labels."""</span>
-
-            <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="c1"># Use float's repr to avoid recursion (str(self) calls __repr__)</span>
-                <span class="k">return</span> <span class="nb">float</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
-
-        <span class="n">lbls</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">label_levels</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">qset</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">qset</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">_NumericFormatter</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">qset</span><span class="o">.</span><span class="n">levels</span><span class="p">]</span>
-            <span class="n">lbls</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span>
-                <span class="o">*</span><span class="n">label_args</span><span class="p">,</span>
-                <span class="n">inline</span><span class="o">=</span><span class="n">inline</span><span class="p">,</span>
-                <span class="n">inline_spacing</span><span class="o">=</span><span class="n">inline_spacing</span><span class="p">,</span>
-                <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">clabel_kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
-
         <span class="c1"># Add colorbar</span>
         <span class="n">cbar_or_mappable</span> <span class="o">=</span> <span class="n">qset</span>
         <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
@@ -1615,7 +1558,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">lbls</span><span class="p">,</span> <span class="n">cbar_or_mappable</span><span class="p">,</span> <span class="n">qset</span></div>
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cbar_or_mappable</span><span class="p">,</span> <span class="n">qset</span></div>
 </div>
 
 </pre></div>

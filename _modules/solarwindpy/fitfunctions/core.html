@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.fitfunctions.core &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../../../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -329,7 +329,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">getfullargspec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">cleandoc</span><span class="p">,</span> <span class="n">getfullargspec</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">docstring_inheritance</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumpyDocstringInheritanceInitMeta</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">least_squares</span><span class="p">,</span> <span class="n">OptimizeWarning</span>
@@ -408,10 +408,77 @@
 
 <span class="sd">    Constructor parameters are documented in the class docstring, which a</span>
 <span class="sd">    subclass's class docstring inherits; ``__init__`` carries no docstring.</span>
+<span class="sd">    The merged class docstring is put in numpydoc's section order.</span>
 <span class="sd">    """</span>
 
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="FitFunctionMeta.__init__">
+<a class="viewcode-back" href="../../../_autosummary/solarwindpy.fitfunctions.core.FitFunctionMeta.html#solarwindpy.fitfunctions.core.FitFunctionMeta.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_in_numpydoc_section_order</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span></div>
+</div>
 
+
+
+<span class="c1"># The section order of the numpydoc docstring standard, which numpydoc also</span>
+<span class="c1"># renders in: https://numpydoc.readthedocs.io/en/latest/format.html#sections</span>
+<span class="n">_NUMPYDOC_SECTIONS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"Parameters"</span><span class="p">,</span>
+    <span class="s2">"Attributes"</span><span class="p">,</span>
+    <span class="s2">"Methods"</span><span class="p">,</span>
+    <span class="s2">"Returns"</span><span class="p">,</span>
+    <span class="s2">"Yields"</span><span class="p">,</span>
+    <span class="s2">"Receives"</span><span class="p">,</span>
+    <span class="s2">"Other Parameters"</span><span class="p">,</span>
+    <span class="s2">"Raises"</span><span class="p">,</span>
+    <span class="s2">"Warns"</span><span class="p">,</span>
+    <span class="s2">"Warnings"</span><span class="p">,</span>
+    <span class="s2">"See Also"</span><span class="p">,</span>
+    <span class="s2">"Notes"</span><span class="p">,</span>
+    <span class="s2">"References"</span><span class="p">,</span>
+    <span class="s2">"Examples"</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_in_numpydoc_section_order</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return ``doc`` with its sections in numpydoc's order.</span>
+
+<span class="sd">    docstring-inheritance builds a merged docstring in the parent's section</span>
+<span class="sd">    order and appends the sections only the child writes, so a child's</span>
+<span class="sd">    ``Attributes`` would follow the parent's ``See Also`` in ``help()``. A</span>
+<span class="sd">    section numpydoc does not name keeps its place after the section it</span>
+<span class="sd">    followed. ``doc`` is returned unchanged when already in order.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">doc</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="c1"># A section header is a non-indented line followed by a rule of dashes at</span>
+    <span class="c1"># least as long as the title, as numpydoc parses one. An unindented dashed</span>
+    <span class="c1"># underline inside a section body would be misread as a header.</span>
+    <span class="n">starts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">i</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">rule</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+        <span class="k">if</span> <span class="n">title</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">title</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span>
+        <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="p">{</span><span class="s2">"-"</span><span class="p">}</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">starts</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">doc</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span><span class="n">lines</span><span class="p">[</span><span class="n">s</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">starts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)])]</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">_NUMPYDOC_SECTIONS</span><span class="p">:</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">_NUMPYDOC_SECTIONS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">ranks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ranks</span> <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ranks</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">doc</span>
+    <span class="n">ordered</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ranks</span><span class="p">,</span> <span class="n">blocks</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">rb</span><span class="p">:</span> <span class="n">rb</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[:</span> <span class="n">starts</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ordered</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span> <span class="k">if</span> <span class="n">head</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
 
 
 <div class="viewcode-block" id="FitFunction">
@@ -467,6 +534,12 @@
 <span class="sd">        then uses w/(y*ln(10)) for proper error propagation in</span>
 <span class="sd">        log space.</span>
 
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    make_fit : Execute the fitting procedure</span>
+<span class="sd">    popt : Access optimized parameters</span>
+<span class="sd">    rsq : Calculate coefficient of determination</span>
+
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    The fitting procedure uses scipy.optimize.least_squares</span>
@@ -491,12 +564,6 @@
 <span class="sd">    &gt;&gt;&gt; fit.make_fit()</span>
 <span class="sd">    &gt;&gt;&gt; {k: round(float(v), 1) for k, v in fit.popt.items()}</span>
 <span class="sd">    {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
-
-<span class="sd">    See Also</span>
-<span class="sd">    --------</span>
-<span class="sd">    make_fit : Execute the fitting procedure</span>
-<span class="sd">    popt : Access optimized parameters</span>
-<span class="sd">    rsq : Calculate coefficient of determination</span>
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="FitFunction.__init__">
@@ -659,22 +726,23 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">initial_guess_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Initial guess and bounds for each parameter, or None.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""The start and bounds of the last successful fit, per parameter, or None.</span>
+
+<span class="sd">        The start is the one :func:`scipy.optimize.least_squares` began from:</span>
+<span class="sd">        the caller's ``p0``, the class's :attr:`p0` as a subclass's</span>
+<span class="sd">        ``make_fit`` adjusted it, or the feasible default when :attr:`p0` is</span>
+<span class="sd">        None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict or None</span>
-<span class="sd">            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial</span>
-<span class="sd">            guess was made (``p0`` is None) or no fit has set the bounds.</span>
+<span class="sd">            ``{name: _InitialGuessInfo(p0, bounds)}``, or None before a fit</span>
+<span class="sd">            succeeds.</span>
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_p0</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_bounds</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
-            <span class="c1"># NotImplementedError: a p0 with no estimate and no reference</span>
-            <span class="c1"># start (HingeMax) made no guess; the caller supplied the start.</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">argnames</span>
@@ -1294,6 +1362,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pcov</span> <span class="o">=</span> <span class="n">pcov</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chisq_dof</span> <span class="o">=</span> <span class="n">all_chisq</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fit_result</span> <span class="o">=</span> <span class="n">res</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_p0</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">build_TeX_info</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_plotter</span><span class="p">()</span></div>

@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge.Hinge &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge.Hinge &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -405,17 +405,21 @@ a small non-zero plateau slope <span class="math notranslate nohighlight">\(m_2 
 line’s x-intercept <span class="math notranslate nohighlight">\(x_2 = x_h - y_h / m_2 = -17867\)</span>, which puts that
 line through the hinge.</p>
 <p class="rubric">Examples</p>
-<p>Fit a Gaussian with mu=1, sigma=0.8, A=3 plus seeded noise and
-recover those parameters:</p>
+<p>Every hinge fit function shares <code class="docutils literal notranslate"><span class="pre">p0</span></code>, shown here with <a class="reference internal" href="solarwindpy.fitfunctions.hinge.TwoLine.html#solarwindpy.fitfunctions.hinge.TwoLine" title="solarwindpy.fitfunctions.hinge.TwoLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TwoLine</span></code></a>,
+whose parameters are <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">x2,</span> <span class="pre">m1,</span> <span class="pre">m2]</span></code>. Two lines meeting at (5, 10),
+with data on both sides of <code class="docutils literal notranslate"><span class="pre">guess_xs</span></code>, give the estimate:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.gaussians</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">Gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">make_fit</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fit</span><span class="o">.</span><span class="n">popt</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<span class="go">{'mu': 1.0, 'sigma': 0.8, 'A': 3.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">solarwindpy.fitfunctions.hinge</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoLine</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">15</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">TwoLine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guess_xs</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span><span class="o">.</span><span class="n">p0</span><span class="p">]</span>
+<span class="go">['0', '15', '2', '-1']</span>
+</pre></div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">guess_xs</span></code> past every point, the second line has no data and no
+estimate, so <code class="docutils literal notranslate"><span class="pre">p0</span></code> logs a warning and returns the reference hinge:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">TwoLine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">guess_xs</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span><span class="o">.</span><span class="n">p0</span><span class="p">]</span>
+<span class="go">['250', '-1.787e+04', '0.02251', '0.0002251']</span>
 </pre></div>
 </div>
 <dl class="py property">
@@ -532,12 +536,16 @@ kwarg.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.hinge.Hinge.initial_guess_info">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_guess_info</span></span><a class="headerlink" href="#solarwindpy.fitfunctions.hinge.Hinge.initial_guess_info" title="Link to this definition"></a></dt>
-<dd><p>Initial guess and bounds for each parameter, or None.</p>
+<dd><p>The start and bounds of the last successful fit, per parameter, or None.</p>
+<p>The start is the one <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html#scipy.optimize.least_squares" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.least_squares()</span></code></a> began from:
+the caller’s <code class="docutils literal notranslate"><span class="pre">p0</span></code>, the class’s <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.p0" title="solarwindpy.fitfunctions.hinge.Hinge.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> as a subclass’s
+<code class="docutils literal notranslate"><span class="pre">make_fit</span></code> adjusted it, or the feasible default when <a class="reference internal" href="#solarwindpy.fitfunctions.hinge.Hinge.p0" title="solarwindpy.fitfunctions.hinge.Hinge.p0"><code class="xref py py-attr docutils literal notranslate"><span class="pre">p0</span></code></a> is
+None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None when no initial
-guess was made (<code class="docutils literal notranslate"><span class="pre">p0</span></code> is None) or no fit has set the bounds.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None before a fit
+succeeds.</p>
 </dd>
 </dl>
 </dd>

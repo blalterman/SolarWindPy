@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.fitfunctions.power_laws &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../../../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -422,8 +422,9 @@
 <span class="sd">        ------</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If the caller's lower bound on ``x0`` leaves it no room below the</span>
-<span class="sd">            smallest used ``x``, or the caller's ``p0`` starts ``x0`` above</span>
-<span class="sd">            its upper bound. Returned instead when ``return_exception``.</span>
+<span class="sd">            smallest used ``x``, or the caller's ``p0`` starts ``x0`` outside</span>
+<span class="sd">            its bounds or at NaN or infinity. Returned instead when</span>
+<span class="sd">            ``return_exception``.</span>
 <span class="sd">        """</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">used</span><span class="o">.</span><span class="n">x</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argnames</span><span class="p">)</span>
@@ -447,10 +448,17 @@
                 <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
                     <span class="c1"># Malformed p0: the base fit reports it.</span>
                     <span class="n">p0</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"the initial guess p0 starts x0 at </span><span class="si">{</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">, not a finite number"</span>
+                <span class="k">elif</span> <span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
                     <span class="n">e</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="sa">f</span><span class="s2">"the initial guess p0 starts x0 at </span><span class="si">{</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">, above its "</span>
                         <span class="sa">f</span><span class="s2">"upper bound </span><span class="si">{</span><span class="n">ub</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">p0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p0</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lb</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"the initial guess p0 starts x0 at </span><span class="si">{</span><span class="n">p0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">, below its "</span>
+                        <span class="sa">f</span><span class="s2">"lower bound </span><span class="si">{</span><span class="n">lb</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">)</span>
             <span class="k">elif</span> <span class="s2">"p0"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>

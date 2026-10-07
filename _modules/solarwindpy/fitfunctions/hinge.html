@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g553aeb229 documentation</title>
+  <title>solarwindpy.fitfunctions.hinge &mdash; SolarWindPy 0.1.dev1+g828a3a366 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=4b5f1075"></script>
+      <script src="../../../_static/documentation_options.js?v=e0fbe36b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -402,6 +402,25 @@
 <span class="sd">    a small non-zero plateau slope :math:`m_2 = 0.01\,m_1`, and the plateau</span>
 <span class="sd">    line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that</span>
 <span class="sd">    line through the hinge.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Every hinge fit function shares ``p0``, shown here with :class:`TwoLine`,</span>
+<span class="sd">    whose parameters are ``[x1, x2, m1, m2]``. Two lines meeting at (5, 10),</span>
+<span class="sd">    with data on both sides of ``guess_xs``, give the estimate:</span>
+
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from solarwindpy.fitfunctions.hinge import TwoLine</span>
+<span class="sd">    &gt;&gt;&gt; x = np.linspace(0, 15, 100)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.minimum(2 * x, -(x - 15))</span>
+<span class="sd">    &gt;&gt;&gt; [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=5.0).p0]</span>
+<span class="sd">    ['0', '15', '2', '-1']</span>
+
+<span class="sd">    With ``guess_xs`` past every point, the second line has no data and no</span>
+<span class="sd">    estimate, so ``p0`` logs a warning and returns the reference hinge:</span>
+
+<span class="sd">    &gt;&gt;&gt; [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=20.0).p0]</span>
+<span class="sd">    ['250', '-1.787e+04', '0.02251', '0.0002251']</span>
 <span class="sd">    """</span>
 
     <span class="c1"># The author's reference hinge, described in the class Notes.</span>
