@@ -447,3 +447,19 @@ of `hist2d.py`; re-baseline mutation scores after the other units land.
 OWNS: tmp/test-quality-review/linkcheck/
 
 Re-run Sphinx linkcheck (network required) after the `docstring-examples` unit lands.
+
+### plotting-and-docstring-cleanup
+
+OWNS: solarwindpy/plotting/spiral.py, solarwindpy/plotting/hist2d.py, solarwindpy/fitfunctions/core.py, solarwindpy/fitfunctions/hinge.py, tests/plotting/test_spiral.py, tests/fitfunctions/
+
+Runs after PRs #498 and #499 merge (both touch these files). Author decisions: remove
+contour labelling from `SpiralPlot2D` as #498 did for `Hist2D` (parameters, `clabel` code,
+labels in return values, docstring examples), with no deprecation; replace the literal
+`{self.plot_edges!s}` placeholder in the `hist2d.py` docstring with a working reference; in
+merged fit-function class docstrings, put Attributes in numpydoc order, before See Also; give
+`Hinge` a hinge example (or none) in place of the Gaussian example it inherits from
+`FitFunction`.
+
+`HingeMax` keeps raising `NotImplementedError` in its no-estimate branch: the author does not
+yet have a good initial guess for it. The `hingemax-point` step stays parked, not blocking
+the track's close.
