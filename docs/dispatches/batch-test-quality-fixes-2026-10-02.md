@@ -521,3 +521,8 @@ support; delete the unreachable covariance (Cholesky) branch in the fit; state i
 `weights` docstring that a 2-d array is refused; replace the GLS strict xfail with a test that
 a 2-d `weights` raises `InvalidParameterError` with a clear message. Results for 1-d weights
 and for no weights are unchanged. The `cut_spec_by_ssn_band` fixes stand.
+
+Author decision (2026-10-07, from the survivor sort): `Plasma` keeps the caller's row order and
+never sorts by time. Out-of-order timestamps flag a timestamp encoding error that the author's
+upstream data cuts drop; sorting would hide it. Pin it with a test that out-of-order input keeps
+its order (kills `Plasma.set_data` mutant 116).
