@@ -255,3 +255,19 @@ Remaining: 1,377 survivors after recheck, 1,139 of them in `plasma.py`, `hist2d.
 `sidc.py`. Some are unkillable by construction (unit factors of 1.0; `nuc` in the fixture's
 high-drift regime, see Mutation sample). The rest are behaviours with no test that fails when
 they break, the gap the review's Governing Property names.
+
+After the survivor units (PRs #503, #504, #505; master at b8439d96), re-measured on the three
+modules they targeted, with the same script, exclusions and recheck:
+
+| Module | Before (killed / survived) | Score | After (killed / survived) | Score | Recheck flips | Survivors after recheck |
+|---|---|---|---|---|---|---|
+| core/plasma.py | 1544 / 548 | 0.74 | 1687 / 405 | 0.81 | 0 | 405 |
+| fitfunctions/core.py | 470 / 184 | 0.72 | 516 / 124 | 0.81 | 13 | 111 |
+| sunspot_number/sidc.py | 497 / 185 | 0.73 | 517 / 149 | 0.78 | 0 | 149 |
+
+Mutant counts fell where #505 deleted code: the unreachable covariance branch and shape check
+in `fitfunctions/core.py` (654 to 640), the dead band-overlap check in `sidc.py` (682 to 666).
+Remaining across all nine modules: 1,138 survivors after recheck. By kind, they are mutants
+no test can kill (behaviour-identical changes), plotting appearance, error and log wording,
+the two mutmut-excluded docstring functions, and the `hist2d` data paths and remaining
+`plasma.py` physics that need a mutant-by-mutant look; GitHub issue tracks them.
