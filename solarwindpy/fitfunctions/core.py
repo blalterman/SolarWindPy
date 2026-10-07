@@ -395,22 +395,23 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def initial_guess_info(self):
-        r"""Initial guess and bounds for each parameter, or None.
+        r"""The start and bounds of the last successful fit, per parameter, or None.
+
+        The start is the one :func:`scipy.optimize.least_squares` began from:
+        the caller's ``p0``, the class's :attr:`p0` as a subclass's
+        ``make_fit`` adjusted it, or the feasible default when :attr:`p0` is
+        None.
 
         Returns
         -------
         dict or None
-            ``{name: _InitialGuessInfo(p0, bounds)}``, or None when no initial
-            guess was made (``p0`` is None) or no fit has set the bounds.
+            ``{name: _InitialGuessInfo(p0, bounds)}``, or None before a fit
+            succeeds.
         """
         try:
-            p0 = self.p0
+            p0 = self._fit_p0
             bounds = self.fit_bounds
-        except (AttributeError, NotImplementedError):
-            # NotImplementedError: a p0 with no estimate and no reference
-            # start (HingeMax) made no guess; the caller supplied the start.
-            return None
-        if p0 is None:
+        except AttributeError:
             return None
 
         names = self.argnames
@@ -1016,6 +1017,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self._pcov = pcov
         self._chisq_dof = all_chisq
         self._fit_result = res
+        self._fit_p0 = tuple(p0)
 
         self.build_TeX_info()
         self.build_plotter()

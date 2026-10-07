@@ -107,8 +107,8 @@ class PowerLawOffCenter(FitFunction):
         ------
         ValueError
             If the caller's lower bound on ``x0`` leaves it no room below the
-            smallest used ``x``, or the caller's ``p0`` starts ``x0`` above
-            its upper bound. Returned instead when ``return_exception``.
+            smallest used ``x``, or the caller's ``p0`` starts ``x0`` outside
+            its bounds. Returned instead when ``return_exception``.
         """
         x = self.observations.used.x
         n = len(self.argnames)
@@ -136,6 +136,11 @@ class PowerLawOffCenter(FitFunction):
                     e = (
                         f"the initial guess p0 starts x0 at {p0[i]}, above its "
                         f"upper bound {ub[i]}"
+                    )
+                elif p0 is not None and p0.size == n and p0[i] < lb[i]:
+                    e = (
+                        f"the initial guess p0 starts x0 at {p0[i]}, below its "
+                        f"lower bound {lb[i]}"
                     )
             elif "p0" not in kwargs:
                 try:

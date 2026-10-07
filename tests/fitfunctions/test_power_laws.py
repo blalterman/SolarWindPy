@@ -412,22 +412,53 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
 
 
+def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
+    """A caller's ``p0`` starting ``x0`` below its lower bound raises ValueError.
+
+    The error names ``x0``, the start and the bound, in place of scipy's
+    "x0 is infeasible", and ``return_exception`` returns it. The positive
+    control fits the same data from a start inside the bounds.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
+    bounds = ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])
+    p0 = [1.0, 1.0, -5.0]
+    match = (
+        r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at -5\.0, "
+        r"below its lower bound -3\.0"
+    )
+
+    with pytest.raises(ValueError, match=match):
+        obj.make_fit(p0=p0, bounds=bounds)
+    got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+    assert isinstance(got, ValueError) and re.search(match, str(got))
+
+    # Positive control: a start inside the bounds fits.
+    p0[2] = -1.0
+    obj.make_fit(p0=p0, bounds=bounds)
+    # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
+    assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
+
+
 @pytest.mark.parametrize(
-    "x0_bounds, x0",
+    "x0_bounds, x0, start",
     [
         # p0 starts x0 at 0, below the caller's lower bound 0.5.
-        pytest.param((0.5, 10.0), 0.75, id="start-below-lower-bound"),
+        pytest.param((0.5, 10.0), 0.75, 0.5, id="start-below-lower-bound"),
         # p0 starts x0 at 0, above the caller's upper bound -1.
-        pytest.param((-3.0, -1.0), -1.5, id="start-above-upper-bound"),
+        pytest.param((-3.0, -1.0), -1.5, -1.0, id="start-above-upper-bound"),
         # Positive control: the start 0 is already inside the bounds.
-        pytest.param((-3.0, 10.0), 0.5, id="start-inside-bounds"),
+        pytest.param((-3.0, 10.0), 0.5, 0.0, id="start-inside-bounds"),
     ],
 )
-def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0):
+def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0, start):
     """``make_fit`` clips the :attr:`p0` start for ``x0`` into the caller's bounds.
 
     Without the clip, a start outside ``[lb, ub]`` makes scipy refuse the fit
-    ("x0 is infeasible").
+    ("x0 is infeasible"). ``initial_guess_info`` reports the clipped start
+    the fit used, not the unclipped :attr:`p0`.
 
     ON FAILURE: the code is wrong.
     """
@@ -440,6 +471,7 @@ def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0):
     assert obj.popt["A"] == noise_free(4.0)
     assert obj.popt["b"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
+    assert obj.initial_guess_info["x0"].p0 == exact(start)
 
 
 def test_power_law_with_weights():
