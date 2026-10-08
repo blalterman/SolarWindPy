@@ -180,7 +180,7 @@ def test_no_network_refuses_the_download_a_stale_cache_triggers(
 # ---------------------------------------------------------------------------
 # The download, from a local file in SILSO's layout.
 # ---------------------------------------------------------------------------
-# ``silso_m13.csv`` holds five rows of the 13-month smoothed series in SILSO's
+# ``silso_m13.csv`` holds six rows of the 13-month smoothed series in SILSO's
 # layout (https://www.sidc.be/SILSO/infosnmstot): semicolon-separated,
 # space-padded, no header; year, month, decimal year, smoothed sunspot number,
 # standard deviation, observation count, definitive flag; -1 marks a missing
@@ -203,8 +203,10 @@ def test_stale_cache_downloads_the_silso_series_and_loads_it(
     boundary; ``no_network`` stays active, and reading a local path opens no
     socket. Every expectation comes from the file's text, split by hand: the
     index is each row's month start, the columns carry SILSO's values with -1
-    as NaN, the standard error is std / sqrt(n_obs), the flag is a bool, and
-    the cycle is the extrema-table interval holding each time.
+    as NaN (the last row is a month with no smoothed sunspot number yet, -1 in
+    ``ssn``, ``std`` and ``n_obs``), the standard error is std / sqrt(n_obs),
+    the flag is a bool, and the cycle is the extrema-table interval holding
+    each time.
 
     ON FAILURE: the code is wrong, unless SILSO changed its published layout; then update ``silso_m13.csv`` and the column table in ``sidc.py``.
     """
@@ -224,7 +226,10 @@ def test_stale_cache_downloads_the_silso_series_and_loads_it(
     ssn = np.array([float(r[3]) for r in rows])
     std = np.array([float(r[4]) for r in rows])
     n_obs = np.array([float(r[5]) for r in rows])
-    n_obs[n_obs == -1] = np.nan
+    # SILSO's missing-value marker, -1, is NaN after loading.
+    for values in (ssn, std, n_obs):
+        values[values == -1] = np.nan
+    assert np.isnan(ssn[-1]), "the fixture's last row must carry the -1 marker"
 
     expected_index = pd.DatetimeIndex(
         [pd.Timestamp(year=y, month=m, day=1) for y, m in zip(year, month)]
@@ -247,8 +252,8 @@ def test_stale_cache_downloads_the_silso_series_and_loads_it(
     assert data.loc[:, "year"].tolist() == year
     assert data.loc[:, "month"].tolist() == month
     assert data.loc[:, "year_fraction"].to_numpy() == exact([float(r[2]) for r in rows])
-    assert data.loc[:, "ssn"].to_numpy() == exact(ssn)
-    assert data.loc[:, "std"].to_numpy() == exact(std)
+    assert data.loc[:, "ssn"].to_numpy() == exact(ssn, nan_ok=True)
+    assert data.loc[:, "std"].to_numpy() == exact(std, nan_ok=True)
     assert data.loc[:, "n_obs"].to_numpy() == exact(n_obs, nan_ok=True)
     assert data.loc[:, "std_error"].to_numpy() == exact(
         std / np.sqrt(n_obs), nan_ok=True
