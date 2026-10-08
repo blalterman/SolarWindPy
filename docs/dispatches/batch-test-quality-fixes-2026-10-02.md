@@ -581,3 +581,9 @@ Author decisions (2026-10-07, PR #510): spacecraft and auxiliary data come from 
 as the plasma data and are sorted the same way at construction, under the same warning; the
 index-equality checks raise ValueError for genuinely mismatched indices. Missing timestamps
 (NaT) log a warning with their count, and the rows are kept.
+
+Author decision revised (2026-10-08): `Plasma` rejects missing timestamps (NaT): construction
+raises ValueError naming how many. This replaces "warn and keep"; NaT handling downstream in
+`Plasma` becomes dead and is removed. Add the 15 tests from the sort of #510's new-code
+survivors (unit `plasma-order-check-tests`, OWNS solarwindpy/core/plasma.py,
+tests/core/test_plasma.py).
