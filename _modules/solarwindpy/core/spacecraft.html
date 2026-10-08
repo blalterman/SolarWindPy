@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+gaf4a49a30 documentation</title>
+  <title>solarwindpy.core.spacecraft &mdash; SolarWindPy 0.1.dev1+ga1e7ff393 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0077d58f"></script>
+      <script src="../../../_static/documentation_options.js?v=096dbbaa"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -404,10 +404,11 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        vector.Vector</span>
-<span class="sd">            Position vector with x, y, z components.</span>
+<span class="sd">            Position vector with x, y, z components, built from the</span>
+<span class="sd">            spacecraft's already-checked columns, so it skips the time checks.</span>
 <span class="sd">        """</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"pos"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"M"</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -433,7 +434,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        vector.Vector</span>
-<span class="sd">            Velocity vector with x, y, z components.</span>
+<span class="sd">            Velocity vector with x, y, z components, built from the</span>
+<span class="sd">            spacecraft's already-checked columns, so it skips the time checks.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -442,7 +444,7 @@
 <span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"M"</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">)]</span>
-            <span class="k">return</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># noqa: F841</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">"Spacecraft doesn't know it's velocity."</span><span class="p">)</span>
 
@@ -539,10 +541,13 @@
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If ``data`` is not a :class:`pandas.DataFrame`.</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If the time index holds missing timestamps (``NaT``), naming how</span>
 <span class="sd">            many.</span>
 <span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"Spacecraft data"</span><span class="p">)</span>
         <span class="c1"># Sorting first means every Vector built from these data later sees</span>
         <span class="c1"># them in order, so no accessor repeats the order warning.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_put_in_time_order</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"Spacecraft data"</span><span class="p">)</span>

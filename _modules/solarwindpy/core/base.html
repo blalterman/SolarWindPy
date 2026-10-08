@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.base &mdash; SolarWindPy 0.1.dev1+gaf4a49a30 documentation</title>
+  <title>solarwindpy.core.base &mdash; SolarWindPy 0.1.dev1+ga1e7ff393 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0077d58f"></script>
+      <script src="../../../_static/documentation_options.js?v=096dbbaa"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -551,14 +551,33 @@
         <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">behind</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">behind</span><span class="p">,</span> <span class="n">order</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_require_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise :class:`TypeError` unless ``data`` is a :class:`pandas.DataFrame`.</span>
+
+<span class="sd">        Run before anything reads ``data``'s index or columns, so the error</span>
+<span class="sd">        names the expected type rather than a missing attribute.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : object</span>
+<span class="sd">            The data to check.</span>
+<span class="sd">        what : str</span>
+<span class="sd">            Names the checked data in the error message.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> must be a pandas DataFrame, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_put_in_time_order</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">refusal</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Return ``data`` in time order, warning per call about rows out of order.</span>
 
 <span class="sd">        Missing timestamps (``NaT``) raise. Rows earlier than the row before</span>
-<span class="sd">        them are counted and located in one warning per call, then sorted with a stable</span>
-<span class="sd">        sort, so rows sharing a timestamp keep their order.</span>
+<span class="sd">        them are counted and located in one warning per call, then sorted</span>
+<span class="sd">        with a stable sort, so rows sharing a timestamp keep their order.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -649,29 +668,40 @@
 <span class="sd">    ----------</span>
 <span class="sd">    data : :class:`pandas.DataFrame`</span>
 <span class="sd">        Data used to initialise the object.</span>
-<span class="sd">    _time_checked : bool, optional</span>
-<span class="sd">        Private, keyword only. True when ``data`` come from an object that</span>
-<span class="sd">        already checked their time index, such as a</span>
-<span class="sd">        :class:`~solarwindpy.core.plasma.Plasma` building its ions; the</span>
-<span class="sd">        missing-time and order checks are then skipped at construction, so</span>
-<span class="sd">        one problem is reported once. Objects built directly keep the default</span>
-<span class="sd">        and run every check. Later calls to :meth:`set_data` always check.</span>
+<span class="sd">    _time_checked : :class:`pandas.Index`, optional</span>
+<span class="sd">        Private, keyword only. Not for users: objects built directly leave it</span>
+<span class="sd">        unset and run every time check. See Notes.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Subclasses override :meth:`set_data` to validate the underlying</span>
 <span class="sd">    :class:`pandas.DataFrame` structure.</span>
+
+<span class="sd">    ``_time_checked`` is the switch that skips the missing-time (``NaT``) and</span>
+<span class="sd">    time-order checks at construction. It exists for children built from data</span>
+<span class="sd">    their parent already checked, such as the ions a</span>
+<span class="sd">    :class:`~solarwindpy.core.plasma.Plasma` builds or the unit vector of a</span>
+<span class="sd">    :class:`~solarwindpy.core.vector.Vector`, so one problem in the parent's</span>
+<span class="sd">    times is reported once rather than again by every child. The builder</span>
+<span class="sd">    passes the parent's own time index; the checks are skipped only when</span>
+<span class="sd">    ``data``'s index equals it, so a child whose times differ from its</span>
+<span class="sd">    parent's is checked like any other object. A child built from its</span>
+<span class="sd">    parent's columns shares the parent's index, and the comparison then</span>
+<span class="sd">    returns without reading a single timestamp. Later calls to</span>
+<span class="sd">    :meth:`set_data` always check.</span>
 <span class="sd">    """</span>
 
 <div class="viewcode-block" id="Base.__init__">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.core.base.Base.html#solarwindpy.core.base.Base.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_time_checked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_time_checked</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_checked</span> <span class="o">=</span> <span class="n">_time_checked</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_time_checked</span> <span class="o">=</span> <span class="kc">False</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_checked</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="Base.mi_tuples">
@@ -713,7 +743,8 @@
         <span class="k">if</span> <span class="n">new</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"You can't set an object with empty data."</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_checked</span><span class="p">:</span>
+        <span class="n">checked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_checked</span>
+        <span class="k">if</span> <span class="n">checked</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">new</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">checked</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_verify_datetimeindex</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 

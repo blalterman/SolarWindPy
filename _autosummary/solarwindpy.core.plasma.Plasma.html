@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+gaf4a49a30 documentation</title>
+  <title>solarwindpy.core.plasma.Plasma &mdash; SolarWindPy 0.1.dev1+ga1e7ff393 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0077d58f"></script>
+      <script src="../_static/documentation_options.js?v=096dbbaa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -659,7 +659,8 @@ selected from the data.</p>
 <dd class="field-odd"><dl>
 <dt><strong>new</strong><span class="classifier"><a class="reference internal" href="solarwindpy.core.spacecraft.Spacecraft.html#solarwindpy.core.spacecraft.Spacecraft" title="solarwindpy.core.spacecraft.Spacecraft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Spacecraft</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>Spacecraft trajectory object containing position and velocity data,
 at the plasma data’s times. A spacecraft sorts its own data by time
-when built, so it holds them in the plasma’s order.</p>
+when built, so it holds them in the plasma’s order; the sort is
+stable, so rows that share a timestamp keep their input order.</p>
 </dd>
 </dl>
 </dd>
@@ -705,7 +706,8 @@ plasma frame transformation.</p>
 <dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>Additional measurements such as data quality flags, derived
 parameters, or instrument-specific metadata, at the plasma data’s
 times. Times in another order are reordered to the plasma’s, with
-a warning.</p>
+a warning, by a stable sort: rows that share a timestamp keep
+their input order.</p>
 </dd>
 </dl>
 </dd>
@@ -744,10 +746,13 @@ instrument operational parameters.</p>
 <span class="sig-name descname"><span class="pre">set_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/solarwindpy/core/plasma.html#Plasma.set_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.core.plasma.Plasma.set_data" title="Link to this definition"></a></dt>
 <dd><p>Set the data in time order, logging its shape and any columns dropped.</p>
 <p>Rows out of time order are sorted with a warning, as at construction
-(see <a class="reference internal" href="#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a>).</p>
+(see <a class="reference internal" href="#solarwindpy.core.plasma.Plasma" title="solarwindpy.core.plasma.Plasma"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plasma</span></code></a>). The magnetic field is rebuilt from columns of
+the data just checked, so its time checks are skipped.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">new</span></code> is not a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>.</p>
+</dd>
 <dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the column levels are not named <code class="docutils literal notranslate"><span class="pre">&quot;M&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;C&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;S&quot;</span></code>;
 if the time index holds missing timestamps (<code class="docutils literal notranslate"><span class="pre">NaT</span></code>); or, while
 spacecraft or auxiliary data are attached, if the rows are out of
@@ -1006,6 +1011,9 @@ species are passed.</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>A vector computed here is derived row by row from the plasma’s
+already-checked data, so it skips the time checks.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1033,7 +1041,9 @@ of-mass species.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>dv</strong><span class="classifier"><a class="reference internal" href="solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector.Vector</span></code></a></span></dt><dd></dd>
+<dt><strong>dv</strong><span class="classifier"><a class="reference internal" href="solarwindpy.core.vector.Vector.html#solarwindpy.core.vector.Vector" title="solarwindpy.core.vector.Vector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector.Vector</span></code></a></span></dt><dd><p>Derived row by row from the plasma’s already-checked data, so it
+skips the time checks.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1356,7 +1366,9 @@ the proton scalar temperature <span class="math notranslate nohighlight">\(T_p\)
 <div><p><span class="math notranslate nohighlight">\(w_e^2 = \frac{m_p}{m_e} w_p^2\)</span>.</p>
 </div></blockquote>
 <p><span class="math notranslate nohighlight">\(T_p\)</span> is taken from species <code class="docutils literal notranslate"><span class="pre">p</span></code> if the plasma holds it, and
-otherwise from the core protons <code class="docutils literal notranslate"><span class="pre">p1</span></code>; the beam <code class="docutils literal notranslate"><span class="pre">p2</span></code> is never used.</p>
+otherwise from the core protons <code class="docutils literal notranslate"><span class="pre">p1</span></code>; the beam <code class="docutils literal notranslate"><span class="pre">p2</span></code> is never used.
+The electron <a class="reference internal" href="solarwindpy.core.ions.Ion.html#solarwindpy.core.ions.Ion" title="solarwindpy.core.ions.Ion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ion</span></code></a> is derived row by row
+from the plasma’s already-checked data, so it skips the time checks.</p>
 </dd></dl>
 
 <dl class="py method">

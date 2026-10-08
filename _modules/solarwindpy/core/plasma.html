@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gaf4a49a30 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+ga1e7ff393 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=0077d58f"></script>
+      <script src="../../../_static/documentation_options.js?v=096dbbaa"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -534,10 +534,7 @@
 <span class="sd">        &gt;&gt;&gt; plasma = Plasma(data, "a", "p1")</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"Plasma data must be a pandas DataFrame, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"Plasma data"</span><span class="p">)</span>
         <span class="c1"># Nothing is attached yet, so `set_data` sorts rather than refusing.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_spacecraft</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -865,6 +862,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ions</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_ions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Build one :class:`~solarwindpy.core.ions.Ion` per species.</span>
+
+<span class="sd">        Each ion is built from columns of the plasma data, whose time index</span>
+<span class="sd">        :meth:`set_data` already checked; selecting columns cannot introduce</span>
+<span class="sd">        missing or reordered times, so the ions skip the time checks</span>
+<span class="sd">        (see :class:`~solarwindpy.core.base.Base`).</span>
+<span class="sd">        """</span>
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">"+"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
@@ -872,7 +876,7 @@
         <span class="n">species</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
         <span class="n">ions_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-            <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">ions</span><span class="o">.</span><span class="n">Ion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">}</span>
+            <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">ions</span><span class="o">.</span><span class="n">Ion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">}</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ions</span> <span class="o">=</span> <span class="n">ions_</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_species</span> <span class="o">=</span> <span class="n">species</span>
@@ -934,7 +938,8 @@
 <span class="sd">        new : Spacecraft or None</span>
 <span class="sd">            Spacecraft trajectory object containing position and velocity data,</span>
 <span class="sd">            at the plasma data's times. A spacecraft sorts its own data by time</span>
-<span class="sd">            when built, so it holds them in the plasma's order.</span>
+<span class="sd">            when built, so it holds them in the plasma's order; the sort is</span>
+<span class="sd">            stable, so rows that share a timestamp keep their input order.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -993,7 +998,8 @@
 <span class="sd">            Additional measurements such as data quality flags, derived</span>
 <span class="sd">            parameters, or instrument-specific metadata, at the plasma data's</span>
 <span class="sd">            times. Times in another order are reordered to the plasma's, with</span>
-<span class="sd">            a warning.</span>
+<span class="sd">            a warning, by a stable sort: rows that share a timestamp keep</span>
+<span class="sd">            their input order.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -1202,10 +1208,13 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the data in time order, logging its shape and any columns dropped.</span>
 
 <span class="sd">        Rows out of time order are sorted with a warning, as at construction</span>
-<span class="sd">        (see :class:`Plasma`).</span>
+<span class="sd">        (see :class:`Plasma`). The magnetic field is rebuilt from columns of</span>
+<span class="sd">        the data just checked, so its time checks are skipped.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If ``new`` is not a :class:`pandas.DataFrame`.</span>
 <span class="sd">        ValueError</span>
 <span class="sd">            If the column levels are not named ``"M"``, ``"C"`` and ``"S"``;</span>
 <span class="sd">            if the time index holds missing timestamps (``NaT``); or, while</span>
@@ -1213,6 +1222,7 @@
 <span class="sd">            time order (sorting would misalign them) or the times differ from</span>
 <span class="sd">            the current time index, which the attached data share.</span>
 <span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_dataframe</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="s2">"Plasma data"</span><span class="p">)</span>
         <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_time</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
@@ -1272,7 +1282,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"no columns dropped from plasma"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_bfield</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">BField</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">),</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">"S"</span><span class="p">),</span> <span class="n">_time_checked</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
         <span class="p">)</span></div>
 
 
@@ -1625,6 +1635,11 @@
 <span class="sd">            A :py:class:`~solarwindpy.core.vector.Vector` for one species</span>
 <span class="sd">            string, or a `pd.Series` of them indexed by species when several</span>
 <span class="sd">            species are passed.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        A vector computed here is derived row by row from the plasma's</span>
+<span class="sd">        already-checked data, so it skips the time checks.</span>
 <span class="sd">        """</span>
         <span class="n">stuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chk_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
 
@@ -1636,7 +1651,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">m_in_mp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">charge_states</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
                 <span class="p">)</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">m2q</span><span class="p">)</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">project_m2q</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -1656,7 +1671,7 @@
                     <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_species_weighted_mean</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">rhos</span><span class="p">),</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_species_weighted_mean</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">rhos</span><span class="p">),</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">v</span></div>
@@ -1674,6 +1689,13 @@
 <span class="sd">        This relies on species masking when the data are set: a species'</span>
 <span class="sd">        density and velocity are missing together, so a weight never pairs</span>
 <span class="sd">        with a missing velocity, nor a velocity with a missing weight.</span>
+
+<span class="sd">        The mean is computed row by row and keeps the rows of ``vectors``,</span>
+<span class="sd">        which come from the plasma's already-checked data. It introduces no</span>
+<span class="sd">        missing or reordered times, so the</span>
+<span class="sd">        :class:`~solarwindpy.core.vector.Vector` callers build from it is</span>
+<span class="sd">        passed the plasma's time index and skips the time checks (see</span>
+<span class="sd">        :class:`~solarwindpy.core.base.Base`).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1720,6 +1742,8 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dv : vector.Vector</span>
+<span class="sd">            Derived row by row from the plasma's already-checked data, so it</span>
+<span class="sd">            skips the time checks.</span>
 
 <span class="sd">        See Also</span>
 <span class="sd">        --------</span>
@@ -1736,7 +1760,7 @@
         <span class="n">v1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">project_m2q</span><span class="o">=</span><span class="n">project_m2q</span><span class="p">)</span><span class="o">.</span><span class="n">cartesian</span>
 
         <span class="n">dv</span> <span class="o">=</span> <span class="n">v0</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
-        <span class="n">dv</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dv</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dv</span></div>
 
@@ -2302,6 +2326,8 @@
 
 <span class="sd">        :math:`T_p` is taken from species ``p`` if the plasma holds it, and</span>
 <span class="sd">        otherwise from the core protons ``p1``; the beam ``p2`` is never used.</span>
+<span class="sd">        The electron :class:`~solarwindpy.core.ions.Ion` is derived row by row</span>
+<span class="sd">        from the plasma's already-checked data, so it skips the time checks.</span>
 <span class="sd">        """</span>
 
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
@@ -2369,7 +2395,7 @@
         <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">ne</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
         <span class="n">electrons</span> <span class="o">=</span> <span class="n">electrons</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">electrons</span> <span class="o">=</span> <span class="n">ions</span><span class="o">.</span><span class="n">Ion</span><span class="p">(</span><span class="n">electrons</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">electrons</span> <span class="o">=</span> <span class="n">ions</span><span class="o">.</span><span class="n">Ion</span><span class="p">(</span><span class="n">electrons</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">,</span> <span class="n">_time_checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="n">cols</span> <span class="o">=</span> <span class="n">electrons</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span>
