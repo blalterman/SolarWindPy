@@ -179,6 +179,90 @@ class Core(ABC):
             )
         return species
 
+    @staticmethod
+    def _time_order(index: pd.Index, what: str):
+        r"""Locate the rows of ``index`` out of time order, refusing ``NaT``.
+
+        Parameters
+        ----------
+        index : pd.Index
+            The time index to check.
+        what : str
+            Names the checked frame in the error message.
+
+        Returns
+        -------
+        behind : np.ndarray
+            Positions of rows earlier than the row before them.
+        order : np.ndarray or None
+            The stable sort putting ``index`` in time order, so rows sharing a
+            timestamp keep their order; None when ``index`` is in order.
+
+        Raises
+        ------
+        ValueError
+            If ``index`` holds any ``NaT``, naming how many.
+        """
+        missing = int(index.isna().sum())
+        if missing:
+            raise ValueError(
+                f"{what} time index has {missing} of {len(index)} "
+                "timestamps missing (NaT); drop those rows first"
+            )
+        values = index.to_numpy()
+        behind = np.flatnonzero(values[1:] < values[:-1]) + 1
+        order = np.argsort(values, kind="stable") if len(behind) else None
+        return behind, order
+
+    def _put_in_time_order(
+        self, data: pd.DataFrame, what: str, refusal: str | None = None
+    ) -> pd.DataFrame:
+        r"""Return ``data`` in time order, warning once about rows out of order.
+
+        Missing timestamps (``NaT``) raise. Rows earlier than the row before
+        them are counted and located in one warning, then sorted with a stable
+        sort, so rows sharing a timestamp keep their order.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Data indexed by time.
+        what : str
+            Names the checked frame in messages.
+        refusal : str, optional
+            When given, out-of-order rows raise :class:`ValueError` ending with
+            this reason instead of being sorted.
+
+        Returns
+        -------
+        pd.DataFrame
+            ``data`` in time order; the input itself when already in order.
+
+        Raises
+        ------
+        ValueError
+            If ``data``'s index holds ``NaT``, or is out of order and
+            ``refusal`` is given.
+        """
+        index = data.index
+        behind, order = self._time_order(index, what)
+        if order is None:
+            return data
+        if refusal is not None:
+            raise ValueError(
+                f"{len(behind)} of {len(index)} {what} rows are earlier than "
+                f"the row before them; {refusal}"
+            )
+        self.logger.warning(
+            "%d of %d rows are earlier than the row before them, first at "
+            "rows %s (times %s); sorting the data by time",
+            len(behind),
+            len(index),
+            behind[:5].tolist(),
+            [str(t) for t in index[behind[:5]]],
+        )
+        return data.iloc[order]
+
     def _verify_datetimeindex(self, data: pd.DataFrame) -> None:
         if not isinstance(data.index, pd.DatetimeIndex):
             self.logger.warning(

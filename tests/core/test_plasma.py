@@ -3346,8 +3346,9 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     index. Per the author, all three come from one source, so all three are
     sorted the same way: the index is the example's sorted epoch, the
     spacecraft x position is the example's [-42, -22, -34], the auxiliary
-    column reads 0, 1, 2, and one order warning is logged, with no reordering
-    warning for the spacecraft or auxiliary data.
+    column reads 0, 1, 2, and the plasma logs one order warning, with no
+    reordering warning for the spacecraft or auxiliary data. (The spacecraft
+    logged its own order warning when built, before the plasma; not counted.)
 
     ON FAILURE: the code is wrong.
     """
@@ -3361,6 +3362,7 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     ).iloc[perm]
     aux.columns.names = ["M", "C", "S"]
 
+    caplog.clear()
     with caplog.at_level("WARNING", logger="solarwindpy"):
         p = plasma.Plasma(data, *ref.species, spacecraft=sc, auxiliary_data=aux)
 
@@ -3490,51 +3492,128 @@ def test_set_data_refuses_out_of_order_data_while_frames_are_attached(attached):
     assert p.data is before
 
 
-@pytest.mark.parametrize("setter", ["set_spacecraft", "set_auxiliary_data"])
-def test_setters_refuse_missing_timestamps(setter):
-    r"""Spacecraft or auxiliary data with NaT in their index raise, naming the count.
+def test_set_auxiliary_data_refuses_missing_timestamps():
+    r"""Auxiliary data with NaT in their index raise, naming the count.
+
+    A spacecraft cannot reach its setter with NaT: `Spacecraft` refuses it when
+    built (tests/core/test_spacecraft.py).
 
     ON FAILURE: the code is wrong.
     """
     p = swp.examples.load_plasma()
     times = pd.DatetimeIndex([p.epoch[0], pd.NaT, p.epoch[2]])
-    if setter == "set_spacecraft":
-        frame = spacecraft.Spacecraft(
-            p.spacecraft.data.set_axis(times, axis=0), "PSP", "HCI"
-        )
-    else:
-        frame = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=times)
-        frame.columns.names = ["M", "C", "S"]
+    aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=times)
+    aux.columns.names = ["M", "C", "S"]
     with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
-        getattr(p, setter)(frame)
+        p.set_auxiliary_data(aux)
 
 
-def test_setters_reorder_frames_holding_the_plasma_times_in_another_order(caplog):
-    r"""Spacecraft or auxiliary data at the plasma's times, reordered, are put in its order.
+def test_set_auxiliary_data_reorders_the_plasma_times_given_in_another_order(caplog):
+    r"""Auxiliary data at the plasma's times, reordered, are put in its order.
 
-    Each frame's rows are passed in order 2, 0, 1. Per the author, a setter
-    called later reorders them to the plasma's order with one warning each: the
-    auxiliary column (0, 1, 2 in time order) reads 0, 1, 2 again and the
-    spacecraft x position is the example's [-42, -22, -34].
+    The rows are passed in order 2, 0, 1. Per the author, the setter called
+    later reorders them to the plasma's order with one warning: the column
+    (0, 1, 2 in time order) reads 0, 1, 2 again.
 
     ON FAILURE: the code is wrong.
     """
     p = swp.examples.load_plasma()
-    perm = [2, 0, 1]
     aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=p.epoch)
     aux.columns.names = ["M", "C", "S"]
-    sc = spacecraft.Spacecraft(p.spacecraft.data.iloc[perm], "PSP", "HCI")
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        p.set_auxiliary_data(aux.iloc[perm])
-        p.set_spacecraft(sc)
+        p.set_auxiliary_data(aux.iloc[[2, 0, 1]])
 
-    assert len(_warnings(caplog, "in another order")) == 2
+    assert len(_warnings(caplog, "in another order")) == 1
     assert p.auxiliary_data.index.equals(p.epoch)
     assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
-    assert p.spacecraft.data.index.equals(p.epoch)
+
+
+_PERM = [2, 0, 1]
+
+
+def _example_aux(index):
+    """One auxiliary column reading 0, 1, 2 in the example's time order, on ``index``."""
+    ref = swp.examples.load_plasma()
+    aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=ref.epoch)
+    aux.columns.names = ["M", "C", "S"]
+    return aux.loc[index]
+
+
+def _example_sc(rows):
+    """The example spacecraft built from its rows in the order ``rows``."""
+    data = swp.examples.load_plasma().spacecraft.data.iloc[rows]
+    return spacecraft.Spacecraft(data, "PSP", "HCI")
+
+
+def _built_out_of_order():
+    """Plasma, spacecraft data and aux, all passed in order 2, 0, 1."""
+    ref = swp.examples.load_plasma()
+    data = ref.data.iloc[_PERM]
+    sc_data = ref.spacecraft.data.iloc[_PERM]
+    sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
+    return plasma.Plasma(
+        data, *ref.species, spacecraft=sc, auxiliary_data=_example_aux(data.index)
+    )
+
+
+def _set_data_then_attach():
+    """`set_data` with rows 2, 0, 1 on a bare plasma, then both frames attached."""
+    p = _plasma_alone()
+    p.set_data(swp.examples.load_plasma().data.iloc[_PERM])
+    p.set_spacecraft(_example_sc([0, 1, 2]))
+    p.set_auxiliary_data(_example_aux(p.epoch))
+    return p
+
+
+def _setters_given_another_order():
+    """Both setters given the plasma's times in order 2, 0, 1."""
+    p = _plasma_alone()
+    p.set_spacecraft(_example_sc(_PERM))
+    p.set_auxiliary_data(_example_aux(p.epoch[_PERM]))
+    return p
+
+
+def _dropped_species():
+    """`drop_species` on a plasma built out of order with both frames."""
+    return _built_out_of_order().drop_species("a")
+
+
+def _self_sorted_spacecraft_attached():
+    """A standalone spacecraft built from rows 2, 0, 1 attached to the example."""
+    p = _example_with_aux_only()
+    p.set_spacecraft(_example_sc(_PERM))
+    return p
+
+
+@pytest.mark.parametrize(
+    "build",
+    [
+        _built_out_of_order,
+        _set_data_then_attach,
+        _setters_given_another_order,
+        _dropped_species,
+        _self_sorted_spacecraft_attached,
+    ],
+)
+def test_plasma_spacecraft_and_auxiliary_data_stay_aligned(build):
+    r"""After every path that orders data, the three frames share one index, row for row.
+
+    Per the author, plasma, spacecraft and auxiliary data must align. Each path
+    starts from rows passed out of order, and the stored values must match
+    their times: the example spacecraft x position [-42, -22, -34] and the
+    auxiliary column 0, 1, 2 in time order.
+
+    ON FAILURE: the code is wrong; a path leaves the frames misaligned.
+    """
+    p = build()
+    ref = swp.examples.load_plasma()
+    assert p.data.index.equals(ref.epoch)
+    assert p.spacecraft.data.index.equals(p.data.index)
+    assert p.auxiliary_data.index.equals(p.data.index)
     assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
         [-42.0, -22.0, -34.0]
     )
+    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 
 def _minutes(n):

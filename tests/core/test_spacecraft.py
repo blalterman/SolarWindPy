@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
@@ -13,6 +14,7 @@ from . import test_base as base
 import solarwindpy as swp
 from solarwindpy.core import vector
 from solarwindpy.core import spacecraft
+from tests.tolerances import exact
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -180,18 +182,45 @@ class TestPSP(SpacecraftTestBase, TestCase):
         pdt.assert_frame_equal(carr, ot.carrington)
 
 
-def test_out_of_order_spacecraft_data_warn_once(caplog):
-    r"""A spacecraft built from out-of-order data logs the order warning once.
+def _warnings(caplog):
+    return [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
 
-    The example trajectory's three rows are passed in order 2, 0, 1. Building
-    one `Spacecraft` is one user-facing object, so the base class's "not
-    monotonically increasing" warning appears once, not once per internal
-    call that validates the same data.
 
-    ON FAILURE: the code is wrong; the data are validated more than once.
+def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
+    r"""Out-of-order spacecraft data warn once when built, are sorted, and warn no more.
+
+    The example trajectory's rows are passed in order 2, 0, 1. Per the author, a
+    standalone `Spacecraft` follows `Plasma`'s time rule: one warning reporting
+    1 of 3 rows out of order, then the rows sorted, so the x position reads the
+    example's [-42, -22, -34] in time order. Accessors built from the sorted
+    data log nothing, however often they are called.
+
+    ON FAILURE: the code is wrong.
     """
-    data = swp.examples.load_plasma().spacecraft.data.iloc[[2, 0, 1]]
+    ref = swp.examples.load_plasma().spacecraft
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        spacecraft.Spacecraft(data, "PSP", "HCI")
-    warned = [r for r in caplog.records if "monotonically" in r.getMessage()]
-    assert len(warned) == 1
+        sc = spacecraft.Spacecraft(ref.data.iloc[[2, 0, 1]], "PSP", "HCI")
+    (message,) = _warnings(caplog)
+    assert "1 of 3 rows are earlier than the row before them" in message
+
+    caplog.clear()
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        for _ in range(2):
+            sc.position, sc.pos, sc.r, sc.velocity, sc.v, sc.distance2sun
+    assert _warnings(caplog) == []
+
+    assert sc.data.index.equals(ref.data.index)
+    assert sc.position.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+
+
+def test_spacecraft_refuses_missing_timestamps():
+    r"""A spacecraft whose time index holds NaT raises ValueError naming the count.
+
+    ON FAILURE: the code is wrong.
+    """
+    data = swp.examples.load_plasma().spacecraft.data
+    times = pd.DatetimeIndex([data.index[0], pd.NaT, data.index[2]])
+    with pytest.raises(
+        ValueError, match=r"1 of 3 timestamps missing \(NaT\); drop those rows first"
+    ):
+        spacecraft.Spacecraft(data.set_axis(times, axis=0), "PSP", "HCI")
