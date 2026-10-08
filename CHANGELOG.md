@@ -184,8 +184,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   row. `set_data` called directly sorts out-of-order rows with a warning. While
   spacecraft or auxiliary data are attached, it instead raises `ValueError` for rows out
   of order, since sorting would misalign the attached frames. It also raises then for
-  rows at other times than the current index. `set_auxiliary_data` refuses `NaT`, and reorders auxiliary data holding
-  the plasma's times in another order to the plasma's, with a warning.
+  rows at other times than the current index.
+- `set_auxiliary_data` refuses `NaT`. It reorders auxiliary data holding the plasma's
+  times in another order to the plasma's, with a warning.
 - `set_spacecraft` and `set_auxiliary_data` raise `ValueError` instead of
   `AssertionError` for a mismatched time index or wrong column-level names, and wrong
   level names in `Plasma` data raise `ValueError` instead of `KeyError`. Plasma data's
@@ -437,7 +438,8 @@ These change computed values; rerun any analysis that used them.
 ### Migration
 
 - Catch `ValueError` where you caught `AssertionError` or `KeyError` from
-  `set_spacecraft`, `set_auxiliary_data` and the column-level-name checks.
+  `set_spacecraft`, `set_auxiliary_data`, the column-level-name checks and
+  `Hist2D.take_data_in_yrange_across_x` (a zero-width or inverted range).
 - Catch `TypeError` where you caught `AttributeError` for input that is not a
   `pandas.DataFrame`.
 - Drop rows with missing timestamps (`NaT`) before building a `Plasma`, `Spacecraft`,
