@@ -194,6 +194,13 @@ class AggPlot(base.Base):
     def _edges_from_intervals(intervals):
         """Return the edges of contiguous bins and the side they close on.
 
+        The empty test comes first, and ``or`` short-circuits on it, so the
+        contiguity test never sees empty intervals. That test alone would
+        pass them: comparing ``intervals.left[1:]`` with
+        ``intervals.right[:-1]`` gives an empty array, whose ``all()`` is
+        True. Empty intervals would then reach ``intervals.right[-1]`` and
+        raise :class:`IndexError` instead of the :class:`ValueError` below.
+
         Raises
         ------
         ValueError

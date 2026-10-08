@@ -3447,6 +3447,31 @@ def test_set_data_refuses_missing_timestamps():
         p.set_data(data)
 
 
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda p, values: plasma.Plasma(values, *p.species),
+        lambda p, values: p.set_data(values),
+    ],
+    ids=["constructor", "set_data"],
+)
+def test_data_that_is_not_a_dataframe_raise_type_error_naming_the_type(build):
+    r"""Plasma data given as an array raise TypeError naming both types.
+
+    The example plasma's values as a numpy array are refused, at construction
+    and by `set_data` called directly alike, with a message naming the
+    expected DataFrame and the ndarray received, before any attribute of the
+    array is read.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _plasma_alone()
+    with pytest.raises(
+        TypeError, match=r"^Plasma data must be a pandas DataFrame, not ndarray$"
+    ):
+        build(p, p.data.to_numpy())
+
+
 def test_set_data_sorts_out_of_order_data_with_one_warning(caplog):
     r"""`set_data` called directly sorts out-of-order rows, with one order warning.
 

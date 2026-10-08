@@ -18,11 +18,7 @@ SC_FRAME = "HCI"
 
 
 def _example_plasma():
-    """Example plasma with its spacecraft and two auxiliary columns.
-
-    The example epochs are 1995-01-01, 2022-03-23 and 2022-10-09, so a start or
-    stop date in 2022 keeps a known subset of rows.
-    """
+    """Example plasma with its spacecraft and two auxiliary columns."""
     p = swp.examples.load_plasma()
     # What the tests below assume of the example data.
     assert p.species == ("a", "e", "p1", "p2"), "example plasma species changed"
@@ -91,7 +87,9 @@ def test_save_then_load_round_trips_data_spacecraft_and_auxiliary_data(tmp_path)
 def test_save_writes_data_spacecraft_and_aux_at_the_default_keys(tmp_path):
     """`save` stores data at "FC", spacecraft at "SC" and aux at "FC_AUX".
 
-    These are the documented defaults that `load_from_file` reads back.
+    These are the documented defaults that `load_from_file` reads back. "FC"
+    holds the plasma's measured columns; the scalar thermal speed is derived
+    from them and recomputed on load, so it is not written.
 
     ON FAILURE: the code is wrong.
     """
@@ -100,6 +98,9 @@ def test_save_writes_data_spacecraft_and_aux_at_the_default_keys(tmp_path):
     p.save(fname)
     with pd.HDFStore(fname, mode="r") as store:
         assert sorted(store.keys()) == ["/FC", "/FC_AUX", "/SC"]
+    measured = p.data.drop("scalar", axis=1, level="C")
+    assert "scalar" in p.data.columns.get_level_values("C"), "nothing was dropped"
+    _assert_same_frame(pd.read_hdf(fname, key="FC"), measured)
     _assert_same_frame(pd.read_hdf(fname, key="SC"), p.spacecraft.data)
     _assert_same_frame(pd.read_hdf(fname, key="FC_AUX"), p.auxiliary_data)
 
