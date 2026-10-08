@@ -159,6 +159,9 @@ class Plasma(base.Base):
         ------
         TypeError
             If ``data`` is not a :class:`pandas.DataFrame`.
+        ValueError
+            If the time index of ``data`` has missing timestamps (``NaT``); the
+            message names how many.
 
         Notes
         -----
@@ -170,7 +173,7 @@ class Plasma(base.Base):
         rows sharing a timestamp keep their order. Spacecraft and auxiliary
         data on the same index as ``data`` are sorted the same way. Repeated
         timestamps log a warning and are kept. Missing timestamps (``NaT``)
-        log a warning and are kept; a sort places them last.
+        have no place in time order, so they raise rather than being sorted.
 
         Examples
         --------
@@ -743,10 +746,9 @@ class Plasma(base.Base):
         if len(index) != len(expected):
             detail = f"it has {len(index)} rows, the plasma data {len(expected)}"
         else:
-            differs = ~(
-                (index.to_numpy() == expected.to_numpy())
-                | (index.isna() & expected.isna())
-            )
+            # NaT compares unequal to everything, and the plasma's own index
+            # holds none (the constructor refuses it).
+            differs = index.to_numpy() != expected.to_numpy()
             row = int(np.flatnonzero(differs)[0])
             detail = f"first difference at row {row}: {index[row]} vs {expected[row]}"
         raise ValueError(
@@ -756,14 +758,13 @@ class Plasma(base.Base):
     def _sort_by_time(self, data, sc, aux):
         r"""Put ``data`` in time order, with ``sc`` and ``aux`` on its index.
 
-        Rows earlier than the row before them (comparing only rows with a
-        timestamp) are counted and located in one warning, then sorted with a
-        stable sort, so rows sharing a timestamp keep their order and rows
-        without one (``NaT``) go last. ``sc`` and ``aux`` are sorted the same
-        way when their index equals ``data``'s; otherwise they are returned
-        unchanged for the setters to refuse. Missing and repeated timestamps
-        each log a warning and are kept. The constructor calls this once, and
-        every method may assume sorted data afterwards.
+        Missing timestamps (``NaT``) raise. Rows earlier than the row before
+        them are counted and located in one warning, then sorted with a stable
+        sort, so rows sharing a timestamp keep their order. ``sc`` and ``aux``
+        are sorted the same way when their index equals ``data``'s; otherwise
+        they are returned unchanged for the setters to refuse. Repeated
+        timestamps log a warning and are kept. The constructor calls this
+        once, and every method may assume sorted data afterwards.
 
         Parameters
         ----------
@@ -778,20 +779,22 @@ class Plasma(base.Base):
         -------
         tuple
             ``(data, sc, aux)``, each the input itself when already in order.
+
+        Raises
+        ------
+        ValueError
+            If ``data``'s time index holds any ``NaT``, naming how many.
         """
         index = data.index
-        valid = ~np.asarray(index.isna())
-        missing = int((~valid).sum())
+        missing = int(index.isna().sum())
         if missing:
-            self.logger.warning(
-                "%d of %d rows have no timestamp (NaT); keeping them",
-                missing,
-                len(index),
+            raise ValueError(
+                f"Plasma data time index has {missing} of {len(index)} "
+                "timestamps missing (NaT); drop or fill them first"
             )
 
-        timed = np.flatnonzero(valid)
-        values = index.to_numpy()[timed]
-        behind = timed[1:][values[1:] < values[:-1]]
+        values = index.to_numpy()
+        behind = np.flatnonzero(values[1:] < values[:-1]) + 1
         if len(behind):
             self.logger.warning(
                 "%d of %d rows are earlier than the row before them, first at "
@@ -801,9 +804,7 @@ class Plasma(base.Base):
                 behind[:5].tolist(),
                 [str(t) for t in index[behind[:5]]],
             )
-            order = np.concatenate(
-                [timed[np.argsort(values, kind="stable")], np.flatnonzero(~valid)]
-            )
+            order = np.argsort(values, kind="stable")
             if sc is not None and sc.data.index.equals(index):
                 sc = spacecraft.Spacecraft(sc.data.iloc[order], sc.name, sc.frame)
             if aux is not None and aux.index.equals(index):
@@ -811,7 +812,7 @@ class Plasma(base.Base):
             data = data.iloc[order]
             index = data.index
 
-        repeated = index.duplicated(keep="first") & ~np.asarray(index.isna())
+        repeated = index.duplicated(keep="first")
         if repeated.any():
             rows = np.flatnonzero(repeated)
             self.logger.warning(
