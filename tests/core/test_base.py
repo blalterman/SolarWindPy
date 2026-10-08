@@ -2,8 +2,11 @@
 """Tests for basic synthetic data setup."""
 
 import pandas as pd
+import pytest
 from unittest import TestCase
 
+import solarwindpy as swp
+from solarwindpy.core import plasma, spacecraft, vector
 from solarwindpy.examples import _read_example
 
 pd.set_option("mode.chained_assignment", "raise")
@@ -86,3 +89,100 @@ class AlphaP1P2Test(object):
     @property
     def species(self):
         return "a+p1+p2"
+
+
+# Time-index checks shared by every data-backed object (``Core._time_disorder``).
+
+
+def _warning_records(caplog):
+    return [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+
+
+def _example_rows(rows):
+    """The example plasma, spacecraft and field frames, taking ``rows`` in order."""
+    p = swp.examples.load_plasma()
+    b = p.data.xs("b", axis=1, level="M").xs("", axis=1, level="S")
+    return p, p.data.iloc[rows], p.spacecraft.data.iloc[rows], b.iloc[rows]
+
+
+def _build_plasma(p, data):
+    """Build a Plasma and every child object it serves, as a user would."""
+    built = plasma.Plasma(data, *p.species)
+    for s in built.species:
+        ion = built.ions.loc[s]
+        ion.v, ion.w, ion.n
+    built.b
+    return built
+
+
+_BUILDS = {
+    "plasma": lambda p, data, sc, b: _build_plasma(p, data),
+    "spacecraft": lambda p, data, sc, b: spacecraft.Spacecraft(sc, "PSP", "HCI"),
+    "vector": lambda p, data, sc, b: vector.BField(b),
+}
+
+
+@pytest.mark.parametrize("build", list(_BUILDS.values()), ids=list(_BUILDS))
+def test_one_out_of_order_problem_logs_exactly_one_warning(caplog, build):
+    r"""Rows out of time order log one warning for the whole build, never two.
+
+    The example rows are taken in order 2, 0, 1: one problem. Building a
+    Plasma and every Ion, Vector and Tensor it serves, a standalone
+    Spacecraft, or a standalone BField each logs exactly one warning. Plasma
+    and Spacecraft sort before the shared order check looks, so it does not
+    repeat their warning; a standalone Vector is warned about and kept as is.
+
+    ON FAILURE: the code is wrong; an object or its children report one problem twice.
+    """
+    p, data, sc, b = _example_rows([2, 0, 1])
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        build(p, data, sc, b)
+    assert len(_warning_records(caplog)) == 1
+
+
+def test_missing_time_in_a_standalone_vector_logs_one_warning_and_is_kept(caplog):
+    r"""A standalone Vector with a NaT time logs one order warning and keeps it.
+
+    Plasma and Spacecraft refuse NaT; per the author, that refusal is theirs
+    alone, and a Vector built directly reports the missing time as an index out
+    of order without raising, its data stored unchanged.
+
+    ON FAILURE: the code is wrong, unless the author extends the NaT refusal to standalone Vectors.
+    """
+    _, _, _, b = _example_rows([0, 1, 2])
+    times = pd.DatetimeIndex([b.index[0], pd.NaT, b.index[2]])
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        v = vector.Vector(b.set_axis(times, axis=0))
+    (message,) = _warning_records(caplog)
+    assert "not monotonically increasing" in message
+    assert v.data.index.equals(times)
+
+
+class RepeatedIndexWarning(AssertionError):
+    """One index problem was logged more than once across a build."""
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=RepeatedIndexWarning,
+    reason="Plasma (solarwindpy/core/plasma.py) builds each Ion, and Ion "
+    "(solarwindpy/core/ions.py) each Vector, from data the Plasma already "
+    "checked, and Base.set_data checks them again, so one non-DatetimeIndex "
+    "logs 'A non-DatetimeIndex will prevent ...' once per object; remove this "
+    "marker when children built from checked data skip the index check",
+)
+def test_one_non_datetime_index_logs_one_warning_across_a_plasma_build(caplog):
+    r"""A Plasma on a non-DatetimeIndex logs that problem once, not once per child.
+
+    The example data on a RangeIndex hold one problem; building the Plasma and
+    every Ion, Vector and Tensor it serves should report it once.
+
+    ON FAILURE: (unexpected pass) children built from checked data no longer repeat the index check; drop the xfail marker.
+    """
+    p = swp.examples.load_plasma()
+    data = p.data.set_axis(pd.RangeIndex(len(p.data)), axis=0)
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        _build_plasma(p, data)
+    found = _warning_records(caplog)
+    if len(found) != 1:
+        raise RepeatedIndexWarning(f"{len(found)} warnings for one problem: {found}")

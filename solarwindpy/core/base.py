@@ -180,6 +180,32 @@ class Core(ABC):
         return species
 
     @staticmethod
+    def _time_disorder(index: pd.Index):
+        r"""Count the missing times in ``index`` and locate the rows out of order.
+
+        The one place that decides whether a time index is in order, for
+        :meth:`_time_order` and :meth:`_verify_datetimeindex` alike.
+
+        Parameters
+        ----------
+        index : pd.Index
+            The time index to check.
+
+        Returns
+        -------
+        missing : int
+            How many entries of ``index`` are missing (``NaT`` or NaN).
+        behind : np.ndarray
+            Positions of rows earlier than the row before them; empty when
+            ``missing`` is nonzero, since a missing time has no place in order.
+        """
+        missing = int(index.isna().sum())
+        if missing:
+            return missing, np.array([], dtype=int)
+        values = index.to_numpy()
+        return 0, np.flatnonzero(values[1:] < values[:-1]) + 1
+
+    @staticmethod
     def _time_order(index: pd.Index, what: str):
         r"""Locate the rows of ``index`` out of time order, refusing ``NaT``.
 
@@ -203,15 +229,13 @@ class Core(ABC):
         ValueError
             If ``index`` holds any ``NaT``, naming how many.
         """
-        missing = int(index.isna().sum())
+        missing, behind = Core._time_disorder(index)
         if missing:
             raise ValueError(
                 f"{what} time index has {missing} of {len(index)} "
                 "timestamps missing (NaT); drop those rows first"
             )
-        values = index.to_numpy()
-        behind = np.flatnonzero(values[1:] < values[:-1]) + 1
-        order = np.argsort(values, kind="stable") if len(behind) else None
+        order = np.argsort(index.to_numpy(), kind="stable") if len(behind) else None
         return behind, order
 
     def _put_in_time_order(
@@ -264,12 +288,26 @@ class Core(ABC):
         return data.iloc[order]
 
     def _verify_datetimeindex(self, data: pd.DataFrame) -> None:
+        r"""Warn about an index that is not a DatetimeIndex or not in order.
+
+        Order is decided by :meth:`_time_disorder`, as for
+        :meth:`_put_in_time_order`. Missing times count as out of order here
+        and are not refused: :class:`~solarwindpy.core.plasma.Plasma` and
+        :class:`~solarwindpy.core.spacecraft.Spacecraft` refuse them, and sort
+        their data, before this runs, so they never reach the order warning.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Data indexed by time.
+        """
         if not isinstance(data.index, pd.DatetimeIndex):
             self.logger.warning(
                 "A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working."
             )
 
-        if not data.index.is_monotonic_increasing:
+        missing, behind = self._time_disorder(data.index)
+        if missing or len(behind):
             self.logger.warning(
                 "An Index that is not monotonically increasing typically indicates the presence of bad data. This will impact performance, especially if it is a DatetimeIndex."
             )
