@@ -3346,7 +3346,8 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     index. Per the author, all three come from one source, so all three are
     sorted the same way: the index is the example's sorted epoch, the
     spacecraft x position is the example's [-42, -22, -34], the auxiliary
-    column reads 0, 1, 2, and one order warning is logged.
+    column reads 0, 1, 2, and one order warning is logged, with no reordering
+    warning for the spacecraft or auxiliary data.
 
     ON FAILURE: the code is wrong.
     """
@@ -3364,6 +3365,7 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
         p = plasma.Plasma(data, *ref.species, spacecraft=sc, auxiliary_data=aux)
 
     assert len(_warnings(caplog, "earlier than the row before")) == 1
+    assert not _warnings(caplog, "in another order")
     assert p.data.index.equals(ref.epoch)
     assert p.spacecraft.data.index.equals(ref.epoch)
     assert p.auxiliary_data.index.equals(ref.epoch)
@@ -3405,6 +3407,134 @@ def test_missing_timestamps_raise_value_error_naming_the_count():
     times = ["2020-01-01 12:00", None, "2020-01-01 12:01", None]
     with pytest.raises(ValueError, match=r"2 of 4 timestamps missing \(NaT\)"):
         plasma.Plasma(_protons_at(times), "p1")
+
+
+def test_out_of_order_data_with_nat_raise_before_any_order_warning(caplog):
+    r"""Out-of-order times containing NaT raise at once, with no order warning logged.
+
+    Times 12:02, 12:00, NaT are both out of order and missing one timestamp.
+    Missing timestamps are refused before the order is examined, so the user
+    sees the error alone.
+
+    ON FAILURE: the code is wrong; the order is checked before NaT is refused.
+    """
+    times = ["2020-01-01 12:02", "2020-01-01 12:00", None]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        with pytest.raises(ValueError, match=r"1 of 3 timestamps missing"):
+            plasma.Plasma(_protons_at(times), "p1")
+    assert not _warnings(caplog, "earlier than the row before")
+
+
+def _plasma_alone():
+    """The example plasma with its spacecraft detached and no auxiliary data."""
+    p = swp.examples.load_plasma()
+    p.set_spacecraft(None)
+    return p
+
+
+def test_set_data_refuses_missing_timestamps():
+    r"""`set_data` called directly refuses NaT, naming the count, as construction does.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _plasma_alone()
+    data = p.data.set_axis(
+        pd.DatetimeIndex([p.epoch[0], pd.NaT, p.epoch[2]], name="Epoch"), axis=0
+    )
+    with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
+        p.set_data(data)
+
+
+def test_set_data_sorts_out_of_order_data_with_one_warning(caplog):
+    r"""`set_data` called directly sorts out-of-order rows, with one order warning.
+
+    The example rows passed in order 2, 0, 1 come back in time order, equal to
+    the example data. The plasma's own order warning is the only one: the base
+    class's "not monotonically increasing" warning does not also fire, since
+    the data are sorted before it looks.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _plasma_alone()
+    ref = p.data
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p.set_data(ref.iloc[[2, 0, 1]])
+    (message,) = _warnings(caplog, "earlier than the row before")
+    assert "1 of 3 rows" in message
+    assert not _warnings(caplog, "monotonically")
+    pdt.assert_frame_equal(p.data, ref)
+
+
+def _example_with_aux_only():
+    """The example plasma with auxiliary data attached and no spacecraft."""
+    p = _plasma_alone()
+    aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=p.epoch)
+    aux.columns.names = ["M", "C", "S"]
+    p.set_auxiliary_data(aux)
+    return p
+
+
+@pytest.mark.parametrize("attached", [swp.examples.load_plasma, _example_with_aux_only])
+def test_set_data_refuses_out_of_order_data_while_frames_are_attached(attached):
+    r"""With spacecraft or auxiliary data attached, out-of-order `set_data` raises.
+
+    Sorting the new plasma data would leave the attached frame's rows paired
+    with the wrong times, so the call is refused and the data are unchanged.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = attached()
+    before = p.data
+    with pytest.raises(ValueError, match="misalign"):
+        p.set_data(before.iloc[[2, 0, 1]])
+    assert p.data is before
+
+
+@pytest.mark.parametrize("setter", ["set_spacecraft", "set_auxiliary_data"])
+def test_setters_refuse_missing_timestamps(setter):
+    r"""Spacecraft or auxiliary data with NaT in their index raise, naming the count.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    times = pd.DatetimeIndex([p.epoch[0], pd.NaT, p.epoch[2]])
+    if setter == "set_spacecraft":
+        frame = spacecraft.Spacecraft(
+            p.spacecraft.data.set_axis(times, axis=0), "PSP", "HCI"
+        )
+    else:
+        frame = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=times)
+        frame.columns.names = ["M", "C", "S"]
+    with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
+        getattr(p, setter)(frame)
+
+
+def test_setters_reorder_frames_holding_the_plasma_times_in_another_order(caplog):
+    r"""Spacecraft or auxiliary data at the plasma's times, reordered, are put in its order.
+
+    Each frame's rows are passed in order 2, 0, 1. Per the author, a setter
+    called later reorders them to the plasma's order with one warning each: the
+    auxiliary column (0, 1, 2 in time order) reads 0, 1, 2 again and the
+    spacecraft x position is the example's [-42, -22, -34].
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    perm = [2, 0, 1]
+    aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=p.epoch)
+    aux.columns.names = ["M", "C", "S"]
+    sc = spacecraft.Spacecraft(p.spacecraft.data.iloc[perm], "PSP", "HCI")
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p.set_auxiliary_data(aux.iloc[perm])
+        p.set_spacecraft(sc)
+
+    assert len(_warnings(caplog, "in another order")) == 2
+    assert p.auxiliary_data.index.equals(p.epoch)
+    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+    assert p.spacecraft.data.index.equals(p.epoch)
+    assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
+        [-42.0, -22.0, -34.0]
+    )
 
 
 def _minutes(n):
@@ -3594,20 +3724,17 @@ def test_setters_refuse_a_one_row_frame_naming_both_lengths(setter, frame):
         getattr(p, setter)(frame(p))
 
 
-@pytest.mark.parametrize("replacement", [pd.Timestamp("1990-01-01"), pd.NaT])
-def test_auxiliary_index_differing_at_one_row_raises_value_error_naming_it(
-    replacement,
-):
+def test_auxiliary_index_differing_at_one_row_raises_value_error_naming_it():
     r"""An auxiliary index equal to the plasma's except at row 1 raises, naming row 1.
 
-    Row 1 is replaced by an unrelated time or by NaT; NaT matches no plasma
-    time, so it is a difference like any other.
+    Row 1 is replaced by a time the plasma does not hold, so the frame is not
+    a reordering of the plasma's times and cannot be aligned to them.
 
     ON FAILURE: the code is wrong.
     """
     p = swp.examples.load_plasma()
     times = p.epoch.to_series().tolist()
-    times[1] = replacement
+    times[1] = pd.Timestamp("1990-01-01")
     aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=pd.DatetimeIndex(times))
     aux.columns.names = ["M", "C", "S"]
     with pytest.raises(ValueError, match="first difference at row 1"):
