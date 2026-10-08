@@ -168,6 +168,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GaussianLn` raises `ValueError` when any used x is ≤ 0 (ln x is undefined there), at
   construction and when `set_fit_obs` selects new observations, instead of fitting
   with `p0` None.
+- `Plasma` puts its data in time order. Rows earlier than the row before them log one
+  warning with their count and first positions, then the data are sorted with a stable
+  sort, so rows sharing a timestamp keep their order; methods may assume sorted data.
+  Spacecraft and auxiliary data passed with the plasma on the same index are sorted with
+  it, without a second warning. Repeated timestamps log a warning and are kept. A
+  standalone `Spacecraft` sorts out-of-order data the same way, with one warning, and its
+  `position` and `velocity` no longer repeat the order warning.
+- Missing timestamps (`NaT`) are refused: `Plasma`, `Spacecraft`, `Ion`, `Vector`,
+  `Tensor` and `BField` raise `ValueError: <Class> data time index has N of M timestamps
+  missing (NaT); drop those rows first`, at construction and in `set_data`. They were
+  previously kept, with an order warning.
+- `Plasma.set_data`, `set_spacecraft` and `set_auxiliary_data` refuse data at other
+  times than the plasma's with `ValueError` naming the row counts or the first differing
+  row. `set_data` called directly sorts out-of-order rows with a warning, but while
+  spacecraft or auxiliary data are attached it raises `ValueError` for rows out of order
+  (sorting would misalign the attached frames) and for rows at other times than the
+  current index. `set_auxiliary_data` refuses `NaT`, and reorders auxiliary data holding
+  the plasma's times in another order to the plasma's, with a warning.
+- `set_spacecraft` and `set_auxiliary_data` raise `ValueError` instead of
+  `AssertionError` for a mismatched time index or wrong column-level names, and wrong
+  level names in `Plasma` data raise `ValueError` instead of `KeyError`. Plasma data's
+  levels may come in any order; spacecraft data's must be exactly `("M", "C")` and
+  auxiliary data's `("M", "C", "S")`.
+- `Plasma(...)`, `Plasma.set_data`, `Spacecraft(...)` and `Spacecraft.set_data` raise
+  `TypeError: <X> data must be a pandas DataFrame, not <type>` for other input, instead
+  of `AttributeError`.
+- `Hist2D.take_data_in_yrange_across_x` raises `ValueError` ("Need left < right ..." or
+  "Need bottom < top ...") for a zero-width or inverted range, instead of
+  `AssertionError`.
 
 ### Changed
 
@@ -257,6 +286,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   warnings; undefined estimates are NaN and `p0` falls back on the same data as before.
 - The `Hist2D.plot_contours` docstring links to `plot_edges` instead of printing a
   literal method repr.
+- A `Plasma` logs each time-index problem once. The Ions, BField, Vectors and Tensors it
+  builds from its checked data no longer repeat the checks (a Plasma on a
+  non-DatetimeIndex logged that warning 14 times); a child whose index differs from its
+  parent's is checked like a directly built object.
+- A missing `Plasma` attribute raises `AttributeError` naming it (was "'super' object has
+  no attribute '__getattr__'"), so `hasattr` and `getattr` with a default work.
+- `AggPlot.calc_bins_intervals`, and so `Hist1D` and `Hist2D` `nbins`, accept a
+  `pandas.IntervalIndex`, keeping its bins and closure. It must be non-empty, contiguous,
+  increasing, and closed `"left"` or `"right"`, else `ValueError`; its edges are rounded
+  only when `bin_precision` is given.
+- `SIDC.cut_spec_by_ssn_band` raises a `KeyError` naming a column `interpolated` lacks,
+  instead of a `TypeError` from `np.isnan`.
+- `FitFunction`'s `weights` docstring no longer promises covariance-matrix weights, which
+  were never accepted: `weights` holds one 1-sigma uncertainty per observation, in
+  `xobs`'s shape, and the `InvalidParameterError` for any other shape says a covariance
+  matrix is not supported.
+- CI no longer installs the HDF5 system packages (`libhdf5-dev`, `pkg-config`); the h5py
+  and tables wheels bundle HDF5. `publish.yml`'s Linux cells keep the step, with a
+  5-minute timeout and apt retries, so a dead mirror fails fast instead of hanging.
 
 ### Added
 
@@ -337,6 +385,17 @@ These change computed values; rerun any analysis that used them.
   instead of starting outside the `x0` bound.
 - `HingeSaturation.p0` returns the reference start when the rising region's points share
   one x, instead of raising `LinAlgError` or using an arbitrary slope.
+- `Hist2D(clip_data="l")` and `clip_data="u"` clip only the lower or upper tail again;
+  they clipped both, because the value was coerced to bool. `Hist1D` is unchanged.
+- `Hist2D.project_1d` keeps the parent's bins and their closure. An integer-`nbins`
+  (including log-binned) parent bins like numpy, but the projection rebinned on
+  right-closed edges, so a sample on an edge moved bin or was dropped: for x = [0, 1, 2,
+  3, 4, 4] and two bins the parent counts [2, 4] and the projection gave [2, 3].
+- `Hist2D.project_1d(only_plotted=False)` sets y to NaN where the parent does not bin
+  it. It kept a y on the bottom edge of right-closed bins.
+- `SIDC.cut_spec_by_ssn_band` no longer fails with "Overlapping IntervalIndex is not
+  accepted" for narrow bands (e.g. `dssn=0.05`), where rounding made neighbouring bands
+  overlap; the bands now share one edge.
 
 ### Removed
 
@@ -370,6 +429,10 @@ These change computed values; rerun any analysis that used them.
   `(ax, cbar_or_mappable, qset)` with no labels. Passing a removed keyword raises
   an error from matplotlib. Filled contours no longer emit matplotlib's `clabel`
   deprecation warning.
+- `Plasma._set_ions`' comma split of a single species string, which was unreachable:
+  `Plasma(data, "a,p1")` already fails in `set_data`.
+- `.github/WORKFLOWS.md`, which described a stale CI setup; the workflow files are the
+  reference.
 
 ## [0.3.0] - 2025-12-24
 
