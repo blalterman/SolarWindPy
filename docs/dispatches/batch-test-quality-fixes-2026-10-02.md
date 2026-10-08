@@ -596,3 +596,9 @@ from unsorted data warns once, not twice.
 
 Author decision (2026-10-08): a standalone `Spacecraft` follows the same time rule as `Plasma`:
 refuse NaT, warn once about out-of-order times, then sort; accessors do not warn again.
+
+Author decisions (2026-10-08, PR #512): every time-indexed object (Ion, Vector, Tensor, BField,
+as well as Plasma and Spacecraft) refuses missing timestamps (NaT). A `Plasma` builds its child
+objects with a private keyword-only `_time_checked=True` switch on the shared base, so children
+built from already-checked plasma data skip the time re-check; it defaults to off, so objects a
+user builds still run the full check. This retires the 7x repeated warning.
