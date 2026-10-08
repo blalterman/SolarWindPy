@@ -602,3 +602,9 @@ as well as Plasma and Spacecraft) refuses missing timestamps (NaT). A `Plasma` b
 objects with a private keyword-only `_time_checked=True` switch on the shared base, so children
 built from already-checked plasma data skip the time re-check; it defaults to off, so objects a
 user builds still run the full check. This retires the 7x repeated warning.
+
+Author decisions (2026-10-08, closing optional items): unit `polish` documents the
+`_time_checked` invariant in docstrings, not comments; `set_data` called directly raises
+TypeError for non-DataFrame input; tie order in auxiliary reordering is documented; the SIDC
+fixture gains a -1 row; #503's example-date docstring and default-key read-back are fixed.
+Unit `changelog-2` records #503 to #512 after `polish` merges. `.github/WORKFLOWS.md` is deleted.
