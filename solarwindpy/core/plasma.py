@@ -821,8 +821,9 @@ class Plasma(base.Base):
         them are counted and located in one warning, then sorted with a stable
         sort, so rows sharing a timestamp keep their order. Data out of order
         raise instead when spacecraft or auxiliary data are attached, since
-        sorting would misalign them. Repeated timestamps log a warning and are
-        kept.
+        sorting would misalign them; with them attached, data in order must
+        also hold exactly the current times, row for row. Repeated timestamps
+        log a warning and are kept.
 
         Parameters
         ----------
@@ -837,8 +838,9 @@ class Plasma(base.Base):
         Raises
         ------
         ValueError
-            If ``data``'s time index holds any ``NaT``, naming how many, or is
-            out of order while spacecraft or auxiliary data are attached.
+            If ``data``'s time index holds any ``NaT``, naming how many, or,
+            while spacecraft or auxiliary data are attached, is out of order
+            or differs from the current time index.
         """
         refusal = None
         if self._spacecraft is not None or self._auxiliary_data is not None:
@@ -848,6 +850,11 @@ class Plasma(base.Base):
             )
         data = self._put_in_time_order(data, "Plasma data", refusal)
         index = data.index
+        if refusal is not None:
+            # In order, but the attached frames hold the current times.
+            self._require_plasma_index(
+                index, "New plasma data (spacecraft or auxiliary data attached)"
+            )
 
         repeated = index.duplicated(keep="first")
         if repeated.any():
@@ -872,9 +879,10 @@ class Plasma(base.Base):
         ------
         ValueError
             If the column levels are not named ``"M"``, ``"C"`` and ``"S"``;
-            if the time index holds missing timestamps (``NaT``); or if the
-            rows are out of time order while spacecraft or auxiliary data are
-            attached, since sorting would misalign them.
+            if the time index holds missing timestamps (``NaT``); or, while
+            spacecraft or auxiliary data are attached, if the rows are out of
+            time order (sorting would misalign them) or the times differ from
+            the current time index, which the attached data share.
         """
         new = self._sort_by_time(new)
         super(Plasma, self).set_data(new)

@@ -3585,6 +3585,20 @@ def _self_sorted_spacecraft_attached():
     return p
 
 
+def _refused_set_data_with_other_times():
+    """`set_data` given in-order data at other times while both frames are attached.
+
+    The call must raise, leaving the plasma's data as they were.
+    """
+    p = _self_sorted_spacecraft_attached()
+    before = p.data
+    shifted = before.set_axis(before.index + pd.Timedelta("1min"), axis=0)
+    with pytest.raises(ValueError, match="first difference at row 0"):
+        p.set_data(shifted)
+    assert p.data is before
+    return p
+
+
 @pytest.mark.parametrize(
     "build",
     [
@@ -3593,6 +3607,7 @@ def _self_sorted_spacecraft_attached():
         _setters_given_another_order,
         _dropped_species,
         _self_sorted_spacecraft_attached,
+        _refused_set_data_with_other_times,
     ],
 )
 def test_plasma_spacecraft_and_auxiliary_data_stay_aligned(build):

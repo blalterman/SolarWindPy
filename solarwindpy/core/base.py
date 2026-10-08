@@ -217,10 +217,10 @@ class Core(ABC):
     def _put_in_time_order(
         self, data: pd.DataFrame, what: str, refusal: str | None = None
     ) -> pd.DataFrame:
-        r"""Return ``data`` in time order, warning once about rows out of order.
+        r"""Return ``data`` in time order, warning per call about rows out of order.
 
         Missing timestamps (``NaT``) raise. Rows earlier than the row before
-        them are counted and located in one warning, then sorted with a stable
+        them are counted and located in one warning per call, then sorted with a stable
         sort, so rows sharing a timestamp keep their order.
 
         Parameters
