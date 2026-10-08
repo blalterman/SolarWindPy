@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+g379319620 documentation</title>
+  <title>solarwindpy.core.plasma &mdash; SolarWindPy 0.1.dev1+gb92fd8515 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5d14453b" />
@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=6ba40c0b"></script>
+      <script src="../../../_static/documentation_options.js?v=f1598c30"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -448,22 +448,45 @@
 <span class="sd">        data : :class:`pandas.DataFrame`</span>
 <span class="sd">            Contains the magnetic field and core ion moments. Columns are a</span>
 <span class="sd">            three-level :class:`~pandas.MultiIndex` labelled ``("M", "C", "S")``</span>
-<span class="sd">            for measurement, component, and species. The index should contain</span>
-<span class="sd">            datetime information, for example ``Epoch`` when loading from a CDF</span>
-<span class="sd">            file.</span>
+<span class="sd">            for measurement, component, and species; the levels may come in</span>
+<span class="sd">            any order. The index should contain datetime information, for</span>
+<span class="sd">            example ``Epoch`` when loading from a CDF file. Rows out of time</span>
+<span class="sd">            order are sorted with a warning (see Notes).</span>
 <span class="sd">        *species : str</span>
 <span class="sd">            Iterable of species contained in ``data``.</span>
 <span class="sd">        spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional</span>
-<span class="sd">            Spacecraft trajectory and velocity information. If ``None``, the</span>
-<span class="sd">            Coulomb number :py:meth:`~Plasma.nc` method will raise a</span>
-<span class="sd">            :class:`ValueError`.</span>
+<span class="sd">            Spacecraft trajectory and velocity information, at the times of</span>
+<span class="sd">            ``data`` (see Notes), with column levels named exactly</span>
+<span class="sd">            ``("M", "C")`` in that order. If ``None``, the Coulomb number</span>
+<span class="sd">            :py:meth:`~Plasma.nc` method will raise a :class:`ValueError`.</span>
 <span class="sd">        auxiliary_data : :class:`pandas.DataFrame`, optional</span>
 <span class="sd">            Additional measurements to carry with the plasma, for example data</span>
-<span class="sd">            quality flags. The column labelling scheme must match ``data``.</span>
+<span class="sd">            quality flags, at the times of ``data`` (see Notes). Its column</span>
+<span class="sd">            levels must be named exactly ``("M", "C", "S")`` in that order.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If ``data`` is not a :class:`pandas.DataFrame`.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the time index of ``data`` has missing timestamps (``NaT``); the</span>
+<span class="sd">            message names how many.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        Thermal speeds assume :math:`mw^2 = 2kT`.</span>
+
+<span class="sd">        The data are put in time order by :meth:`set_data`, and every method</span>
+<span class="sd">        may assume sorted data afterwards. Rows earlier than the row before</span>
+<span class="sd">        them are counted and located in a warning, then sorted with a stable</span>
+<span class="sd">        sort, so rows sharing a timestamp keep their order. A</span>
+<span class="sd">        :class:`~solarwindpy.core.spacecraft.Spacecraft` sorts its own data</span>
+<span class="sd">        the same way when built. Auxiliary data on the same index as ``data``</span>
+<span class="sd">        come from the same source and are sorted the same way without a</span>
+<span class="sd">        further warning; at the same times in another order, they are</span>
+<span class="sd">        reordered to the plasma's with a warning. Repeated timestamps log a</span>
+<span class="sd">        warning and are kept. Missing timestamps (``NaT``) have no place in</span>
+<span class="sd">        time order, so they raise rather than being sorted.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -511,18 +534,36 @@
 <span class="sd">        &gt;&gt;&gt; plasma = Plasma(data, "a", "p1")</span>
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logger</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Plasma data must be a pandas DataFrame, not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="c1"># Nothing is attached yet, so `set_data` sorts rather than refusing.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spacecraft</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_species</span><span class="p">(</span><span class="o">*</span><span class="n">species</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_ions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_spacecraft</span><span class="p">(</span><span class="n">spacecraft</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_auxiliary_data</span><span class="p">(</span><span class="n">auxiliary_data</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_auxiliary_data</span><span class="p">(</span><span class="n">auxiliary_data</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return the :class:`~solarwindpy.core.ions.Ion` named ``attr``.</span>
+
+<span class="sd">        Python calls this only after normal lookup fails, so ``plasma.p1`` is</span>
+<span class="sd">        the proton ion. Any other name raises :class:`AttributeError` naming</span>
+<span class="sd">        it, so :func:`hasattr` and :func:`getattr` with a default work.</span>
+<span class="sd">        """</span>
+        <span class="c1"># Read `_ions` from the instance dict: before `_set_ions` runs, going</span>
+        <span class="c1"># through the `ions` property would re-enter this method.</span>
+        <span class="n">ions_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"_ions"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ions_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">ions_</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ions_</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> object has no attribute </span><span class="si">{</span><span class="n">attr</span><span class="si">!r}</span><span class="s2">"</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -825,8 +866,6 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_ions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">"+"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
         <span class="p">),</span> <span class="s2">"Plasma.species can't contain '+'."</span>
@@ -891,13 +930,16 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        new : Spacecraft or None</span>
-<span class="sd">            Spacecraft trajectory object containing position and velocity data.</span>
-<span class="sd">            Must have matching datetime index with plasma data.</span>
+<span class="sd">            Spacecraft trajectory object containing position and velocity data,</span>
+<span class="sd">            at the plasma data's times. A spacecraft sorts its own data by time</span>
+<span class="sd">            when built, so it holds them in the plasma's order.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
-<span class="sd">            If spacecraft index does not match plasma data index.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the spacecraft index holds other times than the plasma data's,</span>
+<span class="sd">            or its column levels are not named exactly ``("M", "C")``, in that</span>
+<span class="sd">            order.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -926,8 +968,10 @@
 
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">==</span> <span class="p">(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">)</span>
+            <span class="c1"># A Spacecraft sorts itself and refuses NaT when built, so its</span>
+            <span class="c1"># times either equal the plasma's row for row or differ.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_plasma_index</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">"Spacecraft data"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_level_names</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="p">(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">),</span> <span class="s2">"Spacecraft data"</span><span class="p">)</span>
             <span class="c1"># Don't test spacecraft data duplicating plasma data b/c labels will</span>
             <span class="c1"># overlap even though they represent different quantities because</span>
             <span class="c1"># spacecraft only has a 2-level MultiIndex.</span>
@@ -945,13 +989,17 @@
 <span class="sd">        ----------</span>
 <span class="sd">        new : pandas.DataFrame or None</span>
 <span class="sd">            Additional measurements such as data quality flags, derived</span>
-<span class="sd">            parameters, or instrument-specific metadata. Must have matching</span>
-<span class="sd">            datetime index with plasma data.</span>
+<span class="sd">            parameters, or instrument-specific metadata, at the plasma data's</span>
+<span class="sd">            times. Times in another order are reordered to the plasma's, with</span>
+<span class="sd">            a warning.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
-<span class="sd">        AssertionError</span>
-<span class="sd">            If auxiliary data index does not match plasma data index.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the auxiliary data's index holds missing timestamps (``NaT``) or</span>
+<span class="sd">            other times than the plasma data's, its column levels are not named</span>
+<span class="sd">            exactly ``("M", "C", "S")`` in that order, or it duplicates a</span>
+<span class="sd">            plasma data column.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
@@ -973,32 +1021,203 @@
 <span class="sd">        &gt;&gt;&gt; plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data</span>
 <span class="sd">        [0, 1, 0]</span>
 <span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_auxiliary_data</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_auxiliary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Set the auxiliary data; ``source`` is the index the plasma data arrived on.</span>
+
+<span class="sd">        Auxiliary data on ``source`` share the plasma data's origin and are put</span>
+<span class="sd">        in the plasma's order without a warning of their own.</span>
+<span class="sd">        """</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">==</span> <span class="p">(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">)</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plasma_order</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">"Auxiliary data"</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_level_names</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="p">(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">),</span> <span class="s2">"Auxiliary data"</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Auxiliary data should not duplicate plasma data"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_if_missing</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="s2">"auxiliary_data"</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="o">=</span> <span class="n">new</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="o">=</span> <span class="n">new</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_log_if_missing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">"""Log at INFO that the optional input ``name`` was not passed."""</span>
         <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"No </span><span class="si">%s</span><span class="s2"> data passed to </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_require_level_names</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">any_order</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise :class:`ValueError` unless ``columns``' levels are named ``expected``.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        columns : pd.MultiIndex</span>
+<span class="sd">            The columns to check.</span>
+<span class="sd">        expected : tuple of str</span>
+<span class="sd">            The required level names.</span>
+<span class="sd">        what : str</span>
+<span class="sd">            Names the checked frame in the error message.</span>
+<span class="sd">        any_order : bool, optional</span>
+<span class="sd">            Accept ``expected`` in any order.</span>
+<span class="sd">        """</span>
+        <span class="c1"># Compare as lists: pandas 3 makes a FrozenList both == and != a tuple.</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">want</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">any_order</span><span class="p">:</span>
+            <span class="n">names</span><span class="p">,</span> <span class="n">want</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">want</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="n">want</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="s2">" in any order"</span> <span class="k">if</span> <span class="n">any_order</span> <span class="k">else</span> <span class="s2">""</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> columns must have levels named </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span><span class="si">}{</span><span class="n">order</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"not </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_require_plasma_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">what</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Raise :class:`ValueError` unless ``index`` equals the plasma data's.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        index : pd.Index</span>
+<span class="sd">            The time index to check.</span>
+<span class="sd">        what : str</span>
+<span class="sd">            Names the checked frame in the error message.</span>
+<span class="sd">        """</span>
+        <span class="n">expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">expected</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected</span><span class="p">):</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"it has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows, the plasma data </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NaT compares unequal to everything, and the plasma's own index</span>
+            <span class="c1"># holds none (the constructor refuses it).</span>
+            <span class="n">differs</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">!=</span> <span class="n">expected</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">differs</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"first difference at row </span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">index</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">expected</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> index must equal the plasma data's time index; </span><span class="si">{</span><span class="n">detail</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_plasma_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">what</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Return the positions putting ``index`` in the plasma data's order.</span>
+
+<span class="sd">        An index holding the plasma's times in another order is reordered to</span>
+<span class="sd">        it with a warning, unless it equals ``source``, the index the plasma</span>
+<span class="sd">        data arrived on. Any other mismatch raises.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        index : pd.Index</span>
+<span class="sd">            The time index of auxiliary data.</span>
+<span class="sd">        what : str</span>
+<span class="sd">            Names the checked frame in messages.</span>
+<span class="sd">        source : pd.Index, optional</span>
+<span class="sd">            The index the plasma data had before sorting.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray or None</span>
+<span class="sd">            None when ``index`` already equals the plasma data's.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``index`` holds ``NaT``, or other times than the plasma data's.</span>
+<span class="sd">        """</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_order</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">what</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span><span class="p">[</span><span class="n">order</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"</span><span class="si">%s</span><span class="s2"> hold the plasma data's times in another order; "</span>
+                    <span class="s2">"reordering them to the plasma's"</span><span class="p">,</span>
+                    <span class="n">what</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_plasma_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">what</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sort_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Put ``data`` in time order, warning of rows out of order or repeated.</span>
+
+<span class="sd">        Missing timestamps (``NaT``) raise. Rows earlier than the row before</span>
+<span class="sd">        them are counted and located in one warning, then sorted with a stable</span>
+<span class="sd">        sort, so rows sharing a timestamp keep their order. Data out of order</span>
+<span class="sd">        raise instead when spacecraft or auxiliary data are attached, since</span>
+<span class="sd">        sorting would misalign them; with them attached, data in order must</span>
+<span class="sd">        also hold exactly the current times, row for row. Repeated timestamps</span>
+<span class="sd">        log a warning and are kept.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : pd.DataFrame</span>
+<span class="sd">            Plasma data indexed by time.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            ``data`` in time order; the input itself when already in order.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If ``data``'s time index holds any ``NaT``, naming how many, or,</span>
+<span class="sd">            while spacecraft or auxiliary data are attached, is out of order</span>
+<span class="sd">            or differs from the current time index.</span>
+<span class="sd">        """</span>
+        <span class="n">refusal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spacecraft</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auxiliary_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">refusal</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">"sorting would misalign the attached spacecraft or auxiliary "</span>
+                <span class="s2">"data, so sort the data first"</span>
+            <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_put_in_time_order</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"Plasma data"</span><span class="p">,</span> <span class="n">refusal</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">if</span> <span class="n">refusal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># In order, but the attached frames hold the current times.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_require_plasma_index</span><span class="p">(</span>
+                <span class="n">index</span><span class="p">,</span> <span class="s2">"New plasma data (spacecraft or auxiliary data attached)"</span>
+            <span class="p">)</span>
+
+        <span class="n">repeated</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">"first"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">repeated</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">repeated</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"</span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> rows repeat an earlier timestamp, first at rows </span><span class="si">%s</span><span class="s2"> "</span>
+                <span class="s2">"(times </span><span class="si">%s</span><span class="s2">); keeping them"</span><span class="p">,</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">rows</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">index</span><span class="p">[</span><span class="n">rows</span><span class="p">[:</span><span class="mi">5</span><span class="p">]]],</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
 <div class="viewcode-block" id="Plasma.set_data">
 <a class="viewcode-back" href="../../../_autosummary/solarwindpy.core.plasma.Plasma.html#solarwindpy.core.plasma.Plasma.set_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the data, logging its shape and any columns dropped."""</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Set the data in time order, logging its shape and any columns dropped.</span>
+
+<span class="sd">        Rows out of time order are sorted with a warning, as at construction</span>
+<span class="sd">        (see :class:`Plasma`).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the column levels are not named ``"M"``, ``"C"`` and ``"S"``;</span>
+<span class="sd">            if the time index holds missing timestamps (``NaT``); or, while</span>
+<span class="sd">            spacecraft or auxiliary data are attached, if the rows are out of</span>
+<span class="sd">            time order (sorting would misalign them) or the times differ from</span>
+<span class="sd">            the current time index, which the attached data share.</span>
+<span class="sd">        """</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_time</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Plasma</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_require_level_names</span><span class="p">(</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="p">(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">),</span> <span class="s2">"Plasma data"</span><span class="p">,</span> <span class="n">any_order</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">([</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">new</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"C"</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">]</span>
 
         <span class="c1"># These are the only quantities we want in plasma.</span>
         <span class="c1"># TODO: move `theta_rms`, `mag_rms` and anything not common to</span>
@@ -1445,6 +1664,10 @@
 <span class="sd">        component are; one that is absent leaves both the weighted sum and the</span>
 <span class="sd">        sum of weights. A time with no species present is NaN. See</span>
 <span class="sd">        :doc:`/missing_data`.</span>
+
+<span class="sd">        This relies on species masking when the data are set: a species'</span>
+<span class="sd">        density and velocity are missing together, so a weight never pairs</span>
+<span class="sd">        with a missing velocity, nor a velocity with a missing weight.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
