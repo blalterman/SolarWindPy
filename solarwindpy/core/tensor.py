@@ -19,15 +19,17 @@ class Tensor(base.Base):
         Tensor data with components ``par``, ``per`` and ``scalar``.
     """
 
-    def __init__(self, data: pd.DataFrame):
+    def __init__(self, data: pd.DataFrame, *, _time_checked: bool = False):
         """Initialize the Tensor object.
 
         Parameters
         ----------
         data : :class:`pandas.DataFrame`
             Tensor data to be stored.
+        _time_checked : bool, optional
+            Private; see :class:`~solarwindpy.core.base.Base`.
         """
-        super().__init__(data)
+        super().__init__(data, _time_checked=_time_checked)
         self._validate_data(data)
         self._data = data
 
