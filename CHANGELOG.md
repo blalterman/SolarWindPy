@@ -181,10 +181,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   previously kept, with an order warning.
 - `Plasma.set_data`, `set_spacecraft` and `set_auxiliary_data` refuse data at other
   times than the plasma's with `ValueError` naming the row counts or the first differing
-  row. `set_data` called directly sorts out-of-order rows with a warning, but while
-  spacecraft or auxiliary data are attached it raises `ValueError` for rows out of order
-  (sorting would misalign the attached frames) and for rows at other times than the
-  current index. `set_auxiliary_data` refuses `NaT`, and reorders auxiliary data holding
+  row. `set_data` called directly sorts out-of-order rows with a warning. While
+  spacecraft or auxiliary data are attached, it instead raises `ValueError` for rows out
+  of order, since sorting would misalign the attached frames. It also raises then for
+  rows at other times than the current index. `set_auxiliary_data` refuses `NaT`, and reorders auxiliary data holding
   the plasma's times in another order to the plasma's, with a warning.
 - `set_spacecraft` and `set_auxiliary_data` raise `ValueError` instead of
   `AssertionError` for a mismatched time index or wrong column-level names, and wrong
@@ -429,10 +429,19 @@ These change computed values; rerun any analysis that used them.
   `(ax, cbar_or_mappable, qset)` with no labels. Passing a removed keyword raises
   an error from matplotlib. Filled contours no longer emit matplotlib's `clabel`
   deprecation warning.
-- `Plasma._set_ions`' comma split of a single species string, which was unreachable:
-  `Plasma(data, "a,p1")` already fails in `set_data`.
+- The comma split of a single species string in `Plasma._set_ions`, which was
+  unreachable: `Plasma(data, "a,p1")` already fails in `set_data`.
 - `.github/WORKFLOWS.md`, which described a stale CI setup; the workflow files are the
   reference.
+
+### Migration
+
+- Catch `ValueError` where you caught `AssertionError` or `KeyError` from
+  `set_spacecraft`, `set_auxiliary_data` and the column-level-name checks.
+- Catch `TypeError` where you caught `AttributeError` for input that is not a
+  `pandas.DataFrame`.
+- Drop rows with missing timestamps (`NaT`) before building a `Plasma`, `Spacecraft`,
+  `Ion`, `Vector`, `Tensor` or `BField`, e.g. `data = data.loc[data.index.notna()]`.
 
 ## [0.3.0] - 2025-12-24
 
