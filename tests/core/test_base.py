@@ -6,7 +6,7 @@ import pytest
 from unittest import TestCase
 
 import solarwindpy as swp
-from solarwindpy.core import plasma, spacecraft, vector
+from solarwindpy.core import ions, plasma, spacecraft, tensor, vector
 from solarwindpy.examples import _read_example
 
 pd.set_option("mode.chained_assignment", "raise")
@@ -140,49 +140,111 @@ def test_one_out_of_order_problem_logs_exactly_one_warning(caplog, build):
     assert len(_warning_records(caplog)) == 1
 
 
-def test_missing_time_in_a_standalone_vector_logs_one_warning_and_is_kept(caplog):
-    r"""A standalone Vector with a NaT time logs one order warning and keeps it.
+NOT_DATETIME = "non-DatetimeIndex"
+NOT_INCREASING = "not monotonically increasing"
 
-    Plasma and Spacecraft refuse NaT; per the author, that refusal is theirs
-    alone, and a Vector built directly reports the missing time as an index out
-    of order without raising, its data stored unchanged.
 
-    ON FAILURE: the code is wrong, unless the author extends the NaT refusal to standalone Vectors.
+def test_a_standalone_vector_out_of_order_warns_and_is_kept(caplog):
+    r"""A Vector built directly on rows out of order logs the order warning.
+
+    The example field rows taken in order 2, 0, 1 hold one problem. A Vector
+    is not sorted: it logs one "not monotonically increasing" warning and
+    stores the rows as given.
+
+    ON FAILURE: the code is wrong; a Vector built directly skipped its order check.
     """
-    _, _, _, b = _example_rows([0, 1, 2])
-    times = pd.DatetimeIndex([b.index[0], pd.NaT, b.index[2]])
+    _, _, _, b = _example_rows([2, 0, 1])
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        v = vector.Vector(b.set_axis(times, axis=0))
+        v = vector.Vector(b)
     (message,) = _warning_records(caplog)
-    assert "not monotonically increasing" in message
-    assert v.data.index.equals(times)
+    assert NOT_INCREASING in message
+    assert v.data.index.equals(b.index)
 
 
-class RepeatedIndexWarning(AssertionError):
-    """One index problem was logged more than once across a build."""
+def _with_missing_time(frame):
+    """``frame``'s first three rows with the middle time replaced by NaT."""
+    frame = frame.iloc[[0, 1, 2]]
+    times = pd.DatetimeIndex([frame.index[0], pd.NaT, frame.index[2]])
+    return frame.set_axis(times, axis=0)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=RepeatedIndexWarning,
-    reason="Plasma (solarwindpy/core/plasma.py) builds each Ion, and Ion "
-    "(solarwindpy/core/ions.py) each Vector, from data the Plasma already "
-    "checked, and Base.set_data checks them again, so one non-DatetimeIndex "
-    "logs 'A non-DatetimeIndex will prevent ...' once per object; remove this "
-    "marker when children built from checked data skip the index check",
-)
+_STANDALONE = {
+    "ion": lambda p: ions.Ion(
+        _with_missing_time(p.data.xs("p1", axis=1, level="S")), "p1"
+    ),
+    "vector": lambda p: vector.Vector(
+        _with_missing_time(
+            p.data.xs("v", axis=1, level="M").xs("p1", axis=1, level="S")
+        )
+    ),
+    "tensor": lambda p: tensor.Tensor(
+        _with_missing_time(
+            p.data.xs("w", axis=1, level="M").xs("p1", axis=1, level="S")
+        )
+    ),
+    "bfield": lambda p: vector.BField(
+        _with_missing_time(p.data.xs("b", axis=1, level="M").xs("", axis=1, level="S"))
+    ),
+}
+
+
+@pytest.mark.parametrize("build", list(_STANDALONE.values()), ids=list(_STANDALONE))
+def test_a_standalone_object_refuses_missing_times(build):
+    r"""An Ion, Vector, Tensor or BField built directly with a NaT time raises.
+
+    Per the author, every time-indexed object refuses missing timestamps, as
+    Plasma and Spacecraft do: three rows with the middle time NaT raise a
+    ValueError naming 1 missing of 3.
+
+    ON FAILURE: the code is wrong; a directly built object accepted a NaT time.
+    """
+    p = swp.examples.load_plasma()
+    with pytest.raises(
+        ValueError, match=r"1 of 3 timestamps missing \(NaT\); drop those rows first"
+    ):
+        build(p)
+
+
 def test_one_non_datetime_index_logs_one_warning_across_a_plasma_build(caplog):
     r"""A Plasma on a non-DatetimeIndex logs that problem once, not once per child.
 
-    The example data on a RangeIndex hold one problem; building the Plasma and
-    every Ion, Vector and Tensor it serves should report it once.
+    The example data on a RangeIndex hold one problem. Building the Plasma and
+    every Ion, Vector and Tensor it serves logs one non-DatetimeIndex warning:
+    the children are built from data the Plasma already checked.
 
-    ON FAILURE: (unexpected pass) children built from checked data no longer repeat the index check; drop the xfail marker.
+    ON FAILURE: the code is wrong; a child built from checked data repeated the index check.
     """
     p = swp.examples.load_plasma()
     data = p.data.set_axis(pd.RangeIndex(len(p.data)), axis=0)
     with caplog.at_level("WARNING", logger="solarwindpy"):
         _build_plasma(p, data)
-    found = _warning_records(caplog)
-    if len(found) != 1:
-        raise RepeatedIndexWarning(f"{len(found)} warnings for one problem: {found}")
+    (message,) = _warning_records(caplog)
+    assert NOT_DATETIME in message
+
+
+def test_a_vector_built_directly_on_a_non_datetime_index_warns(caplog):
+    r"""A Vector built directly, with the default, runs the full index check.
+
+    The example field on a RangeIndex logs one non-DatetimeIndex warning; only
+    objects a Plasma builds from its own checked data skip the check.
+
+    ON FAILURE: the code is wrong; an object built directly skipped its index check.
+    """
+    _, _, _, b = _example_rows([0, 1, 2])
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        vector.Vector(b.set_axis(pd.RangeIndex(3), axis=0))
+    (message,) = _warning_records(caplog)
+    assert NOT_DATETIME in message
+
+
+def test_an_ion_a_plasma_built_still_checks_new_data():
+    r"""An Ion built by a Plasma refuses a NaT time passed to its ``set_data``.
+
+    The Plasma's children skip the time checks only for the data the Plasma
+    handed them; data set on them later are checked like any other.
+
+    ON FAILURE: the code is wrong; skipping the time checks outlived construction.
+    """
+    p = swp.examples.load_plasma()
+    with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
+        p.p1.set_data(_with_missing_time(p.data.xs("p1", axis=1, level="S")))

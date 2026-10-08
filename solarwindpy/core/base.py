@@ -180,30 +180,38 @@ class Core(ABC):
         return species
 
     @staticmethod
-    def _time_disorder(index: pd.Index):
-        r"""Count the missing times in ``index`` and locate the rows out of order.
+    def _time_disorder(index: pd.Index, what: str):
+        r"""Locate the rows of ``index`` out of time order, refusing missing times.
 
-        The one place that decides whether a time index is in order, for
-        :meth:`_time_order` and :meth:`_verify_datetimeindex` alike.
+        The one place that decides whether a time index is complete and in
+        order, for :meth:`_time_order` and :meth:`_verify_datetimeindex` alike.
 
         Parameters
         ----------
         index : pd.Index
             The time index to check.
+        what : str
+            Names the checked frame in the error message.
 
         Returns
         -------
-        missing : int
-            How many entries of ``index`` are missing (``NaT`` or NaN).
         behind : np.ndarray
-            Positions of rows earlier than the row before them; empty when
-            ``missing`` is nonzero, since a missing time has no place in order.
+            Positions of rows earlier than the row before them.
+
+        Raises
+        ------
+        ValueError
+            If ``index`` holds any missing time (``NaT`` or NaN), naming how
+            many; a missing time has no place in time order.
         """
         missing = int(index.isna().sum())
         if missing:
-            return missing, np.array([], dtype=int)
+            raise ValueError(
+                f"{what} time index has {missing} of {len(index)} "
+                "timestamps missing (NaT); drop those rows first"
+            )
         values = index.to_numpy()
-        return 0, np.flatnonzero(values[1:] < values[:-1]) + 1
+        return np.flatnonzero(values[1:] < values[:-1]) + 1
 
     @staticmethod
     def _time_order(index: pd.Index, what: str):
@@ -229,12 +237,7 @@ class Core(ABC):
         ValueError
             If ``index`` holds any ``NaT``, naming how many.
         """
-        missing, behind = Core._time_disorder(index)
-        if missing:
-            raise ValueError(
-                f"{what} time index has {missing} of {len(index)} "
-                "timestamps missing (NaT); drop those rows first"
-            )
+        behind = Core._time_disorder(index, what)
         order = np.argsort(index.to_numpy(), kind="stable") if len(behind) else None
         return behind, order
 
@@ -288,26 +291,31 @@ class Core(ABC):
         return data.iloc[order]
 
     def _verify_datetimeindex(self, data: pd.DataFrame) -> None:
-        r"""Warn about an index that is not a DatetimeIndex or not in order.
+        r"""Refuse missing times; warn about an index not a DatetimeIndex or not in order.
 
-        Order is decided by :meth:`_time_disorder`, as for
-        :meth:`_put_in_time_order`. Missing times count as out of order here
-        and are not refused: :class:`~solarwindpy.core.plasma.Plasma` and
-        :class:`~solarwindpy.core.spacecraft.Spacecraft` refuse them, and sort
-        their data, before this runs, so they never reach the order warning.
+        Completeness and order are decided by :meth:`_time_disorder`, as for
+        :meth:`_put_in_time_order`.
+        :class:`~solarwindpy.core.plasma.Plasma` and
+        :class:`~solarwindpy.core.spacecraft.Spacecraft` sort their data
+        before this runs, so they never reach the order warning.
 
         Parameters
         ----------
         data : pd.DataFrame
             Data indexed by time.
+
+        Raises
+        ------
+        ValueError
+            If the index holds missing times (``NaT``), naming how many.
         """
+        behind = self._time_disorder(data.index, f"{self.__class__.__name__} data")
         if not isinstance(data.index, pd.DatetimeIndex):
             self.logger.warning(
                 "A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working."
             )
 
-        missing, behind = self._time_disorder(data.index)
-        if missing or len(behind):
+        if len(behind):
             self.logger.warning(
                 "An Index that is not monotonically increasing typically indicates the presence of bad data. This will impact performance, especially if it is a DatetimeIndex."
             )
@@ -320,6 +328,13 @@ class Base(Core):
     ----------
     data : :class:`pandas.DataFrame`
         Data used to initialise the object.
+    _time_checked : bool, optional
+        Private, keyword only. True when ``data`` come from an object that
+        already checked their time index, such as a
+        :class:`~solarwindpy.core.plasma.Plasma` building its ions; the
+        missing-time and order checks are then skipped at construction, so
+        one problem is reported once. Objects built directly keep the default
+        and run every check. Later calls to :meth:`set_data` always check.
 
     Notes
     -----
@@ -327,9 +342,13 @@ class Base(Core):
     :class:`pandas.DataFrame` structure.
     """
 
-    def __init__(self, data: pd.DataFrame) -> None:
+    def __init__(self, data: pd.DataFrame, *, _time_checked: bool = False) -> None:
         super().__init__()
-        self.set_data(data)
+        self._time_checked = _time_checked
+        try:
+            self.set_data(data)
+        finally:
+            self._time_checked = False
 
     @staticmethod
     def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> pd.MultiIndex:
@@ -360,12 +379,13 @@ class Base(Core):
         Raises
         ------
         ValueError
-            If the new data is empty.
+            If the new data is empty, or their time index holds ``NaT``.
         """
         if new.empty:
             raise ValueError("You can't set an object with empty data.")
 
-        self._verify_datetimeindex(new)
+        if not self._time_checked:
+            self._verify_datetimeindex(new)
 
     def _clean_species_for_setting(self, *species):
         species = super(Base, self)._clean_species_for_setting(*species)

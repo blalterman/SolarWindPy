@@ -555,7 +555,9 @@ class Plasma(base.Base):
         ), "Plasma.species can't contain '+'."
         species = tuple(species)
 
-        ions_ = pd.Series({s: ions.Ion(self.data, s) for s in species})
+        ions_ = pd.Series(
+            {s: ions.Ion(self.data, s, _time_checked=True) for s in species}
+        )
         self._ions = ions_
         self._species = species
 
@@ -942,7 +944,9 @@ class Plasma(base.Base):
         else:
             self.logger.info("no columns dropped from plasma")
 
-        self._bfield = vector.BField(data.b.xs("", axis=1, level="S"))
+        self._bfield = vector.BField(
+            data.b.xs("", axis=1, level="S"), _time_checked=True
+        )
 
     def _mask_invalid_species(self, data):
         r"""Set a species to NaN at every time any of its moments is missing.
@@ -1272,7 +1276,7 @@ class Plasma(base.Base):
                     self.constants.m_in_mp[s] / self.constants.charge_states[s]
                 )
                 v = v.data.multiply(m2q)
-                v = vector.Vector(v)
+                v = vector.Vector(v, _time_checked=True)
 
         elif project_m2q:
             raise NotImplementedError(
@@ -1291,7 +1295,9 @@ species: {}
                     names=["S"],
                     sort=True,
                 )
-                v = vector.Vector(self._species_weighted_mean(v, rhos))
+                v = vector.Vector(
+                    self._species_weighted_mean(v, rhos), _time_checked=True
+                )
 
         return v
 
@@ -1364,7 +1370,7 @@ species: {}
         v1 = self.velocity(s1, project_m2q=project_m2q).cartesian
 
         dv = v0.subtract(v1)
-        dv = vector.Vector(dv)
+        dv = vector.Vector(dv, _time_checked=True)
 
         return dv
 
@@ -1961,7 +1967,7 @@ species: {}
         mask = ~ne.astype(bool)
         electrons = electrons.mask(mask, axis=0)
 
-        electrons = ions.Ion(electrons, "e")
+        electrons = ions.Ion(electrons, "e", _time_checked=True)
 
         if inplace:
             cols = electrons.data.columns
