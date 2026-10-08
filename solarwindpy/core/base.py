@@ -297,7 +297,10 @@ class Core(ABC):
         :meth:`_put_in_time_order`.
         :class:`~solarwindpy.core.plasma.Plasma` and
         :class:`~solarwindpy.core.spacecraft.Spacecraft` sort their data
-        before this runs, so they never reach the order warning.
+        before this runs, so they never reach the order warning. An index whose
+        values cannot be compared, such as ``[1, "a", 2.0]``, has no order: it
+        gets the order warning, as pandas' ``is_monotonic_increasing`` is False
+        for it, and the data are kept.
 
         Parameters
         ----------
@@ -309,13 +312,18 @@ class Core(ABC):
         ValueError
             If the index holds missing times (``NaT``), naming how many.
         """
-        behind = self._time_disorder(data.index, f"{self.__class__.__name__} data")
+        what = f"{self.__class__.__name__} data"
+        try:
+            in_order = not len(self._time_disorder(data.index, what))
+        except TypeError:
+            # Values that cannot be compared have no order.
+            in_order = False
         if not isinstance(data.index, pd.DatetimeIndex):
             self.logger.warning(
                 "A non-DatetimeIndex will prevent some DatetimeIndex-dependent functionality from working."
             )
 
-        if len(behind):
+        if not in_order:
             self.logger.warning(
                 "An Index that is not monotonically increasing typically indicates the presence of bad data. This will impact performance, especially if it is a DatetimeIndex."
             )

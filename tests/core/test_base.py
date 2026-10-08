@@ -248,3 +248,22 @@ def test_an_ion_a_plasma_built_still_checks_new_data():
     p = swp.examples.load_plasma()
     with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
         p.p1.set_data(_with_missing_time(p.data.xs("p1", axis=1, level="S")))
+
+
+def test_a_vector_on_an_index_that_cannot_be_ordered_warns_and_is_kept(caplog):
+    r"""A Vector on an index of mixed types warns twice and keeps its rows.
+
+    The index ``[1, "a", 2.0]`` is not a DatetimeIndex and its values cannot be
+    compared, so it has no order: the Vector logs the non-DatetimeIndex and
+    the order warnings, does not sort, and does not raise.
+
+    ON FAILURE: the code is wrong; an index that cannot be ordered crashed or was sorted.
+    """
+    _, _, _, b = _example_rows([0, 1, 2])
+    index = pd.Index([1, "a", 2.0])
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        v = vector.Vector(b.set_axis(index, axis=0))
+    first, second = _warning_records(caplog)
+    assert NOT_DATETIME in first
+    assert NOT_INCREASING in second
+    assert v.data.index.equals(index)
