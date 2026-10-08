@@ -72,9 +72,9 @@ class Spacecraft(base.Base):
         >>> spacecraft.velocity.data.loc[:, "y"].tolist()
         [-80.0, -70.0, -90.0]
         """
+        # `Base.__init__` calls `set_data`, which needs neither frame nor name.
         super(Spacecraft, self).__init__(data)
         self.set_frame_name(frame, name)
-        self.set_data(data)
         self._log_spacecraft()
 
     @property

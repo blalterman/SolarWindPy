@@ -10,6 +10,7 @@ from abc import ABC, abstractclassmethod, abstractproperty
 
 from . import test_base as base
 
+import solarwindpy as swp
 from solarwindpy.core import vector
 from solarwindpy.core import spacecraft
 
@@ -177,3 +178,20 @@ class TestPSP(SpacecraftTestBase, TestCase):
         self.assertIsInstance(ot.carrington, pd.DataFrame)
         pdt.assert_index_equal(cols, ot.carrington.columns)
         pdt.assert_frame_equal(carr, ot.carrington)
+
+
+def test_out_of_order_spacecraft_data_warn_once(caplog):
+    r"""A spacecraft built from out-of-order data logs the order warning once.
+
+    The example trajectory's three rows are passed in order 2, 0, 1. Building
+    one `Spacecraft` is one user-facing object, so the base class's "not
+    monotonically increasing" warning appears once, not once per internal
+    call that validates the same data.
+
+    ON FAILURE: the code is wrong; the data are validated more than once.
+    """
+    data = swp.examples.load_plasma().spacecraft.data.iloc[[2, 0, 1]]
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        spacecraft.Spacecraft(data, "PSP", "HCI")
+    warned = [r for r in caplog.records if "monotonically" in r.getMessage()]
+    assert len(warned) == 1
