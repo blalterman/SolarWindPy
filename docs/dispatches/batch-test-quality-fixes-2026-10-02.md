@@ -587,3 +587,9 @@ raises ValueError naming how many. This replaces "warn and keep"; NaT handling d
 `Plasma` becomes dead and is removed. Add the 15 tests from the sort of #510's new-code
 survivors (unit `plasma-order-check-tests`, OWNS solarwindpy/core/plasma.py,
 tests/core/test_plasma.py).
+
+Author decisions (2026-10-08, PR #511): `Plasma.set_data` called directly runs the same time
+checks as construction (refuse NaT; warn then sort, or refuse out-of-order data when spacecraft
+or auxiliary data are attached). `set_auxiliary_data` (and `set_spacecraft`, same source) refuse
+NaT and reorder the plasma's times to the plasma's order with a warning. `Spacecraft` built
+from unsorted data warns once, not twice.
