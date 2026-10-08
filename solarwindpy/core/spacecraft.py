@@ -72,9 +72,9 @@ class Spacecraft(base.Base):
         >>> spacecraft.velocity.data.loc[:, "y"].tolist()
         [-80.0, -70.0, -90.0]
         """
+        # `Base.__init__` calls `set_data`, which needs neither frame nor name.
         super(Spacecraft, self).__init__(data)
         self.set_frame_name(frame, name)
-        self.set_data(data)
         self._log_spacecraft()
 
     @property
@@ -218,8 +218,19 @@ class Spacecraft(base.Base):
         Parameters
         ----------
         data : pd.DataFrame
-            Spacecraft position/velocity data.
+            Spacecraft position/velocity data. Rows out of time order are
+            sorted with one warning, as :class:`~solarwindpy.core.plasma.Plasma`
+            sorts its data.
+
+        Raises
+        ------
+        ValueError
+            If the time index holds missing timestamps (``NaT``), naming how
+            many.
         """
+        # Sorting first means every Vector built from these data later sees
+        # them in order, so no accessor repeats the order warning.
+        data = self._put_in_time_order(data, "Spacecraft data")
         super(Spacecraft, self).set_data(data)
 
         p = data.xs("pos", axis=1, level="M")
