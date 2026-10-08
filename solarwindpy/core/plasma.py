@@ -146,31 +146,38 @@ class Plasma(base.Base):
         *species : str
             Iterable of species contained in ``data``.
         spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
-            Spacecraft trajectory and velocity information, on the same time
-            index as ``data``, with column levels named exactly ``("M", "C")``
-            in that order. If ``None``, the Coulomb number
+            Spacecraft trajectory and velocity information, at the times of
+            ``data`` (see Notes), with column levels named exactly
+            ``("M", "C")`` in that order. If ``None``, the Coulomb number
             :py:meth:`~Plasma.nc` method will raise a :class:`ValueError`.
         auxiliary_data : :class:`pandas.DataFrame`, optional
             Additional measurements to carry with the plasma, for example data
-            quality flags, on the same time index as ``data``. Its column
+            quality flags, at the times of ``data`` (see Notes). Its column
             levels must be named exactly ``("M", "C", "S")`` in that order.
 
         Raises
         ------
         TypeError
             If ``data`` is not a :class:`pandas.DataFrame`.
+        ValueError
+            If the time index of ``data`` has missing timestamps (``NaT``); the
+            message names how many.
 
         Notes
         -----
         Thermal speeds assume :math:`mw^2 = 2kT`.
 
-        The data are put in time order once, here, and every method may assume
-        sorted data afterwards. Rows earlier than the row before them are
-        counted and located in a warning, then sorted with a stable sort, so
-        rows sharing a timestamp keep their order. Spacecraft and auxiliary
-        data on the same index as ``data`` are sorted the same way. Repeated
-        timestamps log a warning and are kept. Missing timestamps (``NaT``)
-        log a warning and are kept; a sort places them last.
+        The data are put in time order by :meth:`set_data`, and every method
+        may assume sorted data afterwards. Rows earlier than the row before
+        them are counted and located in a warning, then sorted with a stable
+        sort, so rows sharing a timestamp keep their order. A
+        :class:`~solarwindpy.core.spacecraft.Spacecraft` sorts its own data
+        the same way when built. Auxiliary data on the same index as ``data``
+        come from the same source and are sorted the same way without a
+        further warning; at the same times in another order, they are
+        reordered to the plasma's with a warning. Repeated timestamps log a
+        warning and are kept. Missing timestamps (``NaT``) have no place in
+        time order, so they raise rather than being sorted.
 
         Examples
         --------
@@ -222,14 +229,15 @@ class Plasma(base.Base):
             raise TypeError(
                 f"Plasma data must be a pandas DataFrame, not {type(data).__name__}"
             )
-        data, spacecraft, auxiliary_data = self._sort_by_time(
-            data, spacecraft, auxiliary_data
-        )
+        # Nothing is attached yet, so `set_data` sorts rather than refusing.
+        self._spacecraft = None
+        self._auxiliary_data = None
+        source = data.index
         self._set_species(*species)
         super(Plasma, self).__init__(data)
         self._set_ions()
         self.set_spacecraft(spacecraft)
-        self.set_auxiliary_data(auxiliary_data)
+        self._set_auxiliary_data(auxiliary_data, source)
 
     def __getattr__(self, attr):
         r"""Return the :class:`~solarwindpy.core.ions.Ion` named ``attr``.
@@ -601,14 +609,16 @@ class Plasma(base.Base):
         Parameters
         ----------
         new : Spacecraft or None
-            Spacecraft trajectory object containing position and velocity data.
-            Must have matching datetime index with plasma data.
+            Spacecraft trajectory object containing position and velocity data,
+            at the plasma data's times. A spacecraft sorts its own data by time
+            when built, so it holds them in the plasma's order.
 
         Raises
         ------
         ValueError
-            If the spacecraft index differs from the plasma data's, or its
-            column levels are not named exactly ``("M", "C")``, in that order.
+            If the spacecraft index holds other times than the plasma data's,
+            or its column levels are not named exactly ``("M", "C")``, in that
+            order.
 
         Notes
         -----
@@ -637,6 +647,8 @@ class Plasma(base.Base):
 
         if new is not None:
             assert isinstance(new.data.index, pd.DatetimeIndex)
+            # A Spacecraft sorts itself and refuses NaT when built, so its
+            # times either equal the plasma's row for row or differ.
             self._require_plasma_index(new.data.index, "Spacecraft data")
             self._require_level_names(new.data.columns, ("M", "C"), "Spacecraft data")
             # Don't test spacecraft data duplicating plasma data b/c labels will
@@ -653,15 +665,17 @@ class Plasma(base.Base):
         ----------
         new : pandas.DataFrame or None
             Additional measurements such as data quality flags, derived
-            parameters, or instrument-specific metadata. Must have matching
-            datetime index with plasma data.
+            parameters, or instrument-specific metadata, at the plasma data's
+            times. Times in another order are reordered to the plasma's, with
+            a warning.
 
         Raises
         ------
         ValueError
-            If the auxiliary data's index differs from the plasma data's, its
-            column levels are not named exactly ``("M", "C", "S")`` in that
-            order, or it duplicates a plasma data column.
+            If the auxiliary data's index holds missing timestamps (``NaT``) or
+            other times than the plasma data's, its column levels are not named
+            exactly ``("M", "C", "S")`` in that order, or it duplicates a
+            plasma data column.
 
         Notes
         -----
@@ -683,14 +697,24 @@ class Plasma(base.Base):
         >>> plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data
         [0, 1, 0]
         """
+        self._set_auxiliary_data(new)
+
+    def _set_auxiliary_data(self, new, source=None):
+        """Set the auxiliary data; ``source`` is the index the plasma data arrived on.
+
+        Auxiliary data on ``source`` share the plasma data's origin and are put
+        in the plasma's order without a warning of their own.
+        """
         assert isinstance(new, pd.DataFrame) or new is None
 
         if new is not None:
             assert isinstance(new.index, pd.DatetimeIndex)
-            self._require_plasma_index(new.index, "Auxiliary data")
+            order = self._plasma_order(new.index, "Auxiliary data", source)
             self._require_level_names(new.columns, ("M", "C", "S"), "Auxiliary data")
             if new.columns.isin(self.data.columns).any():
                 raise ValueError("Auxiliary data should not duplicate plasma data")
+            if order is not None:
+                new = new.iloc[order]
 
         self._log_if_missing(new, "auxiliary_data")
         self._auxiliary_data = new
@@ -743,75 +767,96 @@ class Plasma(base.Base):
         if len(index) != len(expected):
             detail = f"it has {len(index)} rows, the plasma data {len(expected)}"
         else:
-            differs = ~(
-                (index.to_numpy() == expected.to_numpy())
-                | (index.isna() & expected.isna())
-            )
+            # NaT compares unequal to everything, and the plasma's own index
+            # holds none (the constructor refuses it).
+            differs = index.to_numpy() != expected.to_numpy()
             row = int(np.flatnonzero(differs)[0])
             detail = f"first difference at row {row}: {index[row]} vs {expected[row]}"
         raise ValueError(
             f"{what} index must equal the plasma data's time index; {detail}"
         )
 
-    def _sort_by_time(self, data, sc, aux):
-        r"""Put ``data`` in time order, with ``sc`` and ``aux`` on its index.
+    def _plasma_order(self, index, what, source=None):
+        r"""Return the positions putting ``index`` in the plasma data's order.
 
-        Rows earlier than the row before them (comparing only rows with a
-        timestamp) are counted and located in one warning, then sorted with a
-        stable sort, so rows sharing a timestamp keep their order and rows
-        without one (``NaT``) go last. ``sc`` and ``aux`` are sorted the same
-        way when their index equals ``data``'s; otherwise they are returned
-        unchanged for the setters to refuse. Missing and repeated timestamps
-        each log a warning and are kept. The constructor calls this once, and
-        every method may assume sorted data afterwards.
+        An index holding the plasma's times in another order is reordered to
+        it with a warning, unless it equals ``source``, the index the plasma
+        data arrived on. Any other mismatch raises.
+
+        Parameters
+        ----------
+        index : pd.Index
+            The time index of auxiliary data.
+        what : str
+            Names the checked frame in messages.
+        source : pd.Index, optional
+            The index the plasma data had before sorting.
+
+        Returns
+        -------
+        np.ndarray or None
+            None when ``index`` already equals the plasma data's.
+
+        Raises
+        ------
+        ValueError
+            If ``index`` holds ``NaT``, or other times than the plasma data's.
+        """
+        _, order = self._time_order(index, what)
+        if order is not None and index[order].equals(self.data.index):
+            if source is None or not index.equals(source):
+                self.logger.warning(
+                    "%s hold the plasma data's times in another order; "
+                    "reordering them to the plasma's",
+                    what,
+                )
+            return order
+        self._require_plasma_index(index, what)
+        return None
+
+    def _sort_by_time(self, data):
+        r"""Put ``data`` in time order, warning of rows out of order or repeated.
+
+        Missing timestamps (``NaT``) raise. Rows earlier than the row before
+        them are counted and located in one warning, then sorted with a stable
+        sort, so rows sharing a timestamp keep their order. Data out of order
+        raise instead when spacecraft or auxiliary data are attached, since
+        sorting would misalign them; with them attached, data in order must
+        also hold exactly the current times, row for row. Repeated timestamps
+        log a warning and are kept.
 
         Parameters
         ----------
         data : pd.DataFrame
             Plasma data indexed by time.
-        sc : Spacecraft or None
-            Spacecraft data from the same source.
-        aux : pd.DataFrame or None
-            Auxiliary data from the same source.
 
         Returns
         -------
-        tuple
-            ``(data, sc, aux)``, each the input itself when already in order.
+        pd.DataFrame
+            ``data`` in time order; the input itself when already in order.
+
+        Raises
+        ------
+        ValueError
+            If ``data``'s time index holds any ``NaT``, naming how many, or,
+            while spacecraft or auxiliary data are attached, is out of order
+            or differs from the current time index.
         """
+        refusal = None
+        if self._spacecraft is not None or self._auxiliary_data is not None:
+            refusal = (
+                "sorting would misalign the attached spacecraft or auxiliary "
+                "data, so sort the data first"
+            )
+        data = self._put_in_time_order(data, "Plasma data", refusal)
         index = data.index
-        valid = ~np.asarray(index.isna())
-        missing = int((~valid).sum())
-        if missing:
-            self.logger.warning(
-                "%d of %d rows have no timestamp (NaT); keeping them",
-                missing,
-                len(index),
+        if refusal is not None:
+            # In order, but the attached frames hold the current times.
+            self._require_plasma_index(
+                index, "New plasma data (spacecraft or auxiliary data attached)"
             )
 
-        timed = np.flatnonzero(valid)
-        values = index.to_numpy()[timed]
-        behind = timed[1:][values[1:] < values[:-1]]
-        if len(behind):
-            self.logger.warning(
-                "%d of %d rows are earlier than the row before them, first at "
-                "rows %s (times %s); sorting the data by time",
-                len(behind),
-                len(index),
-                behind[:5].tolist(),
-                [str(t) for t in index[behind[:5]]],
-            )
-            order = np.concatenate(
-                [timed[np.argsort(values, kind="stable")], np.flatnonzero(~valid)]
-            )
-            if sc is not None and sc.data.index.equals(index):
-                sc = spacecraft.Spacecraft(sc.data.iloc[order], sc.name, sc.frame)
-            if aux is not None and aux.index.equals(index):
-                aux = aux.iloc[order]
-            data = data.iloc[order]
-            index = data.index
-
-        repeated = index.duplicated(keep="first") & ~np.asarray(index.isna())
+        repeated = index.duplicated(keep="first")
         if repeated.any():
             rows = np.flatnonzero(repeated)
             self.logger.warning(
@@ -822,18 +867,24 @@ class Plasma(base.Base):
                 rows[:5].tolist(),
                 [str(t) for t in index[rows[:5]]],
             )
-        return data, sc, aux
+        return data
 
     def set_data(self, new):
-        r"""Set the data, logging its shape and any columns dropped.
+        r"""Set the data in time order, logging its shape and any columns dropped.
 
-        The constructor sorts the data by time before calling this.
+        Rows out of time order are sorted with a warning, as at construction
+        (see :class:`Plasma`).
 
         Raises
         ------
         ValueError
-            If the column levels are not named ``"M"``, ``"C"`` and ``"S"``.
+            If the column levels are not named ``"M"``, ``"C"`` and ``"S"``;
+            if the time index holds missing timestamps (``NaT``); or, while
+            spacecraft or auxiliary data are attached, if the rows are out of
+            time order (sorting would misalign them) or the times differ from
+            the current time index, which the attached data share.
         """
+        new = self._sort_by_time(new)
         super(Plasma, self).set_data(new)
 
         self._require_level_names(
