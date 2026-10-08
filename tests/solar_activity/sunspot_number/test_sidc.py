@@ -9,19 +9,19 @@ cache with a sunspot series of known shape, and then construct a real
 ``SIDC``: a real ``SIDC_ID``, a real ``SIDCLoader``, a real ``SSNExtrema``
 reading the real shipped ``ssn_extrema.csv``, and the real labelling code.
 
-Nothing here patches a name defined in ``sidc.py``. Two boundaries are faked,
-both outside the package: ``Path.home`` (the ``fake_home`` fixture) and the
+Only boundaries are faked: ``Path.home`` (the ``fake_home`` fixture), the
 socket layer (the autouse ``no_network`` fixture, which makes
-``socket.getaddrinfo`` and ``socket.socket.connect`` raise ``NetworkRefused``).
-Expectations are recomputed from the inputs -- the seeded series and the
-extrema table -- or are analytic identities of the normalization being applied.
+``socket.getaddrinfo`` and ``socket.socket.connect`` raise ``NetworkRefused``),
+and, in one test, ``SIDC_ID.url``, the SILSO download URL, redirected to a
+local file in SILSO's layout (``silso_m13.csv``) so a stale cache downloads
+offline.
+Expectations are recomputed from the inputs -- the seeded series, the local SILSO
+file's text and the extrema table -- or are analytic identities of the normalization
+being applied.
 
-KNOWN GAP -- the download itself
---------------------------------
-``SIDCLoader.download_data`` fetching from www.sidc.be is not exercised here.
-Its parsing is covered offline in ``test_sidc_loader.py`` by pointing the
-loader at a local file in SILSO's wire format; whether the live endpoint still
-serves that format is a drift question, not a unit-test question.
+Whether the live endpoint still serves SILSO's layout is a drift question, not
+a unit-test question. ``test_sidc_loader.py`` covers ``download_data``'s
+parsing of the other series keys.
 """
 
 import inspect
@@ -175,6 +175,92 @@ def test_no_network_refuses_the_download_a_stale_cache_triggers(
 
     with pytest.raises(NetworkRefused, match="tried to open a network connection"):
         SIDC("m13")
+
+
+# ---------------------------------------------------------------------------
+# The download, from a local file in SILSO's layout.
+# ---------------------------------------------------------------------------
+# ``silso_m13.csv`` holds five rows of the 13-month smoothed series in SILSO's
+# layout (https://www.sidc.be/SILSO/infosnmstot): semicolon-separated,
+# space-padded, no header; year, month, decimal year, smoothed sunspot number,
+# standard deviation, observation count, definitive flag; -1 marks a missing
+# value. The numbers are chosen for the test, not copied from SILSO.
+SILSO_M13 = Path(__file__).parent / "silso_m13.csv"
+
+
+def silso_rows():
+    """The local file's rows, split by hand rather than by pandas."""
+    return [line.split(";") for line in SILSO_M13.read_text().splitlines()]
+
+
+def test_stale_cache_downloads_the_silso_series_and_loads_it(
+    fake_home, seeded_index, extrema, monkeypatch
+):
+    """A stale cache downloads, parses, caches and labels the SILSO series.
+
+    Yesterday's cache holds the sinusoidal series, so ``SIDC("m13")`` must
+    download. The download URL is redirected to the local file, on the network
+    boundary; ``no_network`` stays active, and reading a local path opens no
+    socket. Every expectation comes from the file's text, split by hand: the
+    index is each row's month start, the columns carry SILSO's values with -1
+    as NaN, the standard error is std / sqrt(n_obs), the flag is a bool, and
+    the cycle is the extrema-table interval holding each time.
+
+    ON FAILURE: the code is wrong, unless SILSO changed its published layout; then update ``silso_m13.csv`` and the column table in ``sidc.py``.
+    """
+    stale = pd.DataFrame(
+        {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
+        index=seeded_index,
+    )
+    yesterday = pd.to_datetime("today") - pd.Timedelta("1D")
+    seed_cache(fake_home, "m13", stale, date=yesterday)
+    monkeypatch.setattr(SIDC_ID, "url", property(lambda self: str(SILSO_M13)))
+
+    data = SIDC("m13").data
+
+    rows = silso_rows()
+    year = [int(r[0]) for r in rows]
+    month = [int(r[1]) for r in rows]
+    ssn = np.array([float(r[3]) for r in rows])
+    std = np.array([float(r[4]) for r in rows])
+    n_obs = np.array([float(r[5]) for r in rows])
+    n_obs[n_obs == -1] = np.nan
+
+    expected_index = pd.DatetimeIndex(
+        [pd.Timestamp(year=y, month=m, day=1) for y, m in zip(year, month)]
+    )
+    pd.testing.assert_index_equal(data.index, expected_index, check_names=False)
+
+    downloaded = {
+        "definitive": np.dtype(bool),
+        "month": np.dtype("int64"),
+        "n_obs": np.dtype("float64"),
+        "ssn": np.dtype("float64"),
+        "std": np.dtype("float64"),
+        "std_error": np.dtype("float64"),
+        "year": np.dtype("int64"),
+        "year_fraction": np.dtype("float64"),
+    }
+    assert set(data.columns) == set(downloaded) | {"cycle", "extremum", "edge"}
+    assert data.loc[:, list(downloaded)].dtypes.to_dict() == downloaded
+
+    assert data.loc[:, "year"].tolist() == year
+    assert data.loc[:, "month"].tolist() == month
+    assert data.loc[:, "year_fraction"].to_numpy() == exact([float(r[2]) for r in rows])
+    assert data.loc[:, "ssn"].to_numpy() == exact(ssn)
+    assert data.loc[:, "std"].to_numpy() == exact(std)
+    assert data.loc[:, "n_obs"].to_numpy() == exact(n_obs, nan_ok=True)
+    assert data.loc[:, "std_error"].to_numpy() == exact(
+        std / np.sqrt(n_obs), nan_ok=True
+    )
+    assert data.loc[:, "definitive"].tolist() == [r[6] == "1" for r in rows]
+
+    cycles = extrema.cycle_intervals.loc[:, "Cycle"]
+    expected_cycles = [
+        next(number for number, interval in cycles.items() if t in interval)
+        for t in expected_index
+    ]
+    assert [int(c) for c in data.loc[:, "cycle"]] == expected_cycles
 
 
 # ---------------------------------------------------------------------------

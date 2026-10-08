@@ -35,7 +35,9 @@ class Ion(base.Base):
         The ion's species name.
     """
 
-    def __init__(self, data: pd.DataFrame, species: str):
+    def __init__(
+        self, data: pd.DataFrame, species: str, *, _time_checked: bool = False
+    ):
         """Initialize an Ion instance with plasma measurement data.
 
         Parameters
@@ -50,6 +52,8 @@ class Ion(base.Base):
             - 'a' for alpha particles (He2+)
             - 'o6' for O6+ ions
             - Other species as needed
+        _time_checked : bool, optional
+            Private; see :class:`~solarwindpy.core.base.Base`.
 
         Notes
         -----
@@ -85,7 +89,7 @@ class Ion(base.Base):
         True
         """
         self.set_species(species)
-        super().__init__(data)
+        super().__init__(data, _time_checked=_time_checked)
 
     def __eq__(self, other: object) -> bool:
         """Check equality between Ion objects.
@@ -163,7 +167,7 @@ class Ion(base.Base):
     @property
     def velocity(self) -> vector.Vector:
         """Get the ion's velocity as a Vector."""
-        return vector.Vector(self.data.loc[:, "v"])
+        return vector.Vector(self.data.loc[:, "v"], _time_checked=True)
 
     @property
     def v(self) -> vector.Vector:
@@ -173,7 +177,7 @@ class Ion(base.Base):
     @property
     def thermal_speed(self) -> tensor.Tensor:
         """Get the ion's thermal speed as a Tensor."""
-        return tensor.Tensor(self.data.loc[:, "w"])
+        return tensor.Tensor(self.data.loc[:, "w"], _time_checked=True)
 
     @property
     def w(self) -> tensor.Tensor:

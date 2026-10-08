@@ -25,15 +25,17 @@ class Vector(base.Base):
         Data with ``x``, ``y`` and ``z`` components.
     """
 
-    def __init__(self, data: pd.DataFrame):
+    def __init__(self, data: pd.DataFrame, *, _time_checked: bool = False):
         """Initialize a :class:`Vector` instance.
 
         Parameters
         ----------
         data : :class:`pandas.DataFrame`
             The vector data with ``x``, ``y`` and ``z`` components.
+        _time_checked : bool, optional
+            Private; see :class:`~solarwindpy.core.base.Base`.
         """
-        super().__init__(data)
+        super().__init__(data, _time_checked=_time_checked)
 
     def __call__(self, component: str) -> pd.Series:
         """Return a vector component.
@@ -228,7 +230,7 @@ class Vector(base.Base):
         """
         uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
-        return Vector(uv)
+        return Vector(uv, _time_checked=True)
 
     @property
     def uv(self) -> "Vector":

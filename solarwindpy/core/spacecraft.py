@@ -97,7 +97,7 @@ class Spacecraft(base.Base):
             Position vector with x, y, z components.
         """
         pos = self.data.xs("pos", axis=1, level="M").loc[:, ("x", "y", "z")]
-        return vector.Vector(pos)
+        return vector.Vector(pos, _time_checked=True)
 
     @property
     def pos(self):
@@ -132,7 +132,7 @@ class Spacecraft(base.Base):
         """
         try:
             v = self.data.xs("v", axis=1, level="M").loc[:, ("x", "y", "z")]
-            return vector.Vector(v)
+            return vector.Vector(v, _time_checked=True)
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know it's velocity.")
 
