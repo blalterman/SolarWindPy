@@ -271,3 +271,23 @@ Remaining across all nine modules: 1,138 survivors after recheck. By kind, they 
 no test can kill (behaviour-identical changes), plotting appearance, error and log wording,
 the two mutmut-excluded docstring functions, and the `hist2d` data paths and remaining
 `plasma.py` physics that need a mutant-by-mutant look; GitHub issue #507 tracks them.
+
+Final re-measurement (2026-10-08), after the survivor sort and its units (PRs #508 to #511;
+master at 3cce07fe). The 221 survivors classified mutant by mutant held 49 real gaps; sorting
+the further 117 `plasma.py` survivors found 40 more, and sorting the survivors in #510's new
+code found 15. All were killed except two `_prep_agg_for_plot` default-argument mutants that
+the public plotting path cannot reach. Along the way the sort exposed and fixed: `Plasma`
+methods sorting rows by time against the author's rule (now: warn, then sort at construction;
+NaT refused; spacecraft and auxiliary data kept aligned), `Hist2D` one-sided clipping coerced to
+both tails, `project_1d` moving samples on bin edges, and a bottom-edge y counted by the
+projection but not by its parent.
+
+| Module | Killed / survived | Score | Survivors after recheck |
+|---|---|---|---|
+| core/plasma.py | 1842 / 410 | 0.82 | 410 |
+| plotting/hist2d.py | 915 / 360 | 0.72 | 360 |
+
+Remaining across all nine modules: 1,097 survivors after recheck (about 1,600 at the review on
+2026-10-02, 1,377 on the morning of 2026-10-07). By kind: mutants no test can kill, plotting
+appearance, error and log wording, the two mutmut-excluded docstring functions, and the two
+unreachable `_prep_agg_for_plot` defaults; issue #507 records them.
