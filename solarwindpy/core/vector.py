@@ -25,14 +25,14 @@ class Vector(base.Base):
         Data with ``x``, ``y`` and ``z`` components.
     """
 
-    def __init__(self, data: pd.DataFrame, *, _time_checked: bool = False):
+    def __init__(self, data: pd.DataFrame, *, _time_checked: pd.Index | None = None):
         """Initialize a :class:`Vector` instance.
 
         Parameters
         ----------
         data : :class:`pandas.DataFrame`
             The vector data with ``x``, ``y`` and ``z`` components.
-        _time_checked : bool, optional
+        _time_checked : pandas.Index, optional
             Private; see :class:`~solarwindpy.core.base.Base`.
         """
         super().__init__(data, _time_checked=_time_checked)
@@ -226,11 +226,12 @@ class Vector(base.Base):
         Returns
         -------
         Vector
-            Normalised vector.
+            Normalised vector, derived row by row from this vector's
+            already-checked data, so it skips the time checks.
         """
         uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
-        return Vector(uv, _time_checked=True)
+        return Vector(uv, _time_checked=self.data.index)
 
     @property
     def uv(self) -> "Vector":

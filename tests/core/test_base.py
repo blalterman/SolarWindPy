@@ -237,6 +237,22 @@ def test_a_vector_built_directly_on_a_non_datetime_index_warns(caplog):
     assert NOT_DATETIME in message
 
 
+def test_a_child_whose_times_differ_from_its_parents_is_checked():
+    r"""A child handed its parent's time index skips the checks only on that index.
+
+    A builder passes the parent's checked time index as ``_time_checked``,
+    the private switch documented on ``Base``. Data whose index is not that
+    one, here the plasma's proton velocity with the middle time replaced by
+    NaT, are checked like any directly built object and raise.
+
+    ON FAILURE: the code is wrong; a child trusted a time index it was not built on.
+    """
+    p = swp.examples.load_plasma()
+    v = _with_missing_time(p.p1.velocity.data)
+    with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
+        vector.Vector(v, _time_checked=p.data.index)
+
+
 def test_an_ion_a_plasma_built_still_checks_new_data():
     r"""An Ion built by a Plasma refuses a NaT time passed to its ``set_data``.
 

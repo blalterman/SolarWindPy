@@ -213,6 +213,31 @@ def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
     assert sc.position.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
 
 
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda sc, values: spacecraft.Spacecraft(values, "PSP", "HCI"),
+        lambda sc, values: sc.set_data(values),
+    ],
+    ids=["constructor", "set_data"],
+)
+def test_data_that_is_not_a_dataframe_raise_type_error_naming_the_type(build):
+    r"""Spacecraft data given as an array raise TypeError naming both types.
+
+    The example spacecraft's values as a numpy array are refused, at
+    construction and by `set_data` called directly alike, with a message
+    naming the expected DataFrame and the ndarray received, as `Plasma`
+    refuses its data.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = swp.examples.load_plasma().spacecraft
+    with pytest.raises(
+        TypeError, match=r"^Spacecraft data must be a pandas DataFrame, not ndarray$"
+    ):
+        build(sc, sc.data.to_numpy())
+
+
 def test_spacecraft_refuses_missing_timestamps():
     r"""A spacecraft whose time index holds NaT raises ValueError naming the count.
 

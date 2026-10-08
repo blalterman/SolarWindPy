@@ -94,10 +94,11 @@ class Spacecraft(base.Base):
         Returns
         -------
         vector.Vector
-            Position vector with x, y, z components.
+            Position vector with x, y, z components, built from the
+            spacecraft's already-checked columns, so it skips the time checks.
         """
         pos = self.data.xs("pos", axis=1, level="M").loc[:, ("x", "y", "z")]
-        return vector.Vector(pos, _time_checked=True)
+        return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
     def pos(self):
@@ -123,7 +124,8 @@ class Spacecraft(base.Base):
         Returns
         -------
         vector.Vector
-            Velocity vector with x, y, z components.
+            Velocity vector with x, y, z components, built from the
+            spacecraft's already-checked columns, so it skips the time checks.
 
         Raises
         ------
@@ -132,7 +134,7 @@ class Spacecraft(base.Base):
         """
         try:
             v = self.data.xs("v", axis=1, level="M").loc[:, ("x", "y", "z")]
-            return vector.Vector(v, _time_checked=True)
+            return vector.Vector(v, _time_checked=self.data.index)
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know it's velocity.")
 
@@ -224,10 +226,13 @@ class Spacecraft(base.Base):
 
         Raises
         ------
+        TypeError
+            If ``data`` is not a :class:`pandas.DataFrame`.
         ValueError
             If the time index holds missing timestamps (``NaT``), naming how
             many.
         """
+        self._require_dataframe(data, "Spacecraft data")
         # Sorting first means every Vector built from these data later sees
         # them in order, so no accessor repeats the order warning.
         data = self._put_in_time_order(data, "Spacecraft data")
