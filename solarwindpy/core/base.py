@@ -241,14 +241,33 @@ class Core(ABC):
         order = np.argsort(index.to_numpy(), kind="stable") if len(behind) else None
         return behind, order
 
+    @staticmethod
+    def _require_dataframe(data: Any, what: str) -> None:
+        r"""Raise :class:`TypeError` unless ``data`` is a :class:`pandas.DataFrame`.
+
+        Run before anything reads ``data``'s index or columns, so the error
+        names the expected type rather than a missing attribute.
+
+        Parameters
+        ----------
+        data : object
+            The data to check.
+        what : str
+            Names the checked data in the error message.
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError(
+                f"{what} must be a pandas DataFrame, not {type(data).__name__}"
+            )
+
     def _put_in_time_order(
         self, data: pd.DataFrame, what: str, refusal: str | None = None
     ) -> pd.DataFrame:
         r"""Return ``data`` in time order, warning per call about rows out of order.
 
         Missing timestamps (``NaT``) raise. Rows earlier than the row before
-        them are counted and located in one warning per call, then sorted with a stable
-        sort, so rows sharing a timestamp keep their order.
+        them are counted and located in one warning per call, then sorted
+        with a stable sort, so rows sharing a timestamp keep their order.
 
         Parameters
         ----------
@@ -336,27 +355,38 @@ class Base(Core):
     ----------
     data : :class:`pandas.DataFrame`
         Data used to initialise the object.
-    _time_checked : bool, optional
-        Private, keyword only. True when ``data`` come from an object that
-        already checked their time index, such as a
-        :class:`~solarwindpy.core.plasma.Plasma` building its ions; the
-        missing-time and order checks are then skipped at construction, so
-        one problem is reported once. Objects built directly keep the default
-        and run every check. Later calls to :meth:`set_data` always check.
+    _time_checked : :class:`pandas.Index`, optional
+        Private, keyword only. Not for users: objects built directly leave it
+        unset and run every time check. See Notes.
 
     Notes
     -----
     Subclasses override :meth:`set_data` to validate the underlying
     :class:`pandas.DataFrame` structure.
+
+    ``_time_checked`` is the switch that skips the missing-time (``NaT``) and
+    time-order checks at construction. It exists for children built from data
+    their parent already checked, such as the ions a
+    :class:`~solarwindpy.core.plasma.Plasma` builds or the unit vector of a
+    :class:`~solarwindpy.core.vector.Vector`, so one problem in the parent's
+    times is reported once rather than again by every child. The builder
+    passes the parent's own time index; the checks are skipped only when
+    ``data``'s index equals it, so a child whose times differ from its
+    parent's is checked like any other object. A child built from its
+    parent's columns shares the parent's index, and the comparison then
+    returns without reading a single timestamp. Later calls to
+    :meth:`set_data` always check.
     """
 
-    def __init__(self, data: pd.DataFrame, *, _time_checked: bool = False) -> None:
+    def __init__(
+        self, data: pd.DataFrame, *, _time_checked: pd.Index | None = None
+    ) -> None:
         super().__init__()
         self._time_checked = _time_checked
         try:
             self.set_data(data)
         finally:
-            self._time_checked = False
+            self._time_checked = None
 
     @staticmethod
     def mi_tuples(x: Tuple[Tuple[str, ...], ...]) -> pd.MultiIndex:
@@ -392,7 +422,8 @@ class Base(Core):
         if new.empty:
             raise ValueError("You can't set an object with empty data.")
 
-        if not self._time_checked:
+        checked = self._time_checked
+        if checked is None or not new.index.equals(checked):
             self._verify_datetimeindex(new)
 
     def _clean_species_for_setting(self, *species):

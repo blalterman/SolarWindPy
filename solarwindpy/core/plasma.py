@@ -225,10 +225,7 @@ class Plasma(base.Base):
         >>> plasma = Plasma(data, "a", "p1")
         """
         self._init_logger()
-        if not isinstance(data, pd.DataFrame):
-            raise TypeError(
-                f"Plasma data must be a pandas DataFrame, not {type(data).__name__}"
-            )
+        self._require_dataframe(data, "Plasma data")
         # Nothing is attached yet, so `set_data` sorts rather than refusing.
         self._spacecraft = None
         self._auxiliary_data = None
@@ -549,6 +546,13 @@ class Plasma(base.Base):
         return self._ions
 
     def _set_ions(self):
+        r"""Build one :class:`~solarwindpy.core.ions.Ion` per species.
+
+        Each ion is built from columns of the plasma data, whose time index
+        :meth:`set_data` already checked; selecting columns cannot introduce
+        missing or reordered times, so the ions skip the time checks
+        (see :class:`~solarwindpy.core.base.Base`).
+        """
         species = self.species
         assert np.all(
             ["+" not in s for s in species]
@@ -556,7 +560,7 @@ class Plasma(base.Base):
         species = tuple(species)
 
         ions_ = pd.Series(
-            {s: ions.Ion(self.data, s, _time_checked=True) for s in species}
+            {s: ions.Ion(self.data, s, _time_checked=self.data.index) for s in species}
         )
         self._ions = ions_
         self._species = species
@@ -613,7 +617,8 @@ class Plasma(base.Base):
         new : Spacecraft or None
             Spacecraft trajectory object containing position and velocity data,
             at the plasma data's times. A spacecraft sorts its own data by time
-            when built, so it holds them in the plasma's order.
+            when built, so it holds them in the plasma's order; the sort is
+            stable, so rows that share a timestamp keep their input order.
 
         Raises
         ------
@@ -669,7 +674,8 @@ class Plasma(base.Base):
             Additional measurements such as data quality flags, derived
             parameters, or instrument-specific metadata, at the plasma data's
             times. Times in another order are reordered to the plasma's, with
-            a warning.
+            a warning, by a stable sort: rows that share a timestamp keep
+            their input order.
 
         Raises
         ------
@@ -875,10 +881,13 @@ class Plasma(base.Base):
         r"""Set the data in time order, logging its shape and any columns dropped.
 
         Rows out of time order are sorted with a warning, as at construction
-        (see :class:`Plasma`).
+        (see :class:`Plasma`). The magnetic field is rebuilt from columns of
+        the data just checked, so its time checks are skipped.
 
         Raises
         ------
+        TypeError
+            If ``new`` is not a :class:`pandas.DataFrame`.
         ValueError
             If the column levels are not named ``"M"``, ``"C"`` and ``"S"``;
             if the time index holds missing timestamps (``NaT``); or, while
@@ -886,6 +895,7 @@ class Plasma(base.Base):
             time order (sorting would misalign them) or the times differ from
             the current time index, which the attached data share.
         """
+        self._require_dataframe(new, "Plasma data")
         new = self._sort_by_time(new)
         super(Plasma, self).set_data(new)
 
@@ -945,7 +955,7 @@ class Plasma(base.Base):
             self.logger.info("no columns dropped from plasma")
 
         self._bfield = vector.BField(
-            data.b.xs("", axis=1, level="S"), _time_checked=True
+            data.b.xs("", axis=1, level="S"), _time_checked=data.index
         )
 
     def _mask_invalid_species(self, data):
@@ -1265,6 +1275,11 @@ class Plasma(base.Base):
             A :py:class:`~solarwindpy.core.vector.Vector` for one species
             string, or a `pd.Series` of them indexed by species when several
             species are passed.
+
+        Notes
+        -----
+        A vector computed here is derived row by row from the plasma's
+        already-checked data, so it skips the time checks.
         """
         stuple = self._chk_species(*species)
 
@@ -1276,7 +1291,7 @@ class Plasma(base.Base):
                     self.constants.m_in_mp[s] / self.constants.charge_states[s]
                 )
                 v = v.data.multiply(m2q)
-                v = vector.Vector(v, _time_checked=True)
+                v = vector.Vector(v, _time_checked=self.data.index)
 
         elif project_m2q:
             raise NotImplementedError(
@@ -1296,7 +1311,7 @@ species: {}
                     sort=True,
                 )
                 v = vector.Vector(
-                    self._species_weighted_mean(v, rhos), _time_checked=True
+                    self._species_weighted_mean(v, rhos), _time_checked=self.data.index
                 )
 
         return v
@@ -1313,6 +1328,13 @@ species: {}
         This relies on species masking when the data are set: a species'
         density and velocity are missing together, so a weight never pairs
         with a missing velocity, nor a velocity with a missing weight.
+
+        The mean is computed row by row and keeps the rows of ``vectors``,
+        which come from the plasma's already-checked data. It introduces no
+        missing or reordered times, so the
+        :class:`~solarwindpy.core.vector.Vector` callers build from it is
+        passed the plasma's time index and skips the time checks (see
+        :class:`~solarwindpy.core.base.Base`).
 
         Parameters
         ----------
@@ -1354,6 +1376,8 @@ species: {}
         Returns
         -------
         dv : vector.Vector
+            Derived row by row from the plasma's already-checked data, so it
+            skips the time checks.
 
         See Also
         --------
@@ -1370,7 +1394,7 @@ species: {}
         v1 = self.velocity(s1, project_m2q=project_m2q).cartesian
 
         dv = v0.subtract(v1)
-        dv = vector.Vector(dv, _time_checked=True)
+        dv = vector.Vector(dv, _time_checked=self.data.index)
 
         return dv
 
@@ -1900,6 +1924,8 @@ species: {}
 
         :math:`T_p` is taken from species ``p`` if the plasma holds it, and
         otherwise from the core protons ``p1``; the beam ``p2`` is never used.
+        The electron :class:`~solarwindpy.core.ions.Ion` is derived row by row
+        from the plasma's already-checked data, so it skips the time checks.
         """
 
         species = self.species
@@ -1967,7 +1993,7 @@ species: {}
         mask = ~ne.astype(bool)
         electrons = electrons.mask(mask, axis=0)
 
-        electrons = ions.Ion(electrons, "e", _time_checked=True)
+        electrons = ions.Ion(electrons, "e", _time_checked=self.data.index)
 
         if inplace:
             cols = electrons.data.columns

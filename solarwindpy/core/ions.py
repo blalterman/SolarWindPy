@@ -36,7 +36,7 @@ class Ion(base.Base):
     """
 
     def __init__(
-        self, data: pd.DataFrame, species: str, *, _time_checked: bool = False
+        self, data: pd.DataFrame, species: str, *, _time_checked: pd.Index | None = None
     ):
         """Initialize an Ion instance with plasma measurement data.
 
@@ -52,7 +52,7 @@ class Ion(base.Base):
             - 'a' for alpha particles (He2+)
             - 'o6' for O6+ ions
             - Other species as needed
-        _time_checked : bool, optional
+        _time_checked : pandas.Index, optional
             Private; see :class:`~solarwindpy.core.base.Base`.
 
         Notes
@@ -166,8 +166,12 @@ class Ion(base.Base):
 
     @property
     def velocity(self) -> vector.Vector:
-        """Get the ion's velocity as a Vector."""
-        return vector.Vector(self.data.loc[:, "v"], _time_checked=True)
+        """Get the ion's velocity as a Vector.
+
+        Built from the ion's already-checked columns, so it skips the time
+        checks.
+        """
+        return vector.Vector(self.data.loc[:, "v"], _time_checked=self.data.index)
 
     @property
     def v(self) -> vector.Vector:
@@ -176,8 +180,12 @@ class Ion(base.Base):
 
     @property
     def thermal_speed(self) -> tensor.Tensor:
-        """Get the ion's thermal speed as a Tensor."""
-        return tensor.Tensor(self.data.loc[:, "w"], _time_checked=True)
+        """Get the ion's thermal speed as a Tensor.
+
+        Built from the ion's already-checked columns, so it skips the time
+        checks.
+        """
+        return tensor.Tensor(self.data.loc[:, "w"], _time_checked=self.data.index)
 
     @property
     def w(self) -> tensor.Tensor:
