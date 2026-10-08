@@ -593,3 +593,6 @@ checks as construction (refuse NaT; warn then sort, or refuse out-of-order data 
 or auxiliary data are attached). `set_auxiliary_data` (and `set_spacecraft`, same source) refuse
 NaT and reorder the plasma's times to the plasma's order with a warning. `Spacecraft` built
 from unsorted data warns once, not twice.
+
+Author decision (2026-10-08): a standalone `Spacecraft` follows the same time rule as `Plasma`:
+refuse NaT, warn once about out-of-order times, then sort; accessors do not warn again.
