@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+g708876648 documentation</title>
+  <title>solarwindpy.plotting.agg_plot.AggPlot &mdash; SolarWindPy 0.1.dev1+g98152c5b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=897d2aaa"></script>
+      <script src="../_static/documentation_options.js?v=ec5c34fb"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -406,7 +406,7 @@
 <dd class="field-odd"><dl>
 <dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Data to clip. A DataFrame is clipped column by column.</p>
 </dd>
-<dt><strong>clip</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A string starting with <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> selects the lower or upper
+<dt><strong>clip</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A string starting with <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> selects the lower or upper
 tail only; any other value clips both tails.</p>
 </dd>
 </dl>
@@ -419,7 +419,7 @@ tail only; any other value clips both tails.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither a Series nor a DataFrame.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">data</span></code> is neither a Series nor a DataFrame.</p>
 </dd>
 </dl>
 </dd>
@@ -564,15 +564,15 @@ bin (e.g. its (x, y) bin in 2-D) meets <cite>threshold</cite>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>x, y, z</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference internal" href="solarwindpy.plotting.labels.base.TeXlabel.html#solarwindpy.plotting.labels.base.TeXlabel" title="solarwindpy.plotting.labels.base.TeXlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.labels.base.TeXlabel</span></code></a>, optional</span></dt><dd><p>New axis labels.</p>
+<dt><strong>x, y, z</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference internal" href="solarwindpy.plotting.labels.base.TeXlabel.html#solarwindpy.plotting.labels.base.TeXlabel" title="solarwindpy.plotting.labels.base.TeXlabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solarwindpy.plotting.labels.base.TeXlabel</span></code></a>, optional</span></dt><dd><p>New axis labels.</p>
 </dd>
-<dt><strong>auto_update_path</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True (default), rebuild the save path from the new labels.</p>
+<dt><strong>auto_update_path</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True (default), rebuild the save path from the new labels.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
 </dd>
 </dl>
 </dd>
@@ -586,7 +586,7 @@ bin (e.g. its (x, y) bin in 2-D) meets <cite>threshold</cite>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
 </dd>
 </dl>
 </dd>
@@ -600,10 +600,10 @@ bin (e.g. its (x, y) bin in 2-D) meets <cite>threshold</cite>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
+<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
 use <code class="docutils literal notranslate"><span class="pre">Path(new)</span></code>.</p>
 </dd>
-<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
+<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
 </dd>
 </dl>
 </dd>

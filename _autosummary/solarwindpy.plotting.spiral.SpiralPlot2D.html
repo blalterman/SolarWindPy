@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.spiral.SpiralPlot2D &mdash; SolarWindPy 0.1.dev1+g708876648 documentation</title>
+  <title>solarwindpy.plotting.spiral.SpiralPlot2D &mdash; SolarWindPy 0.1.dev1+g98152c5b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=897d2aaa"></script>
+      <script src="../_static/documentation_options.js?v=ec5c34fb"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -338,11 +338,11 @@ splot.initialize_mesh()</p>
 </dd>
 <dt><strong>z</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a>, optional</span></dt><dd><p>Value to aggregate in each cell. If None, cells count points.</p>
 </dd>
-<dt><strong>logx, logy</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, use <code class="docutils literal notranslate"><span class="pre">log10(abs())</span></code> of that coordinate.</p>
+<dt><strong>logx, logy</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, use <code class="docutils literal notranslate"><span class="pre">log10(abs())</span></code> of that coordinate.</p>
 </dd>
-<dt><strong>initial_bins</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></span></dt><dd><p>Initial bins per axis; see <code class="docutils literal notranslate"><span class="pre">calc_initial_bins</span></code>.</p>
+<dt><strong>initial_bins</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></span></dt><dd><p>Initial bins per axis; see <code class="docutils literal notranslate"><span class="pre">calc_initial_bins</span></code>.</p>
 </dd>
-<dt><strong>clip_data</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>Stored as <code class="docutils literal notranslate"><span class="pre">clip</span></code>.</p>
+<dt><strong>clip_data</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>Stored as <code class="docutils literal notranslate"><span class="pre">clip</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -388,7 +388,7 @@ order; a cell removed by any of them is NaN.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the mesh categories and the data differ in length.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If the mesh categories and the data differ in length.</p>
 </dd>
 </dl>
 </dd>
@@ -402,7 +402,7 @@ order; a cell removed by any of them is NaN.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>nbins</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></span></dt><dd><p>An int gives that many bins per axis at equally spaced quantiles of
+<dt><strong>nbins</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></span></dt><dd><p>An int gives that many bins per axis at equally spaced quantiles of
 the finite data; a pair gives one int or edge array per axis. The
 last edge is raised to the larger of 0.01 and 1.01 times the
 largest edge so the maximum lies inside the grid.</p>
@@ -411,7 +411,7 @@ largest edge so the maximum lies inside the grid.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">((&quot;x&quot;,</span> <span class="pre">edges),</span> <span class="pre">(&quot;y&quot;,</span> <span class="pre">edges))</span></code>.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">((&quot;x&quot;,</span> <span class="pre">edges),</span> <span class="pre">(&quot;y&quot;,</span> <span class="pre">edges))</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -447,13 +447,13 @@ largest edge so the maximum lies inside the grid.</p>
 <dd class="field-odd"><dl>
 <dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Axes</span></code></a>, optional</span></dt><dd><p>If None, create one.</p>
 </dd>
-<dt><strong>cbar</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, draw a colorbar.</p>
+<dt><strong>cbar</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, draw a colorbar.</p>
 </dd>
-<dt><strong>cbar_kwargs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>Passed to the colorbar.</p>
+<dt><strong>cbar_kwargs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, optional</span></dt><dd><p>Passed to the colorbar.</p>
 </dd>
-<dt><strong>fcn</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Aggregation function passed to <code class="docutils literal notranslate"><span class="pre">agg</span></code>.</p>
+<dt><strong>fcn</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Aggregation function passed to <code class="docutils literal notranslate"><span class="pre">agg</span></code>.</p>
 </dd>
-<dt><strong>alpha_fcn</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If given, cells are made more transparent the larger this
+<dt><strong>alpha_fcn</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If given, cells are made more transparent the larger this
 aggregation of z is.</p>
 </dd>
 <dt><strong>**kwargs</strong></dt><dd><p>Only <code class="docutils literal notranslate"><span class="pre">cmap</span></code> and <code class="docutils literal notranslate"><span class="pre">norm</span></code> are accepted.</p>
@@ -469,7 +469,7 @@ aggregation of z is.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If any other keyword is passed.</p>
 </dd>
 </dl>
 </dd>
@@ -490,7 +490,7 @@ irregular adaptive mesh:</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mpl.axes.Axes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>If None, create an Axes instance from <code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code>.</p>
+<dt><strong>ax</strong><span class="classifier"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mpl.axes.Axes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>If None, create an Axes instance from <code class="docutils literal notranslate"><span class="pre">plt.subplots</span></code>.</p>
 </dd>
 <dt><strong>method</strong><span class="classifier">{“rbf”, “grid”, “tricontour”}</span></dt><dd><p>Interpolation method. Default is <code class="docutils literal notranslate"><span class="pre">&quot;rbf&quot;</span></code> (fastest with smoothing).</p>
 </dd>
@@ -598,7 +598,7 @@ inclusive and None leaves that side open. A <code class="docutils literal notran
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lower, upper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The limits.</p>
+<dt><strong>lower, upper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The limits.</p>
 </dd>
 <dt><strong>kind</strong><span class="classifier">{“value”, “quantile”}</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code>: the limits are aggregated values. <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>: the
 limits are quantiles in [0, 1] of the final aggregated values,
@@ -612,7 +612,7 @@ row.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">kind</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if <code class="docutils literal notranslate"><span class="pre">lower</span></code> is
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">kind</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if <code class="docutils literal notranslate"><span class="pre">lower</span></code> is
 not less than <code class="docutils literal notranslate"><span class="pre">upper</span></code>, or, for <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if a limit is
 outside [0, 1].</p>
 </dd>
@@ -634,7 +634,7 @@ outside [0, 1].</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
 </dd>
 </dl>
 </dd>
@@ -648,10 +648,10 @@ outside [0, 1].</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
+<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
 use <code class="docutils literal notranslate"><span class="pre">Path(new)</span></code>.</p>
 </dd>
-<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
+<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
 </dd>
 </dl>
 </dd>

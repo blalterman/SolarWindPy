@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.fitfunctions.composite.GaussianPlusHeavySide &mdash; SolarWindPy 0.1.dev1+g708876648 documentation</title>
+  <title>solarwindpy.fitfunctions.composite.GaussianPlusHeavySide &mdash; SolarWindPy 0.1.dev1+g98152c5b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=897d2aaa"></script>
+      <script src="../_static/documentation_options.js?v=ec5c34fb"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -352,17 +352,17 @@ below a threshold:</p>
 </dd>
 <dt class="field-even">Attributes<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>x0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Transition x-coordinate (fitted parameter).</p>
+<dt><strong>x0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Transition x-coordinate (fitted parameter).</p>
 </dd>
-<dt><strong>y0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Constant offset applied everywhere (fitted parameter).</p>
+<dt><strong>y0</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Constant offset applied everywhere (fitted parameter).</p>
 </dd>
-<dt><strong>y1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Additional offset for x &lt; x0 (fitted parameter).</p>
+<dt><strong>y1</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Additional offset for x &lt; x0 (fitted parameter).</p>
 </dd>
-<dt><strong>mu</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian mean (fitted parameter).</p>
+<dt><strong>mu</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian mean (fitted parameter).</p>
 </dd>
-<dt><strong>sigma</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian standard deviation (fitted parameter).</p>
+<dt><strong>sigma</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian standard deviation (fitted parameter).</p>
 </dd>
-<dt><strong>A</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian amplitude (fitted parameter).</p>
+<dt><strong>A</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>Gaussian amplitude (fitted parameter).</p>
 </dd>
 </dl>
 </dd>
@@ -427,7 +427,7 @@ parameters; its <code class="docutils literal notranslate"><span class="pre">x0<
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>return_exception</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">False</span></code></a></span></dt><dd><p>As in <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+<dt><strong>return_exception</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, default <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">False</span></code></a></span></dt><dd><p>As in <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
 </dd>
 <dt><strong>**kwargs</strong></dt><dd><p>Passed to every fit, as in <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
 </dd>
@@ -435,7 +435,7 @@ parameters; its <code class="docutils literal notranslate"><span class="pre">x0<
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a></dt><dd><p>As in <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a></dt><dd><p>As in <a class="reference internal" href="solarwindpy.fitfunctions.core.FitFunction.html#solarwindpy.fitfunctions.core.FitFunction.make_fit" title="solarwindpy.fitfunctions.core.FitFunction.make_fit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make_fit()</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -449,7 +449,7 @@ parameters; its <code class="docutils literal notranslate"><span class="pre">x0<
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a></dt><dd><p>Function with signature <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">x0,</span> <span class="pre">y0,</span> <span class="pre">y1,</span> <span class="pre">mu,</span> <span class="pre">sigma,</span> <span class="pre">A)</span></code>.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#callable" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">callable()</span></code></a></dt><dd><p>Function with signature <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">x0,</span> <span class="pre">y0,</span> <span class="pre">y1,</span> <span class="pre">mu,</span> <span class="pre">sigma,</span> <span class="pre">A)</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -458,7 +458,7 @@ parameters; its <code class="docutils literal notranslate"><span class="pre">x0<
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.p0">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.p0" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p0</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.p0" title="Link to this definition"></a></dt>
 <dd><p>Calculate initial parameter guess.</p>
 <p>The initial guess is derived from:
 - Weighted mean and std for Gaussian parameters
@@ -472,7 +472,7 @@ or a width under half the smallest spacing of distinct <code class="docutils lit
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>Initial guesses as [x0, y0, y1, mu, sigma, A].</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p>Initial guesses as [x0, y0, y1, mu, sigma, A].</p>
 </dd>
 </dl>
 </dd>
@@ -489,12 +489,12 @@ or a width under half the smallest spacing of distinct <code class="docutils lit
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.TeX_function">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.TeX_function" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TeX_function</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#solarwindpy.fitfunctions.composite.GaussianPlusHeavySide.TeX_function" title="Link to this definition"></a></dt>
 <dd><p>LaTeX representation of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>Multi-line LaTeX string describing the function.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></dt><dd><p>Multi-line LaTeX string describing the function.</p>
 </dd>
 </dl>
 </dd>
@@ -572,7 +572,7 @@ None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None before a fit
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{name:</span> <span class="pre">_InitialGuessInfo(p0,</span> <span class="pre">bounds)}</span></code>, or None before a fit
 succeeds.</p>
 </dd>
 </dl>
@@ -625,9 +625,9 @@ succeeds.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>pct</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, return percentage residuals.</p>
+<dt><strong>pct</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, return percentage residuals.</p>
 </dd>
-<dt><strong>use_all</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, calculate residuals for all input data including
+<dt><strong>use_all</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, default=False</span></dt><dd><p>If True, calculate residuals for all input data including
 points excluded by constraints (xmin, xmax, etc.) passed
 during initialization.
 If False (default), calculate only for points used in fit.</p>
@@ -681,7 +681,7 @@ constraints are passed in __init__).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">SS_res</span> <span class="pre">/</span> <span class="pre">SS_tot</span></code>. When the used <code class="docutils literal notranslate"><span class="pre">y</span></code> have no spread (a single
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">SS_res</span> <span class="pre">/</span> <span class="pre">SS_tot</span></code>. When the used <code class="docutils literal notranslate"><span class="pre">y</span></code> have no spread (a single
 point, or constant data), <code class="docutils literal notranslate"><span class="pre">SS_tot</span> <span class="pre">=</span> <span class="pre">0</span></code> and R² is undefined, so
 <code class="docutils literal notranslate"><span class="pre">nan</span></code> is returned without a divide-by-zero warning.</p>
 </dd>

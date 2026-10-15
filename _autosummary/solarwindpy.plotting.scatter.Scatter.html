@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.scatter.Scatter &mdash; SolarWindPy 0.1.dev1+g708876648 documentation</title>
+  <title>solarwindpy.plotting.scatter.Scatter &mdash; SolarWindPy 0.1.dev1+g98152c5b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=897d2aaa"></script>
+      <script src="../_static/documentation_options.js?v=ec5c34fb"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -427,7 +427,7 @@ inclusive and None leaves that side open. A <code class="docutils literal notran
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>lower, upper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The limits.</p>
+<dt><strong>lower, upper</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>The limits.</p>
 </dd>
 <dt><strong>kind</strong><span class="classifier">{“value”, “quantile”}</span></dt><dd><p><code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code>: the limits are aggregated values. <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>: the
 limits are quantiles in [0, 1] of the final aggregated values,
@@ -441,7 +441,7 @@ row.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">kind</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if <code class="docutils literal notranslate"><span class="pre">lower</span></code> is
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">kind</span></code> is not <code class="docutils literal notranslate"><span class="pre">&quot;value&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if <code class="docutils literal notranslate"><span class="pre">lower</span></code> is
 not less than <code class="docutils literal notranslate"><span class="pre">upper</span></code>, or, for <code class="docutils literal notranslate"><span class="pre">&quot;quantile&quot;</span></code>, if a limit is
 outside [0, 1].</p>
 </dd>
@@ -461,7 +461,7 @@ outside [0, 1].</p>
 </dd>
 <dt><strong>z</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a>, optional</span></dt><dd><p>Value at each point. If None, every point gets <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
 </dd>
-<dt><strong>clip_data</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Stored as <code class="docutils literal notranslate"><span class="pre">self.clip</span></code>, None as False. True clips both tails;
+<dt><strong>clip_data</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Stored as <code class="docutils literal notranslate"><span class="pre">self.clip</span></code>, None as False. True clips both tails;
 <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> clips only the lower or upper tail (see
 <code class="docutils literal notranslate"><span class="pre">AggPlot.clip_data</span></code>).</p>
 </dd>
@@ -469,7 +469,7 @@ outside [0, 1].</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If no row is left after dropping NaNs.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></dt><dd><p>If no row is left after dropping NaNs.</p>
 </dd>
 </dl>
 </dd>
@@ -489,7 +489,7 @@ outside [0, 1].</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a>, optional</span></dt><dd><p>If True, the axis is logarithmic. None keeps the current value.</p>
 </dd>
 </dl>
 </dd>
@@ -503,10 +503,10 @@ outside [0, 1].</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
+<dt><strong>new</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, build the path from <code class="docutils literal notranslate"><span class="pre">self.labels</span></code>. Otherwise,
 use <code class="docutils literal notranslate"><span class="pre">Path(new)</span></code>.</p>
 </dd>
-<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.14)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
+<dt><strong>add_scale</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a></span></dt><dd><p>If True, add information about the axis scales to the end of the path.</p>
 </dd>
 </dl>
 </dd>

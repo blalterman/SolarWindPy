@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.base.IndicatorExtrema &mdash; SolarWindPy 0.1.dev1+g708876648 documentation</title>
+  <title>solarwindpy.solar_activity.base.IndicatorExtrema &mdash; SolarWindPy 0.1.dev1+g98152c5b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=897d2aaa"></script>
+      <script src="../_static/documentation_options.js?v=ec5c34fb"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -349,7 +349,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code></a></dt><dd><p>If <a class="reference internal" href="#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands" title="solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands"><code class="xref py py-meth docutils literal notranslate"><span class="pre">calculate_extrema_bands()</span></code></a> has not been called.</p>
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AttributeError</span></code></a></dt><dd><p>If <a class="reference internal" href="#solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands" title="solarwindpy.solar_activity.base.IndicatorExtrema.calculate_extrema_bands"><code class="xref py py-meth docutils literal notranslate"><span class="pre">calculate_extrema_bands()</span></code></a> has not been called.</p>
 </dd>
 </dl>
 </dd>
@@ -381,7 +381,7 @@ SSN cycle.</p>
 <dd class="field-odd"><dl>
 <dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Data to cut.</p>
 </dd>
-<dt><strong>kind</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If provided, restricts the cut to a subset of interval types.</p>
+<dt><strong>kind</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If provided, restricts the cut to a subset of interval types.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Key</p></th>
@@ -410,7 +410,7 @@ Exclusive option.</p></td>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">&quot;Edges&quot;</span></code> is exclusive and will specify
 <code class="docutils literal notranslate"><span class="pre">[&quot;Fall&quot;,</span> <span class="pre">&quot;Rise&quot;]</span></code> alone.</p>
 </dd>
-<dt><strong>tk_cycles</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a>, optional</span></dt><dd><p>If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, a selector used to choose target solar cycles.</p>
+<dt><strong>tk_cycles</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a>, optional</span></dt><dd><p>If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, a selector used to choose target solar cycles.</p>
 </dd>
 </dl>
 </dd>
@@ -430,7 +430,7 @@ Exclusive option.</p></td>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>dt</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>, optional</span></dt><dd><p>Half-width of the window around each extremum. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;365D&quot;</span></code>.</p>
+<dt><strong>dt</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>, optional</span></dt><dd><p>Half-width of the window around each extremum. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;365D&quot;</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -453,7 +453,7 @@ Exclusive option.</p></td>
 <dd class="field-odd"><dl>
 <dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Times to classify.</p>
 </dd>
-<dt><strong>tk_cycles</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a>, optional</span></dt><dd><p>Subset of cycles to use when cutting.</p>
+<dt><strong>tk_cycles</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a>, optional</span></dt><dd><p>Subset of cycles to use when cutting.</p>
 </dd>
 <dt><strong>kind</strong><span class="classifier">{“Min”, “Max”}, optional</span></dt><dd><p>Restrict the classification to minima or maxima.</p>
 </dd>
@@ -461,7 +461,7 @@ Exclusive option.</p></td>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>]</dt><dd><p>A series of intervals and a mapped series of the form <code class="docutils literal notranslate"><span class="pre">&quot;N-Min&quot;</span></code> or
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>]</dt><dd><p>A series of intervals and a mapped series of the form <code class="docutils literal notranslate"><span class="pre">&quot;N-Min&quot;</span></code> or
 <code class="docutils literal notranslate"><span class="pre">&quot;N-Max&quot;</span></code>.</p>
 </dd>
 </dl>
