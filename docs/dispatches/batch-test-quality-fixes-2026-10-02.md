@@ -616,3 +616,10 @@ did not cover (the other 31 non-`__init__` modules plus the four `__init__.py` f
 define functions), by the same method: mutmut, whole-file recheck, a parallel sort of the
 survivors into real gaps, unkillable and wording, then test units for the real gaps. The
 review's Governing Property is reported only after this.
+
+Author decisions (2026-10-15, batch A of the remaining-module sort): correct the `fitfunctions`
+package docstring that calls a 2-D `weights` a covariance matrix (weights are 1-d only);
+`npts` does not reach the TeX annotation; fix the `set_TeX_argnames` initial-guess check that can
+never fail; `plot_trend_fit_resid` must not swallow unknown kwargs; plot-styling defaults are
+pinned by tests. Pending investigation: `GaussianLn.TeX_popt`, the HingeMin and HingeAtPoint
+singular starts, `plot_all_popt_1d(ls=...)`, `guess_s`/`guess_yh`, `logx`, explicit `p0=None`.
