@@ -608,3 +608,11 @@ Author decisions (2026-10-08, closing optional items): unit `polish` documents t
 TypeError for non-DataFrame input; tie order in auxiliary reordering is documented; the SIDC
 fixture gains a -1 row; #503's example-date docstring and default-key read-back are fixed.
 Unit `changelog-2` records #503 to #512 after `polish` merges. `.github/WORKFLOWS.md` is deleted.
+
+## Remaining modules (2026-10-15)
+
+Author decision: before closing the track, measure the 35 modules the first mutation sample
+did not cover (the other 31 non-`__init__` modules plus the four `__init__.py` files that
+define functions), by the same method: mutmut, whole-file recheck, a parallel sort of the
+survivors into real gaps, unkillable and wording, then test units for the real gaps. The
+review's Governing Property is reported only after this.
