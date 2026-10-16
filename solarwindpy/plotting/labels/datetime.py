@@ -229,8 +229,7 @@ class Frequency(special.ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = rf"${self.tex} \; [{self.units}]$"
-        return self._format_with_description(result)
+        return self.with_units
 
     @property
     def other(self):
@@ -245,7 +244,7 @@ class Frequency(special.ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the inverse of the other label's units."""
-        return f"({self.other.units})^{-1}"
+        return f"({self.other.units})^{{-1}}"
 
     @property
     def path(self):

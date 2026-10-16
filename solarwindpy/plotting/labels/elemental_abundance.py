@@ -66,10 +66,17 @@ class ElementalAbundance(base.Base):
 
     @property
     def tex(self):
-        r"""TeX of the ratio, over its photospheric value if ``photospheric``."""
-        num = base._trans_species.get(self.species, self.species)
-        den = base._trans_species.get(self.reference_species, self.reference_species)
-        ratio = r"\mathrm{%s}/\mathrm{%s}" % (num, den)
+        r"""TeX of the ratio, over its photospheric value if ``photospheric``.
+
+        A species in the module's species table takes its TeX from there,
+        which already sets the element in ``\mathrm``; any other species is
+        set in ``\mathrm`` here.
+        """
+        num, den = (
+            base._trans_species.get(s, r"\mathrm{%s}" % s)
+            for s in (self.species, self.reference_species)
+        )
+        ratio = f"{num}/{den}"
         if self.photospheric:
             tex = f"{ratio}:{ratio}_" r"\mathrm{photo}"  # noqa: W605
         else:
