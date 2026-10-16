@@ -654,5 +654,10 @@ zero; the plotting dead code is deleted, and `nbins` accepts numpy integers with
 for other bad input; `plot_contours` gets the proposed tests plus handling for one level with a
 colour bar; the never-matching label rules are deleted, `>=` and `<=` map to GEQ and LEQ, and
 CountOther paths replace spaces. The Raffaella branch stays: it was moved from an analysis file
-to give it a permanent home. `construct_cdf` builds the CDF of the observed x values and never
-uses y. Mesh building must keep showing live per-step progress by default.
+to give it a permanent home: its docstring states that it expects GSE input and converts to
+RTN, `Plasma`'s builder docstring says keyword arguments reach `AlfvenicTurbulence`, and one
+test with hand-computed values covers it; its behaviour is unchanged. `construct_cdf` builds
+the CDF of the observed x values and never uses y, so its y check is removed, its docstring
+names the `"position"` column, and a test checks known values. Mesh building gains
+`progress=True` (on by default), which prints the same per-step table live, no longer at
+WARNING; `progress=False` silences it. No `mesh.history`; the printed layout is unchanged.
