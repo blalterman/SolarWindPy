@@ -16,8 +16,11 @@ documented names from the autosummary entries in
 import ast
 import importlib
 import inspect
+import os
 import pkgutil
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -328,3 +331,23 @@ def test_docs_parse_finds_the_documented_api():
     """
     assert DOCUMENTED
     assert all(re.fullmatch(r"solarwindpy(\.\w+)+", d) for d in DOCUMENTED)
+
+
+def test_importing_solarwindpy_alone_draws_no_docstring_inheritance_warning():
+    """A plain ``import solarwindpy`` switches inheritance on without a warning.
+
+    The counterpart of ``test_import_order_that_disables_inheritance_warns``
+    in ``tests/fitfunctions/test_docstring_inheritance.py``: imported first,
+    solarwindpy sets the switch itself, so the "inheritance is off" warning
+    must not fire. Runs in a fresh interpreter with the switch unset,
+    because the check happens once, at import.
+
+    ON FAILURE: the code is wrong; every user would see a spurious warning.
+    """
+    env = {k: v for k, v in os.environ.items() if k != "DOCSTRING_INHERITANCE_ENABLE"}
+    code = "import warnings; warnings.simplefilter('always'); import solarwindpy"
+    result = subprocess.run(
+        [sys.executable, "-c", code], env=env, capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
+    assert "docstring inheritance is off" not in result.stderr
