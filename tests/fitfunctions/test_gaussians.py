@@ -1,4 +1,6 @@
 import inspect
+import warnings
+
 import numpy as np
 import pytest
 from scipy.optimize import OptimizeResult
@@ -365,3 +367,64 @@ def test_gaussian_ln_set_fit_obs_refuses_x_without_a_logarithm():
     ):
         obj.set_fit_obs(x, y, None)
     assert obj.observations.used.x.tolist() == [2.0, 3.0]
+
+
+def test_weights_summing_to_one_give_an_estimate():
+    """y = [0.25, 0.5, 0.25] sums to 1 and still gives the weighted moments.
+
+    x = [1, 2, 3] weighted by those y has mean 2 and variance 0.5; A is the
+    peak, 0.5.
+
+    ON FAILURE: the code is wrong.
+    """
+    p0 = Gaussian(np.array([1.0, 2, 3]), np.array([0.25, 0.5, 0.25])).p0
+    assert p0 == exact([2.0, np.sqrt(0.5), 0.5])
+
+
+def test_weights_summing_to_zero_give_no_estimate_without_a_numpy_warning():
+    """y summing to zero gives ``p0`` None by check, not by dividing 0 by 0.
+
+    numpy's invalid-value and divide warnings are errors here.
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        p0 = Gaussian(np.array([0.0, 1, 2, 3]), np.array([1.0, -1, 1, -1])).p0
+    assert p0 is None
+
+
+def test_an_overflowing_variance_alone_gives_no_estimate():
+    """x = [-1e200, 0, 1e200] has mean 0 but a variance past the float maximum.
+
+    One finite moment is not enough: ``p0`` is None.
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        p0 = Gaussian(np.array([-1e200, 0.0, 1e200]), np.ones(3)).p0
+    assert p0 is None
+
+
+def test_a_width_equal_to_half_the_spacing_of_two_distinct_x_is_resolved():
+    """x = [1, 1, 3, 3] with equal weights: width 1 is half the spacing 2.
+
+    Mean 2, variance 1 exactly. A width of exactly half the smallest spacing
+    is resolved (the rule refuses only a narrower one), also when there are
+    only two distinct x.
+
+    ON FAILURE: the code is wrong.
+    """
+    p0 = Gaussian(np.array([1.0, 1, 3, 3]), np.ones(4)).p0
+    assert p0 == exact([2.0, 1.0, 1.0])
+
+
+@pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
+def test_make_fit_takes_return_exception_by_position(cls):
+    """``make_fit(True)`` returns the insufficient-data error, as the base does.
+
+    ON FAILURE: the code is wrong.
+    """
+    obj = cls(np.array([1.0, 2.0]), np.array([1.0, 2.0]))
+    assert isinstance(obj.make_fit(True), InsufficientDataError)
