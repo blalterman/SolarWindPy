@@ -962,8 +962,9 @@ class TestComparisonLabelStrings:
         [
             ("$labelA / $labelB", ""),
             (r"{$labelA} - x", "$labelA"),
+            (r"{$invalid} + {$keys}", "$invalid,$keys"),
         ],
-        ids=["no-braced-keys", "one-key"],
+        ids=["no-braced-keys", "one-key", "two-wrong-keys"],
     )
     def test_template_missing_a_key_raises_value_error(self, n_a, n_p1, fcn, keys):
         """A template lacking either braced key raises ValueError listing the keys found.

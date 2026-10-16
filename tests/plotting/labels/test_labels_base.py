@@ -601,6 +601,7 @@ def test_texlabel_unknown_measurement_has_unknown_units(labels_base):
     "mcs0, mcs1, units",
     [
         (("v", "x", "p"), ("zz", "", "p"), r"\mathrm{km \; s^{-1}}/???"),
+        (("zz", "", "p"), ("v", "x", "p"), r"???/\mathrm{km \; s^{-1}}"),
         (
             ("v_err", "x", "p"),
             ("n", "", "p"),
@@ -612,7 +613,12 @@ def test_texlabel_unknown_measurement_has_unknown_units(labels_base):
             r"\mathrm{cm}^{-3}/\mathrm{km \; s^{-1}}",
         ),
     ],
-    ids=["unknown-denominator", "error-numerator", "error-denominator"],
+    ids=[
+        "unknown-denominator",
+        "unknown-numerator",
+        "error-numerator",
+        "error-denominator",
+    ],
 )
 def test_ratio_units_look_up_each_measurement_without_err(
     labels_base, mcs0, mcs1, units
