@@ -871,9 +871,10 @@ def test_window_band_and_edges_follow_the_line_style_by_default(xy):
 
 
 def test_window_kwargs_style_the_band_and_edges(xy):
-    """``window_kwargs`` sets the band's alpha and the band and edges' colour and style.
+    """``window_kwargs`` styles the band and edges; other keywords style the line.
 
-    The central line keeps the caller's own colour and linestyle.
+    The central line keeps the caller's own colour, linestyle and width;
+    any other ``window_kwargs`` entry (here a width) reaches band and edges.
     ON FAILURE: the code is wrong.
     """
     x, y = xy
@@ -885,17 +886,20 @@ def test_window_kwargs_style_the_band_and_edges(xy):
         plot_window_edges=True,
         color="m",
         linestyle="-.",
+        lw=2.0,
         window_kwargs={"alpha": 0.4, "color": "c", "linestyle": ":", "lw": 3.0},
     )
 
     central, upper, lower = ax.lines
     band = ax.collections[0]
     assert (central.get_color(), central.get_linestyle()) == ("m", "-.")
+    assert central.get_linewidth() == 2.0
     for edge in (upper, lower):
         assert (edge.get_color(), edge.get_linestyle()) == ("c", ":")
         assert edge.get_linewidth() == 3.0
     assert band.get_alpha() == 0.4
     assert tuple(band.get_facecolor()[0][:3]) == mcolors.to_rgb("c")
+    assert list(band.get_linewidth()) == [3.0]
 
 
 def test_transposed_window_edges_sit_at_value_minus_and_plus_error(xy):
