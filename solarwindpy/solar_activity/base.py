@@ -24,8 +24,6 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 _Loader_Dtypes_Columns = namedtuple("LoaderNamedTuple", ["dtypes", "columns"])
 _data_date_pattern = re.compile(r"\d{4}\d{2}\d{2}")
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class Base(ABC):
     """Abstract base class providing a logger interface."""

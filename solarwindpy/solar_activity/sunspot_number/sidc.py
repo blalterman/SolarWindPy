@@ -23,9 +23,6 @@ from ..base import (
     _Loader_Dtypes_Columns,
 )
 
-pd.set_option("mode.chained_assignment", "raise")
-
-
 _d_dtypes_columns = _Loader_Dtypes_Columns(
     {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
     ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
