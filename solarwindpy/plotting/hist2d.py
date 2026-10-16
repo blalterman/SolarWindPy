@@ -175,9 +175,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
 
-        else:
-            raise ValueError(f"Unrecognized axnorm ({axnorm})")
-
         return agg
 
     def agg(self, **kwargs):
