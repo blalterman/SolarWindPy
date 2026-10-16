@@ -945,33 +945,28 @@ data : {z.size}
             If None, create an Axes instance from ``plt.subplots``.
         method : {"rbf", "grid", "tricontour"}
             Interpolation method. Default is ``"rbf"`` (fastest with smoothing).
-
-        RBF Method Parameters
-        ---------------------
         rbf_neighbors : int
-            Number of nearest neighbors for sparse RBF. Higher = smoother but slower.
-            Default is 50.
+            ``"rbf"`` only. Number of nearest neighbors for sparse RBF.
+            Higher = smoother but slower. Default is 50.
         rbf_smoothing : float
-            RBF smoothing parameter. Higher values produce smoother surfaces.
-            Default is 1.0.
+            ``"rbf"`` only. RBF smoothing parameter. Higher values produce
+            smoother surfaces. Default is 1.0.
         rbf_kernel : str
-            RBF kernel type. Options: "thin_plate_spline", "cubic", "quintic",
-            "multiquadric", "inverse_multiquadric", "gaussian".
-
-        Grid Method Parameters
-        ----------------------
+            ``"rbf"`` only. RBF kernel type. Options: "thin_plate_spline"
+            (default), "cubic", "quintic", "multiquadric",
+            "inverse_multiquadric", "gaussian".
         grid_resolution : int
-            Number of grid points along each axis. Default is 100.
+            ``"rbf"`` and ``"grid"``. Number of points along each axis of the
+            regular grid interpolated to. Default is 100.
         gaussian_filter_std : float
-            Standard deviation for Gaussian smoothing. Default is 1.5.
-            Set to 0 to disable smoothing.
+            ``"grid"`` only. Standard deviation for Gaussian smoothing.
+            Default is 1.5. Set to 0 to disable smoothing.
         interpolation : {"linear", "cubic", "nearest"}
-            Interpolation method for griddata. Default is "cubic".
+            ``"grid"`` only. Interpolation method for griddata. Default is
+            "cubic".
         nan_aware_filter : bool
-            If True, use NaN-aware Gaussian filtering. Default is True.
-
-        Common Parameters
-        -----------------
+            ``"grid"`` only. If True, use NaN-aware Gaussian filtering.
+            Default is True.
         cbar : bool
             If True, create a colorbar. Default is True.
         cbar_kwargs : dict, None
@@ -992,6 +987,12 @@ data : {z.size}
             The colorbar if ``cbar=True``, else the contour set.
         qset : QuadContourSet
             The contour set object.
+
+        Raises
+        ------
+        ValueError
+            If ``method`` is not one of the three above, or if ``cbar=True``
+            and the contour set has fewer than 2 levels.
 
         Examples
         --------
@@ -1127,6 +1128,12 @@ data : {z.size}
         # Add colorbar
         cbar_or_mappable = qset
         if cbar:
+            if len(qset.levels) < 2:
+                # Matplotlib's colorbar fails with a bare IndexError here.
+                raise ValueError(
+                    f"A colorbar needs at least 2 contour levels, got "
+                    f"{list(qset.levels)}. Pass more levels or cbar=False."
+                )
             cbar_obj = self._make_cbar(qset, norm=norm, **cbar_kwargs)
             cbar_or_mappable = cbar_obj
 

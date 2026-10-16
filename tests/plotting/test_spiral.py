@@ -1304,3 +1304,145 @@ def test_data_are_not_clipped_by_default():
     splot.initialize_mesh(min_per_bin=101, progress=False)
     splot.build_grouped()
     assert splot.agg().tolist() == [1, 99, 1]
+
+
+# ---------------------------------------------------------------------------
+# plot_contours: no-argument calls, documented defaults, all options.
+# ---------------------------------------------------------------------------
+
+
+def _nan_aware_gaussian(ZZ, sigma):
+    """Normalised convolution: smooth data and weights, keep NaN cells NaN."""
+    finite = np.isfinite(ZZ)
+    num = gaussian_filter(np.where(finite, ZZ, 0.0), sigma)
+    den = gaussian_filter(finite.astype(float), sigma)
+    with np.errstate(invalid="ignore"):  # 0 / 0 far from data; NaN either way
+        out = num / den
+    out[~finite] = np.nan
+    return out
+
+
+def _default_reference(method, x, y, z):
+    """Contours drawn with every default ``plot_contours`` documents.
+
+    rbf: 50 neighbours, smoothing 1.0, thin-plate spline, 100 x 100 grid.
+    grid: cubic ``griddata`` on a 100 x 100 grid, NaN-aware Gaussian sigma 1.5.
+    tricontour: the centres as given. Line contours, matplotlib's levels.
+    """
+    _, ax = plt.subplots()
+    if method == "tricontour":
+        return ax.tricontour(x, y, z)
+    XX, YY = _regular_grid(x, y, 100)
+    if method == "rbf":
+        rbf = RBFInterpolator(
+            np.column_stack([x, y]),
+            z,
+            neighbors=50,
+            smoothing=1.0,
+            kernel="thin_plate_spline",
+        )
+        ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
+    else:
+        ZZ = _nan_aware_gaussian(griddata((x, y), z, (XX, YY), method="cubic"), 1.5)
+    return ax.contour(XX, YY, np.ma.masked_invalid(ZZ))
+
+
+class TestPlotContoursCalls:
+    """Calls with no arguments, with every option, and with one level."""
+
+    @pytest.mark.parametrize("method", [None, "rbf", "grid", "tricontour"])
+    def test_call_without_arguments_uses_the_documented_defaults(self, method):
+        """With no arguments ``plot_contours`` draws its documented default.
+
+        It makes its own axes, draws line contours of the mean per cell with
+        a colorbar, and matches ``_default_reference``; ``None`` calls it
+        with no arguments at all (the default method, rbf).
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        kwargs = {} if method is None else {"method": method}
+        ax, cbar, qset = splot.plot_contours(**kwargs)
+        assert isinstance(cbar, Colorbar) and cbar.mappable is qset
+        assert qset.axes is ax and not qset.filled
+        x, y, z = _occupied_centers(splot)
+        _assert_same_segments(qset, _default_reference(method or "rbf", x, y, z))
+
+    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
+    def test_every_option_reaches_the_drawing(self, method):
+        """Each option changes the drawing as documented.
+
+        ``fcn="max"`` contours the maxima (5 where p2 and p3 share a cell at
+        min_per_bin=2); the method's own options shape the field; ``levels``,
+        ``cmap``, ``norm`` and ``linestyles`` reach the contour set; the
+        colorbar is drawn with ``cbar_kwargs`` on the given axes.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        levels = [2.0, 4.0, 6.0]
+        norm = matplotlib.colors.Normalize(0.0, 10.0)
+        linestyles = ["--", ":", "-."]
+        options = {
+            "rbf": {"rbf_neighbors": 4, "rbf_smoothing": 0.5, "rbf_kernel": "cubic"},
+            "grid": {
+                "interpolation": "linear",
+                "gaussian_filter_std": 0.5,  # between 0 and 1: still smooths
+                "nan_aware_filter": False,
+            },
+            "tricontour": {},
+        }[method]
+        _, ax = plt.subplots()
+        got_ax, cbar, qset = splot.plot_contours(
+            ax=ax,
+            method=method,
+            grid_resolution=15,
+            fcn="max",
+            levels=levels,
+            cmap="magma",
+            norm=norm,
+            linestyles=linestyles,
+            cbar_kwargs={"label": "chosen"},
+            **options,
+        )
+        assert got_ax is ax and qset.axes is ax
+        assert list(qset.levels) == levels
+        assert qset.get_cmap().name == "magma" and qset.norm is norm
+        assert list(qset.linestyles) == linestyles
+        assert cbar.mappable is qset and cbar.ax.get_ylabel() == "chosen"
+
+        x, y, z = _occupied_centers(splot, fcn=max)
+        assert 5.0 in z.tolist()
+        _, ref_ax = plt.subplots()
+        if method == "tricontour":
+            ref = ref_ax.tricontour(x, y, z, levels)
+        else:
+            XX, YY = _regular_grid(x, y, 15)
+            if method == "rbf":
+                rbf = RBFInterpolator(
+                    np.column_stack([x, y]),
+                    z,
+                    neighbors=4,
+                    smoothing=0.5,
+                    kernel="cubic",
+                )
+                ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
+            else:
+                ZZ = griddata((x, y), z, (XX, YY), method="linear")
+                ZZ = gaussian_filter(np.nan_to_num(ZZ, nan=0.0), 0.5)
+            ref = ref_ax.contour(XX, YY, np.ma.masked_invalid(ZZ), levels)
+        _assert_same_segments(qset, ref)
+
+    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
+    def test_one_level_with_a_colorbar_is_a_clear_error(self, method):
+        """A single contour level with ``cbar=True`` raises a ValueError saying why.
+
+        Without the colorbar the single level is drawn.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        with pytest.raises(ValueError, match="at least 2 contour levels"):
+            splot.plot_contours(method=method, levels=[3.0])
+        _, mappable, qset = splot.plot_contours(method=method, levels=[3.0], cbar=False)
+        assert mappable is qset and list(qset.levels) == [3.0]
