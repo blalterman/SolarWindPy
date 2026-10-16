@@ -327,11 +327,14 @@ def test_caller_keywords_override_the_default_style_by_alias(kind):
 def test_observation_plots_draw_their_observations(kind):
     """``plot_raw`` draws every raw point; ``plot_used`` the used subset.
 
+    Without ``edge_kwargs`` the returned edges are None.
+
     ON FAILURE: the code is wrong.
     """
     plot, _, obs = make_ffplot()
     method = getattr(plot, f"plot_{kind}")
-    ax, (line, *_) = method()
+    ax, (line, _, edges) = method()
+    assert edges is None
     expected = getattr(obs, kind)
     np.testing.assert_array_equal(line[0].get_xdata(), expected.x)
     np.testing.assert_array_equal(line[0].get_ydata(), expected.y)
