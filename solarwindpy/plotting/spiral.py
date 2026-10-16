@@ -22,6 +22,7 @@ from matplotlib import pyplot as plt
 
 from . import base
 from . import labels
+from .agg_plot import AggPlot
 
 _InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
 _SpiralMeshBinID = namedtuple("_SpiralMeshBinID", "id,fill,visited")
@@ -495,8 +496,11 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
             If True, use ``log10(abs())`` of that coordinate.
         initial_bins : int or tuple
             Initial bins per axis; see ``calc_initial_bins``.
-        clip_data : bool
-            Stored as ``clip``.
+        clip_data : bool or str
+            If True, clip x and y to their 0.01st and 99.99th percentiles
+            (``AggPlot.clip_data``) when placing points in the mesh; the
+            initial bin edges are computed from the unclipped data. ``"l"`` or
+            ``"u"`` clips only the lower or upper tail. Stored as ``clip``.
         """
         super().__init__()
         self.set_log(x=logx, y=logy)
@@ -652,10 +656,15 @@ data : {z.size}
         r"""Build the ``SpiralMesh`` and assign every point to a cell.
 
         ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
-        passed to ``SpiralMesh``, e.g. ``min_per_bin``.
+        passed to ``SpiralMesh``, e.g. ``min_per_bin``. If ``clip`` is set, x
+        and y are clipped with ``AggPlot.clip_data`` before they are placed
+        in the mesh.
         """
         x = self.data.loc[:, "x"]
         y = self.data.loc[:, "y"]
+        if self.clip:
+            x = AggPlot.clip_data(x, self.clip)
+            y = AggPlot.clip_data(y, self.clip)
 
         xbins = self.initial_bins["x"]
         ybins = self.initial_bins["y"]
