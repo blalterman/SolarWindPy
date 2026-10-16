@@ -18,44 +18,102 @@ __all__ = [
     "Xcorr",
 ]
 
+import re
 from pathlib import Path
 from string import Template
 from string import Formatter
 from abc import abstractmethod
 from . import base
 
+# TeX spacing commands: \, \: \; \! "\ " \quad \qquad
+_TEX_SPACING = re.compile(r"\\(?:[,:;! ]|qquad|quad)")
 
-def _check_other_label(other):
-    r"""Return ``other`` if it is a label object, else raise.
 
-    Shared by every label that wraps another label (``Probability``,
-    ``CountOther``, ``MathFcn``, ``AbsoluteValue``). They read ``tex``,
-    ``units`` and ``path`` from ``other``, so a plain string would only fail
-    later with an ``AttributeError``.
+def _check_label(label, name):
+    r"""Return ``label`` if it is a label object, else raise.
+
+    Shared by every label that wraps other labels (``Probability``,
+    ``CountOther``, ``MathFcn``, ``AbsoluteValue``, ``ComparisonLabel``).
+    They read ``tex``, ``units`` and ``path`` from the wrapped label, so a
+    plain string would only fail later with an ``AttributeError``.
 
     Parameters
     ----------
-    other : solarwindpy.plotting.labels.base.Base
+    label : solarwindpy.plotting.labels.base.Base
         The wrapped label.
+    name : str
+        Argument name reported in the error, e.g. ``"other_label"``.
 
     Returns
     -------
     solarwindpy.plotting.labels.base.Base
-        ``other``, unchanged.
+        ``label``, unchanged.
 
     Raises
     ------
     TypeError
-        If ``other`` is not a :class:`~solarwindpy.plotting.labels.base.Base`.
+        If ``label`` is not a :class:`~solarwindpy.plotting.labels.base.Base`.
         Wrap a raw TeX string in ``ManualLabel`` first.
     """
-    if not isinstance(other, base.Base):
+    if not isinstance(label, base.Base):
         raise TypeError(
-            "other_label must be a solarwindpy.plotting.labels.base.Base "
+            f"{name} must be a solarwindpy.plotting.labels.base.Base "
             "(e.g. TeXlabel or ManualLabel), "
-            f"got {type(other).__name__}: {other!r}"
+            f"got {type(label).__name__}: {label!r}"
         )
-    return other
+    return label
+
+
+def _comparison_path(comparison):
+    r"""Spell a comparison such as ``"\geq 5"`` with letters for a save path.
+
+    Shared by ``Probability`` and ``CountOther``. ``>=`` and ``<=`` map to
+    ``GEQ`` and ``LEQ`` before ``>`` and ``<`` map to ``GT`` and ``LT``;
+    spaces become ``_``.
+
+    Parameters
+    ----------
+    comparison : str
+        Comparison string, e.g. ``"> 5"`` or ``r"\leq 5"``.
+
+    Returns
+    -------
+    str
+        The comparison with every operator spelled in capitals.
+    """
+    return (
+        comparison.replace(">=", "GEQ")
+        .replace("<=", "LEQ")
+        .replace(">", "GT")
+        .replace("<", "LT")
+        .replace(r"\gt", "GT")
+        .replace(r"\lt", "LT")
+        .replace(r"\geq", "GEQ")
+        .replace(r"\leq", "LEQ")
+        .replace(r"\neq", "NEQ")
+        .replace(r"\eq", "EQ")
+        .replace(r"==", "EQ")
+        .replace(r"!=", "NEQ")
+        .replace(r" ", "_")
+    )
+
+
+def _path_part(part):
+    r"""``str(part)`` with TeX spacing commands removed and each run of spaces as ``-``.
+
+    Shared by ``ComparisonLabel`` and ``Xcorr``, which join the paths of two
+    labels into one save path.
+
+    Parameters
+    ----------
+    part : str or Path
+        Path of one constituent label, or a raw TeX string.
+
+    Returns
+    -------
+    str
+    """
+    return re.sub(r"\s+", "-", _TEX_SPACING.sub(" ", str(part)).strip())
 
 
 class ArbitraryLabel(base.Base):
@@ -94,13 +152,18 @@ class ManualLabel(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
+        return self.with_units
+
+    @property
+    def with_units(self):
+        r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
         result = (
             r"$\mathrm{%s} \; [%s]$"
             % (
                 self.tex.replace(" ", r" \; "),
-                self.unit,
+                self.units,
             )
-        ).replace(r"\; []", "")
+        ).replace(r" \; []", "")
         return self._format_with_description(result)
 
     @property
@@ -109,9 +172,14 @@ class ManualLabel(ArbitraryLabel):
         return self._tex
 
     @property
-    def unit(self):
+    def units(self):
         r"""TeX of the units, without ``$``."""
         return self._unit
+
+    @property
+    def unit(self):
+        r"""TeX of the units, without ``$``; the same as ``units``."""
+        return self.units
 
     @property
     def path(self):
@@ -348,7 +416,7 @@ class Probability(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label of the quantity being compared."""
-        self._other_label = _check_other_label(other)
+        self._other_label = _check_label(other, "other_label")
 
     def set_comparison(self, new):
         r"""Store the comparison as a string; None becomes ``""``."""
@@ -367,20 +435,7 @@ class Probability(ArbitraryLabel):
         other = str(other.path)
         other = other.replace(" ", "-")
 
-        comp = (
-            self.comparison.replace(">", "GT")
-            .replace("<", "LT")
-            .replace(r"\gt", "GT")
-            .replace(r"\lt", "LT")
-            .replace(r"\geq", "GEQ")
-            .replace(r"\leq", "LEQ")
-            .replace(r"\gt", "GT")
-            .replace(r"\neq", "NEQ")
-            .replace(r"\eq", "EQ")
-            .replace(r"==", "EQ")
-            .replace(r"!=", "NEQ")
-            .replace(r" ", "_")
-        )
+        comp = _comparison_path(self.comparison)
 
         path = Path(f"prob-{other}-{comp}")
 
@@ -451,7 +506,7 @@ class CountOther(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label of the quantity being compared."""
-        self._other_label = _check_other_label(other)
+        self._other_label = _check_label(other, "other_label")
 
     def set_comparison(self, new):
         r"""Store the comparison as a string; None becomes ``""``."""
@@ -470,19 +525,7 @@ class CountOther(ArbitraryLabel):
         other = str(other.path)
         other = other.replace(" ", "-")
 
-        comp = (
-            self.comparison.replace(">", "GT")
-            .replace("<", "LT")
-            .replace(r"\gt", "GT")
-            .replace(r"\lt", "LT")
-            .replace(r"\geq", "GEQ")
-            .replace(r"\leq", "LEQ")
-            .replace(r"\gt", "GT")
-            .replace(r"\neq", "NEQ")
-            .replace(r"\eq", "EQ")
-            .replace(r"==", "EQ")
-            .replace(r"!=", "NEQ")
-        )
+        comp = _comparison_path(self.comparison)
 
         path = Path(f"cnt-{other}-{comp}")
 
@@ -563,7 +606,7 @@ class MathFcn(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label the function is applied to."""
-        self._other_label = _check_other_label(other)
+        self._other_label = _check_label(other, "other_label")
 
     def set_function(self, new):
         r"""Store the function name as a string; None becomes ``""``."""
@@ -670,7 +713,7 @@ class AbsoluteValue(ArbitraryLabel):
 
     def set_other_label(self, other):
         r"""Store the label the function is applied to."""
-        self._other_label = _check_other_label(other)
+        self._other_label = _check_label(other, "other_label")
 
     def _build_tex(self):
         return rf"\left|{self.other_label.tex}\right|"
@@ -867,14 +910,13 @@ class ComparisonLabel(ArbitraryLabel):
         Raises
         ------
         TypeError
-            If either label is neither a str nor a label object.
+            If either label is not a label object. Wrap a raw TeX string in
+            ``ManualLabel`` first.
         ValueError
             If both labels have units and the units differ.
         """
-        if not isinstance(labelA, (str, base.Base)):
-            raise TypeError
-        if not isinstance(labelB, (str, base.Base)):
-            raise TypeError
+        _check_label(labelA, "labelA")
+        _check_label(labelB, "labelB")
 
         if (
             hasattr(labelA, "units")
@@ -911,18 +953,25 @@ labelB : {labelB.units}
         Raises
         ------
         ValueError
-            If the template lacks either key.
+            If ``fcn`` is None and ``fcn_name`` names no built-in template, or
+            if the template lacks either key.
         """
         if fcn is None:
-            get_fcn = fcn_name.lower()
             translate = {
                 "subtract": r"{$labelA} - {$labelB}",
                 "add": r"{$labelA} + {$labelB}",
                 "multiply": r"{$labelA} \times {$labelB}",
             }
-            fcn = translate.get(get_fcn)
+            try:
+                fcn = translate[fcn_name.lower()]
+            except KeyError:
+                raise ValueError(
+                    f"{self.__class__.__name__} has no built-in function "
+                    f"{fcn_name!r}; pass fcn or use one of "
+                    f"{', '.join(sorted(translate))}."
+                ) from None
 
-        keys = [x[1] for x in Formatter().parse(fcn)]
+        keys = [x[1] for x in Formatter().parse(fcn) if x[1] is not None]
         if not (("$labelA" in keys) and ("$labelB" in keys)):
             raise ValueError(
                 rf"""{self.__class__.__name__}'s function must have the keys "$labelA" and "$labelB".
@@ -933,22 +982,8 @@ keys : {",".join(keys)}
         self._function_name = fcn_name
 
     def _build_tex(self):
-        labelA = self.labelA
-        labelB = self.labelB
-        function = self.function
-
-        try:
-            texA = labelA.tex
-        except AttributeError:
-            texA = labelA
-
-        try:
-            texB = labelB.tex
-        except AttributeError:
-            texB = labelB
-
-        template = Template(function)
-        tex = template.safe_substitute(labelA=texA, labelB=texB)
+        template = Template(self.function)
+        tex = template.safe_substitute(labelA=self.labelA.tex, labelB=self.labelB.tex)
 
         while tex.find(r"\,\,") >= 0:
             tex = tex.replace(r"\,\,", r"\,")
@@ -956,21 +991,8 @@ keys : {",".join(keys)}
         self._tex = tex
 
     def _build_path(self):
-        labelA = self.labelA
-        labelB = self.labelB
-
-        try:
-            pathA = labelA.path
-        except AttributeError:
-            pathA = labelA
-
-        try:
-            pathB = labelB.path
-        except AttributeError:
-            pathB = labelB
-
-        pathA = str(pathA).replace(" ", "-")
-        pathB = str(pathB).replace(" ", "-")
+        pathA = _path_part(self.labelA.path)
+        pathB = _path_part(self.labelB.path)
 
         function = self.function_name
         path = Path(f"{function}-{pathA}-{pathB}")
@@ -1097,8 +1119,8 @@ class Xcorr(ArbitraryLabel):
         except AttributeError:
             pathB = labelB
 
-        pathA = str(pathA).replace(" ", "-")
-        pathB = str(pathB).replace(" ", "-")
+        pathA = _path_part(pathA)
+        pathB = _path_part(pathB)
 
         method = self.method
         path = Path(f"Xcorr{method}-{pathA}-{pathB}")
