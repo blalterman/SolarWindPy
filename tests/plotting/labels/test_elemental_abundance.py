@@ -85,21 +85,38 @@ class TestElementalAbundanceTeX:
     """Test ElementalAbundance TeX formatting."""
 
     def test_tex_basic_ratio(self):
-        """Test basic ratio TeX formatting."""
+        r"""Each element is wrapped in ``\mathrm`` once.
+
+        Author decision (2026-10-16): ``ElementalAbundance`` wraps the element
+        in ``\mathrm`` once; it used to print ``\mathrm{\mathrm{He}}``.
+
+        ON FAILURE: the code is wrong.
+        """
         abundance = ElementalAbundance("He", "H", photospheric=False)
-        tex = abundance.tex
-        assert r"\mathrm{He}" in tex
-        assert r"\mathrm{H}" in tex
-        assert "/" in tex
+        assert abundance.tex == r"\mathrm{He}/\mathrm{H}"
 
     def test_tex_photospheric_ratio(self):
-        """Test photospheric ratio TeX formatting."""
+        r"""A photospheric ratio reads ``<ratio>:<ratio>_\mathrm{photo}``.
+
+        ON FAILURE: the code is wrong.
+        """
         abundance = ElementalAbundance("He", "H", photospheric=True)
-        tex = abundance.tex
-        assert r"\mathrm{He}" in tex
-        assert r"\mathrm{H}" in tex
-        assert r"\mathrm{photo}" in tex
-        assert ":" in tex
+        assert (
+            abundance.tex
+            == r"\mathrm{He}/\mathrm{H}:\mathrm{He}/\mathrm{H}_\mathrm{photo}"
+        )
+
+    def test_tex_isotope_and_unknown_species(self):
+        r"""An isotope keeps its table TeX; a species outside the table is set in ``\mathrm``.
+
+        ON FAILURE: the code is wrong.
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            isotopes = ElementalAbundance("3He", "4He", photospheric=False)
+            unknown = ElementalAbundance("Zz", "O", photospheric=False)
+        assert isotopes.tex == r"^{3}\mathrm{He}/^{4}\mathrm{He}"
+        assert unknown.tex == r"\mathrm{Zz}/\mathrm{O}"
 
     def test_tex_with_known_species(self):
         """Test TeX formatting with known species translations."""
@@ -165,18 +182,28 @@ class TestElementalAbundanceSetMethods:
         assert abundance.reference_species == "O"
 
     def test_set_species_unknown_warning(self, caplog):
-        """Test set_species warns for unknown species."""
+        """An unknown species logs one warning naming it; a known reference logs none.
+
+        ON FAILURE: the code is wrong.
+        """
         abundance = ElementalAbundance("He", "H")
         with caplog.at_level(logging.WARNING):
             abundance.set_species("Unknown", "H")
-        assert "not recognized" in caplog.text or len(caplog.records) > 0
+        assert [r.getMessage() for r in caplog.records] == [
+            "Species (Unknown) is not recognized"
+        ]
 
     def test_set_species_unknown_reference_warning(self, caplog):
-        """Test set_species warns for unknown reference species."""
+        """An unknown reference species logs one warning naming it; a known species none.
+
+        ON FAILURE: the code is wrong.
+        """
         abundance = ElementalAbundance("He", "H")
         with caplog.at_level(logging.WARNING):
             abundance.set_species("He", "Unknown")
-        assert "not recognized" in caplog.text or len(caplog.records) > 0
+        assert [r.getMessage() for r in caplog.records] == [
+            "Reference species (Unknown) is not recognized"
+        ]
 
 
 class TestElementalAbundanceInheritance:
