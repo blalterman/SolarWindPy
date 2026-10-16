@@ -623,3 +623,23 @@ package docstring that calls a 2-D `weights` a covariance matrix (weights are 1-
 never fail; `plot_trend_fit_resid` must not swallow unknown kwargs; plot-styling defaults are
 pinned by tests. Pending investigation: `GaussianLn.TeX_popt`, the HingeMin and HingeAtPoint
 singular starts, `plot_all_popt_1d(ls=...)`, `guess_s`/`guess_yh`, `logx`, explicit `p0=None`.
+
+Author decisions (2026-10-16, the 39 remaining-module decision cards). Approved as recommended:
+restore `GaussianLn`'s normal-parameter report through `TeXinfo`; remove `guess_yh` from
+`HingeAtPoint` and `guess_s` from `Saturation`; remove `FitFunction.logx` (TrendFit sets the
+plotter's log x); explicit `p0=None` means the generic start, and `GaussianPlusHeavySide` is
+fixed to match; robust percent residuals are refused; 2-d x is refused; a test draws each plot;
+a zero model value gives NaN in percent residuals and `with_rax` is removed; the species assert
+becomes ValueError; unequal v and b need explicit `sort=True`; the Hist1D range ValueError; the
+bin fallback warning; contour style overrides; the scatter colour bar; implement spiral
+`clip_data`; delete the mesh helper; path spaces; TeX in paths; Frequency brackets;
+`ComparisonLabel` requires label objects; the trailing space; the proposed units for `cos_phi`,
+`ratio`, `eth`, `Qhat` and `dbeta`; all core, plotting and label bug fixes; all fitting bug
+fixes, with two notes (`ls=` is fixed through matplotlib's kwarg normalisation; the
+`available()` listing and TeX annotation are not pinned to fixed text). FFPlot's default-style
+table becomes the single source of plot styles. A solar cycle with no maximum yet has no Fall
+phase. `abundance_ratio` drops the no-op replacement and stays Photosphere-only. Pending
+investigation at the author's request: the hinge singular starts as an unfittable case, the
+Raffaella branch (a GSE-to-RTN verification aid), the ICMECAT interval rules, `construct_cdf`'s
+y-value check, pinning names and default counts, the spiral top edge, the plotting dead code,
+`plot_contours`' history, mesh progress output, and the never-matching label rules.
