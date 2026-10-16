@@ -98,8 +98,8 @@ class ICMECAT:
     spacecraft : str or None
         Spacecraft filter applied (None if full catalog).
 
-    Example
-    -------
+    Examples
+    --------
     In normal use ``ICMECAT(spacecraft="Ulysses")`` downloads the catalog
     from ``ICMECAT_URL``. This example stays offline by pointing
     ``ICMECAT_URL`` at a small local catalog in the same CSV layout.
