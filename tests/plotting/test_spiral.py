@@ -14,7 +14,9 @@ not enough. What is asserted about a plot is the data handed to matplotlib
 (rectangle coordinates, collection arrays, face alphas, contour segments).
 """
 
+import io
 import logging
+import re
 import warnings
 
 import numpy as np
@@ -29,6 +31,7 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
@@ -186,9 +189,9 @@ def _rectangles(collection):
     return np.array(out)
 
 
-def _occupied_centers(splot, fcn=np.mean):
+def _occupied_centers(splot, fcn=np.mean, rows=ROWS):
     """Centres and values of the occupied cells, in linear data space."""
-    values = _expected_agg(splot, fcn)
+    values = _expected_agg(splot, fcn, rows)
     mesh = splot.mesh.mesh
     x = 0.5 * (mesh[:, 0] + mesh[:, 1])
     y = 0.5 * (mesh[:, 2] + mesh[:, 3])
@@ -501,12 +504,15 @@ class TestSpiralMesh:
         assert 0 < sum(expected) < len(expected)
 
     def test_unknown_filter_threshold_is_rejected(self):
-        """``set_cell_filter_thresholds`` rejects names other than density and size.
+        r"""``set_cell_filter_thresholds`` rejects names other than density and size.
+
+        The error names the rejected keyword and its value. ``KeyError``
+        reprs its message, so the newline appears as a literal ``\n``.
 
         ON FAILURE: the code is wrong.
         """
         mesh = self._mesh(1)
-        with pytest.raises(KeyError, match="Unexpected kwarg"):
+        with pytest.raises(KeyError, match="Unexpected kwarg\\\\narea: 0.5"):
             mesh.set_cell_filter_thresholds(area=0.5)
 
 
@@ -563,16 +569,24 @@ class TestInitialBins:
         assert np.nansum(_expected_agg(splot, len, rows)) == len(rows)
 
     @pytest.mark.parametrize(
-        "bins, error",
-        [((3, 3, 3), ValueError), ([list(XEDGES), list(YEDGES)], TypeError)],
+        "bins, error, match",
+        [
+            # The message names the problem and the type that was passed.
+            ((3, 3, 3), ValueError, r"Unrecognized `nbins`\ntype: <class 'tuple'>"),
+            (
+                [list(XEDGES), list(YEDGES)],
+                TypeError,
+                "integer or np.ndarrays for initial edges",
+            ),
+        ],
         ids=["three-axes", "list-edges"],
     )
-    def test_malformed_bins_are_rejected(self, bins, error):
-        """Bins other than an int, or one int or ndarray per axis, raise.
+    def test_malformed_bins_are_rejected(self, bins, error, match):
+        """Bins other than an int, or one int or ndarray per axis, raise and say why.
 
         ON FAILURE: the code is wrong.
         """
-        with pytest.raises(error):
+        with pytest.raises(error, match=match):
             SpiralPlot2D(X, Y, initial_bins=bins)
 
     def test_log_axes_store_log10_of_the_magnitude(self):
@@ -1085,3 +1099,537 @@ def test_integer_edges_are_raised_above_the_largest_sample():
     for axis in ("x", "y"):
         if not splot.initial_bins[axis][-1] > 10.0:
             raise TopEdgeNotAboveData(f"{axis}: {splot.initial_bins[axis]}")
+
+
+# ---------------------------------------------------------------------------
+# Progress output of mesh building.
+# ---------------------------------------------------------------------------
+
+HEADER = [
+    "",
+    " Step      N      Elapsed Time",
+    "======  =======  ==============",
+]
+ELAPSED = re.compile(r"\d+:\d{2}:\d{2}(\.\d{6})?")  # str(datetime.timedelta)
+
+
+def _mesh_on_rows(min_per_bin, rows=ROWS):
+    x = pd.Series([r[0] for r in rows])
+    y = pd.Series([r[1] for r in rows])
+    return SpiralMesh(x, y, np.array(XEDGES), np.array(YEDGES), min_per_bin=min_per_bin)
+
+
+def _step_rows(lines):
+    """(step, number split) of each table row, checking the column layout.
+
+    Columns: step right-aligned in 6, two spaces, number split right-aligned
+    in 7, two spaces, the step's elapsed time.
+    """
+    start = lines.index(HEADER[-1]) + 1
+    stop = lines.index("", start)
+    rows = []
+    for line in lines[start:stop]:
+        assert line[6:8] == "  " and line[15:17] == "  ", line
+        assert ELAPSED.fullmatch(line[17:]), line
+        rows.append((int(line[:6]), int(line[8:15])))
+    return rows
+
+
+def _own_or_warning_records(caplog):
+    """Records at WARNING or above, or from ``__main__`` or SolarWindPy, at any level.
+
+    Numba logs DEBUG records of its own whenever it compiles a function, which
+    depends on its cache, so those are left out.
+    """
+    return [
+        r
+        for r in caplog.records
+        if r.levelno >= logging.WARNING
+        or r.name == "__main__"
+        or r.name.startswith("solarwindpy")
+    ]
+
+
+class TestProgressOutput:
+    """Mesh building reports its progress on stderr unless told not to."""
+
+    def test_progress_table_is_written_to_stderr(self, capsys):
+        """By default ``generate_mesh`` writes the header, steps and summary to stderr.
+
+        Hand-worked for min_per_bin=1 (see ``MESH_MIN1``): step 0 splits
+        [2,6)x[2,4), step 1 splits [2,4)x[2,3), step 2 splits nothing. The
+        result is 12 cells for the 6 samples, 6 / 12 = 0.500 per cell.
+        Nothing goes to stdout.
+
+        ON FAILURE: the code is wrong.
+        """
+        _mesh_on_rows(1).generate_mesh()
+        out, err = capsys.readouterr()
+        assert out == ""
+        lines = err.split("\n")
+        assert lines[0].startswith("Generating SpiralMesh at ")
+        assert lines[1:4] == HEADER
+        assert _step_rows(lines) == [(0, 1), (1, 1), (2, 0)]
+        after_steps = lines.index("", 4) + 1
+        summary = lines[after_steps:]
+        assert summary[0].startswith("Completed SpiralMesh at ")
+        assert re.fullmatch(r"Elapsed time " + ELAPSED.pattern, summary[1])
+        assert summary[2:] == [
+            "Split bin threshold 1",
+            "Generated 12 bins for 6 spectra (~0.500 spectra per bin)",
+            "",
+            "",
+        ]
+
+    def test_a_mesh_needing_no_split_reports_no_steps(self, capsys):
+        """When no cell is over-full, the table has a header and no step rows.
+
+        At min_per_bin=3 the fullest initial cell holds 3 samples.
+
+        ON FAILURE: the code is wrong.
+        """
+        _mesh_on_rows(3).generate_mesh()
+        lines = capsys.readouterr().err.split("\n")
+        assert _step_rows(lines) == []
+        assert "Generated 6 bins for 6 spectra (~1.000 spectra per bin)" in lines
+
+    def test_progress_false_writes_nothing_and_logs_nothing(self, capfd, caplog):
+        """``progress=False`` writes nothing to either stream and logs nothing.
+
+        Logging is re-enabled here, so a WARNING record on any logger would
+        reach ``caplog`` and Python's last-resort handler on stderr.
+
+        ON FAILURE: the code is wrong.
+        """
+        logging.disable(logging.NOTSET)
+        with caplog.at_level(logging.DEBUG):
+            _mesh_on_rows(1).generate_mesh(progress=False)
+        assert capfd.readouterr() == ("", "")
+        assert _own_or_warning_records(caplog) == []
+
+    def test_progress_is_not_logged(self, capsys, caplog):
+        """With progress on, the table goes to stderr only, not to a logger.
+
+        ON FAILURE: the code is wrong.
+        """
+        logging.disable(logging.NOTSET)
+        with caplog.at_level(logging.DEBUG):
+            _mesh_on_rows(1).generate_mesh()
+        assert "Elapsed Time" in capsys.readouterr().err
+        assert _own_or_warning_records(caplog) == []
+
+    @pytest.mark.parametrize("progress", [True, False])
+    def test_initialize_mesh_passes_progress_through(self, capsys, progress):
+        """``SpiralPlot2D.initialize_mesh(progress=...)`` controls the table.
+
+        The default is on.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = SpiralPlot2D(X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
+        if progress:
+            splot.initialize_mesh(min_per_bin=1)
+        else:
+            splot.initialize_mesh(min_per_bin=1, progress=False)
+        err = capsys.readouterr().err
+        assert ("Elapsed Time" in err) is progress
+        assert set(_cells(splot.mesh.mesh)) == _refine(
+            splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
+        )
+
+
+# ---------------------------------------------------------------------------
+# The top initial edge.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "values, top",
+    [
+        ([2.0, 10.0], 10.1),  # 10 + 1% of 10
+        ([-20.0, -5.0], -4.95),  # -5 + 1% of |-5|: above -5, not 1% below it
+        ([-3.0, 0.0], 0.01),  # zero: the 0.01 floor
+    ],
+    ids=["positive", "negative", "zero"],
+)
+def test_top_edge_is_the_largest_value_plus_one_percent_of_its_size(values, top):
+    """The top initial edge is max + 0.01 * |max|, or 0.01 when max is zero.
+
+    With one quantile bin the edges are the minimum and maximum; only the top
+    one moves.
+
+    ON FAILURE: the code is wrong.
+    """
+    v = pd.Series(values)
+    splot = SpiralPlot2D(v, v, initial_bins=1)
+    for axis in ("x", "y"):
+        assert splot.initial_bins[axis].tolist() == exact([values[0], top])
+
+
+# ---------------------------------------------------------------------------
+# Clipping the data before meshing.
+# ---------------------------------------------------------------------------
+
+# 101 samples: one just inside [0,2), 99 at 3, one just inside [4,6). With
+# pandas' linear quantiles the 0.01% quantile sits at position
+# q * (n - 1) = 0.0001 * 100 = 0.01, between the two smallest samples:
+# 1.99 + 0.01 * (3 - 1.99) = 2.0001. The 99.99% quantile sits at 99.99:
+# 3 + 0.99 * (4.01 - 3) = 3.9999. Both fall in [2,4), so clipping moves each
+# tail sample into the middle cell.
+CLIP_X = pd.Series([1.99] + [3.0] * 99 + [4.01])
+CLIP_Y = pd.Series([0.5] * 101)  # constant, so clipping leaves y alone
+CLIP_EDGES = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
+
+
+@pytest.mark.parametrize(
+    "clip, counts",
+    [
+        (False, [1, 99, 1]),
+        (True, [np.nan, 101, np.nan]),
+        ("l", [np.nan, 100, 1]),
+        ("u", [1, 100, np.nan]),
+    ],
+    ids=["none", "both", "lower", "upper"],
+)
+def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
+    clip, counts
+):
+    """``clip_data`` clips x and y to their 0.01%/99.99% quantiles before meshing.
+
+    True clips both tails, "l" and "u" one each (worked next to ``CLIP_X``).
+    ``min_per_bin=101`` keeps the three initial cells unsplit.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip_data=clip)
+    splot.initialize_mesh(min_per_bin=101, progress=False)
+    splot.build_grouped()
+    assert splot.clip == clip
+    assert splot.agg().tolist() == exact(counts, nan_ok=True)
+
+
+def test_data_are_not_clipped_by_default():
+    """Without ``clip_data`` the tail samples stay in their own cells.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES)
+    splot.initialize_mesh(min_per_bin=101, progress=False)
+    splot.build_grouped()
+    assert splot.agg().tolist() == [1, 99, 1]
+
+
+# ---------------------------------------------------------------------------
+# plot_contours: no-argument calls, documented defaults, all options.
+# ---------------------------------------------------------------------------
+
+
+def _nan_aware_gaussian(ZZ, sigma):
+    """Normalised convolution: smooth data and weights, keep NaN cells NaN."""
+    finite = np.isfinite(ZZ)
+    num = gaussian_filter(np.where(finite, ZZ, 0.0), sigma)
+    den = gaussian_filter(finite.astype(float), sigma)
+    with np.errstate(invalid="ignore"):  # 0 / 0 far from data; NaN either way
+        out = num / den
+    out[~finite] = np.nan
+    return out
+
+
+def _default_reference(method, x, y, z):
+    """Contours drawn with every default ``plot_contours`` documents.
+
+    rbf: 50 neighbours, smoothing 1.0, thin-plate spline, 100 x 100 grid.
+    grid: cubic ``griddata`` on a 100 x 100 grid, NaN-aware Gaussian sigma 1.5.
+    tricontour: the centres as given. Line contours, matplotlib's levels.
+    """
+    _, ax = plt.subplots()
+    if method == "tricontour":
+        return ax.tricontour(x, y, z)
+    XX, YY = _regular_grid(x, y, 100)
+    if method == "rbf":
+        rbf = RBFInterpolator(
+            np.column_stack([x, y]),
+            z,
+            neighbors=50,
+            smoothing=1.0,
+            kernel="thin_plate_spline",
+        )
+        ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
+    else:
+        ZZ = _nan_aware_gaussian(griddata((x, y), z, (XX, YY), method="cubic"), 1.5)
+    return ax.contour(XX, YY, np.ma.masked_invalid(ZZ))
+
+
+class TestPlotContoursCalls:
+    """Calls with no arguments, with every option, and with one level."""
+
+    @pytest.mark.parametrize("method", [None, "rbf", "grid", "tricontour"])
+    def test_call_without_arguments_uses_the_documented_defaults(self, method):
+        """With no arguments ``plot_contours`` draws its documented default.
+
+        It makes its own axes, draws line contours of the mean per cell with
+        a colorbar, and matches ``_default_reference``; ``None`` calls it
+        with no arguments at all (the default method, rbf).
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        kwargs = {} if method is None else {"method": method}
+        ax, cbar, qset = splot.plot_contours(**kwargs)
+        assert isinstance(cbar, Colorbar) and cbar.mappable is qset
+        assert qset.axes is ax and not qset.filled
+        x, y, z = _occupied_centers(splot)
+        _assert_same_segments(qset, _default_reference(method or "rbf", x, y, z))
+
+    def test_default_rbf_uses_fifty_neighbours(self):
+        """With more than 50 occupied cells, the default RBF uses 50 neighbours.
+
+        An 8 x 8 lattice of samples, one per leaf at min_per_bin=1, gives 64
+        occupied cells. The reference with 51 neighbours differs from the one
+        with 50, so this input separates the documented default from its
+        neighbours; with ROWS' 6 cells both would use all 6.
+
+        ON FAILURE: the code is wrong.
+        """
+        rows = [
+            (i + 0.3, j + 0.6, (i + 0.3 - 4.0) ** 2 + (j + 0.6))
+            for i in range(8)
+            for j in range(8)
+        ]
+        x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
+        edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
+        splot = SpiralPlot2D(x, y, z, initial_bins=edges)
+        splot.initialize_mesh(min_per_bin=1, progress=False)
+        splot.build_grouped()
+        _, _, qset = splot.plot_contours(cbar=False, grid_resolution=20)
+
+        cx, cy, cz = _occupied_centers(splot, rows=rows)
+        assert len(cz) == 64
+        XX, YY = _regular_grid(cx, cy, 20)
+        pts = np.column_stack([XX.ravel(), YY.ravel()])
+
+        def ref(neighbors):
+            rbf = RBFInterpolator(
+                np.column_stack([cx, cy]),
+                cz,
+                neighbors=neighbors,
+                smoothing=1.0,
+                kernel="thin_plate_spline",
+            )
+            _, ax = plt.subplots()
+            return ax.contour(XX, YY, rbf(pts).reshape(XX.shape))
+
+        _assert_same_segments(qset, ref(50))
+        assert _segments_differ(ref(50), ref(51))
+
+    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
+    def test_every_option_reaches_the_drawing(self, method):
+        """Each option changes the drawing as documented.
+
+        ``fcn="max"`` contours the maxima (5 where p2 and p3 share a cell at
+        min_per_bin=2); the method's own options shape the field; ``levels``,
+        ``cmap``, ``norm`` and ``linestyles`` reach the contour set; the
+        colorbar is drawn with ``cbar_kwargs`` on the given axes.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        levels = [2.0, 4.0, 6.0]
+        norm = matplotlib.colors.Normalize(0.0, 10.0)
+        linestyles = ["--", ":", "-."]
+        options = {
+            "rbf": {"rbf_neighbors": 4, "rbf_smoothing": 0.5, "rbf_kernel": "cubic"},
+            "grid": {
+                "interpolation": "linear",
+                "gaussian_filter_std": 0.5,  # between 0 and 1: still smooths
+                "nan_aware_filter": False,
+            },
+            "tricontour": {},
+        }[method]
+        _, ax = plt.subplots()
+        got_ax, cbar, qset = splot.plot_contours(
+            ax=ax,
+            method=method,
+            grid_resolution=15,
+            fcn="max",
+            levels=levels,
+            cmap="magma",
+            norm=norm,
+            linestyles=linestyles,
+            cbar_kwargs={"label": "chosen"},
+            **options,
+        )
+        assert got_ax is ax and qset.axes is ax
+        assert list(qset.levels) == levels
+        assert qset.get_cmap().name == "magma" and qset.norm is norm
+        assert list(qset.linestyles) == linestyles
+        assert cbar.mappable is qset and cbar.ax.get_ylabel() == "chosen"
+
+        x, y, z = _occupied_centers(splot, fcn=max)
+        assert 5.0 in z.tolist()
+        _, ref_ax = plt.subplots()
+        if method == "tricontour":
+            ref = ref_ax.tricontour(x, y, z, levels)
+        else:
+            XX, YY = _regular_grid(x, y, 15)
+            if method == "rbf":
+                rbf = RBFInterpolator(
+                    np.column_stack([x, y]),
+                    z,
+                    neighbors=4,
+                    smoothing=0.5,
+                    kernel="cubic",
+                )
+                ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
+            else:
+                ZZ = griddata((x, y), z, (XX, YY), method="linear")
+                ZZ = gaussian_filter(np.nan_to_num(ZZ, nan=0.0), 0.5)
+            ref = ref_ax.contour(XX, YY, np.ma.masked_invalid(ZZ), levels)
+        _assert_same_segments(qset, ref)
+
+    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
+    def test_one_level_with_a_colorbar_is_a_clear_error(self, method):
+        """A single contour level with ``cbar=True`` raises a ValueError saying why.
+
+        Without the colorbar the single level is drawn.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(1)
+        with pytest.raises(ValueError, match="at least 2 contour levels"):
+            splot.plot_contours(method=method, levels=[3.0])
+        _, mappable, qset = splot.plot_contours(method=method, levels=[3.0], cbar=False)
+        assert mappable is qset and list(qset.levels) == [3.0]
+
+
+# ---------------------------------------------------------------------------
+# Refinement at the grid's lower edges, the categorical, labels, options.
+# ---------------------------------------------------------------------------
+
+
+def test_samples_on_the_lower_outer_edges_drive_refinement():
+    """Samples in the first column and row, and on the grid's lower corner, count.
+
+    [0,2)x[0,1) holds (0, 0) on the outer corner, (0.5, 0.25) and
+    (1.5, 0.75): 3 > 2, so it splits at (1, 0.5) into four quadrants, none
+    over-full. Without the corner sample it would hold 2 and not split.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [(0.0, 0.0, 0.0), (0.5, 0.25, 0.0), (1.5, 0.75, 0.0)]
+    mesh = _mesh_on_rows(2, rows)
+    mesh.generate_mesh(progress=False)
+    hand = set(INITIAL[1:]) | {
+        (0.0, 1.0, 0.0, 0.5),
+        (1.0, 2.0, 0.0, 0.5),
+        (1.0, 2.0, 0.5, 1.0),
+        (0.0, 1.0, 0.5, 1.0),
+    }
+    assert _refine(XEDGES, YEDGES, _points(rows), 2) == hand
+    assert set(_cells(mesh.mesh)) == hand
+
+
+def test_categorical_leaves_out_samples_outside_the_mesh():
+    """``cat`` has no fill-value category; an out-of-mesh sample is NaN in it.
+
+    ON FAILURE: the code is wrong.
+    """
+    mesh = _mesh_on_rows(2, ROWS + [(-1.0, 0.5, 0.0)])
+    mesh.place_spectra_in_mesh(progress=False)
+    mesh.build_cat()
+    assert FILL not in mesh.cat.categories
+    assert pd.isna(mesh.cat[-1])
+    assert list(mesh.cat[:-1]) == list(mesh.bin_id.id[:-1])
+
+
+def test_default_labels_name_the_axes_and_count_without_z():
+    """Labels default to "x" and "y"; z is a Count label without z, "z" with it.
+
+    ON FAILURE: the code is wrong.
+    """
+    counted = SpiralPlot2D(X, Y)
+    valued = SpiralPlot2D(X, Y, Z)
+    assert (counted.labels.x, counted.labels.y) == ("x", "y")
+    assert isinstance(counted.labels.z, Count)
+    assert (valued.labels.x, valued.labels.y, valued.labels.z) == ("x", "y", "z")
+
+
+def test_grouping_data_of_another_length_than_the_mesh_is_rejected():
+    """``build_grouped`` raises when the data no longer match the mesh.
+
+    Replacing the data after ``initialize_mesh`` leaves the mesh's cells for
+    6 samples and z for 5.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _plot(1)
+    splot.set_data(X[:5], Y[:5], Z[:5], False)
+    with pytest.raises(ValueError, match="`cat` must have same size"):
+        splot.build_grouped()
+
+
+class TestMakePlotOptions:
+    """``make_plot`` passes its options to the drawn collection."""
+
+    def test_fcn_selects_the_aggregation_drawn(self):
+        """``make_plot(fcn="max")`` colours each cell by its maximum.
+
+        At min_per_bin=2, p2 and p3 share a cell: max 5, mean 3.5.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        _, coll = splot.make_plot(cbar=False, fcn="max")
+        values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
+        assert np.asarray(values) == exact(_expected_agg(splot, max), nan_ok=True)
+        assert 5.0 in values.tolist() and 3.5 not in values.tolist()
+
+    def test_cmap_and_norm_reach_the_collection(self):
+        """``cmap`` and ``norm`` are the collection's colormap and normalisation.
+
+        ON FAILURE: the code is wrong.
+        """
+        norm = matplotlib.colors.Normalize(0.0, 20.0)
+        _, coll = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
+        assert coll.get_cmap().name == "magma"
+        assert coll.norm is norm
+
+    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    def test_axes_limits_span_the_mesh(self, log):
+        """The axes show exactly the mesh: x from 0 to 6.06, y from 0 to 4.04.
+
+        6.06 and 4.04 are the raised top edges (6 + 1%, 4 + 1%); on log axes
+        the limits are 10 to those powers.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _ = _plot(2, log=log).make_plot(cbar=False)
+        expected = np.array([[0.0, 6.06], [0.0, 4.04]])
+        if log:
+            expected = 10.0**expected
+        assert np.array([ax.get_xlim(), ax.get_ylim()]) == exact(expected)
+
+    def test_figure_draws_to_an_agg_buffer(self):
+        """A SpiralPlot2D figure with a colorbar renders to an in-memory Agg buffer.
+
+        Inside three cells, away from grid lines, the rendered pixel is the
+        colour of the cell's mean: p4 alone (9), p0 alone (1), p1 alone (3),
+        each mapped through the collection's colormap and norm and rounded to
+        8 bits. The figure also saves as PNG.
+
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        _, cbar = _plot(2).make_plot(ax=ax)
+        fig.canvas.draw()
+        rgba = np.asarray(fig.canvas.buffer_rgba())
+        coll = cbar.mappable
+        height = rgba.shape[0]
+        for point, mean in [((4.7, 3.3), 9.0), ((1.3, 0.3), 1.0), ((4.7, 1.3), 3.0)]:
+            px, py = ax.transData.transform(point)
+            pixel = rgba[int(round(height - py)), int(round(px))]
+            colour = np.round(np.array(coll.cmap(coll.norm(mean))) * 255)
+            assert pixel.tolist() == colour.astype(int).tolist(), point
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png")
+        assert buf.getvalue().startswith(b"\x89PNG\r\n\x1a\n")
