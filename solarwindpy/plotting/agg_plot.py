@@ -100,49 +100,6 @@ class AggPlot(base.Base):
         return self._axnorm
 
     @staticmethod
-    def clip_data(data, clip):
-        r"""Clip data to its 0.01st and 99.99th percentiles.
-
-        Parameters
-        ----------
-        data : pd.Series or pd.DataFrame
-            Data to clip. A DataFrame is clipped column by column.
-        clip : bool or str
-            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails.
-
-        Returns
-        -------
-        pd.Series or pd.DataFrame
-            The clipped data.
-
-        Raises
-        ------
-        TypeError
-            If ``data`` is neither a Series nor a DataFrame.
-        """
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip(lower=lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip(upper=up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
-
-    @staticmethod
     def _bin_widths(bins):
         r"""Width of each bin in the binned variable.
 

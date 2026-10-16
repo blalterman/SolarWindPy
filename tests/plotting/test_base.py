@@ -33,6 +33,7 @@ from solarwindpy.plotting.base import (  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Chosen input: index, x, y, z. Row 11 has NaN x, row 13 NaN y, row 14 NaN z,
@@ -242,6 +243,22 @@ def test_set_log_coerces_to_bool_and_none_keeps_the_current_value():
     assert plot.log == LogAxes(False, False)
 
 
+def test_set_log_of_one_axis_keeps_the_other_logarithmic():
+    """``set_log(x=True)`` on a plot with log y leaves y logarithmic.
+
+    The test above ends with y linear, where resetting y is invisible; here
+    y starts logarithmic, so a reset shows.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = LinePlot(X, Y)
+    plot.set_log(y=True)
+    plot.set_log(x=True)
+    assert plot.log == LogAxes(True, True)
+    plot.set_log(x=False)
+    assert plot.log == LogAxes(False, True)
+
+
 def test_set_labels_changes_only_the_labels_passed():
     """Labels not passed keep their current values (docstring).
 
@@ -384,6 +401,29 @@ def test_hist1d_axes_carry_labels_scales_grid_and_ticks(ax, transpose):
         ticks = axis.get_major_ticks()
         assert all(t.gridline.get_visible() for t in ticks)
         assert {t.get_tickdir() for t in ticks} == {"inout"}
+    # The log axis carries minor ticks; they point in and out as well.
+    log_axis = ax.yaxis if transpose else ax.xaxis
+    minor = log_axis.get_minor_ticks()
+    assert minor
+    assert {t.get_tickdir() for t in minor} == {"inout"}
+
+
+def test_major_grid_is_on_even_where_the_style_already_draws_one():
+    """With ``axes.grid`` on in the style, formatted axes still show the grid.
+
+    Under matplotlib's default style the grid starts off, so turning it on
+    and toggling it look the same; starting from on separates them.
+
+    ON FAILURE: the code is wrong.
+    """
+    with matplotlib.rc_context({"axes.grid": True}):
+        _, ax = plt.subplots()
+        Hist1D(DECADES, logx=True, nbins=3).make_plot(ax)
+    try:
+        for axis in (ax.xaxis, ax.yaxis):
+            assert all(t.gridline.get_visible() for t in axis.get_major_ticks())
+    finally:
+        plt.close("all")
 
 
 def test_hist1d_leaves_a_none_label_blank(ax):
@@ -432,6 +472,24 @@ def test_scatter_colorbar_accepts_a_list_of_axes(ax):
     _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
     assert cbar.ax.figure is ax.figure
     assert len(ax.figure.axes) == 2
+
+
+def test_scatter_colorbar_given_another_axes_takes_its_space_from_that_axes():
+    """``cbar_kwargs={"ax": other}`` puts the colorbar beside ``other``.
+
+    matplotlib makes room for a colorbar by shrinking the axes it is given,
+    so the given axes narrows and the plotted axes keeps its width.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, (plotted, other) = plt.subplots(1, 2)
+    try:
+        width_before = (plotted.get_position().width, other.get_position().width)
+        Scatter(X, Y, Z).make_plot(plotted, cbar_kwargs={"ax": other})
+        assert plotted.get_position().width == exact(width_before[0])
+        assert other.get_position().width < width_before[1]
+    finally:
+        plt.close("all")
 
 
 def test_scatter_colorbar_given_both_ax_and_cax_raises_value_error(ax):
@@ -561,11 +619,116 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes(plot):
 def test_cbar_kwargs_that_are_not_a_mapping_raise_type_error(plot):
     """A ``cbar_kwargs`` that is not a mapping is refused with ``TypeError``.
 
+    The message names the type the caller passed, here a list.
+
     ON FAILURE: the code is wrong.
     """
     _, ax = plt.subplots()
     try:
-        with pytest.raises(TypeError, match="cbar_kwargs must be a mapping"):
+        with pytest.raises(
+            TypeError, match="cbar_kwargs must be a mapping or None, not list"
+        ):
             plot(ax, [("shrink", 0.5)])
     finally:
         plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# clip_data
+# ---------------------------------------------------------------------------
+
+SERIES = pd.Series(np.arange(1.0, 11.0))
+FRAME = pd.DataFrame({"a": np.arange(1.0, 6.0), "b": np.arange(10.0, 60.0, 10.0)})
+
+
+class TestClipData:
+    """``clip_data`` clips to the 0.01st and 99.99th percentiles, or one of them.
+
+    Thresholds come from numpy.quantile (linear interpolation), applied with
+    numpy.clip; for 1..10 they are 1 + 9 * 1e-4 = 1.0009 and 10 - 9 * 1e-4 =
+    9.9991 by hand.
+    """
+
+    def test_series_both_tails_hand_computed(self):
+        """Any clip value other than "l"/"u" clips both tails of 1..10.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(SERIES, True)
+        expected = np.r_[1.0009, np.arange(2.0, 10.0), 9.9991]
+        assert np.asarray(result) == exact(expected)
+        assert isinstance(result, pd.Series)
+
+    def test_dataframe_both_tails_per_column(self):
+        """A DataFrame is clipped column by column at its own percentiles.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(FRAME, "both")
+        lo = np.quantile(FRAME, 1e-4, axis=0)
+        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, lo, hi))
+        assert list(result.columns) == ["a", "b"]
+
+    def test_series_lower(self):
+        """``"l"`` raises only the low tail: 1 becomes 1.0009, 10 stays 10.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(SERIES, "l")
+        expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
+        assert np.asarray(result) == exact(expected)
+        assert result.iloc[0] == exact(1.0009)
+        assert result.iloc[-1] == 10.0
+
+    def test_series_upper(self):
+        """``"u"`` lowers only the high tail: 10 becomes 9.9991, 1 stays 1.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(SERIES, "u")
+        expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
+        assert np.asarray(result) == exact(expected)
+        assert result.iloc[-1] == exact(9.9991)
+        assert result.iloc[0] == 1.0
+
+    def test_dataframe_lower(self):
+        """``"l"`` clips each column's low tail at that column's percentile.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(FRAME, "l")
+        lo = np.quantile(FRAME, 1e-4, axis=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, lo, None))
+
+    def test_dataframe_upper(self):
+        """``"u"`` clips each column's high tail at that column's percentile.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(FRAME, "u")
+        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
+        assert np.asarray(result) == exact(np.clip(FRAME, None, hi))
+
+    def test_tail_selector_is_case_insensitive(self):
+        """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
+
+        ON FAILURE: the code is wrong.
+        """
+        lower = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
+        upper = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
+        for mode, expected in (
+            ("L", lower),
+            ("Lower", lower),
+            ("U", upper),
+            ("Upper", upper),
+        ):
+            assert np.asarray(Base.clip_data(SERIES, mode)) == exact(expected)
+
+    def test_rejects_non_pandas_input_with_typeerror(self):
+        """A list is neither Series nor DataFrame: TypeError naming its type.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(TypeError, match="Unexpected object <class 'list'>"):
+            Base.clip_data([1.0, 2.0, 3.0], True)

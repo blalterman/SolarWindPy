@@ -56,7 +56,7 @@ class Hist1D(AggPlot):
         clip_data : bool or str, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
-            (see ``AggPlot.clip_data``). None is stored as False.
+            (see ``Base.clip_data``). None is stored as False.
         nbins : int or array-like, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
             :func:`pandas.cut` depending on the input type.
