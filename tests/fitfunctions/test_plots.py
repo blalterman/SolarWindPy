@@ -89,13 +89,17 @@ def test_str_returns_class_name():
 
 
 def test_initial_properties_and_path():
+    """Properties read back; ``path`` names a linear y axis ``linY``.
+
+    ON FAILURE: the code is wrong.
+    """
     plot, tex, obs, y_fit = make_ffplot()
     assert plot.observations is obs
     assert np.all(plot.y_fit == y_fit)
     assert plot.TeX_info is tex
     assert plot.labels == AxesLabels("x", "y")
     assert plot.log == LogAxes(False, False)
-    expected = Path("FFPlot") / "dummy" / "x" / "y" / "linX_logY"
+    expected = Path("FFPlot") / "dummy" / "x" / "y" / "linX_linY"
     assert plot.path == expected
 
     plot.set_labels(x=Label("X", "xp"), y=Label("Y", "yp"), z="Z")
@@ -472,7 +476,10 @@ class TestPathWithLabelZ:
     """Test path property with z label."""
 
     def test_path_with_z_label_as_label_object(self):
-        """Verify path includes z label from Label object."""
+        """Verify path includes z label from Label object.
+
+        ON FAILURE: the code is wrong.
+        """
         plot, *_ = make_ffplot()
         plot.set_labels(
             x=Label("X", "xp"),
@@ -480,7 +487,7 @@ class TestPathWithLabelZ:
             z=Label("Z", "zp"),
         )
 
-        expected = Path("FFPlot") / "dummy" / "xp" / "yp" / "zp" / "linX_logY"
+        expected = Path("FFPlot") / "dummy" / "xp" / "yp" / "zp" / "linX_linY"
         assert plot.path == expected
 
 

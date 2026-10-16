@@ -101,7 +101,7 @@ class FFPlot(object):
                 base = base / str(self.labels.z)
 
         x_scale = "logX" if self.log.x else "linX"
-        y_scale = "logY" if self.log.y else "logY"
+        y_scale = "logY" if self.log.y else "linY"
         scale_info = "_".join([x_scale, y_scale])
 
         path = base / scale_info
