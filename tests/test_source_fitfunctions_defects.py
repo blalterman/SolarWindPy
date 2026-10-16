@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 
 from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import FitFailedError, InsufficientDataError
 from solarwindpy.fitfunctions.lines import Line, LineXintercept
 from tests.tolerances import exact, noise_free
 
@@ -249,3 +249,79 @@ def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
 
     assert fit.make_fit(return_exception=True) is None
     assert fit.popt == noise_free({"m": 2.0, "b": 1.0})
+
+
+def test_gaussian_plus_heavyside_finds_a_step_in_the_first_gap():
+    """A step between the first two samples is found: the scan includes gap 0.
+
+    The true ``x0 = 0.025`` lies between x = 0 and the next sample, 10/199.
+
+    ON FAILURE: the code is wrong.
+    """
+    true = dict(PARAMS[0], x0=0.025)
+    x = np.linspace(0, 10, 200)
+    fit = GaussianPlusHeavySide(x, _model(x, **true))
+    fit.make_fit()
+    lo, hi = _bracket(x, true["x0"])
+    assert lo < fit.popt["x0"] < hi
+
+
+def test_gaussian_plus_heavyside_returns_a_failed_final_fit():
+    """``return_exception=True`` returns the final fit's failure; keywords reach it.
+
+    ``max_nfev=1`` stops every least-squares run before convergence, the
+    final one included, so the fit fails with FitFailedError, returned, not
+    raised. Without it, the same data fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.linspace(0, 10, 200)
+    fit = GaussianPlusHeavySide(x, _model(x, **PARAMS[0]))
+    got = fit.make_fit(return_exception=True, max_nfev=1)
+    assert isinstance(got, FitFailedError), repr(got)
+    with pytest.raises(FitFailedError):
+        fit.make_fit(max_nfev=1)
+    assert fit.make_fit(return_exception=True) is None
+
+
+def test_gaussian_plus_heavyside_accepts_absolute_sigma_false():
+    """``absolute_sigma=False`` is accepted, as by every other fit function.
+
+    The keyword is the base fit's, so the ``x0`` scan must not hand it to
+    scipy's least_squares, which does not take it.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.linspace(0, 10, 200)
+    fit = GaussianPlusHeavySide(x, _model(x, **PARAMS[0]))
+    assert fit.make_fit(return_exception=True, absolute_sigma=False) is None
+
+
+def test_gaussian_plus_heavyside_with_no_guess_starts_inside_caller_bounds():
+    """With no estimate, the scan starts from the feasible point of the bounds.
+
+    y sums to zero, so ``p0`` is None. The bounds hold ``y0`` in [2, 3] and
+    ``sigma`` in [0.1, inf); scipy's feasible start for them is the midpoint
+    2.5 and ``0.1 + 1``, and ones elsewhere. The fit must end exactly as a fit
+    given that start explicitly, not refuse an all-ones start outside the
+    bounds.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1, 2, 3, 4, 5])
+    y = np.array([1.0, -1, 1, -1, 1, -1])
+    bounds = (
+        [-np.inf, 2.0, -np.inf, -np.inf, 0.1, -np.inf],
+        [np.inf, 3.0, np.inf, np.inf, np.inf, np.inf],
+    )
+    fit = GaussianPlusHeavySide(x, y)
+    assert fit.p0 is None
+
+    got = fit.make_fit(return_exception=True, bounds=bounds)
+    explicit = GaussianPlusHeavySide(x, y)
+    start = [1.0, 2.5, 1.0, 1.0, 1.1, 1.0]
+    expected = explicit.make_fit(return_exception=True, bounds=bounds, p0=start)
+    assert "infeasible" not in str(got), got
+    assert type(got) is type(expected), (got, expected)
+    if got is None:
+        assert fit.popt == explicit.popt

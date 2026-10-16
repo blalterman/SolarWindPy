@@ -438,3 +438,28 @@ class TestExponentialTeXPhase6:
             for cls in [Exponential, ExponentialPlusC, ExponentialCDF]
         }
         assert len(tex) == 3
+
+
+def test_cdf_tex_info_reports_the_fixed_amplitude_after_the_rate():
+    """ExponentialCDF's annotation lists the caller's ``y0`` as ``A``, value only.
+
+    ``A = 2.5`` is the chosen amplitude; it is fixed, so it carries no
+    uncertainty and follows the fitted ``c``. The method that was meant to
+    add it called a parent method that does not exist and was never called.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.linspace(0, 5, 50)
+    obj = ExponentialCDF(x, 2.5 * (1.0 - np.exp(-0.8 * x)))
+    obj.set_y0(2.5)
+    obj.make_fit()
+
+    lines = [ln.strip("$").strip() for ln in str(obj.TeX_info).split("\n")]
+    (c_at,) = [i for i, ln in enumerate(lines) if ln.startswith("c = ")]
+    (a_at,) = [i for i, ln in enumerate(lines) if ln.startswith("A = ")]
+    assert a_at > c_at
+    value = lines[a_at].split(" = ", 1)[1]
+    assert r"\pm" not in value
+    value = value.replace(r" \times 10^{", "e").replace("}", "").replace(" ", "")
+    assert float(value) == exact(2.5)
+    assert obj.TeX_info.extra_params == {"A": 2.5}

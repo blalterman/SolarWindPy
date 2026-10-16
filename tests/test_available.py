@@ -11,6 +11,7 @@ function never requires editing this file.
 import importlib
 import inspect
 import pkgutil
+import re
 
 import solarwindpy.fitfunctions as ff
 from solarwindpy.fitfunctions.core import FitFunction
@@ -90,6 +91,53 @@ def test_every_fit_function_formula_reads_without_data(capsys):
     assert not any(
         "needs a fitted instance" in row for row in _printed_rows(capsys).values()
     )
+
+
+def test_each_row_names_the_module_the_class_is_imported_from(capsys):
+    """A row's second column is a module of the package that defines its class.
+
+    ``solarwindpy.fitfunctions.<module>.<name>`` must be that class, so the
+    listing tells a reader where to import it from.
+
+    ON FAILURE: the code is wrong; a row names the wrong module.
+    """
+    for name, row in _printed_rows(capsys).items():
+        module = row.split()[1]
+        imported = importlib.import_module(f"{ff.__name__}.{module}")
+        assert (
+            getattr(imported, name) is _fit_functions_found_by_scanning_modules()[name]
+        ), row
+
+
+def test_columns_are_aligned_under_dashes_as_wide_as_each_column(capsys):
+    """Each column starts at one offset in every line, under its dash rule.
+
+    The rule line has one run of dashes per column, starting where the
+    column starts; the first two runs are as wide as their column's widest
+    entry, so no entry overflows into the next column.
+
+    ON FAILURE: the code is wrong; the listing's columns no longer line up.
+    """
+    ff.available()
+    header, rule, *rows = capsys.readouterr().out.splitlines()
+    runs = [(m.start(), m.end()) for m in re.finditer(r"\S+", rule)]
+    assert set(rule.replace(" ", "")) == {"-"}, rule
+    assert len(runs) == 3, rule
+    starts = [start for start, _ in runs]
+    assert starts[0] == 0, rule
+    for line in [header] + rows:
+        assert line[0] != " ", line
+        for start in starts[1:]:
+            # The column's entry begins exactly at its start, after a space.
+            assert line[start - 1] == " " and line[start] != " ", line
+    module_start, formula_start = starts[1], starts[2]
+    for line in rows:
+        name, module = line.split()[:2]
+        assert line[:module_start].split() == [name], line
+        assert line[module_start:formula_start].split() == [module], line
+    for column, (start, end) in enumerate(runs[:2]):
+        widest = max(len(line.split()[column]) for line in rows)
+        assert end - start >= widest, (column, rule)
 
 
 def test_available_ignores_subclasses_defined_elsewhere(capsys):
