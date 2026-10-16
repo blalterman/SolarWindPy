@@ -643,3 +643,16 @@ investigation at the author's request: the hinge singular starts as an unfittabl
 Raffaella branch (a GSE-to-RTN verification aid), the ICMECAT interval rules, `construct_cdf`'s
 y-value check, pinning names and default counts, the spiral top edge, the plotting dead code,
 `plot_contours`' history, mesh progress output, and the never-matching label rules.
+
+Author decisions (2026-10-16, after the investigation): a hinge side with fewer than 2 points
+gives NaN and the fit starts from the reference start (a bad guess is not unfittable data);
+both ICMECAT lookups use recorded magnetic-obstacle end times only, the estimated-end intervals
+stay available under an explicit name, and `get_events_in_range` gets tests; user-visible
+Series names are pinned and "Intability" becomes "Instability", but the default bin count is
+not pinned; the spiral top edge pads by 1% of the largest value's size with a small floor for
+zero; the plotting dead code is deleted, and `nbins` accepts numpy integers with a clear error
+for other bad input; `plot_contours` gets the proposed tests plus handling for one level with a
+colour bar; the never-matching label rules are deleted, `>=` and `<=` map to GEQ and LEQ, and
+CountOther paths replace spaces. The Raffaella branch stays: it was moved from an analysis file
+to give it a permanent home. `construct_cdf` builds the CDF of the observed x values and never
+uses y. Mesh building must keep showing live per-step progress by default.
