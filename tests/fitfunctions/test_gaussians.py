@@ -9,7 +9,7 @@ from solarwindpy.fitfunctions.gaussians import (
     GaussianLn,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
-from tests.tolerances import exact, noise_free
+from tests.tolerances import exact, noise_free, printed
 
 
 @pytest.mark.parametrize(
@@ -237,32 +237,65 @@ class TestGaussianLn:
         assert normal["mu"] == exact(expected_mu)
         assert normal["sigma"] == exact(expected_sigma)
 
-    def test_TeX_report_normal_parameters_default(self, lognormal_data):
-        """Test that TeX_report_normal_parameters defaults to False."""
-        x, y, _ = lognormal_data
+    @staticmethod
+    def _reported(info, name):
+        """Value of the ``name = value`` line of a TeX annotation, or None."""
+        for line in info.split("\n"):
+            body = line.strip("$").strip()
+            if body.startswith(f"{name} = "):
+                text = body.split(" = ", 1)[1]
+                text = text.replace(r" \times 10^{", "e").replace("}", "")
+                assert r"\pm" not in text, line
+                return float(text.replace(" ", ""))
+        return None
+
+    def test_tex_info_reports_normal_parameters_only_when_asked(self, lognormal_data):
+        r"""The annotation lists mu and sigma when the flag is on, and not when off.
+
+        The data are noise-free with m = 0.5 and s = 0.3, so the reported
+        values are mu = exp(m + s^2/2) = exp(0.545) = 1.7246 and
+        sigma = sqrt(exp(s^2 + 2m)(exp(s^2) - 1)) = sqrt(2.9743 * 0.094174)
+        = 0.5292 (mathworld LogNormalDistribution, the class's reference),
+        printed to four significant digits. Turning the flag on or off after
+        the fit updates the annotation.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y, params = lognormal_data
+        m, s = params["m"], params["s"]
+        mu = np.exp(m + s**2 / 2)
+        sigma = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
+        assert mu == printed(1.7246, decimals=4)
+        assert sigma == printed(0.5292, decimals=4)
+
         obj = GaussianLn(x, y)
         assert obj.TeX_report_normal_parameters is False
+        obj.make_fit()
+        off = str(obj.TeX_info)
+        assert self._reported(off, r"\mu") is None
+        assert self._reported(off, r"\sigma") is None
 
-    def test_set_TeX_report_normal_parameters(self, lognormal_data):
-        """Test setting TeX_report_normal_parameters."""
+        obj.set_TeX_report_normal_parameters(True)
+        assert obj.TeX_report_normal_parameters is True
+        on = str(obj.TeX_info)
+        assert self._reported(on, r"\mu") == printed(mu, decimals=3)
+        assert self._reported(on, r"\sigma") == printed(sigma, decimals=4)
+        for name in ("m", "s", "A"):
+            assert f"$ {name} = " in on
+
+        obj.set_TeX_report_normal_parameters(False)
+        assert str(obj.TeX_info) == off
+
+    def test_flag_set_before_the_fit_reaches_the_annotation(self, lognormal_data):
+        """``set_TeX_report_normal_parameters(True)`` before ``make_fit`` holds.
+
+        ON FAILURE: the code is wrong.
+        """
         x, y, _ = lognormal_data
         obj = GaussianLn(x, y)
         obj.set_TeX_report_normal_parameters(True)
-        assert obj.TeX_report_normal_parameters is True
-        obj.set_TeX_report_normal_parameters(False)
-        assert obj.TeX_report_normal_parameters is False
-
-    def test_TeX_info_TeX_popt_without_normal_parameters(self, lognormal_data):
-        """Test TeX_info.TeX_popt returns log-normal params."""
-        x, y, _ = lognormal_data
-        obj = GaussianLn(x, y)
         obj.make_fit()
-
-        # Access via TeX_info, not direct property (GaussianLn.TeX_popt is broken)
-        tex_popt = obj.TeX_info.TeX_popt
-        assert "m" in tex_popt
-        assert "s" in tex_popt
-        assert "A" in tex_popt
+        assert self._reported(str(obj.TeX_info), r"\mu") is not None
 
     def test_make_fit_success(self, lognormal_data):
         """GaussianLn fitted to noise-free log-normal data recovers m, |s|, A.

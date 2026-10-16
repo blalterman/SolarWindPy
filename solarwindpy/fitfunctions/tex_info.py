@@ -33,7 +33,7 @@ class TeXinfo(object):
         chisq_dof,
         rsq,
         initial_guess_info=None,
-        npts=None,
+        extra_params=None,
     ):
         r"""A container for printing :py:class:`~solarwindpy.fitfunctions.core.FitFunction` info on a figure.
 
@@ -50,16 +50,18 @@ class TeXinfo(object):
         initial_guess_info: dict, None
             If not None, a dict with keys corresponding to function arg names
             and values that are (p0, fit_bounds) for that fit parameter.
-        npts: scalar, None
-            If not None, the number of data points in the fit. If not None,
-            cast to int.
+        extra_params: dict, None
+            If not None, values reported after the fitted parameters as
+            ``name = value``, without an uncertainty: a quantity derived
+            from the fitted parameters, or one the caller fixed. Keys are
+            written as given, in LaTeX.
         """
         self.set_popt_psigma(popt, psigma)
         self.set_TeX_function(TeX_function)
         self.set_chisq_dof(chisq_dof)
         self.set_rsq(rsq)
         self.set_initial_guess_info(initial_guess_info)
-        self.set_npts(npts)
+        self.set_extra_params(extra_params)
 
     def __str__(self):
         r"""Return :attr:`info`."""
@@ -108,9 +110,9 @@ class TeXinfo(object):
         return self._chisq_dof
 
     @property
-    def npts(self):
-        r"""Number of points in the fit, or None."""
-        return self._npts
+    def extra_params(self):
+        r"""Values reported without an uncertainty after the fitted parameters, by LaTeX name."""
+        return dict(self._extra_params)
 
     @property
     def popt(self):
@@ -267,7 +269,6 @@ class TeXinfo(object):
         convert_pow_10=True,
         strip_uncertainties=False,
         simplify_info_for_paper=False,
-        npts=False,
         relative_error=False,
     ):
         """Assemble the formatted lines describing the fit."""
@@ -277,6 +278,12 @@ class TeXinfo(object):
 
         template = "%s = %s"
         info = [template % kv for kv in TeX_popt.items()]
+        # A value without an uncertainty is printed as `val_uncert_2_string`
+        # prints one whose uncertainty is not finite, less the uncertainty.
+        info += [
+            template % (k, self.val_uncert_2_string(v, np.nan).split(r" \pm")[0])
+            for k, v in self.extra_params.items()
+        ]
         # `.split("\n")` guarantees function is a list, irrespecitve
         # of whether or not it contians 1 or more lines
         info = TeX_function.split("\n") + info
@@ -284,25 +291,13 @@ class TeXinfo(object):
         if relative_error:
             info += ["", self.TeX_relative_error]  # blank for visual cue
 
-        if npts and self.npts is not None:
-            info += [
-                "",  # blank line for visual cue
-                r"N_\mathrm{pts} = {%.0f}" % self.npts,
-            ]
-
         if chisq_dof:
 
             chisq_info = (
                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
                 % (self.chisq_dof.linear, self.chisq_dof.robust)
             )
-            if (not npts) or (self.npts is None):
-                chisq_info = ["", chisq_info]  # blank line for visual cue
-
-            else:
-                chisq_info = [chisq_info]
-
-            info += chisq_info
+            info += ["", chisq_info]  # blank line for visual cue
 
         if convert_pow_10 and (not simplify_info_for_paper):
             # Convert to 10^X notation.
@@ -400,8 +395,6 @@ class TeXinfo(object):
             fit parameters x.
         rsq: bool
             If True, include :math:`R^2` coefficient of determination.
-        npts: bool
-            If True, include the number of points in the fit.
         convert_pow_10: bool
             If True, use 10^{X} format. Otherwise, use eX format.
             Note that `simplify_info_for_paper` must be disabled.
@@ -423,7 +416,6 @@ class TeXinfo(object):
 
         chisq_dof = kwargs.pop("chisq_dof", True)
         rsq = kwargs.pop("rsq", False)
-        npts = kwargs.pop("npts", False)
         relative_error = kwargs.pop("relative_error", False)
         convert_pow_10 = kwargs.pop("convert_pow_10", True)
         strip_uncertainties = kwargs.pop("strip_uncertainties", False)
@@ -446,7 +438,6 @@ class TeXinfo(object):
                 strip_uncertainties=strip_uncertainties,
                 simplify_info_for_paper=simplify_info_for_paper,
                 relative_error=relative_error,
-                npts=npts,
             )
 
         if add_initial_guess:
@@ -481,14 +472,26 @@ class TeXinfo(object):
 
         self._initial_guess_info = new
 
-    def set_npts(self, new):
-        r"""Store the number of fitted points as an int, or None."""
-        if not isinstance(new, Number) and (new is not None):
-            raise TypeError(f"Unexpected npts type ({type(new)})")
+    def set_extra_params(self, new):
+        r"""Store the values reported without an uncertainty; ``new`` is a dict or None.
 
-        if new is not None:
-            new = int(new)
-        self._npts = new
+        The annotation is rebuilt with defaults the next time :attr:`info`
+        is read.
+
+        Raises
+        ------
+        TypeError
+            If ``new`` is neither a dict nor None, or a value is not a number.
+        """
+        if new is None:
+            new = {}
+        if not isinstance(new, dict):
+            raise TypeError(f"extra_params must be a dict or None, not {type(new)}")
+        for k, v in new.items():
+            if not isinstance(v, Number):
+                raise TypeError(f"extra_params[{k!r}] is not a number: {v!r}")
+        self._extra_params = tuple(new.items())
+        self.__dict__.pop("_info", None)
 
     def set_popt_psigma(self, popt, psigma):
         r"""Store parameters and uncertainties; every ``popt`` key must be in ``psigma``."""
@@ -499,10 +502,21 @@ class TeXinfo(object):
         self._psigma = tuple(psigma.items())
 
     def set_TeX_argnames(self, **kwargs):
-        r"""Define the mapping to format LaTeX function argnames."""
+        r"""Define the mapping to format LaTeX function argnames.
+
+        Raises
+        ------
+        ValueError
+            If a name is not a fitted parameter, or is missing from the
+            initial guess info when there is one.
+        """
         # Save a tuple so immutable.
         popt = self.popt
-        initial_guess = self.initial_guess_info
+        # The parameter names, not the formatted :attr:`initial_guess_info`
+        # table, in which a name is only a substring.
+        initial_guess = self._initial_guess_info
+        if initial_guess is not None:
+            initial_guess = dict(initial_guess)
         for k, v in kwargs.items():
             if k not in popt:
                 raise ValueError(

@@ -688,9 +688,19 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             self.chisq_dof,
             self.rsq,
             initial_guess_info=self.initial_guess_info,
+            extra_params=self._TeX_extra_params(),
         )
         self._TeX_info = tex_info
         return tex_info
+
+    def _TeX_extra_params(self):
+        r"""Values the TeX info reports without an uncertainty, by LaTeX name, or None.
+
+        None by default. A class that reports a quantity besides its fitted
+        parameters, such as one derived from them or one the caller fixed,
+        overrides it.
+        """
+        return None
 
     def residuals(self, pct=False, use_all=False):
         r"""
