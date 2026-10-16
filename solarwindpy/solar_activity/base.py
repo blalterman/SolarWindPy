@@ -24,8 +24,6 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 _Loader_Dtypes_Columns = namedtuple("LoaderNamedTuple", ["dtypes", "columns"])
 _data_date_pattern = re.compile(r"\d{4}\d{2}\d{2}")
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class Base(ABC):
     """Abstract base class providing a logger interface."""
@@ -165,11 +163,6 @@ class DataLoader(Base):
         self._data = data
 
     @property
-    def logger(self):
-        r"""``logging.Logger`` attached to the instance."""
-        return self._logger
-
-    @property
     def data(self):
         r"""Loaded data, :class:`pandas.DataFrame` indexed by time."""
         return self._data
@@ -193,13 +186,6 @@ class DataLoader(Base):
     def age(self):
         r"""Time since :attr:`ctime`."""
         return self._age
-
-    def _init_logger(self):
-        r"""Attach a logger named after the module and class."""
-        logger = logging.getLogger(
-            name="{}.{}".format(__name__, self.__class__.__name__)
-        )
-        self._logger = logger
 
     def set_key(self, key):
         r"""Set :attr:`key`."""
@@ -466,6 +452,11 @@ class IndicatorExtrema(Base):
         The rising edge comes before the falling edge in time, i.e. it's
         Min ``N`` followed by Max ``N``. Also calculate intervals for a full
         SSN cycle.
+
+        A cycle ends at the next cycle's minimum, or today if there is none
+        yet. A cycle with no maximum yet (none recorded, or one recorded no
+        earlier than the cycle's end) rises until that end and has no
+        falling edge: its ``Fall`` is ``NaT``.
         """
         extrema = self.data
         intervals = pd.DataFrame(
@@ -479,29 +470,19 @@ class IndicatorExtrema(Base):
             t0 = r.loc["Min"]
             t1 = r.loc["Max"]
 
-            if pd.isna(t1):
-                # No maximum yet, then use Today for maximum
-                t1 = today
-
             try:
-                # Get next cycle's Minimum to calculate Falling edge
                 t2 = extrema.loc[c + 1, "Min"]
             except KeyError:
-                if t1 < today:
-                    # We haven't reached next Min yet, but have current cycle Max
-                    # so use today.
-                    t2 = today
-                else:
-                    # This cycle does not have a falling edge.
-                    t2 = t1 + pd.to_timedelta(6 * 365, unit="D")
+                # The next minimum has not happened yet.
+                t2 = today
 
-            rise_ = pd.Interval(t0, t1)
-            fall_ = pd.Interval(t1, t2)
-            all_ = pd.Interval(t0, t2)
-
-            if t1 == t2:
-                # Then no falling edge
+            if pd.isna(t1) or t1 >= t2:
+                rise_ = pd.Interval(t0, t2)
                 fall_ = pd.NaT
+            else:
+                rise_ = pd.Interval(t0, t1)
+                fall_ = pd.Interval(t1, t2)
+            all_ = pd.Interval(t0, t2)
 
             intervals.loc[c] = pd.Series({"Rise": rise_, "Fall": fall_, "Cycle": all_})
 
@@ -565,7 +546,8 @@ class IndicatorExtrema(Base):
         if tk_cycles is not None:
             intervals = intervals.loc[tk_cycles]
 
-        ii = pd.IntervalIndex(intervals.stack()).sort_values()
+        # A cycle with no maximum yet has no falling edge (NaT); drop it.
+        ii = pd.IntervalIndex(intervals.stack().dropna()).sort_values()
         if not (ii.is_unique and ii.is_monotonic_increasing):
             raise ValueError
 

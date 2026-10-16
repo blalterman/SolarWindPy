@@ -28,8 +28,7 @@ def _read_example(name):
     Parameters
     ----------
     name : str
-        ``"plasma"`` or ``"spacecraft"``; also ``"auxiliary_data"``, read
-        only when the package ships ``example_auxiliary_data.csv``.
+        ``"plasma"`` or ``"spacecraft"``.
 
     Returns
     -------
@@ -53,8 +52,7 @@ def load_plasma():
 
     Every species in the example data is loaded. The spacecraft is Parker
     Solar Probe in the heliocentric inertial (HCI) frame, with position,
-    velocity and Carrington location. Auxiliary data is loaded from
-    ``example_auxiliary_data.csv`` when the package ships one.
+    velocity and Carrington location.
 
     Returns
     -------
@@ -100,8 +98,4 @@ def load_plasma():
     ).sort_index(axis=1)
     spacecraft = Spacecraft(psp, "PSP", "HCI")
 
-    auxiliary_data = None
-    if _DATA.joinpath("example_auxiliary_data.csv").is_file():
-        auxiliary_data = _read_example("auxiliary_data")
-
-    return Plasma(data, *species, spacecraft=spacecraft, auxiliary_data=auxiliary_data)
+    return Plasma(data, *species, spacecraft=spacecraft)

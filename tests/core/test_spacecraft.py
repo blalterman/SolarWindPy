@@ -239,13 +239,33 @@ def test_data_that_is_not_a_dataframe_raise_type_error_naming_the_type(build):
 
 
 def test_spacecraft_refuses_missing_timestamps():
-    r"""A spacecraft whose time index holds NaT raises ValueError naming the count.
+    r"""A spacecraft whose time index holds NaT raises ValueError naming its data and the count.
 
     ON FAILURE: the code is wrong.
     """
     data = swp.examples.load_plasma().spacecraft.data
     times = pd.DatetimeIndex([data.index[0], pd.NaT, data.index[2]])
     with pytest.raises(
-        ValueError, match=r"1 of 3 timestamps missing \(NaT\); drop those rows first"
+        ValueError,
+        match=r"^Spacecraft data time index has 1 of 3 timestamps missing \(NaT\); "
+        "drop those rows first",
     ):
         spacecraft.Spacecraft(data.set_axis(times, axis=0), "PSP", "HCI")
+
+
+@pytest.mark.parametrize(
+    "name, frame, message",
+    [
+        ("PSP", "rtn", r"^Unrecognized frame: RTN$"),
+        ("ace", "GSE", r"^Unrecognized name: ACE$"),
+    ],
+    ids=["frame", "name"],
+)
+def test_an_unknown_frame_or_name_raises_naming_it(name, frame, message):
+    r"""An unsupported frame or spacecraft name is refused by name, upper-cased.
+
+    ON FAILURE: the code is wrong.
+    """
+    data = swp.examples.load_plasma().spacecraft.data
+    with pytest.raises(NotImplementedError, match=message):
+        spacecraft.Spacecraft(data, name, frame)

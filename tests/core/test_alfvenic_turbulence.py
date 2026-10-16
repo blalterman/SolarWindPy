@@ -17,6 +17,8 @@ from scipy.constants import physical_constants
 from . import test_base as base
 
 from solarwindpy.core import alfvenic_turbulence as turb
+from solarwindpy.core.spacecraft import Spacecraft
+from tests.tolerances import exact
 
 pd.set_option("mode.chained_assignment", "raise")
 
@@ -479,3 +481,224 @@ def test_species_that_is_not_a_string_raises_type_error():
     """
     with pytest.raises(TypeError, match="must be a single species"):
         _small_turbulence(("a", "p1", "p2"))
+
+
+@pytest.mark.parametrize(
+    "given, stored",
+    [("p2+a", "a+p2"), ("p2+p1+a", "a+p1+p2"), ("p1,p2+a", "p1,a+p2")],
+)
+def test_species_joined_by_plus_are_sorted_on_each_side_of_the_comma(given, stored):
+    """``+``-joined species are sorted; the order across the ``,`` is kept.
+
+    Chosen input: unsorted ``+`` lists, so a species string stored as given
+    fails. The comma separates the velocity species from the density
+    species, so the two sides never swap.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert _small_turbulence(given).species == stored
+
+
+def test_equal_indexes_log_no_mismatch_warning(caplog):
+    """v, b and rho on one index log no "unequal indices" warning.
+
+    ON FAILURE: the code is wrong.
+    """
+    with caplog.at_level(logging.WARNING):
+        _small_turbulence("p1")
+    assert "unequal indices" not in caplog.text
+
+
+def test_unequal_v_and_b_indexes_are_put_in_time_order():
+    """v and b on interleaved times give measurements on the sorted union.
+
+    Chosen input: v at 00, 02, 04 h and b at 01, 03, 05 h, so a union kept
+    in order of appearance (v's times, then b's) is out of time order.
+
+    ON FAILURE: the code is wrong.
+    """
+    t = pd.date_range("2020-01-01", periods=6, freq="h")
+    cols = pd.Index(["x", "y", "z"], name="C")
+    v = pd.DataFrame(np.ones((3, 3)), index=t[::2], columns=cols)
+    b = pd.DataFrame(np.ones((3, 3)), index=t[1::2], columns=cols)
+    rho = pd.Series(1.0, index=t)
+
+    ot = turb.AlfvenicTurbulence(v, b, rho, "p1", window="2h", min_periods=1)
+    assert ot.measurements.index.equals(t)
+    assert ot.data.index.equals(t)
+
+
+def test_min_periods_and_rolling_kwargs_reach_the_background_average():
+    """``min_periods`` and other rolling keywords change the background.
+
+    Chosen input: v = 0, 1, ..., 5 km/s along x, hourly. With
+    ``min_periods=3`` the first two rows have no background (NaN); with
+    ``center=True`` the 3 h window at row 2 holds rows 1, 2, 3 (mean 2),
+    so the fluctuation there is 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    t = pd.date_range("2020-01-01", periods=6, freq="h")
+    cols = pd.Index(["x", "y", "z"], name="C")
+    vx = np.arange(6.0)
+    v = pd.DataFrame({"x": vx, "y": 0.0, "z": 0.0}, index=t)
+    v.columns = cols
+    b = pd.DataFrame(1.0, index=t, columns=cols)
+    rho = pd.Series(1.0, index=t)
+
+    trailing = turb.AlfvenicTurbulence(v, b, rho, "p1", window="3h", min_periods=3)
+    dvx = trailing.v.loc[:, "x"].to_numpy()
+    assert np.isnan(dvx[:2]).all()
+    # Rows 2..5 trail rows i-2..i, mean i-1, so each fluctuation is 1.
+    assert dvx[2:] == exact([1.0, 1.0, 1.0, 1.0])
+    assert trailing.averaging_info == turb.AlfvenicTurbAveraging("3h", 3)
+
+    centered = turb.AlfvenicTurbulence(
+        v, b, rho, "p1", window="3h", min_periods=1, center=True
+    )
+    assert centered.v.loc[t[2], "x"] == exact(0.0)
+
+
+def test_measurements_and_fluctuations_carry_their_names():
+    """``measurements`` is named "measurements" and ``data`` "deltas".
+
+    ON FAILURE: the code is wrong.
+    """
+    ot = _small_turbulence("p1")
+    assert ot.measurements.name == "measurements"
+    assert ot.data.name == "deltas"
+
+
+def test_set_data_called_directly_replaces_the_data():
+    """``set_data`` with its defaults rebuilds the object from new inputs.
+
+    Chosen input: the same frames with v doubled, so the fluctuations
+    double.
+
+    ON FAILURE: the code is wrong.
+    """
+    ot = _small_turbulence("p1")
+    before = ot.v.copy()
+    idx = before.index
+    v = pd.DataFrame(
+        2 * np.arange(9.0).reshape(3, 3), index=idx, columns=["x", "y", "z"]
+    )
+    b = pd.DataFrame(
+        np.arange(9.0).reshape(3, 3) / 10.0, index=idx, columns=["x", "y", "z"]
+    )
+    ot.set_data(v, b, pd.Series([1.0, 2.0, 3.0], index=idx), "p1")
+    assert ot.v.to_numpy() == exact(2 * before.to_numpy(), nan_ok=True)
+
+
+# ---------------------------------------------------------------------------
+# raffaella_version: GSE input converted to RTN
+# ---------------------------------------------------------------------------
+
+#: Hand-computed solar-rotation speed subtracted from v_T, km/s. The
+#: spacecraft sits at GSE (3, 0, 4) Re, so cos(latitude) = 3/5. Its distance
+#: to the Sun is |(AU - 3 Re, 0, 4 Re)| with AU = 149 597 870 700 m (IAU 2012
+#: B2) and Re = 6378.1 km (the package's Earth radius, IAU 2015 B3):
+#: sqrt(149 578 736 400^2 + 25 512 400^2) m = 149 578 738.5757 km. Then
+#: 2.865e-6 rad/s * 149 578 738.5757 km * 0.6 = 257.1258516 km/s.
+ROTATION_SPEED_KM_S = 257.12585161166068
+
+
+def _gse_inputs():
+    """Five hourly GSE samples and a Wind spacecraft at GSE (3, 0, 4) Re.
+
+    Rows, as (v [km/s]; b [nT]) in GSE, chosen so each polarity rule shows:
+
+    0. v = (-400, 0, 0), b = (-1, 0, 0): v_R b_R > 0, polarity +1.
+    1. v = (-400, 0, 0), b = (+1, 0, 0): v_R b_R < 0, polarity -1.
+    2. v = (-100, 0, 0), b = (-1, -5, 0): v_R b_R = 100 k but
+       v_T b_T = -257.1 * 5 k, so polarity -1 only with the rotation
+       correction and the T term.
+    3. v = (-400, 0, 1000), b = (-1, 0, -1): the N term (-1000 k) would
+       flip the sign; it is excluded, so polarity +1.
+    4. v = (-400, 0, 0), b = (0, 0, 0), spacecraft z unknown (NaN).
+
+    k > 0 is the Alfven-unit scale of 1 nT at rho = 1.
+    """
+    t = pd.date_range("2020-01-01", periods=5, freq="h")
+    cols = pd.Index(["x", "y", "z"], name="C")
+    v = pd.DataFrame(
+        [
+            [-400.0, 0.0, 0.0],
+            [-400.0, 0.0, 0.0],
+            [-100.0, 0.0, 0.0],
+            [-400.0, 0.0, 1000.0],
+            [-400.0, 0.0, 0.0],
+        ],
+        index=t,
+        columns=cols,
+    )
+    b = pd.DataFrame(
+        [
+            [-1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [-1.0, -5.0, 0.0],
+            [-1.0, 0.0, -1.0],
+            [0.0, 0.0, 0.0],
+        ],
+        index=t,
+        columns=cols,
+    )
+    rho = pd.Series(1.0, index=t)
+    pos = pd.DataFrame({"x": 3.0, "y": 0.0, "z": 4.0}, index=t)
+    pos.iloc[4, 2] = np.nan
+    pos.columns = pd.MultiIndex.from_product(
+        [["pos"], ["x", "y", "z"]], names=["M", "C"]
+    )
+    sc = Spacecraft(pos, "wind", "gse")
+    return v, b, rho, sc
+
+
+def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
+    """GSE input becomes RTN, v_T loses the solar-rotation speed, b is rectified.
+
+    Expected values come from the documented transformation applied by hand
+    to ``_gse_inputs``: (R, T, N) = (-X, -Y, Z); v_T minus
+    ``ROTATION_SPEED_KM_S``, NaN where the spacecraft position is unknown;
+    polarity = sign(v_R b_R + v_T b_T) = +1, -1, -1, +1 for rows 0-3; and
+    ``bfield`` is the field fluctuation times that polarity. The inputs are
+    left unchanged.
+
+    ON FAILURE: the code is wrong, unless the author rejects the documented
+    GSE-to-RTN steps in the ``AlfvenicTurbulence`` docstring.
+    """
+    v, b, rho, sc = _gse_inputs()
+    v_before, b_before = v.copy(), b.copy()
+    kwargs = dict(window="10h", min_periods=1, center=True)
+
+    ot = turb.AlfvenicTurbulence(
+        v, b, rho, "p1", raffaella_version=True, sc_vector=sc, **kwargs
+    )
+    plain = turb.AlfvenicTurbulence(v, b, rho, "p1", **kwargs)
+
+    mv = ot.measurements.loc[:, "v"]
+    assert mv.loc[:, "x"].to_numpy() == exact([400.0, 400.0, 100.0, 400.0, 400.0])
+    assert mv.loc[:, "z"].to_numpy() == exact([0.0, 0.0, 0.0, 1000.0, 0.0])
+    vt = mv.loc[:, "y"].to_numpy()
+    assert vt[:4] == exact([-ROTATION_SPEED_KM_S] * 4)
+    assert np.isnan(vt[4])
+
+    flip = pd.Series({"x": -1.0, "y": -1.0, "z": 1.0})
+    expected_b = plain.measurements.loc[:, "b"].multiply(flip, axis=1)
+    assert ot.measurements.loc[:, "b"].to_numpy() == exact(expected_b.to_numpy())
+
+    polarity = np.array([1.0, -1.0, -1.0, 1.0])
+    raw_db = ot.data.loc[:, "b"].to_numpy()[:4]
+    assert ot.bfield.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+
+    pdt.assert_frame_equal(v, v_before)
+    pdt.assert_frame_equal(b, b_before)
+
+
+def test_raffaella_version_without_a_spacecraft_raises_value_error():
+    """The GSE-to-RTN aid needs the spacecraft position, and says so.
+
+    ON FAILURE: the code is wrong.
+    """
+    v, b, rho, _ = _gse_inputs()
+    with pytest.raises(ValueError, match="SC-Sun distance required"):
+        turb.AlfvenicTurbulence(v, b, rho, "p1", raffaella_version=True)

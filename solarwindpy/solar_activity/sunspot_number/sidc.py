@@ -23,9 +23,6 @@ from ..base import (
     _Loader_Dtypes_Columns,
 )
 
-pd.set_option("mode.chained_assignment", "raise")
-
-
 _d_dtypes_columns = _Loader_Dtypes_Columns(
     {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
     ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
@@ -428,21 +425,6 @@ class SIDC(ActivityIndicator):
             return self.data.loc[:, "nssn"]
         except KeyError:
             return self.run_normalization()
-
-    def _run_normalization(self, indicator, norm_fcn):
-        r"""Apply ``norm_fcn`` to ``indicator`` separately within each cycle."""
-        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
-        joint = pd.concat(
-            [indicator, cut], axis=1, keys=["indicator", "cycle"]
-        ).sort_index(axis=1)
-        grouped = joint.groupby("cycle")
-
-        normed = {}
-        for k, g in grouped:
-            g = g.loc[:, "indicator"]
-            normed[k] = norm_fcn(g)
-        normed = pd.concat(normed.values(), axis=0).sort_index()
-        return normed
 
     def run_normalization(self, norm_by="max"):
         # Note: "max" and "feature-scale" are the same if the min(SSN) = 0.
