@@ -26,6 +26,7 @@ from abc import abstractmethod
 from . import base
 
 # TeX spacing commands: \, \: \; \! "\ " \quad \qquad
+# \! (negative space) is mapped like the others: a path only needs them removed.
 _TEX_SPACING = re.compile(r"\\(?:[,:;! ]|qquad|quad)")
 
 
