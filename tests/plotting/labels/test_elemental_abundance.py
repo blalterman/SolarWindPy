@@ -4,7 +4,12 @@ import logging
 import warnings
 from pathlib import Path
 
-from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
+import pytest
+
+from solarwindpy.plotting.labels.elemental_abundance import (
+    ElementalAbundance,
+    known_species,
+)
 
 
 class TestElementalAbundanceInitialization:
@@ -385,3 +390,25 @@ def test_module_imports():
 
     assert isinstance(ElementalAbundance, type), "ElementalAbundance should be a class"
     assert isinstance(known_species, tuple), "known_species should be a tuple"
+
+
+@pytest.mark.parametrize("species", known_species)
+def test_every_species_sets_its_element_in_mathrm_exactly_once(species):
+    r"""Every known species renders with ``\mathrm{<element>}`` exactly once.
+
+    Species are title-cased, then looked up in the module's species table;
+    a hit is used as-is (it already carries ``\mathrm``), a miss is wrapped in
+    ``\mathrm`` here. The element is the title-cased species with any leading
+    mass number removed (``3He`` -> ``He``).
+
+    ON FAILURE: the code is wrong, or a species table entry lost or doubled
+    its ``\mathrm``.
+    """
+    title = species.title()
+    element = title.lstrip("0123456789")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        numerator = ElementalAbundance(species, "H", photospheric=False).tex
+    numerator = numerator.rsplit("/", 1)[0]
+    assert numerator.count(r"\mathrm") == 1, numerator
+    assert rf"\mathrm{{{element}}}" in numerator, numerator
