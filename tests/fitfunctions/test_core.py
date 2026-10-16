@@ -1,3 +1,4 @@
+import re
 import warnings
 
 import numpy as np
@@ -911,18 +912,18 @@ def test_a_covariance_matrix_as_weights_is_refused():
         LinearFit(x, 2.0 * x + 1.0, weights=cov)
 
 
-def test_weights_in_the_shape_of_2d_xobs_are_accepted():
-    """2 x 3 x, y and weights pass the shape check and fit y = 2x + 1.
+@pytest.mark.parametrize(
+    "x", [np.arange(6.0).reshape(2, 3), np.array(3.0)], ids=["2-d", "0-d"]
+)
+def test_xobs_that_is_not_1d_is_refused_with_its_shape(x):
+    """A fit refuses x that is not 1-d with a ValueError naming the shape.
 
-    The shape rule is ``weights.shape == xobs.shape``, whatever the
-    dimension; the used observations are the flattened finite samples.
+    The author decided that 2-d x is refused: every model here is a function
+    of one variable. y and weights match x's shape, so only the 1-d rule can
+    refuse the input.
 
     ON FAILURE: the code is wrong.
     """
-    x = np.arange(6.0).reshape(2, 3)
-    w = np.full((2, 3), 0.5)
-    lf = LinearFit(x, 2.0 * x + 1.0, weights=w)
-    lf.make_fit()
-
-    assert lf.observations.used.w == exact(w.ravel())
-    assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
+    shape = re.escape(str(x.shape))
+    with pytest.raises(ValueError, match=rf"xobs must be 1-d.*{shape}"):
+        LinearFit(x, 2.0 * x + 1.0, weights=np.full(x.shape, 0.5))
