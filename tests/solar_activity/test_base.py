@@ -455,13 +455,66 @@ def test_cycle_intervals_run_min_to_max_to_next_min(extrema):
         assert got.loc[number, "Cycle"] == iv(t0, t2)
 
 
-def test_a_cycle_without_a_maximum_rises_until_today():
-    """A cycle whose maximum is not yet known is rising until today.
+@pytest.mark.parametrize(
+    "max3",
+    [pd.NaT, today() + pd.Timedelta(days=100)],
+    ids=["no-maximum-recorded", "maximum-after-today"],
+)
+def test_a_cycle_without_a_maximum_rises_until_today_and_has_no_fall(max3):
+    """A cycle with no maximum yet rises until today and has no falling edge.
+
+    Per the author, such a cycle has no Fall phase: ``Fall`` is missing
+    (NaT), and the cycle runs from its minimum to today. A maximum recorded
+    after today has not happened yet either.
 
     ON FAILURE: the code is wrong.
     """
-    got = Extrema(extrema_table(max3=pd.NaT)).cycle_intervals
+    got = Extrema(extrema_table(max3=max3)).cycle_intervals
     assert got.loc[3, "Rise"] == iv("2012-01-01", today())
+    assert pd.isna(got.loc[3, "Fall"])
+    assert got.loc[3, "Cycle"] == iv("2012-01-01", today())
+
+
+def test_cut_by_edges_skips_the_missing_fall_of_a_cycle_without_a_maximum():
+    """Cutting by edges works when the last cycle has no falling edge.
+
+    Chosen input: 2013-06-01 lies on cycle 3's rise, which runs to today.
+
+    ON FAILURE: the code is wrong.
+    """
+    extrema = Extrema(extrema_table(max3=pd.NaT))
+    cut = extrema.cut_spec_by_interval(EPOCHS, kind="Edges")
+    assert cut.iloc[1] == iv("2003-01-01", "2006-01-01")
+    assert cut.iloc[3] == iv("2012-01-01", today())
+
+
+def test_extrema_keyword_arguments_reach_load_or_set_data():
+    """Keyword arguments to the constructor are passed to ``load_or_set_data``.
+
+    ON FAILURE: the code is wrong.
+    """
+    table = extrema_table()
+    assert Extrema(table=table).data is table
+
+
+def test_loggers_sit_under_the_solarwindpy_logger():
+    """Each object's logger is a child of ``solarwindpy``, named for its class.
+
+    Users configure the package's logging through ``logging.getLogger("solarwindpy")``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert Catalog("daily").logger.name == "solarwindpy.solar_activity.base.Catalog"
+    assert Extrema(extrema_table()).logger.name.startswith("solarwindpy.")
+
+
+def test_loader_logger_sits_under_the_solarwindpy_logger(cache_root):
+    """A loader's logger is a child of ``solarwindpy``, named for its class.
+
+    ON FAILURE: the code is wrong.
+    """
+    loader = CacheLoader("daily", "unused", cache_root)
+    assert loader.logger.name == "solarwindpy.solar_activity.base.CacheLoader"
 
 
 # ---------------------------------------------------------------------------
@@ -481,6 +534,7 @@ def test_cut_by_cycle_assigns_each_epoch_to_its_cycle(extrema):
         iv("2006-01-01", "2012-01-01"),
         iv("2012-01-01", today()),
     ]
+    assert cut.name == "Cycle_Interval"
 
 
 def test_cut_by_rise_leaves_falling_epochs_unassigned(extrema):
@@ -613,6 +667,9 @@ def test_cut_about_bands_labels_epochs_by_cycle_and_extremum(extrema):
     assert cut.iloc[0] == iv("1999-09-23", "2000-04-10")
     assert list(mapped.iloc[:2]) == ["1-Min", "1-Max"]
     assert pd.isna(mapped.iloc[2])
+    assert cut.name == "spec_by_extrema_band"
+    assert cut.index.equals(BAND_EPOCHS)
+    assert mapped.index.equals(BAND_EPOCHS)
 
 
 def test_cut_about_bands_honours_kind_and_cycle_selection(extrema):
