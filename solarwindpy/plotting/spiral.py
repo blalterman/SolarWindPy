@@ -7,6 +7,7 @@ __all__ = [
 ]
 
 import logging
+import sys
 
 import numpy as np
 import pandas as pd
@@ -321,15 +322,27 @@ class SpiralMesh(object):
 
         return new_cells, nbins_to_replace
 
-    def generate_mesh(self):
+    def generate_mesh(self, progress=True):
         r"""Split cells repeatedly until none holds more than ``min_per_bin`` points.
 
         Only finite points inside the initial grid are used. The result is
         stored in ``mesh``.
+
+        Parameters
+        ----------
+        progress : bool
+            If True, write a progress table to ``sys.stderr`` as the mesh is
+            built: a header, one line per step as it finishes (step number,
+            number of cells split, elapsed time), then a summary. If False,
+            write nothing.
         """
-        logger = logging.getLogger("__main__")
+
+        def report(message):
+            if progress:
+                print(message, file=sys.stderr, flush=True)
+
         start = datetime.now()
-        logger.warning(f"Generating {self.__class__.__name__} at {start}")
+        report(f"Generating {self.__class__.__name__} at {start}")
 
         x = self.data.x.values
         y = self.data.y.values
@@ -361,7 +374,7 @@ class SpiralMesh(object):
         list_of_bins = [initial_bins]
         active_bins = initial_bins
 
-        logger.warning("""
+        report("""
  Step      N      Elapsed Time
 ======  =======  ==============""")
         step_start = datetime.now()
@@ -371,7 +384,7 @@ class SpiralMesh(object):
                 active_bins, x, y, min_per_bin
             )
             now = datetime.now()
-            logger.warning(f"{step:>6}  {nbins_to_replace:>7}  {(now - step_start)}")
+            report(f"{step:>6}  {nbins_to_replace:>7}  {(now - step_start)}")
             list_of_bins.append(active_bins)
             step += 1
             step_start = now
@@ -382,10 +395,10 @@ class SpiralMesh(object):
         final_bins = final_bins[valid_bins]
 
         stop = datetime.now()
-        logger.warning(f"\nCompleted {self.__class__.__name__} at {stop}")
-        logger.warning(f"Elasped time {stop - start}")
-        logger.warning(f"Split bin threshold {min_per_bin}")
-        logger.warning(
+        report(f"\nCompleted {self.__class__.__name__} at {stop}")
+        report(f"Elasped time {stop - start}")
+        report(f"Split bin threshold {min_per_bin}")
+        report(
             f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size / final_bins.shape[0]:.3f} spectra per bin)\n"
         )
 
@@ -436,9 +449,12 @@ They will be replaced by NaNs and excluded from the aggregation.
         self._bin_id = bin_id
         return bin_id
 
-    def place_spectra_in_mesh(self):
-        r"""Generate the mesh, then assign each point to a cell; return ``bin_id``."""
-        self.generate_mesh()
+    def place_spectra_in_mesh(self, progress=True):
+        r"""Generate the mesh, then assign each point to a cell; return ``bin_id``.
+
+        ``progress`` is passed to ``generate_mesh``.
+        """
+        self.generate_mesh(progress=progress)
         bin_id = self.calculate_bin_number()
         return bin_id
 
@@ -629,10 +645,11 @@ data : {z.size}
         self._initial_bins = bins
         return bins
 
-    def initialize_mesh(self, **kwargs):
+    def initialize_mesh(self, progress=True, **kwargs):
         r"""Build the ``SpiralMesh`` and assign every point to a cell.
 
-        ``kwargs`` are passed to ``SpiralMesh``, e.g. ``min_per_bin``.
+        ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
+        passed to ``SpiralMesh``, e.g. ``min_per_bin``.
         """
         x = self.data.loc[:, "x"]
         y = self.data.loc[:, "y"]
@@ -645,7 +662,7 @@ data : {z.size}
         # Makes debugging easier.
         self._mesh = mesh
 
-        mesh.place_spectra_in_mesh()
+        mesh.place_spectra_in_mesh(progress=progress)
         mesh.build_cat()
 
     def set_clim(self, lower=None, upper=None):

@@ -15,6 +15,7 @@ not enough. What is asserted about a plot is the data handed to matplotlib
 """
 
 import logging
+import re
 import warnings
 
 import numpy as np
@@ -1085,3 +1086,140 @@ def test_integer_edges_are_raised_above_the_largest_sample():
     for axis in ("x", "y"):
         if not splot.initial_bins[axis][-1] > 10.0:
             raise TopEdgeNotAboveData(f"{axis}: {splot.initial_bins[axis]}")
+
+
+# ---------------------------------------------------------------------------
+# Progress output of mesh building.
+# ---------------------------------------------------------------------------
+
+HEADER = [
+    "",
+    " Step      N      Elapsed Time",
+    "======  =======  ==============",
+]
+ELAPSED = re.compile(r"\d+:\d{2}:\d{2}(\.\d{6})?")  # str(datetime.timedelta)
+
+
+def _mesh_on_rows(min_per_bin, rows=ROWS):
+    x = pd.Series([r[0] for r in rows])
+    y = pd.Series([r[1] for r in rows])
+    return SpiralMesh(x, y, np.array(XEDGES), np.array(YEDGES), min_per_bin=min_per_bin)
+
+
+def _step_rows(lines):
+    """(step, number split) of each table row, checking the column layout.
+
+    Columns: step right-aligned in 6, two spaces, number split right-aligned
+    in 7, two spaces, the step's elapsed time.
+    """
+    start = lines.index(HEADER[-1]) + 1
+    stop = lines.index("", start)
+    rows = []
+    for line in lines[start:stop]:
+        assert line[6:8] == "  " and line[15:17] == "  ", line
+        assert ELAPSED.fullmatch(line[17:]), line
+        rows.append((int(line[:6]), int(line[8:15])))
+    return rows
+
+
+def _own_or_warning_records(caplog):
+    """Records at WARNING or above, or from ``__main__`` or SolarWindPy, at any level.
+
+    Numba logs DEBUG records of its own whenever it compiles a function, which
+    depends on its cache, so those are left out.
+    """
+    return [
+        r
+        for r in caplog.records
+        if r.levelno >= logging.WARNING
+        or r.name == "__main__"
+        or r.name.startswith("solarwindpy")
+    ]
+
+
+class TestProgressOutput:
+    """Mesh building reports its progress on stderr unless told not to."""
+
+    def test_progress_table_is_written_to_stderr(self, capsys):
+        """By default ``generate_mesh`` writes the header, steps and summary to stderr.
+
+        Hand-worked for min_per_bin=1 (see ``MESH_MIN1``): step 0 splits
+        [2,6)x[2,4), step 1 splits [2,4)x[2,3), step 2 splits nothing. The
+        result is 12 cells for the 6 samples, 6 / 12 = 0.500 per cell.
+        Nothing goes to stdout.
+
+        ON FAILURE: the code is wrong.
+        """
+        _mesh_on_rows(1).generate_mesh()
+        out, err = capsys.readouterr()
+        assert out == ""
+        lines = err.split("\n")
+        assert lines[0].startswith("Generating SpiralMesh at ")
+        assert lines[1:4] == HEADER
+        assert _step_rows(lines) == [(0, 1), (1, 1), (2, 0)]
+        after_steps = lines.index("", 4) + 1
+        summary = lines[after_steps:]
+        assert summary[0].startswith("Completed SpiralMesh at ")
+        assert re.fullmatch(r"\S+ time " + ELAPSED.pattern, summary[1])
+        assert summary[2:] == [
+            "Split bin threshold 1",
+            "Generated 12 bins for 6 spectra (~0.500 spectra per bin)",
+            "",
+            "",
+        ]
+
+    def test_a_mesh_needing_no_split_reports_no_steps(self, capsys):
+        """When no cell is over-full, the table has a header and no step rows.
+
+        At min_per_bin=3 the fullest initial cell holds 3 samples.
+
+        ON FAILURE: the code is wrong.
+        """
+        _mesh_on_rows(3).generate_mesh()
+        lines = capsys.readouterr().err.split("\n")
+        assert _step_rows(lines) == []
+        assert "Generated 6 bins for 6 spectra (~1.000 spectra per bin)" in lines
+
+    def test_progress_false_writes_nothing_and_logs_nothing(self, capfd, caplog):
+        """``progress=False`` writes nothing to either stream and logs nothing.
+
+        Logging is re-enabled here, so a WARNING record on any logger would
+        reach ``caplog`` and Python's last-resort handler on stderr.
+
+        ON FAILURE: the code is wrong.
+        """
+        logging.disable(logging.NOTSET)
+        with caplog.at_level(logging.DEBUG):
+            _mesh_on_rows(1).generate_mesh(progress=False)
+        assert capfd.readouterr() == ("", "")
+        assert _own_or_warning_records(caplog) == []
+
+    def test_progress_is_not_logged(self, capsys, caplog):
+        """With progress on, the table goes to stderr only, not to a logger.
+
+        ON FAILURE: the code is wrong.
+        """
+        logging.disable(logging.NOTSET)
+        with caplog.at_level(logging.DEBUG):
+            _mesh_on_rows(1).generate_mesh()
+        assert "Elapsed Time" in capsys.readouterr().err
+        assert _own_or_warning_records(caplog) == []
+
+    @pytest.mark.parametrize("progress", [True, False])
+    def test_initialize_mesh_passes_progress_through(self, capsys, progress):
+        """``SpiralPlot2D.initialize_mesh(progress=...)`` controls the table.
+
+        The default is on.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = SpiralPlot2D(X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
+        if progress:
+            splot.initialize_mesh(min_per_bin=1)
+        else:
+            splot.initialize_mesh(min_per_bin=1, progress=False)
+        err = capsys.readouterr().err
+        assert ("Elapsed Time" in err) is progress
+        assert set(_cells(splot.mesh.mesh)) == _refine(
+            splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
+        )
