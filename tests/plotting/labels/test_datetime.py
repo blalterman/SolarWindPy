@@ -30,16 +30,24 @@ def test_epoch_label():
 
 
 def test_frequency_label():
-    """Validate ``Frequency`` label output."""
+    r"""``Frequency`` renders ``^{-1}`` in text and path and ``\left[ \right]`` in both forms.
+
+    Author decisions (2026-10-16): Frequency renders ``^{-1}`` (text and path)
+    and uses ``\left[ ... \right]`` in ``str`` and ``with_units`` alike. The
+    hour's offset name is ``h`` or ``H`` depending on the pandas version.
+
+    ON FAILURE: the code is wrong.
+    """
     freq = datetime_labels.Frequency("1h")
     assert str(freq.path) in (
-        "frequency_of_(1 \\; \\mathrm{h})^-1",
-        "frequency_of_(1 \\; \\mathrm{H})^-1",
+        "frequency_of_(1 \\; \\mathrm{h})^{-1}",
+        "frequency_of_(1 \\; \\mathrm{H})^{-1}",
     )
     assert str(freq) in (
-        "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{h})^-1]$",
-        "$\\mathrm{Frequency} \\; [(1 \\; \\mathrm{H})^-1]$",
+        "$\\mathrm{Frequency} \\; \\left[(1 \\; \\mathrm{h})^{-1}\\right]$",
+        "$\\mathrm{Frequency} \\; \\left[(1 \\; \\mathrm{H})^{-1}\\right]$",
     )
+    assert freq.with_units == str(freq)
 
 
 def test_january1st_label():
@@ -303,12 +311,12 @@ class TestFrequency:
         assert freq.tex == r"\mathrm{Frequency}"
 
     def test_frequency_units_property(self):
-        """Test units property."""
-        freq = datetime_labels.Frequency("1h")
-        units = freq.units
-        assert units.endswith("^-1")  # Fixed - uses ^-1 not ^{-1}
-        assert "(" in units
-        assert ")" in units
+        """``units`` is the interval's units in parentheses to the power ``{-1}``.
+
+        ON FAILURE: the code is wrong.
+        """
+        freq = datetime_labels.Frequency("1D")
+        assert freq.units == "(1 \\; \\mathrm{D})^{-1}"
 
     def test_frequency_path_generation(self):
         """Test path generation."""
@@ -317,20 +325,23 @@ class TestFrequency:
         assert "frequency_of_" in path_str
 
     def test_frequency_with_invalid_offset(self):
-        """Test Frequency with invalid offset."""
+        """An interval pandas cannot parse has unknown units and saves as ``UNK``.
+
+        ON FAILURE: the code is wrong.
+        """
         freq = datetime_labels.Frequency("invalid")
-        path_str = str(freq.path)
-        assert "UNK" in path_str or "???" in path_str
+        assert freq.units == "(???)^{-1}"
+        assert freq.path == Path("frequency_of_UNK")
 
     def test_frequency_string_representation(self):
-        """Test string representation."""
+        r"""``str`` brackets the units with ``\left[ \right]``.
+
+        ON FAILURE: the code is wrong.
+        """
         freq = datetime_labels.Frequency("1D")
-        str_repr = str(freq)
-        assert str_repr.startswith("$")
-        assert str_repr.endswith("$")
-        assert "Frequency" in str_repr
-        assert "[" in str_repr
-        assert "]" in str_repr
+        assert str(freq) == (
+            "$\\mathrm{Frequency} \\; \\left[(1 \\; \\mathrm{D})^{-1}\\right]$"
+        )
 
     def test_frequency_set_other(self):
         """Test set_other method."""
@@ -445,14 +456,17 @@ class TestDateTimeIntegration:
         assert len(paths) == len(set(paths))  # All unique
 
     def test_scientific_accuracy(self):
-        """Test that labels represent scientifically accurate concepts."""
+        """Interval is Delta t, frequency is the interval to the power -1, epochs read "of".
+
+        ON FAILURE: the code is wrong.
+        """
         # Test time delta representation
         td = datetime_labels.Timedelta("1h")
-        assert r"\Delta t" in td.tex
+        assert td.tex == r"\Delta t"
 
-        # Test frequency units
-        freq = datetime_labels.Frequency("1h")
-        assert "^-1" in freq.units
+        # Test frequency units: the whole exponent is braced, "^{-1}".
+        freq = datetime_labels.Frequency("1D")
+        assert freq.units == r"(1 \; \mathrm{D})^{-1}"
 
         # Test epoch relationships
         epoch = datetime_labels.Epoch("Hour", "Day")
