@@ -339,7 +339,7 @@ HINGE_IMPOSSIBLE = [
         HingeAtPoint,
         [0.0, 0, 1, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_xh": 2.5, "guess_yh": 2.0},
+        {"guess_xh": 2.5},
         id="HingeAtPoint",
     ),
 ]
@@ -676,7 +676,7 @@ NORMAL = [
         HingeAtPoint,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_xh": 2.5, "guess_yh": 9.0},
+        {"guess_xh": 2.5},
         [2.5, 2.0, 1.0, -1.0],
         id="HingeAtPoint",
     ),
@@ -700,3 +700,271 @@ def test_insufficient_data_still_raises_from_p0():
     """
     with pytest.raises(InsufficientDataError, match="insufficient data"):
         HeavySide(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0
+
+
+def test_heavyside_uses_both_level_guesses_when_given():
+    """With ``guess_y0`` and ``guess_y1``, ``p0`` returns them as the levels.
+
+    ``x0`` is the midpoint of the x range, 2; the levels are the chosen 7, 9.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1, 2, 3, 4])
+    fit = HeavySide(x, np.array([5.0, 5, 5, 2, 2]), guess_y0=7.0, guess_y1=9.0)
+    assert fit.p0 == exact([2.0, 7.0, 9.0])
+
+
+# The hinge data below: x = 0..5 and y = [0, 1, 2, 2, 1, 0], two lines of slope
+# +1 through the origin and -1 through (5, 0).
+HX = np.array([0.0, 1, 2, 3, 4, 5])
+HY = np.array([0.0, 1, 2, 2, 1, 0])
+
+
+@pytest.mark.parametrize(
+    "cls, kwarg", [(HingeMin, "guess_h"), (HingeAtPoint, "guess_xh")]
+)
+@pytest.mark.parametrize(
+    "hinge", [-1.0, 0.5, 4.5], ids=["none-below", "one-below", "one-above"]
+)
+def test_hinge_side_with_fewer_than_two_points_gives_the_reference_start(
+    cls, kwarg, hinge, caplog
+):
+    """A side with 0 or 1 points has no slope, so ``p0`` is the reference start.
+
+    The author decided that such a side gives NaN and the fit starts from the
+    reference start: a bad guess is not unfittable data. The old fallbacks (a
+    slope across the x range, a zero slope, ``x2 = h``) gave a start at the
+    model's singularity ``h = x2`` or ``m2 = 0``.
+
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge.
+    """
+    fit = cls(HX, HY, **{kwarg: hinge})
+    with caplog.at_level(logging.WARNING):
+        start = fit.p0
+    assert start == exact(HINGE_START[cls]), start
+    assert NO_ESTIMATE in caplog.text, caplog.text
+
+
+# A side of exactly two points has a slope. Hand cases on (HX, HY):
+#  hinge 1.5: below x = 0, 1 (slope 1, x-intercept 0); above x = 2..5, slopes
+#   [0, -1, -1], median -1, x-intercepts x - y/m = [4, 5, 5, 5], median 5.
+#  hinge 3.5: below x = 0..3, slopes [1, 1, 0], median 1, x-intercepts
+#   [0, 0, 0, 1], median 0; above x = 4, 5 (slope -1, x-intercept 5).
+#  HingeAtPoint's yh is y at the x nearest the hinge, the first of a tie:
+#   x = 1 (y = 1) for 1.5, x = 3 (y = 2) for 3.5.
+#  HingeSaturation at (3.5, 2): the rising least-squares slope through
+#   (0, 0), (1, 1), (2, 2), (3, 2) is 3.5 / 5 = 0.7, so x1 = 3.5 - 2 / 0.7.
+TWO_POINT_SIDES = [
+    _case(HingeMin, HX, HY, {"guess_h": 1.5}, [1.0, 0.0, 5.0, 1.5], id="Min-below"),
+    _case(HingeMin, HX, HY, {"guess_h": 3.5}, [1.0, 0.0, 5.0, 3.5], id="Min-above"),
+    _case(
+        HingeAtPoint,
+        HX,
+        HY,
+        {"guess_xh": 1.5},
+        [1.5, 1.0, 1.0, -1.0],
+        id="AtPoint-below",
+    ),
+    _case(
+        HingeAtPoint,
+        HX,
+        HY,
+        {"guess_xh": 3.5},
+        [3.5, 2.0, 1.0, -1.0],
+        id="AtPoint-above",
+    ),
+    _case(
+        HingeSaturation,
+        HX,
+        HY,
+        {"guess_xh": 3.5, "guess_yh": 2.0},
+        [3.5, 2.0, 3.5 - 2.0 / 0.7, -1.0],
+        id="Saturation-plateau",
+    ),
+]
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs, expected", TWO_POINT_SIDES)
+def test_hinge_side_with_exactly_two_points_gives_an_estimate(
+    cls, x, y, kwargs, expected
+):
+    """Two points on a side are enough for its slope: ``p0`` is the estimate.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert cls(x, y, **kwargs).p0 == exact(expected)
+
+
+# A point exactly at the hinge, off both lines: x = 0..6 and
+# y = [0, 1, 5, 4, 4, 6, 8], hinge at 2. HingeMin, HingeAtPoint and
+# HingeSaturation put x = 2 on the upper side (x >= h), TwoLine and Saturation
+# on the lower side (x <= xs), as their class Notes state. Hand cases:
+#  upper x >= 2: slopes [-1, 0, 2, 2], median 1, x-intercepts x - y = [-3, -1,
+#   0, -1, -2], median -1. lower x < 2: slope 1, x-intercept 0.
+#  lower x <= 2: slopes [1, 4], median 2.5, x-intercepts x - y/2.5 = [0, 0.6,
+#   0], median 0. upper x > 2: slopes [0, 2, 2], median 2, x-intercepts
+#   x - y/2 = [1, 2, 2, 2], median 2.
+#  Saturation: s = median(2.5 (2 - 0), 2 (2 - 2)) = 2.5 and
+#   theta = arctan((2.5 - 2) / (1 + 2.5 * 2)) = arctan(1/12).
+#  HingeAtPoint's yh is y at x = 2, 5; HingeSaturation's x1 = 2 - 5 / 1.
+AX = np.array([0.0, 1, 2, 3, 4, 5, 6])
+AY = np.array([0.0, 1, 5, 4, 4, 6, 8])
+AT_THE_HINGE = [
+    _case(HingeMin, AX, AY, {"guess_h": 2.0}, [1.0, 0.0, -1.0, 2.0], id="Min"),
+    _case(HingeAtPoint, AX, AY, {"guess_xh": 2.0}, [2.0, 5.0, 1.0, 1.0], id="AtPoint"),
+    _case(
+        HingeSaturation,
+        AX,
+        AY,
+        {"guess_xh": 2.0, "guess_yh": 5.0},
+        [2.0, 5.0, -3.0, 1.0],
+        id="HingeSaturation",
+    ),
+    _case(TwoLine, AX, AY, {"guess_xs": 2.0}, [0.0, 2.0, 2.5, 2.0], id="TwoLine"),
+    _case(
+        Saturation,
+        AX,
+        AY,
+        {"guess_xs": 2.0},
+        [0.0, 2.0, 2.5, np.arctan(1.0 / 12.0)],
+        id="Saturation",
+    ),
+]
+
+
+@pytest.mark.parametrize("cls, x, y, kwargs, expected", AT_THE_HINGE)
+def test_a_point_at_the_hinge_belongs_to_the_documented_side(
+    cls, x, y, kwargs, expected
+):
+    """A point exactly at the hinge enters the side the class Notes name.
+
+    ON FAILURE: the code is wrong, unless the author moved the boundary;
+    then update the class Notes and these cases.
+    """
+    assert cls(x, y, **kwargs).p0 == exact(expected)
+
+
+@pytest.mark.parametrize(
+    "cls, kwargs",
+    [
+        (HingeMin, {"guess_h": 2.5}),
+        (HingeAtPoint, {"guess_xh": 2.5}),
+        (HingeSaturation, {"guess_xh": 2.5, "guess_yh": 2.0}),
+    ],
+)
+def test_repeated_point_on_the_upper_side_gives_no_estimate(cls, kwargs):
+    """A repeated (x, y) on the upper side makes its slope undefined.
+
+    Upper side x = [3, 3, 4, 5], y = [2, 2, 1, 0]: the repeated point has no
+    slope, and the class Notes make the upper slope undefined on repeated x
+    rather than skipping it (which would give -1), so ``p0`` is the
+    reference start.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1, 2, 3, 3, 4, 5])
+    y = np.array([0.0, 1, 2, 2, 2, 1, 0])
+    assert cls(x, y, **kwargs).p0 == exact(HINGE_START[cls])
+
+
+def test_a_repeated_point_on_twoline_lower_side_is_skipped():
+    """TwoLine skips the slope of a repeated point, so the lower slope is 1.
+
+    Lower side x = [0, 0, 1], y = [0, 0, 1]: the repeated point has no slope
+    and the other is 1, x-intercept 0. Upper side x = [2, 3, 4], y = [3, 2, 1]:
+    slope -1, x-intercept 5.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 0, 1, 2, 3, 4])
+    y = np.array([0.0, 0, 1, 3, 2, 1])
+    assert TwoLine(x, y, guess_xs=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
+
+
+def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
+    """Slopes -inf and +inf at the middle make TwoLine's lower slope undefined.
+
+    Lower side x = [1, 1, 1], y = [1, 0, 1]: a step down then up. Their
+    median is undefined, and ``p0`` reports it by check, not by numpy's
+    invalid-value warning (an error here).
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 1, 1, 2, 3, 4])
+    y = np.array([1.0, 0, 1, 3, 2, 1])
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert TwoLine(x, y, guess_xs=1.5).p0 == exact(HINGE_START[TwoLine])
+
+
+@pytest.mark.parametrize(
+    "y, expected",
+    [
+        # m1 = 2, m2 = -2: x1 = 0, x2 = 5, s = 5, theta = arctan(4 / (1 - 4)).
+        ([0.0, 2, 4, 4, 2, 0], [0.0, 2.5, 5.0, np.arctan(-4.0 / 3.0)]),
+        # m1 = 1, m2 = -1 are perpendicular: theta = +pi/2, the sign of m1 - m2.
+        ([0.0, 1, 2, 2, 1, 0], [0.0, 2.5, 2.5, np.pi / 2]),
+        # m1 = -1, m2 = 1: x1 = x2 = 2.5, s = 0, theta = -pi/2.
+        ([2.5, 1.5, 0.5, 0.5, 1.5, 2.5], [2.5, 2.5, 0.0, -np.pi / 2]),
+    ],
+    ids=["general", "perpendicular+", "perpendicular-"],
+)
+def test_saturation_estimates_the_angle_between_the_lines(y, expected):
+    """Saturation's ``theta`` is arctan((m1 - m2) / (1 + m1 m2)), or +-pi/2.
+
+    For perpendicular lines the denominator is zero, and the class checks
+    for it rather than dividing (numpy's divide warning is an error here).
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        p0 = Saturation(HX, np.array(y), guess_xs=2.5).p0
+    assert p0 == exact(expected)
+
+
+@pytest.mark.parametrize(
+    "y, kwargs, expected",
+    [
+        # One rising point (x = 0): x1 is the data minimum, 0. Plateau x = 1..5,
+        # slopes [1, 0, -1, -1], median -0.5.
+        (HY, {"guess_xh": 0.5, "guess_yh": 1.0}, [0.5, 1.0, 0.0, -0.5]),
+        # Flat rising region: x1 is the data minimum, 0. Plateau slope 1.
+        (
+            [2.0, 2, 2, 3, 4, 5],
+            {"guess_xh": 2.5, "guess_yh": 2.0},
+            [2.5, 2.0, 0.0, 1.0],
+        ),
+        # One plateau point (x = 5): m2 is 0. Rising least-squares slope
+        # through x = 0..4, y = [0, 1, 2, 2, 1] is 3 / 10, so x1 = 4.5 - 1 / 0.3.
+        (HY, {"guess_xh": 4.5, "guess_yh": 1.0}, [4.5, 1.0, 4.5 - 1.0 / 0.3, 0.0]),
+    ],
+    ids=["one-rising-point", "flat-rising", "one-plateau-point"],
+)
+def test_hinge_saturation_fallbacks_are_the_documented_values(y, kwargs, expected):
+    """HingeSaturation's short or flat regions fall back as its Notes state.
+
+    ON FAILURE: the code is wrong, unless the author changed the fallbacks;
+    then update the class Notes and these cases.
+    """
+    assert HingeSaturation(HX, np.array(y), **kwargs).p0 == exact(expected)
+
+
+@pytest.mark.parametrize(
+    "cls, attribute, default",
+    [
+        (HingeSaturation, "saturation_guess", (326, 0.5)),
+        (TwoLine, "guess_xs", 425.0),
+        (Saturation, "guess_xs", 425.0),
+        (HingeMin, "guess_h", 400.0),
+        (HingeMax, "guess_h", 400.0),
+        (HingeAtPoint, "guess_xh", 400.0),
+    ],
+)
+def test_hinge_guess_defaults_are_the_documented_values(cls, attribute, default):
+    """Each hinge class's guess defaults to the value its Parameters section states.
+
+    ON FAILURE: the code is wrong, unless the author changed a default; then
+    update the docstring and this table.
+    """
+    assert getattr(cls(HX, HY), attribute) == default
