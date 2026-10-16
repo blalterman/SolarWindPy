@@ -689,6 +689,63 @@ class TestNbinsAndEdges:
         assert h.edges["x"][-1] < 1e14
         assert f"{x.size - counted} of {x.size} finite values" in caplog.text
 
+    def test_out_of_memory_warning_names_the_axis(self, caplog):
+        """The warning names the binned axis, here ``'x'``.
+
+        ON FAILURE: the code is wrong.
+        """
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            Hist1D(self.OUT_OF_MEMORY_X, nbins="fd")
+        assert "The bins for 'x' did not fit in memory" in caplog.text
+
+    def test_ordinary_binning_logs_no_warning(self, caplog):
+        """A rule whose edges fit in memory bins silently.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X.iloc[:-1]  # without the outlier
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            Hist1D(x, nbins="fd")
+        assert caplog.records == []
+
+    def test_out_of_memory_bins_follow_the_rule_on_the_clipped_data(self):
+        """The fallback's edges are the rule's edges of the clipped data.
+
+        numpy computes the reference: "fd" edges of the data clipped to its
+        0.05th and 99.95th percentiles, rounded to 5 places.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        lo, hi = np.quantile(x, [0.0005, 0.9995])
+        expected = np.histogram_bin_edges(np.clip(x, lo, hi), "fd").round(5)
+
+        h = Hist1D(x, nbins="fd")
+
+        assert h.edges["x"].to_numpy() == exact(expected)
+
+    def test_out_of_memory_count_follows_clip_data(self, caplog):
+        """With ``clip_data="u"`` the outliers clipped onto the top edge are counted.
+
+        The top 20 samples of the bulk are 1.0, so the 99.95th and 99.99th
+        percentiles are both 1.0 (numpy.quantile, asserted): clipping moves
+        the two 1e14 outliers onto the top edge, inside the last bin. The
+        warning's count and the counted values add up to every value
+        (identity), clipped or not.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series(np.r_[np.arange(19980) * 0.00005, np.ones(20), 1e14, 1e14])
+        assert list(np.quantile(x, [0.9995, 0.9999])) == [1.0, 1.0]
+
+        counted = {}
+        for clip in (False, "u"):
+            caplog.clear()
+            with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+                h = Hist1D(x, nbins="fd", clip_data=clip)
+            counted[clip] = int(h.agg().sum())
+            assert f"{x.size - counted[clip]} of {x.size} finite values" in caplog.text
+
+        assert counted["u"] == counted[False] + 2  # the two outliers
+
     def test_out_of_memory_bins_span_the_documented_percentiles(self):
         """The fallback's outer edges are the 0.05th and 99.95th percentiles.
 

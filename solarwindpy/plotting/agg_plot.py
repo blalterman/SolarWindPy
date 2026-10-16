@@ -281,7 +281,7 @@ class AggPlot(base.Base):
                 b = b.round(precision)
 
             if clipped_for_memory:
-                self._warn_values_outside_bins(k, d, b, closed)
+                self._warn_values_outside_bins(k, d, b)
 
             zipped = zip(b[:-1], b[1:])
             i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
@@ -322,20 +322,18 @@ class AggPlot(base.Base):
             return dict(zip(gb_axes, nbins))
         return {k: nbins for k in gb_axes}
 
-    def _warn_values_outside_bins(self, axis, finite, edges, closed):
+    def _warn_values_outside_bins(self, axis, finite, edges):
         r"""Warn how many finite values of ``axis`` fall outside ``edges``.
 
-        Called when the bins were computed from clipped data, so the values
-        beyond the clip lie outside every bin and go uncounted. A value is
-        counted as ``make_cut`` bins it: after ``clip_data``, if set, with the
-        last bin of left-closed bins also holding its right edge.
+        Called when a bin rule's edges were computed from clipped data, so the
+        values beyond the clip lie outside every bin and go uncounted. Such
+        bins are right-closed: an integer bin count that exhausts memory does
+        so again on the clipped data, so only a rule reaches here. A value is
+        counted as ``make_cut`` bins it, after ``clip_data`` if set.
         """
         if self.clip:
             finite = self.clip_data(finite, self.clip)
-        if closed == "left":
-            inside = (finite >= edges[0]) & (finite <= edges[-1])
-        else:
-            inside = (finite > edges[0]) & (finite <= edges[-1])
+        inside = (finite > edges[0]) & (finite <= edges[-1])
         self.logger.warning(
             f"The bins for {axis!r} did not fit in memory, so they were computed "
             "from the data clipped to its 0.05th and 99.95th percentiles: "
