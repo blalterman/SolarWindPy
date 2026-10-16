@@ -589,3 +589,32 @@ def test_stability_contours_figure_renders_to_png():
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png")
     assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
+
+
+@pytest.mark.parametrize(
+    "anisotropy, expected, label",
+    [
+        (
+            3.0,
+            {"AIC": True, "FMW": False, "MM": False, "OFI": False},
+            "Between\nAIC &\nMM",
+        ),
+        (5.0, {"AIC": True, "FMW": False, "MM": True, "OFI": False}, "MM"),
+    ],
+    ids=["R=3", "R=5"],
+)
+def test_undefined_threshold_is_stable_while_others_hold(anisotropy, expected, label):
+    """With FMW undefined, the other instabilities still decide; FMW stays False.
+
+    Table 1 at 1e-3 and beta = 0.1, by hand from Eq. (5): beta - c_FMW = 0.1 -
+    0.543 < 0, so FMW is undefined; AIC 1 + 0.437 / 0.103**0.428 = 2.16; MM 1 +
+    0.801 / 0.163**0.763 = 4.20; OFI 1 - 1.39 / 0.211**1.005 = -5.64. R = 3
+    exceeds AIC only; R = 5 exceeds AIC and MM. Neither is below OFI.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityCondition(-3, pd.Series([0.1]), pd.Series([anisotropy]))
+
+    assert sc.instability_thresholds["FMW"].isna().all()
+    assert sc.is_unstable.iloc[0].to_dict() == expected
+    assert sc.stability_map[sc.stability_bin.iloc[0]] == label
