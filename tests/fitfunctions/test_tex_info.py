@@ -400,6 +400,21 @@ def test_extra_params_follow_the_fitted_parameters_without_an_uncertainty():
     assert "A = " not in TeXinfo(POPT, PSIGMA, FUNCTION, CHISQ, RSQ).build_info()
 
 
+@pytest.mark.parametrize("value", [True, 1 + 2j], ids=["bool", "complex"])
+def test_extra_params_refuse_values_that_are_not_real_numbers(texinfo, value):
+    """A bool or complex extra value raises TypeError naming its key; reals pass.
+
+    ``True`` is a Number (an int) but not a quantity to report, and a
+    complex value has no place on a real axis.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match="'A'.*not a real number"):
+        texinfo.set_extra_params({"A": value})
+    texinfo.set_extra_params({"A": 2, "B": 2.5, "C": np.float64(3.0)})
+    assert texinfo.extra_params == {"A": 2, "B": 2.5, "C": 3.0}
+
+
 def test_setting_extra_params_rebuilds_the_annotation(texinfo):
     """After ``set_extra_params``, ``str`` shows the new values, then drops them.
 

@@ -230,8 +230,12 @@ class HingeSaturation(Hinge):
     points or the fit is flat, and is undefined when the region's points
     share one ``x`` (no slope); ``m2`` is the median slope in the plateau
     region (x >= xh), is 0 when that region has fewer than two points, and
-    is undefined when it has repeated ``x``. When an estimate is undefined, ``p0`` returns the reference hinge
-    of :class:`Hinge` as ``[xh, yh, x1, m2]``.
+    is undefined when it has repeated ``x``. When an estimate is undefined,
+    ``p0`` returns the reference hinge of :class:`Hinge` as
+    ``[xh, yh, x1, m2]``. Unlike :class:`HingeMin` and :class:`HingeAtPoint`,
+    a short region keeps its own fallback: ``m2 = 0`` is a flat plateau at
+    ``yh``, which the model evaluates directly, so that start is not
+    singular.
 
     Examples
     --------
@@ -413,11 +417,11 @@ class TwoLine(Hinge):
     -----
     ``p0`` estimates ``[x1, x2, m1, m2]`` from the data on each side of
     ``guess_xs``: at or below it (x <= guess_xs) and above it. A repeated
-    point has no slope and is skipped. Each side needs at least two points with distinct ``x`` for
-    a slope, and a nonzero slope for an x-intercept; otherwise an estimate is
-    undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as
-    ``[x1, x2, m1, m2]``. The default ``guess_xs=425`` is appropriate for
-    solar wind speed analysis.
+    point has no slope and is skipped. Each side needs at least two points
+    with distinct ``x`` for a slope, and a nonzero slope for an x-intercept;
+    otherwise an estimate is undefined, and ``p0`` returns the reference
+    hinge of :class:`Hinge` as ``[x1, x2, m1, m2]``. The default
+    ``guess_xs=425`` is appropriate for solar wind speed analysis.
 
     Examples
     --------
@@ -625,10 +629,9 @@ class Saturation(Hinge):
     -----
     ``p0`` estimates ``[x1, xs, s, theta]`` from the data on each side of
     ``xs = guess_xs``: at or below it (x <= xs) and above it. Each side
-    needs at
-    least two points with distinct ``x`` for a slope, and the rising side a
-    nonzero slope for ``x1``; otherwise an estimate is undefined, and ``p0``
-    returns the reference hinge of :class:`Hinge` as
+    needs at least two points with distinct ``x`` for a slope, and the
+    rising side a nonzero slope for ``x1``; otherwise an estimate is
+    undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as
     ``[x1, xs, s, theta] = [x1, xh, yh, theta]``, where
     :math:`\theta = \arctan(m_1) - \arctan(m_2)` inverts the model's
     :math:`m_2 = \tan(\arctan(m_1) - \theta)`. The default ``guess_xs=425``
@@ -860,12 +863,13 @@ class HingeMin(Hinge):
     ``h = guess_h``: below it (x < h) and at or above it. Each side needs at
     least two points for a slope, and a nonzero slope for an x-intercept;
     the lower side skips a repeated point, and on the upper side repeated
-    ``x`` leave the slope undefined.
-    Otherwise an estimate is undefined, and ``p0``
-    returns the reference hinge of :class:`Hinge` as ``[m1, x1, x2, h]``
-    with ``h = xh``; the model's :math:`m_2 = m_1 (h - x_1) / (h - x_2)`
-    then recovers the reference :math:`m_2`. The default ``guess_h=400`` is
-    appropriate for solar wind speed analysis.
+    ``x`` leave the slope undefined. Otherwise an estimate is undefined, and
+    ``p0`` returns the reference hinge of :class:`Hinge` as
+    ``[m1, x1, x2, h]`` with ``h = xh``; the model's
+    :math:`m_2 = m_1 (h - x_1) / (h - x_2)` then recovers the reference
+    :math:`m_2`. When either side is short, the whole start is the reference
+    hinge: the other side's estimate is not kept. The default
+    ``guess_h=400`` is appropriate for solar wind speed analysis.
 
     Examples
     --------
@@ -1132,9 +1136,11 @@ class HingeAtPoint(Hinge):
     ``xh``, and the slopes come from each side of it: below it (x < xh) and
     at or above it. Each side needs at least two points for a slope; the
     lower side skips a repeated point, and on the upper side repeated ``x``
-    leave the slope undefined. Otherwise a slope is undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as
-    ``[xh, yh, m1, m2]``. The default ``guess_xh=400`` is appropriate for
-    solar wind speed analysis.
+    leave the slope undefined. Otherwise a slope is undefined, and ``p0``
+    returns the reference hinge of :class:`Hinge` as ``[xh, yh, m1, m2]``.
+    When either side is short, the whole start is the reference hinge: the
+    other side's estimate is not kept. The default ``guess_xh=400`` is
+    appropriate for solar wind speed analysis.
 
     Examples
     --------

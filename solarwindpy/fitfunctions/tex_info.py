@@ -10,7 +10,7 @@ __all__ = ["TeXinfo"]
 
 import re
 import numpy as np
-from numbers import Number
+from numbers import Real
 from tabulate import tabulate
 
 # Compile this once on import to save time.
@@ -481,16 +481,19 @@ class TeXinfo(object):
         Raises
         ------
         TypeError
-            If ``new`` is neither a dict nor None, or a value is not a number.
+            If ``new`` is neither a dict nor None, or a value is not a real
+            number (``bool`` and ``complex`` are refused).
         """
         if new is None:
             new = {}
         if not isinstance(new, dict):
             raise TypeError(f"extra_params must be a dict or None, not {type(new)}")
         for k, v in new.items():
-            if not isinstance(v, Number):
-                raise TypeError(f"extra_params[{k!r}] is not a number: {v!r}")
+            if isinstance(v, bool) or not isinstance(v, Real):
+                raise TypeError(f"extra_params[{k!r}] is not a real number: {v!r}")
         self._extra_params = tuple(new.items())
+        # Drop the annotation cached by build_info, which the `info`
+        # property returns as `self._info`, so it is rebuilt with these values.
         self.__dict__.pop("_info", None)
 
     def set_popt_psigma(self, popt, psigma):
