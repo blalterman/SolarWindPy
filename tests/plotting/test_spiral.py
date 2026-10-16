@@ -189,9 +189,9 @@ def _rectangles(collection):
     return np.array(out)
 
 
-def _occupied_centers(splot, fcn=np.mean):
+def _occupied_centers(splot, fcn=np.mean, rows=ROWS):
     """Centres and values of the occupied cells, in linear data space."""
-    values = _expected_agg(splot, fcn)
+    values = _expected_agg(splot, fcn, rows)
     mesh = splot.mesh.mesh
     x = 0.5 * (mesh[:, 0] + mesh[:, 1])
     y = 0.5 * (mesh[:, 2] + mesh[:, 3])
@@ -1380,6 +1380,47 @@ class TestPlotContoursCalls:
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
         _assert_same_segments(qset, _default_reference(method or "rbf", x, y, z))
+
+    def test_default_rbf_uses_fifty_neighbours(self):
+        """With more than 50 occupied cells, the default RBF uses 50 neighbours.
+
+        An 8 x 8 lattice of samples, one per leaf at min_per_bin=1, gives 64
+        occupied cells. The reference with 51 neighbours differs from the one
+        with 50, so this input separates the documented default from its
+        neighbours; with ROWS' 6 cells both would use all 6.
+
+        ON FAILURE: the code is wrong.
+        """
+        rows = [
+            (i + 0.3, j + 0.6, (i + 0.3 - 4.0) ** 2 + (j + 0.6))
+            for i in range(8)
+            for j in range(8)
+        ]
+        x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
+        edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
+        splot = SpiralPlot2D(x, y, z, initial_bins=edges)
+        splot.initialize_mesh(min_per_bin=1, progress=False)
+        splot.build_grouped()
+        _, _, qset = splot.plot_contours(cbar=False, grid_resolution=20)
+
+        cx, cy, cz = _occupied_centers(splot, rows=rows)
+        assert len(cz) == 64
+        XX, YY = _regular_grid(cx, cy, 20)
+        pts = np.column_stack([XX.ravel(), YY.ravel()])
+
+        def ref(neighbors):
+            rbf = RBFInterpolator(
+                np.column_stack([cx, cy]),
+                cz,
+                neighbors=neighbors,
+                smoothing=1.0,
+                kernel="thin_plate_spline",
+            )
+            _, ax = plt.subplots()
+            return ax.contour(XX, YY, rbf(pts).reshape(XX.shape))
+
+        _assert_same_segments(qset, ref(50))
+        assert _segments_differ(ref(50), ref(51))
 
     @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
     def test_every_option_reaches_the_drawing(self, method):
