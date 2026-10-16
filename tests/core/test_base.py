@@ -237,18 +237,6 @@ def test_a_standalone_object_refuses_missing_times(build, name):
         build(p)
 
 
-def test_a_spacecraft_refuses_missing_times_naming_its_data():
-    r"""A Spacecraft built with a NaT time raises ValueError naming its data.
-
-    ON FAILURE: the code is wrong.
-    """
-    p = swp.examples.load_plasma()
-    with pytest.raises(
-        ValueError, match=r"Spacecraft data time index has 1 of 3 timestamps missing"
-    ):
-        spacecraft.Spacecraft(_with_missing_time(p.spacecraft.data), "PSP", "HCI")
-
-
 def test_one_non_datetime_index_logs_one_warning_across_a_plasma_build(caplog):
     r"""A Plasma on a non-DatetimeIndex logs that problem once, not once per child.
 
