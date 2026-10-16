@@ -14,6 +14,7 @@ not enough. What is asserted about a plot is the data handed to matplotlib
 (rectangle coordinates, collection arrays, face alphas, contour segments).
 """
 
+import io
 import logging
 import re
 import warnings
@@ -30,6 +31,7 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
     SpiralPlot2D,
@@ -502,12 +504,15 @@ class TestSpiralMesh:
         assert 0 < sum(expected) < len(expected)
 
     def test_unknown_filter_threshold_is_rejected(self):
-        """``set_cell_filter_thresholds`` rejects names other than density and size.
+        r"""``set_cell_filter_thresholds`` rejects names other than density and size.
+
+        The error names the rejected keyword and its value. ``KeyError``
+        reprs its message, so the newline appears as a literal ``\n``.
 
         ON FAILURE: the code is wrong.
         """
         mesh = self._mesh(1)
-        with pytest.raises(KeyError, match="Unexpected kwarg"):
+        with pytest.raises(KeyError, match="Unexpected kwarg\\\\narea: 0.5"):
             mesh.set_cell_filter_thresholds(area=0.5)
 
 
@@ -564,16 +569,24 @@ class TestInitialBins:
         assert np.nansum(_expected_agg(splot, len, rows)) == len(rows)
 
     @pytest.mark.parametrize(
-        "bins, error",
-        [((3, 3, 3), ValueError), ([list(XEDGES), list(YEDGES)], TypeError)],
+        "bins, error, match",
+        [
+            # The message names the problem and the type that was passed.
+            ((3, 3, 3), ValueError, r"Unrecognized `nbins`\ntype: <class 'tuple'>"),
+            (
+                [list(XEDGES), list(YEDGES)],
+                TypeError,
+                "integer or np.ndarrays for initial edges",
+            ),
+        ],
         ids=["three-axes", "list-edges"],
     )
-    def test_malformed_bins_are_rejected(self, bins, error):
-        """Bins other than an int, or one int or ndarray per axis, raise.
+    def test_malformed_bins_are_rejected(self, bins, error, match):
+        """Bins other than an int, or one int or ndarray per axis, raise and say why.
 
         ON FAILURE: the code is wrong.
         """
-        with pytest.raises(error):
+        with pytest.raises(error, match=match):
             SpiralPlot2D(X, Y, initial_bins=bins)
 
     def test_log_axes_store_log10_of_the_magnitude(self):
@@ -1446,3 +1459,136 @@ class TestPlotContoursCalls:
             splot.plot_contours(method=method, levels=[3.0])
         _, mappable, qset = splot.plot_contours(method=method, levels=[3.0], cbar=False)
         assert mappable is qset and list(qset.levels) == [3.0]
+
+
+# ---------------------------------------------------------------------------
+# Refinement at the grid's lower edges, the categorical, labels, options.
+# ---------------------------------------------------------------------------
+
+
+def test_samples_on_the_lower_outer_edges_drive_refinement():
+    """Samples in the first column and row, and on the grid's lower corner, count.
+
+    [0,2)x[0,1) holds (0, 0) on the outer corner, (0.5, 0.25) and
+    (1.5, 0.75): 3 > 2, so it splits at (1, 0.5) into four quadrants, none
+    over-full. Without the corner sample it would hold 2 and not split.
+
+    ON FAILURE: the code is wrong.
+    """
+    rows = [(0.0, 0.0, 0.0), (0.5, 0.25, 0.0), (1.5, 0.75, 0.0)]
+    mesh = _mesh_on_rows(2, rows)
+    mesh.generate_mesh(progress=False)
+    hand = set(INITIAL[1:]) | {
+        (0.0, 1.0, 0.0, 0.5),
+        (1.0, 2.0, 0.0, 0.5),
+        (1.0, 2.0, 0.5, 1.0),
+        (0.0, 1.0, 0.5, 1.0),
+    }
+    assert _refine(XEDGES, YEDGES, _points(rows), 2) == hand
+    assert set(_cells(mesh.mesh)) == hand
+
+
+def test_categorical_leaves_out_samples_outside_the_mesh():
+    """``cat`` has no fill-value category; an out-of-mesh sample is NaN in it.
+
+    ON FAILURE: the code is wrong.
+    """
+    mesh = _mesh_on_rows(2, ROWS + [(-1.0, 0.5, 0.0)])
+    mesh.place_spectra_in_mesh(progress=False)
+    mesh.build_cat()
+    assert FILL not in mesh.cat.categories
+    assert pd.isna(mesh.cat[-1])
+    assert list(mesh.cat[:-1]) == list(mesh.bin_id.id[:-1])
+
+
+def test_default_labels_name_the_axes_and_count_without_z():
+    """Labels default to "x" and "y"; z is a Count label without z, "z" with it.
+
+    ON FAILURE: the code is wrong.
+    """
+    counted = SpiralPlot2D(X, Y)
+    valued = SpiralPlot2D(X, Y, Z)
+    assert (counted.labels.x, counted.labels.y) == ("x", "y")
+    assert isinstance(counted.labels.z, Count)
+    assert (valued.labels.x, valued.labels.y, valued.labels.z) == ("x", "y", "z")
+
+
+def test_grouping_data_of_another_length_than_the_mesh_is_rejected():
+    """``build_grouped`` raises when the data no longer match the mesh.
+
+    Replacing the data after ``initialize_mesh`` leaves the mesh's cells for
+    6 samples and z for 5.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _plot(1)
+    splot.set_data(X[:5], Y[:5], Z[:5], False)
+    with pytest.raises(ValueError, match="`cat` must have same size"):
+        splot.build_grouped()
+
+
+class TestMakePlotOptions:
+    """``make_plot`` passes its options to the drawn collection."""
+
+    def test_fcn_selects_the_aggregation_drawn(self):
+        """``make_plot(fcn="max")`` colours each cell by its maximum.
+
+        At min_per_bin=2, p2 and p3 share a cell: max 5, mean 3.5.
+
+        ON FAILURE: the code is wrong.
+        """
+        splot = _plot(2)
+        _, coll = splot.make_plot(cbar=False, fcn="max")
+        values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
+        assert np.asarray(values) == exact(_expected_agg(splot, max), nan_ok=True)
+        assert 5.0 in values.tolist() and 3.5 not in values.tolist()
+
+    def test_cmap_and_norm_reach_the_collection(self):
+        """``cmap`` and ``norm`` are the collection's colormap and normalisation.
+
+        ON FAILURE: the code is wrong.
+        """
+        norm = matplotlib.colors.Normalize(0.0, 20.0)
+        _, coll = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
+        assert coll.get_cmap().name == "magma"
+        assert coll.norm is norm
+
+    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    def test_axes_limits_span_the_mesh(self, log):
+        """The axes show exactly the mesh: x from 0 to 6.06, y from 0 to 4.04.
+
+        6.06 and 4.04 are the raised top edges (6 + 1%, 4 + 1%); on log axes
+        the limits are 10 to those powers.
+
+        ON FAILURE: the code is wrong.
+        """
+        ax, _ = _plot(2, log=log).make_plot(cbar=False)
+        expected = np.array([[0.0, 6.06], [0.0, 4.04]])
+        if log:
+            expected = 10.0**expected
+        assert np.array([ax.get_xlim(), ax.get_ylim()]) == exact(expected)
+
+    def test_figure_draws_to_an_agg_buffer(self):
+        """A SpiralPlot2D figure with a colorbar renders to an in-memory Agg buffer.
+
+        Inside three cells, away from grid lines, the rendered pixel is the
+        colour of the cell's mean: p4 alone (9), p0 alone (1), p1 alone (3),
+        each mapped through the collection's colormap and norm and rounded to
+        8 bits. The figure also saves as PNG.
+
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        _, cbar = _plot(2).make_plot(ax=ax)
+        fig.canvas.draw()
+        rgba = np.asarray(fig.canvas.buffer_rgba())
+        coll = cbar.mappable
+        height = rgba.shape[0]
+        for point, mean in [((4.7, 3.3), 9.0), ((1.3, 0.3), 1.0), ((4.7, 1.3), 3.0)]:
+            px, py = ax.transData.transform(point)
+            pixel = rgba[int(round(height - py)), int(round(px))]
+            colour = np.round(np.array(coll.cmap(coll.norm(mean))) * 255)
+            assert pixel.tolist() == colour.astype(int).tolist(), point
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png")
+        assert buf.getvalue().startswith(b"\x89PNG\r\n\x1a\n")
