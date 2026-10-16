@@ -689,6 +689,22 @@ class TestNbinsAndEdges:
         assert h.edges["x"][-1] < 1e14
         assert f"{x.size - counted} of {x.size} finite values" in caplog.text
 
+    def test_out_of_memory_bins_span_the_documented_percentiles(self):
+        """The fallback's outer edges are the 0.05th and 99.95th percentiles.
+
+        "fd" edges run from the clipped data's minimum to its maximum, which
+        are those percentiles (``calc_bins_intervals`` Notes), rounded to 5
+        places; the percentiles come from numpy.quantile.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        lo, hi = np.round(np.quantile(x, [0.0005, 0.9995]), 5)
+
+        h = Hist1D(x, nbins="fd")
+
+        assert h.edges["x"][0] == exact(lo)
+        assert h.edges["x"][-1] == exact(hi)
+
 
 class TestAggKeywords:
     """``agg`` hands keywords to the aggregation and applies ``clim`` inclusively."""

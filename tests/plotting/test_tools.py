@@ -8,6 +8,7 @@ The only fake is the clock that stamps saved PNGs.
 """
 
 import logging
+import re
 from datetime import datetime
 
 import matplotlib
@@ -200,6 +201,29 @@ class TestSave:
 
         assert size("tight.png") != size("full.png")
         assert size("fig.png") == size("tight.png")
+
+    def test_pdf_is_cropped_to_the_drawn_content_by_default(self, tmp_path):
+        """Without ``bbox_inches`` the PDF page is cropped as ``"tight"`` crops it.
+
+        Page sizes are read from each PDF's ``/MediaBox``; the references are
+        matplotlib's own tight and uncropped saves, which differ (asserted).
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots(figsize=(4.0, 3.0))
+        ax.plot([0, 1], [0, 1])
+        with matplotlib.rc_context({"savefig.bbox": "standard"}):
+            fig.savefig(tmp_path / "tight.pdf", bbox_inches="tight")
+            fig.savefig(tmp_path / "full.pdf")
+            plotting_tools.save(fig, tmp_path / "fig", png=False, log=False)
+
+        def page(name):
+            found = re.search(
+                rb"/MediaBox\s*\[([^\]]*)\]", (tmp_path / name).read_bytes()
+            )
+            return found.group(1).split()
+
+        assert page("tight.pdf") != page("full.pdf")
+        assert page("fig.pdf") == page("tight.pdf")
 
     def test_kwargs_reach_the_pdf_save(self, tmp_path):
         """``metadata`` passed to ``save`` is written into the PDF.
