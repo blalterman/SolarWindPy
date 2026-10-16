@@ -581,3 +581,138 @@ class TestSelection:
         assert mask.all()
         assert np.asarray(subset["x"]) == exact(x)
         assert np.asarray(subset["y"]) == exact(y)
+        # The histogram's own data stay log10 values: only the subset changed.
+        assert np.asarray(h.data["x"]) == exact(np.log10(x))
+        assert np.asarray(h.data["y"]) == exact(np.log10(y))
+
+
+# ---------------------------------------------------------------------------
+# nbins validation, outward rounding, and the out-of-memory fallback
+# ---------------------------------------------------------------------------
+
+
+class TestNbinsAndEdges:
+    """How ``calc_bins_intervals`` reads ``nbins`` and places the outer edges."""
+
+    def test_numpy_integer_nbins_counts_bins_like_a_python_integer(self, xyz):
+        """``np.int64(4)`` and ``np.int32(4)`` give the edges ``4`` gives.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y, _ = xyz
+        expected = Hist2D(x, y, nbins=4).edges
+        for nbins in (np.int64(4), np.int32(4)):
+            got = Hist2D(x, y, nbins=nbins).edges
+            for axis in ("x", "y"):
+                assert got[axis].equals(expected[axis])
+        assert Hist1D(x, nbins=np.int64(3)).edges["x"].size == 4
+
+    @pytest.mark.parametrize(
+        "nbins, type_name", [(3.5, "float"), (None, "NoneType"), (True, "bool")]
+    )
+    def test_unusable_nbins_raise_value_error_naming_it(self, xyz, nbins, type_name):
+        """A float, None or a bool is not a bin specification: ``ValueError``.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _, _ = xyz
+        with pytest.raises(
+            ValueError, match=f"Unrecognized `nbins` {nbins!r} of type {type_name}"
+        ):
+            Hist1D(x, nbins=nbins)
+
+    def test_outer_edges_enclose_samples_that_round_inside_them(self):
+        """Outer edges move one step outward when rounding would cut a sample off.
+
+        The smallest sample is the float just below 1e-4 and the largest the
+        float just above 7.7e-4. Rounded to 5 places they would become 1e-4
+        and 7.7e-4, excluding both; the enclosing 5-place edges are 0.00009
+        and 0.00078 (hand-derived), and all four samples are counted.
+        ON FAILURE: the code is wrong.
+        """
+        low = np.nextafter(1e-4, 0.0)
+        high = np.nextafter(7.7e-4, 1.0)
+        x = pd.Series([low, 3e-4, 5e-4, high])
+
+        h = Hist1D(x, nbins=3)
+
+        assert h.edges["x"][0] == exact(0.00009)
+        assert h.edges["x"][-1] == exact(0.00078)
+        assert h.agg().sum() == 4
+
+    def test_samples_on_interior_edges_are_counted_as_numpy_counts_them(self):
+        """x = 0, 1, 2, 3, 4 in 4 integer bins counts 1, 1, 1, 2, as numpy does.
+
+        Each sample sits on an edge: left-closed bins hold their left edge,
+        and the last bin also holds its right edge.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0])
+
+        agg = Hist1D(x, nbins=4).agg()
+
+        expected = np.histogram(x, bins=4)[0]
+        assert agg.to_numpy() == exact(expected.astype(float))
+        assert list(expected) == [1, 1, 1, 2]  # hand count
+
+    # "fd" on a 0.00025 grid over [0, 1) plus one value of 1e14 asks numpy for
+    # about 1e15 bins. The grid puts a sample exactly on the lowest fallback
+    # edge, which a right-closed first bin leaves out.
+    OUT_OF_MEMORY_X = pd.Series(np.r_[np.arange(4000) * 0.00025, 1e14])
+
+    def test_fd_rule_on_an_extreme_outlier_exhausts_memory(self):
+        """numpy cannot allocate the "fd" edges of ``OUT_OF_MEMORY_X``.
+
+        And one sample equals the fallback's lowest edge, the 0.05th
+        percentile rounded to 5 places (``calc_bins_intervals`` Notes).
+        ON FAILURE: the fixture no longer separates the out-of-memory fallback
+        from ordinary binning, or no sample sits on its lowest edge; fix the
+        fixture.
+        """
+        x = self.OUT_OF_MEMORY_X
+        with pytest.raises(MemoryError):
+            np.histogram_bin_edges(x, "fd")
+        assert (x == np.round(np.quantile(x, 0.0005), 5)).sum() == 1
+
+    def test_bin_rule_too_large_for_memory_falls_back_and_warns_the_count(self, caplog):
+        """An out-of-memory bin rule bins clipped data and warns how many values fall out.
+
+        The warning's count and the counted values add up to every finite
+        value (identity), and the outlier is among those left out.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            h = Hist1D(x, nbins="fd")
+
+        counted = int(h.agg().sum())
+        assert h.edges["x"][-1] < 1e14
+        assert f"{x.size - counted} of {x.size} finite values" in caplog.text
+
+
+class TestAggKeywords:
+    """``agg`` hands keywords to the aggregation and applies ``clim`` inclusively."""
+
+    def test_keywords_reach_the_aggregation_function(self, xyz):
+        """``agg(fcn="quantile", q=0.25)`` gives each bin's 25th percentile of y.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y, _ = xyz
+        h = Hist1D(x, y, nbins=X_EDGES)
+        bins = _bin_index(x.to_numpy(), X_EDGES)
+        expected = [np.quantile(y.to_numpy()[bins == i], 0.25) for i in range(4)]
+
+        assert h.agg(fcn="quantile", q=0.25).to_numpy() == exact(expected)
+
+    def test_upper_clim_keeps_a_bin_whose_count_equals_it(self):
+        """``set_clim(None, 2)`` keeps bins of 1 and 2 points and blanks the bin of 3.
+
+        Edges [0, 1, 2, 4] hold 1, 3 and 2 samples (hand count).
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.5, 1.25, 1.5, 1.75, 3.0, 3.5])
+        h = Hist1D(x, nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+        h.set_clim(None, 2)
+
+        assert h.agg().to_numpy() == exact([1.0, np.nan, 2.0], nan_ok=True)
