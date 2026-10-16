@@ -1223,3 +1223,31 @@ class TestProgressOutput:
         assert set(_cells(splot.mesh.mesh)) == _refine(
             splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
         )
+
+
+# ---------------------------------------------------------------------------
+# The top initial edge.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "values, top",
+    [
+        ([2.0, 10.0], 10.1),  # 10 + 1% of 10
+        ([-20.0, -5.0], -4.95),  # -5 + 1% of |-5|: above -5, not 1% below it
+        ([-3.0, 0.0], 0.01),  # zero: the 0.01 floor
+    ],
+    ids=["positive", "negative", "zero"],
+)
+def test_top_edge_is_the_largest_value_plus_one_percent_of_its_size(values, top):
+    """The top initial edge is max + 0.01 * |max|, or 0.01 when max is zero.
+
+    With one quantile bin the edges are the minimum and maximum; only the top
+    one moves.
+
+    ON FAILURE: the code is wrong.
+    """
+    v = pd.Series(values)
+    splot = SpiralPlot2D(v, v, initial_bins=1)
+    for axis in ("x", "y"):
+        assert splot.initial_bins[axis].tolist() == exact([values[0], top])

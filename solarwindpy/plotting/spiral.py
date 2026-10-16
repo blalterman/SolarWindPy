@@ -89,9 +89,8 @@ def _calculate_bin_number_with_numba(mesh, x, y):
     for i in prange(nbins):
         x0, x1, y0, y1 = mesh[i]
 
-        # Assume that largest x- and y-edges are extended by larger of 1% and 0.01
-        # so that we can just naively use < instead of a special case of <=.
-        # At time of writing (20200418), `SpiralPlot.initialize_mesh` did this.
+        # The largest x- and y-edges lie above the data (see
+        # `SpiralPlot2D.calc_initial_bins`), so a plain < needs no <= special case.
         tk = (x >= x0) & (x < x1) & (y >= y0) & (y < y1)
 
         zbin[tk] = i
@@ -591,8 +590,9 @@ data : {z.size}
         nbins : int or tuple
             An int gives that many bins per axis at equally spaced quantiles of
             the finite data; a pair gives one int or edge array per axis. The
-            last edge is raised to the larger of 0.01 and 1.01 times the
-            largest edge so the maximum lies inside the grid.
+            last edge is set to the largest edge plus 1% of its absolute
+            value (plus 0.01 if it is zero) so the maximum lies inside the
+            grid.
 
         Returns
         -------
@@ -633,9 +633,12 @@ data : {z.size}
             # into the caller's array nor be truncated by an integer dtype.
             b = np.array(b, dtype=float)
 
-            # Extend the right most bin by the larger of 1% or 0.01 (in the case of zero)
-            # So that y < y1 inludes data at real data edge.
-            b[-1] = np.max([0.01, 1.01 * b.max()])
+            # Raise the top edge above the largest edge so that the half-open
+            # test y < y1 includes data on the real data edge. Pad by 1% of
+            # the largest edge's size, whatever its sign; 0.01 when it is zero.
+            top = b.max()
+            pad = 0.01 * abs(top) if top != 0 else 0.01
+            b[-1] = top + pad
 
             assert not np.isnan(b).any()
 
