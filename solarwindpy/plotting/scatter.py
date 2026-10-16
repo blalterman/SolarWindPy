@@ -8,7 +8,6 @@ __all__ = [
 from matplotlib import pyplot as plt
 
 from . import base
-from .agg_plot import AggPlot
 
 
 class Scatter(base.PlotWithZdata, base._CbarMaker):
@@ -23,9 +22,10 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             Data defining (x, y) coordinates.
         z: pd.Series, optional
             If not None, used to specify the color for each point.
-        clip_data: bool
+        clip_data: bool or str
             If True, ``make_plot`` clips each column to its 0.01st and 99.99th
-            percentiles with ``AggPlot.clip_data``.
+            percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
+            the lower or upper tail.
         """
         super(Scatter, self).__init__()
         self.set_data(x, y, z, clip_data)
@@ -74,7 +74,7 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
 
         data = self.data
         if self.clip:
-            data = AggPlot.clip_data(data, self.clip)
+            data = self.clip_data(data, self.clip)
 
         data = data.loc[self._apply_alim(data.loc[:, "z"]).notna()]
 

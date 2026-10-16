@@ -13,6 +13,7 @@ edge lines. Those are the numbers the science depends on; the rendering is not.
 """
 
 import inspect
+import io
 import subprocess
 import sys
 import textwrap
@@ -2261,6 +2262,24 @@ class TestAxnormKeys:
             [sys.executable, "-O", "-c", script], capture_output=True, text=True
         )
         assert result.returncode == 0, result.stderr + result.stdout
+
+
+def test_hist2d_figure_renders_to_png():
+    """A 2-D histogram with its colorbar renders to an in-memory PNG.
+
+    Building artists does not run every matplotlib check; rendering does.
+    ON FAILURE: the code is wrong.
+    """
+    x = pd.Series([0.5, 1.5, 1.5, 2.5, 2.5, 2.5])
+    y = pd.Series([0.5, 0.5, 1.5, 1.5, 2.5, 2.5])
+    fig, ax = plt.subplots()
+    try:
+        Hist2D(x, y, nbins=[np.arange(4.0), np.arange(4.0)]).make_plot(ax=ax)
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format="png")
+    finally:
+        plt.close("all")
+    assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
 
 
 if __name__ == "__main__":

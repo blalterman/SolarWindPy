@@ -20,7 +20,6 @@ import pandas as pd
 import pytest
 from scipy.stats import binned_statistic_2d
 
-from solarwindpy.plotting.agg_plot import AggPlot
 from solarwindpy.plotting.hist1d import Hist1D
 from solarwindpy.plotting.hist2d import Hist2D
 from tests.tolerances import exact
@@ -582,104 +581,211 @@ class TestSelection:
         assert mask.all()
         assert np.asarray(subset["x"]) == exact(x)
         assert np.asarray(subset["y"]) == exact(y)
+        # The histogram's own data stay log10 values: only the subset changed.
+        assert np.asarray(h.data["x"]) == exact(np.log10(x))
+        assert np.asarray(h.data["y"]) == exact(np.log10(y))
 
 
 # ---------------------------------------------------------------------------
-# clip_data
+# nbins validation, outward rounding, and the out-of-memory fallback
 # ---------------------------------------------------------------------------
 
-SERIES = pd.Series(np.arange(1.0, 11.0))
-FRAME = pd.DataFrame({"a": np.arange(1.0, 6.0), "b": np.arange(10.0, 60.0, 10.0)})
 
+class TestNbinsAndEdges:
+    """How ``calc_bins_intervals`` reads ``nbins`` and places the outer edges."""
 
-class TestClipData:
-    """``clip_data`` clips to the 0.01st and 99.99th percentiles, or one of them.
-
-    Thresholds come from numpy.quantile (linear interpolation), applied with
-    numpy.clip; for 1..10 they are 1 + 9 * 1e-4 = 1.0009 and 10 - 9 * 1e-4 =
-    9.9991 by hand.
-    """
-
-    def test_series_both_tails_hand_computed(self):
-        """Any clip value other than "l"/"u" clips both tails of 1..10.
+    def test_numpy_integer_nbins_counts_bins_like_a_python_integer(self, xyz):
+        """``np.int64(4)`` and ``np.int32(4)`` give the edges ``4`` gives.
 
         ON FAILURE: the code is wrong.
         """
-        result = AggPlot.clip_data(SERIES, True)
-        expected = np.r_[1.0009, np.arange(2.0, 10.0), 9.9991]
-        assert np.asarray(result) == exact(expected)
-        assert isinstance(result, pd.Series)
+        x, y, _ = xyz
+        expected = Hist2D(x, y, nbins=4).edges
+        for nbins in (np.int64(4), np.int32(4)):
+            got = Hist2D(x, y, nbins=nbins).edges
+            for axis in ("x", "y"):
+                assert got[axis].equals(expected[axis])
+        assert Hist1D(x, nbins=np.int64(3)).edges["x"].size == 4
 
-    def test_dataframe_both_tails_per_column(self):
-        """A DataFrame is clipped column by column at its own percentiles.
-
-        ON FAILURE: the code is wrong.
-        """
-        result = AggPlot.clip_data(FRAME, "both")
-        lo = np.quantile(FRAME, 1e-4, axis=0)
-        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
-        assert np.asarray(result) == exact(np.clip(FRAME, lo, hi))
-        assert list(result.columns) == ["a", "b"]
-
-    def test_series_lower(self):
-        """``"l"`` raises only the low tail: 1 becomes 1.0009, 10 stays 10.
+    @pytest.mark.parametrize(
+        "nbins, type_name", [(3.5, "float"), (None, "NoneType"), (True, "bool")]
+    )
+    def test_unusable_nbins_raise_value_error_naming_it(self, xyz, nbins, type_name):
+        """A float, None or a bool is not a bin specification: ``ValueError``.
 
         ON FAILURE: the code is wrong.
         """
-        result = AggPlot.clip_data(SERIES, "l")
-        expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
-        assert np.asarray(result) == exact(expected)
-        assert result.iloc[0] == exact(1.0009)
-        assert result.iloc[-1] == 10.0
-
-    def test_series_upper(self):
-        """``"u"`` lowers only the high tail: 10 becomes 9.9991, 1 stays 1.
-
-        ON FAILURE: the code is wrong.
-        """
-        result = AggPlot.clip_data(SERIES, "u")
-        expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
-        assert np.asarray(result) == exact(expected)
-        assert result.iloc[-1] == exact(9.9991)
-        assert result.iloc[0] == 1.0
-
-    def test_dataframe_lower(self):
-        """``"l"`` clips each column's low tail at that column's percentile.
-
-        ON FAILURE: the code is wrong.
-        """
-        result = AggPlot.clip_data(FRAME, "l")
-        lo = np.quantile(FRAME, 1e-4, axis=0)
-        assert np.asarray(result) == exact(np.clip(FRAME, lo, None))
-
-    def test_dataframe_upper(self):
-        """``"u"`` clips each column's high tail at that column's percentile.
-
-        ON FAILURE: the code is wrong.
-        """
-        result = AggPlot.clip_data(FRAME, "u")
-        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
-        assert np.asarray(result) == exact(np.clip(FRAME, None, hi))
-
-    def test_tail_selector_is_case_insensitive(self):
-        """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
-
-        ON FAILURE: the code is wrong.
-        """
-        lower = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
-        upper = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
-        for mode, expected in (
-            ("L", lower),
-            ("Lower", lower),
-            ("U", upper),
-            ("Upper", upper),
+        x, _, _ = xyz
+        with pytest.raises(
+            ValueError, match=f"Unrecognized `nbins` {nbins!r} of type {type_name}"
         ):
-            assert np.asarray(AggPlot.clip_data(SERIES, mode)) == exact(expected)
+            Hist1D(x, nbins=nbins)
 
-    def test_rejects_non_pandas_input_with_typeerror(self):
-        """A list is neither Series nor DataFrame and raises TypeError.
+    def test_outer_edges_enclose_samples_that_round_inside_them(self):
+        """Outer edges move one step outward when rounding would cut a sample off.
+
+        The smallest sample is the float just below 1e-4 and the largest the
+        float just above 7.7e-4. Rounded to 5 places they would become 1e-4
+        and 7.7e-4, excluding both; the enclosing 5-place edges are 0.00009
+        and 0.00078 (hand-derived), and all four samples are counted.
+        ON FAILURE: the code is wrong.
+        """
+        low = np.nextafter(1e-4, 0.0)
+        high = np.nextafter(7.7e-4, 1.0)
+        x = pd.Series([low, 3e-4, 5e-4, high])
+
+        h = Hist1D(x, nbins=3)
+
+        assert h.edges["x"][0] == exact(0.00009)
+        assert h.edges["x"][-1] == exact(0.00078)
+        assert h.agg().sum() == 4
+
+    def test_samples_on_interior_edges_are_counted_as_numpy_counts_them(self):
+        """x = 0, 1, 2, 3, 4 in 4 integer bins counts 1, 1, 1, 2, as numpy does.
+
+        Each sample sits on an edge: left-closed bins hold their left edge,
+        and the last bin also holds its right edge.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0])
+
+        agg = Hist1D(x, nbins=4).agg()
+
+        expected = np.histogram(x, bins=4)[0]
+        assert agg.to_numpy() == exact(expected.astype(float))
+        assert list(expected) == [1, 1, 1, 2]  # hand count
+
+    # "fd" on a 0.00025 grid over [0, 1) plus one value of 1e14 asks numpy for
+    # about 1e15 bins. The grid puts a sample exactly on the lowest fallback
+    # edge, which a right-closed first bin leaves out.
+    OUT_OF_MEMORY_X = pd.Series(np.r_[np.arange(4000) * 0.00025, 1e14])
+
+    def test_fd_rule_on_an_extreme_outlier_exhausts_memory(self):
+        """numpy cannot allocate the "fd" edges of ``OUT_OF_MEMORY_X``.
+
+        And one sample equals the fallback's lowest edge, the 0.05th
+        percentile rounded to 5 places (``calc_bins_intervals`` Notes).
+        ON FAILURE: the fixture no longer separates the out-of-memory fallback
+        from ordinary binning, or no sample sits on its lowest edge; fix the
+        fixture.
+        """
+        x = self.OUT_OF_MEMORY_X
+        with pytest.raises(MemoryError):
+            np.histogram_bin_edges(x, "fd")
+        assert (x == np.round(np.quantile(x, 0.0005), 5)).sum() == 1
+
+    def test_bin_rule_too_large_for_memory_falls_back_and_warns_the_count(self, caplog):
+        """An out-of-memory bin rule bins clipped data and warns how many values fall out.
+
+        The warning's count and the counted values add up to every finite
+        value (identity), and the outlier is among those left out.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            h = Hist1D(x, nbins="fd")
+
+        counted = int(h.agg().sum())
+        assert h.edges["x"][-1] < 1e14
+        assert f"{x.size - counted} of {x.size} finite values" in caplog.text
+
+    def test_out_of_memory_warning_names_the_axis(self, caplog):
+        """The warning names the binned axis, here ``'x'``.
 
         ON FAILURE: the code is wrong.
         """
-        with pytest.raises(TypeError, match="Unexpected object"):
-            AggPlot.clip_data([1.0, 2.0, 3.0], True)
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            Hist1D(self.OUT_OF_MEMORY_X, nbins="fd")
+        assert "The bins for 'x' did not fit in memory" in caplog.text
+
+    def test_ordinary_binning_logs_no_warning(self, caplog):
+        """A rule whose edges fit in memory bins silently.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X.iloc[:-1]  # without the outlier
+        with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+            Hist1D(x, nbins="fd")
+        assert caplog.records == []
+
+    def test_out_of_memory_bins_follow_the_rule_on_the_clipped_data(self):
+        """The fallback's edges are the rule's edges of the clipped data.
+
+        numpy computes the reference: "fd" edges of the data clipped to its
+        0.05th and 99.95th percentiles, rounded to 5 places.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        lo, hi = np.quantile(x, [0.0005, 0.9995])
+        expected = np.histogram_bin_edges(np.clip(x, lo, hi), "fd").round(5)
+
+        h = Hist1D(x, nbins="fd")
+
+        assert h.edges["x"].to_numpy() == exact(expected)
+
+    def test_out_of_memory_count_follows_clip_data(self, caplog):
+        """With ``clip_data="u"`` the outliers clipped onto the top edge are counted.
+
+        The top 20 samples of the bulk are 1.0, so the 99.95th and 99.99th
+        percentiles are both 1.0 (numpy.quantile, asserted): clipping moves
+        the two 1e14 outliers onto the top edge, inside the last bin. The
+        warning's count and the counted values add up to every value
+        (identity), clipped or not.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series(np.r_[np.arange(19980) * 0.00005, np.ones(20), 1e14, 1e14])
+        assert list(np.quantile(x, [0.9995, 0.9999])) == [1.0, 1.0]
+
+        counted = {}
+        for clip in (False, "u"):
+            caplog.clear()
+            with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
+                h = Hist1D(x, nbins="fd", clip_data=clip)
+            counted[clip] = int(h.agg().sum())
+            assert f"{x.size - counted[clip]} of {x.size} finite values" in caplog.text
+
+        assert counted["u"] == counted[False] + 2  # the two outliers
+
+    def test_out_of_memory_bins_span_the_documented_percentiles(self):
+        """The fallback's outer edges are the 0.05th and 99.95th percentiles.
+
+        "fd" edges run from the clipped data's minimum to its maximum, which
+        are those percentiles (``calc_bins_intervals`` Notes), rounded to 5
+        places; the percentiles come from numpy.quantile.
+        ON FAILURE: the code is wrong.
+        """
+        x = self.OUT_OF_MEMORY_X
+        lo, hi = np.round(np.quantile(x, [0.0005, 0.9995]), 5)
+
+        h = Hist1D(x, nbins="fd")
+
+        assert h.edges["x"][0] == exact(lo)
+        assert h.edges["x"][-1] == exact(hi)
+
+
+class TestAggKeywords:
+    """``agg`` hands keywords to the aggregation and applies ``clim`` inclusively."""
+
+    def test_keywords_reach_the_aggregation_function(self, xyz):
+        """``agg(fcn="quantile", q=0.25)`` gives each bin's 25th percentile of y.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, y, _ = xyz
+        h = Hist1D(x, y, nbins=X_EDGES)
+        bins = _bin_index(x.to_numpy(), X_EDGES)
+        expected = [np.quantile(y.to_numpy()[bins == i], 0.25) for i in range(4)]
+
+        assert h.agg(fcn="quantile", q=0.25).to_numpy() == exact(expected)
+
+    def test_upper_clim_keeps_a_bin_whose_count_equals_it(self):
+        """``set_clim(None, 2)`` keeps bins of 1 and 2 points and blanks the bin of 3.
+
+        Edges [0, 1, 2, 4] hold 1, 3 and 2 samples (hand count).
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.5, 1.25, 1.5, 1.75, 3.0, 3.5])
+        h = Hist1D(x, nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+        h.set_clim(None, 2)
+
+        assert h.agg().to_numpy() == exact([1.0, np.nan, 2.0], nan_ok=True)

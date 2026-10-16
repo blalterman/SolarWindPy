@@ -56,7 +56,7 @@ class Hist1D(AggPlot):
         clip_data : bool or str, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
-            (see ``AggPlot.clip_data``). None is stored as False.
+            (see ``Base.clip_data``). None is stored as False.
         nbins : int or array-like, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
             :func:`pandas.cut` depending on the input type.
@@ -126,21 +126,30 @@ class Hist1D(AggPlot):
         self._axnorm = new
 
     def construct_cdf(self, only_plotted=True):
-        r"""Convert the obsered measuremets.
+        r"""Build the empirical cumulative distribution of the observed x values.
+
+        The CDF is built from x alone; any y stored with the histogram is
+        ignored.
+
+        Parameters
+        ----------
+        only_plotted : bool
+            If True, use only the measurements in bins that survive
+            aggregation (see ``get_plotted_data_boolean_series``). Otherwise,
+            use every measurement inside the bins.
 
         Returns
         -------
         cdf: pd.DataFrame
-            "x" column is the value of the measuremnt.
-            "position" column is the normalized position in the cdf.
-            To plot the cdf:
+            ``"x"`` column: the measurements in ascending order, in linear
+            units even when ``logx`` is set.
+            ``"position"`` column: the normalized position in the CDF, ``i /
+            (n - 1)`` for the i-th of n measurements, from 0 to 1.
+            To plot the CDF::
 
-                cdf.plot(x="x", y="cdf")
+                cdf.plot(x="x", y="position")
         """
         data = self.data
-        if not data.loc[:, "y"].unique().size <= 2:
-            raise ValueError("Only able to convert data to a cdf if it is a histogram.")
-
         tk = self.cut.loc[:, "x"].notna()
         if only_plotted:
             tk = tk & self.get_plotted_data_boolean_series()
@@ -174,9 +183,6 @@ class Hist1D(AggPlot):
 
         elif axnorm == "t":
             agg = self._divide_by_max(agg)
-
-        else:
-            raise ValueError("Unrecognized axnorm: %s" % axnorm)
 
         return agg
 
@@ -239,9 +245,15 @@ class Hist1D(AggPlot):
             Requires two functions passed to `fcn`. Instead of error bars, plots the uncertainty
             window as a semi-transparent band.
         plot_window_edges: bool
-            If True, plot solid lines at the window boundaries.
+            If True, plot lines at the window boundaries.
         kwargs:
-            Passed directly to `ax.plot`.
+            Without ``plot_window``, passed to :meth:`matplotlib.axes.Axes.errorbar`,
+            with ``drawstyle`` defaulting to ``"steps-mid"``. With
+            ``plot_window``, passed to :meth:`matplotlib.axes.Axes.plot` for the
+            central line. Matplotlib aliases (``c``, ``ls``) are accepted. The
+            key ``window_kwargs`` holds a dict of options for the band and its
+            edge lines: ``alpha`` (band only) defaults to 0.15, and ``color``
+            and ``linestyle`` default to the central line's.
         """
         agg = self.agg(fcn=fcn)
         x = pd.IntervalIndex(agg.index).mid
@@ -358,20 +370,24 @@ class Hist1D(AggPlot):
 
         get_x_bounds: function
             First argument is one key of `ranges_by_x` and returns `left, right`.
-            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
-            to whether or not the keys are :math:`log(x)` or :math:`x` in a manner
-            that matches data stored in Hist2D.
+            The keyword argument `expected_logx` is the bool ``self.log.x``, so
+            the returned values can be :math:`log(x)` or :math:`x` to match the
+            data stored in Hist1D.
 
-        get_y_bounds: functions
-            Takes on value of `ranges_by_x` and returns `top, bottom`. Second argument
-            Second argument is a kwarg (`expected_logx`) boolean to transform the returned values according
-            to whether or not the keys are :math:`log(y)` or :math:`y` in a manner
-            that matches data stored in Hist2D.
+        get_y_bounds: function
+            Takes one row of `ranges_by_x` and returns `bottom, top`. It gets
+            no log flag: Hist1D stores y in linear units.
 
         Returns
         -------
         taken: np.ndarray 1D
-            Array of indices for selecting data in interval.
+            Array of indices for selecting data in interval: the points with
+            ``left < x <= right`` and ``bottom < y <= top``.
+
+        Raises
+        ------
+        ValueError
+            If a range has ``left >= right`` or ``bottom >= top``.
         """
 
         available_x = self.agg().index
@@ -379,15 +395,16 @@ class Hist1D(AggPlot):
 
         data = self.data
         logx = self.log.x
-        logy = self.log.y
 
         taken = []
         for x, at_x in ranges_by_x.iterrows():
             l, r = get_x_bounds(x, expected_logx=logx)
-            b, t = get_y_bounds(at_x, expected_logy=logy)
+            b, t = get_y_bounds(at_x)
 
-            assert l < r
-            assert b < t
+            if not l < r:
+                raise ValueError(f"Need left < right for x-bin {x}, got ({l}, {r}).")
+            if not b < t:
+                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
 
             tkx = (l < data.x) & (data.x <= r)
             tky = (b < data.y) & (data.y <= t)

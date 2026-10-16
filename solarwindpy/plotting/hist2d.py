@@ -38,7 +38,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.
     clip_data : bool or str
         If True, clip x and y to their 0.01st and 99.99th percentiles
-        (``AggPlot.clip_data``) when assigning points to bins; the bin edges
+        (``Base.clip_data``) when assigning points to bins; the bin edges
         are computed from the unclipped data. ``"l"`` or ``"u"`` clips only
         the lower or upper tail.
     nbins : int or str or tuple
@@ -174,9 +174,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             )
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
-
-        else:
-            raise ValueError(f"Unrecognized axnorm ({axnorm})")
 
         return agg
 

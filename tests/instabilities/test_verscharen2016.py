@@ -14,6 +14,7 @@ here independently of the module:
   instabilities; R_p < 1 drives the FM/W and oblique firehose (OFI) instabilities.
 """
 
+import io
 import warnings
 
 import matplotlib
@@ -488,3 +489,132 @@ def test_table_legend_rows_and_columns_describe_their_curves(tk_kind, plotted):
             mismatches.append(((row, column), sorted(described or [])))
     if mismatches:
         raise LegendTableMismatch(mismatches)
+
+
+# ---------------------------------------------------------------------------
+# Names, missing values, and contour styles
+# ---------------------------------------------------------------------------
+
+
+def test_user_visible_names_are_instability_growth_rate_and_stability():
+    """``insta_params`` rows are named Instability and Growth Rate; bins are "Stability".
+
+    ON FAILURE: the code is wrong.
+    """
+    assert list(v16.insta_params.index.names) == ["Instability", "Growth Rate"]
+    sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
+    assert sc.stability_bin.name == "Stability"
+
+
+def test_missing_beta_or_anisotropy_counts_as_stable():
+    """A NaN beta or anisotropy is unstable to nothing and lands in the Stable bin.
+
+    The class Notes say a missing value counts as stable.
+    ON FAILURE: the code is wrong.
+    """
+    beta = pd.Series([np.nan, 1.0, np.nan])
+    anisotropy = pd.Series([3.0, np.nan, np.nan])
+
+    sc = v16.StabilityCondition(-3, beta, anisotropy)
+
+    assert not sc.is_unstable.to_numpy().any()
+    assert [sc.stability_map[b] for b in sc.stability_bin] == ["Stable"] * 3
+
+
+def test_plot_contours_default_styles():
+    """Each curve has its own colour, linestyle and marker, and the documented markers.
+
+    The ``plot_contours`` docstring gives marker size 10, edge width 0.5,
+    edge colour black, and a marker on every 10th point.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    sc.plot_contours(ax)
+
+    lines = ax.get_lines()
+    assert len(lines) == len(ROWS)
+    looks = {
+        (to_hex(ln.get_color()), ln.get_linestyle(), ln.get_marker()) for ln in lines
+    }
+    assert len(looks) == len(ROWS)
+    for line in lines:
+        assert line.get_markersize() == 10
+        assert line.get_markeredgewidth() == 0.5
+        assert to_hex(line.get_markeredgecolor()) == to_hex("k")
+        assert line.get_markevery() == 10
+        assert line.get_label() in INSTABILITIES
+
+
+def test_plot_contours_style_kwargs_override_every_default():
+    """Passed styles, aliases included, replace the defaults on every curve.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    sc.plot_contours(
+        ax,
+        plot_gamma=-3,
+        c="r",
+        ls=":",
+        marker="s",
+        ms=4,
+        mew=2.0,
+        mec="b",
+        markevery=5,
+        label="mine",
+    )
+
+    lines = ax.get_lines()
+    assert len(lines) == len(INSTABILITIES)
+    for line in lines:
+        assert (to_hex(line.get_color()), line.get_linestyle()) == (to_hex("r"), ":")
+        assert (line.get_marker(), line.get_markersize()) == ("s", 4)
+        assert line.get_markeredgewidth() == 2.0
+        assert to_hex(line.get_markeredgecolor()) == to_hex("b")
+        assert line.get_markevery() == 5
+        assert line.get_label() == "mine"
+
+
+def test_stability_contours_figure_renders_to_png():
+    """All contours with their table legend render to an in-memory PNG.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    sc.plot_contours(ax)
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png")
+    assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
+
+
+@pytest.mark.parametrize(
+    "anisotropy, expected, label",
+    [
+        (
+            3.0,
+            {"AIC": True, "FMW": False, "MM": False, "OFI": False},
+            "Between\nAIC &\nMM",
+        ),
+        (5.0, {"AIC": True, "FMW": False, "MM": True, "OFI": False}, "MM"),
+    ],
+    ids=["R=3", "R=5"],
+)
+def test_undefined_threshold_is_stable_while_others_hold(anisotropy, expected, label):
+    """With FMW undefined, the other instabilities still decide; FMW stays False.
+
+    Table 1 at 1e-3 and beta = 0.1, by hand from Eq. (5): beta - c_FMW = 0.1 -
+    0.543 < 0, so FMW is undefined; AIC 1 + 0.437 / 0.103**0.428 = 2.16; MM 1 +
+    0.801 / 0.163**0.763 = 4.20; OFI 1 - 1.39 / 0.211**1.005 = -5.64. R = 3
+    exceeds AIC only; R = 5 exceeds AIC and MM. Neither is below OFI.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityCondition(-3, pd.Series([0.1]), pd.Series([anisotropy]))
+
+    assert sc.instability_thresholds["FMW"].isna().all()
+    assert sc.is_unstable.iloc[0].to_dict() == expected
+    assert sc.stability_map[sc.stability_bin.iloc[0]] == label
