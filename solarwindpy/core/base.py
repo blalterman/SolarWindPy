@@ -439,10 +439,14 @@ class Base(Core):
         """
         if self._times_already_checked(new.index):
             return new
+        what = f"{self.__class__.__name__} data"
         try:
-            return self._put_in_time_order(new, f"{self.__class__.__name__} data")
+            # Only the comparison of index values is guarded: it raises
+            # TypeError for values that cannot be compared.
+            self._time_disorder(new.index, what)
         except TypeError:
             return new
+        return self._put_in_time_order(new, what)
 
     def _clean_species_for_setting(self, *species):
         species = super(Base, self)._clean_species_for_setting(*species)

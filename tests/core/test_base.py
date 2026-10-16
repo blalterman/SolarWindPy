@@ -348,3 +348,28 @@ def test_objects_with_differently_labelled_data_are_unequal():
     assert vector.Vector(b) != vector.Vector(later)
     assert vector.Vector(b) != vector.Vector(extra)
     assert vector.Vector(b) == vector.Vector(b.copy())
+
+
+class _SortFailsVector(vector.Vector):
+    """A Vector whose sort step fails with a TypeError unrelated to comparison.
+
+    Stands in for a defect inside the sort itself (not an index whose values
+    cannot be compared), which no public input can provoke.
+    """
+
+    def _put_in_time_order(self, data, what, refusal=None):
+        raise TypeError("unrelated failure inside the sort")
+
+
+def test_an_unrelated_type_error_while_sorting_is_not_swallowed():
+    r"""Only an index that cannot be compared is kept as given; other TypeErrors raise.
+
+    The fallback for unorderable indexes must not hide a real failure in the
+    sort: with comparable, in-order times, a TypeError raised while sorting
+    reaches the caller.
+
+    ON FAILURE: the code is wrong; the unorderable-index fallback swallows unrelated errors.
+    """
+    _, _, _, b = _example_rows([0, 1, 2])
+    with pytest.raises(TypeError, match="unrelated failure inside the sort"):
+        _SortFailsVector(b)
