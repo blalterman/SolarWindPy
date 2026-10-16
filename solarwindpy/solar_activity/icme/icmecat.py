@@ -89,10 +89,12 @@ class ICMECAT:
     ----------
     data : pd.DataFrame
         Raw catalog data (filtered if spacecraft was specified).
-    intervals : pd.DataFrame
-        Prepared intervals with computed interval_end column.
     strict_intervals : pd.DataFrame
-        Intervals with valid mo_end_time only (no fallbacks used).
+        Events with a recorded ``mo_end_time``, the intervals that
+        :meth:`contains` and :meth:`get_events_in_range` use.
+    estimated_intervals : pd.DataFrame
+        Every event, with an ``interval_end`` estimated where
+        ``mo_end_time`` is missing.
     spacecraft : str or None
         Spacecraft filter applied (None if full catalog).
 
@@ -126,14 +128,15 @@ class ICMECAT:
     >>> cat
     ICMECAT(spacecraft='Ulysses', n_events=2)
 
-    The second event has no ``mo_end_time``, so its ``interval_end`` falls
-    back to ``mo_start_time`` + 24 h:
+    The second event has no ``mo_end_time``, so its estimated
+    ``interval_end`` falls back to ``mo_start_time`` + 24 h:
 
-    >>> cat.intervals["interval_end"].dt.strftime("%Y-%m-%d %H:%M").tolist()
+    >>> ends = cat.estimated_intervals["interval_end"]
+    >>> ends.dt.strftime("%Y-%m-%d %H:%M").tolist()
     ['1998-01-02 00:00', '1998-02-02 06:00']
 
     Check which observations fall within ICME intervals. Only events with a
-    valid ``mo_end_time`` count, so the second observation is outside:
+    recorded ``mo_end_time`` count, so the second observation is outside:
 
     >>> observations = pd.DatetimeIndex(["1998-01-01 12:00", "1998-02-01 12:00"])
     >>> cat.contains(observations).tolist()
@@ -178,24 +181,31 @@ class ICMECAT:
         return self._data
 
     @property
-    def intervals(self) -> pd.DataFrame:
-        """Prepared intervals with computed interval_end.
+    def estimated_intervals(self) -> pd.DataFrame:
+        """Every event, with an ``interval_end`` estimated where none is recorded.
 
-        The interval_end column uses fallbacks:
-        1. mo_end_time if available
-        2. mo_start_time + 24h if mo_end_time is NaT
-        3. icme_start_time + 24h if both are NaT
+        The ``interval_end`` column is:
+
+        1. ``mo_end_time`` if recorded,
+        2. else ``mo_start_time`` + 24 h,
+        3. else ``icme_start_time`` + 24 h.
+
+        The spacecraft's heliocentric distance and HEEQ latitude and
+        longitude (``mo_sc_heliodistance``, ``mo_sc_lat_heeq``,
+        ``mo_sc_long_heeq``) are carried along where the catalog has them.
+        :meth:`contains` and :meth:`get_events_in_range` do not use the
+        estimates; they use :attr:`strict_intervals`.
         """
         return self._intervals
 
     @property
     def strict_intervals(self) -> pd.DataFrame:
-        """Intervals with valid mo_end_time only (no fallbacks)."""
+        """Events with a recorded ``mo_end_time`` only, no estimated ends."""
         return self._intervals[self._intervals["mo_end_time"].notna()].copy()
 
     def __len__(self) -> int:
         """Number of ICME events."""
-        return len(self._data) if self._data is not None else 0
+        return len(self._data)
 
     def __repr__(self) -> str:
         sc_str = (
@@ -398,6 +408,9 @@ class ICMECAT:
     ) -> pd.DataFrame:
         """Get ICME events that overlap with a time range.
 
+        Uses only :attr:`strict_intervals` (events with a recorded
+        ``mo_end_time``), as :meth:`contains` does.
+
         Parameters
         ----------
         start, end : pd.Timestamp
@@ -406,12 +419,14 @@ class ICMECAT:
         Returns
         -------
         pd.DataFrame
-            Events where icme_start_time <= end AND interval_end >= start.
+            Events where ``icme_start_time <= end`` and
+            ``mo_end_time >= start``.
         """
-        mask = (self._intervals["icme_start_time"] <= end) & (
-            self._intervals["interval_end"] >= start
+        intervals = self.strict_intervals
+        mask = (intervals["icme_start_time"] <= end) & (
+            intervals["mo_end_time"] >= start
         )
-        return self._intervals[mask].copy()
+        return intervals[mask]
 
     def contains(self, times: pd.DatetimeIndex | pd.Series) -> pd.Series:
         """Check which timestamps fall within any ICME interval.
