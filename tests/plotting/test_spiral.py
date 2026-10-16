@@ -1173,7 +1173,7 @@ class TestProgressOutput:
         after_steps = lines.index("", 4) + 1
         summary = lines[after_steps:]
         assert summary[0].startswith("Completed SpiralMesh at ")
-        assert re.fullmatch(r"\S+ time " + ELAPSED.pattern, summary[1])
+        assert re.fullmatch(r"Elapsed time " + ELAPSED.pattern, summary[1])
         assert summary[2:] == [
             "Split bin threshold 1",
             "Generated 12 bins for 6 spectra (~0.500 spectra per bin)",

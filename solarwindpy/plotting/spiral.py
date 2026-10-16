@@ -396,7 +396,7 @@ class SpiralMesh(object):
 
         stop = datetime.now()
         report(f"\nCompleted {self.__class__.__name__} at {stop}")
-        report(f"Elasped time {stop - start}")
+        report(f"Elapsed time {stop - start}")
         report(f"Split bin threshold {min_per_bin}")
         report(
             f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size / final_bins.shape[0]:.3f} spectra per bin)\n"
@@ -500,7 +500,8 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
             If True, clip x and y to their 0.01st and 99.99th percentiles
             (``AggPlot.clip_data``) when placing points in the mesh; the
             initial bin edges are computed from the unclipped data. ``"l"`` or
-            ``"u"`` clips only the lower or upper tail. Stored as ``clip``.
+            ``"u"`` clips only the lower or upper tail. Clipping limits x and
+            y only; z is aggregated unclipped. Stored as ``clip``.
         """
         super().__init__()
         self.set_log(x=logx, y=logy)
@@ -652,7 +653,7 @@ data : {z.size}
         self._initial_bins = bins
         return bins
 
-    def initialize_mesh(self, progress=True, **kwargs):
+    def initialize_mesh(self, *, progress=True, **kwargs):
         r"""Build the ``SpiralMesh`` and assign every point to a cell.
 
         ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
