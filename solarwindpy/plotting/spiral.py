@@ -194,7 +194,6 @@ class SpiralMesh(object):
             ids = np.asarray(self.bin_id.id)
             ids = ids[ids != self.bin_id.fill]
             cnt = np.bincount(ids, minlength=self.mesh.shape[0])
-            assert cnt.shape == tk.shape
             cell_density = cnt / dA
             density_quantile = np.quantile(cell_density, density)
             tk_density = cell_density > density_quantile
@@ -322,60 +321,6 @@ class SpiralMesh(object):
 
         return new_cells, nbins_to_replace
 
-    @staticmethod
-    def _visualize_logged_stats(stats_str):
-        from matplotlib import pyplot as plt
-
-        stats = [[y.strip() for y in x.split("  ") if y] for x in stats_str.split("\n")]
-        stats.pop(1)  # Remove column underline row
-        stats = np.array(stats)
-        index = pd.Index(stats[1:, 0].astype(int), name="Step")
-        n_replaced = stats[1:, 1].astype(int)
-
-        dt = pd.to_timedelta(stats[1:, 2]).total_seconds()
-        dt_unit = "s"
-        if dt.max() > 60:
-            dt /= 60
-            dt_unit = "m"
-        if dt.max() > 60:
-            dt /= 60
-            dt_unit = "H"
-        if dt.max() > 24:
-            dt /= 24
-            dt_unit = "D"
-
-        dt_key = f"Elapsed [{dt_unit}]"
-        stats = pd.DataFrame({dt_key: dt, "N Divisions": n_replaced}, index=index)
-
-        fig, ax = plt.subplots()
-        tax = ax.twinx()
-
-        x = stats.index
-        k = f"Elapsed [{dt_unit}]"
-        ax.plot(x, stats.loc[:, k], label=k, marker="+", ms=8)
-
-        k = "N Divisions"
-        tax.plot(x, stats.loc[:, k], label=k, c="C1", ls="--", marker="x", ms=8)
-
-        tax.grid(False)
-        ax.set_xlabel("Step Number")
-        ax.set_ylabel(dt_key)
-        tax.set_ylabel("N Divisions")
-
-        h0, l0 = ax.get_legend_handles_labels()
-        h1, l1 = tax.get_legend_handles_labels()
-
-        ax.legend(
-            h0 + h1,
-            l0 + l1,
-            title=rf"$\Delta t = {stats.loc[:, dt_key].sum():.0f} \, {dt_unit}$",
-        )
-
-        ax.set_yscale("log")
-        tax.set_yscale("log")
-
-        return ax, tax, stats
-
     def generate_mesh(self):
         r"""Split cells repeatedly until none holds more than ``min_per_bin`` points.
 
@@ -455,11 +400,6 @@ class SpiralMesh(object):
             Named tuple ``(id, fill, visited)``: cell index per point (fill
             value outside the mesh), the fill value, and the visit count of
             each cell.
-
-        Raises
-        ------
-        ValueError
-            If the cell counts do not cover every mesh cell.
         """
         logger = logging.getLogger(__name__)
         logger.warning(
@@ -491,16 +431,6 @@ They will be replaced by NaNs and excluded from the aggregation.
         logger.warning(f"""Largest bin population is {bin_frequency.max()}
 {n_empty} of {nbins} bins ({100 * n_empty / nbins:.1f}%) are empty
 """)
-
-        if not bin_visited.all():
-            logger.warning(f"{(~bin_visited).sum()} bins went unvisited.")
-        if (bin_visited > 1).any():
-            logger.warning(f"({(bin_visited > 1).sum()} bins visted more than once.")
-
-        if nbins - bin_frequency.shape[0] != 0:
-            raise ValueError(
-                f"{nbins - bin_frequency.shape[0]} mesh cells do not have an associated z-value"
-            )
 
         bin_id = _SpiralMeshBinID(zbin, fill, bin_visited)
         self._bin_id = bin_id
@@ -613,12 +543,7 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
         reindex = pd.RangeIndex(start=0, stop=self.mesh.mesh.shape[0], step=1)
         agg = agg.reindex(reindex)
 
-        cell_filter = self.mesh.cell_filter
-        if agg.shape != cell_filter.shape:
-            raise ValueError(f"""Unable to algin `agg` and `cell_filter.
-agg    : {agg.shape}
-filter : {cell_filter.shape}""")
-        agg = agg.where(cell_filter, axis=0)
+        agg = agg.where(self.mesh.cell_filter, axis=0)
 
         return self._apply_alim(agg)
 
@@ -785,12 +710,6 @@ data : {z.size}
 
         C = self.agg(fcn=fcn)
         C = np.ma.masked_invalid(C.values)
-        assert isinstance(C, np.ndarray)
-        assert C.ndim == 1
-        if C.shape[0] != self.mesh.mesh.shape[0]:
-            raise ValueError(
-                f"""{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have a z-value associated with them. The z-values and mesh are not properly aligned."""
-            )
 
         xmesh = self.mesh.mesh[:, [0, 1]]
         ymesh = self.mesh.mesh[:, [2, 3]]
@@ -1105,11 +1024,6 @@ data : {z.size}
 
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
-        if C.shape[0] != self.mesh.mesh.shape[0]:
-            raise ValueError(
-                f"{self.mesh.mesh.shape[0] - C.shape[0]} mesh cells do not have "
-                "a z-value. The z-values and mesh are not properly aligned."
-            )
 
         x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
         y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
