@@ -661,3 +661,118 @@ the CDF of the observed x values and never uses y, so its y check is removed, it
 names the `"position"` column, and a test checks known values. Mesh building gains
 `progress=True` (on by default), which prints the same per-step table live, no longer at
 WARNING; `progress=False` silences it. No `mesh.history`; the printed layout is unchanged.
+`SpiralMesh._visualize_logged_stats` is deleted (card 27).
+
+## Remaining-module units (2026-10-16)
+
+Each unit implements the author decisions above that fall in its files, and writes tests for
+the real gaps among its modules' surviving mutants. Survivors and their diffs:
+`tmp/test-quality-review/mutants_survivors.csv` in the main checkout
+(`/Users/balterma/observatories/code/SolarWindPy`), filtered to mutants whose status in
+`tmp/test-quality-review/mutants_recheck-2026-10-15.csv` is `survived`. Sort each survivor:
+(a) real gap, test it; (b) cannot be killed (equivalent behaviour), list it; (c) wording or
+appearance the author has not asked to pin, list it; (d) dead code, delete it if a decision
+here covers it, else list it. Pin user-visible contracts (names, errors, values a user reads);
+never freeze adaptable things (default bin counts, discovered listings) to their current
+value. A decision that needs a file the unit does not own is reported, not edited. CHANGELOG
+lines go in the PR body; a later unit writes them. Report back as text, about 30 lines: PR
+number, positive-control output, survivors killed and the (b)/(c)/(d) lists by mutant name.
+
+### rm-fit-models
+
+OWNS: solarwindpy/fitfunctions/ (all but plots.py), tests/fitfunctions/ (all but test_plots.py), tests/test_available.py, tests/test_fitfunctions_public_names.py, tests/test_source_fitfunctions_defects.py
+
+Decisions: restore `GaussianLn`'s normal-parameter report through `TeXinfo` (TeXinfo accepts
+extra parameters to report; `GaussianLn` passes its normal-space values when the flag is on;
+test the annotation both ways); fix `ExponentialCDF.set_TeX_info` the same way; HingeMin and
+HingeAtPoint return NaN for a side with fewer than 2 points so `Hinge.p0` falls back to the
+reference start; remove `guess_yh` from `HingeAtPoint` and `guess_s` from `Saturation`; remove
+`FitFunction.logx` (TrendFit sets the plotter's log x when `trend_logx` is on); explicit
+`p0=None` means the generic start, `GaussianPlusHeavySide` fixed to match, with a test across
+classes; a fit refuses x that is not 1-d with a ValueError naming the shape;
+`TrendFit.plot_all_popt_1d` pops `"linestyle"` after normalising kwargs (trend_fits.py:291);
+batch A items (package docstring on 1-d `weights`, `npts` kept out of the annotation, the
+`set_TeX_argnames` check that can never fail, `plot_trend_fit_resid` refuses unknown kwargs).
+`available()` and the TeX annotation are tested by property, never by fixed text.
+
+### rm-fit-plots
+
+OWNS: solarwindpy/fitfunctions/plots.py, tests/fitfunctions/test_plots.py
+
+Decisions: replace `_get_default_plot_style` with one module-level `_DEFAULT_STYLES` dict (raw,
+used, fit, simple residuals, robust residuals) filled with the styles drawn today, each plot
+method merging normalised user kwargs over its entry, tested so table and plots cannot drift;
+robust residuals in percent raise ValueError (robust residuals are in units of sigma); percent
+residuals are NaN where the model is zero, stated in the docstring; delete `_format_hax`'s
+unused `with_rax`; robust-residual plotting catches only the missing-result case, not every
+AttributeError; `edge_kwargs={"ec": "r"}` works (prepare edge options for the line kind
+drawn); fit-plot paths say `"linY"` for a linear y axis (correct the test asserting
+`"logY"`); one test draws an FFPlot figure to an in-memory Agg buffer.
+
+### rm-core-solar
+
+OWNS: solarwindpy/__init__.py, solarwindpy/examples/__init__.py, solarwindpy/core/ (all but plasma.py and ions.py; in plasma.py only the builder method's docstring), solarwindpy/solar_activity/, tests/core/ (all but test_plasma.py, test_plasma_io.py and test_ions.py), tests/solar_activity/, tests/test_examples.py, tests/test_public_imports.py
+
+Decisions: the Raffaella branch keeps its behaviour, its docstring says it expects GSE input
+and converts to RTN, `Plasma`'s builder docstring says kwargs reach `AlfvenicTurbulence`, and
+one test with hand-computed values covers it (a value the unit cannot derive by hand is
+reported, not asserted from output); `AlfvenicTurbulence.set_data` passes `sort=True` for
+unequal v and b indexes, with a test; a solar cycle with no maximum yet has no Fall phase (left
+out or marked missing) and the unreachable `t1 == t2` branch goes; ICMECAT lookups both use
+recorded `mo_end_time` intervals, the estimated-end intervals stay under an explicit name, and
+`get_events_in_range` gets an offline test; `abundance_ratio` drops the no-op uncertainty
+replacement and stays Photosphere-only; `Base._clean_species_for_setting` raises ValueError
+naming the species. Core bug list: `Tensor.set_data` stores the new data; a `Vector` or
+`Tensor` built directly from out-of-order times warns then sorts; remove the two inert pandas
+`chained_assignment` settings (`_configure_pandas`, `solar_activity/base.py`); remove the two
+deep copies in `alfvenic_turbulence.py`; `DataLoader._init_logger`,
+`AlfvenicTurbulence._clean_species_for_setting` and `SIDC._run_normalization` each become one
+shared copy; delete ICMECAT `__len__`'s `else 0`, `Core.__eq__`'s `except` and the examples
+loader's auxiliary-data branch. Pin `IndicatorExtrema`'s `"spec_by_extrema_band"` name.
+
+### rm-hist-agg
+
+OWNS: solarwindpy/plotting/{base,hist1d,hist2d,agg_plot,scatter,tools}.py, solarwindpy/instabilities/, tests/plotting/ (all but test_spiral.py and labels/), tests/instabilities/, tests/test_source_plotting_defects.py
+
+Decisions: `construct_cdf` drops its y check, its docstring names the `"position"` column, and
+a test checks known values; `Hist1D` zero-width range raises ValueError naming it; the
+quantile bin fallback logs a warning with the count dropped, tested; `StabilityContours`
+style kwargs override its defaults; a two-valued z keeps Scatter's colour bar, tested; pin the
+`"Stability"` name and fix the `"Intability"` index name, but do not pin the 101-bin default;
+`nbins` accepts numpy integers and other bad input gets the intended clear error; delete the
+dead code here (Hist1D/Hist2D "Unrecognized axnorm", agg_plot's numpy-1.15 histogram fallback,
+tools' `cbar_loc` else and axes-shape check, verscharen2016's two "Did you visit every data
+point?" checks). Plotting bug list: `Hist1D.take_data_in_yrange_across_x` stops passing a
+log-y flag (Hist1D never log-transforms y); Scatter `clip_data="l"` uses the shared clipping;
+`set_log(x=True)` no longer resets y; the verscharen2016 missing-value fallback is replaced by
+what it does (missing counts as stable), documented; remove the deep copy in
+`get_subset_above_threshold` and the unused bin array in `calc_bins_intervals`. One test per
+plotting class here draws its figure to an in-memory Agg buffer.
+
+### rm-spiral
+
+OWNS: solarwindpy/plotting/spiral.py, tests/plotting/test_spiral.py
+
+Decisions: `SpiralPlot2D` implements `clip_data` with the shared clipping helper (including
+one-sided "l" and "u"); the top bin edge is the largest value plus 1% of its size with a small
+floor for zero; delete the dead mesh checks (unvisited/visited-twice warnings, the
+no-z-value warnings and the always-true shape checks); test `plot_contours` with no
+arguments for all three methods, with all options, and its documented defaults, and give one
+level with the colour bar on a fix or a clear error; delete `_visualize_logged_stats`;
+`generate_mesh` and `SpiralPlot2D.initialize_mesh` gain `progress=True` (default on) printing
+the same per-step table live to stderr, not via WARNING, and `progress=False` silences it.
+One test draws a SpiralPlot2D figure to an in-memory Agg buffer.
+
+### rm-labels
+
+OWNS: solarwindpy/plotting/labels/, tests/plotting/labels/
+
+Decisions: CountOther paths replace spaces as Probability does; ComparisonLabel and Xcorr
+paths strip TeX spacing; Frequency uses `\left[ ... \right]` in both forms; delete the
+never-matching clean-up rules (base.py 539-540, 580-583, the repeated `.strip`, the second
+`\gt` in special.py); `>=` and `<=` map to GEQ and LEQ; `ComparisonLabel` requires label
+objects (a string raises TypeError suggesting ManualLabel); `ManualLabel` with empty units has
+no trailing space; units: `cos_phi`, `ratio`, `Qhat`, `dbeta` dimensionless, `eth` eV. Label
+bug list: `ManualLabel` exposes `units` and `with_units`; Frequency renders `^{-1}` (text and
+path); `ComparisonLabel.set_function` raises its intended ValueError; `ElementalAbundance`
+wraps the element in `\mathrm` once. Every test is exact-string.
