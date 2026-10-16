@@ -12,6 +12,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytest
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import to_rgba
@@ -561,6 +562,22 @@ def test_percent_residuals_are_nan_where_the_model_is_zero():
     """
     plot, *_ = make_ffplot(y_fit=np.array([1.0, 0.0, 4.0, 14.0, 9.0, 11.0]))
     assert plot.residuals(pct=True) == exact([np.nan, -25.0, 50.0], nan_ok=True)
+
+
+@pytest.mark.parametrize("pct, robust", [(False, False), (True, False), (False, True)])
+def test_residuals_return_an_ndarray_on_every_path(pct, robust):
+    """``residuals`` returns an ndarray on every path.
+
+    It does so even from a Series model and a list ``fun``, as its
+    docstring promises.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot, *_ = make_ffplot(y_fit=pd.Series(Y_FIT), fun=list(FUN))
+    r = plot.residuals(pct=pct, robust=robust)
+    assert type(r) is np.ndarray
+    expected = FUN if robust else (SIMPLE_PCT if pct else SIMPLE)
+    assert r == exact(expected)
 
 
 def test_robust_residuals_are_the_fit_results_residual_vector():

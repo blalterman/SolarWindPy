@@ -331,7 +331,9 @@ class FFPlot(object):
             error bars.
         edge_kwargs : dict, optional
             If not None, draw the window's edges as lines with these
-            keywords; ``ec`` or ``edgecolor`` sets their colour.
+            keywords; ``ec`` or ``edgecolor`` sets their colour. Only those
+            edge-colour keys are translated; other collection-only keys,
+            such as ``facecolor``, are not accepted by the edge lines.
         **kwargs
             Line2D keywords merged over the default raw style. The
             ``window_kwargs`` keyword is passed to
@@ -513,7 +515,7 @@ class FFPlot(object):
         if ax is None:
             fig, ax = plt.subplots(**subplots_kwargs)
 
-        kwargs = dict(kwargs)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         label = kwargs.pop("label", r"").strip("$")
         if kwargs.get("markevery") is None:
             kwargs["markevery"] = self._estimate_markevery()
@@ -554,7 +556,9 @@ class FFPlot(object):
             was developed with default size 6x4 and this size helps accomodate annotation.
             So we persist it here.
         resid_kwargs: dict, None
-            Passed to :py:meth:`plot_residuals`.
+            Passed to :py:meth:`plot_residuals`. Its ``kind="robust"`` or
+            ``"both"`` needs ``resid_pct=False``: robust residuals are in
+            units of sigma and have no percent form.
         kwargs:
             Passed to :py:meth:`plot_raw_used_fit`.
 
@@ -617,7 +621,7 @@ class FFPlot(object):
                     "Robust residuals are in units of the observation "
                     "uncertainty and have no percent form; pass pct=False."
                 )
-            return self.fit_result.fun
+            return np.asarray(self.fit_result.fun)
 
         y_fit_used = self.y_fit[self.observations.tk_observed]
         r = y_fit_used - self.observations.used.y
@@ -627,7 +631,7 @@ class FFPlot(object):
                 r = 100.0 * (r / y_fit_used)
             r = np.where(y_fit_used == 0, np.nan, r)
 
-        return r
+        return np.asarray(r)
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels.
