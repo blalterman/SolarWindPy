@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g06531b0ff documentation</title>
+  <title>solarwindpy.core.abundances.ReferenceAbundances &mdash; SolarWindPy 0.1.dev1+g4a592d3b9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=926d6e5e"></script>
+      <script src="../_static/documentation_options.js?v=9d169cd3"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -330,7 +330,7 @@ in the standard dex scale: log ε_X = log(N_X/N_H) + 12.</p>
 <dl class="field-list">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><a class="reference internal" href="#solarwindpy.core.abundances.ReferenceAbundances.data" title="solarwindpy.core.abundances.ReferenceAbundances.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Elemental abundances in dex scale.</p>
+<dt><a class="reference internal" href="#solarwindpy.core.abundances.ReferenceAbundances.data" title="solarwindpy.core.abundances.ReferenceAbundances.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Elemental abundances in dex scale.</p>
 </dd>
 </dl>
 </dd>
@@ -363,7 +363,7 @@ A&amp;A, 653, A141. <a class="reference external" href="https://doi.org/10.1051/
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>MultiIndex DataFrame with index (Z, Symbol) and columns
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>MultiIndex DataFrame with index (Z, Symbol) and columns
 (CI_chondrites, Photosphere) × (Ab, Uncert).</p>
 </dd>
 </dl>
@@ -387,7 +387,7 @@ or “Meteorites” (alias for CI_chondrites).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Series with ‘Ab’ (abundance in dex) and ‘Uncert’ (uncertainty),
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Series with ‘Ab’ (abundance in dex) and ‘Uncert’ (uncertainty),
 named by the element’s atomic number Z whether <cite>key</cite> is the
 symbol or Z.</p>
 </dd>

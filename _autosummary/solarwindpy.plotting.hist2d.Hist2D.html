@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+g06531b0ff documentation</title>
+  <title>solarwindpy.plotting.hist2d.Hist2D &mdash; SolarWindPy 0.1.dev1+g4a592d3b9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=926d6e5e"></script>
+      <script src="../_static/documentation_options.js?v=9d169cd3"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -325,9 +325,9 @@
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>x and y data to bin.</p>
+<dt><strong>x, y</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>x and y data to bin.</p>
 </dd>
-<dt><strong>z</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a>, optional</span></dt><dd><p>If not None, the value to aggregate in each bin. If None, each bin
+<dt><strong>z</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a>, optional</span></dt><dd><p>If not None, the value to aggregate in each bin. If None, each bin
 counts its points.</p>
 </dd>
 <dt><strong>axnorm</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Normalization of the aggregated values; see <code class="docutils literal notranslate"><span class="pre">set_axnorm</span></code> for the keys.</p>
@@ -498,7 +498,7 @@ is shared by the mesh and the contours.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>border: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.namedtuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">collections.namedtuple()</span></code></a></dt><dd><p>Contains “top” and “bottom” fields, each a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+<dt>border: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.namedtuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">collections.namedtuple()</span></code></a></dt><dd><p>Contains “top” and “bottom” fields, each a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 </dd>
 </dl>
 </dd>
@@ -660,7 +660,7 @@ to <cite>ax_norm</cite>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>above_contour: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>For data in a bin above <cite>level</cite>, indicates the x-<cite>pd.Interval</cite> within
+<dt>above_contour: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>For data in a bin above <cite>level</cite>, indicates the x-<cite>pd.Interval</cite> within
 which the observation falls. <cite>NaN</cite> are observations that are below
 <cite>level</cite>. This object is purposely the same length as the data stored by
 Hist2D and can be used in groupby operations.</p>
@@ -746,7 +746,7 @@ If str and nbins == “knuth”, use <cite>astropy.stats.knuth_bin_width</cite>
 to calculate optimal bin widths.
 If str and nbins != “knuth”, use <cite>np.histogram(data, bins=nbins)</cite>
 to calculate bins.
-If a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.IntervalIndex.html#pandas.IntervalIndex" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.IntervalIndex</span></code></a> of contiguous intervals closed
+If a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.IntervalIndex.html#pandas.IntervalIndex" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.IntervalIndex</span></code></a> of contiguous intervals closed
 on the left or right, use those bins and that side, e.g. another
 histogram’s <code class="docutils literal notranslate"><span class="pre">intervals</span></code>. Its edges are rounded only when
 <code class="docutils literal notranslate"><span class="pre">precision</span></code> is given.
@@ -788,7 +788,7 @@ its bins. Other <code class="docutils literal notranslate"><span class="pre">nbi
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Data to clip. A DataFrame is clipped column by column.</p>
+<dt><strong>data</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Data to clip. A DataFrame is clipped column by column.</p>
 </dd>
 <dt><strong>clip</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bltin-boolean-values" title="(in Python v3.15)"><span class="xref std std-ref">bool</span></a> or <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>A string starting with <code class="docutils literal notranslate"><span class="pre">&quot;l&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;u&quot;</span></code> selects the lower or upper
 tail only; any other value clips both tails.</p>
@@ -797,7 +797,7 @@ tail only; any other value clips both tails.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>The clipped data.</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>The clipped data.</p>
 </dd>
 </dl>
 </dd>

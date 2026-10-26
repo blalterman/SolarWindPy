@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.icme.icmecat.ICMECAT &mdash; SolarWindPy 0.1.dev1+g06531b0ff documentation</title>
+  <title>solarwindpy.solar_activity.icme.icmecat.ICMECAT &mdash; SolarWindPy 0.1.dev1+g4a592d3b9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=926d6e5e"></script>
+      <script src="../_static/documentation_options.js?v=9d169cd3"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -337,11 +337,11 @@ SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 </dd>
 <dt class="field-even">Attributes<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.data" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Raw ICMECAT data (filtered if spacecraft specified).</p>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.data" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Raw ICMECAT data (filtered if spacecraft specified).</p>
 </dd>
-<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intervals</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Prepared intervals with computed interval_end.</p>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intervals</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Prepared intervals with computed interval_end.</p>
 </dd>
-<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strict_intervals</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Intervals with valid mo_end_time only (no fallbacks).</p>
+<dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strict_intervals</span></code></a><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></span></dt><dd><p>Intervals with valid mo_end_time only (no fallbacks).</p>
 </dd>
 <dt><a class="reference internal" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.spacecraft" title="solarwindpy.solar_activity.icme.icmecat.ICMECAT.spacecraft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spacecraft</span></code></a><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>Spacecraft filter applied, or None if full catalog.</p>
 </dd>
@@ -367,13 +367,13 @@ SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.data">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.data" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.data" title="Link to this definition"></a></dt>
 <dd><p>Raw ICMECAT data (filtered if spacecraft specified).</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">intervals</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">intervals</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.intervals" title="Link to this definition"></a></dt>
 <dd><p>Prepared intervals with computed interval_end.</p>
 <p>The interval_end column uses fallbacks:
 1. mo_end_time if available
@@ -383,7 +383,7 @@ SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">strict_intervals</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">strict_intervals</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.strict_intervals" title="Link to this definition"></a></dt>
 <dd><p>Intervals with valid mo_end_time only (no fallbacks).</p>
 </dd></dl>
 
@@ -409,18 +409,18 @@ SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.get_events_in_range">
-<span class="sig-name descname"><span class="pre">get_events_in_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.6)"><span class="pre">Timestamp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.6)"><span class="pre">Timestamp</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.get_events_in_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.get_events_in_range" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_events_in_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.1)"><span class="pre">Timestamp</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.1)"><span class="pre">Timestamp</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.get_events_in_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.get_events_in_range" title="Link to this definition"></a></dt>
 <dd><p>Get ICME events that overlap with a time range.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>start, end</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Timestamp</span></code></a></span></dt><dd><p>Time range to query.</p>
+<dt><strong>start, end</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Timestamp</span></code></a></span></dt><dd><p>Time range to query.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>Events where icme_start_time &lt;= end AND interval_end &gt;= start.</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>Events where icme_start_time &lt;= end AND interval_end &gt;= start.</p>
 </dd>
 </dl>
 </dd>
@@ -429,20 +429,20 @@ SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><span class="pre">DatetimeIndex</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><span class="pre">Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><span class="pre">Series</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.contains" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.1)"><span class="pre">DatetimeIndex</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><span class="pre">Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><span class="pre">Series</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.contains" title="Link to this definition"></a></dt>
 <dd><p>Check which timestamps fall within any ICME interval.</p>
 <p>Uses only strict intervals (events with valid mo_end_time) to ensure
 accurate containment checking.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>Timestamps to check.</p>
+<dt><strong>times</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></span></dt><dd><p>Timestamps to check.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Boolean mask, True if timestamp is within any ICME interval.
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Series</span></code></a></dt><dd><p>Boolean mask, True if timestamp is within any ICME interval.
 Index matches input times.</p>
 </dd>
 </dl>
@@ -452,12 +452,12 @@ Index matches input times.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.icme.icmecat.ICMECAT.summary">
-<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.summary" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/solarwindpy/solar_activity/icme/icmecat.html#ICMECAT.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#solarwindpy.solar_activity.icme.icmecat.ICMECAT.summary" title="Link to this definition"></a></dt>
 <dd><p>Summary statistics of ICME events.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>Single-row DataFrame with statistics including:
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></a></dt><dd><p>Single-row DataFrame with statistics including:
 - n_events: Total number of events
 - n_strict: Events with valid mo_end_time
 - date_range_start/end: Temporal coverage

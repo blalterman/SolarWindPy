@@ -7,7 +7,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema &mdash; SolarWindPy 0.1.dev1+g06531b0ff documentation</title>
+  <title>solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema &mdash; SolarWindPy 0.1.dev1+g4a592d3b9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=5d14453b" />
@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=926d6e5e"></script>
+      <script src="../_static/documentation_options.js?v=9d169cd3"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "displayMath": [["$$", "$$"], ["\\[", "\\]"]]}}</script>
@@ -336,13 +336,13 @@
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>dt</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>, optional</span></dt><dd><p>Half-width of the window around each extremum. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;365D&quot;</span></code>.</p>
+<dt><strong>dt</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>, optional</span></dt><dd><p>Half-width of the window around each extremum. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;365D&quot;</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> intervals for each cycle.</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> intervals for each cycle.</p>
 </dd>
 </dl>
 </dd>
@@ -367,7 +367,7 @@ SSN cycle.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Times to classify.</p>
+<dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Times to classify.</p>
 </dd>
 <dt><strong>tk_cycles</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice</span></code></a>, optional</span></dt><dd><p>Subset of cycles to use when cutting.</p>
 </dd>
@@ -377,7 +377,7 @@ SSN cycle.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>]</dt><dd><p>A series of intervals and a mapped series of the form <code class="docutils literal notranslate"><span class="pre">&quot;N-Min&quot;</span></code> or
+<dt><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>]</dt><dd><p>A series of intervals and a mapped series of the form <code class="docutils literal notranslate"><span class="pre">&quot;N-Min&quot;</span></code> or
 <code class="docutils literal notranslate"><span class="pre">&quot;N-Max&quot;</span></code>.</p>
 </dd>
 </dl>
@@ -392,7 +392,7 @@ SSN cycle.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Data to cut.</p>
+<dt><strong>epoch</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a></span></dt><dd><p>Data to cut.</p>
 </dd>
 <dt><strong>kind</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>If provided, restricts the cut to a subset of interval types.</p>
 <table class="docutils align-default">
@@ -429,7 +429,7 @@ Exclusive option.</p></td>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.6)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></dt><dd><p>Series of <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Interval.html#pandas.Interval" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Interval</span></code></a> objects labeling each epoch.</p>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></dt><dd><p>Series of <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Interval.html#pandas.Interval" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Interval</span></code></a> objects labeling each epoch.</p>
 </dd>
 </dl>
 </dd>
@@ -439,13 +439,13 @@ Exclusive option.</p></td>
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.cycle_intervals">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cycle_intervals</span></span><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.cycle_intervals" title="Link to this definition"></a></dt>
-<dd><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Interval.html#pandas.Interval" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Interval</span></code></a> for rising and falling edges and full cycle.</p>
+<dd><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Interval.html#pandas.Interval" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Interval</span></code></a> for rising and falling edges and full cycle.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.data">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema.data" title="Link to this definition"></a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> dates of each cycle, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Min</span></code> and <code class="docutils literal notranslate"><span class="pre">Max</span></code> dates of each cycle, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py property">
