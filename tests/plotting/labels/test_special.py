@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from pathlib import Path
 from solarwindpy.plotting.labels import special as labels_special
@@ -436,19 +438,33 @@ class TestComparisonLabel:
         with pytest.raises(ValueError):
             labels_special.ComparisonLabel(basic_texlabel, label_b, "subtract")
 
-    def test_string_labels(self):
-        """Test comparison with string labels."""
-        comp = labels_special.ComparisonLabel("labelA", "labelB", "add")
-        assert comp.labelA == "labelA"
-        assert comp.labelB == "labelB"
+    @pytest.mark.parametrize("which", ["labelA", "labelB"])
+    def test_string_label_raises_type_error_suggesting_manual_label(
+        self, basic_texlabel, which
+    ):
+        """A plain string for either label is refused, naming ``ManualLabel``.
 
-    def test_type_validation(self):
-        """Test type validation for labels."""
-        with pytest.raises(TypeError):
-            labels_special.ComparisonLabel(123, "labelB", "add")
+        Author decision (2026-10-16): ``ComparisonLabel`` requires label objects.
 
-        with pytest.raises(TypeError):
-            labels_special.ComparisonLabel("labelA", 456, "add")
+        ON FAILURE: the code is wrong.
+        """
+        args = {"labelA": basic_texlabel, "labelB": basic_texlabel, which: "n_p"}
+        expected = (
+            f"{which} must be a solarwindpy.plotting.labels.base.Base "
+            "(e.g. TeXlabel or ManualLabel), got str: 'n_p'"
+        )
+        with pytest.raises(TypeError, match=f"^{re.escape(expected)}$"):
+            labels_special.ComparisonLabel(args["labelA"], args["labelB"], "add")
+
+    def test_non_label_raises_type_error(self, basic_texlabel):
+        """A number for either label is refused with a TypeError.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(TypeError, match="^labelA must be .* got int: 123$"):
+            labels_special.ComparisonLabel(123, basic_texlabel, "add")
+        with pytest.raises(TypeError, match="^labelB must be .* got int: 456$"):
+            labels_special.ComparisonLabel(basic_texlabel, 456, "add")
 
 
 class TestXcorr:
@@ -532,10 +548,25 @@ class TestLabelIntegration:
     """Test integration between different label types."""
 
     def test_mixed_label_comparison(self, basic_texlabel):
-        """Test comparison using mixed label types."""
+        """A ``TeXlabel`` and a ``ManualLabel`` in the same units combine, sharing them.
+
+        ``ManualLabel`` exposes ``units`` (author decision 2026-10-16), so its
+        units take part in the same-units check.
+
+        ON FAILURE: the code is wrong.
+        """
+        manual = labels_special.ManualLabel("Custom", "kms")
+        comp = labels_special.ComparisonLabel(basic_texlabel, manual, "add")
+        assert comp.units == r"\mathrm{km \; s^{-1}}"
+
+    def test_mixed_label_comparison_in_different_units_raises(self, basic_texlabel):
+        """A ``ManualLabel`` in other units than the ``TeXlabel`` is refused.
+
+        ON FAILURE: the code is wrong.
+        """
         manual = labels_special.ManualLabel("Custom", "units")
-        # Verify construction succeeds (result intentionally unused)
-        labels_special.ComparisonLabel(basic_texlabel, manual, "add")
+        with pytest.raises(ValueError, match="they must be the same"):
+            labels_special.ComparisonLabel(basic_texlabel, manual, "add")
 
     def test_probability_with_manual_label(self):
         """Test probability with manual label."""
@@ -576,3 +607,458 @@ def test_label_object_other_label_is_stored(name, basic_texlabel):
     ON FAILURE: the code is wrong.
     """
     assert _WRAPS_OTHER_LABEL[name](basic_texlabel).other_label is basic_texlabel
+
+
+# ---------------------------------------------------------------------------
+# Exact strings. Each expected value is the class's format string filled by
+# hand from the wrapped label: TeXlabel(("n", "", "p1")) has tex "n_{p_1}",
+# units "\mathrm{cm}^{-3}" and path "n_p1" (default template, species table).
+# ---------------------------------------------------------------------------
+
+_N_P1 = ("n", "", "p1")
+
+
+@pytest.fixture()
+def n_p1():
+    """``TeXlabel`` for proton-1 density: tex ``n_{p_1}``, path ``n_p1``."""
+    return labels_base.TeXlabel(_N_P1)
+
+
+_COMPARISONS = [
+    ("> 5", "GT_5"),
+    ("< 5", "LT_5"),
+    (">= 5", "GEQ_5"),
+    ("<= 5", "LEQ_5"),
+    (r"\gt 5", "GT_5"),
+    (r"\lt 5", "LT_5"),
+    (r"\geq 5", "GEQ_5"),
+    (r"\leq 5", "LEQ_5"),
+    (r"\neq 5", "NEQ_5"),
+    (r"\eq 5", "EQ_5"),
+    ("== 5", "EQ_5"),
+    ("!= 5", "NEQ_5"),
+]
+
+
+@pytest.mark.parametrize("comparison, spelled", _COMPARISONS)
+@pytest.mark.parametrize(
+    "cls, prefix",
+    [(labels_special.Probability, "prob"), (labels_special.CountOther, "cnt")],
+    ids=["Probability", "CountOther"],
+)
+def test_comparison_path_spells_operator_and_replaces_spaces(
+    n_p1, cls, prefix, comparison, spelled
+):
+    """The save path spells the operator in capitals and writes spaces as ``_``.
+
+    Author decisions (2026-10-16): ``>=`` and ``<=`` map to GEQ and LEQ, and
+    CountOther paths replace spaces as Probability does.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = cls(n_p1, comparison)
+    assert label.path == Path(f"{prefix}-n_p1-{spelled}")
+
+
+def test_wrapped_label_path_spaces_become_dashes(n_p1):
+    """A space in the wrapped label's path is written ``-`` in the save path.
+
+    ON FAILURE: the code is wrong.
+    """
+    other = labels_special.ManualLabel("x", "", path="a b")
+    assert labels_special.Probability(other, "> 5").path == Path("prob-a-b-GT_5")
+    assert labels_special.CountOther(other, "> 5").path == Path("cnt-a-b-GT_5")
+
+
+def test_probability_tex_units_and_string(n_p1):
+    r"""``Probability`` reads ``\mathrm{Prob.}(<tex> <comparison>)`` in percent, spaces as ``\,``.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.Probability(n_p1, "> 5")
+    assert label.tex == r"\mathrm{Prob.}(n_{p_1} \, > \, 5)"
+    assert str(label) == r"$\mathrm{Prob.}(n_{p_1} \, > \, 5) \; [\%]$"
+
+
+def test_count_other_tex_and_both_string_forms(n_p1):
+    r"""``CountOther`` reads ``\mathrm{Count.}(<tex> <comparison>)`` in counts.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.CountOther(n_p1, "> 5")
+    assert label.tex == r"\mathrm{Count.}(n_{p_1} \, > \, 5)"
+    assert str(label) == r"$\mathrm{Count.}(n_{p_1} \, > \, 5) \; [\#]$"
+    two_lines = labels_special.CountOther(n_p1, "> 5", new_line_for_units=True)
+    assert str(two_lines) == (r"$\mathrm{Count.}(n_{p_1} \, > \, 5) $" "\n" r"$ [\#]$")
+
+
+def test_count_other_without_comparison_stores_empty_string(n_p1):
+    """A missing comparison is stored as the empty string.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_special.CountOther(n_p1).comparison == ""
+
+
+@pytest.mark.parametrize(
+    "norm, tex, path",
+    [
+        (None, r"\mathrm{Count}", "count"),
+        ("c", r"\mathrm{Col. \, Norm \, Count}", "count/Cnorm"),
+        ("r", r"\mathrm{Row \, Norm \, Count}", "count/Rnorm"),
+        ("t", r"\mathrm{Total \, Norm \, Count}", "count/Tnorm"),
+        ("d", r"\mathrm{Probability \, Density}", "count/Dnorm"),
+        ("cd", r"\mathrm{1D \, Probability \, Density}", "count/CDnorm"),
+        ("rd", r"\mathrm{1D \, Probability \, Density}", "count/RDnorm"),
+    ],
+)
+def test_count_tex_and_path_per_normalization(norm, tex, path):
+    r"""``Count`` names its normalization in ``tex`` (spaces as ``\,``) and in ``path``.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.Count(norm)
+    assert label.tex == tex
+    assert label.path == Path(path)
+    assert str(label) == rf"${tex} \; [\#]$"
+
+
+def test_math_fcn_tex_units_and_both_string_forms(n_p1):
+    r"""``MathFcn`` reads ``\mathrm{<fcn>}(<tex>)``, dimensionless unless told otherwise.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.MathFcn("log", n_p1)
+    assert label.tex == r"\mathrm{log}(n_{p_1})"
+    assert str(label) == r"$\mathrm{log}(n_{p_1}) \; \left[\mathrm{\#}\right]$"
+    two_lines = labels_special.MathFcn("log", n_p1, new_line_for_units=True)
+    assert str(two_lines) == (
+        r"$\mathrm{log}(n_{p_1}) $" "\n" r"$ \left[\mathrm{\#}\right]$"
+    )
+    dimensional = labels_special.MathFcn("log", n_p1, dimensionless=False)
+    assert dimensional.units == r"\mathrm{log}\left(\mathrm{cm}^{-3}\right)"
+
+
+def test_math_fcn_spaces_in_wrapped_tex_become_thin_spaces():
+    r"""A space in the wrapped label's TeX is written ``\,``.
+
+    ON FAILURE: the code is wrong.
+    """
+    other = labels_special.ManualLabel("a b", "")
+    assert labels_special.MathFcn("log", other).tex == r"\mathrm{log}(a \, b)"
+
+
+@pytest.mark.parametrize(
+    "fcn, path",
+    [
+        (r"\mathrm{log_{10}}", "log_10-n_p1"),
+        (r"\ln", "ln-n_p1"),
+        ("a/b", "a-OV-b-n_p1"),
+    ],
+    ids=["mathrm-braces", "backslash", "slash"],
+)
+def test_math_fcn_path_strips_tex_from_function_name(n_p1, fcn, path):
+    r"""The save path drops ``\mathrm``, braces and backslashes and writes ``/`` as ``-OV-``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_special.MathFcn(fcn, n_p1).path == Path(path)
+
+
+def test_math_fcn_none_function_is_empty_string(n_p1):
+    """``set_function(None)`` stores the empty string, as documented.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_special.MathFcn(None, n_p1).function == ""
+
+
+def test_absolute_value_tex_units_path_and_both_string_forms(n_p1):
+    r"""``AbsoluteValue`` wraps ``tex`` in ``\left| \right|`` and keeps the units.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.AbsoluteValue(n_p1)
+    assert label.tex == r"\left|n_{p_1}\right|"
+    assert label.units == r"\mathrm{cm}^{-3}"
+    assert label.path == Path("abs-n_p1")
+    assert str(label) == r"$\left|n_{p_1}\right| \; \left[\mathrm{cm}^{-3}\right]$"
+    two_lines = labels_special.AbsoluteValue(n_p1, new_line_for_units=1)
+    assert two_lines.new_line_for_units is True
+    assert str(two_lines) == (
+        r"$\left|n_{p_1}\right| $" "\n" r"$ \left[\mathrm{cm}^{-3}\right]$"
+    )
+
+
+def test_fixed_special_labels_print_exact_strings():
+    """``Vsw``, ``CarringtonRotation``, ``Power``, ``Distance2Sun`` and ``SSN`` strings.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert str(labels_special.Vsw()) == (
+        r"$V_\mathrm{SW} \; \left[\mathrm{km \, s^{-1}}\right]$"
+    )
+    assert str(labels_special.CarringtonRotation()) == r"$\mathrm{CR} \; [\#]$"
+    long_cr = labels_special.CarringtonRotation(short_label=False)
+    assert long_cr.tex == r"\mathrm{Carrington \; Rotation}"
+    assert str(labels_special.Power()) == r"$\mathrm{Power} \; [\mathrm{\#}]$"
+    assert str(labels_special.Distance2Sun("m")) == (
+        r"$\mathrm{Distance \; to \; Sun} \; [\mathrm{m}]$"
+    )
+    assert str(labels_special.SSN("M13")) == (
+        r"$\mathrm{13 \; Month \; Smoothed \; SSN} \; [\#]$"
+    )
+
+
+def test_distance2sun_unknown_units_error_names_them():
+    """An unknown distance unit raises NotImplementedError naming it.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(
+        NotImplementedError, match="^Unrecognized distance2sun units furlong$"
+    ):
+        labels_special.Distance2Sun("furlong")
+
+
+def test_wrapping_label_type_error_message_is_exact():
+    """The TypeError for a non-label ``other_label`` names the type and suggests labels.
+
+    ON FAILURE: the code is wrong.
+    """
+    expected = (
+        "other_label must be a solarwindpy.plotting.labels.base.Base "
+        "(e.g. TeXlabel or ManualLabel), got str: 'n_p'"
+    )
+    with pytest.raises(TypeError, match=f"^{re.escape(expected)}$"):
+        labels_special.Probability("n_p")
+
+
+class TestManualLabelUnits:
+    """``ManualLabel`` exposes ``units`` and ``with_units`` like every label."""
+
+    def test_units_and_with_units(self):
+        r"""``units`` is the translated unit; ``with_units`` wraps tex in ``\mathrm``.
+
+        Author decision (2026-10-16): ``ManualLabel`` exposes ``units`` and
+        ``with_units``; before it, both raised AttributeError.
+
+        ON FAILURE: the code is wrong.
+        """
+        label = labels_special.ManualLabel("Test Label", "b")
+        assert label.units == r"\mathrm{nT}"
+        assert label.with_units == r"$\mathrm{Test \; Label} \; [\mathrm{nT}]$"
+        assert str(label) == label.with_units
+
+    def test_empty_units_leave_no_trailing_space(self):
+        """With empty units the label is the bare TeX, without a trailing space.
+
+        Author decision (2026-10-16).
+
+        ON FAILURE: the code is wrong.
+        """
+        assert str(labels_special.ManualLabel("Test", "")) == r"$\mathrm{Test}$"
+
+    def test_dollar_signs_are_stripped_from_tex_and_units(self):
+        """Surrounding ``$`` are stripped from tex and units, and nothing else.
+
+        ON FAILURE: the code is wrong.
+        """
+        label = labels_special.ManualLabel("$X$", "$X$")
+        assert label.tex == "X"
+        assert label.units == "X"
+
+
+class TestComparisonLabelStrings:
+    """Exact TeX, units, paths and errors of ``ComparisonLabel``."""
+
+    @pytest.fixture()
+    def n_a(self):
+        r"""``TeXlabel`` for alpha density: tex ``n_{\alpha}``, path ``n_a``."""
+        return labels_base.TeXlabel(("n", "", "a"))
+
+    @pytest.mark.parametrize(
+        "name, tex",
+        [
+            ("subtract", r"{n_{\alpha}} - {n_{p_1}}"),
+            ("add", r"{n_{\alpha}} + {n_{p_1}}"),
+            ("multiply", r"{n_{\alpha}} \times {n_{p_1}}"),
+        ],
+    )
+    def test_built_in_functions(self, n_a, n_p1, name, tex):
+        """Each built-in function fills its template with both labels' TeX.
+
+        ON FAILURE: the code is wrong.
+        """
+        label = labels_special.ComparisonLabel(n_a, n_p1, name)
+        assert label.tex == tex
+        assert label.units == r"\mathrm{cm}^{-3}"
+        assert label.path == Path(f"{name}-n_a-n_p1")
+        assert str(label) == rf"${tex} \; [\mathrm{{cm}}^{{-3}}]$"
+
+    def test_repeated_thin_spaces_collapse_to_one(self, n_a, n_p1):
+        r"""Runs of ``\,`` in the filled template collapse to one, including at the start.
+
+        ON FAILURE: the code is wrong.
+        """
+        fcn = r"\,\,{$labelA}\,\,\,{$labelB}"
+        label = labels_special.ComparisonLabel(n_a, n_p1, "f", fcn)
+        assert label.tex == r"\,{n_{\alpha}}\,{n_{p_1}}"
+
+    def test_path_strips_tex_spacing(self):
+        r"""TeX spacing commands in either label's path are dropped and spaces become ``-``.
+
+        Author decision (2026-10-16): ComparisonLabel paths strip TeX spacing.
+
+        ON FAILURE: the code is wrong.
+        """
+        a = labels_special.ManualLabel("A", "kms", path=r"n \; p")
+        b = labels_special.ManualLabel("B", "kms", path=r"b\,c")
+        label = labels_special.ComparisonLabel(a, b, "subtract")
+        assert label.path == Path("subtract-n-p-b-c")
+
+    def test_label_without_units_gives_unknown_units(self, n_a):
+        """If either label has no units, the comparison's units are ``???``.
+
+        ON FAILURE: the code is wrong.
+        """
+        from solarwindpy.plotting.labels.datetime import DateTime
+
+        label = labels_special.ComparisonLabel(n_a, DateTime("Year"), "subtract")
+        assert label.units == "???"
+
+    def test_different_units_error_names_both(self, n_a):
+        """Different units raise ValueError naming each label's units.
+
+        ON FAILURE: the code is wrong.
+        """
+        v = labels_base.TeXlabel(("v", "x", "p"))
+        expected = (
+            "If both ComparisonLabel labels have units, they must be the same.\n"
+            "labelA : \\mathrm{cm}^{-3}\n"
+            "labelB : \\mathrm{km \\; s^{-1}}\n"
+        )
+        with pytest.raises(ValueError) as excinfo:
+            labels_special.ComparisonLabel(n_a, v, "subtract")
+        assert str(excinfo.value) == expected
+
+    def test_unknown_function_name_raises_value_error(self, n_a, n_p1):
+        """A name with no built-in template and no ``fcn`` raises ValueError.
+
+        Author decision (2026-10-16): ``set_function`` raises its intended
+        ValueError; before the fix this was a TypeError from parsing None.
+
+        ON FAILURE: the code is wrong.
+        """
+        expected = (
+            "ComparisonLabel has no built-in function 'divide'; pass fcn or use "
+            "one of add, multiply, subtract."
+        )
+        with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
+            labels_special.ComparisonLabel(n_a, n_p1, "divide")
+
+    @pytest.mark.parametrize(
+        "fcn, keys",
+        [
+            ("$labelA / $labelB", ""),
+            (r"{$labelA} - x", "$labelA"),
+            (r"{$invalid} + {$keys}", "$invalid,$keys"),
+        ],
+        ids=["no-braced-keys", "one-key", "two-wrong-keys"],
+    )
+    def test_template_missing_a_key_raises_value_error(self, n_a, n_p1, fcn, keys):
+        """A template lacking either braced key raises ValueError listing the keys found.
+
+        Author decision (2026-10-16): ``set_function`` raises its intended
+        ValueError; a template with no braced key used to raise TypeError.
+
+        ON FAILURE: the code is wrong.
+        """
+        expected = (
+            "ComparisonLabel's function must have the keys "
+            f'"$labelA" and "$labelB".\nkeys : {keys}\n'
+        )
+        with pytest.raises(ValueError) as excinfo:
+            labels_special.ComparisonLabel(n_a, n_p1, "f", fcn)
+        assert str(excinfo.value) == expected
+
+
+class TestXcorrStrings:
+    """Exact TeX, strings and paths of ``Xcorr``."""
+
+    def test_long_and_short_tex_from_labels(self, n_p1):
+        """Long TeX names the method; short TeX is rho with its initial.
+
+        ON FAILURE: the code is wrong.
+        """
+        v = labels_base.TeXlabel(("v", "x", "a"))
+        long_form = labels_special.Xcorr(n_p1, v, "pearson")
+        assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}})"
+        assert str(long_form) == (
+            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}}) \; [\#]$"
+        )
+        assert long_form.path == Path("XcorrPearson-n_p1-v_x_a")
+        short = labels_special.Xcorr(n_p1, v, "pearson", short_tex=True)
+        assert short.tex == r"\rho_{P}(n_{p_1},{v}_{{X};{\alpha}})"
+
+    def test_string_constituents_spaces_and_tex_spacing(self):
+        r"""Spaces in string constituents become one ``\,`` in TeX and ``-`` in the path.
+
+        Author decision (2026-10-16): Xcorr paths strip TeX spacing.
+
+        ON FAILURE: the code is wrong.
+        """
+        label = labels_special.Xcorr("a b", r"c \, d", "kendall", short_tex=True)
+        assert label.tex == r"\rho_{K}(a\,b,c\,d)"
+        assert label.path == Path("XcorrKendall-a-b-c-d")
+
+
+def _all_label_factories():
+    """One factory per public label class, each taking ``description``."""
+    from solarwindpy.plotting.labels import composition, datetime
+    from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
+
+    n = labels_base.TeXlabel(_N_P1)
+    return {
+        "TeXlabel": lambda d: labels_base.TeXlabel(_N_P1, description=d),
+        "ManualLabel": lambda d: labels_special.ManualLabel("M", "b", description=d),
+        "Vsw": lambda d: labels_special.Vsw(description=d),
+        "CarringtonRotation": lambda d: labels_special.CarringtonRotation(
+            description=d
+        ),
+        "Count": lambda d: labels_special.Count(description=d),
+        "Power": lambda d: labels_special.Power(description=d),
+        "Probability": lambda d: labels_special.Probability(n, "> 5", description=d),
+        "CountOther": lambda d: labels_special.CountOther(n, "> 5", description=d),
+        "MathFcn": lambda d: labels_special.MathFcn("log", n, description=d),
+        "AbsoluteValue": lambda d: labels_special.AbsoluteValue(n, description=d),
+        "Distance2Sun": lambda d: labels_special.Distance2Sun("m", description=d),
+        "SSN": lambda d: labels_special.SSN("M", description=d),
+        "ComparisonLabel": lambda d: labels_special.ComparisonLabel(
+            n, n, "subtract", description=d
+        ),
+        "Xcorr": lambda d: labels_special.Xcorr(n, n, "pearson", description=d),
+        "Timedelta": lambda d: datetime.Timedelta("1h", description=d),
+        "DateTime": lambda d: datetime.DateTime("Year", description=d),
+        "Epoch": lambda d: datetime.Epoch("hour", "day", description=d),
+        "Frequency": lambda d: datetime.Frequency("1h", description=d),
+        "January1st": lambda d: datetime.January1st(description=d),
+        "Ion": lambda d: composition.Ion("O", 6, description=d),
+        "ChargeStateRatio": lambda d: composition.ChargeStateRatio(
+            ("O", 7), ("O", 6), description=d
+        ),
+        "ElementalAbundance": lambda d: ElementalAbundance("Fe", "O", description=d),
+    }
+
+
+@pytest.mark.parametrize("name", sorted(_all_label_factories()))
+def test_description_argument_is_printed_above_the_label(name):
+    """A ``description`` passed to the constructor heads the label on its own line.
+
+    The expected string is the same label built without a description,
+    prefixed by the description and a newline (``Base._format_with_description``).
+
+    ON FAILURE: the code is wrong.
+    """
+    factory = _all_label_factories()[name]
+    assert str(factory("Protons")) == "Protons\n" + str(factory(None))

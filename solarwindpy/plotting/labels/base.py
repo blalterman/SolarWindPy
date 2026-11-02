@@ -131,6 +131,8 @@ _trans_units = {
     "deg": _inU["deg"],
     "cos": _inU["dimless"],
     "cos_theta": _inU["dimless"],
+    "cos_phi": _inU["dimless"],
+    "ratio": _inU["dimless"],
     # Timestamps.
     "year": r"\mathrm{Year}",
     "fdoy": r"\mathrm{fdoy}",
@@ -152,9 +154,11 @@ _trans_units = {
     "T": r"10^5 \, \mathrm{K}",
     "q": r"\mathrm{\mu W \, m^{-2}}",  # heat flux,
     "qhat": _inU["dimless"],  # normalized heat flux
+    "Qhat": _inU["dimless"],  # normalized heat flux
     "Wk": r"\mathrm{\mu W \, m^{-2}}",  # kinetic energy flux
     "R": r"\perp/\parallel",
     "beta": _inU["dimless"],
+    "dbeta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
     "S": r"\mathrm{eV \, cm^2 \, m_p^{-5/3}}",  # Specific Entropy
@@ -191,6 +195,7 @@ _trans_units = {
     "gamma": _inU["Hz"],
     "gamma_max": _inU["Hz"],
     "gyro_freq": _inU["Hz"],
+    "eth": r"\mathrm{eV}",
     "kvec": _inU["dimless"],
     "k": _inU["dimless"],
     "insta_power": _inU["unknown"],
@@ -536,8 +541,6 @@ class TeXlabel(Base):
                 ]
             )
             .replace(",", "")
-            .replace(",{", "{")
-            .replace("{,", "{")
             .replace("__", "_")
             .replace(".", "")
             .strip("_")
@@ -577,12 +580,8 @@ class TeXlabel(Base):
             .replace(",}", "}")
             .replace("{,", "{")
             .replace(";}", "}")
-            .replace("};{}", "}")
-            .replace("};}", "}}")
-            .replace(";}", "}")
             .replace("_{}", "")
             .rstrip("_")
-            .strip(" ")
             .strip(" ")
         )
 
