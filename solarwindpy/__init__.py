@@ -56,18 +56,6 @@ def _check_docstring_inheritance() -> None:
 
 _check_docstring_inheritance()
 
-
-def _configure_pandas() -> None:
-    """Configure global pandas options used throughout SolarWindPy."""
-    # Imported here, not at module level, so ``solarwindpy`` binds no
-    # third-party names.
-    import pandas as pd
-
-    pd.set_option("mode.chained_assignment", "raise")
-
-
-_configure_pandas()
-
 # ``pp`` is the one temporary nickname in the package: every other public
 # object has exactly one import path, the module that defines it. It stays
 # only until the author's analysis code migrates to ``solarwindpy.plotting``.

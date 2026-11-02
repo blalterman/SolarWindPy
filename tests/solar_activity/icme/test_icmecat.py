@@ -83,7 +83,7 @@ class TestICMECATInitialization:
         cat = ICMECAT(spacecraft="Ulysses")
         assert cat.spacecraft == "Ulysses"
         assert cat.data["icmecat_id"].tolist() == ULYSSES_IDS
-        assert cat.intervals["icmecat_id"].tolist() == ULYSSES_IDS
+        assert cat.estimated_intervals["icmecat_id"].tolist() == ULYSSES_IDS
 
     def test_init_without_spacecraft_keeps_all(self, serve_catalog):
         """ICMECAT() without a spacecraft keeps every spacecraft.
@@ -135,7 +135,7 @@ class TestICMECATDataProperty:
 
 
 class TestICMECATIntervalsProperty:
-    """ICMECAT.intervals carries a computed interval_end."""
+    """ICMECAT.estimated_intervals carries a computed interval_end."""
 
     def test_intervals_has_documented_columns(self, serve_catalog):
         """intervals carries the event id, the three times, and interval_end.
@@ -151,8 +151,8 @@ class TestICMECATIntervalsProperty:
             "mo_end_time",
             "interval_end",
         }
-        assert required <= set(cat.intervals.columns)
-        assert cat.intervals["icmecat_id"].tolist() == ALL_IDS
+        assert required <= set(cat.estimated_intervals.columns)
+        assert cat.estimated_intervals["icmecat_id"].tolist() == ALL_IDS
 
     def test_interval_end_matches_hand_computed_fallbacks(self, serve_catalog):
         """interval_end is mo_end, else mo_start + 24 h, else icme_start + 24 h.
@@ -163,7 +163,7 @@ class TestICMECATIntervalsProperty:
         """
         serve_catalog()
         cat = ICMECAT()
-        assert cat.intervals["interval_end"].tolist() == INTERVAL_END
+        assert cat.estimated_intervals["interval_end"].tolist() == INTERVAL_END
 
     def test_interval_end_dtype_datetime(self, serve_catalog):
         """interval_end is datetime64.
@@ -172,7 +172,9 @@ class TestICMECATIntervalsProperty:
         """
         serve_catalog()
         cat = ICMECAT()
-        assert pd.api.types.is_datetime64_any_dtype(cat.intervals["interval_end"])
+        assert pd.api.types.is_datetime64_any_dtype(
+            cat.estimated_intervals["interval_end"]
+        )
 
 
 class TestICMECATIntervalFallbacks:
@@ -185,7 +187,7 @@ class TestICMECATIntervalFallbacks:
         """
         serve_catalog(catalog.iloc[[0]])
         cat = ICMECAT()
-        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-15")
+        assert cat.estimated_intervals.iloc[0]["interval_end"] == T("2000-01-15")
 
     def test_fallback_mo_start_plus_24h(self, serve_catalog):
         """mo_end_time missing: interval_end = mo_start_time + 24 h.
@@ -203,7 +205,7 @@ class TestICMECATIntervalFallbacks:
         )
         serve_catalog(data)
         cat = ICMECAT()
-        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-03")
+        assert cat.estimated_intervals.iloc[0]["interval_end"] == T("2000-01-03")
 
     def test_fallback_icme_start_plus_24h(self, serve_catalog):
         """mo_end_time and mo_start_time missing: interval_end = icme_start + 24 h.
@@ -221,7 +223,7 @@ class TestICMECATIntervalFallbacks:
         )
         serve_catalog(data)
         cat = ICMECAT()
-        assert cat.intervals.iloc[0]["interval_end"] == T("2000-01-02")
+        assert cat.estimated_intervals.iloc[0]["interval_end"] == T("2000-01-02")
 
 
 class TestICMECATStrictIntervals:
@@ -244,7 +246,7 @@ class TestICMECATStrictIntervals:
         serve_catalog()
         cat = ICMECAT()
         strict = cat.strict_intervals
-        pd.testing.assert_frame_equal(strict, cat.intervals.loc[strict.index])
+        pd.testing.assert_frame_equal(strict, cat.estimated_intervals.loc[strict.index])
 
     def test_strict_intervals_returns_copy(self, serve_catalog):
         """Writing to strict_intervals leaves intervals unchanged.
@@ -256,7 +258,7 @@ class TestICMECATStrictIntervals:
         strict = cat.strict_intervals
         assert strict.iloc[0]["icmecat_id"] == "U1"
         strict.iloc[0, strict.columns.get_loc("icmecat_id")] = "MODIFIED"
-        assert cat.intervals.iloc[0]["icmecat_id"] == "U1"
+        assert cat.estimated_intervals.iloc[0]["icmecat_id"] == "U1"
         assert cat.strict_intervals.iloc[0]["icmecat_id"] == "U1"
 
 
@@ -312,7 +314,7 @@ class TestICMECATFilter:
         serve_catalog()
         filtered = ICMECAT().filter("ulysses")
         assert filtered.data["icmecat_id"].tolist() == ULYSSES_IDS
-        assert filtered.intervals["interval_end"].tolist() == INTERVAL_END[:3]
+        assert filtered.estimated_intervals["interval_end"].tolist() == INTERVAL_END[:3]
 
     def test_filter_unknown_spacecraft_empty(self, serve_catalog):
         """filter() with a spacecraft absent from the catalog returns no events.
@@ -322,7 +324,7 @@ class TestICMECATFilter:
         serve_catalog()
         filtered = ICMECAT().filter("NONEXISTENT")
         assert len(filtered) == 0
-        assert len(filtered.intervals) == 0
+        assert len(filtered.estimated_intervals) == 0
 
 
 class TestICMECATContains:
@@ -544,7 +546,7 @@ class TestICMECATEdgeCases:
         serve_catalog()
         cat = ICMECAT(spacecraft="NONEXISTENT")
         assert len(cat) == 0
-        assert len(cat.intervals) == 0
+        assert len(cat.estimated_intervals) == 0
         assert len(cat.strict_intervals) == 0
         times = pd.Series([T("2000-01-12")])
         assert cat.contains(times).tolist() == [False]
@@ -569,7 +571,7 @@ class TestICMECATEdgeCases:
         serve_catalog(data)
         cat = ICMECAT()
         # A: mo_start + 24 h; B: icme_start + 24 h.
-        assert cat.intervals["interval_end"].tolist() == [
+        assert cat.estimated_intervals["interval_end"].tolist() == [
             T("2000-01-03"),
             T("2000-02-02"),
         ]
@@ -628,7 +630,7 @@ class TestICMECATDownloadAndCache:
         cat = ICMECAT(cache_dir=cache_dir)
         pd.testing.assert_frame_equal(cat.data, downloaded.data, check_exact=True)
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
-        assert cat.intervals["interval_end"].tolist() == INTERVAL_END
+        assert cat.estimated_intervals["interval_end"].tolist() == INTERVAL_END
 
     def test_stale_cache_served_with_warning_when_download_fails(
         self, serve_catalog, tmp_path, monkeypatch
@@ -646,3 +648,199 @@ class TestICMECATDownloadAndCache:
         with pytest.warns(UserWarning, match="serving cached data that is 40 days old"):
             cat = ICMECAT(cache_dir=cache_dir)
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
+
+    def test_fresh_cache_wins_over_a_reachable_catalog(
+        self, serve_catalog, catalog, tmp_path
+    ):
+        """A cache younger than 30 days is read instead of downloading again.
+
+        Chosen input: after the cache is written, ICMECAT_URL serves a
+        different, one-event catalog, so a download would change the events.
+
+        ON FAILURE: the code is wrong.
+        """
+        cache_dir = tmp_path / "cache"
+        serve_catalog()
+        ICMECAT(cache_dir=cache_dir)
+        serve_catalog(catalog.iloc[[5]])
+        cat = ICMECAT(cache_dir=cache_dir)
+        assert cat.data["icmecat_id"].tolist() == ALL_IDS
+
+    def test_download_creates_a_missing_nested_cache_directory(
+        self, serve_catalog, tmp_path
+    ):
+        """A cache directory that does not exist yet, parents included, is created.
+
+        ON FAILURE: the code is wrong.
+        """
+        cache_dir = tmp_path / "a" / "b"
+        serve_catalog()
+        ICMECAT(cache_dir=cache_dir)
+        assert (cache_dir / "icmecat.csv").is_file()
+
+    def test_download_writes_into_an_existing_empty_cache_directory(
+        self, serve_catalog, tmp_path
+    ):
+        """An existing cache directory without a cache file is written into.
+
+        ON FAILURE: the code is wrong.
+        """
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        serve_catalog()
+        ICMECAT(cache_dir=cache_dir)
+        assert (cache_dir / "icmecat.csv").is_file()
+
+
+class TestICMECATGetEventsInRange:
+    """get_events_in_range() finds events overlapping a time range.
+
+    It uses recorded intervals only, icme_start_time to mo_end_time (author
+    decision 2026-10-16): U1 01-10..01-15, U2 02-15..02-20, W2 05-01..05-04,
+    S1 06-01..06-03.
+    """
+
+    def test_events_overlapping_the_range_are_returned(self, serve_catalog):
+        """A range from 01-14 to 02-16 overlaps U1's end and U2's start.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        got = ICMECAT().get_events_in_range(T("2000-01-14"), T("2000-02-16"))
+        assert got["icmecat_id"].tolist() == ["U1", "U2"]
+
+    def test_range_boundaries_are_inclusive(self, serve_catalog):
+        """A range starting at U1's mo_end and ending at U2's start finds both.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        got = ICMECAT().get_events_in_range(T("2000-01-15"), T("2000-02-15"))
+        assert got["icmecat_id"].tolist() == ["U1", "U2"]
+
+    def test_events_with_only_an_estimated_end_are_not_returned(self, serve_catalog):
+        """U3 and W1 overlap 03-21..04-01 12:00 only through estimated ends.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        got = ICMECAT().get_events_in_range(T("2000-03-21"), T("2000-04-01 12:00"))
+        assert got.empty
+
+    def test_a_range_between_events_finds_none(self, serve_catalog):
+        """No event overlaps 01-16..02-14.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().get_events_in_range(T("2000-01-16"), T("2000-02-14")).empty
+
+
+class TestICMECATSmallCatalogs:
+    """One-event and empty catalogs behave like larger ones."""
+
+    def test_a_one_event_catalog_contains_times_inside_its_event(
+        self, serve_catalog, catalog
+    ):
+        """With only U1 (01-10..01-15), 01-12 is inside and 01-20 is not.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog(catalog.iloc[[0]])
+        times = pd.Series([T("2000-01-12"), T("2000-01-20")])
+        assert ICMECAT().contains(times).tolist() == [True, False]
+
+    def test_a_one_event_summary_reports_that_event(self, serve_catalog, catalog):
+        """With only U1, the summary counts one event lasting 120 hours.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog(catalog.iloc[[0]])
+        row = ICMECAT().summary().iloc[0]
+        assert row["n_events"] == 1
+        assert row["n_strict"] == 1
+        # Whole hours from whole-hour timestamps: 01-10 to 01-15.
+        assert row["duration_max_hours"] == exact(120.0)
+
+    def test_an_empty_summary_has_the_columns_of_a_full_one(self, serve_catalog):
+        """The empty catalog's summary has the same columns, with zero counts.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        full = ICMECAT().filter("Wind").summary()
+        empty = ICMECAT().filter("NONEXISTENT").summary()
+        assert empty.columns.tolist() == full.columns.tolist()
+        assert empty["n_events"].iloc[0] == 0
+        assert empty["n_strict"].iloc[0] == 0
+
+    def test_contains_on_an_empty_catalog_keeps_the_callers_index(self, serve_catalog):
+        """An empty catalog flags nothing and returns the caller's index.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        times = pd.DatetimeIndex(["2000-01-12", "2000-07-01"])
+        result = ICMECAT(spacecraft="NONEXISTENT").contains(times)
+        assert result.tolist() == [False, False]
+        assert result.index.equals(times)
+
+    def test_contains_with_no_recorded_end_keeps_the_callers_index(
+        self, serve_catalog, catalog
+    ):
+        """A catalog whose events all lack mo_end_time returns the caller's index.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog(catalog.iloc[[2, 3]])
+        times = pd.DatetimeIndex(["2000-03-21", "2000-04-01 12:00"])
+        result = ICMECAT().contains(times)
+        assert result.tolist() == [False, False]
+        assert result.index.equals(times)
+
+    def test_empty_estimated_intervals_have_a_datetime_interval_end(
+        self, serve_catalog
+    ):
+        """An empty catalog's estimated intervals still carry a datetime interval_end.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        intervals = ICMECAT(spacecraft="NONEXISTENT").estimated_intervals
+        assert "interval_end" in intervals.columns
+        assert pd.api.types.is_datetime64_any_dtype(intervals["interval_end"])
+
+
+class TestICMECATNamesAndPositions:
+    """Spacecraft name matching, logger name and position columns."""
+
+    def test_filter_matches_a_mixed_case_spelling(self, serve_catalog):
+        """filter("Ulysses") finds the catalog's "ULYSSES" events.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        filtered = ICMECAT().filter("Ulysses")
+        assert filtered.data["icmecat_id"].tolist() == ULYSSES_IDS
+
+    def test_logger_sits_under_the_solarwindpy_logger(self, serve_catalog):
+        """The catalog logs under ``solarwindpy``, named for its module and class.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        assert ICMECAT().logger.name == (
+            "solarwindpy.solar_activity.icme.icmecat.ICMECAT"
+        )
+
+    def test_estimated_intervals_carry_the_spacecraft_position(
+        self, serve_catalog, catalog
+    ):
+        """Heliocentric distance and HEEQ latitude and longitude ride along.
+
+        ON FAILURE: the code is wrong.
+        """
+        serve_catalog()
+        intervals = ICMECAT().estimated_intervals
+        for column in ("mo_sc_heliodistance", "mo_sc_lat_heeq", "mo_sc_long_heeq"):
+            assert intervals[column].tolist() == catalog[column].tolist()
