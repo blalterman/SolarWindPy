@@ -74,14 +74,7 @@ class Core(ABC):
             return True
         if not isinstance(other, type(self)):
             return False
-        try:
-            eq_data = self.data.equals(other.data)
-            return eq_data
-
-        except ValueError as e:
-            if "Can only compare identically-labeled DataFrame objects" in str(e):
-                return False
-            raise
+        return self.data.equals(other.data)
 
     @property
     def logger(self) -> logging.Logger:
@@ -422,17 +415,48 @@ class Base(Core):
         if new.empty:
             raise ValueError("You can't set an object with empty data.")
 
-        checked = self._time_checked
-        if checked is None or not new.index.equals(checked):
+        if not self._times_already_checked(new.index):
             self._verify_datetimeindex(new)
+
+    def _times_already_checked(self, index: pd.Index) -> bool:
+        r"""Whether ``index`` is the parent's already-checked time index.
+
+        True only while :meth:`__init__` runs with ``_time_checked`` set and
+        ``index`` equals it; see the class Notes.
+        """
+        checked = self._time_checked
+        return checked is not None and index.equals(checked)
+
+    def _put_in_time_order_unless_checked(self, new: pd.DataFrame) -> pd.DataFrame:
+        r"""Return ``new`` in time order, warning once, unless already checked.
+
+        For classes that sort their data on setting, as
+        :class:`~solarwindpy.core.vector.Vector` and
+        :class:`~solarwindpy.core.tensor.Tensor` do. Missing timestamps
+        (``NaT``) raise :class:`ValueError`; see :meth:`_put_in_time_order`.
+        An index whose values cannot be compared has no order, so ``new`` is
+        returned as given and :meth:`_verify_datetimeindex` warns about it.
+        """
+        if self._times_already_checked(new.index):
+            return new
+        what = f"{self.__class__.__name__} data"
+        try:
+            # Only the comparison of index values is guarded: it raises
+            # TypeError for values that cannot be compared.
+            self._time_disorder(new.index, what)
+        except TypeError:
+            return new
+        return self._put_in_time_order(new, what)
 
     def _clean_species_for_setting(self, *species):
         species = super(Base, self)._clean_species_for_setting(*species)
-        assert np.all(
-            ["+" not in s for s in species]
-        ), "%s.species can't contain '+'." % (self.__class__.__name__)
-        species = tuple(sorted(species))
-        return species
+        combined = [s for s in species if "+" in s]
+        if combined:
+            raise ValueError(
+                f"{self.__class__.__name__}.species can't contain '+': "
+                f"{', '.join(combined)}"
+            )
+        return tuple(sorted(species))
 
     def head(self):
         """Return the first few rows of the data.

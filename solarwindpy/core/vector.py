@@ -58,13 +58,17 @@ class Vector(base.Base):
         Parameters
         ----------
         new : :class:`pandas.DataFrame`
-            New vector data.
+            New vector data. Rows out of time order are sorted with one
+            warning, as :class:`~solarwindpy.core.plasma.Plasma` sorts its
+            data.
 
         Raises
         ------
         ValueError
-            If ``new`` does not contain the required columns.
+            If ``new`` does not contain the required columns, or its time
+            index holds missing timestamps (``NaT``).
         """
+        new = self._put_in_time_order_unless_checked(new)
         super().set_data(new)
         required_columns = pd.Index(["x", "y", "z"])
         if (

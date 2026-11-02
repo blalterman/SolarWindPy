@@ -397,6 +397,11 @@ These change computed values; rerun any analysis that used them.
 - `SIDC.cut_spec_by_ssn_band` no longer fails with "Overlapping IntervalIndex is not
   accepted" for narrow bands (e.g. `dssn=0.05`), where rounding made neighbouring bands
   overlap; the bands now share one edge.
+- Solar cycle 25's maximum in `ssn_extrema.csv` is 2024-10-01, the peak (160.9) of the
+  SILSO 13-month smoothed sunspot number, replacing the placeholder 2030-12-01. Epochs
+  after 2024-10 are now on cycle 25's falling edge (`SIDC` `edge` is `"Fall"`, and
+  `SSNExtrema.cycle_intervals` Fall runs from the maximum to today), and `SIDC`
+  `extremum` labels those below half the cycle maximum `"26-Min"` instead of `"25-Min"`.
 
 ### Removed
 

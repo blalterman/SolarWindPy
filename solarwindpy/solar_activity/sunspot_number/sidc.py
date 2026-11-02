@@ -23,9 +23,6 @@ from ..base import (
     _Loader_Dtypes_Columns,
 )
 
-pd.set_option("mode.chained_assignment", "raise")
-
-
 _d_dtypes_columns = _Loader_Dtypes_Columns(
     {0: int, 1: int, 2: int, 3: float, 4: float, 5: float, 6: int, 7: bool},
     ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
@@ -429,21 +426,6 @@ class SIDC(ActivityIndicator):
         except KeyError:
             return self.run_normalization()
 
-    def _run_normalization(self, indicator, norm_fcn):
-        r"""Apply ``norm_fcn`` to ``indicator`` separately within each cycle."""
-        cut = self.extrema.cut_spec_by_interval(indicator.index, kind="Cycle")
-        joint = pd.concat(
-            [indicator, cut], axis=1, keys=["indicator", "cycle"]
-        ).sort_index(axis=1)
-        grouped = joint.groupby("cycle")
-
-        normed = {}
-        for k, g in grouped:
-            g = g.loc[:, "indicator"]
-            normed[k] = norm_fcn(g)
-        normed = pd.concat(normed.values(), axis=0).sort_index()
-        return normed
-
     def run_normalization(self, norm_by="max"):
         # Note: "max" and "feature-scale" are the same if the min(SSN) = 0.
         assert norm_by in ("max", "zscore", "feature-scale")
@@ -511,7 +493,18 @@ class SIDC(ActivityIndicator):
                 f"`interpolated` has no column {key!r}; interpolate it with "
                 f"interpolate_data(..., key={key!r}) first."
             ) from e
-        cut = pd.cut(values, intervals)
+        if len(intervals):
+            cut = pd.cut(values, intervals)
+        else:
+            # No band centres below the maximum (e.g. an all-zero series): every
+            # label is NaN. pandas 3.1.0's pd.cut raises IndexError on empty bins.
+            cut = pd.Series(
+                pd.Categorical.from_codes(
+                    np.full(len(values), -1), categories=intervals, ordered=True
+                ),
+                index=values.index,
+                name=values.name,
+            )
 
         cut.name = f"{key}_band"
         self._spec_by_ssn_band = cut
@@ -592,7 +585,7 @@ class SSNExtrema(IndicatorExtrema):
             )
 
         path = Path(__file__).parent / "ssn_extrema.csv"
-        data = pd.read_csv(path, header=0, skiprows=45, index_col=0)
+        data = pd.read_csv(path, header=0, skiprows=48, index_col=0)
         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
         data.columns.names = ["kind"]
         self._data = data

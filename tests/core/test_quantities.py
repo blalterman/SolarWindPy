@@ -530,6 +530,38 @@ class TestTensorMagnitude:
         pdt.assert_index_equal(w.magnitude.index, w.data.index)
 
 
+class TestTensorSetting:
+    """What ``Tensor`` stores and refuses when its data are set."""
+
+    @staticmethod
+    def _tensor_data(columns, scale=1.0):
+        """Three hourly rows of ``columns``; row i holds ``scale * i``."""
+        index = pd.date_range("2020-01-01", periods=3, freq="h")
+        values = scale * np.repeat(np.arange(3.0)[:, None], len(columns), axis=1)
+        return pd.DataFrame(values, index=index, columns=columns)
+
+    def test_set_data_stores_the_new_data(self):
+        """``Tensor.set_data`` replaces the data the tensor reports.
+
+        Chosen input: new data ten times the old.
+
+        ON FAILURE: the code is wrong.
+        """
+        columns = ["par", "per", "scalar"]
+        t = tensor.Tensor(self._tensor_data(columns))
+        new = self._tensor_data(columns, scale=10.0)
+        t.set_data(new)
+        pdt.assert_frame_equal(t.data, new)
+
+    def test_missing_columns_are_named(self):
+        """A tensor without a ``scalar`` column raises ValueError naming it.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=r"Missing required columns: \['scalar'\]"):
+            tensor.Tensor(self._tensor_data(["par", "per"]))
+
+
 class TestQuantitySubclassEquality(TestCase):
     @classmethod
     def setUpClass(cls):

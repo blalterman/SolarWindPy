@@ -113,9 +113,8 @@ def test_package_docstring_describes_sunspot_numbers():
 def test_repeated_import_returns_the_cached_module():
     """Importing twice yields one module object, so module state is shared.
 
-    sidc.py calls ``pd.set_option("mode.chained_assignment", "raise")`` at
-    import time; a second, distinct copy of the module would mean two copies
-    of every class and failing isinstance checks across them.
+    A second, distinct copy of the module would mean two copies of every
+    class and failing isinstance checks across them.
 
     ON FAILURE: the package is being imported under two names. The packaging
     is wrong.
