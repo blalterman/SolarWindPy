@@ -320,12 +320,10 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
         cax = gs[0, :]
         col_range = range(ncols)
         row_range = range(2, nrows + 2)
-    elif cbar_loc == "bottom":
+    else:  # "bottom", the only location left after the check above
         cax = gs[-1, :]
         col_range = range(ncols)
         row_range = range(0, nrows)
-    else:
-        raise ValueError
 
     cax = fig.add_subplot(cax)
 
@@ -352,11 +350,6 @@ def build_ax_array_with_common_colorbar(  # noqa: C901 - complexity justified by
     elif cbar_loc == "left":
         cax.yaxis.set_ticks_position("left")
         cax.yaxis.set_label_position("left")
-
-    if axes.shape != (nrows, ncols):
-        raise ValueError(  # noqa: E203 - aligned table format intentional
-            f"Unexpected axes shape\nExpected : {(nrows, ncols)}\nCreated  : {axes.shape}"
-        )
 
     axes = axes.squeeze()
     if axes.ndim == 0:

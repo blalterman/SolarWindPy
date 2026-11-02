@@ -493,7 +493,18 @@ class SIDC(ActivityIndicator):
                 f"`interpolated` has no column {key!r}; interpolate it with "
                 f"interpolate_data(..., key={key!r}) first."
             ) from e
-        cut = pd.cut(values, intervals)
+        if len(intervals):
+            cut = pd.cut(values, intervals)
+        else:
+            # No band centres below the maximum (e.g. an all-zero series): every
+            # label is NaN. pandas 3.1.0's pd.cut raises IndexError on empty bins.
+            cut = pd.Series(
+                pd.Categorical.from_codes(
+                    np.full(len(values), -1), categories=intervals, ordered=True
+                ),
+                index=values.index,
+                name=values.name,
+            )
 
         cut.name = f"{key}_band"
         self._spec_by_ssn_band = cut
@@ -574,7 +585,7 @@ class SSNExtrema(IndicatorExtrema):
             )
 
         path = Path(__file__).parent / "ssn_extrema.csv"
-        data = pd.read_csv(path, header=0, skiprows=45, index_col=0)
+        data = pd.read_csv(path, header=0, skiprows=48, index_col=0)
         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
         data.columns.names = ["kind"]
         self._data = data
