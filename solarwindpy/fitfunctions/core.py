@@ -169,7 +169,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     Parameters
     ----------
     xobs : array-like
-        Observed x values (independent variable).
+        Observed x values (independent variable), 1-d.
         Shape must match yobs.
     yobs : array-like
         Observed y values (dependent variable).
@@ -202,8 +202,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     wmax : float, optional
         Upper weight limit. Observations with larger weights
         are excluded from the fit.
-    logx : bool, default False
-        Whether to interpret x on a log10 scale.
     logy : bool, default False
         Whether to interpret y on a log10 scale. Weight selection
         then uses w/(y*ln(10)) for proper error propagation in
@@ -254,7 +252,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         weights=None,
         wmin=None,
         wmax=None,
-        logx=False,
         logy=False,
     ):
         # Documented in the class docstring (see FitFunctionMeta).
@@ -277,7 +274,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             youtside=youtside,
             wmin=wmin,
             wmax=wmax,
-            logx=logx,
             logy=logy,
         )
 
@@ -599,11 +595,23 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         r"""Set the raw x- and y-values along with weights for the fit.
 
         Doesn't account for extrema, finite data, etc.
+
+        Raises
+        ------
+        ValueError
+            If ``xobs`` is not 1-d: every model is a function of one variable.
+        InvalidParameterError
+            If ``yobs`` or ``weights`` does not match ``xobs``'s shape.
         """
         xobs = np.asarray(xobs)
         yobs = np.asarray(yobs)
         if weights is not None:
             weights = np.asarray(weights)
+
+        if xobs.ndim != 1:
+            raise ValueError(
+                f"xobs must be 1-d, one value per observation; got shape {xobs.shape}."
+            )
 
         if xobs.shape != yobs.shape:
             raise InvalidParameterError(f"""xobs and yobs must have the same shape.
@@ -688,9 +696,19 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             self.chisq_dof,
             self.rsq,
             initial_guess_info=self.initial_guess_info,
+            extra_params=self._TeX_extra_params(),
         )
         self._TeX_info = tex_info
         return tex_info
+
+    def _TeX_extra_params(self):
+        r"""Values the TeX info reports without an uncertainty, by LaTeX name, or None.
+
+        None by default. A class that reports a quantity besides its fitted
+        parameters, such as one derived from them or one the caller fixed,
+        overrides it.
+        """
+        return None
 
     def residuals(self, pct=False, use_all=False):
         r"""
@@ -774,7 +792,6 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         youtside=None,
         wmin=None,
         wmax=None,
-        logx=False,
         logy=False,
     ):
         r"""Set the observed values we'll actually use in the fit.
@@ -784,6 +801,11 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         All boundaries are inclusive <= or >=.
 
         If logy, then make selection of `wmin` and `wmax` based on :math:`w/(y \ln(10))`.
+
+        Raises
+        ------
+        ValueError
+            If ``xobs_raw`` is not 1-d.
         """
 
         xobs_raw, yobs_raw, weights_raw = self._clean_raw_obs(
@@ -979,6 +1001,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
                  max_nfev      10000
                  f_scale       0.1
                 ============= ======================================
+
+            An explicit ``p0=None`` starts from the feasible default that
+            a :attr:`p0` of None gives, without reading :attr:`p0`.
         """
         try:
             self._require_sufficient_data()

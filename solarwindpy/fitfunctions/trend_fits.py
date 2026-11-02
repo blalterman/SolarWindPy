@@ -56,7 +56,8 @@ class TrendFit(object):
         trendfunc: fitfunctoins.FitFunction
             The function to fit the trend of the ffunc1d popts.
         trend_logx: bool
-            If True, take :math:`10.0^x` for x-values passed to `trendfunc_class`.
+            If True, take :math:`10.0^x` for x-values passed to `trendfunc_class`,
+            and plot the trend on a logarithmic x-axis.
         ykey1d, wkey1d: str
             The keys to select y-values and weights from the 1D `FitFunction`s for
             passing to the `FitFunction` for fitting the trend.
@@ -123,9 +124,9 @@ class TrendFit(object):
 
     @property
     def trend_logx(self):
-        r"""If True, trend's x-axis is log-scaled.
+        r"""If True, the trend is fit to :math:`10^x` and plotted on a log x-axis.
 
-        Should probably change this to pull from `trend_func` somehow, but unsure how to do so.
+        The trend plots set the trend fit's plotter to a logarithmic x-axis.
         """
         return self._trend_logx
 
@@ -247,7 +248,6 @@ class TrendFit(object):
             x,
             popt.loc[:, ykey].values,
             weights=popt.loc[:, wkey].values,
-            logx=self.trend_logx,
             **kwargs,
         )
 
@@ -288,7 +288,9 @@ class TrendFit(object):
         wkey = kwargs.pop("wkey", wkey)  # For disabling errobars
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
         color = kwargs.pop("color", "cyan")
-        linestyle = kwargs.pop("ls", "--")
+        # normalize_kwargs turned an ``ls`` alias into ``linestyle``. None
+        # keeps matplotlib's default line style for the window's line.
+        linestyle = kwargs.pop("linestyle", None)
         label = kwargs.pop("label", "1D Fits")
 
         if plot_window:
@@ -306,7 +308,9 @@ class TrendFit(object):
             y = popt.loc[:, ykey]
             w = popt.loc[:, wkey]
 
-            line = ax.plot(x, y, label=label, color=color, **kwargs)
+            line = ax.plot(
+                x, y, label=label, color=color, linestyle=linestyle, **kwargs
+            )
 
             y1 = y - w
             y2 = y + w
@@ -322,6 +326,8 @@ class TrendFit(object):
             plotted = (line, window)
 
         else:
+            if linestyle is None:
+                linestyle = "--"
             plotted = ax.errorbar(
                 x=x,
                 y=ykey,
@@ -340,20 +346,52 @@ class TrendFit(object):
 
         return plotted
 
+    def _trend_plotter(self):
+        r"""The trend fit's plotter, its x-axis set logarithmic under `trend_logx`."""
+        plotter = self.trend_func.plotter
+        if self.trend_logx:
+            plotter.set_log(x=True)
+        return plotter
+
     def plot_trend_fit_resid(self, **kwargs):
+        r"""Plot the trend fit and its residuals on a new pair of axes.
+
+        Parameters
+        ----------
+        annotate_kwargs : dict, optional
+            Passed to the fit annotation. Default
+            ``dict(xloc=0.5, yloc=0.1, va="bottom")``.
+        used_kwargs : dict, optional
+            Passed to the plot of the observations used in the trend fit.
+            Default ``dict(color="k")``.
+        drawstyle : str, optional
+            Matplotlib drawstyle of the observations. Default ``"default"``.
+
+        Returns
+        -------
+        hax, rax : matplotlib.axes.Axes
+            The trend fit's axes and its residuals' axes. Under
+            :attr:`trend_logx` their x-axes are logarithmic.
+
+        Raises
+        ------
+        TypeError
+            If any other keyword argument is given.
+        """
         annotate_kwargs = kwargs.pop(
             "annotate_kwargs", dict(xloc=0.5, yloc=0.1, va="bottom")
         )
         used_kwargs = kwargs.pop("used_kwargs", dict(color="k"))
         drawstyle = kwargs.pop("drawstyle", "default")
-        hax, rax = self.trend_func.plotter.plot_raw_used_fit_resid(
+        if kwargs:
+            raise TypeError(
+                f"plot_trend_fit_resid got unexpected keyword arguments: {sorted(kwargs)}"
+            )
+        hax, rax = self._trend_plotter().plot_raw_used_fit_resid(
             drawstyle=drawstyle,
             annotate_kwargs=annotate_kwargs,
             used_kwargs=used_kwargs,
         )
-
-        if self.trend_logx:
-            rax.set_xscale("log")
 
         return hax, rax
 
@@ -364,13 +402,10 @@ class TrendFit(object):
         if fit1d_kwargs is None:
             fit1d_kwargs = {}
 
-        hax, rax = self.plot_trend_fit_resid(ax=None, **trend_kwargs)
+        hax, rax = self.plot_trend_fit_resid(**trend_kwargs)
         self.plot_all_popt_1d(hax, **fit1d_kwargs)
 
         hax.legend(ncol=4, loc=1, framealpha=0.5)
-
-        if self.trend_logx:
-            rax.set_xscale("log")
 
         return hax, rax
 
@@ -385,7 +420,7 @@ class TrendFit(object):
         annotate_kwargs = kwargs.pop("annotate_kwargs", dict())
         fit_kwargs = kwargs.pop("fit_kwargs", dict(color="limegreen"))
 
-        self.trend_func.plotter.plot_raw_used_fit(
+        self._trend_plotter().plot_raw_used_fit(
             ax,
             annotate_kwargs=annotate_kwargs,
             fit_kwargs=fit_kwargs,
