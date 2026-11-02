@@ -23,6 +23,50 @@ from matplotlib import pyplot as plt
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 
+# The single source of FFPlot's default styles. Each plot method merges the
+# caller's normalised Line2D keywords over its entry, so a caller's keyword
+# always wins and an unset one falls back to this table.
+_DEFAULT_STYLES = {
+    "raw": {"color": "k", "label": r"$\mathrm{Obs}$"},
+    "used": {
+        "color": "forestgreen",
+        "marker": "P",
+        "markerfacecolor": "none",
+        "markersize": 8,
+        "label": r"$\mathrm{Used}$",
+    },
+    "fit": {
+        "color": "darkorange",
+        "linestyle": (0, (7, 3, 1, 3, 1, 3, 1, 3)),
+        "label": r"$\mathrm{Fit}$",
+    },
+    "simple_residuals": {
+        "color": "forestgreen",
+        "marker": "P",
+        "linestyle": "-",
+        "drawstyle": "steps-mid",
+        "markerfacecolor": "none",
+        "markersize": 8,
+    },
+    "robust_residuals": {
+        "color": "darkorange",
+        "marker": "X",
+        "linestyle": "-",
+        "drawstyle": "steps-mid",
+        "markerfacecolor": "none",
+        "markersize": 8,
+    },
+}
+_WINDOW_ALPHA = 0.15
+
+
+def _style(kind, kwargs):
+    """Merge normalised Line2D ``kwargs`` over the default style for ``kind``."""
+    return {
+        **_DEFAULT_STYLES[kind],
+        **mpl.cbook.normalize_kwargs(dict(kwargs), mpl.lines.Line2D),
+    }
+
 
 class FFPlot(object):
     """Plot of a fit function's observations, fit, and residuals.
@@ -101,7 +145,7 @@ class FFPlot(object):
                 base = base / str(self.labels.z)
 
         x_scale = "logX" if self.log.x else "linX"
-        y_scale = "logY" if self.log.y else "logY"
+        y_scale = "logY" if self.log.y else "linY"
         scale_info = "_".join([x_scale, y_scale])
 
         path = base / scale_info
@@ -151,11 +195,11 @@ class FFPlot(object):
 
         return markevery
 
-    def _format_hax(self, ax, with_rax=False):
-        r"""Format the plot axes.
+    def _format_hax(self, ax):
+        r"""Format the axes of the observation and fit plots.
 
-        Format the :py:meth:`plot_bins`, :py:meth:`plot_in_fit`, and
-        :py:meth:`plot_fit` results.
+        Used by :py:meth:`plot_raw`, :py:meth:`plot_used`, and
+        :py:meth:`plot_fit`.
         """
         ax.grid(True, which="major", axis="both")
 
@@ -202,229 +246,144 @@ class FFPlot(object):
             fig, ax = plt.subplots()
         return ax
 
-    def _get_default_plot_style(self, plot_type):
-        """Get default style parameters for different plot types."""
-        styles = {
-            "raw": {"color": "k", "label": r"$\mathrm{Obs}$"},
-            "used": {
-                "color": "forestgreen",
-                "marker": "P",
-                "markerfacecolor": "none",
-                "markersize": 8,
-                "label": r"$\mathrm{Used}$",
-            },
-            "fit": {"color": "tab:red", "linewidth": 3, "label": r"$\mathrm{Fit}$"},
-            "residuals": {"color": "k", "marker": "o", "markerfacecolor": "none"},
-        }
-        return styles.get(plot_type, {})
+    def _plot_window_edges(self, ax, x, y1, y2, color, edge_kwargs):
+        """Draw the window's lower and upper edges as lines.
+
+        ``edge_kwargs`` may use the window's (collection) vocabulary, so
+        ``ec``/``edgecolor`` sets the edge lines' colour; what remains is
+        normalised for the Line2D that is drawn.
+        """
+        kwargs = mpl.cbook.normalize_kwargs(
+            dict(edge_kwargs), mpl.collections.Collection
+        )
+        line_color = kwargs.pop("color", color)
+        line_color = kwargs.pop("edgecolor", line_color)
+        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
+
+        edge1 = ax.plot(x, y1, color=line_color, **kwargs)
+        edge2 = ax.plot(x, y2, color=line_color, **kwargs)
+        return edge1, edge2
+
+    def _plot_observations(self, kind, ax, plot_window, edge_kwargs, kwargs):
+        """Draw the ``kind`` (``"raw"`` or ``"used"``) observations.
+
+        Shared by :py:meth:`plot_raw` and :py:meth:`plot_used`.
+        """
+        ax = self._get_or_create_axes(ax)
+
+        window_kwargs = kwargs.pop("window_kwargs", dict())
+        style = _style(kind, kwargs)
+
+        obs = getattr(self.observations, kind)
+        x = obs.x
+        y = obs.y
+        w = obs.w
+
+        if not plot_window:
+            plotted = ax.errorbar(x, y, yerr=w, **style)
+            self._format_hax(ax)
+            return ax, plotted
+
+        if w is None:
+            logging.getLogger().warning(
+                "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
+            )
+            w = 0
+
+        window_kwargs = mpl.cbook.normalize_kwargs(
+            window_kwargs, mpl.collections.Collection
+        )
+        window_color = window_kwargs.pop("color", style["color"])
+        window_alpha = window_kwargs.pop("alpha", _WINDOW_ALPHA)
+
+        line = ax.plot(x, y, **style)
+
+        y1 = y - w
+        y2 = y + w
+        window = ax.fill_between(
+            x,
+            y1,
+            y2,
+            color=window_color,
+            alpha=window_alpha,
+            **window_kwargs,
+        )
+
+        edges = None
+        if edge_kwargs is not None:
+            edges = self._plot_window_edges(ax, x, y1, y2, window_color, edge_kwargs)
+
+        self._format_hax(ax)
+        return ax, (line, window, edges)
 
     def plot_raw(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
-        r"""Plot the observations used in the fit from raw data.
+        r"""Plot the raw observations.
 
         Plot from ``observations.raw.x``, ``observations.raw.y``, and
         ``observations.raw.w``.
 
         Parameters
         ----------
-        edge_kwargs: None, dict
-            If not None, plot edges on the window using these kwargs.
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on. If None, a new figure and axes are created.
+        plot_window : bool, default True
+            If True, draw a line with a ``y +- w`` window. Otherwise draw
+            error bars.
+        edge_kwargs : dict, optional
+            If not None, draw the window's edges as lines with these
+            keywords; ``ec`` or ``edgecolor`` sets their colour. Only those
+            edge-colour keys are translated; other collection-only keys,
+            such as ``facecolor``, are not accepted by the edge lines.
+        **kwargs
+            Line2D keywords merged over the default raw style. The
+            ``window_kwargs`` keyword is passed to
+            :meth:`matplotlib.axes.Axes.fill_between` for the window.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        plotted : tuple or matplotlib.container.ErrorbarContainer
+            ``(line, window, edges)`` with a window, else the error bars.
         """
-        ax = self._get_or_create_axes(ax)
-
-        window_kwargs = kwargs.pop("window_kwargs", dict())
-
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
-
-        # Apply default style for raw plots
-        defaults = self._get_default_plot_style("raw")
-        color = kwargs.pop("color", defaults.get("color", "k"))
-        label = kwargs.pop("label", defaults.get("label", r"$\mathrm{Obs}$"))
-
-        x = self.observations.raw.x
-        y = self.observations.raw.y
-        w = self.observations.raw.w
-
-        def _plot_window_edges(ax, **kwargs):
-            kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.collections.Collection)
-
-            edge1 = ax.plot(x, y1, **kwargs)
-            edge2 = ax.plot(x, y2, **kwargs)
-
-            return edge1, edge2
-
-        if plot_window:
-            if w is None:
-                logging.getLogger().warning(
-                    "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
-                )
-                w = 0
-
-            window_kwargs = mpl.cbook.normalize_kwargs(
-                window_kwargs, mpl.collections.Collection
-            )
-            window_color = window_kwargs.pop("color", color)
-            window_alpha = window_kwargs.pop("alpha", 0.15)
-
-            line = ax.plot(x, y, label=label, color=color, **kwargs)
-
-            y1 = y - w
-            y2 = y + w
-            window = ax.fill_between(
-                x,
-                y1,
-                y2,
-                color=window_color,
-                alpha=window_alpha,
-                **window_kwargs,
-            )
-
-            edges = None
-            if edge_kwargs is not None:
-                edge_kwargs = mpl.cbook.normalize_kwargs(
-                    edge_kwargs, mpl.collections.Collection
-                )
-                edge_color = edge_kwargs.pop("color", window_color)
-                edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
-
-            plotted = (line, window, edges)
-
-        else:
-            # Plot the raw data histograms.
-            plotted = ax.errorbar(
-                x,
-                y,
-                yerr=w,
-                label=label,
-                color=color,
-                **kwargs,
-            )
-
-        self._format_hax(ax)
-
-        return ax, plotted
+        return self._plot_observations("raw", ax, plot_window, edge_kwargs, kwargs)
 
     def plot_used(self, ax=None, plot_window=True, edge_kwargs=None, **kwargs):
-        r"""Plot the observations used in the fit from used data.
+        r"""Plot the observations used in the fit.
 
         Plot from ``observations.used.x``, ``observations.used.y``, and
-        ``observations.used.w``.
+        ``observations.used.w``. Parameters and returns are those of
+        :py:meth:`plot_raw`; unless ``markevery`` is given, a marker is
+        drawn on every :math:`10^{\lfloor \log_{10} N \rfloor - 1}`-th of
+        the :math:`N` used points.
         """
-        ax = self._get_or_create_axes(ax)
-
-        window_kwargs = kwargs.pop("window_kwargs", dict())
-
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
-        color = kwargs.pop("color", "forestgreen")
-        marker = kwargs.pop("marker", "P")
-        markerfacecolor = kwargs.pop("markerfacecolor", "none")
-        markersize = kwargs.pop("markersize", 8)
-        markevery = kwargs.pop("markevery", None)
-        label = kwargs.pop("label", r"$\mathrm{Used}$")
-
-        x = self.observations.used.x
-        y = self.observations.used.y
-        w = self.observations.used.w
-
-        if markevery is None:
-            markevery = self._estimate_markevery()
-
-        if plot_window:
-            if w is None:
-                logging.getLogger().warning(
-                    "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
-                )
-                w = 0
-
-            window_kwargs = mpl.cbook.normalize_kwargs(
-                window_kwargs, mpl.collections.Collection
-            )
-            window_color = window_kwargs.pop("color", color)
-            window_alpha = window_kwargs.pop("alpha", 0.15)
-
-            line = ax.plot(
-                x,
-                y,
-                label=label,
-                color=color,
-                marker=marker,
-                markerfacecolor=markerfacecolor,
-                markersize=markersize,
-                markevery=markevery,
-                **kwargs,
-            )
-
-            y1 = y - w
-            y2 = y + w
-            window = ax.fill_between(
-                x,
-                y1,
-                y2,
-                color=window_color,
-                alpha=window_alpha,
-                **window_kwargs,
-            )
-
-            edges = None
-            if edge_kwargs is not None:
-
-                def _plot_window_edges(ax, **kwargs):
-                    kwargs = mpl.cbook.normalize_kwargs(
-                        kwargs, mpl.collections.Collection
-                    )
-
-                    edge1 = ax.plot(x, y1, **kwargs)
-                    edge2 = ax.plot(x, y2, **kwargs)
-
-                    return edge1, edge2
-
-                edge_kwargs = mpl.cbook.normalize_kwargs(
-                    edge_kwargs, mpl.collections.Collection
-                )
-                edge_color = edge_kwargs.pop("color", window_color)
-                edges = _plot_window_edges(ax, color=edge_color, **edge_kwargs)
-
-            plotted = (line, window, edges)
-
-        else:
-            # Plot the raw data histograms.
-            plotted = ax.errorbar(
-                x,
-                y,
-                yerr=w,
-                label=label,
-                color=color,
-                marker=marker,
-                markerfacecolor=markerfacecolor,
-                markersize=markersize,
-                markevery=markevery,
-                **kwargs,
-            )
-
-        self._format_hax(ax)
-
-        return ax, plotted
+        if kwargs.get("markevery") is None:
+            kwargs["markevery"] = self._estimate_markevery()
+        return self._plot_observations("used", ax, plot_window, edge_kwargs, kwargs)
 
     def plot_fit(self, ax=None, annotate=True, annotate_kwargs=None, **kwargs):
-        r"""Plot the fit."""
+        r"""Plot the fit over the raw ``x`` values.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on. If None, a new figure and axes are created.
+        annotate : bool, default True
+            If True, annotate the axes with :py:attr:`TeX_info`.
+        annotate_kwargs : dict, optional
+            Passed to ``TeX_info.annotate_info``.
+        **kwargs
+            Line2D keywords merged over the default fit style.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        """
         ax = self._get_or_create_axes(ax)
 
         if annotate_kwargs is None:
             annotate_kwargs = {}
 
-        kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
-        color = kwargs.pop("color", "darkorange")
-        label = kwargs.pop("label", r"$\mathrm{Fit}$")
-        linestyle = kwargs.pop("linestyle", (0, (7, 3, 1, 3, 1, 3, 1, 3)))
-
-        # Overplot the fit.
-        ax.plot(
-            self.observations.raw.x,
-            self.y_fit,
-            label=label,
-            color=color,
-            linestyle=linestyle,
-            **kwargs,
-        )
+        ax.plot(self.observations.raw.x, self.y_fit, **_style("fit", kwargs))
 
         if annotate:
             self.TeX_info.annotate_info(ax, **annotate_kwargs)
@@ -500,31 +459,55 @@ class FFPlot(object):
         return ax
 
     def plot_residuals(
-        self, ax=None, pct=True, subplots_kwargs=None, kind="both", **kwargs
+        self, ax=None, pct=True, subplots_kwargs=None, kind="simple", **kwargs
     ):
         r"""Plot residuals for the data used in the fit.
 
-        Residuals are shown on a symlog scale with ``linthresh=10``. By default
-        they are expressed as percentages of the fitted model.
+        Percent residuals are shown on a symlog scale with ``linthresh=10``
+        within :math:`\pm 100\%`.
 
         Parameters
         ----------
         ax : mpl.axes.Axes, optional
             Axis to draw on. If ``None`` a new figure and axis are created.
         pct : bool, default True
-            If ``True``, show residuals as percentages.
+            If ``True``, show simple residuals as percentages of the model.
+            Robust residuals are in units of the observation uncertainty, so
+            ``kind="robust"`` or ``"both"`` requires ``pct=False``.
         subplots_kwargs : dict, optional
             Passed to ``plt.subplots`` when ``ax`` is ``None``.
-        kind : {'simple', 'robust', 'both'}, default "both"
-            Which residuals to plot.
+        kind : {'simple', 'robust', 'both'}, default "simple"
+            Which residuals to plot. With ``"both"``, the robust residuals
+            are skipped when the fit result holds none.
         **kwargs
-            Additional keyword arguments passed to ``ax.plot``.
+            Line2D keywords merged over each residual kind's default style.
+            ``label`` prefixes each line's ``Simple`` or ``Robust`` label.
 
         Returns
         -------
         ax : mpl.axes.Axes
             Axis with residuals plotted.
+
+        Raises
+        ------
+        ValueError
+            If ``kind`` is unknown, or robust residuals are requested in
+            percent.
         """
+        kind = kind.lower()
+        kinds = {"simple": ("simple",), "robust": ("robust",)}
+        kinds["both"] = ("simple", "robust")
+        if kind not in kinds:
+            raise ValueError(
+                f"kind must be 'simple', 'robust', or 'both', not {kind!r}"
+            )
+
+        to_draw = kinds[kind]
+        if kind == "both" and getattr(self.fit_result, "fun", None) is None:
+            to_draw = ("simple",)
+
+        # Compute every series before drawing, so a refused request draws nothing.
+        series = [(k, self.residuals(pct=pct, robust=(k == "robust"))) for k in to_draw]
 
         if subplots_kwargs is None:
             subplots_kwargs = {}
@@ -533,92 +516,17 @@ class FFPlot(object):
             fig, ax = plt.subplots(**subplots_kwargs)
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
-        drawstyle = kwargs.pop("drawstyle", "steps-mid")
-        markerfacecolor = kwargs.pop("markerfacecolor", "none")
-        markersize = kwargs.pop("markersize", 8)
-        markevery = kwargs.pop("markevery", None)
         label = kwargs.pop("label", r"").strip("$")
-        kind = kind.lower()
+        if kwargs.get("markevery") is None:
+            kwargs["markevery"] = self._estimate_markevery()
 
-        if markevery is None:
-            markevery = self._estimate_markevery()
-
-        if kind in ("simple", "robust"):
-            residuals = self.residuals(
-                pct=pct, robust=True if kind == "robust" else False
-            )
-
-            color = kwargs.pop("color", "forestgreen")
-            marker = kwargs.pop("marker", "P")
-            linestyle = kwargs.pop("linestyle", "-")
-
-            # Handle empty label case to preserve spacing
-            if not label:
-                label = r" \; %s" % kind.title()
-                label = r"$\mathrm{%s}$" % label
-            else:
-                label = r" \; ".join([label, kind.title()]).lstrip(r" \; ")
-                label = r"$\mathrm{%s}$" % label
-
+        for k, r in series:
             ax.plot(
                 self.observations.used.x,
-                residuals,
-                label=label,
-                drawstyle=drawstyle,
-                color=color,
-                marker=marker,
-                linestyle=linestyle,
-                markerfacecolor=markerfacecolor,
-                markersize=markersize,
-                markevery=markevery,
-                **kwargs,
+                r,
+                label=r"$\mathrm{%s \; %s}$" % (label, k.title()),
+                **_style(f"{k}_residuals", kwargs),
             )
-
-        elif kind == "both":
-            # Handle label formatting to preserve spacing correctly
-            simple_label = (
-                r"$\mathrm{ \; Simple}$"
-                if not label
-                else r"$\mathrm{%s \; Simple}$" % label
-            )
-            robust_label = (
-                r"$\mathrm{ \; Robust}$"
-                if not label
-                else r"$\mathrm{%s \; Robust}$" % label
-            )
-
-            ax.plot(
-                self.observations.used.x,
-                self.residuals(pct=pct, robust=False),
-                label=simple_label,
-                drawstyle=drawstyle,
-                color="forestgreen",
-                marker="P",
-                linestyle="-",
-                markerfacecolor=markerfacecolor,
-                markersize=markersize,
-                markevery=markevery,
-                **kwargs,
-            )
-
-            try:
-                r = self.residuals(pct=pct, robust=True)
-                ax.plot(
-                    self.observations.used.x,
-                    r,
-                    label=robust_label,
-                    drawstyle=drawstyle,
-                    color="darkorange",
-                    marker="X",
-                    linestyle="-",
-                    markerfacecolor=markerfacecolor,
-                    markersize=markersize,
-                    markevery=markevery,
-                    **kwargs,
-                )
-            except AttributeError as e:
-                if "NoneType" in str(e):
-                    pass
 
         self._format_rax(ax, pct)
         return ax
@@ -648,7 +556,9 @@ class FFPlot(object):
             was developed with default size 6x4 and this size helps accomodate annotation.
             So we persist it here.
         resid_kwargs: dict, None
-            Passed to :py:meth:`plot_residuals`.
+            Passed to :py:meth:`plot_residuals`. Its ``kind="robust"`` or
+            ``"both"`` needs ``resid_pct=False``: robust residuals are in
+            units of sigma and have no percent form.
         kwargs:
             Passed to :py:meth:`plot_raw_used_fit`.
 
@@ -671,9 +581,7 @@ class FFPlot(object):
             rax = fig.add_subplot(gs[1])
             hax = fig.add_subplot(gs[0], sharex=rax)
 
-        if resid_kwargs is None:
-            resid_kwargs = dict()
-
+        resid_kwargs = dict() if resid_kwargs is None else dict(resid_kwargs)
         resid_pct = resid_kwargs.pop("resid_pct", True)
 
         self.plot_raw_used_fit(ax=hax, annotate=annotate, **kwargs)
@@ -685,22 +593,45 @@ class FFPlot(object):
         return hax, rax
 
     def residuals(self, pct=False, robust=False):
-        r"""Calculate the fit residuals.
+        r"""Calculate the fit residuals, model minus observation.
 
-        If pct, normalize by fit yvalues.
+        Parameters
+        ----------
+        pct : bool, default False
+            If True, express simple residuals as a percentage of the model.
+            Where the model is zero the percent residual is NaN.
+        robust : bool, default False
+            If True, return the fit result's residual vector ``fun``, in
+            units of the observation uncertainty.
+
+        Returns
+        -------
+        numpy.ndarray
+
+        Raises
+        ------
+        ValueError
+            If both ``pct`` and ``robust`` are True: robust residuals are in
+            units of the uncertainty and have no percent form.
         """
 
-        y_fit_used = self.y_fit[self.observations.tk_observed]
-
         if robust:
-            r = self.fit_result.fun
-        else:
-            r = y_fit_used - self.observations.used.y
+            if pct:
+                raise ValueError(
+                    "Robust residuals are in units of the observation "
+                    "uncertainty and have no percent form; pass pct=False."
+                )
+            return np.asarray(self.fit_result.fun)
+
+        y_fit_used = self.y_fit[self.observations.tk_observed]
+        r = y_fit_used - self.observations.used.y
 
         if pct:
-            r = 100.0 * (r / y_fit_used)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                r = 100.0 * (r / y_fit_used)
+            r = np.where(y_fit_used == 0, np.nan, r)
 
-        return r
+        return np.asarray(r)
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels.
