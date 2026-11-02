@@ -8,6 +8,7 @@ The only fake is the clock that stamps saved PNGs.
 """
 
 import logging
+import re
 from datetime import datetime
 
 import matplotlib
@@ -166,6 +167,92 @@ class TestSave:
         stamp = fig.texts[0]
         assert stamp.get_text().endswith(" 20240102T030405")
         assert stamp.get_position() == (0.25, 0.75)
+
+    def test_stamp_defaults_to_the_bottom_left_corner(self, tmp_path, frozen_clock):
+        """Without ``info_x``/``info_y`` the stamp sits at figure coordinates (0, 0).
+
+        The docstring places the stamp at the bottom left.
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        plotting_tools.save(fig, tmp_path / "fig", pdf=False, log=False)
+        assert fig.texts[0].get_position() == (0, 0)
+
+    def test_png_is_cropped_to_the_drawn_content_by_default(self, tmp_path):
+        """Without ``bbox_inches`` the PNG is cropped as ``bbox_inches="tight"`` crops.
+
+        The SolarWindPy style already crops every save (``savefig.bbox:
+        tight``), so the style is set to "standard" here; ``save`` must still
+        crop. The reference sizes are matplotlib's own saves of the same
+        figure, tight and uncropped, which differ (asserted).
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots(figsize=(4.0, 3.0))
+        ax.plot([0, 1], [0, 1])
+        with matplotlib.rc_context({"savefig.bbox": "standard"}):
+            fig.savefig(tmp_path / "tight.png", bbox_inches="tight")
+            fig.savefig(tmp_path / "full.png")
+            plotting_tools.save(
+                fig, tmp_path / "fig", pdf=False, add_info=False, log=False
+            )
+
+        def size(name):
+            return mpimg.imread(tmp_path / name).shape[:2]
+
+        assert size("tight.png") != size("full.png")
+        assert size("fig.png") == size("tight.png")
+
+    def test_pdf_is_cropped_to_the_drawn_content_by_default(self, tmp_path):
+        """Without ``bbox_inches`` the PDF page is cropped as ``"tight"`` crops it.
+
+        Page sizes are read from each PDF's ``/MediaBox``; the references are
+        matplotlib's own tight and uncropped saves, which differ (asserted).
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots(figsize=(4.0, 3.0))
+        ax.plot([0, 1], [0, 1])
+        with matplotlib.rc_context({"savefig.bbox": "standard"}):
+            fig.savefig(tmp_path / "tight.pdf", bbox_inches="tight")
+            fig.savefig(tmp_path / "full.pdf")
+            plotting_tools.save(fig, tmp_path / "fig", png=False, log=False)
+
+        def page(name):
+            found = re.search(
+                rb"/MediaBox\s*\[([^\]]*)\]", (tmp_path / name).read_bytes()
+            )
+            return found.group(1).split()
+
+        assert page("tight.pdf") != page("full.pdf")
+        assert page("fig.pdf") == page("tight.pdf")
+
+    def test_kwargs_reach_the_pdf_save(self, tmp_path):
+        """``metadata`` passed to ``save`` is written into the PDF.
+
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax = plt.subplots()
+        plotting_tools.save(
+            fig,
+            tmp_path / "fig",
+            png=False,
+            log=False,
+            metadata={"Title": "SolarWindPyTitleMarker"},
+        )
+        assert b"SolarWindPyTitleMarker" in (tmp_path / "fig.pdf").read_bytes()
+
+    def test_logs_by_default(self, tmp_path, caplog):
+        """Without ``log``, ``save`` records the path it saved to at INFO.
+
+        ON FAILURE: the code is wrong.
+        """
+        caplog.set_level(logging.INFO, logger=plotting_tools.__name__)
+        fig, ax = plt.subplots()
+        spath = tmp_path / "fig"
+        plotting_tools.save(fig, spath, pdf=False)
+        messages = [
+            r.getMessage() for r in caplog.records if r.name == plotting_tools.__name__
+        ]
+        assert any(str(spath.resolve()) in m for m in messages)
 
     @pytest.mark.parametrize(
         "kwargs",
@@ -511,6 +598,51 @@ class TestBuildAxArrayWithCommonColorbar:
         fig, ax, cax = plotting_tools.build_ax_array_with_common_colorbar(1, 1)
         assert isinstance(ax, Axes)
         assert ax is not cax
+
+    def test_defaults_are_one_panel_with_shared_axes(self):
+        """With no arguments: one panel; with only a shape, panels share x and y.
+
+        The signature's defaults are ``nrows=1, ncols=1`` and
+        ``sharex=sharey=True``.
+        ON FAILURE: the code is wrong.
+        """
+        fig, ax, cax = plotting_tools.build_ax_array_with_common_colorbar()
+        assert isinstance(ax, Axes)
+
+        fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(2, 2)
+        axes[0, 0].set_xlim(-10, 10)
+        axes[0, 0].set_ylim(-5, 5)
+        for other in axes.flat[1:]:
+            assert other.get_xlim() == (-10, 10)
+            assert other.get_ylim() == (-5, 5)
+
+    @pytest.mark.parametrize("cbar_loc", CBAR_LOCS)
+    def test_colorbar_is_a_thin_strip_close_to_the_panels(self, cbar_loc):
+        """The bar and its gap are each under a tenth of a panel's size across.
+
+        A panel is much larger than the strip that labels its colours; the
+        gap separates them without displacing the panels.
+        ON FAILURE: the code is wrong.
+        """
+        fig, axes, cax = plotting_tools.build_ax_array_with_common_colorbar(
+            2, 2, cbar_loc=cbar_loc
+        )
+        cx0, cy0, cx1, cy1 = _pos(cax)
+        x0, y0, x1, y1 = _pos(axes[0, 0])
+        if cbar_loc in ("left", "right"):
+            panel, thickness = x1 - x0, cx1 - cx0
+            gap = {
+                "right": cx0 - _pos(axes[0, -1])[2],
+                "left": _pos(axes[0, 0])[0] - cx1,
+            }[cbar_loc]
+        else:
+            panel, thickness = y1 - y0, cy1 - cy0
+            gap = {
+                "top": cy0 - _pos(axes[0, 0])[3],
+                "bottom": _pos(axes[-1, 0])[1] - cy1,
+            }[cbar_loc]
+        assert 0 < thickness < 0.1 * panel
+        assert 0 < gap < 0.1 * panel
 
     def test_cbar_loc_is_case_insensitive(self):
         """``"RIGHT"`` places the bar as ``"right"`` does.

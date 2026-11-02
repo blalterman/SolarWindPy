@@ -14,6 +14,8 @@ edge, which holds with probability one for the continuous random samples used
 here.
 """
 
+import io
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -21,10 +23,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 
+import matplotlib.colors as mcolors  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
+from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
 # Unequal widths (2, 0.5, 0.5, 0.25, 1.75, 1.5): a width, center, or
@@ -529,14 +533,45 @@ class TestConstructCdf:
 
         assert np.asarray(cdf["x"].values) == exact(np.sort(x.values))
 
-    def test_cdf_of_aggregated_y_raises_value_error(self, xy):
-        """A cdf is refused when y holds values rather than counts.
+    def test_cdf_hand_computed(self):
+        """x = 3, 1, 4, 2 in one bin gives x 1, 2, 3, 4 at positions 0, 1/3, 2/3, 1.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([3.0, 1.0, 4.0, 2.0])
+
+        cdf = Hist1D(x, nbins=np.array([0.0, 5.0])).construct_cdf()
+
+        assert list(cdf.columns) == ["x", "position"]
+        assert cdf["x"].to_numpy() == exact([1.0, 2.0, 3.0, 4.0])
+        assert cdf["position"].to_numpy() == exact([0.0, 1 / 3, 2 / 3, 1.0])
+
+    def test_cdf_ignores_y(self, xy):
+        """A histogram that aggregates y gives the same cdf of x as one that counts.
 
         ON FAILURE: the code is wrong.
         """
         x, y = xy
-        with pytest.raises(ValueError, match="Only able to convert data to a cdf"):
-            Hist1D(x, y, nbins=EDGES).construct_cdf(only_plotted=False)
+
+        with_y = Hist1D(x, y, nbins=EDGES).construct_cdf(only_plotted=False)
+        counted = Hist1D(x, nbins=EDGES).construct_cdf(only_plotted=False)
+
+        pd.testing.assert_frame_equal(with_y, counted)
+
+    def test_default_cdf_leaves_out_bins_dropped_by_clim(self):
+        """By default the cdf holds only measurements in bins that are plotted.
+
+        Edges [0, 1, 2, 4] hold 1, 3 and 2 samples; ``set_clim(2)`` drops the
+        first bin, so 0.5 is left out and the other five remain (hand count).
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.5, 1.25, 1.5, 1.75, 3.0, 3.5])
+        hist = Hist1D(x, nbins=np.array([0.0, 1.0, 2.0, 4.0]))
+        hist.set_clim(2, None)
+
+        cdf = hist.construct_cdf()
+
+        assert cdf["x"].to_numpy() == exact([1.25, 1.5, 1.75, 3.0, 3.5])
 
     def test_default_cdf_with_every_bin_plotted_is_the_whole_binned_sample(self, xy):
         """With every bin populated, the default cdf equals the unfiltered one.
@@ -595,6 +630,8 @@ def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
 
     Bottoms differ from bin to bin, so a window applied to the wrong bin
     selects a different set; the result is index labels, not positions.
+    ``get_y_bounds`` takes the row alone: Hist1D never log-transforms y, so it
+    hands no log flag.
 
     ON FAILURE: the code is wrong.
     """
@@ -606,7 +643,7 @@ def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
     taken = hist.take_data_in_yrange_across_x(
         ranges,
         lambda interval, expected_logx: (interval.left, interval.right),
-        lambda row, expected_logy: (row["bottom"], row["top"]),
+        lambda row: (row["bottom"], row["top"]),
     )
 
     xv, yv = x.values, y.values
@@ -616,3 +653,309 @@ def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
     expected = x.index.values[mask]
     assert 0 < expected.size < x.size
     np.testing.assert_array_equal(taken, expected)
+
+
+# Points on the window boundaries, bins (0, 1] and (1, 2], window (5, 6] in
+# each: 10 sits on bin 1's right edge (in) and bin 2's left edge (out), 11 on
+# the bottom (out), 12 on bin 2's right edge and the top (in), 13 inside.
+EDGE_X = pd.Series([1.0, 1.5, 2.0, 0.5], index=[10, 11, 12, 13])
+EDGE_Y = pd.Series([5.5, 5.0, 6.0, 5.5], index=[10, 11, 12, 13])
+
+
+def _edge_hist_and_ranges():
+    hist = Hist1D(EDGE_X, EDGE_Y, nbins=np.array([0.0, 1.0, 2.0]))
+    ranges = pd.DataFrame({"bottom": 5.0, "top": 6.0}, index=hist.agg().index)
+    return hist, ranges
+
+
+def _interval_bounds(interval, expected_logx):
+    return interval.left, interval.right
+
+
+def test_take_data_in_yrange_windows_are_open_below_and_closed_above():
+    """A point is taken when left < x <= right and bottom < y <= top.
+
+    Hand-selected from ``EDGE_X``/``EDGE_Y``: 10, 12 and 13, each once.
+    ON FAILURE: the code is wrong.
+    """
+    hist, ranges = _edge_hist_and_ranges()
+
+    taken = hist.take_data_in_yrange_across_x(
+        ranges, _interval_bounds, lambda row: (row["bottom"], row["top"])
+    )
+
+    np.testing.assert_array_equal(taken, [10, 12, 13])
+
+
+@pytest.mark.parametrize(
+    "x_bounds, y_bounds, match",
+    [
+        (lambda iv, expected_logx: (iv.left, iv.left), None, "Need left < right"),
+        (None, lambda row: (5.0, 5.0), "Need bottom < top"),
+    ],
+    ids=["zero-width-x", "zero-width-y"],
+)
+def test_take_data_in_yrange_zero_width_range_raises_value_error(
+    x_bounds, y_bounds, match
+):
+    """A zero-width x or y range raises ``ValueError`` naming the range.
+
+    ON FAILURE: the code is wrong.
+    """
+    hist, ranges = _edge_hist_and_ranges()
+    x_bounds = x_bounds or _interval_bounds
+    y_bounds = y_bounds or (lambda row: (row["bottom"], row["top"]))
+
+    with pytest.raises(ValueError, match=match + r" for x-bin .*, got \("):
+        hist.take_data_in_yrange_across_x(ranges, x_bounds, y_bounds)
+
+
+def test_take_data_in_yrange_hands_get_x_bounds_the_logx_flag_as_a_bool():
+    """``get_x_bounds`` receives ``expected_logx=True`` from a logx histogram.
+
+    ON FAILURE: the code is wrong.
+    """
+    hist = Hist1D(10.0**EDGE_X, EDGE_Y, logx=True, nbins=np.array([0.0, 1.0, 2.0]))
+    ranges = pd.DataFrame({"bottom": 5.0, "top": 6.0}, index=hist.agg().index)
+    flags = []
+
+    def x_bounds(interval, expected_logx):
+        flags.append(expected_logx)
+        return interval.left, interval.right
+
+    hist.take_data_in_yrange_across_x(
+        ranges, x_bounds, lambda row: (row["bottom"], row["top"])
+    )
+
+    assert flags == [True, True]
+    assert all(f is True for f in flags)
+
+
+# ---------------------------------------------------------------------------
+# Labels
+# ---------------------------------------------------------------------------
+
+
+def test_default_labels_are_x_and_y_or_a_count():
+    """x is labelled "x"; y is "y" when given and a ``Count`` label otherwise.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = EDGE_X, EDGE_Y
+    with_y = Hist1D(x, y, nbins=np.array([0.0, 1.0, 2.0]))
+    counted = Hist1D(x, nbins=np.array([0.0, 1.0, 2.0]))
+
+    assert (with_y.labels.x, with_y.labels.y) == ("x", "y")
+    assert counted.labels.x == "x"
+    assert isinstance(counted.labels.y, Count)
+
+
+def test_count_label_follows_set_axnorm():
+    """After ``set_axnorm("d")`` the count label reads as a density label.
+
+    The expected label is ``Count(norm="d")`` built directly.
+    ON FAILURE: the code is wrong.
+    """
+    hist = Hist1D(EDGE_X, nbins=np.array([0.0, 1.0, 2.0]))
+    assert str(hist.labels.y) == str(Count())
+
+    hist.set_axnorm("d")
+
+    assert str(hist.labels.y) == str(Count(norm="d"))
+    assert str(Count(norm="d")) != str(Count())
+
+
+def test_a_new_count_label_takes_the_histograms_axnorm():
+    """``set_labels(y=Count())`` on a density histogram gives a density label.
+
+    ON FAILURE: the code is wrong.
+    """
+    hist = Hist1D(EDGE_X, axnorm="d", nbins=np.array([0.0, 1.0, 2.0]))
+
+    hist.set_labels(y=Count())
+
+    assert str(hist.labels.y) == str(Count(norm="d"))
+
+
+def test_z_label_is_refused_naming_the_class():
+    """A 1-D histogram has no z axis: ``set_labels(z=...)`` raises ``ValueError``.
+
+    ON FAILURE: the code is wrong.
+    """
+    hist = Hist1D(EDGE_X, nbins=np.array([0.0, 1.0, 2.0]))
+    with pytest.raises(ValueError, match="Hist1D doesn't have a z-label"):
+        hist.set_labels(z="z")
+
+
+# ---------------------------------------------------------------------------
+# Line styles: drawstyle, user keywords and the window band
+# ---------------------------------------------------------------------------
+
+
+def test_counts_are_drawn_as_steps_unless_the_caller_says_otherwise(xy):
+    """The histogram line uses ``drawstyle="steps-mid"``; a passed one wins.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, _ = xy
+    _, ax = plt.subplots()
+    Hist1D(x, nbins=EDGES).make_plot(ax)
+    Hist1D(x, nbins=EDGES).make_plot(ax, drawstyle="default")
+
+    assert [line.get_drawstyle() for line in ax.lines] == ["steps-mid", "default"]
+
+
+def test_keywords_and_their_aliases_reach_the_line(xy):
+    """``c``, ``ls`` and ``label`` style the drawn line, with or without a window.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    _, ax = plt.subplots()
+    _, container = Hist1D(x, y, nbins=EDGES).make_plot(
+        ax, c="r", ls="--", label="errorbar"
+    )
+    Hist1D(x, y, nbins=EDGES).make_plot(
+        ax, fcn=("mean", "std"), plot_window=True, c="g", ls=":", label="window"
+    )
+
+    errorbar_line, window_line = ax.lines
+    assert (errorbar_line.get_color(), errorbar_line.get_linestyle()) == ("r", "--")
+    assert container.get_label() == "errorbar"  # errorbar labels its container
+    assert (window_line.get_color(), window_line.get_linestyle()) == ("g", ":")
+    assert window_line.get_label() == "window"
+
+
+def test_window_without_edges_draws_only_the_central_line(xy):
+    """``plot_window`` alone draws one line and the band, no edge lines.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    _, ax = plt.subplots()
+    Hist1D(x, y, nbins=EDGES).make_plot(ax, fcn=("mean", "std"), plot_window=True)
+
+    assert len(ax.lines) == 1
+    assert len(ax.collections) == 1
+
+
+def test_window_band_and_edges_follow_the_line_style_by_default(xy):
+    """Band and edges take the line's colour and linestyle; the band's alpha is 0.15.
+
+    0.15 is the documented default ``alpha`` (``make_plot`` docstring).
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    _, ax = plt.subplots()
+    Hist1D(x, y, nbins=EDGES).make_plot(
+        ax,
+        fcn=("mean", "std"),
+        plot_window=True,
+        plot_window_edges=True,
+        color="m",
+        linestyle="-.",
+    )
+
+    band = ax.collections[0]
+    assert [(ln.get_color(), ln.get_linestyle()) for ln in ax.lines] == [
+        ("m", "-."),
+        ("m", "-."),
+        ("m", "-."),
+    ]
+    assert band.get_alpha() == 0.15
+    assert tuple(band.get_facecolor()[0][:3]) == mcolors.to_rgb("m")
+    # matplotlib's own band drawn with linestyle "-." is the reference.
+    _, ref_ax = plt.subplots()
+    reference = ref_ax.fill_between([0.0, 1.0], [0.0, 0.0], [1.0, 1.0], linestyle="-.")
+    assert band.get_linestyle() == reference.get_linestyle()
+
+
+def test_window_kwargs_style_the_band_and_edges(xy):
+    """``window_kwargs`` styles the band and edges; other keywords style the line.
+
+    The central line keeps the caller's own colour, linestyle and width;
+    any other ``window_kwargs`` entry (here a width) reaches band and edges.
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    _, ax = plt.subplots()
+    Hist1D(x, y, nbins=EDGES).make_plot(
+        ax,
+        fcn=("mean", "std"),
+        plot_window=True,
+        plot_window_edges=True,
+        color="m",
+        linestyle="-.",
+        lw=2.0,
+        window_kwargs={"alpha": 0.4, "color": "c", "linestyle": ":", "lw": 3.0},
+    )
+
+    central, upper, lower = ax.lines
+    band = ax.collections[0]
+    assert (central.get_color(), central.get_linestyle()) == ("m", "-.")
+    assert central.get_linewidth() == 2.0
+    for edge in (upper, lower):
+        assert (edge.get_color(), edge.get_linestyle()) == ("c", ":")
+        assert edge.get_linewidth() == 3.0
+    assert band.get_alpha() == 0.4
+    assert tuple(band.get_facecolor()[0][:3]) == mcolors.to_rgb("c")
+    assert list(band.get_linewidth()) == [3.0]
+
+
+def test_transposed_window_edges_sit_at_value_minus_and_plus_error(xy):
+    """Transposed, the edge lines are at x + dx then x - dx at each bin center.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    mean = _per_bin(x, y, np.mean)
+    std = _per_bin(x, y, lambda s: np.std(s, ddof=1))
+
+    _, ax = plt.subplots()
+    Hist1D(x, y, nbins=EDGES).make_plot(
+        ax,
+        fcn=("mean", "std"),
+        plot_window=True,
+        plot_window_edges=True,
+        transpose_axes=True,
+    )
+
+    _, upper, lower = ax.lines
+    assert np.asarray(_line_xy(upper)[0]) == exact(mean + std)
+    assert np.asarray(_line_xy(lower)[0]) == exact(mean - std)
+    assert np.asarray(_line_xy(upper)[1]) == exact(_centers())
+
+
+def test_transposed_errorbars_are_horizontal(xy):
+    """Transposed, the error bars run along x: value -/+ error at each center.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    mean = _per_bin(x, y, np.mean)
+    std = _per_bin(x, y, lambda s: np.std(s, ddof=1))
+
+    _, ax = plt.subplots()
+    _, container = Hist1D(x, y, nbins=EDGES).make_plot(
+        ax, fcn=("mean", "std"), transpose_axes=True
+    )
+
+    (bars,) = container.lines[2]
+    segments = np.array(bars.get_segments())
+    assert np.asarray(np.sort(segments[:, :, 0], axis=1)) == exact(
+        np.column_stack([mean - std, mean + std])
+    )
+    assert np.asarray(segments[:, :, 1].T) == exact(np.array([_centers()] * 2))
+
+
+def test_hist1d_figure_renders_to_png(xy):
+    """A histogram with error bars renders to an in-memory PNG.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = xy
+    fig, ax = plt.subplots()
+    Hist1D(x, y, nbins=EDGES).make_plot(ax, fcn=("mean", "std"))
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png")
+    assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
