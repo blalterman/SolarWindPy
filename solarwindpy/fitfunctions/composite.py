@@ -111,7 +111,8 @@ class GaussianPlusHeavySide(FitFunction):
         and the one with the lowest cost is refit through
         :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`. A ``p0``
         passed by the caller supplies the starting values of the other
-        parameters; its ``x0`` is replaced.
+        parameters; its ``x0`` is replaced. An explicit ``p0=None`` starts
+        them from the feasible default, as when :attr:`p0` is None.
 
         Parameters
         ----------
@@ -125,9 +126,10 @@ class GaussianPlusHeavySide(FitFunction):
         None or Exception
             As in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
         """
-        user_p0 = kwargs.pop("p0", None)
         try:
-            p0 = self.p0 if user_p0 is None else user_p0
+            # An explicit p0=None asks for the generic start, as in the base
+            # class, so self.p0 is read only when the caller gave no p0.
+            p0 = kwargs.pop("p0") if "p0" in kwargs else self.p0
         except InsufficientDataError:
             # The base class reports insufficient data.
             return super().make_fit(return_exception=return_exception, **kwargs)

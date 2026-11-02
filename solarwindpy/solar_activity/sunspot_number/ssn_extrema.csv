@@ -4,6 +4,9 @@
 # -----
 # [1] <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt>
 #
+# Cycle 25 Max is the peak of the SILSO 13-month smoothed series (160.9 in
+# 2024-10), pending a SILSO entry; [1] listed none when checked 2026-10-23.
+#
 # To update extrema, use the following an manually copy
 #
 #         extrema = pd.read_csv(
@@ -69,4 +72,4 @@ Number,Min,Max
 22,1986-09-01,1989-11-01
 23,1996-08-01,2001-11-01
 24,2008-12-01,2014-04-01
-25,2019-12-01,2030-12-01
+25,2019-12-01,2024-10-01

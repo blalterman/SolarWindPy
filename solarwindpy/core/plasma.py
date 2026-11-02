@@ -2093,9 +2093,11 @@ species: {}
             mass density passed to `AlfvenTurbulence` and used for converting
             magentic field in Alfven units.
         kwargs:
-            Passed to `rolling` method in
-            :py:class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`
-            to specify window size.
+            Passed to
+            :py:class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`:
+            ``raffaella_version`` and ``sc_vector`` select its GSE-to-RTN
+            verification aid, and the rest reach its ``rolling`` call, e.g.
+            ``window`` and ``min_periods``.
         """
         species_ = species.split(",")
 

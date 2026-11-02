@@ -10,6 +10,7 @@ brute-force weighted mean built with numpy, and from a hand-computed case.
 """
 
 import math
+import warnings
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -154,3 +155,19 @@ class TestNanGaussianFilter:
         result = nan_gaussian_filter(counts, sigma=1.0)
         expected = nan_gaussian_filter(counts.astype(float), sigma=1.0)
         assert np.asarray(result) == exact(expected)
+
+    def test_nan_region_wider_than_the_kernel_stays_nan_without_warnings(self):
+        """Cells with no valid neighbour in reach stay NaN, and no warning is raised.
+
+        With sigma 1 and scipy's default truncate of 4 the kernel reaches 4
+        cells, so columns 15 to 29 of the NaN block have no valid neighbour
+        and zero weight; dividing there would warn about 0/0.
+        ON FAILURE: the code is wrong.
+        """
+        arr = np.ones((6, 30))
+        arr[:, 10:] = np.nan
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            result = nan_gaussian_filter(arr, sigma=1.0)
+        np.testing.assert_array_equal(np.isnan(result), np.isnan(arr))
+        assert np.asarray(result[:, :10]) == exact(1.0)

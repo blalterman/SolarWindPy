@@ -98,7 +98,8 @@ class ExponentialCDF(FitFunction):
     Only the rate ``c`` is fitted. The amplitude :attr:`y0` (written ``A``
     in :attr:`TeX_function`) is fixed by the caller with :meth:`set_y0`,
     which must be called before :meth:`make_fit`; otherwise the fit
-    raises ``AttributeError``.
+    raises ``AttributeError``. The TeX info reports it after ``c`` as
+    ``A``, without an uncertainty.
     """
 
     @property
@@ -145,17 +146,6 @@ class ExponentialCDF(FitFunction):
         TeX = r"f(x)=A \left(1 - e^{-cx}\right)"
         return TeX
 
-    def set_TeX_info(self, **kwargs):
-        """Include ``A`` value in the TeX annotation."""
-
-        # HACK: assumes integer A
-        #       If not integer, will need to format float or exp.
-        additional_info = kwargs.pop("additional_info", [])
-        if not isinstance(additional_info, list):
-            additional_info = [additional_info]
-        info_A = r"$A = %s$" % self.y0
-        additional_info = [info_A] + additional_info
-
-        super(ExponentialCDF, self).set_TeX_info(
-            additional_info=additional_info, **kwargs
-        )
+    def _TeX_extra_params(self):
+        r"""The fixed amplitude :attr:`y0`, reported in the TeX info as ``A``."""
+        return {"A": self.y0}

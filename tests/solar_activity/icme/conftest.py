@@ -26,7 +26,7 @@ NaT = pd.NaT
 #   W2  Wind       2000-05-01        2000-05-02        2000-05-04  2000-05-04    mo_end
 #   S1  STEREO-A   2000-06-01        2000-06-01 12:00  2000-06-03  2000-06-03    mo_end
 #
-# mo_bmax is a catalog column that ICMECAT.intervals does not carry.
+# mo_bmax is a catalog column that ICMECAT.estimated_intervals does not carry.
 #
 # CATALOG is read-only shared state: tests receive copies through the
 # `catalog` and `serve_catalog` fixtures and never touch it directly.

@@ -314,41 +314,40 @@ class GaussianLn(FitFunction):
 
     @property
     def TeX_report_normal_parameters(self):
-        r"""Report normal parameters, not log-normal parameters in the TeX info."""
+        r"""Whether the TeX info also reports the normal parameters :math:`\mu, \sigma`.
+
+        When True, the annotation lists :attr:`normal_parameters` after the
+        fitted ``m``, ``s`` and ``A``, without an uncertainty: the
+        propagation of the log-normal uncertainties is not implemented.
+        """
         try:
             return self._use_normal_parameters
         except AttributeError:
             return False
 
     def set_TeX_report_normal_parameters(self, new):
-        r"""Set :attr:`TeX_report_normal_parameters` to ``bool(new)``."""
+        r"""Set :attr:`TeX_report_normal_parameters` to ``bool(new)``.
+
+        A TeX info already built by a fit is updated to match.
+        """
         new = bool(new)
         self._use_normal_parameters = new
+        try:
+            tex_info = self.TeX_info
+        except AttributeError:  # Not fitted yet.
+            return
+        tex_info.set_extra_params(self._TeX_extra_params())
 
-    @property
-    def TeX_popt(self):
-        r"""Create a dictionary with ``(k, v)`` pairs corresponding to parameter values.
+    def _TeX_extra_params(self):
+        r"""The normal parameters as ``{r"\mu": mu, r"\sigma": sigma}``, or None.
 
-        ``(self.argnames, :math:`p_{\mathrm{opt}} \pm \sigma_p`)`` with the
-        appropriate uncertainty.
-
-        See ``set_TeX_trans_argnames`` to translate the argnames for TeX.
+        None unless :attr:`TeX_report_normal_parameters` and a fit has set
+        ``popt``.
         """
-        TeX_popt = super(GaussianLn, self).TeX_popt
-
-        if self.TeX_report_normal_parameters:
-            popt = self.normal_parameters.items()
-            # use -9999 to indicate fill value that hasn't been set.
-            # I need to figure out how to calculate the transformation
-            # of the uncertainty of log normal to normal.
-            normal_popt = {k: self.val_uncert_2_string(v, np.nan) for k, v in popt}
-            normal_popt = {k: v.split(r" \pm")[0] for k, v in normal_popt.items()}
-
-            translate = dict(mu=r"\mu", sigma=r"\sigma")
-            for k0, k1 in translate.items():
-                normal_popt[k1] = normal_popt[k0]
-                del normal_popt[k0]
-
-            TeX_popt.update(normal_popt)
-
-        return TeX_popt
+        if not self.TeX_report_normal_parameters:
+            return None
+        try:
+            normal = self.normal_parameters
+        except AttributeError:  # Not fitted.
+            return None
+        return {r"\mu": normal["mu"], r"\sigma": normal["sigma"]}

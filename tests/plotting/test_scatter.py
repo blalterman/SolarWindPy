@@ -6,11 +6,12 @@ by z when z varies, with a colorbar labelled ``labels.z``. Expectations come
 from the hand-typed ``ROWS`` table; assertions read the real ``PathCollection``
 (offsets, colour array, sizes), ``Axes`` and ``Colorbar`` on the Agg backend.
 
-The ``Scatter(..., clip_data=True)`` path is not tested here: its
-``make_plot`` calls ``self.clip_data``, which ``Scatter`` lacks, so it raises
-``AttributeError``. The fix to ``scatter.py`` carries its own test.
+Clipping both tails (``clip_data=True``) is tested in
+``tests/test_source_plotting_defects.py``, beside the defect it fixed; the
+one-tailed ``"l"`` and ``"u"`` are tested here.
 """
 
+import io
 import warnings
 
 import numpy as np
@@ -95,6 +96,20 @@ def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
     assert cbar.mappable is coll
     assert cbar.ax.get_ylabel() == "T"
     assert (ax.get_xlabel(), ax.get_ylabel()) == ("Vx", "Np")
+
+
+def test_two_valued_z_is_colour_mapped_with_a_colorbar(ax):
+    """A z holding exactly two values is data: points are coloured, with a colorbar.
+
+    Only a single z value means "no z"; two values already vary.
+
+    ON FAILURE: the code is wrong.
+    """
+    z = pd.Series([0.5, 0.5, 0.9, 0.9, 0.5, 0.9])
+    _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    kept_z = z.drop(1).to_numpy()  # row 1 has NaN y (ROWS)
+    np.testing.assert_array_equal(ax.collections[0].get_array(), kept_z)
+    assert isinstance(cbar, Colorbar)
 
 
 @pytest.mark.parametrize("z", [None, pd.Series(7.0, index=X.index)])
@@ -297,3 +312,69 @@ def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
     keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
     assert 2 < keep.sum() < ALIM_Z.size - 2
     _assert_drawn(ax, cbar, keep)
+
+
+def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
+    """A quantile limit of 0 is allowed and keeps the smallest finite z.
+
+    ``set_alim`` documents quantiles in [0, 1], bounds inclusive; the 0th
+    quantile of the finite z is their minimum, 0.0 in ``ALIM_Z``.
+    ON FAILURE: the code is wrong.
+    """
+    sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
+    sc.set_alim(0.0, 0.5, kind="quantile")
+    _, cbar = sc.make_plot(ax=ax)
+    hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], 0.5)
+    _assert_drawn(ax, cbar, ALIM_Z <= hi)
+
+
+def test_quantile_alim_with_one_finite_z_still_masks_the_infinite_ones(ax):
+    """With one finite z, its quantiles are that value, and +inf lies above them.
+
+    Points 1 and 2 have z = +inf, outside every quantile limit of the finite
+    z, which is [1.0]; only point 0 is drawn.
+    ON FAILURE: the code is wrong.
+    """
+    sc = Scatter([0.0, 1.0, 2.0], [5.0, 6.0, 7.0], [1.0, np.inf, np.inf])
+    sc.set_alim(None, 0.5, kind="quantile")
+    sc.make_plot(ax=ax)
+    np.testing.assert_array_equal(ax.collections[0].get_offsets(), [[0.0, 5.0]])
+
+
+@pytest.mark.parametrize("clip_data", ["l", "u"])
+def test_one_tailed_clip_data_clips_only_that_tail(ax, clip_data):
+    """``"l"`` clips only the low tail of each column, ``"u"`` only the high.
+
+    The input is 0..10000 with one far outlier on each end. The clipped tail
+    is raised or lowered to numpy's 0.01st or 99.99th percentile; the other
+    tail, outlier included, is drawn unchanged.
+    ON FAILURE: the code is wrong.
+    """
+    raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
+    Scatter(pd.Series(raw), pd.Series(raw), clip_data=clip_data).make_plot(ax=ax)
+    # Percentiles from the Base.clip_data docstring.
+    if clip_data == "l":
+        expected = np.clip(raw, np.quantile(raw, 1e-4), None)
+        assert expected[-1] == 1e6
+    else:
+        expected = np.clip(raw, None, np.quantile(raw, 1 - 1e-4))
+        assert expected[0] == -1e6
+    np.testing.assert_array_equal(
+        np.asarray(ax.collections[0].get_offsets()), np.c_[expected, expected]
+    )
+
+
+def test_scatter_figure_renders_to_png():
+    """A coloured scatter with its colorbar renders to an in-memory PNG.
+
+    Building artists does not run every matplotlib check; rendering does.
+    ON FAILURE: the code is wrong.
+    """
+    fig, ax = plt.subplots()
+    try:
+        Scatter(X, Y, Z).make_plot(ax=ax)
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format="png")
+    finally:
+        plt.close("all")
+    assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature

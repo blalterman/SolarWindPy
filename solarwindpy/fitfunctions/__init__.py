@@ -38,9 +38,11 @@ computes the optimized parameters, their covariance and
 - The default loss is ``"huber"`` with ``f_scale=0.1``, method ``"trf"``;
   ``loss``, ``f_scale``, ``method``, ``bounds``, ``p0`` and other
   :func:`~scipy.optimize.least_squares` keywords pass through ``make_fit``.
-- ``weights`` are treated as :func:`scipy.optimize.curve_fit` treats
-  ``sigma``: a 1-D array holds per-point uncertainties, a 2-D array a
-  covariance matrix. ``absolute_sigma=True`` raises ``NotImplementedError``.
+- ``weights`` are treated as :func:`scipy.optimize.curve_fit` treats a 1-D
+  ``sigma``: one 1-sigma uncertainty per observation, in the shape of the
+  1-D ``xobs``. A covariance matrix is not supported; weights of any other
+  shape raise :class:`~solarwindpy.fitfunctions.core.InvalidParameterError`.
+  ``absolute_sigma=True`` raises ``NotImplementedError``.
 - The covariance is the pseudo-inverse of :math:`J^T J` from the final
   Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square
   root of its diagonal.

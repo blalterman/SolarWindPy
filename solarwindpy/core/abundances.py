@@ -217,6 +217,10 @@ class ReferenceAbundances:
     def abundance_ratio(self, numerator, denominator):
         r"""Calculate abundance ratio N_X/N_Y with uncertainty.
 
+        Both abundances are photospheric (the ``Photosphere`` column of
+        Asplund et al. 2021, Table 2). An element without a photospheric
+        abundance gives NaN for the ratio and its uncertainty.
+
         Parameters
         ----------
         numerator, denominator : str or int
@@ -244,14 +248,10 @@ class ReferenceAbundances:
         """
         top = self.get_element(numerator)
         tu = top.Uncert
-        if np.isnan(tu):
-            tu = 0
 
         if denominator != "H":
             bottom = self.get_element(denominator)
             bu = bottom.Uncert
-            if np.isnan(bu):
-                bu = 0
 
             rat = 10.0 ** (top.Ab - bottom.Ab)
             uncert = rat * np.log(10) * np.sqrt((tu**2) + (bu**2))

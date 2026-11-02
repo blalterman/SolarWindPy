@@ -601,3 +601,63 @@ def test_power_law_edge_case_exponents():
     assert obj.function(x, 3.0, 1.0) == exact([3.0, 6.0, 12.0])
     assert obj.function(x, 5.0, 0.0) == exact([5.0, 5.0, 5.0])
     assert obj.function(x, 2.0, -1.0) == exact([2.0, 1.0, 0.5])
+
+
+# Off-center data: 16 / x^2 on x = [1, 2, 4, 8]; x0's upper bound is the
+# largest float below the smallest x, 1.
+OFF_X = np.array([1.0, 2.0, 4.0, 8.0])
+OFF_Y = 16.0 * OFF_X**-2.0
+BELOW_ONE = np.nextafter(1.0, -np.inf)
+
+
+def test_power_law_off_center_refusal_names_the_class():
+    """The no-room refusal opens with the class name, ``PowerLawOffCenter``.
+
+    The lower bound on x0 equal to its upper bound (the largest float below
+    the smallest x) leaves no room, so it is refused, not handed to scipy.
+
+    ON FAILURE: the code is wrong.
+    """
+    obj = PowerLawOffCenter(OFF_X, OFF_Y)
+    bounds = ([0.0, -5.0, BELOW_ONE], [100.0, 5.0, 10.0])
+    with pytest.raises(ValueError, match=r"^PowerLawOffCenter needs x0 below"):
+        obj.make_fit(bounds=bounds)
+
+
+@pytest.mark.parametrize(
+    "p0, bounds",
+    [
+        ([1.0, 1.0, BELOW_ONE], (-np.inf, np.inf)),
+        ([1.0, 1.0, -3.0], ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])),
+    ],
+    ids=["at-upper-bound", "at-lower-bound"],
+)
+def test_power_law_off_center_accepts_a_start_on_a_bound(p0, bounds):
+    """A caller's ``x0`` start exactly on its bound is inside the bounds.
+
+    The bounds are inclusive, so neither start is refused for lying outside
+    them; whether scipy then converges is its business.
+
+    ON FAILURE: the code is wrong.
+    """
+    obj = PowerLawOffCenter(OFF_X, OFF_Y)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+    assert "p0 starts x0" not in str(got), got
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [{"bounds": (1.0, 2.0, 3.0)}, {"p0": ["a", "b", "c"]}],
+    ids=["malformed-bounds", "malformed-p0"],
+)
+def test_power_law_off_center_leaves_malformed_input_to_the_base_fit(kwargs):
+    """Malformed bounds or ``p0`` are returned as the base fit's ValueError.
+
+    ON FAILURE: the code is wrong.
+    """
+    obj = PowerLawOffCenter(OFF_X, OFF_Y)
+    got = obj.make_fit(return_exception=True, **kwargs)
+    assert isinstance(got, ValueError), repr(got)
+    assert "needs x0 below" not in str(got), got
