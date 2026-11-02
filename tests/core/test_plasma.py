@@ -1588,7 +1588,7 @@ class PlasmaTestBase(ABC):
             return None  # Exit test.
 
         m = self.mass_in_mp
-        n = self.data.n.loc[:, pd.IndexSlice["", slist]].xs("", axis=1, level="C")
+        n = self.data.n.xs("", axis=1, level="C").loc[:, slist]
         rho = n.multiply(m, axis=1, level="S")
         rho.columns.names = ["S"]
 
