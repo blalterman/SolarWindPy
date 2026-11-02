@@ -592,7 +592,7 @@ class SSNExtrema(IndicatorExtrema):
             )
 
         path = Path(__file__).parent / "ssn_extrema.csv"
-        data = pd.read_csv(path, header=0, skiprows=45, index_col=0)
+        data = pd.read_csv(path, header=0, skiprows=48, index_col=0)
         data = pd.to_datetime(data.stack(), format="%Y-%m-%d").unstack(level=1)
         data.columns.names = ["kind"]
         self._data = data

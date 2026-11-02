@@ -98,6 +98,52 @@ class Base(ABC):
         log = LogAxes(bool(x), bool(y))
         self._log = log
 
+    @staticmethod
+    def clip_data(data, clip):
+        r"""Clip data to its 0.01st and 99.99th percentiles.
+
+        The one clipping rule every plot shares: each plot's ``clip_data``
+        option is handed here as ``clip``.
+
+        Parameters
+        ----------
+        data : pd.Series or pd.DataFrame
+            Data to clip. A DataFrame is clipped column by column.
+        clip : bool or str
+            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
+            tail only; any other value clips both tails.
+
+        Returns
+        -------
+        pd.Series or pd.DataFrame
+            The clipped data.
+
+        Raises
+        ------
+        TypeError
+            If ``data`` is neither a Series nor a DataFrame.
+        """
+        if isinstance(data, pd.Series):
+            ax = 0
+        elif isinstance(data, pd.DataFrame):
+            ax = 1
+        else:
+            raise TypeError("Unexpected object %s" % type(data))
+
+        q0 = 0.0001
+        q1 = 0.9999
+        pct = data.quantile([q0, q1])
+        lo = pct.loc[q0]
+        up = pct.loc[q1]
+
+        if isinstance(clip, str) and clip.lower()[0] == "l":
+            data = data.clip(lower=lo, axis=ax)
+        elif isinstance(clip, str) and clip.lower()[0] == "u":
+            data = data.clip(upper=up, axis=ax)
+        else:
+            data = data.clip(lo, up, axis=ax)
+        return data
+
     def set_labels(self, **kwargs):
         r"""Set or update the x, y, or z labels.
 
@@ -430,7 +476,7 @@ class PlotWithZdata(Base):
         clip_data : bool or str, optional
             Stored as ``self.clip``, None as False. True clips both tails;
             ``"l"`` or ``"u"`` clips only the lower or upper tail (see
-            ``AggPlot.clip_data``).
+            ``Base.clip_data``).
 
         Raises
         ------

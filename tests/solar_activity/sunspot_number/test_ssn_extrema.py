@@ -4,7 +4,7 @@
 Every test in this module reads the actual CSV that ships with the package,
 ``solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv``, whose own header
 cites <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt> as its source.
-Nothing here mocks :func:`pandas.read_csv`; the ``skiprows=45`` at
+Nothing here mocks :func:`pandas.read_csv`; the ``skiprows=48`` at
 ``sidc.py:552`` is the most fragile line in the module and it is executed by
 every test below.
 
@@ -12,15 +12,16 @@ Expectations are derived from the file itself (parsed independently with the
 standard library), from definitional properties of a solar cycle, or from
 published cycle statistics -- never captured from a run of the code.
 
-KNOWN GAP -- solar cycle 25 maximum
------------------------------------
-The shipped CSV records cycle 25's maximum as ``2030-12-01``, giving an
-11.0-year rise time. Every closed cycle in the same file rises in 2.9 to 6.8
-years. That value is a placeholder for a maximum the file was written before
-observing, not a measurement, so no test here asserts it. Property tests that
-depend on a cycle being closed run over cycles 1 through 24 via
-:data:`LAST_CLOSED_CYCLE`. Deciding what cycle 25's maximum should be is the
-author's call, not the test suite's.
+Solar cycle 25: maximum known, next minimum not yet observed
+------------------------------------------------------------
+SILSO's TableCyclesMiMa.txt lists cycle 25's minimum but not yet its maximum,
+so the CSV takes cycle 25's maximum from the peak of the SILSO 13-month
+smoothed series: 160.9 at ``2024-10-01``, a 4.8-year rise inside the 2.9 to
+6.8 years of every earlier cycle in the file. The CSV header says so. Cycle 26
+has no minimum yet, so cycle 25 has no successor: IndicatorExtrema
+.calculate_intervals ends its falling edge, and the cycle, at today's date.
+Properties that need a following minimum run over cycles 1 through 24 via
+:data:`LAST_CLOSED_CYCLE`; the cycle 25 tests below pin the open cycle itself.
 """
 
 import pandas as pd
@@ -38,7 +39,7 @@ SSN_EXTREMA_CSV = sidc.Path(sidc.__file__).parent / "ssn_extrema.csv"
 # The header row of the data block. Everything above it is commentary.
 HEADER_PREFIX = "Number,"
 
-# Cycle 25 is still open in the shipped file (see KNOWN GAP above), so
+# Cycle 25 has no following minimum yet (see the module docstring), so
 # properties that require a completed rise and fall exclude it.
 LAST_CLOSED_CYCLE = 24
 
@@ -81,35 +82,35 @@ def extrema():
 
 @pytest.fixture
 def closed_cycles(extrema):
-    """Extrema rows for cycles whose maximum is a measurement, not a placeholder."""
+    """Extrema rows for cycles that are followed by the next cycle's minimum."""
     return extrema.data.loc[:LAST_CLOSED_CYCLE]
 
 
 # ---------------------------------------------------------------------------
-# The header offset: skiprows=45 at sidc.py:552.
+# The header offset: skiprows=48 in SSNExtrema.load_or_set_data.
 # ---------------------------------------------------------------------------
 #
 # Measured (not guessed): the "Number,Min,Max" header line's raw 0-based line
-# index in ssn_extrema.csv. sidc.py:552 uses skiprows=45, one less than this,
-# because a blank line at index 45 precedes the header and pandas' default
+# index in ssn_extrema.csv. sidc.py uses skiprows=48, one less than this,
+# because a blank line at index 48 precedes the header and pandas' default
 # skip_blank_lines=True absorbs it during parsing -- confirmed below by
 # actually parsing with skiprows=45 and checking the resulting columns.
 #
-# Measured consequence: skiprows=45 and skiprows=46 parse this file
-# identically, because 45 lands on the blank line that pandas then drops and
-# 46 lands on the header itself. Only 47 and beyond eat a data row. So there
-# is no test here asserting that sidc.py's literal is 45 specifically -- such
-# a test fails on a correct reimplementation that chose 46, which makes it a
+# Measured consequence: skiprows=48 and skiprows=49 parse this file
+# identically, because 48 lands on the blank line that pandas then drops and
+# 49 lands on the header itself. Only 50 and beyond eat a data row. So there
+# is no test here asserting that sidc.py's literal is 48 specifically -- such
+# a test fails on a correct reimplementation that chose 49, which makes it a
 # report of refactoring rather than of a defect. What is asserted instead is
 # that the parse recovers every data row, which is what actually breaks.
-EXPECTED_HEADER_LINE_INDEX = 46
-SKIPROWS = 45
+EXPECTED_HEADER_LINE_INDEX = 49
+SKIPROWS = 48
 
 
 def test_header_line_index_matches_measurement(raw_csv):
     """The 'Number,' header line is where sidc.py:552's skiprows expects.
 
-    skiprows=45 does not land directly on the header line (raw index 46); it
+    skiprows=48 does not land directly on the header line (raw index 49); it
     lands on the blank line immediately before it, which pandas'
     skip_blank_lines default then absorbs. Both facts are measured here, not
     assumed.
@@ -207,15 +208,16 @@ def test_cycle_numbers_are_contiguous_from_one(extrema):
     assert list(index) == list(range(1, len(index) + 1))
 
 
-def test_minimum_precedes_maximum_within_each_cycle(closed_cycles):
+def test_minimum_precedes_maximum_within_each_cycle(extrema):
     """A cycle rises before it falls: Min < Max.
 
     Definitional: a solar cycle begins at a minimum of the 13-month smoothed
-    sunspot number and peaks at the following maximum.
+    sunspot number and peaks at the following maximum. This needs no following
+    minimum, so it covers the open cycle 25 too.
 
     ON FAILURE: an extremum pair is transposed. The data file is wrong.
     """
-    assert (closed_cycles.loc[:, "Min"] < closed_cycles.loc[:, "Max"]).all()
+    assert (extrema.data.loc[:, "Min"] < extrema.data.loc[:, "Max"]).all()
 
 
 def test_maximum_precedes_the_next_cycles_minimum(extrema):
@@ -452,6 +454,71 @@ def test_cut_spec_by_interval_honours_tk_cycles(extrema):
 
     assert cut.iloc[0] == inside
     assert pd.isna(cut.iloc[1])
+
+
+# ---------------------------------------------------------------------------
+# Cycle 25: maximum known, next minimum not yet observed.
+# ---------------------------------------------------------------------------
+OPEN_CYCLE = LAST_CLOSED_CYCLE + 1
+
+
+def test_open_cycle_extrema_are_pinned(extrema):
+    """Cycle 25 is the last row: Min 2019-12-01, Max 2024-10-01.
+
+    The minimum is SILSO's TableCyclesMiMa.txt entry. The maximum is the peak
+    of the SILSO 13-month smoothed series (160.9 in 2024-10), recorded in the
+    CSV header, because the table had no cycle 25 maximum when it was set.
+
+    ON FAILURE: cycle 25's extrema changed. If SILSO now lists a maximum,
+    update the CSV, its header note, and these dates together.
+    """
+    assert extrema.data.index[-1] == OPEN_CYCLE
+    assert extrema.data.loc[OPEN_CYCLE, "Min"] == pd.Timestamp("2019-12-01")
+    assert extrema.data.loc[OPEN_CYCLE, "Max"] == pd.Timestamp("2024-10-01")
+
+
+def test_open_cycle_falling_edge_runs_from_its_maximum_to_today(extrema):
+    """With no next minimum, cycle 25 falls from its maximum to today.
+
+    calculate_intervals substitutes today's date for the missing Min(26) when
+    the cycle's maximum is in the past, so Rise = (Min, Max], Fall = (Max,
+    today], Cycle = (Min, today].
+
+    ON FAILURE: the open cycle's intervals no longer follow its extrema, so
+    recent epochs would be binned to the wrong edge or dropped. The code is
+    wrong.
+    """
+    today = pd.Timestamp.today().normalize()
+    row = extrema.data.loc[OPEN_CYCLE]
+    intervals = extrema.cycle_intervals.loc[OPEN_CYCLE]
+
+    assert intervals.loc["Rise"] == pd.Interval(row.loc["Min"], row.loc["Max"])
+    assert intervals.loc["Fall"].left == row.loc["Max"]
+    assert intervals.loc["Cycle"].left == row.loc["Min"]
+    assert intervals.loc["Fall"].right == intervals.loc["Cycle"].right
+    # A run that crosses midnight between the fixture and this line sees a
+    # one-day difference.
+    assert today - pd.Timedelta("1D") <= intervals.loc["Fall"].right <= today
+
+
+def test_epochs_after_the_open_cycle_maximum_bin_into_its_falling_edge(extrema):
+    """Epochs past 2024-10 are on cycle 25's falling edge, not dropped.
+
+    Intervals are right-closed, so the maximum itself is the last rising
+    epoch. The probes run to 2026-07, the end of the data this was set for.
+
+    ON FAILURE: post-maximum epochs fall outside every interval or onto the
+    rising edge. The code or the data file is wrong.
+    """
+    intervals = extrema.cycle_intervals.loc[OPEN_CYCLE]
+    probes = pd.DatetimeIndex(["2022-01-01", "2024-10-01", "2024-11-01", "2026-07-01"])
+
+    edges = extrema.cut_spec_by_interval(probes, kind="Edges")
+    cycles = extrema.cut_spec_by_interval(probes, kind="Cycle")
+
+    rise, fall = intervals.loc["Rise"], intervals.loc["Fall"]
+    assert list(edges.values) == [rise, rise, fall, fall]
+    assert (cycles == intervals.loc["Cycle"]).all()
 
 
 # ---------------------------------------------------------------------------
