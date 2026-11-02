@@ -100,49 +100,6 @@ class AggPlot(base.Base):
         return self._axnorm
 
     @staticmethod
-    def clip_data(data, clip):
-        r"""Clip data to its 0.01st and 99.99th percentiles.
-
-        Parameters
-        ----------
-        data : pd.Series or pd.DataFrame
-            Data to clip. A DataFrame is clipped column by column.
-        clip : bool or str
-            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails.
-
-        Returns
-        -------
-        pd.Series or pd.DataFrame
-            The clipped data.
-
-        Raises
-        ------
-        TypeError
-            If ``data`` is neither a Series nor a DataFrame.
-        """
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip(lower=lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip(upper=up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
-
-    @staticmethod
     def _bin_widths(bins):
         r"""Width of each bin in the binned variable.
 
@@ -224,20 +181,27 @@ class AggPlot(base.Base):
         r"""Calculate histogram bins.
 
         nbins: int, str, array-like
-            If int, use np.histogram to calculate the bin edges.
+            If an integer (a Python or numpy int), use
+            :func:`numpy.histogram_bin_edges` to calculate that many bins.
             If str and nbins == "knuth", use `astropy.stats.knuth_bin_width`
             to calculate optimal bin widths.
-            If str and nbins != "knuth", use `np.histogram(data, bins=nbins)`
-            to calculate bins.
+            If str and nbins != "knuth", use
+            `np.histogram_bin_edges(data, bins=nbins)` to calculate bins.
             If a :class:`pandas.IntervalIndex` of contiguous intervals closed
             on the left or right, use those bins and that side, e.g. another
             histogram's ``intervals``. Its edges are rounded only when
             ``precision`` is given.
-            If array-like, treat as bins.
+            If array-like with one entry per binned axis, each entry is that
+            axis's specification; any other array-like is the bin edges.
 
         precision: int or None
             Decimal places to which bin edges are rounded. If None, 5, except
             that an ``IntervalIndex`` keeps its edges.
+
+        Raises
+        ------
+        ValueError
+            If ``nbins`` is none of the above, e.g. a float, a bool or None.
 
         Notes
         -----
@@ -247,9 +211,13 @@ class AggPlot(base.Base):
         ``IntervalIndex`` keeps its closure, and a left-closed one also closes
         its last bin on the right, so another histogram's intervals reproduce
         its bins. Other ``nbins`` give right-closed bins, ``(a, b]``.
+
+        A bin rule that asks for more bins than fit in memory (e.g. ``"fd"`` on
+        data with an extreme outlier) is retried on the data clipped to its
+        0.05th and 99.95th percentiles. The values outside the resulting bins
+        are not counted, and a warning gives their number.
         """
         data = self.data
-        bins = {}
         intervals = {}
 
         # An `IntervalIndex` keeps its edges unless the caller sets a precision.
@@ -257,21 +225,7 @@ class AggPlot(base.Base):
         if precision is None:
             precision = 5
 
-        gb_axes = self._gb_axes
-
-        if isinstance(nbins, (str, int, pd.IntervalIndex)) or (
-            hasattr(nbins, "__iter__") and len(nbins) != len(gb_axes)
-        ):
-            # Single paramter for `nbins`.
-            nbins = {k: nbins for k in gb_axes}
-
-        elif len(nbins) == len(gb_axes):
-            # Passed one bin spec per axis
-            nbins = {k: v for k, v in zip(gb_axes, nbins)}
-
-        else:
-            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins:{nbins}"
-            raise ValueError(msg)
+        nbins = self._nbins_by_axis(nbins)
 
         for k in self._gb_axes:
             b = nbins[k]
@@ -286,6 +240,7 @@ class AggPlot(base.Base):
             from_count = isinstance(b, Integral) and not isinstance(b, bool)
 
             closed = "right"
+            clipped_for_memory = False
             given_intervals = isinstance(b, pd.IntervalIndex)
             if given_intervals:
                 b, closed = self._edges_from_intervals(b)
@@ -305,8 +260,7 @@ class AggPlot(base.Base):
                     # Clip the extremely large values and extremely small outliers.
                     lo, up = d.quantile([0.0005, 0.9995])
                     b = np.histogram_bin_edges(d.clip(lo, up), b)
-                except AttributeError:
-                    c, b = np.histogram(d, b)
+                    clipped_for_memory = True
 
             assert np.unique(b).size == b.size
             try:
@@ -326,15 +280,66 @@ class AggPlot(base.Base):
             elif round_intervals or not given_intervals:
                 b = b.round(precision)
 
+            if clipped_for_memory:
+                self._warn_values_outside_bins(k, d, b)
+
             zipped = zip(b[:-1], b[1:])
             i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
 
-            bins[k] = b
             intervals[k] = pd.CategoricalIndex(i)
 
-        bins = tuple(bins.items())
         intervals = tuple(intervals.items())
         self._categoricals = intervals
+
+    def _nbins_by_axis(self, nbins):
+        r"""Map each binned axis to its bin specification.
+
+        A count, a rule, an ``IntervalIndex``, or edges apply to every axis;
+        a sequence with one entry per axis gives each axis its own.
+
+        Raises
+        ------
+        ValueError
+            If ``nbins`` is neither a specification nor a sequence of them.
+        """
+        gb_axes = self._gb_axes
+        single = isinstance(nbins, (str, pd.IntervalIndex)) or (
+            isinstance(nbins, Integral) and not isinstance(nbins, bool)
+        )
+        if single:
+            return {k: nbins for k in gb_axes}
+
+        try:
+            n_specs = len(nbins)
+        except TypeError:
+            raise ValueError(
+                f"Unrecognized `nbins` {nbins!r} of type {type(nbins).__name__}: "
+                "expected an int, a str, an IntervalIndex, bin edges, or one of "
+                "these per axis."
+            ) from None
+
+        if n_specs == len(gb_axes):
+            return dict(zip(gb_axes, nbins))
+        return {k: nbins for k in gb_axes}
+
+    def _warn_values_outside_bins(self, axis, finite, edges):
+        r"""Warn how many finite values of ``axis`` fall outside ``edges``.
+
+        Called when a bin rule's edges were computed from clipped data, so the
+        values beyond the clip lie outside every bin and go uncounted. Such
+        bins are right-closed: an integer bin count that exhausts memory does
+        so again on the clipped data, so only a rule reaches here. A value is
+        counted as ``make_cut`` bins it, after ``clip_data`` if set.
+        """
+        if self.clip:
+            finite = self.clip_data(finite, self.clip)
+        inside = (finite > edges[0]) & (finite <= edges[-1])
+        self.logger.warning(
+            f"The bins for {axis!r} did not fit in memory, so they were computed "
+            "from the data clipped to its 0.05th and 99.95th percentiles: "
+            f"{int((~inside).sum())} of {finite.size} finite values lie outside "
+            "the bins and are not counted."
+        )
 
     def make_cut(self):
         r"""Calculate the `Categorical` quantities for the aggregation axes."""
@@ -470,7 +475,8 @@ class AggPlot(base.Base):
 
         tk_h2 = self._joint_bin_mask(tk.index)
 
-        subset = self.data.loc[tk_h2].copy(deep=True)
+        # Boolean selection returns a new frame; the stored data is untouched.
+        subset = self.data.loc[tk_h2]
         for k, log in self.log._asdict().items():
             if log:
                 subset.loc[:, k] = 10 ** subset.loc[:, k]

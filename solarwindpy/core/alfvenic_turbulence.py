@@ -52,11 +52,42 @@ class AlfvenicTurbulence(base.Core):
     rho : :class:`pandas.Series`
         Mass density used for normalising ``bfield``.
     species : str
-        Species string used when converting to Alfv\'en units.
+        Species string used when converting to Alfv\'en units. At most one
+        ``,``; the ``+``-joined species on either side are sorted.
+    raffaella_version : bool, optional
+        If True, ``velocity`` and ``bfield`` must be GSE vectors, which are
+        converted to RTN and corrected for solar rotation; see Notes.
+    sc_vector : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+        Spacecraft in the GSE frame, at the times of ``velocity``. Required
+        when ``raffaella_version`` is True.
+    **kwargs
+        Passed to :meth:`pandas.DataFrame.rolling` when subtracting the
+        background. ``window`` defaults to ``"15min"`` and ``min_periods``
+        to 5.
+
+    Raises
+    ------
+    ValueError
+        If ``raffaella_version`` is True and ``sc_vector`` is None.
 
     Notes
     -----
     Implementation follows the formalism of Bruno & Carbone (2013).
+
+    ``raffaella_version`` is a verification aid that expects GSE input and
+    converts it to RTN before the background is subtracted:
+
+    1. Every vector, velocity and field alike, becomes
+       :math:`(R, T, N) = (-X, -Y, Z)`.
+    2. The speed of solar rotation at the spacecraft,
+       :math:`\Omega r \cos\lambda`, is subtracted from :math:`v_T`. Here
+       :math:`\Omega = 2.865 \times 10^{-6}` rad/s is the Sun's sidereal
+       rotation rate (:math:`2\pi` per 25.38 days), :math:`r` is the
+       spacecraft's distance to the Sun in km, and :math:`\cos\lambda` is
+       :math:`\sqrt{x^2 + y^2} / \sqrt{x^2 + y^2 + z^2}` of its GSE position.
+    3. The polarity of each measurement is the sign of
+       :math:`v_R b_R + v_T b_T`, and :attr:`bfield` returns the field
+       fluctuations multiplied by it.
     """
 
     def __init__(
@@ -71,16 +102,7 @@ class AlfvenicTurbulence(base.Core):
     ):
         r"""Initialize an :py:class:`AlfvenicTurbulence` object.
 
-        Parameters
-        ----------
-        velocity: pd.DataFrame
-            Vector velocity measurments.
-        bfield: pd.DataFrame
-            Vector mangetic field measurements.
-        rho: pd.Series
-            Mass density measurments, used to put `bfield` into Alfven units.
-        kwargs:
-            Passed to `rolling` method when mean-subtracing in `set_data`.
+        The parameters are described in the class docstring.
         """
 
         super(AlfvenicTurbulence, self).__init__()
@@ -342,11 +364,11 @@ unexpected.""")
         )
         b_ca_units = b_in.divide(rho.pipe(np.sqrt), axis=0).multiply(coef)
 
-        data = (
-            pd.concat({"v": v_in, "b": b_ca_units}, axis=1, names=["M"], sort=True)
-            .sort_index(axis=1)
-            .copy(deep=True)
-        )
+        # `sort=True` puts the union of unequal v and b indexes in time order,
+        # which `rolling` requires.
+        data = pd.concat(
+            {"v": v_in, "b": b_ca_units}, axis=1, names=["M"], sort=True
+        ).sort_index(axis=1)
 
         polarity = None
         if raffaella_version:
@@ -363,7 +385,7 @@ unexpected.""")
 
             # Project along nominal Parker Spiral
             omega = 2.865e-6  # rad/s
-            pos = sc_vector.data.pos.copy(deep=True)
+            pos = sc_vector.data.xs("pos", axis=1, level="M")
             r_rtn = (
                 pos.loc[:, ["x", "y", "z"]]
                 .pow(2)
@@ -411,11 +433,9 @@ unexpected.""")
         if not isinstance(species, str):
             msg = "%s.species must be a single species w/ an optional `+` or `,`"
             raise TypeError(msg % self.__class__.__name__)
-        if species.count(",") > 1:
+        parts = species.split(",")
+        if len(parts) > 2:
             msg = "%s.species can contain at most one `,`\nspecies: %s"
             raise ValueError(msg % (self.__class__.__name__, species))
 
-        species = ",".join(
-            ["+".join(tuple(sorted(s.split("+")))) for s in species.split(",")]
-        )
-        return species
+        return ",".join("+".join(self._conform_species(s)) for s in parts)

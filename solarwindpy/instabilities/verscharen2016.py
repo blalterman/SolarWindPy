@@ -29,7 +29,7 @@ import matplotlib as mpl
 
 from collections import namedtuple
 
-_inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Intability")
+_inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Instability")
 _param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
 #: Fit parameters ``a``, ``b`` and ``c`` of each instability threshold
@@ -167,7 +167,15 @@ class StabilityCondition(object):
     is_unstable : pandas.DataFrame
         Boolean mask indicating unstable modes.
     stability_bin : pandas.Series
-        Integer label describing the dominant instability.
+        Integer label describing the dominant instability, named
+        ``"Stability"``.
+
+    Notes
+    -----
+    A missing value counts as stable. Where a threshold is undefined
+    (beta at or below the fit offset ``c`` of Eq. (5), or beta missing) or
+    the anisotropy is missing, the measurement is not unstable to that
+    instability.
     """
 
     def __init__(self, growth_rate, beta, anisotropy):
@@ -198,7 +206,7 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Used to build data containers and check all entries are visited."""
+        r"""Placeholder ``stability_bin`` starts from before each bin is assigned."""
         return -9999.0
 
     @property
@@ -359,33 +367,8 @@ class StabilityCondition(object):
         }
         is_unstable = pd.concat(is_unstable, axis=1).sort_index(axis=1)
 
-        # If the value is NaN in `instability_thresholds`, the comparison
-        # returns False. We want to propagate it so that we can check the
-        # other instabilities. A bool frame cannot hold NaN, so mask an
-        # upcast float copy (True -> 1.0, False -> 0.0) and cast back below.
-        is_unstable = is_unstable.astype(float).mask(
-            self.instability_thresholds.isnull()
-        )
-
-        # When an instability is NaN, we have to check the other instabilities.
-        for key, column in is_unstable.items():
-            # Temporarily replace the NaNs here with False because NaNs don"t
-            # qualify as unstable on their own. We make the replacement here
-            # and not earlier because we are relying on those NaNs to indicate
-            # the spectra we must actually check against the other
-            # instabilities.
-            others = is_unstable.drop(key, axis=1)
-            others = others.fillna(0.0).astype(bool).all(axis=1)
-            column = column.mask(column.isnull(), others).astype(bool)
-
-            # Replace the whole column so it may change dtype to bool.
-            is_unstable[key] = column
-
-        if is_unstable.isnull().any().any():
-            msg = "Did you visit every data point? " "It looks like you missed %s."
-            msg = msg % (not is_unstable.isnull()).sum()
-            raise ValueError(msg)
-
+        # A missing value counts as stable: no comparison with a NaN threshold
+        # or anisotropy holds.
         self._is_unstable = is_unstable.astype(bool)
 
     def _calc_stability_bin(self):
@@ -414,11 +397,8 @@ class StabilityCondition(object):
         )
         stability_bin.mask(unstable.OFI, map_inverse["OFI"], inplace=True)
 
-        if (stability_bin == self.fill).any():
-            msg = "Did you visit every data point? " "It looks like you missed %s."
-            msg = msg % (stability_bin == self.fill).sum()
-            raise ValueError(msg)
-
+        # Every row is now assigned: stable when no instability holds, and
+        # otherwise AIC, MM, FMW or OFI each set one of the four other bins.
         self._stability_bin = stability_bin
 
     def calculate_stability_criteria(self):
@@ -488,6 +468,13 @@ class StabilityContours(object):
         tk_kind: None, str, list-like of str
             Contours to plot. Valid options are "MM", "AIC", "FMW", "OFI",
             and any combination thereof.
+        kwargs:
+            Line styles passed to :meth:`matplotlib.axes.Axes.plot` for every
+            contour, overriding the defaults; matplotlib aliases (``ms``,
+            ``c``, ``ls``) are accepted. By default each contour has its own
+            ``color``, ``linestyle`` and ``marker`` and is labelled with its
+            instability, with ``markersize=10``, ``markeredgewidth=0.5``,
+            ``markeredgecolor="k"`` and ``markevery=10``.
         """
         assert isinstance(ax, mpl.axes.Axes)
 
@@ -496,10 +483,12 @@ class StabilityContours(object):
         )
 
         kwargs = mpl.cbook.normalize_kwargs(kwargs, mpl.lines.Line2D)
-        ms = kwargs.pop("markersize", 10)
-        mew = kwargs.pop("markeredgewidth", 0.5)
-        mec = kwargs.pop("markeredgecolor", "k")
-        markevery = kwargs.pop("markevery", 10)
+        common_style = {
+            "markersize": 10,
+            "markeredgewidth": 0.5,
+            "markeredgecolor": "k",
+            "markevery": 10,
+        }
 
         if tk_kind is not None:
             if isinstance(tk_kind, str):
@@ -526,19 +515,13 @@ class StabilityContours(object):
                     # Don't plot this gamma.
                     continue
 
-            plot_kwargs = _plot_contour_kwargs.loc[gamma, itype]
-            if gamma is not None:
-                plot_kwargs["label"] = itype
-            im = ax.plot(
-                self.beta,
-                v,
-                markevery=markevery,
-                ms=ms,
-                mew=mew,
-                mec=mec,
-                **plot_kwargs,
+            style = {
+                **common_style,
+                **_plot_contour_kwargs.loc[(gamma, itype)].to_dict(),
+                "label": itype,
                 **kwargs,
-            )
+            }
+            im = ax.plot(self.beta, v, **style)
             # only want line object, not list of them. so im[0].
             images_for_table_legend.loc[gamma, itype] = im[0]
 

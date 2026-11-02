@@ -498,3 +498,163 @@ def test_latitude_is_lambda_and_colatitude_is_theta(labels_base, mcs, tex):
     label = labels_base.TeXlabel(mcs)
     assert label.tex == tex
     assert label.units == "\\mathrm{deg.}"
+
+
+@pytest.mark.parametrize(
+    "mcs, units",
+    [
+        (("cos_phi", "", "p1"), "\\mathrm{\\#}"),
+        (("ratio", "", ""), "\\mathrm{\\#}"),
+        (("Qhat", "", "p1"), "\\mathrm{\\#}"),
+        (("dbeta", "", "p1"), "\\mathrm{\\#}"),
+        (("eth", "", "p1"), "\\mathrm{eV}"),
+    ],
+    ids=["cos_phi", "ratio", "Qhat", "dbeta", "eth"],
+)
+def test_measurement_units_follow_author_decision(labels_base, mcs, units):
+    """``cos_phi``, ``ratio``, ``Qhat`` and ``dbeta`` are dimensionless; ``eth`` is eV.
+
+    The units are the author's decision (2026-10-16 remaining-module cards);
+    before it these measurements fell through to the unknown units ``???``.
+
+    ON FAILURE: the code is wrong, unless the author changed these units.
+    """
+    assert labels_base.TeXlabel(mcs).units == units
+
+
+@pytest.mark.parametrize(
+    "mcs, tex",
+    [
+        # Default template "{$M}_{{$C};{$S}}" with C and S empty: the "{};",
+        # "{}" and trailing "_{}" clean-up rules leave the bare measurement.
+        (("beta", "", ""), "{\\beta}"),
+        (("Qhat", "", ""), "{\\widehat{q}}"),
+        # S given, C empty: "{};" is removed from the subscript.
+        (("Qhat", "", "p1"), "{\\widehat{q}}_{{p_1}}"),
+        # A component with no TeX translation is used as written.
+        (("v", "w", "p"), "{v}_{{w};{p}}"),
+        # "_err" wraps the label in sigma().
+        (("v_err", "x", "p"), "\\sigma({v}_{{X};{p}})"),
+        # "caani" template "... \; ($C)" with C empty drops "\; ()".
+        (("caani", "", ""), "C^{(\\mathrm{Ani})}_{A}"),
+        # "nuc" template "\nu_{$C,$S}": an empty side drops its comma.
+        (("nuc", "x", ""), "\\nu_{X}"),
+        (("nuc", "", "p1"), "\\nu_{p_1}"),
+        # "SEP_differential_flux" template "{{$S}} \: dJ/dE" with S empty
+        # drops "{{}}" and the leading space.
+        (("SEP_differential_flux", "", ""), "\\: dJ/dE"),
+        # "SEP_spectrum_index" template "\gamma_{{$S}}" with S empty: the
+        # dangling "_" is stripped.
+        (("SEP_spectrum_index", "", ""), "\\gamma"),
+    ],
+    ids=lambda v: "-".join(v) if isinstance(v, tuple) else None,
+)
+def test_texlabel_tex_is_the_cleaned_template(labels_base, mcs, tex):
+    """``tex`` is the measurement's template filled from M, C, S, with empty parts removed.
+
+    Each expected string is the template in ``base._templates`` (or the
+    default ``{$M}_{{$C};{$S}}``) filled by hand from the component and
+    species tables, then stripped of the empty groups the comment names.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(mcs).tex == tex
+
+
+@pytest.mark.parametrize(
+    "mcs, path",
+    [
+        # "/" in each of M, C, S becomes "-OV-".
+        (("a/b", "c/d", "e/f"), "a-OV-b_c-OV-d_e-OV-f"),
+        # Commas and dots are removed.
+        (("t.x", "", "p,q"), "tx_pq"),
+        # Only "_" is stripped from the ends; a capital X survives.
+        (("X", "", ""), "X"),
+    ],
+    ids=["slash", "comma-and-dot", "capital-x"],
+)
+def test_texlabel_path_joins_mcs_with_underscores(labels_base, mcs, path):
+    """``path`` joins M, C and S with ``_`` after replacing ``/`` and dropping ``,`` and ``.``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(mcs).path == Path(path)
+
+
+def test_texlabel_longitude_component_has_degree_units(labels_base):
+    """A ``lon`` component takes degree units whatever the measurement.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(("v", "lon", "p1")).units == "\\mathrm{deg.}"
+
+
+def test_texlabel_unknown_measurement_has_unknown_units(labels_base):
+    """A measurement missing from the units table has units ``???``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(("zz", "x", "p")).units == "???"
+
+
+@pytest.mark.parametrize(
+    "mcs0, mcs1, units",
+    [
+        (("v", "x", "p"), ("zz", "", "p"), r"\mathrm{km \; s^{-1}}/???"),
+        (("zz", "", "p"), ("v", "x", "p"), r"???/\mathrm{km \; s^{-1}}"),
+        (
+            ("v_err", "x", "p"),
+            ("n", "", "p"),
+            r"\mathrm{km \; s^{-1}}/\mathrm{cm}^{-3}",
+        ),
+        (
+            ("n", "", "p"),
+            ("v_err", "x", "p"),
+            r"\mathrm{cm}^{-3}/\mathrm{km \; s^{-1}}",
+        ),
+    ],
+    ids=[
+        "unknown-denominator",
+        "unknown-numerator",
+        "error-numerator",
+        "error-denominator",
+    ],
+)
+def test_ratio_units_look_up_each_measurement_without_err(
+    labels_base, mcs0, mcs1, units
+):
+    """A ratio's units are numerator/denominator units, ``_err`` ignored, ``???`` if unknown.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(mcs0, mcs1).units == units
+
+
+def test_axnorm_label_names_the_normalization_in_tex_path_and_units(labels_base):
+    r"""A column-normalized label reads "Col. Norm", saves under ``Cnorm`` and counts ``\#``.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "p"), axnorm="c")
+    assert label.tex == r"\mathrm{Col. \; Norm} \; n_{p}"
+    assert label.path == Path("n_p/Cnorm")
+    assert label.units == "\\#"
+    assert label.with_units == r"$\mathrm{Col. \; Norm} \; n_{p} \; \left[\#\right]$"
+
+
+def test_new_line_for_units_splits_label_and_units_into_two_math_lines(labels_base):
+    """With ``new_line_for_units`` the units are a second ``$...$`` line.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "p"), new_line_for_units=True)
+    assert label.with_units == "$n_{p} $\n$ " + r"\left[\mathrm{cm}^{-3}\right]$"
+
+
+def test_logger_is_named_for_module_and_class(labels_base):
+    """``logger`` is named ``<module>.<class name>``, as its docstring states.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "p"))
+    assert label.logger.name == "solarwindpy.plotting.labels.base.TeXlabel"

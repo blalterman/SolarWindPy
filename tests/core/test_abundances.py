@@ -400,6 +400,23 @@ class TestCommentsColumn:
         comment = ref.get_comment(symbol)
         assert comment is None, f"{symbol}: expected None, got {comment!r}"
 
+    def test_comment_by_atomic_number_matches_comment_by_symbol(self, ref):
+        """``get_comment(2)`` is He's comment, "helioseismology".
+
+        ON FAILURE: the code is wrong.
+        """
+        assert ref.get_comment(2) == "helioseismology"
+
+    def test_invalid_key_type_raises_valueerror_naming_the_type(self, ref):
+        """A float key raises ValueError naming ``float``.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(
+            ValueError, match=r"Unrecognized key type \(<class 'float'>\)"
+        ):
+            ref.get_comment(2.0)
+
 
 # =============================================================================
 # Unit Tests: Get Element
@@ -486,11 +503,13 @@ class TestGetElement:
         )
 
     def test_invalid_key_type_raises_valueerror(self, ref):
-        """Float key raises ValueError.
+        """A float key raises ValueError naming ``float``.
 
         ON FAILURE: the code is wrong.
         """
-        with pytest.raises(ValueError, match=r"Unrecognized key type"):
+        with pytest.raises(
+            ValueError, match=r"Unrecognized key type \(<class 'float'>\)"
+        ):
             ref.get_element(3.14)
 
     def test_unknown_element_raises_keyerror(self, ref):
@@ -701,6 +720,20 @@ class TestAbundanceRatio:
         # Both sides are computed from the same verbatim table decimals.
         assert result.measurement == exact(expected_ratio)
         assert result.uncertainty == exact(expected_uncert)
+
+    @pytest.mark.parametrize("denominator", ["O", "H"])
+    def test_an_element_without_a_photospheric_value_gives_nan(self, ref, denominator):
+        """A numerator without a photospheric abundance gives a NaN ratio and error.
+
+        ``abundance_ratio`` is photosphere-only (author decision 2026-10-16);
+        Table 2 leaves the photospheric value blank for
+        ELEMENTS_WITHOUT_PHOTOSPHERE.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = ref.abundance_ratio(ELEMENTS_WITHOUT_PHOTOSPHERE[0], denominator)
+        assert np.isnan(result.measurement)
+        assert np.isnan(result.uncertainty)
 
 
 # =============================================================================

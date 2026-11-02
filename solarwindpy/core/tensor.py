@@ -30,8 +30,6 @@ class Tensor(base.Base):
             Private; see :class:`~solarwindpy.core.base.Base`.
         """
         super().__init__(data, _time_checked=_time_checked)
-        self._validate_data(data)
-        self._data = data
 
     def __call__(self, component: str) -> pd.Series | pd.DataFrame:
         """Access a specific component of the tensor.
@@ -59,15 +57,20 @@ class Tensor(base.Base):
         Parameters
         ----------
         new : :class:`pandas.DataFrame`
-            The new tensor data.
+            The new tensor data. Rows out of time order are sorted with one
+            warning, as :class:`~solarwindpy.core.plasma.Plasma` sorts its
+            data.
 
         Raises
         ------
         ValueError
-            If ``new`` does not contain the required columns.
+            If ``new`` does not contain the required columns, or its time
+            index holds missing timestamps (``NaT``).
         """
+        new = self._put_in_time_order_unless_checked(new)
         super().set_data(new)
         self._validate_data(new)
+        self._data = new
 
     @staticmethod
     def _validate_data(data: pd.DataFrame):
