@@ -717,6 +717,7 @@ data : {z.size}
         assert isinstance(upper, Number) or upper is None
         self._clim = base.RangeLimits(lower, upper)
 
+    @base._plot_call
     def make_plot(
         self,
         ax=None,
@@ -931,6 +932,7 @@ data : {z.size}
 
         return XX, YY, ZZ
 
+    @base._plot_call
     def plot_contours(
         self,
         ax=None,

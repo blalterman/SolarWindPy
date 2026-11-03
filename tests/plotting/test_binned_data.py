@@ -10,9 +10,13 @@ bin also holds its right edge. Edges ``0, 1, 2, 3`` give three bins.
 The plot classes' side of the contract is tested here too: a plot given a
 ``BinnedData`` as ``nbins`` takes its bins, codes, log and clip settings by
 column name, and keeps only the rows its mask keeps; every plot constructor
-checks its caller ``mask`` the way ``BinnedData`` does; and ``clip`` is set per
-axis, read back as a ``ClipAxes``.
+checks its caller ``mask`` the way ``BinnedData`` does; ``clip`` is set per
+axis, read back as a ``ClipAxes``; and every plot or selection call warns, once
+per outermost call, when the data it was binned from has changed.
 """
+
+import gc
+import logging
 
 import numpy as np
 import pandas as pd
@@ -23,7 +27,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
-from solarwindpy.plotting.base import ClipAxes, LogAxes  # noqa: E402
+from solarwindpy.plotting.base import (  # noqa: E402
+    ClipAxes,
+    LogAxes,
+    methods_with_role,
+)
 from solarwindpy.plotting.binned import BinnedData  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
@@ -811,3 +819,303 @@ class TestIntegerInputOnALogAxis:
         h = Hist2D(v, v[::-1].reset_index(drop=True), logx=True, logy=True, nbins=3)
         assert h.data.loc[:, "x"].tolist() == exact(self.LOG10)
         assert h.data.loc[:, "y"].tolist() == exact(self.LOG10[::-1])
+
+
+# The two warnings, verbatim from the author's specification. The tests match
+# them by text, because `_warn_values_outside_bins` also logs at WARNING.
+CHANGED = (
+    "source changed since binning; plots reflect data at binning time; "
+    "rebuild BinnedData to update"
+)
+GONE = "source frame no longer exists; cannot verify it is unchanged since binning"
+
+
+def _count(caplog, message):
+    """WARNING records whose text is ``message``, from any logger."""
+    return sum(
+        r.levelno == logging.WARNING and r.getMessage() == message
+        for r in caplog.records
+    )
+
+
+def _source(seed=8):
+    """200 rows in [1, 2): positive, so BetaRPlot's log axes take them as is."""
+    rng = np.random.default_rng(seed)
+    return pd.DataFrame(
+        {k: rng.uniform(1.0, 2.0, 200) for k in ("a", "b", "c")},
+        index=pd.RangeIndex(100, 300),
+    )
+
+
+SHARED_EDGES = {"a": np.linspace(1.0, 2.0, 6), "b": np.linspace(1.0, 2.0, 6)}
+
+# A plot built on a shared BinnedData: every class that accepts one.
+SHARED_BUILDERS = {
+    "Hist1D": lambda f, b: Hist1D(f.a, nbins=b),
+    "Hist2D": lambda f, b: Hist2D(f.a, f.b, z=f.c, nbins=b),
+    "BetaRPlot": lambda f, b: BetaRPlot(f.a, f.b, "p", nbins=b),
+}
+
+
+def _ready(plot):
+    """Spiral draws only once its mesh is built and its points grouped."""
+    if isinstance(plot, SpiralPlot2D):
+        plot.initialize_mesh(min_per_bin=5, progress=False)
+        plot.build_grouped()
+    return plot
+
+
+# A plot built from columns (its private BinnedData): every plot class.
+PRIVATE_BUILDERS = {
+    "Hist1D": lambda x, y, z: Hist1D(x, nbins=5),
+    "Hist2D": lambda x, y, z: Hist2D(x, y, z=z, nbins=5),
+    "BetaRPlot": lambda x, y, z: BetaRPlot(x, y, "p", nbins=5),
+    "Scatter": lambda x, y, z: Scatter(x, y, z),
+    "SpiralPlot2D": lambda x, y, z: _ready(SpiralPlot2D(x, y, z, initial_bins=5)),
+}
+
+
+def _draw(plot):
+    fig, ax = plt.subplots()
+    try:
+        plot.make_plot(ax=ax)
+    finally:
+        plt.close(fig)
+
+
+class TestBinnedDataSourceStatus:
+    """``BinnedData.source_status`` compares the frame now with the frame binned."""
+
+    def test_an_unedited_frame_is_unchanged(self):
+        """Nothing edited since binning: ``"unchanged"``.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        assert BinnedData(f, SHARED_EDGES).source_status() == "unchanged"
+
+    @pytest.mark.parametrize(
+        "edit",
+        [
+            lambda f: f.loc.__setitem__((150, "a"), 1.25),
+            lambda f: f.__delitem__("b"),
+            lambda f: setattr(f, "index", f.index + 1000),
+        ],
+        ids=["value", "binned column deleted", "rows relabelled"],
+    )
+    def test_an_in_place_edit_of_a_binned_column_is_a_change(self, edit):
+        """A new value, a deleted binned column or new labels: ``"changed"``.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        b = BinnedData(f, SHARED_EDGES)
+        edit(f)
+        assert b.source_status() == "changed"
+
+    def test_editing_a_column_that_is_not_binned_is_no_change(self):
+        """Only the binned columns are watched: editing ``c`` leaves it unchanged.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        b = BinnedData(f, SHARED_EDGES)
+        f.loc[150, "c"] = 1.25
+        assert b.source_status() == "unchanged"
+
+    def test_a_deleted_frame_cannot_be_verified(self):
+        """Once the frame is garbage collected: ``"unverifiable"``.
+
+        ON FAILURE: the code is wrong, unless something else now holds a
+        reference to the frame (then the fixture is wrong).
+        """
+        f = _source()
+        b = BinnedData(f, SHARED_EDGES)
+        del f
+        gc.collect()
+        assert b.source_status() == "unverifiable"
+
+
+class TestSourceChangeWarning:
+    """Each outermost plot or selection call checks the plot's source once.
+
+    With a shared ``BinnedData`` the check re-hashes the frame that object was
+    built from (held by weak reference). A plot built from columns watches the
+    columns it holds: pandas copies on write, so editing the caller's frame
+    never reaches them, while editing a numpy array a Series wraps without a
+    copy does.
+    """
+
+    @pytest.mark.parametrize("name", sorted(SHARED_BUILDERS))
+    def test_a_shared_plot_warns_once_per_outermost_call_after_an_edit(
+        self, name, caplog
+    ):
+        """Edit the frame in place after binning: two draws log two warnings.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        plot = SHARED_BUILDERS[name](f, BinnedData(f, SHARED_EDGES))
+        caplog.set_level(logging.WARNING, logger=plot.logger.name)
+        f.loc[150, "a"] = 1.25
+        _draw(plot)
+        assert _count(caplog, CHANGED) == 1
+        _draw(plot)
+        assert _count(caplog, CHANGED) == 2
+
+    @pytest.mark.parametrize("name", sorted(SHARED_BUILDERS))
+    def test_a_shared_plot_of_an_unchanged_frame_is_silent(self, name, caplog):
+        """No edit: drawing and selecting log neither warning.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        plot = SHARED_BUILDERS[name](f, BinnedData(f, SHARED_EDGES))
+        caplog.set_level(logging.WARNING, logger=plot.logger.name)
+        _draw(plot)
+        plot.get_plotted_data_boolean_series()
+        assert _count(caplog, CHANGED) == 0
+        assert _count(caplog, GONE) == 0
+
+    @pytest.mark.parametrize(
+        "call",
+        [
+            lambda h: h.make_joint_h2_h1_plot(),
+            lambda h: h.project_1d("x"),
+            lambda h: h.get_subset_above_threshold(1),
+            lambda h: h.plot_contours(ax=plt.subplots()[1]),
+        ],
+        ids=["make_joint_h2_h1_plot", "project_1d", "subset", "plot_contours"],
+    )
+    def test_a_call_that_makes_nested_calls_warns_once(self, call, caplog):
+        """Calls that call other checked methods still log exactly one warning.
+
+        ``make_joint_h2_h1_plot`` calls ``make_plot`` and ``project_1d``,
+        which calls ``get_plotted_data_boolean_series``; the ``Hist1D``
+        margins it builds hold the histogram's data, unchanged.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        h = Hist2D(f.a, f.b, z=f.c, nbins=BinnedData(f, SHARED_EDGES))
+        caplog.set_level(logging.WARNING, logger=h.logger.name)
+        f.loc[150, "b"] = 1.25
+        try:
+            call(h)
+        finally:
+            plt.close("all")
+        assert _count(caplog, CHANGED) == 1
+
+    @pytest.mark.parametrize("name", sorted(SHARED_BUILDERS))
+    def test_a_shared_plot_whose_frame_is_deleted_cannot_verify(self, name, caplog):
+        """``del frame; gc.collect()``: each draw logs the "cannot verify" warning.
+
+        Only a shared ``BinnedData`` refers to a frame the caller owns; a
+        plot built from columns watches a frame it holds itself.
+
+        ON FAILURE: the code is wrong, unless something else now holds a
+        reference to the frame (then the fixture is wrong).
+        """
+        f = _source()
+        plot = SHARED_BUILDERS[name](f, BinnedData(f, SHARED_EDGES))
+        caplog.set_level(logging.WARNING, logger=plot.logger.name)
+        del f
+        gc.collect()
+        _draw(plot)
+        assert _count(caplog, GONE) == 1
+        assert _count(caplog, CHANGED) == 0
+
+    @pytest.mark.parametrize("name", sorted(PRIVATE_BUILDERS))
+    def test_a_plot_from_columns_ignores_edits_to_the_callers_frame(self, name, caplog):
+        """Pandas copies on write: the plot keeps the values it was built from.
+
+        So the check passes and logs nothing; ``data`` still holds the old
+        value at the edited label.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        plot = PRIVATE_BUILDERS[name](f.a, f.b, f.c)
+        before = plot.data.loc[150, "x"]
+        caplog.set_level(logging.WARNING, logger=plot.logger.name)
+        f.loc[150, "a"] = 1.25
+        _draw(plot)
+        assert _count(caplog, CHANGED) == 0
+        assert _count(caplog, GONE) == 0
+        assert plot.data.loc[150, "x"] == exact(before)
+
+    @pytest.mark.parametrize("name", sorted(PRIVATE_BUILDERS))
+    def test_a_plot_from_columns_warns_when_their_array_is_edited(self, name, caplog):
+        """x wraps a numpy array without a copy; editing the array is a change.
+
+        One warning per outermost call: two draws, two warnings.
+
+        ON FAILURE: the code is wrong.
+        """
+        f = _source()
+        a = f.a.to_numpy(copy=True)
+        x = pd.Series(a, index=f.index, name="a", copy=False)
+        plot = PRIVATE_BUILDERS[name](x, f.b, f.c)
+        caplog.set_level(logging.WARNING, logger=plot.logger.name)
+        _draw(plot)
+        assert _count(caplog, CHANGED) == 0
+        a[50] = 1.25
+        _draw(plot)
+        _draw(plot)
+        assert _count(caplog, CHANGED) == 2
+
+
+ROLES = {
+    "Hist1D": (
+        {"make_plot"},
+        {
+            "construct_cdf",
+            "get_plotted_data_boolean_series",
+            "get_subset_above_threshold",
+            "take_data_in_yrange_across_x",
+        },
+    ),
+    "Hist2D": (
+        {
+            "make_joint_h2_h1_plot",
+            "make_plot",
+            "plot_contours",
+            "plot_edges",
+            "plot_hist_with_contours",
+        },
+        {
+            "get_plotted_data_boolean_series",
+            "get_subset_above_threshold",
+            "id_data_above_contour",
+            "project_1d",
+            "take_data_in_yrange_across_x",
+        },
+    ),
+    "Scatter": ({"make_plot"}, set()),
+    "SpiralPlot2D": ({"make_plot", "plot_contours"}, set()),
+}
+ROLES["BetaRPlot"] = ROLES["Hist2D"]
+CLASSES = {c.__name__: c for c in (Hist1D, Hist2D, BetaRPlot, Scatter, SpiralPlot2D)}
+
+
+class TestMethodsWithRole:
+    """``methods_with_role`` lists each class's checked methods by role."""
+
+    @pytest.mark.parametrize("name", sorted(ROLES))
+    def test_each_class_has_the_plot_and_selection_methods_listed(self, name):
+        """The sets equal the author's role assignment, inherited methods included.
+
+        ON FAILURE: the code is wrong, unless the author changed a role
+        assignment; then update ROLES.
+        """
+        plot, selection = ROLES[name]
+        assert methods_with_role(CLASSES[name], "plot") == plot
+        assert methods_with_role(CLASSES[name], "selection") == selection
+
+    def test_an_unknown_role_raises_value_error(self):
+        """Roles are "plot" and "selection" only.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match="role must be one of"):
+            methods_with_role(Hist2D, "draw")

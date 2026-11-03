@@ -289,6 +289,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         """Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""
         return nan_gaussian_filter(array, sigma, **kwargs)
 
+    @base._plot_call
     def make_plot(
         self,
         ax=None,
@@ -385,6 +386,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return ax, cbar_or_mappable
 
+    @base._plot_call
     def plot_hist_with_contours(
         self,
         ax=None,
@@ -604,6 +606,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return ax.plot(x, y, **kwargs)
 
+    @base._plot_call
     def plot_edges(self, ax, smooth=True, sg_kwargs=None, **kwargs):
         """Overplot the edges.
 
@@ -672,6 +675,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return edges_kwargs, cbar_kwargs
 
+    @base._plot_call
     def plot_contours(
         self,
         ax=None,
@@ -815,6 +819,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return ax, cbar_or_mappable, qset
 
+    @base._selection_call
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         """Make a ``Hist1D`` from the data stored in this ``Hist2D``.
 
@@ -891,6 +896,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return h1
 
+    @base._plot_call
     def make_joint_h2_h1_plot(
         self, project_counts=True, kwargs_1d=None, fig_axes=None, **kwargs
     ):
@@ -979,6 +985,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return hax, xax, yax, cbar
 
+    @base._selection_call
     def id_data_above_contour(self, level):
         r"""Gets data above the `level`.
 
@@ -1017,6 +1024,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return above_contour
 
+    @base._selection_call
     def take_data_in_yrange_across_x(
         self,
         ranges_by_x,

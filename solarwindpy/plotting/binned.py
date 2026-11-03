@@ -12,6 +12,8 @@ This module imports nothing from :mod:`solarwindpy.plotting`.
 
 __all__ = ["BinnedData"]
 
+import weakref
+
 from collections.abc import Mapping
 from numbers import Integral
 
@@ -156,6 +158,59 @@ def _has_one_distinct_value(values):
     return values.unique().size == 1
 
 
+def _digest(frame):
+    r"""One 64-bit sum of the row hashes of ``frame``, index included."""
+    return int(pd.util.hash_pandas_object(frame, index=True).sum())
+
+
+class _SourceWatch:
+    r"""Whether the columns a plot was built from still hold the same values.
+
+    Stores 8 bytes of digest and a weak reference to ``frame``, never a row of
+    data: ``status`` re-hashes the referent's ``columns`` (and ``value``) and
+    compares.
+
+    Parameters
+    ----------
+    frame : pd.DataFrame
+        The frame the columns came from, referenced weakly.
+    columns : sequence of str
+        The columns of ``frame`` to watch.
+    value : pd.Series, optional
+        A further column on ``frame``'s index, held by the caller and hashed
+        with ``columns``.
+    """
+
+    __slots__ = ("_ref", "_columns", "_value", "_digest")
+
+    def __init__(self, frame, columns, value=None):
+        self._ref = weakref.ref(frame)
+        self._columns = list(columns)
+        self._value = value
+        self._digest = _digest(self._hashed(frame))
+
+    def _hashed(self, frame):
+        view = frame.loc[:, self._columns]
+        if self._value is None:
+            return view
+        # Built from arrays, so nothing is aligned (labels may repeat).
+        cols = {k: view.iloc[:, i].to_numpy() for i, k in enumerate(view.columns)}
+        cols[self._value.name] = self._value.to_numpy()
+        return pd.DataFrame(cols, index=view.index, copy=False)
+
+    def status(self):
+        r"""``"unchanged"``, ``"changed"``, or ``"unverifiable"`` (frame gone)."""
+        frame = self._ref()
+        if frame is None:
+            return "unverifiable"
+        try:
+            hashed = self._hashed(frame)
+        except KeyError:
+            # A watched column was removed from the frame in place.
+            return "changed"
+        return "unchanged" if _digest(hashed) == self._digest else "changed"
+
+
 class _PlotSource:
     r"""A plot's input columns and the rows it keeps.
 
@@ -182,7 +237,8 @@ class _PlotSource:
         a row is kept only where it is True.
     within : BinnedData, optional
         A shared ``BinnedData``: a row its own mask excludes is not kept
-        either, so no kept row lacks a bin for that reason alone.
+        either, so no kept row lacks a bin for that reason alone. Its
+        ``source_status`` is then this source's.
 
     Raises
     ------
@@ -240,6 +296,10 @@ class _PlotSource:
         self._value = value
         self._log = {k: bool(v) for k, v in (log or {}).items() if v}
         self._rows = rows
+        if within is not None:
+            self._watch = within._watch
+        else:
+            self._watch = _SourceWatch(frame, frame.columns, value)
 
         if value is None:
             n_kept = index.size if rows is None else int(rows.sum())
@@ -267,6 +327,22 @@ class _PlotSource:
     def counts(self):
         r"""True if aggregating without a function counts; False if it averages."""
         return self._counts
+
+    def source_status(self):
+        r"""Whether the columns held still have the values they had when built.
+
+        Without ``within`` the frame watched is the one this source built from
+        its coordinates (``copy=False``) and holds, with the value column; it
+        lives as long as the source does. Pandas copies on write, so editing
+        the caller's frame never reaches it; editing a numpy array a
+        coordinate wraps without a copy does.
+
+        Returns
+        -------
+        str
+            ``"unchanged"``, ``"changed"``, or ``"unverifiable"``.
+        """
+        return self._watch.status()
 
     def _frame_on_rows(self):
         frame = self._frame
@@ -327,7 +403,9 @@ class _PlotSource:
         if self._rows is not None:
             mask = pd.Series(self._rows, index=frame.index, copy=False)
         log = {k: self._log.get(k, False) for k in bins}
-        return BinnedData(frame, bins, log=log, clip=clip, mask=mask)
+        return BinnedData._watched_by(
+            self._watch, frame, bins, log=log, clip=clip, mask=mask
+        )
 
     def materialize(self):
         r"""Build the plot's ``data``: every column on ``rows``, logged where set.
@@ -445,7 +523,9 @@ class BinnedData:
         Holds the columns to bin. ``BinnedData`` keeps a copy-on-write view of
         those columns, ``frame.loc[:, list(bins)]``, never ``frame`` itself:
         editing ``frame`` in place afterwards changes neither the values held
-        nor the bins assigned.
+        nor the bins assigned. It also keeps a weak reference to ``frame`` and
+        a digest of those columns, so ``source_status`` can tell whether
+        ``frame`` changed since.
     bins : dict of str to pd.IntervalIndex or array-like
         Bins per column. An ``IntervalIndex`` of contiguous intervals closed on
         the left or right keeps its intervals and closure; edges give
@@ -482,6 +562,22 @@ class BinnedData:
     """
 
     def __init__(self, frame, bins, *, log=None, clip=None, mask=None, precision=None):
+        self._build(frame, bins, log, clip, mask, precision)
+        self._watch = _SourceWatch(frame, self._columns)
+
+    @classmethod
+    def _watched_by(cls, watch, frame, bins, *, log=None, clip=None, mask=None):
+        r"""A ``BinnedData`` whose ``source_status`` is ``watch``'s.
+
+        For a plot's private bins: its source already watches ``frame``, so
+        the columns are not hashed twice.
+        """
+        b = cls.__new__(cls)
+        b._build(frame, bins, log, clip, mask, None)
+        b._watch = watch
+        return b
+
+    def _build(self, frame, bins, log, clip, mask, precision):
         if not isinstance(frame, pd.DataFrame):
             raise TypeError(
                 f"frame must be a pd.DataFrame, got {type(frame).__name__}."
@@ -599,6 +695,23 @@ class BinnedData:
         kept = np.ones(index.size, dtype=bool)
         kept[found] = keep[positions[found]]
         return None if kept.all() else kept
+
+    def source_status(self):
+        r"""Whether the frame's binned columns still hold the values binned.
+
+        At build time the binned columns (with the index) are hashed into one
+        64-bit digest, and the frame passed in is referenced weakly. This
+        re-hashes those columns of that frame now.
+
+        Returns
+        -------
+        str
+            ``"unchanged"``; ``"changed"`` if a value, a label, or a binned
+            column of the frame differs (the bins and codes still hold the
+            values at binning time); or ``"unverifiable"`` if the frame no
+            longer exists.
+        """
+        return self._watch.status()
 
     def _check(self, col):
         if col not in self._codes:

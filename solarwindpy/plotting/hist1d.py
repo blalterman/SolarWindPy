@@ -170,6 +170,7 @@ class Hist1D(AggPlot):
 
         self._axnorm = new
 
+    @base._selection_call
     def construct_cdf(self, only_plotted=True):
         r"""Build the empirical cumulative distribution of the observed x values.
 
@@ -255,6 +256,7 @@ class Hist1D(AggPlot):
 
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
+    @base._plot_call
     def make_plot(
         self,
         ax=None,
@@ -400,6 +402,7 @@ class Hist1D(AggPlot):
 
         return ax, out
 
+    @base._selection_call
     def take_data_in_yrange_across_x(
         self,
         ranges_by_x,
