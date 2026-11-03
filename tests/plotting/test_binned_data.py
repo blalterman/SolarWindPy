@@ -871,3 +871,262 @@ class TestPlotSnapshot:
         with pytest.raises(ValueError, match="data is set once"):
             plot._set_data(other.a, other.b)
         pd.testing.assert_frame_equal(plot.data, before)
+
+
+# ---------------------------------------------------------------------------
+# Codes equal pandas.cut on every route a column can take: floats searched by
+# guess-and-check, non-finite or integer edges and integer values searched
+# directly, and every other dtype handed to pandas.cut itself.
+# ---------------------------------------------------------------------------
+
+# Uneven widths (0.1 to 6), so a guess from the outer edges often misses.
+UNEVEN = np.array([0.0, 0.1, 0.35, 1.0, 4.0, 10.0])
+# Forty log-spaced bins: a linear guess is wrong for nearly every value.
+GEOMETRIC = np.geomspace(1e-3, 1e3, 41)
+# Non-finite outer edges: guess-and-check needs finite edges.
+OPEN_ENDED = np.array([-np.inf, 0.0, 1.0, 2.0, np.inf])
+
+
+def _pandas_codes(values, edges, closed):
+    """Codes from ``pd.cut`` (NaN as -1), with the numpy.histogram last-edge rule.
+
+    pandas.cut gives the bin position of each value. ``numpy.histogram``'s
+    last bin also holds its right edge, which ``BinnedData`` documents for a
+    left-closed last bin; pandas.cut leaves that value out.
+    """
+    values = pd.Series(values)
+    found = pd.cut(values, edges, right=(closed == "right"), labels=False)
+    found = pd.Series(found).to_numpy(dtype=float, na_value=np.nan)
+    codes = np.where(np.isnan(found), -1, found).astype(np.int64)
+    if closed == "left":
+        last = (values == edges[-1]).to_numpy(dtype=bool, na_value=False)
+        codes[last] = len(edges) - 2  # numpy.histogram: [a, b] for the last bin
+    return codes
+
+
+def _with_edges_and_specials(edges, rng, n=300, dtype=np.float64):
+    """Seeded values across and beyond ``edges``, every edge, +/-inf and NaN."""
+    finite = edges[np.isfinite(edges)]
+    lo, hi = finite[0], finite[-1]
+    span = hi - lo
+    spread = rng.uniform(lo - 0.1 * span, hi + 0.1 * span, n)
+    values = np.concatenate([spread, finite, [-np.inf, np.inf, np.nan, np.nan]])
+    return rng.permutation(values).astype(dtype)
+
+
+def _intervals(edges, closed):
+    # An IntervalIndex keeps its edges unrounded and its closure.
+    return pd.IntervalIndex.from_breaks(edges, closed=closed)
+
+
+@pytest.mark.parametrize("closed", ["right", "left"])
+class TestCodesEqualPandasCut:
+    """``BinnedData.codes`` equals ``pd.cut`` codes for every dtype and edge kind."""
+
+    @pytest.mark.parametrize("dtype", [np.float64, np.float32], ids=["f8", "f4"])
+    @pytest.mark.parametrize(
+        "edges", [EDGES, UNEVEN, GEOMETRIC], ids=["even", "uneven", "geometric"]
+    )
+    def test_float_values_get_pandas_cut_codes(self, edges, dtype, closed):
+        """Seeded floats, every edge, +/-inf and NaN: codes equal ``pd.cut``'s.
+
+        Expected: ``pd.cut`` on the same values and intervals, NaN as -1, and
+        for a left-closed last bin numpy.histogram's rule that its right edge
+        is inside.
+
+        ON FAILURE: the code is wrong.
+        """
+        values = _with_edges_and_specials(edges, np.random.default_rng(91), dtype=dtype)
+        b = BinnedData(_frame(values), {"x": _intervals(edges, closed)})
+        expected = _pandas_codes(values, edges, closed)  # pandas.cut + histogram rule
+        np.testing.assert_array_equal(b.codes("x"), expected)
+
+    def test_values_on_every_edge_get_the_hand_codes(self, closed):
+        """Each uneven edge alone: (a, b] puts it left, [a, b) right, last bin [a, b].
+
+        Hand values for UNEVEN's five bins; pandas.cut agrees.
+
+        ON FAILURE: the code is wrong.
+        """
+        hand = {
+            "right": [-1, 0, 1, 2, 3, 4],  # edge e_i closes bin i - 1; e_0 in none
+            "left": [0, 1, 2, 3, 4, 4],  # edge e_i opens bin i; e_5 joins bin 4
+        }[closed]
+        b = BinnedData(_frame(UNEVEN.copy()), {"x": _intervals(UNEVEN, closed)})
+        np.testing.assert_array_equal(b.codes("x"), hand)
+        np.testing.assert_array_equal(hand, _pandas_codes(UNEVEN, UNEVEN, closed))
+
+    def test_left_closed_counts_equal_numpy_histogram(self, closed):
+        """Left-closed counts of the finite values equal ``np.histogram``'s.
+
+        Only the left closure is numpy.histogram's; for the right closure the
+        expected counts are ``pd.cut``'s value counts.
+
+        ON FAILURE: the code is wrong.
+        """
+        values = _with_edges_and_specials(UNEVEN, np.random.default_rng(92))
+        b = BinnedData(_frame(values), {"x": _intervals(UNEVEN, closed)})
+        codes = b.codes("x")
+        counts = np.bincount(codes[codes >= 0], minlength=UNEVEN.size - 1)
+        if closed == "left":
+            expected, _ = np.histogram(values[np.isfinite(values)], UNEVEN)
+        else:
+            found = pd.cut(values, UNEVEN, right=True, labels=False)
+            expected = np.bincount(found[~np.isnan(found)].astype(int), minlength=5)
+        np.testing.assert_array_equal(counts, expected)
+
+    def test_non_finite_edges_get_pandas_cut_codes(self, closed):
+        """Edges -inf, 0, 1, 2, inf: +/-inf values land as ``pd.cut`` puts them.
+
+        Expected: ``pd.cut`` (plus the histogram rule placing +inf, the last
+        edge, in the last left-closed bin).
+
+        ON FAILURE: the code is wrong.
+        """
+        values = _with_edges_and_specials(
+            np.array([0.0, 2.0]), np.random.default_rng(93)
+        )
+        b = BinnedData(_frame(values), {"x": _intervals(OPEN_ENDED, closed)})
+        expected = _pandas_codes(values, OPEN_ENDED, closed)  # pandas.cut + rule
+        np.testing.assert_array_equal(b.codes("x"), expected)
+
+    def test_integer_edges_bin_float_values_as_pandas_cut(self, closed):
+        """Integer breaks 0..3 keep an integer dtype and bin floats as ``pd.cut``.
+
+        ON FAILURE: the code is wrong.
+        """
+        int_edges = np.array([0, 1, 2, 3])
+        values = _with_edges_and_specials(EDGES, np.random.default_rng(94))
+        b = BinnedData(_frame(values), {"x": _intervals(int_edges, closed)})
+        assert b.edges("x").dtype.kind == "i"  # the fixture: integer edges
+        expected = _pandas_codes(values, int_edges, closed)  # pandas.cut + rule
+        np.testing.assert_array_equal(b.codes("x"), expected)
+
+    @pytest.mark.parametrize(
+        "values",
+        [
+            np.random.default_rng(95).integers(-2, 6, 200),
+            np.random.default_rng(96).integers(0, 5, 200).astype(np.uint8),
+            pd.array([-1, 0, 1, None, 2, 3, 4], dtype="Int64"),
+            pd.array([-0.5, 0.0, 0.5, None, 2.0, 3.0, 3.5], dtype="Float64"),
+            pd.Categorical([0.0, 0.5, 1.0, 1.5, 3.0, 3.5]),
+            np.array([True, False, True]),
+        ],
+        ids=["int64", "uint8", "Int64-NA", "Float64-NA", "categorical", "bool"],
+    )
+    def test_other_dtypes_get_pandas_cut_codes(self, values, closed):
+        """Integer, unsigned, nullable, categorical and bool values: ``pd.cut``'s codes.
+
+        Values include every edge 0..3 and values beyond both ends.
+
+        ON FAILURE: the code is wrong.
+        """
+        values = pd.Series(values)
+        b = BinnedData(values.to_frame("x"), {"x": _intervals(EDGES, closed)})
+        expected = _pandas_codes(values, EDGES, closed)  # pandas.cut + rule
+        np.testing.assert_array_equal(b.codes("x"), expected)
+
+    @pytest.mark.parametrize(
+        "values",
+        [pd.Series(["a", "b"]), pd.Series(pd.Categorical(["a", "b"]))],
+        ids=["str", "categorical-str"],
+    )
+    def test_string_values_raise_as_pandas_cut_does(self, values, closed):
+        """Strings cannot be ordered against numeric edges: the TypeError ``pd.cut`` raises.
+
+        ON FAILURE: the code is wrong.
+        """
+        import re
+
+        with pytest.raises(TypeError) as expected:
+            pd.cut(values, EDGES, right=(closed == "right"))
+        with pytest.raises(TypeError, match=re.escape(str(expected.value))):
+            BinnedData(values.to_frame("x"), {"x": _intervals(EDGES, closed)})
+
+    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    def test_masked_rows_are_minus_one_and_kept_rows_match_pandas_cut(
+        self, log, closed
+    ):
+        """With a mask, kept rows get ``pd.cut``'s code and the rest -1.
+
+        A linear column is binned whole and masked after; a logged column is
+        masked first, then logged. Both equal ``pd.cut`` of log10(|v|) (or v)
+        on the kept rows.
+
+        ON FAILURE: the code is wrong.
+        """
+        rng = np.random.default_rng(97)
+        values = _with_edges_and_specials(UNEVEN, rng)
+        values = np.abs(values) + 0.5 if log else values  # log10 of a positive value
+        keep = rng.random(values.size) < 0.6
+        b = BinnedData(
+            _frame(values),
+            {"x": _intervals(UNEVEN, closed)},
+            mask=pd.Series(keep),
+            log={"x": log},
+        )
+        binned = np.log10(np.abs(values)) if log else values
+        expected = np.where(keep, _pandas_codes(binned, UNEVEN, closed), -1)
+        np.testing.assert_array_equal(b.codes("x"), expected)
+
+
+class TestPlotConstructionCodesEqualPandasCut:
+    """A plot's own binning, from its constructor, gives ``pd.cut``'s codes."""
+
+    @pytest.mark.parametrize("closed", ["right", "left"])
+    @pytest.mark.parametrize("dtype", [np.float64, np.float32, np.int64])
+    def test_hist1d_cut_codes_equal_pandas_cut(self, dtype, closed):
+        """Hist1D(x, nbins=intervals).cut holds ``pd.cut``'s codes on its rows.
+
+        Hist1D drops NaN rows; its kept rows' codes equal ``pd.cut`` of those
+        rows.
+
+        ON FAILURE: the code is wrong.
+        """
+        rng = np.random.default_rng(98)
+        if dtype is np.int64:
+            values = rng.integers(-1, 12, 200)
+        else:
+            values = _with_edges_and_specials(UNEVEN, rng, dtype=dtype)
+        x = pd.Series(values, index=pd.RangeIndex(100, 100 + values.size))
+        h = Hist1D(x, nbins=_intervals(UNEVEN, closed))
+        kept = x.dropna()
+        assert h.cut.index.equals(kept.index)  # the plot keeps the non-NaN rows
+        expected = _pandas_codes(kept, UNEVEN, closed)  # pandas.cut + rule
+        np.testing.assert_array_equal(h.cut["x"].cat.codes, expected)
+
+    def test_hist1d_given_edges_bins_right_closed_as_pandas_cut(self):
+        """Hist1D(x, nbins=edges) bins (a, b] exactly as ``pd.cut(x, edges)``.
+
+        UNEVEN needs no rounding at 5 decimals, so the edges are used as given.
+
+        ON FAILURE: the code is wrong.
+        """
+        values = _with_edges_and_specials(UNEVEN, np.random.default_rng(99))
+        x = pd.Series(values)
+        h = Hist1D(x, nbins=UNEVEN)
+        expected = _pandas_codes(x.dropna(), UNEVEN, "right")  # pandas.cut
+        np.testing.assert_array_equal(h.cut["x"].cat.codes, expected)
+
+    @pytest.mark.parametrize("closed", ["right", "left"])
+    def test_hist2d_cut_codes_equal_pandas_cut_per_axis(self, closed):
+        """Hist2D(float32 x, int64 y) codes equal ``pd.cut`` on each axis.
+
+        x bins by UNEVEN (guess-and-check), y by integer-valued 0..3
+        (searched directly); rows with NaN x are dropped.
+
+        ON FAILURE: the code is wrong.
+        """
+        rng = np.random.default_rng(100)
+        xv = _with_edges_and_specials(UNEVEN, rng, n=150, dtype=np.float32)
+        x = pd.Series(xv)
+        y = pd.Series(rng.integers(-1, 5, xv.size))
+        h = Hist2D(x, y, nbins=(_intervals(UNEVEN, closed), _intervals(EDGES, closed)))
+        kept = x.notna()
+        assert h.cut.index.equals(x.index[kept])  # the plot keeps non-NaN rows
+        np.testing.assert_array_equal(
+            h.cut["x"].cat.codes, _pandas_codes(x[kept], UNEVEN, closed)  # pandas.cut
+        )
+        np.testing.assert_array_equal(
+            h.cut["y"].cat.codes, _pandas_codes(y[kept], EDGES, closed)  # pandas.cut
+        )
