@@ -1,0 +1,1147 @@
+#!/usr/bin/env python
+# Spent-When: MARKED(tests/plotting/_legacy/spiral.py)
+# Supersedes: none
+# Legacy oracle: verbatim copy of solarwindpy/plotting/spiral.py at commit 4bc1c08eb5c610151e9a4905cdb171dc26202653.
+# Only the imports are rewritten; see tests/plotting/_legacy/__init__.py.
+r"""Spiral mesh plots and associated binning utilities."""
+
+__all__ = [
+    "SpiralMesh",
+    "SpiralPlot2D",
+]
+
+import logging
+import sys
+
+import numpy as np
+import pandas as pd
+import matplotlib as mpl
+
+from datetime import datetime
+from numbers import Number
+from collections import namedtuple
+from numba import njit, prange
+
+from matplotlib import pyplot as plt
+
+from . import base
+from solarwindpy.plotting import labels
+from .agg_plot import AggPlot
+
+_InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
+_SpiralMeshBinID = namedtuple("_SpiralMeshBinID", "id,fill,visited")
+_SpiralFilterThresholds = namedtuple(
+    "_SpiralFilterThresholds", "density,size", defaults=(False,)
+)
+
+
+@njit(parallel=True)
+def _get_counts_per_bin(bins, x, y):
+    r"""Count the points in each rectangular bin.
+
+    Parameters
+    ----------
+    bins : np.ndarray
+        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+    x, y : np.ndarray
+        Point coordinates.
+
+    Returns
+    -------
+    np.ndarray
+        Number of points with ``x0 <= x < x1`` and ``y0 <= y < y1`` in each bin.
+    """
+    nbins = bins.shape[0]
+    cell_count = np.full(nbins, 0, dtype=np.int64)
+
+    for i in prange(nbins):
+        x0, x1, y0, y1 = bins[i]
+        left = x >= x0
+        right = x < x1
+        bottom = y >= y0
+        top = y < y1
+        chk_cell = left & right & bottom & top
+        cell_count[i] = chk_cell.sum()
+
+    return cell_count
+
+
+@njit(parallel=True)
+def _calculate_bin_number_with_numba(mesh, x, y):
+    r"""Assign each point the index of the mesh cell that contains it.
+
+    Parameters
+    ----------
+    mesh : np.ndarray
+        Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+    x, y : np.ndarray
+        Point coordinates.
+
+    Returns
+    -------
+    zbin : np.ndarray
+        Cell index of each point, or ``fill`` for points in no cell.
+    fill : int
+        The fill value, -9999.
+    bin_visited : np.ndarray
+        Number of times each cell was processed.
+    """
+    fill = -9999
+    zbin = np.full(x.size, fill, dtype=np.int64)
+
+    nbins = mesh.shape[0]
+    bin_visited = np.zeros(nbins, dtype=np.int64)
+    for i in prange(nbins):
+        x0, x1, y0, y1 = mesh[i]
+
+        # The largest x- and y-edges lie above the data (see
+        # `SpiralPlot2D.calc_initial_bins`), so a plain < needs no <= special case.
+        tk = (x >= x0) & (x < x1) & (y >= y0) & (y < y1)
+
+        zbin[tk] = i
+        bin_visited[i] += 1
+
+    return zbin, fill, bin_visited
+
+
+class SpiralMesh(object):
+    r"""Adaptive rectangular mesh that splits crowded cells into quarters.
+
+    Starting from the grid of initial edges, every cell holding more than
+    ``min_per_bin`` points is split into four equal cells until none does.
+    """
+
+    def __init__(self, x, y, initial_xedges, initial_yedges, min_per_bin=250):
+        r"""Store the data, the initial edges and the split threshold.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        initial_xedges, initial_yedges : np.ndarray
+            Edges of the initial grid.
+        min_per_bin : int
+            A cell holding more points than this is split.
+        """
+        self.set_data(x, y)
+        self.set_min_per_bin(min_per_bin)
+        self.set_initial_edges(initial_xedges, initial_yedges)
+        self._cell_filter_thresholds = _SpiralFilterThresholds(
+            density=False, size=False
+        )
+
+    @property
+    def bin_id(self):
+        r"""``_SpiralMeshBinID`` of (cell index per point, fill value, visit counts)."""
+        return self._bin_id
+
+    @property
+    def cat(self):
+        r"""``bin_id.id`` as a :class:`pandas.Categorical`, with the fill value removed."""
+        return self._cat
+
+    @property
+    def data(self):
+        r"""DataFrame with columns ``x`` and ``y``."""
+        return self._data
+
+    @property
+    def initial_edges(self):
+        r"""``_InitialSpiralEdges`` namedtuple of the initial x and y edges."""
+        return self._initial_edges
+
+    @property
+    def mesh(self):
+        r"""Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges."""
+        return self._mesh
+
+    @property
+    def min_per_bin(self):
+        r"""A cell holding more points than this is split."""
+        return self._min_per_bin
+
+    @property
+    def cell_filter_thresholds(self):
+        r"""``_SpiralFilterThresholds`` of the density and size quantiles."""
+        return self._cell_filter_thresholds
+
+    @property
+    def cell_filter(self):
+        r"""Boolean array identifying properly filled mesh cells.
+
+        Selects mesh cells that meet the density and area criteria in
+        ``cell_filter_thresholds``.
+
+        Notes
+        -----
+        Neither `density` nor `size` convert log-scale edges into linear scale.
+        Doing so would overweight the area of mesh cells at larger values on a
+        given axis.
+        """
+        density = self.cell_filter_thresholds.density
+        size = self.cell_filter_thresholds.size
+
+        x = self.mesh[:, [0, 1]]
+        y = self.mesh[:, [2, 3]]
+
+        dx = x[:, 1] - x[:, 0]
+        dy = y[:, 1] - y[:, 0]
+        dA = dx * dy
+
+        tk = np.full_like(dx, True, dtype=bool)
+        if size:
+            size_quantile = np.quantile(dA, size)
+            tk_size = dA < size_quantile
+            tk = tk & (tk_size)
+        if density:
+            # Samples outside the mesh carry the negative fill id, which
+            # `np.bincount` rejects; they belong to no cell, so drop them.
+            ids = np.asarray(self.bin_id.id)
+            ids = ids[ids != self.bin_id.fill]
+            cnt = np.bincount(ids, minlength=self.mesh.shape[0])
+            cell_density = cnt / dA
+            density_quantile = np.quantile(cell_density, density)
+            tk_density = cell_density > density_quantile
+            tk = tk & tk_density
+
+        return tk
+
+    def set_cell_filter_thresholds(self, **kwargs):
+        r"""Set or update ``cell_filter_thresholds``.
+
+        Parameters
+        ----------
+        density: scalar
+            The density quantile above which we want to select bins, e.g.
+            above the 0.01 quantile. This ensures that each bin meets some
+            sufficient fill factor.
+        size: scalar
+            The size quantile below which we want to select bins, e.g.
+            below the 0.99 quantile. This ensures that the bin isn't so large
+            that it will appear as an outlier.
+        """
+        density = kwargs.pop("density", False)
+        size = kwargs.pop("size", False)
+        if len(kwargs.keys()):
+            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
+            raise KeyError("Unexpected kwarg\n{}".format(extra))
+
+        self._cell_filter_thresholds = _SpiralFilterThresholds(
+            density=density, size=size
+        )
+
+    def set_initial_edges(self, xedges, yedges):
+        r"""Store the initial x and y edges."""
+        self._initial_edges = _InitialSpiralEdges(xedges, yedges)
+
+    def set_data(self, x, y):
+        r"""Store ``x`` and ``y`` as the columns of one DataFrame."""
+        data = pd.concat({"x": x, "y": y}, axis=1)
+        self._data = data  # SpiralMeshData(x, y)
+
+    def set_min_per_bin(self, new):
+        r"""Store the split threshold as an int."""
+        self._min_per_bin = int(new)
+
+    def initialize_bins(self):
+        r"""Build the initial grid of cells from the initial edges.
+
+        Returns
+        -------
+        np.ndarray
+            Shape (nx * ny, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+        """
+        # Leaves initial edges altered when we change maximum edge.
+        xbins = self.initial_edges.x
+        ybins = self.initial_edges.y
+
+        left = xbins[:-1]
+        right = xbins[1:]
+        bottom = ybins[:-1]
+        top = ybins[1:]
+
+        nx = left.size
+        ny = bottom.size
+
+        mesh = np.full((nx * ny, 4), np.nan, dtype=np.float64)
+        for x0, x1, i in zip(left, right, range(nx)):
+            for y0, y1, j in zip(bottom, top, range(ny)):
+                # NOTE: i*ny+j means go to i'th row, which has
+                #       nrow * number of bins passed. Then go
+                #       to j'th bin because we have to traverse
+                #       to the j'th y-bin too.
+                mesh[(i * ny) + j] = [x0, x1, y0, y1]
+
+        mesh = np.array(mesh)
+
+        self.initial_mesh = np.array(mesh)
+        return mesh
+
+    @staticmethod
+    def process_one_spiral_step(bins, x, y, min_per_bin):
+        r"""Split every cell holding more than ``min_per_bin`` points into quarters.
+
+        The rows of ``bins`` that were split are set to NaN in place.
+
+        Returns
+        -------
+        new_cells : np.ndarray or None
+            Shape (4 * n, 4) array of the new cells, or None if none were split.
+        n : int
+            Number of cells split.
+        """
+        cell_count = _get_counts_per_bin(bins, x, y)
+
+        bins_to_replace = cell_count > min_per_bin
+        nbins_to_replace = bins_to_replace.sum()
+
+        if not nbins_to_replace:
+            return None, 0
+
+        xhyh = 0.5 * (bins[:, [0, 2]] + bins[:, [1, 3]])
+
+        def split_this_cell(idx):
+            r"""Return the four quarters of cell ``idx`` as edge lists."""
+            x0, x1, y0, y1 = bins[idx]
+            xh, yh = xhyh[idx]
+
+            # Reduce calls to `np.array`.
+            # Just return a list here.
+            split_cell = [
+                [x0, xh, y0, yh],
+                [xh, x1, y0, yh],
+                [xh, x1, yh, y1],
+                [x0, xh, yh, y1],
+            ]
+
+            return split_cell
+
+        new_cells = bins_to_replace.sum() * [None]
+        for i, idx in enumerate(np.where(bins_to_replace)[0]):
+            new_cells[i] = split_this_cell(idx)
+
+        new_cells = np.vstack(new_cells)
+
+        bins[bins_to_replace] = np.nan
+
+        return new_cells, nbins_to_replace
+
+    def generate_mesh(self, progress=True):
+        r"""Split cells repeatedly until none holds more than ``min_per_bin`` points.
+
+        Only finite points inside the initial grid are used. The result is
+        stored in ``mesh``.
+
+        Parameters
+        ----------
+        progress : bool
+            If True, write a progress table to ``sys.stderr`` as the mesh is
+            built: a header, one line per step as it finishes (step number,
+            number of cells split, elapsed time), then a summary. If False,
+            write nothing.
+        """
+
+        def report(message):
+            if progress:
+                print(message, file=sys.stderr, flush=True)
+
+        start = datetime.now()
+        report(f"Generating {self.__class__.__name__} at {start}")
+
+        x = self.data.x.values
+        y = self.data.y.values
+
+        min_per_bin = self.min_per_bin
+
+        initial_bins = self.initialize_bins()
+
+        # To reduce memory needs, only process data in mesh.
+        x0 = initial_bins[:, 0].min()
+        x1 = initial_bins[:, 1].max()
+        y0 = initial_bins[:, 2].min()
+        y1 = initial_bins[:, 3].max()
+        tk_data_in_mesh = (
+            (x0 <= x)
+            & (x <= x1)
+            & (y0 <= y)
+            & (y <= y1)
+            & np.isfinite(x)
+            & np.isfinite(y)
+        )
+        x = x[tk_data_in_mesh]
+        y = y[tk_data_in_mesh]
+
+        initial_cell_count = _get_counts_per_bin(initial_bins, x, y)
+        bins_to_replace = initial_cell_count > min_per_bin
+        nbins_to_replace = bins_to_replace.sum()
+
+        list_of_bins = [initial_bins]
+        active_bins = initial_bins
+
+        report("""
+ Step      N      Elapsed Time
+======  =======  ==============""")
+        step_start = datetime.now()
+        step = 0
+        while nbins_to_replace > 0:
+            active_bins, nbins_to_replace = self.process_one_spiral_step(
+                active_bins, x, y, min_per_bin
+            )
+            now = datetime.now()
+            report(f"{step:>6}  {nbins_to_replace:>7}  {(now - step_start)}")
+            list_of_bins.append(active_bins)
+            step += 1
+            step_start = now
+
+        list_of_bins = [b for b in list_of_bins if b is not None]
+        final_bins = np.vstack(list_of_bins)
+        valid_bins = np.isfinite(final_bins).all(axis=1)
+        final_bins = final_bins[valid_bins]
+
+        stop = datetime.now()
+        report(f"\nCompleted {self.__class__.__name__} at {stop}")
+        report(f"Elapsed time {stop - start}")
+        report(f"Split bin threshold {min_per_bin}")
+        report(
+            f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size / final_bins.shape[0]:.3f} spectra per bin)\n"
+        )
+
+        self._mesh = final_bins
+
+    def calculate_bin_number(self):
+        r"""Assign each point to its mesh cell and store the result in ``bin_id``.
+
+        Returns
+        -------
+        tuple
+            Named tuple ``(id, fill, visited)``: cell index per point (fill
+            value outside the mesh), the fill value, and the visit count of
+            each cell.
+        """
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            f"Calculating {self.__class__.__name__} bin_number at {datetime.now()}"
+        )
+        x = self.data.loc[:, "x"].values
+        y = self.data.loc[:, "y"].values
+        mesh = self.mesh
+        nbins = mesh.shape[0]
+
+        start = datetime.now()
+        zbin, fill, bin_visited = _calculate_bin_number_with_numba(mesh, x, y)
+        stop = datetime.now()
+
+        logger.warning(f"Elapsed time {stop - start}")
+
+        if (zbin == fill).any():
+            logger.warning(
+                f"""`zbin` contains {(zbin == fill).sum()} ({100 * (zbin == fill).mean():.1f}%) fill values that are outside of mesh.
+They will be replaced by NaNs and excluded from the aggregation.
+"""
+            )
+
+        # Set fill bin to zero
+        is_fill = zbin == fill
+        # `minlength=nbins` forces us to include empty bins at the end of the array.
+        bin_frequency = np.bincount(zbin[~is_fill], minlength=nbins)
+        n_empty = (bin_frequency == 0).sum()
+        logger.warning(f"""Largest bin population is {bin_frequency.max()}
+{n_empty} of {nbins} bins ({100 * n_empty / nbins:.1f}%) are empty
+""")
+
+        bin_id = _SpiralMeshBinID(zbin, fill, bin_visited)
+        self._bin_id = bin_id
+        return bin_id
+
+    def place_spectra_in_mesh(self, progress=True):
+        r"""Generate the mesh, then assign each point to a cell; return ``bin_id``.
+
+        ``progress`` is passed to ``generate_mesh``.
+        """
+        self.generate_mesh(progress=progress)
+        bin_id = self.calculate_bin_number()
+        return bin_id
+
+    def build_cat(self):
+        r"""Store ``cat``, the cell indices as a Categorical without the fill value."""
+        bin_id = self.bin_id.id
+        fill = self.bin_id.fill
+
+        # Integer number corresponds to the order over
+        # which the mesh was traversed.
+        cat = pd.Categorical(bin_id, ordered=False)
+        if fill in bin_id:
+            cat = cat.remove_categories(fill)
+
+        self._cat = cat
+
+
+class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
+    r"""2D spiral plotting with adaptive mesh refinement.
+
+    Examples
+    --------
+    splot = SpiralPlot2D(...)
+    splot.initialize_mesh()
+    """
+
+    def __init__(
+        self, x, y, z=None, logx=False, logy=False, initial_bins=5, clip_data=False
+    ):
+        r"""Store the data and labels, then compute the initial bin edges.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        z : pd.Series, optional
+            Value to aggregate in each cell. If None, cells count points.
+        logx, logy : bool
+            If True, use ``log10(abs())`` of that coordinate.
+        initial_bins : int or tuple
+            Initial bins per axis; see ``calc_initial_bins``.
+        clip_data : bool or str
+            If True, clip x and y to their 0.01st and 99.99th percentiles
+            (``AggPlot.clip_data``) when placing points in the mesh; the
+            initial bin edges are computed from the unclipped data. ``"l"`` or
+            ``"u"`` clips only the lower or upper tail. Clipping limits x and
+            y only; z is aggregated unclipped. Stored as ``clip``.
+        """
+        super().__init__()
+        self.set_log(x=logx, y=logy)
+        self.set_data(x, y, z, clip_data)
+        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
+        self.calc_initial_bins(initial_bins)
+        self.set_clim(None, None)
+
+    @property
+    def clim(self):
+        r"""``RangeLimits`` of the minimum and maximum counts per cell."""
+        return self._clim
+
+    @property
+    def initial_bins(self):
+        r"""Dict of the initial x and y bin edges."""
+        return dict(self._initial_bins)
+
+    @property
+    def grouped(self):
+        r"""z-values grouped by mesh cell, set by ``build_grouped``."""
+        return self._grouped
+
+    @property
+    def mesh(self):
+        r"""The ``SpiralMesh``, set by ``initialize_mesh``."""
+        return self._mesh
+
+    def agg(self, fcn=None):
+        r"""Aggregate the z-values into their cells.
+
+        ``clim``, the mesh's ``cell_filter`` and ``alim`` are applied in that
+        order; a cell removed by any of them is NaN.
+        """
+        self.logger.debug("aggregating z-data")
+
+        if fcn is None:
+            if self.data.loc[:, "z"].unique().size == 1:
+                fcn = "count"
+            else:
+                fcn = "mean"
+
+        gb = self.grouped
+        agg = gb.agg(fcn)
+
+        c0, c1 = self.clim
+        if c0 is not None or c1 is not None:
+            cnt = gb.agg("count")
+            tk = pd.Series(True, index=agg.index)
+
+            if c0 is not None:
+                tk = tk & (cnt >= c0)
+            if c1 is not None:
+                tk = tk & (cnt <= c1)
+
+            agg = agg.where(tk)
+
+        # reindex to ensure we have a z-value for every bin.
+        reindex = pd.RangeIndex(start=0, stop=self.mesh.mesh.shape[0], step=1)
+        agg = agg.reindex(reindex)
+
+        agg = agg.where(self.mesh.cell_filter, axis=0)
+
+        return self._apply_alim(agg)
+
+    def build_grouped(self):
+        r"""Group the z-values by mesh cell and store the result in ``grouped``.
+
+        Raises
+        ------
+        ValueError
+            If the mesh categories and the data differ in length.
+        """
+        cat = self.mesh.cat
+        z = self.data.loc[:, "z"]
+
+        if not (cat.size == z.size):
+            raise ValueError(f"""`cat` must have same size as data's first dimesion
+cat  : {cat.size}
+data : {z.size}
+""")
+
+        gb = z.groupby(cat)
+        self._grouped = gb
+
+    def calc_initial_bins(self, nbins):
+        r"""Compute the initial bin edges for x and y.
+
+        Parameters
+        ----------
+        nbins : int or tuple
+            An int gives that many bins per axis at equally spaced quantiles of
+            the finite data; a pair gives one int or edge array per axis. The
+            last edge is set to the largest edge plus 1% of its absolute
+            value (plus 0.01 if it is zero) so the maximum lies inside the
+            grid.
+
+        Returns
+        -------
+        tuple
+            ``(("x", edges), ("y", edges))``.
+        """
+        data = self.data
+        keys = ("x", "y")
+        bins = {}
+
+        if isinstance(nbins, int):
+            # Single paramter for `nbins`.
+            nbins = {k: nbins for k in keys}
+
+        elif len(nbins) == len(keys):
+            # Passed one bin spec per axis
+            nbins = {k: v for k, v in zip(keys, nbins)}
+
+        else:
+            msg = f"Unrecognized `nbins`\ntype: {type(nbins)}\n bins:{nbins}"
+            raise ValueError(msg)
+
+        for k, b in nbins.items():
+            # Numpy and Astropy don't like NaNs when calculating bins.
+            # Infinities in bins (typically from log10(0)) also create problems.
+            d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+
+            if not isinstance(b, (int, np.ndarray)):
+                raise TypeError("Only want in integer or np.ndarrays for initial edges")
+
+            if isinstance(b, int):
+                # Lets calculate the following quantiles.
+                b = np.quantile(
+                    d, np.linspace(0, 1, b + 1)
+                )  # Need N + 1 edges to make N bins.
+
+            # Work on a float copy: raising the top edge must neither write
+            # into the caller's array nor be truncated by an integer dtype.
+            b = np.array(b, dtype=float)
+
+            # Raise the top edge above the largest edge so that the half-open
+            # test y < y1 includes data on the real data edge. Pad by 1% of
+            # the largest edge's size, whatever its sign; 0.01 when it is zero.
+            top = b.max()
+            pad = 0.01 * abs(top) if top != 0 else 0.01
+            b[-1] = top + pad
+
+            assert not np.isnan(b).any()
+
+            bins[k] = b
+
+        bins = tuple(bins.items())
+        self._initial_bins = bins
+        return bins
+
+    def initialize_mesh(self, *, progress=True, **kwargs):
+        r"""Build the ``SpiralMesh`` and assign every point to a cell.
+
+        ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
+        passed to ``SpiralMesh``, e.g. ``min_per_bin``. If ``clip`` is set, x
+        and y are clipped with ``AggPlot.clip_data`` before they are placed
+        in the mesh.
+        """
+        x = self.data.loc[:, "x"]
+        y = self.data.loc[:, "y"]
+        if self.clip:
+            x = AggPlot.clip_data(x, self.clip)
+            y = AggPlot.clip_data(y, self.clip)
+
+        xbins = self.initial_bins["x"]
+        ybins = self.initial_bins["y"]
+
+        mesh = SpiralMesh(x, y, xbins, ybins, **kwargs)
+        # Attach mesh before anything else.
+        # Makes debugging easier.
+        self._mesh = mesh
+
+        mesh.place_spectra_in_mesh(progress=progress)
+        mesh.build_cat()
+
+    def set_clim(self, lower=None, upper=None):
+        """Set the min (lower) and max (upper) counts per bin.
+
+        This limit is applied after the groupby aggregation in ``agg``.
+        """
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        self._clim = base.RangeLimits(lower, upper)
+
+    def set_data(self, x, y, z, clip):
+        r"""Store the data, taking ``log10(abs())`` of each axis flagged in ``log``."""
+        super().set_data(x, y, z, clip)
+        data = self.data
+        if self.log.x:
+            data.loc[:, "x"] = np.log10(np.abs(data.loc[:, "x"]))
+        if self.log.y:
+            data.loc[:, "y"] = np.log10(np.abs(data.loc[:, "y"]))
+        self._data = data
+
+    def make_plot(
+        self,
+        ax=None,
+        cbar=True,
+        cbar_kwargs=None,
+        fcn=None,
+        alpha_fcn=None,
+        **kwargs,
+    ):
+        r"""Draw each mesh cell as a rectangle colored by its aggregated z-value.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            If None, create one.
+        cbar : bool
+            If True, draw a colorbar.
+        cbar_kwargs : dict, optional
+            Passed to the colorbar.
+        fcn : str, optional
+            Aggregation function passed to ``agg``.
+        alpha_fcn : str, optional
+            If given, cells are made more transparent the larger this
+            aggregation of z is.
+        **kwargs
+            Only ``cmap`` and ``norm`` are accepted.
+
+        Returns
+        -------
+        ax : Axes
+        cbar_or_mappable : Colorbar or matplotlib.collections.PatchCollection
+            The colorbar if ``cbar``, otherwise the patch collection.
+
+        Raises
+        ------
+        ValueError
+            If any other keyword is passed.
+        """
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        C = self.agg(fcn=fcn)
+        C = np.ma.masked_invalid(C.values)
+
+        xmesh = self.mesh.mesh[:, [0, 1]]
+        ymesh = self.mesh.mesh[:, [2, 3]]
+
+        if self.log.x:
+            xmesh = 10.0**xmesh
+        if self.log.y:
+            ymesh = 10.0**ymesh
+
+        # (x,y) of bin's lower left corner.
+        xy = zip(xmesh[:, 0], ymesh[:, 0])
+        dx = xmesh[:, 1] - xmesh[:, 0]
+        dy = ymesh[:, 1] - ymesh[:, 0]
+
+        start1 = datetime.now()
+        self.logger.warning("Making patches")
+        self.logger.warning(f"Start {start1}")
+
+        patches = [
+            mpl.patches.Rectangle(this_xy, this_dx, this_dy)
+            for this_xy, this_dx, this_dy in zip(xy, dx, dy)
+        ]
+
+        stop1 = datetime.now()
+        self.logger.warning(f"Stop {stop1}")
+        self.logger.warning(f"Elapsed {stop1 - start1}")
+
+        # TODO: `match_original=False` if calculate alpha for each patch.
+        edgecolors = "none"
+        linewidth = 0.0
+        collection = mpl.collections.PatchCollection(
+            patches, linewidth=linewidth, edgecolors=edgecolors
+        )
+
+        collection.set_array(C)
+
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop("norm", None)
+        if len(kwargs):
+            raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
+
+        collection.set_alpha(None)
+        collection.set_cmap(cmap)
+        collection.set_norm(norm)
+        collection.autoscale_None()
+
+        ax.add_collection(collection, autolim=False)
+
+        minx = xmesh[:, 0].min()
+        miny = ymesh[:, 0].min()
+        maxx = xmesh[:, 1].max()
+        maxy = ymesh[:, 1].max()
+        collection.sticky_edges.x[:] = [minx, maxx]
+        collection.sticky_edges.y[:] = [miny, maxy]
+        corners = (minx, miny), (maxx, maxy)
+        ax.update_datalim(corners)
+        ax.autoscale_view()
+
+        cbar_or_mappable = collection
+        if cbar:
+            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
+
+            cbar = self._make_cbar(collection, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar
+
+        self._format_axis(ax)
+
+        if alpha_fcn is not None:
+            alpha_agg = np.ma.masked_invalid(self.agg(fcn=alpha_fcn).values)
+            # Feature scale then invert so smallest STD
+            # is most opaque.
+            alpha_agg = mpl.colors.Normalize()(alpha_agg)
+            alpha = 1 - alpha_agg
+            self.logger.warning("Scaling alpha filter as alpha**0.25")
+            alpha = alpha**0.25
+
+            # Set masked values to zero. Otherwise, masked
+            # values are rendered as black.
+            alpha = alpha.filled(0)
+
+            # Must draw to initialize `facecolor`s
+            plt.draw()
+            colors = collection.get_facecolors()
+            colors[:, 3] = alpha
+            collection.set_facecolor(colors)
+
+        return ax, cbar_or_mappable
+
+    def _interpolate_to_grid(self, x, y, z, resolution=100, method="cubic"):
+        r"""Interpolate scattered data to a regular grid.
+
+        Parameters
+        ----------
+        x, y : np.ndarray
+            Coordinates of data points.
+        z : np.ndarray
+            Values at data points.
+        resolution : int
+            Number of grid points along each axis.
+        method : {"linear", "cubic", "nearest"}
+            Interpolation method passed to :func:`scipy.interpolate.griddata`.
+
+        Returns
+        -------
+        XX, YY : np.ndarray
+            2D meshgrid arrays.
+        ZZ : np.ndarray
+            Interpolated values on the grid.
+        """
+        from scipy.interpolate import griddata
+
+        xi = np.linspace(x.min(), x.max(), resolution)
+        yi = np.linspace(y.min(), y.max(), resolution)
+        XX, YY = np.meshgrid(xi, yi)
+        ZZ = griddata((x, y), z, (XX, YY), method=method)
+        return XX, YY, ZZ
+
+    def _interpolate_with_rbf(
+        self,
+        x,
+        y,
+        z,
+        resolution=100,
+        neighbors=50,
+        smoothing=1.0,
+        kernel="thin_plate_spline",
+    ):
+        r"""Interpolate scattered data using sparse RBF.
+
+        Uses :class:`scipy.interpolate.RBFInterpolator` with the ``neighbors``
+        parameter for efficient O(N·k) computation instead of O(N²).
+
+        Parameters
+        ----------
+        x, y : np.ndarray
+            Coordinates of data points.
+        z : np.ndarray
+            Values at data points.
+        resolution : int
+            Number of grid points along each axis.
+        neighbors : int
+            Number of nearest neighbors to use for each interpolation point.
+            Higher values produce smoother results but increase computation time.
+        smoothing : float
+            Smoothing parameter. Higher values produce smoother surfaces.
+        kernel : str
+            RBF kernel type. Options include "thin_plate_spline", "cubic",
+            "quintic", "multiquadric", "inverse_multiquadric", "gaussian".
+
+        Returns
+        -------
+        XX, YY : np.ndarray
+            2D meshgrid arrays.
+        ZZ : np.ndarray
+            Interpolated values on the grid.
+        """
+        from scipy.interpolate import RBFInterpolator
+
+        points = np.column_stack([x, y])
+        rbf = RBFInterpolator(
+            points, z, neighbors=neighbors, smoothing=smoothing, kernel=kernel
+        )
+
+        xi = np.linspace(x.min(), x.max(), resolution)
+        yi = np.linspace(y.min(), y.max(), resolution)
+        XX, YY = np.meshgrid(xi, yi)
+        grid_pts = np.column_stack([XX.ravel(), YY.ravel()])
+        ZZ = rbf(grid_pts).reshape(XX.shape)
+
+        return XX, YY, ZZ
+
+    def plot_contours(
+        self,
+        ax=None,
+        method="rbf",
+        # RBF method params (default method)
+        rbf_neighbors=50,
+        rbf_smoothing=1.0,
+        rbf_kernel="thin_plate_spline",
+        # Grid method params
+        grid_resolution=100,
+        gaussian_filter_std=1.5,
+        interpolation="cubic",
+        nan_aware_filter=True,
+        # Common params
+        cbar=True,
+        cbar_kwargs=None,
+        fcn=None,
+        use_contourf=False,
+        **kwargs,
+    ):
+        r"""Make a contour plot from adaptive mesh data with optional smoothing.
+
+        Supports three interpolation methods for generating contours from the
+        irregular adaptive mesh:
+
+        - ``"rbf"``: Sparse RBF interpolation (default, fastest with built-in smoothing)
+        - ``"grid"``: Grid interpolation + Gaussian smoothing (matches Hist2D API)
+        - ``"tricontour"``: Direct triangulated contours (no smoothing, for debugging)
+
+        Parameters
+        ----------
+        ax : mpl.axes.Axes, None
+            If None, create an Axes instance from ``plt.subplots``.
+        method : {"rbf", "grid", "tricontour"}
+            Interpolation method. Default is ``"rbf"`` (fastest with smoothing).
+        rbf_neighbors : int
+            ``"rbf"`` only. Number of nearest neighbors for sparse RBF.
+            Higher = smoother but slower. Default is 50.
+        rbf_smoothing : float
+            ``"rbf"`` only. RBF smoothing parameter. Higher values produce
+            smoother surfaces. Default is 1.0.
+        rbf_kernel : str
+            ``"rbf"`` only. RBF kernel type. Options: "thin_plate_spline"
+            (default), "cubic", "quintic", "multiquadric",
+            "inverse_multiquadric", "gaussian".
+        grid_resolution : int
+            ``"rbf"`` and ``"grid"``. Number of points along each axis of the
+            regular grid interpolated to. Default is 100.
+        gaussian_filter_std : float
+            ``"grid"`` only. Standard deviation for Gaussian smoothing.
+            Default is 1.5. Set to 0 to disable smoothing.
+        interpolation : {"linear", "cubic", "nearest"}
+            ``"grid"`` only. Interpolation method for griddata. Default is
+            "cubic".
+        nan_aware_filter : bool
+            ``"grid"`` only. If True, use NaN-aware Gaussian filtering.
+            Default is True.
+        cbar : bool
+            If True, create a colorbar. Default is True.
+        cbar_kwargs : dict, None
+            Keyword arguments passed to ``self._make_cbar``.
+        fcn : callable, None
+            Aggregation function. If None, automatically select in :py:meth:`agg`.
+        use_contourf : bool
+            If True, use filled contours. Default is False.
+        **kwargs
+            Additional arguments passed to the contour function.
+            Common options: ``levels``, ``cmap``, ``norm``, ``linestyles``.
+
+        Returns
+        -------
+        ax : mpl.axes.Axes
+            The axes containing the plot.
+        cbar_or_mappable : Colorbar or QuadContourSet
+            The colorbar if ``cbar=True``, else the contour set.
+        qset : QuadContourSet
+            The contour set object.
+
+        Raises
+        ------
+        ValueError
+            If ``method`` is not one of the three above, or if ``cbar=True``
+            and the contour set has fewer than 2 levels.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> from solarwindpy.plotting.spiral import SpiralPlot2D
+        >>> rng = np.random.default_rng(42)
+        >>> x = pd.Series(rng.uniform(1, 100, 500))
+        >>> y = pd.Series(rng.uniform(1, 100, 500))
+        >>> z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
+        >>> splot = SpiralPlot2D(x, y, z, initial_bins=5)
+        >>> splot.initialize_mesh(min_per_bin=10)
+        >>> splot.build_grouped()
+
+        >>> # Default: sparse RBF (fastest)
+        >>> ax, cbar, qset = splot.plot_contours()
+
+        >>> # Grid interpolation with Gaussian smoothing
+        >>> ax, cbar, qset = splot.plot_contours(
+        ...     method='grid',
+        ...     grid_resolution=100,
+        ...     gaussian_filter_std=2.0
+        ... )
+
+        >>> # Debug: see raw triangulation
+        >>> ax, cbar, qset = splot.plot_contours(method='tricontour')
+        """
+        from solarwindpy.plotting.tools import nan_gaussian_filter
+
+        # Validate method
+        valid_methods = ("rbf", "grid", "tricontour")
+        if method not in valid_methods:
+            raise ValueError(
+                f"Invalid method '{method}'. Must be one of {valid_methods}."
+            )
+
+        # Pop contour-specific kwargs
+        levels = kwargs.pop("levels", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop("norm", None)
+        linestyles = kwargs.pop(
+            "linestyles",
+            [
+                "-",
+                ":",
+                "--",
+                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+                "--",
+                ":",
+                "-",
+                (0, (7, 3, 1, 3, 1, 3)),
+            ],
+        )
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
+
+        # Get aggregated data and mesh cell centers
+        C = self.agg(fcn=fcn).values
+
+        x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
+        y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
+
+        if self.log.x:
+            x = 10.0**x
+        if self.log.y:
+            y = 10.0**y
+
+        # Filter to finite values
+        tk_finite = np.isfinite(C)
+        x = x[tk_finite]
+        y = y[tk_finite]
+        C = C[tk_finite]
+
+        # Select contour function based on method
+        if method == "tricontour":
+            # Direct triangulated contour (no smoothing)
+            contour_fcn = ax.tricontourf if use_contourf else ax.tricontour
+            if levels is None:
+                args = [x, y, C]
+            else:
+                args = [x, y, C, levels]
+            qset = contour_fcn(
+                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
+            )
+
+        else:
+            # Interpolate to regular grid (rbf or grid method)
+            if method == "rbf":
+                XX, YY, ZZ = self._interpolate_with_rbf(
+                    x,
+                    y,
+                    C,
+                    resolution=grid_resolution,
+                    neighbors=rbf_neighbors,
+                    smoothing=rbf_smoothing,
+                    kernel=rbf_kernel,
+                )
+            else:  # method == "grid"
+                XX, YY, ZZ = self._interpolate_to_grid(
+                    x,
+                    y,
+                    C,
+                    resolution=grid_resolution,
+                    method=interpolation,
+                )
+                # Apply Gaussian smoothing if requested
+                if gaussian_filter_std > 0:
+                    if nan_aware_filter:
+                        ZZ = nan_gaussian_filter(ZZ, sigma=gaussian_filter_std)
+                    else:
+                        from scipy.ndimage import gaussian_filter
+
+                        ZZ = gaussian_filter(
+                            np.nan_to_num(ZZ, nan=0), sigma=gaussian_filter_std
+                        )
+
+            # Mask invalid values
+            ZZ = np.ma.masked_invalid(ZZ)
+
+            # Standard contour on regular grid
+            contour_fcn = ax.contourf if use_contourf else ax.contour
+            if levels is None:
+                args = [XX, YY, ZZ]
+            else:
+                args = [XX, YY, ZZ, levels]
+            qset = contour_fcn(
+                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
+            )
+
+        # Add colorbar
+        cbar_or_mappable = qset
+        if cbar:
+            if len(qset.levels) < 2:
+                # Matplotlib's colorbar fails with a bare IndexError here.
+                raise ValueError(
+                    f"A colorbar needs at least 2 contour levels, got "
+                    f"{list(qset.levels)}. Pass more levels or cbar=False."
+                )
+            cbar_obj = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+            cbar_or_mappable = cbar_obj
+
+        self._format_axis(ax)
+
+        return ax, cbar_or_mappable, qset
