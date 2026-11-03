@@ -18,6 +18,7 @@ the data. An ``IntervalIndex`` keeps the side its bins close on.
 import numpy as np
 import pandas as pd
 import pytest
+from astropy.stats import knuth_bin_width
 from scipy.stats import binned_statistic_2d
 
 from solarwindpy.plotting.hist1d import Hist1D
@@ -105,10 +106,9 @@ class TestBinEdges:
 
         ON FAILURE: the code is wrong.
         """
-        astropy_stats = pytest.importorskip("astropy.stats")
         x, _, _ = xyz
         h = Hist1D(x, nbins="knuth")
-        _, bins = astropy_stats.knuth_bin_width(x, return_bins=True)
+        _, bins = knuth_bin_width(x, return_bins=True)
         np.testing.assert_array_equal(h.edges["x"], bins.round(5))
 
     def test_explicit_edges_are_used_as_given(self, xyz):

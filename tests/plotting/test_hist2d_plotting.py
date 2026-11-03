@@ -31,6 +31,7 @@ from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
 from solarwindpy.plotting.base import ClipAxes  # noqa: E402
+from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -655,6 +656,60 @@ class TestClipData:
         grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
         counts = grid.fillna(0).sum(axis=0)  # empty x-bins count 0
         assert counts.to_numpy() == exact(expected)
+
+
+# log10 of 0, 1, 10, 100 is -inf, 0, 1, 2.
+ZERO_FIRST = pd.Series([0.0, 1.0, 10.0, 100.0])
+Y4 = pd.Series([1.0, 2.0, 3.0, 4.0])
+
+DEFECT_3 = (
+    "defect #3, fixed in Phase D group D3: a row whose log10 is +/-inf "
+    "(log10(0)) survives the NaN drop (binned.py _PlotSource rows); expected "
+    "label 0 absent from data; remove this marker when D3 lands"
+)
+
+
+class TestZeroOnALogAxis:
+    """log10(0) = -inf on a log axis: it moves no edge and falls in no bin."""
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(ZERO_FIRST, logx=True, nbins=2),
+            lambda: Hist2D(ZERO_FIRST, Y4, logx=True, nbins=2),
+        ],
+        ids=["Hist1D", "Hist2D"],
+    )
+    def test_a_zero_on_a_log_axis_moves_no_edge_and_is_counted_in_no_bin(self, build):
+        """x = 0 on a log axis: edges from log10 of 1, 10, 100, and 0 is not counted.
+
+        By hand: numpy's 2 equal bins over 0, 1, 2 have edges 0, 1, 2, left-closed
+        with the last edge inside: [0, 1) holds 1 point, [1, 2] holds 2. The zero
+        (log10 -inf) is in no bin, so 3 of 4 rows are counted.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = build()
+        assert h.edges["x"].to_numpy() == exact([0.0, 1.0, 2.0])  # hand: numpy edges
+        counts = h.cut.loc[:, "x"].value_counts(sort=False).sort_index()
+        assert counts.tolist() == [1, 2]  # hand: [0, 1) and [1, 2]
+        assert 0 not in h.cut.dropna().index  # hand: -inf is in no bin
+
+    @pytest.mark.xfail(strict=True, raises=AssertionError, reason=DEFECT_3)
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(ZERO_FIRST, logx=True, nbins=2),
+            lambda: Hist2D(ZERO_FIRST, Y4, logx=True, nbins=2),
+        ],
+        ids=["Hist1D", "Hist2D"],
+    )
+    def test_a_row_whose_log_is_infinite_is_not_a_plot_row(self, build):
+        """A zero on a log axis is dropped like NaN (author ruling #3): rows 1, 2, 3.
+
+        ON FAILURE: (unexpected pass) the defect #3 fix has landed; drop the xfail marker.
+        """
+        assert build().data.index.tolist() == [1, 2, 3]  # hand: label 0 is log10(0)
 
 
 class TestAggregatedValues:
@@ -1814,6 +1869,32 @@ class TestIdDataAboveContour:
         level = known_counts.max()  # no column other than the peak's clears this
         labelled = known_hist.id_data_above_contour(level)
         assert labelled.notna().sum() < known_hist.data.index.size
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=TypeError,
+        reason=(
+            "defect #12, fixed in Phase D unit D0: Hist2D.id_data_above_contour "
+            "raises TypeError 'Categorical is not ordered for operation min' "
+            "(hist2d.py id_data_above_contour, bins stored as an unordered "
+            "CategoricalIndex); remove this marker when D0 lands"
+        ),
+    )
+    def test_rows_in_bins_at_or_above_the_level_are_labelled_by_their_x_bin(self):
+        """Counts (0,1]x(0,1]: 2, (0,1]x(1,2]: 1, (1,2]x(0,1]: 1; level 2 labels rows 0, 1.
+
+        By hand: only bin (0, 1] x (0, 1] reaches 2, so rows 0 and 1 get the x
+        bin (0, 1]; rows 2 and 3 sit in bins of count 1 and stay NaN.
+
+        ON FAILURE: (unexpected pass) the D0 fix has landed; drop the xfail marker.
+        """
+        edges = np.array([0.0, 1.0, 2.0, 3.0])
+        x = pd.Series([0.5, 0.5, 0.5, 1.5])
+        y = pd.Series([0.5, 0.5, 1.5, 0.5])
+        h = Hist2D(x, y, nbins=(edges, edges))
+        labelled = h.id_data_above_contour(2)
+        assert labelled.iloc[:2].tolist() == [pd.Interval(0.0, 1.0)] * 2  # hand
+        assert labelled.iloc[2:].isna().all()  # hand: count-1 bins
 
 
 class TestTakeDataInYRangeAcrossX:

@@ -425,6 +425,18 @@ class TestSharedBinnedData:
         h.set_clim(None, None)
         assert h.agg(fcn="count").sum() == exact(4)
 
+    def test_a_shared_binned_data_averages_z_in_its_bins(self):
+        """Through nbins=b: z 1, 3 in (0,1]x(0,1] and 10 in (2,3]x(1,2]: means 2 and 10.
+
+        Points a and e share (0, 1] x (0, 1]; c is alone in (2, 3] x (1, 2].
+        ON FAILURE: the code is wrong.
+        """
+        frame = POINTS.loc[["a", "c", "e"]]
+        z = pd.Series([1.0, 10.0, 3.0], index=["a", "c", "e"])
+        b = BinnedData(frame, GRID)
+        h = Hist2D(frame.vx, frame.vy, z=z, nbins=b)
+        assert h.agg().to_numpy() == exact([2.0, 10.0])  # hand: (1 + 3) / 2, 10
+
 
 #: Every plot class's constructor, given x and y and a mask.
 MASKED_PLOTS = {
@@ -482,6 +494,22 @@ class TestCallerMask:
         """
         with pytest.raises(TypeError, match="mask must"):
             MASKED_PLOTS[plot](POINTS.vx, POINTS.vy, mask)
+
+    def test_integer_nbins_edges_come_from_the_rows_the_mask_keeps(self):
+        """Mask drops x = 100: 3 bins over 0..3 give edges 0, 1, 2, 3 on each axis.
+
+        By hand: numpy's 3 equal bins over 0, 1, 2, 3 have edges 0, 1, 2, 3; with
+        x = 100 kept, x's edges would be 0, 33.33, 66.67, 100.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.0, 1.0, 2.0, 3.0, 100.0])
+        y = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0])
+        mask = pd.Series([True, True, True, True, False])
+        h = Hist2D(x, y, mask=mask, nbins=3)
+        assert h.edges["x"].to_numpy() == exact([0.0, 1.0, 2.0, 3.0])  # hand
+        assert h.edges["y"].to_numpy() == exact([0.0, 1.0, 2.0, 3.0])  # hand
+        assert h.agg(fcn="count").sum() == exact(4.0)  # hand: the kept rows
 
 
 @pytest.mark.parametrize(
@@ -730,6 +758,70 @@ class TestClipAxes:
             build()
 
 
+# 0..9, 1000 and 5000. Over the first 11 values numpy's linear 99.99th
+# percentile is 9 + 0.999 * (1000 - 9) = 999.009, so 1000 is clipped into
+# (5, 999.5]. Over all 12 it is 1000 + 0.9989 * 4000 = 4995.6, and 1000 stays
+# in (999.5, 1001].
+CLIPPED = pd.Series(np.r_[np.arange(10.0), 1000.0, 5000.0])
+CLIP_EDGES = np.array([-1.0, 5.0, 999.5, 1001.0])
+DROP_5000 = pd.Series([True] * 11 + [False])
+
+
+class TestClipQuantiles:
+    """Clip quantiles are taken over the kept rows, after log."""
+
+    def test_binned_data_clips_to_quantiles_of_the_rows_its_mask_keeps(self):
+        """With 5000 masked out, 1000 is clipped to 999.009: code 1, not 2.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(
+            CLIPPED.to_frame("x"), {"x": CLIP_EDGES}, clip={"x": True}, mask=DROP_5000
+        )
+        assert b.codes("x")[10] == 1  # hand: 999.009 in (5, 999.5]
+        assert b.codes("x")[11] == -1  # masked out
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(CLIPPED, clip=True, mask=DROP_5000, nbins=CLIP_EDGES),
+            lambda: Hist2D(
+                CLIPPED,
+                pd.Series([1.0] * 11 + [np.nan]),
+                clip={"x": True},
+                nbins=(CLIP_EDGES, 1),
+            ),
+        ],
+        ids=["Hist1D-mask", "Hist2D-nan-y"],
+    )
+    def test_a_plot_clips_to_quantiles_of_the_rows_it_keeps(self, build):
+        """5000 is dropped (mask, or a NaN y), so 1000 is clipped into (5, 999.5].
+
+        ON FAILURE: the code is wrong.
+        """
+        h = build()
+        assert h.cut.loc[10, "x"] == pd.Interval(5.0, 999.5)  # hand: 999.009
+        assert 11 not in h.cut.index  # the dropped row
+
+    def test_clip_quantiles_are_taken_after_log(self):
+        """log10 of 1 .. 1e9 and 1e100 is 0..9 and 100; clipping in log space bins 1e100 at 99.909.
+
+        By hand: numpy's linear 99.99th percentile of 0..9, 100 is
+        9 + 0.999 * 91 = 99.909, in (5, 99.95]. Clipping before log would give
+        log10(1e9 + 0.999 * (1e100 - 1e9)) = 99.99957, in (99.95, 101].
+
+        ON FAILURE: the code is wrong.
+        """
+        values = pd.Series(np.r_[10.0 ** np.arange(10), 1e100])
+        b = BinnedData(
+            values.to_frame("x"),
+            {"x": [-1.0, 5.0, 99.95, 101.0]},
+            log={"x": True},
+            clip={"x": True},
+        )
+        assert b.codes("x")[-1] == 1  # hand: 99.909 in (5, 99.95]
+
+
 class TestRowsWithASharedBinnedData:
     """Rows b's mask excludes are absent from data and every selection."""
 
@@ -789,29 +881,112 @@ class TestRowsWithASharedBinnedData:
         assert h.data.index.tolist() == self.ROWS
 
 
+# x on 20, 30, 10, 40; y on 30, 10, 20, 50; z on 40, 30, 20, 10.
+UNSORTED_X = pd.Series([1.0, 2.0, 3.0, 4.0], index=[20, 30, 10, 40])
+UNSORTED_Y = pd.Series([5.0, 6.0, 7.0, 8.0], index=[30, 10, 20, 50])
+UNSORTED_Z = pd.Series([9.0, 8.0, 7.0, 6.0], index=[40, 30, 20, 10])
+
+
+class TestRowOrder:
+    """x, y and z carrying different labels are aligned by label."""
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist2D(UNSORTED_X, UNSORTED_Y, z=UNSORTED_Z, nbins=2),
+            lambda: Scatter(UNSORTED_X, UNSORTED_Y, z=UNSORTED_Z),
+            lambda: SpiralPlot2D(UNSORTED_X, UNSORTED_Y, z=UNSORTED_Z, initial_bins=2),
+        ],
+        ids=["Hist2D", "Scatter", "SpiralPlot2D"],
+    )
+    def test_two_axis_rows_are_the_sorted_shared_labels_with_values_by_label(
+        self, build
+    ):
+        """x, y and z with different labels: rows 10, 20, 30, sorted, values by label.
+
+        By hand: the labels of x and y together sorted are 10, 20, 30, 40, 50; 40
+        has no y and 50 no x, so 10, 20 and 30 remain. At 10: x 3, y 6, z 6; at
+        20: x 1, y 7, z 7; at 30: x 2, y 5, z 8.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = build().data
+        assert data.index.tolist() == [10, 20, 30]  # hand: sorted shared labels
+        assert data.loc[:, "x"].tolist() == exact([3.0, 1.0, 2.0])  # hand, by label
+        assert data.loc[:, "y"].tolist() == exact([6.0, 7.0, 5.0])  # hand, by label
+        assert data.loc[:, "z"].tolist() == exact([6.0, 7.0, 8.0])  # hand, by label
+
+    def test_hist1d_rows_keep_xs_order_with_y_aligned_to_x_by_label(self):
+        """Hist1D keeps x's order, 20, 30, 10, and drops 40, which has no y.
+
+        By hand: y at 20, 30, 10 is 7, 5, 6; 40 has no y, so its row is dropped
+        (how="any"). Unlike Hist2D, the order is not sorted.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = Hist1D(UNSORTED_X, UNSORTED_Y, nbins=2).data
+        assert data.index.tolist() == [20, 30, 10]  # hand: x's order, 40 dropped
+        assert data.loc[:, "x"].tolist() == exact([1.0, 2.0, 3.0])  # hand
+        assert data.loc[:, "y"].tolist() == exact([7.0, 5.0, 6.0])  # hand, by label
+
+
+class TestIntegerZ:
+    """Integer z is aggregated as numbers, not as its integer dtype."""
+
+    def test_integer_z_is_averaged_per_bin(self):
+        """int64 z = 1, 4 in (0, 1] x (0, 1] and 2, 2 in (1, 2] x (0, 1]: means 2.5, 2.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([0.5, 0.5, 1.5, 1.5])
+        y = pd.Series([0.5, 0.5, 0.5, 0.5])
+        z = pd.Series([1, 4, 2, 2], dtype="int64")
+        h = Hist2D(x, y, z=z, nbins=EDGES)
+        assert h.agg().to_numpy() == exact([2.5, 2.0])  # hand: (1 + 4) / 2, (2 + 2) / 2
+        assert h.agg(fcn="count").to_numpy() == exact([2.0, 2.0])  # hand
+
+
+# log10 of 2, 20, 200, 2000 is not an integer, so a result cast back to int64
+# cannot pass. On master, Hist2D, BetaRPlot and SpiralPlot2D silently cast
+# log10 of 1, 10, 100, 1000 back to int64 (0, 1, 2, 3, which equal the float
+# log10 values) and raised TypeError on 2, 20, 200, 2000; Hist1D already
+# returned floats. y is x reversed, so swapping the axes cannot pass.
+INTS = pd.Series([2, 20, 200, 2000], dtype="int64")
+INTS_REVERSED = pd.Series([2000, 200, 20, 2], dtype="int64")
+LOG10_INTS = [np.log10(2.0) + k for k in range(4)]  # hand: log10(2 * 10**k)
+
+
 class TestIntegerInputOnALogAxis:
     """Change f: integer x or y with a log axis gives float log10 values."""
 
-    VALUES = [1, 10, 100, 1000]
-    LOG10 = [np.log10(1), np.log10(10), np.log10(100), np.log10(1000)]
+    @pytest.mark.parametrize(
+        "build, logged",
+        [
+            (lambda: Hist1D(INTS, logx=True, nbins=3), ("x",)),
+            (
+                lambda: Hist2D(INTS, INTS_REVERSED, logx=True, logy=True, nbins=3),
+                ("x", "y"),
+            ),
+            (lambda: BetaRPlot(INTS, INTS_REVERSED, "p", nbins=3), ("x", "y")),
+            (
+                lambda: SpiralPlot2D(
+                    INTS, INTS_REVERSED, logx=True, logy=True, initial_bins=2
+                ),
+                ("x", "y"),
+            ),
+        ],
+        ids=["Hist1D", "Hist2D", "BetaRPlot", "SpiralPlot2D"],
+    )
+    def test_integer_input_on_a_log_axis_stores_float_log10(self, build, logged):
+        """int64 2, 20, 200, 2000 on a log axis store 0.30103, 1.30103, 2.30103, 3.30103.
 
-    def test_hist1d_logs_integer_x(self):
-        """Hist1D(int x, logx=True) stores log10 of the hand values.
-
+        y is the same values reversed, so it stores 3.30103 down to 0.30103.
         ON FAILURE: the code is wrong.
         """
-        h = Hist1D(pd.Series(self.VALUES, dtype="int64"), logx=True, nbins=3)
-        assert h.data.loc[:, "x"].tolist() == exact(self.LOG10)
-
-    def test_hist2d_logs_integer_x_and_y(self):
-        """Hist2D(int x, int y, logx=True, logy=True) stores log10 of both.
-
-        ON FAILURE: the code is wrong.
-        """
-        v = pd.Series(self.VALUES, dtype="int64")
-        h = Hist2D(v, v[::-1].reset_index(drop=True), logx=True, logy=True, nbins=3)
-        assert h.data.loc[:, "x"].tolist() == exact(self.LOG10)
-        assert h.data.loc[:, "y"].tolist() == exact(self.LOG10[::-1])
+        data = build().data
+        expected = {"x": LOG10_INTS, "y": LOG10_INTS[::-1]}
+        for axis in logged:
+            assert data.loc[:, axis].tolist() == exact(expected[axis]), axis  # hand
 
 
 def _source(seed=8):

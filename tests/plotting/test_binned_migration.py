@@ -254,22 +254,16 @@ HIST2D_KINDS = {
 }
 
 
-def _spec(name, case, axes, log):
-    if name == "knuth":
-        pytest.importorskip("astropy")
-    return nbins_spec(name, case, axes, log)
-
-
 def build_hist1d(case_name, spec_name):
     """Build the live and the legacy ``Hist1D`` for one case and ``nbins``."""
     case = CASES[case_name]
     log = {"x": case.logx}
-    live = attempt(_hist1d, Hist1D, case, _spec(spec_name, case, ("x",), log))
+    live = attempt(_hist1d, Hist1D, case, nbins_spec(spec_name, case, ("x",), log))
     legacy = attempt(
         _hist1d,
         LegacyHist1D,
         case,
-        _spec(spec_name, case, ("x",), log),
+        nbins_spec(spec_name, case, ("x",), log),
         kept_rows=True,
     )
     return live, legacy
@@ -281,8 +275,8 @@ def build_hist2d(kind, case_name, spec_name):
     case = CASES[case_name]
     log = {"x": always_log or case.logx, "y": always_log or case.logy}
     axes = ("x", "y")
-    live = attempt(factory, live_cls, case, _spec(spec_name, case, axes, log))
-    legacy = attempt(factory, legacy_cls, case, _spec(spec_name, case, axes, log))
+    live = attempt(factory, live_cls, case, nbins_spec(spec_name, case, axes, log))
+    legacy = attempt(factory, legacy_cls, case, nbins_spec(spec_name, case, axes, log))
     return live, legacy
 
 
@@ -715,8 +709,14 @@ def build_spiral(case_name, spec_name):
 
 
 def spiral_state(s):
-    """The data, initial bins, mesh, cell of every point and aggregates."""
+    """The data, initial bins, mesh, cell of every point and aggregates.
+
+    ``build_grouped`` runs first: ``agg`` and ``make_plot`` read the grouping
+    it stores, so without it both sides raise the same ``AttributeError`` and
+    the aggregates and drawn cells are never compared.
+    """
     mesh = s.mesh
+    s.build_grouped()
     out = {
         "data": s.data,
         "initial_bins": s.initial_bins,
@@ -879,7 +879,7 @@ def test_hist2d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     """
     c = CASES[case]
     mask = caller_mask(c)
-    nbins = _spec(spec, c, ("x", "y"), {"x": c.logx, "y": c.logy})
+    nbins = nbins_spec(spec, c, ("x", "y"), {"x": c.logx, "y": c.logy})
     options = dict(logx=c.logx, logy=c.logy, nbins=nbins)
     live = attempt(
         Hist2D,
@@ -951,7 +951,7 @@ def test_hist1d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     """
     c = CASES[case]
     mask = caller_mask(c)
-    nbins = _spec(spec, c, ("x",), {"x": c.logx})
+    nbins = nbins_spec(spec, c, ("x",), {"x": c.logx})
     y = None if c.z is None else c.y
     options = dict(logx=c.logx, nbins=nbins)
     live = attempt(
