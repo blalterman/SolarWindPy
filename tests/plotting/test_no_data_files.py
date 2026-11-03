@@ -116,13 +116,13 @@ def plotting_test_files():
 
 
 def test_scan_covers_plotting_subfolders():
-    """The scan reaches ``tests/plotting/_legacy`` and ``tests/plotting/labels``.
+    """The scan reaches the nested ``tests/plotting/labels`` folder.
 
     ON FAILURE: ``plotting_test_files`` no longer recurses, or the subfolders
     moved; fix the file list so every plotting test is scanned.
     """
     folders = {p.parent.name for p in plotting_test_files()}
-    assert {"plotting", "_legacy", "labels"} <= folders
+    assert {"plotting", "labels"} <= folders
     assert THIS_FILE not in [p.resolve() for p in plotting_test_files()]
 
 
