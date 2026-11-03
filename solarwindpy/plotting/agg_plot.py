@@ -689,6 +689,15 @@ class AggPlot(base.Base):
 
         aggregate. If `axnorm` set, this is used. A row is kept when its joint
         bin (e.g. its (x, y) bin in 2-D) meets `threshold`.
+
+        Returns
+        -------
+        subset : pd.DataFrame
+            The kept rows, one column per column of ``data``, holding the
+            values the caller passed: never logged, sign included, whatever
+            ``log`` says.
+        tk : pd.Series of bool
+            True for each kept row, on the index of ``data``.
         """
         agg = self.agg(fcn=fcn)
         tk = agg >= threshold
@@ -696,11 +705,15 @@ class AggPlot(base.Base):
 
         tk_h2 = self._joint_bin_mask(tk.index)
 
-        # Boolean selection returns a new frame; the stored data is untouched.
-        subset = self.data.loc[tk_h2]
-        for k, log in self.log._asdict().items():
-            if log:
-                subset.loc[:, k] = 10 ** subset.loc[:, k]
+        # The source's values on the kept rows: no 10** round trip, so only
+        # what was stored logged differs from `data`, and it is not inverted.
+        source = self._source
+        subset = pd.DataFrame(
+            {k: source.take(k) for k in source.columns},
+            index=self._kept_index(),
+            copy=False,
+        )
+        subset = subset.loc[tk_h2.to_numpy(dtype=bool)]
 
         return subset, tk_h2
 

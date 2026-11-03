@@ -23,6 +23,33 @@ from .binned import BinnedData
 from .hist1d import Hist1D
 
 
+def _within(values, lower, upper, bins):
+    r"""Which ``values`` lie between ``lower`` and ``upper``, closed as ``bins`` are.
+
+    Parameters
+    ----------
+    values : pd.Series
+        Values on the binned scale, ``log10(abs())`` on a log axis.
+    lower, upper : scalar
+        The bounds.
+    bins : pd.IntervalIndex
+        The axis's bins. Right-closed bins compare ``lower < v <= upper``;
+        left-closed bins compare ``lower <= v < upper`` and, as the last
+        left-closed bin also holds its right edge (``np.histogram``), keep
+        ``v == upper`` when ``upper`` is that edge.
+
+    Returns
+    -------
+    pd.Series of bool
+    """
+    if bins.closed == "left":
+        inside = (lower <= values) & (values < upper)
+        if upper == bins.right[-1]:
+            inside |= values == upper
+        return inside
+    return (lower < values) & (values <= upper)
+
+
 class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
@@ -801,6 +828,20 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return ax, cbar_or_mappable, qset
 
+    def _on_source_index(self, values):
+        r"""``values``, given on the kept rows, on every row of the source.
+
+        Rows the histogram does not keep get NaN, or False for a boolean
+        Series. Placed by position, so repeated labels are kept apart.
+        """
+        rows = self._source.rows
+        if rows is None:
+            return values
+        fill = False if values.dtype == bool else np.nan
+        full = np.full(rows.size, fill, dtype=np.result_type(values.dtype, type(fill)))
+        full[rows] = values.to_numpy()
+        return pd.Series(full, index=self._source.index, name=values.name)
+
     def project_1d(self, axis, only_plotted=True, project_counts=False, **kwargs):
         """Make a ``Hist1D`` from the data stored in this ``Hist2D``.
 
@@ -815,22 +856,32 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             If True, only send the variable plotted along `axis` to
             :class:`~solarwindpy.plotting.hist1d.Hist1D`, which then counts it.
             Otherwise, also send the values to aggregate: the z-values when the
-            histogram has them, else the other axis, NaN wherever the
-            histogram does not bin that axis's value; the ``Hist1D`` drops
-            those rows.
+            histogram has them, else the other axis. A row whose other-axis
+            value the histogram puts in no bin is not sent.
         kwargs:
-            Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
+            Passed to `Hist1D`, e.g. `axnorm`. The bins are the parent's, so
+            `bin_precision` raises ``ValueError``.
 
         Returns
         -------
         h1: solarwindpy.plotting.hist1d.Hist1D
+
+        Notes
+        -----
+        The ``Hist1D`` takes this histogram's ``BinnedData`` as its ``nbins``:
+        each row keeps the bin it has on `axis` here, clipped or not, so the
+        projected bins are this histogram's by construction and the projected
+        counts are its marginal sums. Binning and display stay on
+        ``log10(abs())`` of a log axis, while the values sent are the measured
+        ones, sign included and never logged, so the other axis is averaged in
+        linear units. A log other axis sets ``log.y`` of the ``Hist1D``, for
+        display only.
         """
         axis = axis.lower()
         assert axis in ("x", "y")
 
-        data = self.data
-
-        if not self._source.counts:
+        source = self._source
+        if not source.counts:
             # Without z every point stores z = 1, so two or more distinct values
             # (two included) mean the caller passed z.
             other = "z"
@@ -839,38 +890,32 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             possible_axes.remove(axis)
             other = possible_axes.pop()
 
-        logx = self.log._asdict()[axis]
-        x = data.loc[:, axis]
-        if logx:
-            # Need to convert back to regular from log-space for data setting.
-            x = 10.0**x
-
-        y = data.loc[:, other] if not project_counts else None
-        logy = False  # Defined b/c project_counts option.
-        if y is not None and (other == "y"):
-            # Only select y-values plotted: those the histogram puts in a y-bin,
-            # which respects whether the bins are closed left or right.
-            logy = self.log._asdict()[other]
-            y = y.where(self.cut.loc[:, other].notna())
-            if logy:
-                y = 10.0**y
-
+        # Rows sent to the Hist1D, among the rows this histogram keeps.
+        keep = np.ones(source.take(axis).size, dtype=bool)
         if only_plotted:
-            tk = self.get_plotted_data_boolean_series()
-            x = x.loc[tk]
-            if y is not None:
-                y = y.loc[tk]
+            keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
+        if not project_counts and other != "z":
+            keep &= self._bin_codes()[other] >= 0
+
+        # The Hist1D finds the axis in the BinnedData by its name and reads
+        # its codes; the measured values are sent on the source's own index,
+        # with a mask, so no row is looked up by label.
+        column = self._bin_columns[axis]
+        x = self._on_source_index(source.take(axis)).rename(column)
+        y = None
+        if not project_counts:
+            y = self._on_source_index(source.take(other))
 
         h1 = Hist1D(
             x,
             y=y,
-            logx=logx,
-            clip=False,  # Any clipping will be addressed by bins.
-            nbins=self.intervals[axis],  # Keeps which side each bin closes on.
+            nbins=self._binned,
+            mask=self._on_source_index(pd.Series(keep, index=self._kept_index())),
             **kwargs,
         )
 
-        h1.set_log(y=logy)  # Need to propagate logy.
+        logy = False if project_counts or other == "z" else self.log._asdict()[other]
+        h1.set_log(y=logy)  # The display scale of the other axis.
         h1.set_labels(x=self.labels._asdict()[axis])
         if not project_counts:
             h1.set_labels(y=self.labels._asdict()[other])
@@ -981,10 +1026,19 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             which the observation falls. `NaN` are observations that are below
             `level`. This object is purposely the same length as the data stored by
             Hist2D and can be used in groupby operations.
+
+        Notes
+        -----
+        In each x-bin, a row is labelled when its x is in that bin and its y
+        lies from the lowest to the highest y-bin reaching `level`. Both are
+        compared on the side the bins close: ``(a, b]`` for right-closed bins,
+        ``[a, b)`` for left-closed ones, whose last bin also holds its right
+        edge.
         """
         data = self.data
         x = data.x
         y = data.y
+        intervals = self.intervals
         # Object dtype, because the values written below are `pd.Interval`s.
         above_contour = pd.Series(np.nan, data.index, dtype=object)
         for k, v in self.agg().unstack("x").items():
@@ -994,7 +1048,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
                 continue
             left, right = k.left, k.right
             bottom, top = v[tk].index.min().left, v[tk].index.max().right
-            above_contour_at_x = (left < x) & (x <= right) & (bottom < y) & (y <= top)
+            above_contour_at_x = _within(x, left, right, intervals["x"]) & _within(
+                y, bottom, top, intervals["y"]
+            )
             above_contour[above_contour_at_x] = k
 
         above_contour = pd.Series(
@@ -1033,7 +1089,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         -------
         taken: np.ndarray 1D
             Array of indices for selecting data in interval: the points with
-            ``left < x <= right`` and ``bottom < y <= top``.
+            x between `left` and `right` and y between `bottom` and `top`.
+            Each axis compares on the side its bins close: ``left < x <=
+            right`` for right-closed bins (explicit edges), ``left <= x <
+            right`` for left-closed bins (an integer `nbins`), whose last bin
+            also holds its right edge, so ``x == right`` is kept when `right`
+            is that edge. Likewise for y with the y-bins.
 
         Raises
         ------
@@ -1058,6 +1119,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         data = self.data
         logx = self.log.x
         logy = self.log.y
+        intervals = self.intervals
 
         taken = []
         for x, at_x in ranges_by_x.iterrows():
@@ -1069,8 +1131,8 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             if not b < t:
                 raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
 
-            tkx = (l < data.x) & (data.x <= r)
-            tky = (b < data.y) & (data.y <= t)
+            tkx = _within(data.x, l, r, intervals["x"])
+            tky = _within(data.y, b, t, intervals["y"])
             tk = tkx & tky
             tk = tk.loc[tk].index
             taken.append(tk)

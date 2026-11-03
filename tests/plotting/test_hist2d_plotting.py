@@ -1704,16 +1704,16 @@ class TestProject1D:
         projected = known_hist.project_1d("x", project_counts=True)
         assert projected.log == (False, False)
 
-    def test_bin_precision_reaches_the_projection(self, known_hist):
-        """``bin_precision`` is passed to ``Hist1D``, which rounds the edges.
+    def test_bin_precision_cannot_reround_the_parent_bins(self, known_hist):
+        """``bin_precision`` raises: the projection's bins are the parent's.
 
-        numpy rounds the parent's edges to one decimal place for the
-        expectation.
+        The projection reuses the parent's bin codes, so its edges are the
+        parent's and cannot be rounded differently.
 
         ON FAILURE: the code is wrong.
         """
-        projected = known_hist.project_1d("x", project_counts=True, bin_precision=1)
-        assert projected.edges["x"].to_numpy() == exact(np.round(XEDGES, 1))
+        with pytest.raises(ValueError, match="bin_precision"):
+            known_hist.project_1d("x", project_counts=True, bin_precision=1)
 
     def test_projection_does_not_clip_an_outlier_into_another_bin(self):
         """An x outlier keeps its bin: the marginal equals the parent's columns.

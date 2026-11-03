@@ -437,7 +437,12 @@ class Hist1D(AggPlot):
         -------
         taken: np.ndarray 1D
             Array of indices for selecting data in interval: the points with
-            ``left < x <= right`` and ``bottom < y <= top``.
+            x between `left` and `right` and ``bottom < y <= top``. x compares
+            on the side its bins close: ``left < x <= right`` for right-closed
+            bins (explicit edges), ``left <= x < right`` for left-closed bins
+            (an integer `nbins`), whose last bin also holds its right edge, so
+            ``x == right`` is kept when `right` is that edge. y is not binned,
+            so its range stays closed on the top.
 
         Raises
         ------
@@ -472,7 +477,14 @@ class Hist1D(AggPlot):
             if not b < t:
                 raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
 
-            tkx = (l < data.x) & (data.x <= r)
+            bins = self.intervals["x"]
+            if bins.closed == "left":
+                tkx = (l <= data.x) & (data.x < r)
+                if r == bins.right[-1]:
+                    # The last left-closed bin also holds its right edge.
+                    tkx |= data.x == r
+            else:
+                tkx = (l < data.x) & (data.x <= r)
             tky = (b < data.y) & (data.y <= t)
             tk = tkx & tky
             tk = tk.loc[tk].index

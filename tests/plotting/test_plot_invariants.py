@@ -505,46 +505,8 @@ def _sorted_keys(keys):
 # Parametrization
 # ---------------------------------------------------------------------------
 
-DEFECT_13 = (
-    "defect #13, fixed in Phase D group D2 with #5: Hist2D.project_1d passes the "
-    "stored log10|x| through as a linear y when the other axis is x (it converts "
-    "back only when the other axis is y); remove this marker when D2 lands"
-)
-DEFECT_14 = (
-    "defect #14, fixed in Phase D group D2 with #5: Hist2D.project_1d builds its "
-    "Hist1D with clip=False, so a row the parent clipped into a bin falls in no "
-    "projected bin and the projected counts miss it; remove this marker when D2 "
-    "lands"
-)
 
-#: (class, method, case, variant) where an invariant fails because of a known
-#: defect. Strict: when D2 lands every entry XPASSes and the set is deleted.
-KNOWN_SELECTION_DEFECTS = {
-    ("BetaRPlot", "project_1d", "counts", variant): pytest.mark.xfail(
-        strict=True, raises=AssertionError, reason=DEFECT_13
-    )
-    for variant in (
-        "private:int",
-        "private:auto",
-        "private:edges",
-        "private:intervals_left",
-        "private:mixed",
-        "private:knuth",
-        "shared:edges",
-        "shared:intervals_left",
-    )
-}
-
-#: (class, case, variant) where the projection-count invariant fails, as above.
-KNOWN_PROJECTION_DEFECTS = {
-    ("Hist2D", "clip_outlier", variant): pytest.mark.xfail(
-        strict=True, raises=AssertionError, reason=DEFECT_14
-    )
-    for variant in ("private:auto", "private:knuth")
-}
-
-
-def _params(classes, methods=None, known=None):
+def _params(classes, methods=None):
     out = []
     for cls in sorted(classes, key=lambda c: c.__name__):
         variants = BUILDERS[cls][1]
@@ -554,22 +516,16 @@ def _params(classes, methods=None, known=None):
         for method in names:
             for case_name in CASES:
                 for variant in variants:
-                    marks = ()
-                    key = (cls.__name__, case_name, variant)
-                    if methods is not None:
-                        key = (cls.__name__, method, case_name, variant)
-                    if known and key in known:
-                        marks = known[key]
                     values = (cls, case_name, variant)
                     ident = [cls.__name__, case_name, variant]
                     if methods is not None:
                         values = (cls, method, case_name, variant)
                         ident.insert(1, method)
-                    out.append(pytest.param(*values, marks=marks, id="-".join(ident)))
+                    out.append(pytest.param(*values, id="-".join(ident)))
     return out
 
 
-SELECTION_PARAMS = _params(BUILDERS, SELECTIONS, known=KNOWN_SELECTION_DEFECTS)
+SELECTION_PARAMS = _params(BUILDERS, SELECTIONS)
 AGG_CLASSES = {cls for cls in BUILDERS if issubclass(cls, AggPlot)}
 PROJECTING_CLASSES = {cls for cls in BUILDERS if hasattr(cls, "project_1d")}
 
@@ -721,7 +677,7 @@ def test_plotted_rows_counted_per_bin_equal_the_count_aggregate(
 
 @pytest.mark.parametrize(
     "cls, case_name, variant",
-    _params(PROJECTING_CLASSES, known=KNOWN_PROJECTION_DEFECTS),
+    _params(PROJECTING_CLASSES),
 )
 def test_projected_counts_equal_the_parents_counts_summed_over_the_other_axis(
     cls, case_name, variant
