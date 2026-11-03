@@ -74,7 +74,16 @@ class Base(ABC):
 
     @property
     def data(self):
-        r"""The plot's data, built from its source on each access."""
+        r"""The plot's data: a new DataFrame built from its source on each access.
+
+        It holds the rows the plot keeps (no NaN in any column, within the
+        caller's ``mask`` and a shared ``BinnedData``'s mask), with each
+        logarithmic axis as ``log10(abs())``. Nothing is stored between
+        accesses, so edits to the returned frame do not persist, and the
+        arrays of its columns (``to_numpy()``) are read-only. The plot's data
+        is set once, by its constructor; to plot other data, build a new
+        plot.
+        """
         return self._source.materialize()
 
     #: The axes the ``clip`` argument applies to, in ``ClipAxes`` field order.

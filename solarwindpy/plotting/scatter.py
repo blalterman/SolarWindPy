@@ -32,7 +32,8 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             ``ClipAxes``.
         mask: pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y. A point
-            is plotted where it is True and x, y and z are not NaN.
+            is plotted where it is True and x, y and z are not NaN. A label
+            missing from ``mask``, or a NaN in it, raises ``ValueError``.
         """
         super(Scatter, self).__init__()
         self._set_data(x, y, z, clip, mask=mask)

@@ -52,7 +52,10 @@ class BetaRPlot(Hist2D):
             Label used to generate axis titles.
         **kwargs
             Additional options forwarded to
-            :class:`~solarwindpy.plotting.hist2d.Hist2D`.
+            :class:`~solarwindpy.plotting.hist2d.Hist2D`, e.g. ``nbins``,
+            which may be a ``BinnedData`` holding columns named like ``beta``
+            and ``ani``, and ``mask``. ``logx`` and ``logy`` default to True,
+            or, with a ``BinnedData``, to its settings for those columns.
         """
 
         x = beta

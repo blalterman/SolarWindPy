@@ -634,6 +634,11 @@ They will be replaced by NaNs and excluded from the aggregation.
 class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
     r"""2D spiral plotting with adaptive mesh refinement.
 
+    Unlike ``Hist2D``, a ``SpiralPlot2D`` does not accept a shared
+    ``BinnedData``: its mesh adapts to its own data, so it always bins the
+    columns it is given. ``make_plot`` draws the cells as one
+    ``PolyCollection``.
+
     Examples
     --------
     splot = SpiralPlot2D(...)

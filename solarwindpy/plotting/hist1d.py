@@ -75,13 +75,20 @@ class Hist1D(AggPlot):
             ``BinnedData``.
         mask : pandas.Series of bool, optional
             Rows to keep, aligned by label to the index of ``x``. Selections
-            are returned on the original labels.
+            are returned on the original labels. A label missing from
+            ``mask``, or a NaN in it, raises ``ValueError``; neither is
+            treated as False.
 
         Raises
         ------
+        KeyError
+            If ``nbins`` is a ``BinnedData`` without a column named
+            ``x.name``.
         ValueError
             If ``nbins`` is a ``BinnedData`` and ``logx`` or ``clip`` is given
-            and differs from its setting, or ``bin_precision`` is given.
+            and differs from its setting, ``bin_precision`` is given, or
+            ``x.index`` is not a subset of its index. Also if no row is left
+            to bin.
         """
         super(Hist1D, self).__init__()
         log, clip = self._inherit(

@@ -563,7 +563,25 @@ class BinnedData:
     r"""Columns of a frame, their bins, and the bin of every row.
 
     The bin of each row is computed once, when the object is built, from the
-    values the frame holds then.
+    values the frame holds then, and cached as int8 codes (int16 above 127
+    bins). Pass one ``BinnedData`` as the ``nbins`` of several ``Hist1D``,
+    ``Hist2D`` or ``BetaRPlot`` objects and they share its bins and codes
+    instead of each binning, and copying, the same columns. A plot finds its
+    columns by the names of its inputs (``x.name``, ``y.name``) and takes the
+    rows of ``x.index``, which must be a subset of ``index``. Its ``logx``,
+    ``logy`` and ``clip`` default to the settings held here for those
+    columns. ``SpiralPlot2D`` refuses a ``BinnedData``: its adaptive mesh is
+    built from its own data.
+
+    Only explicit bins are accepted: edges or a ``pd.IntervalIndex`` per
+    column. Edges from an integer or string rule (``nbins=101``, ``"auto"``,
+    ``"knuth"``) depend on which rows a plot keeps, so they stay per plot:
+    pass those to the plot's ``nbins`` instead.
+
+    The object is read-only once built. Its API is ``columns``, ``index``,
+    ``log_of(col)``, ``clip_of(col)``, ``edges(col)``, ``intervals(col)``,
+    ``codes(col, on=None)`` and ``categorical(col, on=None)``; the arrays it
+    returns are read-only.
 
     Parameters
     ----------
@@ -584,7 +602,9 @@ class BinnedData:
         one tail only. Unlisted columns are not clipped.
     mask : pd.Series of bool, optional
         Rows to bin, aligned by label to ``frame.index``. Rows it excludes get
-        code -1.
+        code -1, and a plot sharing this object does not keep them. A label of
+        ``frame.index`` missing from ``mask``, or a NaN in it, raises; neither
+        is ever treated as False.
     precision : int, optional
         Decimal places to which edges are rounded. If None, 5 for edges, while
         an ``IntervalIndex`` keeps its edges.
@@ -605,6 +625,55 @@ class BinnedData:
     A value is in a left-closed bin ``[a, b)``; as in :func:`numpy.histogram`,
     the last left-closed bin also holds its right edge. A right-closed bin is
     ``(a, b]``. NaN, +/-inf and values outside the edges get code -1.
+
+    A ``BinnedData`` is a snapshot. It holds a copy-on-write view of the
+    binned columns, so a pandas edit to ``frame`` after it is built (for
+    example ``frame.loc[i, col] = v``) changes neither its values nor its
+    codes; build a new ``BinnedData`` to bin the edited data. One case is not
+    guarded: a column that wraps a NumPy array without a copy
+    (``pd.Series(arr, copy=False)``, or a frame built from one with
+    ``copy=False``) shares that array, and writing into ``arr`` after
+    building changes the values held, and the ``data`` of plots built on
+    them, though not the codes already assigned.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from solarwindpy.plotting.binned import BinnedData
+    >>> from solarwindpy.plotting.hist2d import Hist2D
+    >>> rng = np.random.default_rng(0)
+    >>> frame = pd.DataFrame(
+    ...     {
+    ...         "a": rng.normal(size=1000),
+    ...         "b": rng.normal(size=1000),
+    ...         "c": rng.uniform(size=1000),
+    ...     }
+    ... )
+    >>> edges = {"a": np.linspace(-4, 4, 9), "b": np.linspace(-4, 4, 5)}
+    >>> b = BinnedData(frame, edges)
+    >>> b.columns, b.codes("a").dtype
+    (('a', 'b'), dtype('int8'))
+    >>> b.intervals("b")
+    IntervalIndex([(-4.0, -2.0], (-2.0, 0.0], (0.0, 2.0], (2.0, 4.0]],
+                  dtype='interval[float64, right]')
+
+    Two histograms share its bins and codes; the second keeps only the rows
+    its ``mask`` selects.
+
+    >>> h = Hist2D(frame["a"], frame["b"], nbins=b)
+    >>> low_c = Hist2D(frame["a"], frame["b"], nbins=b, mask=frame["c"] < 0.5)
+    >>> h.agg().shape, low_c.agg().shape
+    ((24,), (22,))
+    >>> int(h.agg().sum()), int(low_c.agg().sum()), int((frame["c"] < 0.5).sum())
+    (1000, 519, 519)
+
+    Editing ``frame`` afterwards changes neither the codes nor the plots.
+
+    >>> before = b.codes("a").copy()
+    >>> frame.loc[0, "a"] = 100.0
+    >>> bool((b.codes("a") == before).all()), bool(h.data.loc[0, "x"] < 100)
+    (True, True)
     """
 
     def __init__(self, frame, bins, *, log=None, clip=None, mask=None, precision=None):

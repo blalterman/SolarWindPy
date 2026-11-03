@@ -60,7 +60,19 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     mask : pd.Series of bool, optional
         Rows to keep, aligned by label to the index of x and y. A row is
         binned where it is True and x, y and z are not NaN. Selections are
-        returned on the original labels.
+        returned on the original labels. A label missing from ``mask``, or a
+        NaN in it, raises ``ValueError``; neither is treated as False.
+
+    Raises
+    ------
+    KeyError
+        If ``nbins`` is a ``BinnedData`` without a column named ``x.name`` or
+        ``y.name``.
+    ValueError
+        If ``nbins`` is a ``BinnedData`` and ``logx``, ``logy`` or ``clip`` is
+        given and differs from its setting, ``bin_precision`` is given, or
+        ``x.index`` is not a subset of its index. Also if no row is left to
+        bin.
 
     Notes
     -----
