@@ -249,6 +249,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     so the length of `agg()` changes for every caller, and a count grid with an empty bin
     is float. Values in occupied bins, the arrays `make_plot` and `plot_contours` draw, and
     every selection are unchanged.
+  - `set_log` on a built plot raises `ValueError` if it would change the log of an axis
+    its data and bins were built on (x for `Hist1D`; x and y for `Hist2D` and
+    `SpiralPlot2D`). Build a new plot or `BinnedData` instead. Axes only drawn on a log
+    scale (`Hist1D` y, `Scatter`) can still be changed, and repeating the current
+    setting is allowed.
+  - `Hist2D.project_1d(..., bin_precision=...)` raises `ValueError`: the projection's
+    bins are the parent's and are not re-rounded.
 
 ### Changed
 
@@ -425,6 +432,33 @@ These change computed values; rerun any analysis that used them.
   `assert` when `ranges_by_x` names x bins the histogram does not have, and, like
   `Hist2D`, logs a warning and selects within the named bins when `ranges_by_x` omits
   some of them.
+- Plots keep no row whose x, y or z is +-inf, in the input or after `log10(abs())` on a
+  logarithmic axis (so a 0 there), just as they drop NaN. This applies to `Hist1D`,
+  `Hist2D`, `BetaRPlot`, `Scatter` and `SpiralPlot2D`, including plots sharing a
+  `BinnedData`. `BinnedData` codes +-inf as -1 even when clipped or when an edge is
+  infinite.
+- `Base.clip_data` computes its quantiles over finite values only, so +inf no longer
+  makes the upper quantile NaN. +-inf is clipped to the quantile on the clipped tail; NaN
+  is unchanged.
+- `SpiralMesh.generate_mesh` (and so `SpiralPlot2D.initialize_mesh`) raises `ValueError`
+  instead of never terminating when more than `min_per_bin` points are identical in x and
+  y. The message names the points and the usual causes (duplicated rows, fill values,
+  clipping both axes). Meshes of other inputs are unchanged.
+- `Hist1D.take_data_in_yrange_across_x`, `Hist2D.take_data_in_yrange_across_x` and
+  `Hist2D.id_data_above_contour` compare each binned axis on the side its bins close:
+  `[a, b)` for an integer `nbins`, with the last bin also holding its right edge, and
+  `(a, b]` for explicit edges. They previously always compared `(a, b]`. `Hist1D`'s y
+  range, which is not binned, stays `(bottom, top]`.
+- `get_subset_above_threshold` returns the caller's values on the kept rows. It
+  previously applied `10**` to every axis flagged as log, which inflated a linear y
+  after `project_1d` and dropped the sign of a logged axis.
+- `Hist2D.project_1d` reuses the parent's bins and bin codes, so the side panels bin each
+  row exactly as the 2-D plot does, including rows clipped into an edge bin, and the
+  projected counts are the parent's marginal sums. It averages the measured z or
+  other-axis values in linear units, sign included; a log other axis was previously
+  passed as `log10|x|`. A log other axis now sets the projection's `log.y` whichever
+  axis is projected, and with `only_plotted=False` rows outside the other axis's bins
+  are dropped, as documented.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
