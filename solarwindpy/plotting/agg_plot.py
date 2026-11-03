@@ -21,6 +21,7 @@ except ModuleNotFoundError:
     pass
 
 from . import base
+from . import binned
 
 
 class AggPlot(base.Base):
@@ -54,7 +55,16 @@ class AggPlot(base.Base):
 
     @property
     def cut(self):
-        return self._cut
+        r"""Bin of each row ``make_cut`` binned: a DataFrame of categoricals.
+
+        One column per binned axis, indexed by the rows kept when ``make_cut``
+        ran. Built on each access from the bin codes.
+        """
+        on = self._cut_rows
+        return pd.DataFrame(
+            {k: self._binned.categorical(k, on=on) for k in self._gb_axes},
+            copy=False,
+        )
 
     @property
     def clim(self):
@@ -144,35 +154,7 @@ class AggPlot(base.Base):
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
 
-    @staticmethod
-    def _edges_from_intervals(intervals):
-        """Return the edges of contiguous bins and the side they close on.
-
-        The empty test comes first, and ``or`` short-circuits on it, so the
-        contiguity test never sees empty intervals. That test alone would
-        pass them: comparing ``intervals.left[1:]`` with
-        ``intervals.right[:-1]`` gives an empty array, whose ``all()`` is
-        True. Empty intervals would then reach ``intervals.right[-1]`` and
-        raise :class:`IndexError` instead of the :class:`ValueError` below.
-
-        Raises
-        ------
-        ValueError
-            If the intervals are empty, not contiguous and increasing, or
-            closed on neither or both sides.
-        """
-        if intervals.closed not in ("left", "right"):
-            raise ValueError(
-                f"Need intervals closed on the left or right, got {intervals.closed!r}."
-            )
-        if (
-            intervals.empty
-            or not intervals.is_monotonic_increasing
-            or not (intervals.left[1:] == intervals.right[:-1]).all()
-        ):
-            raise ValueError(f"Need contiguous, increasing intervals, got {intervals}.")
-        edges = np.append(intervals.left.to_numpy(), intervals.right[-1])
-        return edges, intervals.closed
+    _edges_from_intervals = staticmethod(binned._edges_from_intervals)
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.
@@ -267,15 +249,10 @@ class AggPlot(base.Base):
 
             if from_count:
                 # Round the outer edges outward so they enclose every sample.
-                scale = 10.0**precision
-                lo = np.floor(b[0] * scale) / scale
-                hi = np.ceil(b[-1] * scale) / scale
-                b = b.round(precision)
-                b[0] = lo if lo <= d.min() else lo - 1 / scale
-                b[-1] = hi if hi >= d.max() else hi + 1 / scale
+                b = binned._round_edges(b, precision, enclose=d)
                 closed = "left"
             elif round_intervals or not given_intervals:
-                b = b.round(precision)
+                b = binned._round_edges(b, precision)
 
             if clipped_for_memory:
                 self._warn_values_outside_bins(k, d, b)
@@ -287,6 +264,22 @@ class AggPlot(base.Base):
 
         intervals = tuple(intervals.items())
         self._categoricals = intervals
+        self._bin_source()
+
+    def _bin_source(self):
+        r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
+
+        The bins keep their closure and edges; the source's log and the plot's
+        ``clip`` apply to every binned axis.
+        """
+        intervals = self.intervals
+        clip = self.clip
+        source = self._source
+        self._binned = source.binned(
+            {k: intervals[k] for k in self._gb_axes},
+            clip={k: clip for k in self._gb_axes},
+        )
+        self._binned_for = (source, clip)
 
     def _nbins_by_axis(self, nbins):
         r"""Map each binned axis to its bin specification.
@@ -339,26 +332,15 @@ class AggPlot(base.Base):
         )
 
     def make_cut(self):
-        r"""Calculate the `Categorical` quantities for the aggregation axes."""
-        intervals = self.intervals
-        data = self.data
+        r"""Assign the plot's current rows to the bins in ``intervals``.
 
-        cut = {}
-        for k in self._gb_axes:
-            d = data.loc[:, k]
-            i = intervals[k]
-
-            if self.clip:
-                d = self.clip_data(d, self.clip)
-
-            c = pd.cut(d, i)
-            if i.closed == "left":
-                # As in `np.histogram`, the last bin also holds its right edge.
-                c[d == i[-1].right] = i[-1]
-            cut[k] = c
-
-        cut = pd.DataFrame.from_dict(cut, orient="columns")
-        self._cut = cut
+        ``cut`` then gives those rows' bins. Data set after this call is not
+        binned until ``make_cut`` runs again.
+        """
+        source, clip = self._binned_for
+        if source is not self._source or clip != self.clip:
+            self._bin_source()
+        self._cut_rows = self._source.rows
 
     def _agg_reindexer(self, agg):
         # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError
