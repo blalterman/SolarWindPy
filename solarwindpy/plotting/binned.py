@@ -23,6 +23,11 @@ def _clip_to_quantiles(data, clip):
     r"""Clip data to its 0.01st and 99.99th percentiles.
 
     The one clipping rule every plot shares; ``Base.clip_data`` delegates here.
+    The percentiles are computed over the finite values only: NaN and +/-inf
+    are left out, so an infinity cannot make a percentile infinite or NaN.
+    The infinities are then clipped like any other value beyond a
+    percentile: +inf to the upper one, -inf to the lower one, when that tail
+    is clipped. NaN stays NaN. A column with no finite value is unchanged.
 
     Parameters
     ----------
@@ -51,7 +56,7 @@ def _clip_to_quantiles(data, clip):
 
     q0 = 0.0001
     q1 = 0.9999
-    pct = data.quantile([q0, q1])
+    pct = data.replace([-np.inf, np.inf], np.nan).quantile([q0, q1])
     lo = pct.loc[q0]
     up = pct.loc[q1]
 
@@ -156,11 +161,46 @@ def _has_one_distinct_value(values):
     return values.unique().size == 1
 
 
+def _usable(values, log):
+    r"""True where a value is neither NaN nor +/-inf, as the plot holds it.
+
+    On a logged column the plot holds ``log10(abs(v))``, which is -inf where
+    ``v`` is 0 and finite for every other finite ``v``, so 0 is not usable
+    there either. A column whose dtype is neither float nor integer is only
+    tested for NaN.
+
+    Parameters
+    ----------
+    values : pd.Series
+        One column.
+    log : bool
+        True if the column is held as ``log10(abs())``.
+
+    Returns
+    -------
+    np.ndarray of bool
+        A new array, one entry per value.
+    """
+    kind = values.dtype.kind
+    if kind == "f":
+        arr = values.to_numpy(dtype=np.float64, na_value=np.nan)
+        keep = np.isfinite(arr)
+    elif kind in "iub":
+        arr = values.to_numpy()
+        keep = np.ones(arr.size, dtype=bool)
+    else:
+        return values.notna().to_numpy()
+    if log:
+        keep &= arr != 0
+    return keep
+
+
 class _PlotSource:
     r"""A plot's input columns and the rows it keeps.
 
-    A row is kept only where no coordinate and not the value is NaN
-    (how="any"), ``mask`` keeps it, and ``within`` keeps it.
+    A row is kept only where no coordinate and not the value is NaN or
+    +/-inf (how="any"), each logged coordinate is finite after
+    ``log10(abs())`` (so not 0), ``mask`` keeps it, and ``within`` keeps it.
 
     Parameters
     ----------
@@ -223,22 +263,30 @@ class _PlotSource:
             if shared is not None:
                 selected = shared if selected is None else selected & shared
 
-        # A row is kept only if no column is NaN (how="any").
-        keep = frame.notna().all(axis=1).to_numpy()
+        log = {k: bool(v) for k, v in (log or {}).items()}
+        # A row is kept only if no column is NaN or +/-inf as the plot holds
+        # it, after log10 on a logged coordinate (how="any").
+        keep = np.ones(index.size, dtype=bool)
+        for k in frame.columns:
+            keep &= _usable(frame.loc[:, k], log.get(k, False))
         if value is not None:
-            keep = keep & value.notna().to_numpy()
+            keep &= _usable(value, False)
         if selected is not None:
             keep = keep & selected
         if not keep.any():
             raise ValueError(
-                "You can't build a %s with data that is exclusively NaNs" % owner
+                "You can't build a %s with data that is exclusively NaNs or "
+                "infinite values" % owner
             )
         rows = None if keep.all() else keep
 
         self._frame = frame
         self._value_name = value_name
         self._value = value
-        self._log = {k: bool(v) for k, v in (log or {}).items() if v}
+        # The coordinates whose log setting, True or False, the rows, the
+        # data and any bins were built on.
+        self._log_columns = tuple(log)
+        self._log = {k: v for k, v in log.items() if v}
         self._rows = rows
 
         if value is None:
@@ -262,6 +310,15 @@ class _PlotSource:
     def rows(self):
         r"""Boolean ndarray of the kept rows, or None when all are kept."""
         return self._rows
+
+    @property
+    def log_columns(self):
+        r"""Coordinates given a log setting, True or False, when built.
+
+        Their kept rows and values, and so the bins of a plot on them,
+        depend on that setting.
+        """
+        return self._log_columns
 
     @property
     def counts(self):
@@ -506,7 +563,8 @@ def _cut_codes(values, edges, closed):
 
     Equals ``pd.cut(values, edges, right=(closed == "right"), labels=False)``
     with NaN as -1, except that, as in :func:`numpy.histogram`, the last
-    left-closed bin also holds its right edge. A float or signed-integer
+    left-closed bin also holds its right edge, and that +/-inf is -1 even
+    where an edge is infinite. A float or signed-integer
     column is searched directly, as ``pd.cut`` searches it; any other dtype
     goes through ``pd.cut``.
 
@@ -551,6 +609,9 @@ def _cut_codes(values, edges, closed):
     if closed == "left":
         # As in `np.histogram`, the last bin also holds its right edge.
         out[last] = n_bins - 1
+    if arr.dtype.kind == "f":
+        # +/-inf is in no bin, even where an edge is infinite.
+        out[np.isinf(arr)] = -1
     return out
 
 
@@ -597,9 +658,10 @@ class BinnedData:
     log : dict of str to bool, optional
         Columns binned as ``log10(abs())``. Unlisted columns are linear.
     clip : dict of str to bool or str, optional
-        Columns clipped to their 0.01st and 99.99th percentiles (over the rows
-        ``mask`` keeps, after ``log``) before binning; ``"l"`` or ``"u"`` clips
-        one tail only. Unlisted columns are not clipped.
+        Columns clipped to their 0.01st and 99.99th percentiles (over the
+        finite values of the rows ``mask`` keeps, after ``log``) before
+        binning; ``"l"`` or ``"u"`` clips one tail only. Unlisted columns are
+        not clipped. Clipping never places +/-inf in a bin.
     mask : pd.Series of bool, optional
         Rows to bin, aligned by label to ``frame.index``. Rows it excludes get
         code -1, and a plot sharing this object does not keep them. A label of
@@ -624,7 +686,9 @@ class BinnedData:
     -----
     A value is in a left-closed bin ``[a, b)``; as in :func:`numpy.histogram`,
     the last left-closed bin also holds its right edge. A right-closed bin is
-    ``(a, b]``. NaN, +/-inf and values outside the edges get code -1.
+    ``(a, b]``. NaN, +/-inf (also after ``log``, so a logged 0, and also
+    where an edge is infinite) and values outside the edges get code -1,
+    clipped or not.
 
     A ``BinnedData`` is a snapshot. It holds a copy-on-write view of the
     binned columns, so a pandas edit to ``frame`` after it is built (for
@@ -753,7 +817,9 @@ class BinnedData:
         A linear, unclipped column is binned whole and the mask applied after,
         since a row's bin does not depend on the other rows. Otherwise the
         kept rows are taken first: clip quantiles are computed over them, and
-        ``log10`` would warn on a zero in a row that is not kept.
+        ``log10`` would warn on a zero in a row that is not kept. A value
+        that is +/-inf, given or after ``log10``, is set to NaN before
+        clipping, so clipping cannot move it into a bin: its code is -1.
         """
         dtype = _code_dtype(edges.size - 1)
         if not (log or clip):
@@ -768,6 +834,7 @@ class BinnedData:
         if log:
             values = np.log10(np.abs(values))
         if clip:
+            values = values.replace([-np.inf, np.inf], np.nan)
             values = _clip_to_quantiles(values, clip)
         placed = _cut_codes(values, edges, closed)
         if keep is None:

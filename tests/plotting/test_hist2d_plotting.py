@@ -662,12 +662,6 @@ class TestClipData:
 ZERO_FIRST = pd.Series([0.0, 1.0, 10.0, 100.0])
 Y4 = pd.Series([1.0, 2.0, 3.0, 4.0])
 
-DEFECT_3 = (
-    "defect #3, fixed in Phase D group D3: a row whose log10 is +/-inf "
-    "(log10(0)) survives the NaN drop (binned.py _PlotSource rows); expected "
-    "label 0 absent from data; remove this marker when D3 lands"
-)
-
 
 class TestZeroOnALogAxis:
     """log10(0) = -inf on a log axis: it moves no edge and falls in no bin."""
@@ -695,7 +689,6 @@ class TestZeroOnALogAxis:
         assert counts.tolist() == [1, 2]  # hand: [0, 1) and [1, 2]
         assert 0 not in h.cut.dropna().index  # hand: -inf is in no bin
 
-    @pytest.mark.xfail(strict=True, raises=AssertionError, reason=DEFECT_3)
     @pytest.mark.parametrize(
         "build",
         [
@@ -707,7 +700,7 @@ class TestZeroOnALogAxis:
     def test_a_row_whose_log_is_infinite_is_not_a_plot_row(self, build):
         """A zero on a log axis is dropped like NaN (author ruling #3): rows 1, 2, 3.
 
-        ON FAILURE: (unexpected pass) the defect #3 fix has landed; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         assert build().data.index.tolist() == [1, 2, 3]  # hand: label 0 is log10(0)
 

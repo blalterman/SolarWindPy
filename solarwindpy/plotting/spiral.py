@@ -24,11 +24,46 @@ from . import base
 from . import labels
 from .binned import BinnedData
 
+_FLOAT64 = np.finfo(np.float64)
+#: Most times refinement splits a cell before it raises ``ValueError``.
+#:
+#: Each split halves a cell's width in x and in y. A finite cell is narrower
+#: than 2**1025 (edges at -/+ the largest float, just under 2**1024), and two
+#: distinct float64 values differ by at least 2**-1074, the smallest
+#: subnormal. So about 1025 + 1074 = 2099 splits leave a cell too narrow to
+#: hold two points that differ in x or in y; the factor 2 covers the rounding
+#: of each midpoint. Only points identical in both x and y stay together that
+#: long, and no number of splits separates them.
+_MAX_SPLIT_DEPTH = 2 * ((_FLOAT64.maxexp + 1) - (_FLOAT64.minexp - _FLOAT64.nmant))
+
 _InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
 _SpiralMeshBinID = namedtuple("_SpiralMeshBinID", "id,fill,visited")
 _SpiralFilterThresholds = namedtuple(
     "_SpiralFilterThresholds", "density,size", defaults=(False,)
 )
+
+
+def _unsplittable(x, y, min_per_bin):
+    r"""The ``ValueError`` for a cell left overfull by ``_MAX_SPLIT_DEPTH`` splits.
+
+    Parameters
+    ----------
+    x, y : np.ndarray
+        The points in that cell.
+    min_per_bin : int
+        The split threshold.
+    """
+    same = bool((x == x[0]).all() and (y == y[0]).all())
+    return ValueError(
+        f"SpiralMesh split a cell {_MAX_SPLIT_DEPTH} times and it still holds "
+        f"more than min_per_bin={min_per_bin} points: {x.size} points "
+        f"{'at' if same else 'near'} ({float(x[0])!r}, {float(y[0])!r}). Points "
+        "identical in both x and y can never be split apart. They come from "
+        "duplicated rows, fill values, quantized measurements, or clipping "
+        "both axes, which moves every point beyond the clip to one corner. "
+        "Drop or deduplicate those points, do not clip both axes, or set "
+        f"min_per_bin to at least {x.size}."
+    )
 
 
 @njit(parallel=True)
@@ -105,6 +140,8 @@ class SpiralMesh(object):
 
     Starting from the grid of initial edges, every cell holding more than
     ``min_per_bin`` points is split into four equal cells until none does.
+    More than ``min_per_bin`` points identical in both x and y can never be
+    split apart; ``generate_mesh`` then raises ``ValueError``.
     """
 
     def __init__(self, x, y, initial_xedges, initial_yedges, min_per_bin=250):
@@ -337,6 +374,15 @@ class SpiralMesh(object):
             built: a header, one line per step as it finishes (step number,
             number of cells split, elapsed time), then a summary. If False,
             write nothing.
+
+        Raises
+        ------
+        ValueError
+            If a cell split 4198 times (``_MAX_SPLIT_DEPTH``) still holds more
+            than ``min_per_bin`` points. Distinct float64 points are apart
+            long before that depth, so the points left are identical in x and
+            y (duplicated rows, fill values, or clipping on both axes). The
+            message gives their number and coordinates.
         """
 
         def report(message):
@@ -445,6 +491,13 @@ class SpiralMesh(object):
         step_start = datetime.now()
         step = 0
         while nbins_to_replace > 0:
+            if step >= _MAX_SPLIT_DEPTH:
+                # `active_bins` were split `step` times; one may be overfull.
+                over = _get_counts_per_bin(active_bins, x, y) > min_per_bin
+                if over.any():
+                    x0, x1, y0, y1 = active_bins[np.flatnonzero(over)[0]]
+                    inside = (x >= x0) & (x < x1) & (y >= y0) & (y < y1)
+                    raise _unsplittable(x[inside], y[inside], min_per_bin)
             active_bins, nbins_to_replace = cls.process_one_spiral_step(
                 active_bins, x, y, min_per_bin
             )
@@ -526,6 +579,9 @@ class SpiralMesh(object):
             n_leaves += bins.shape[0] - n_split
             if not n_split:
                 break
+            if step >= _MAX_SPLIT_DEPTH:
+                inside = cell == np.flatnonzero(overfull)[0]
+                raise _unsplittable(px[inside], py[inside], min_per_bin)
 
             parents = bins[overfull]
             x0, x1, y0, y1 = parents.T

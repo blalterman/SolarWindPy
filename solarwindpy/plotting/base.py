@@ -76,9 +76,10 @@ class Base(ABC):
     def data(self):
         r"""The plot's data: a new DataFrame built from its source on each access.
 
-        It holds the rows the plot keeps (no NaN in any column, within the
-        caller's ``mask`` and a shared ``BinnedData``'s mask), with each
-        logarithmic axis as ``log10(abs())``. Nothing is stored between
+        It holds the rows the plot keeps (no NaN or +/-inf in any column,
+        a logarithmic axis taken after ``log10(abs())``, so no 0 there;
+        within the caller's ``mask`` and a shared ``BinnedData``'s mask),
+        with each logarithmic axis as ``log10(abs())``. Nothing is stored between
         accesses, so edits to the returned frame do not persist, and the
         arrays of its columns (``to_numpy()``) are read-only. The plot's data
         is set once, by its constructor; to plot other data, build a new
@@ -151,10 +152,24 @@ class Base(ABC):
     def set_log(self, x=None, y=None):
         r"""Set which axes use a logarithmic scale.
 
+        A plot's constructor sets the log of the axes its data is built on:
+        which rows it keeps, the values it holds (``log10(abs())``) and its
+        bins depend on it. Once the plot is built, ``set_log`` cannot change
+        those axes; build a new plot (or a new ``BinnedData``) instead. Axes
+        only drawn on a log scale, such as the y of a ``Hist1D`` or both axes
+        of a ``Scatter``, can still be changed.
+
         Parameters
         ----------
         x, y : bool, optional
             If True, the axis is logarithmic. None keeps the current value.
+
+        Raises
+        ------
+        ValueError
+            If the plot is built and the call would change the log of an axis
+            its data and bins were built on. Passing the value it already has
+            is allowed.
         """
         if x is None:
             x = self.log.x
@@ -162,6 +177,20 @@ class Base(ABC):
             y = self.log.y
 
         log = LogAxes(bool(x), bool(y))
+        source = self.__dict__.get("_source")
+        if source is not None:
+            changed = [
+                k
+                for k in source.log_columns
+                if k in log._fields and getattr(log, k) != getattr(self.log, k)
+            ]
+            if changed:
+                raise ValueError(
+                    f"Can't change the log of {changed!r} on a built "
+                    f"{self.__class__.__name__}: its data and bins depend on "
+                    "log. To use another scale, build a new plot or "
+                    "BinnedData."
+                )
         self._log = log
 
     @staticmethod
@@ -169,7 +198,11 @@ class Base(ABC):
         r"""Clip data to its 0.01st and 99.99th percentiles.
 
         The one clipping rule every plot shares: each axis's setting in a
-        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``.
+        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``. The
+        percentiles are computed over the finite values only; +/-inf is
+        clipped to them like any other value beyond a percentile, when that
+        tail is clipped, and NaN stays NaN. A column with no finite value is
+        unchanged.
 
         Parameters
         ----------
@@ -533,7 +566,7 @@ class PlotWithZdata(Base):
         return agg.where(keep)
 
     def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
-        r"""Store x, y and z as the plot's source, keeping rows without NaN.
+        r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
 
         Called only by the constructor.
 
@@ -551,7 +584,8 @@ class PlotWithZdata(Base):
             ``Base.clip_data``).
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y; a row is
-            kept where it is True and x, y and z are not NaN.
+            kept where it is True and x, y and z are neither NaN nor +/-inf,
+            a logarithmic axis taken after ``log10(abs())``.
         within : BinnedData, optional
             The shared ``BinnedData`` passed as ``nbins``: rows its own mask
             excludes are not kept either.

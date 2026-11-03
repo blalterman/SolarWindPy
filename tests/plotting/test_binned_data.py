@@ -1160,11 +1160,14 @@ class TestCodesEqualPandasCut:
             expected = np.bincount(found[~np.isnan(found)].astype(int), minlength=5)
         np.testing.assert_array_equal(counts, expected)
 
-    def test_non_finite_edges_get_pandas_cut_codes(self, closed):
-        """Edges -inf, 0, 1, 2, inf: +/-inf values land as ``pd.cut`` puts them.
+    def test_non_finite_edges_bin_finite_values_as_pandas_cut_and_no_infinity(
+        self, closed
+    ):
+        """Edges -inf, 0, 1, 2, inf: finite values get ``pd.cut``'s codes, +/-inf -1.
 
-        Expected: ``pd.cut`` (plus the histogram rule placing +inf, the last
-        edge, in the last left-closed bin).
+        Expected: ``pd.cut`` (plus the histogram rule) for finite values;
+        +/-inf is in no bin even where an edge is infinite, as the
+        ``BinnedData`` Notes state (author ruling #3).
 
         ON FAILURE: the code is wrong.
         """
@@ -1173,6 +1176,7 @@ class TestCodesEqualPandasCut:
         )
         b = BinnedData(_frame(values), {"x": _intervals(OPEN_ENDED, closed)})
         expected = _pandas_codes(values, OPEN_ENDED, closed)  # pandas.cut + rule
+        expected[np.isinf(values)] = -1  # Notes: +/-inf is in no bin
         np.testing.assert_array_equal(b.codes("x"), expected)
 
     def test_integer_edges_bin_float_values_as_pandas_cut(self, closed):
@@ -1263,8 +1267,8 @@ class TestPlotConstructionCodesEqualPandasCut:
     def test_hist1d_cut_codes_equal_pandas_cut(self, dtype, closed):
         """Hist1D(x, nbins=intervals).cut holds ``pd.cut``'s codes on its rows.
 
-        Hist1D drops NaN rows; its kept rows' codes equal ``pd.cut`` of those
-        rows.
+        Hist1D drops NaN and +/-inf rows; its kept rows' codes equal
+        ``pd.cut`` of those rows.
 
         ON FAILURE: the code is wrong.
         """
@@ -1275,8 +1279,8 @@ class TestPlotConstructionCodesEqualPandasCut:
             values = _with_edges_and_specials(UNEVEN, rng, dtype=dtype)
         x = pd.Series(values, index=pd.RangeIndex(100, 100 + values.size))
         h = Hist1D(x, nbins=_intervals(UNEVEN, closed))
-        kept = x.dropna()
-        assert h.cut.index.equals(kept.index)  # the plot keeps the non-NaN rows
+        kept = x[np.isfinite(x)]
+        assert h.cut.index.equals(kept.index)  # the plot keeps the finite rows
         expected = _pandas_codes(kept, UNEVEN, closed)  # pandas.cut + rule
         np.testing.assert_array_equal(h.cut["x"].cat.codes, expected)
 
@@ -1290,7 +1294,7 @@ class TestPlotConstructionCodesEqualPandasCut:
         values = _with_edges_and_specials(UNEVEN, np.random.default_rng(99))
         x = pd.Series(values)
         h = Hist1D(x, nbins=UNEVEN)
-        expected = _pandas_codes(x.dropna(), UNEVEN, "right")  # pandas.cut
+        expected = _pandas_codes(x[np.isfinite(x)], UNEVEN, "right")  # pandas.cut
         np.testing.assert_array_equal(h.cut["x"].cat.codes, expected)
 
     @pytest.mark.parametrize("closed", ["right", "left"])
@@ -1298,7 +1302,7 @@ class TestPlotConstructionCodesEqualPandasCut:
         """Hist2D(float32 x, int64 y) codes equal ``pd.cut`` on each axis.
 
         x bins by UNEVEN (guess-and-check), y by integer-valued 0..3
-        (searched directly); rows with NaN x are dropped.
+        (searched directly); rows with NaN or +/-inf x are dropped.
 
         ON FAILURE: the code is wrong.
         """
@@ -1307,8 +1311,8 @@ class TestPlotConstructionCodesEqualPandasCut:
         x = pd.Series(xv)
         y = pd.Series(rng.integers(-1, 5, xv.size))
         h = Hist2D(x, y, nbins=(_intervals(UNEVEN, closed), _intervals(EDGES, closed)))
-        kept = x.notna()
-        assert h.cut.index.equals(x.index[kept])  # the plot keeps non-NaN rows
+        kept = np.isfinite(x)
+        assert h.cut.index.equals(x.index[kept])  # the plot keeps finite rows
         np.testing.assert_array_equal(
             h.cut["x"].cat.codes, _pandas_codes(x[kept], UNEVEN, closed)  # pandas.cut
         )

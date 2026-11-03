@@ -1061,13 +1061,14 @@ def test_samples_outside_the_mesh_are_excluded_from_the_aggregation(outside, log
 
     Source of the contract: ``calculate_bin_number`` logs that out-of-mesh
     samples "will be replaced by NaNs and excluded from the aggregation." In
-    the log case the sample's x is 0, whose log10 is -inf.
+    the log case the sample's x is 0, whose log10 is -inf: like NaN, it is
+    not kept as a row (author ruling #3), so it never reaches the mesh.
 
     ON FAILURE: the code is wrong.
     """
     splot = _plot(1, z=None, log=log, rows=ROWS + [outside])
     if log:
-        assert splot.data["x"].min() == -np.inf  # the zero reached the mesh
+        assert len(splot.data) == len(ROWS)  # the zero is not a row
     np.testing.assert_array_equal(splot.agg().values, _expected_agg(splot, len))
     assert np.nansum(splot.agg().values) == len(ROWS)
 

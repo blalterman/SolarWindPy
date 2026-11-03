@@ -10,8 +10,9 @@ returns, these hold, for every ``solarwindpy`` plot class (found by walking
 rule on the private path, explicit bins in a shared ``BinnedData``):
 
 - I1: every selected label is a label of ``h.data``.
-- I2: no selected label has NaN in the caller's x, y or z, and the caller's
-  mask keeps it.
+- I2: no selected label has NaN or +/-inf in the caller's x, y or z, nor 0
+  on an axis the caller asked to be logged (``log10(0)`` is -inf), and the
+  caller's mask keeps it.
 - I3: the caller's values at those labels, as ``log10(abs())`` on the axes
   the caller asked to be logged, equal ``h.data`` there. Values a selection
   returns equal the caller's, in absolute value on a logged axis: a logged
@@ -438,11 +439,15 @@ def _assert_i2(b, sel, where):
     for col in b.h.data.columns:
         if b.inputs.get(col) is None:
             continue
-        nan = np.isnan(_caller(b, col, sel.labels))
-        if nan.any():
+        values = _caller(b, col, sel.labels)
+        bad = ~np.isfinite(values)
+        if b.log[col]:
+            bad |= values == 0
+        if bad.any():
             raise InvariantViolation(
-                f"I2 {where}: {nan.sum()} selected labels have NaN in the "
-                f"caller's {col}, e.g. {list(sel.labels[nan][:3])}"
+                f"I2 {where}: {bad.sum()} selected labels have NaN or inf in "
+                f"the caller's {col}, after log10 where logged, e.g. "
+                f"{list(sel.labels[bad][:3])}"
             )
     if b.mask is not None:
         kept = b.mask.reindex(sel.labels).eq(True).to_numpy()
