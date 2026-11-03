@@ -22,7 +22,6 @@ from matplotlib import pyplot as plt
 
 from . import base
 from . import labels
-from .agg_plot import AggPlot
 from .binned import BinnedData
 
 _InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
@@ -487,10 +486,10 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
         x,
         y,
         z=None,
-        logx=False,
-        logy=False,
+        logx=None,
+        logy=None,
         initial_bins=5,
-        clip_data=False,
+        clip=None,
         mask=None,
     ):
         r"""Store the data and labels, then compute the initial bin edges.
@@ -501,16 +500,19 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
             Point coordinates.
         z : pd.Series, optional
             Value to aggregate in each cell. If None, cells count points.
-        logx, logy : bool
-            If True, use ``log10(abs())`` of that coordinate.
+        logx, logy : bool or None
+            If True, use ``log10(abs())`` of that coordinate. None means
+            False.
         initial_bins : int or tuple
             Initial bins per axis; see ``calc_initial_bins``.
-        clip_data : bool or str
+        clip : bool, str, Mapping or None
             If True, clip x and y to their 0.01st and 99.99th percentiles
-            (``AggPlot.clip_data``) when placing points in the mesh; the
+            (``Base.clip_data``) when placing points in the mesh; the
             initial bin edges are computed from the unclipped data. ``"l"`` or
-            ``"u"`` clips only the lower or upper tail. Clipping limits x and
-            y only; z is aggregated unclipped. Stored as ``clip``.
+            ``"u"`` clips only the lower or upper tail; a mapping such as
+            ``{"y": "u"}`` sets each axis on its own. Clipping limits x and
+            y only; z is aggregated unclipped. None means False. Stored as
+            ``clip``, a ``ClipAxes``.
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y. A point
             is placed in the mesh where it is True and x, y and z are not NaN.
@@ -530,8 +532,8 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
                 "cannot use a shared BinnedData; pass x and y instead."
             )
         super().__init__()
-        self.set_log(x=logx, y=logy)
-        self._set_data(x, y, z, clip_data, mask=mask)
+        self.set_log(x=bool(logx), y=bool(logy))
+        self._set_data(x, y, z, clip, mask=mask)
         self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
         self.calc_initial_bins(initial_bins)
         self.set_clim(None, None)
@@ -683,16 +685,17 @@ data : {z.size}
         r"""Build the ``SpiralMesh`` and assign every point to a cell.
 
         ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
-        passed to ``SpiralMesh``, e.g. ``min_per_bin``. If ``clip`` is set, x
-        and y are clipped with ``AggPlot.clip_data`` before they are placed
-        in the mesh.
+        passed to ``SpiralMesh``, e.g. ``min_per_bin``. Each of x and y whose
+        field of ``clip`` is set is clipped with ``Base.clip_data`` before
+        the points are placed in the mesh.
         """
         data = self.data
         x = data.loc[:, "x"]
         y = data.loc[:, "y"]
-        if self.clip:
-            x = AggPlot.clip_data(x, self.clip)
-            y = AggPlot.clip_data(y, self.clip)
+        if self.clip.x:
+            x = self.clip_data(x, self.clip.x)
+        if self.clip.y:
+            y = self.clip_data(y, self.clip.y)
 
         xbins = self.initial_bins["x"]
         ybins = self.initial_bins["y"]

@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from . import base
 from . import labels
 from .agg_plot import AggPlot
-from .binned import _PlotSource
+from .binned import BinnedData, _PlotSource
 
 
 class Hist1D(AggPlot):
@@ -34,9 +34,9 @@ class Hist1D(AggPlot):
         self,
         x,
         y=None,
-        logx=False,
+        logx=None,
         axnorm=None,
-        clip_data=False,
+        clip=None,
         nbins=101,
         bin_precision=None,
         mask=None,
@@ -50,37 +50,58 @@ class Hist1D(AggPlot):
         y : pandas.Series or None, optional
             Values to aggregate in bins of ``x``. If ``None``, counts of
             ``x`` are used.
-        logx : bool, optional
-            If ``True``, compute bins in logarithmic space.
+        logx : bool or None, optional
+            If ``True``, compute bins in logarithmic space. None means False,
+            or, with a ``BinnedData`` as ``nbins``, its setting for ``x``'s
+            column.
         axnorm : {"t", "d", None}, optional
             Normalisation applied to the histogram. ``"t"`` divides by the
             maximum (peak equals 1) and ``"d"`` yields a density.
-        clip_data : bool or str, optional
+        clip : bool, str, Mapping or None, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
-            (see ``Base.clip_data``). None is stored as False.
+            (see ``Base.clip_data``). A mapping may name ``"x"`` only. None
+            means False, or, with a ``BinnedData`` as ``nbins``, its setting
+            for ``x``'s column. Stored as ``clip``, a ``ClipAxes``.
         nbins : int or array-like or BinnedData, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
             :func:`pandas.cut` depending on the input type. A ``BinnedData``
             is shared: its bins and bin codes for the column named ``x.name``
-            are used, and ``logx`` and ``clip_data`` must equal its settings
-            for that column.
+            are used, ``logx`` and ``clip`` default to its settings for that
+            column, and rows its own mask excludes are not kept.
         bin_precision : int, optional
-            Precision for decimal bin edges.
+            Precision for decimal bin edges. Must be None with a
+            ``BinnedData``.
         mask : pandas.Series of bool, optional
             Rows to keep, aligned by label to the index of ``x``. Selections
             are returned on the original labels.
+
+        Raises
+        ------
+        ValueError
+            If ``nbins`` is a ``BinnedData`` and ``logx`` or ``clip`` is given
+            and differs from its setting, or ``bin_precision`` is given.
         """
         super(Hist1D, self).__init__()
-        self.set_log(x=logx)
+        log, clip = self._inherit(
+            nbins,
+            {"x": getattr(x, "name", None)},
+            {"x": logx},
+            self._clip_by_axis(clip),
+            bin_precision,
+        )
+        self.set_log(**log)
         self.set_axnorm(axnorm)
-        self._set_data(x, y, clip_data, mask=mask)
+        within = nbins if isinstance(nbins, BinnedData) else None
+        self._set_data(x, y, clip, mask=mask, within=within)
         self.set_labels(
             x="x", y=labels.special.Count(norm=axnorm) if y is None else "y"
         )
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
+
+    _clipped_axes = ("x",)
 
     @property
     def _gb_axes(self):
@@ -105,13 +126,15 @@ class Hist1D(AggPlot):
 
     set_path.__doc__ = base.Base.set_path.__doc__
 
-    def _set_data(self, x, y, clip, mask=None):
+    def _set_data(self, x, y, clip=None, mask=None, within=None):
         r"""Store x, and y aligned to it, keeping every row ``mask`` keeps.
 
         Called only by the constructor. ``x`` is stored as ``log10(abs(x))``
         when ``self.log.x`` is set. If ``y`` is None, every point gets
-        ``y = 1``. ``clip`` is stored as ``self.clip``, None as False.
-        ``mask`` is a boolean Series aligned by label to the index of ``x``.
+        ``y = 1``. ``clip`` is stored as ``self.clip``, a ``ClipAxes``, None
+        as False. ``mask`` is a boolean Series aligned by label to the index
+        of ``x``. Rows the mask of ``within``, a shared ``BinnedData``,
+        excludes are not kept either.
         """
         self._source = _PlotSource(
             {"x": x},
@@ -121,8 +144,9 @@ class Hist1D(AggPlot):
             dropna=False,
             owner=self.__class__.__name__,
             mask=mask,
+            within=within,
         )
-        self._clip = False if clip is None else clip
+        self._store_clip(clip)
         self._bin_names = {"x": getattr(x, "name", None)}
         self._bin_index = getattr(x, "index", None)
 

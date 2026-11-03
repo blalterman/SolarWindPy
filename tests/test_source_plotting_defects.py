@@ -21,8 +21,8 @@ from solarwindpy.plotting.labels.composition import ChargeStateRatio, Ion  # noq
 from solarwindpy.plotting.labels.special import CountOther, Probability  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
-# ``clip_data`` clips each column to its 0.01st and 99.99th percentiles
-# (``AggPlot.clip_data`` docstring); both quantiles are recomputed here with numpy.
+# ``clip=True`` clips each column to its 0.01st and 99.99th percentiles
+# (``Base.clip_data`` docstring); both quantiles are recomputed here with numpy.
 Q_LOWER, Q_UPPER = 1e-4, 1 - 1e-4
 
 
@@ -33,7 +33,7 @@ def _close_figures():
 
 
 def test_scatter_with_clip_data_plots_points_clipped_to_percentiles():
-    """``Scatter(..., clip_data=True).make_plot`` draws the clipped points.
+    """``Scatter(..., clip=True).make_plot`` draws the clipped points.
 
     Before the fix, ``make_plot`` raised ``AttributeError: 'Scatter' object has
     no attribute 'clip_data'`` because only ``AggPlot`` defined ``clip_data``.
@@ -47,7 +47,7 @@ def test_scatter_with_clip_data_plots_points_clipped_to_percentiles():
     y = pd.Series(2.0 * raw)
 
     fig, ax = plt.subplots()
-    ax, cbar = Scatter(x, y, clip_data=True).make_plot(ax=ax)
+    ax, cbar = Scatter(x, y, clip=True).make_plot(ax=ax)
 
     offsets = ax.collections[0].get_offsets()
     expected_x = np.clip(raw, np.quantile(raw, Q_LOWER), np.quantile(raw, Q_UPPER))
@@ -62,7 +62,7 @@ def test_scatter_with_clip_data_plots_points_clipped_to_percentiles():
 
 
 def test_scatter_without_clip_data_plots_raw_points():
-    """With ``clip_data=False`` the outliers are drawn unchanged.
+    """With ``clip=False`` the outliers are drawn unchanged.
 
     This separates the clipped test above from a scatter that never clips.
 
@@ -70,7 +70,7 @@ def test_scatter_without_clip_data_plots_raw_points():
     """
     raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
     fig, ax = plt.subplots()
-    ax, cbar = Scatter(pd.Series(raw), pd.Series(raw), clip_data=False).make_plot(ax=ax)
+    ax, cbar = Scatter(pd.Series(raw), pd.Series(raw), clip=False).make_plot(ax=ax)
     np.testing.assert_array_equal(
         np.asarray(ax.collections[0].get_offsets()[:, 0]), raw
     )

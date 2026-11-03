@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -584,7 +585,7 @@ class TestBinContract:
 
 
 class TestClipData:
-    """``clip_data`` clips the tails it names when points are binned."""
+    """``clip`` clips the tails it names when points are binned."""
 
     # One low and one high x outlier. Clipping to the 0.01st percentile moves
     # -1000 to about -999.1 and clipping to the 99.99th moves 1000 to about
@@ -594,7 +595,7 @@ class TestClipData:
     XEDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
 
     @pytest.mark.parametrize(
-        "clip_data, expected",
+        "clip, expected",
         [
             (None, [1, 8, 1]),  # nothing moves
             (False, [1, 8, 1]),
@@ -603,7 +604,7 @@ class TestClipData:
             ("u", [1, 9, 0]),  # only the high outlier moves
         ],
     )
-    def test_clip_data_clips_the_tails_it_names(self, clip_data, expected):
+    def test_clip_clips_the_tails_it_names(self, clip, expected):
         """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
 
         ON FAILURE: the code is wrong.
@@ -612,7 +613,7 @@ class TestClipData:
         h = Hist2D(
             self.X,
             y,
-            clip_data=clip_data,
+            clip=clip,
             nbins=[self.XEDGES, np.array([0.0, 1.0])],
         )
         grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
@@ -623,14 +624,37 @@ class TestClipData:
         "given, expected",
         [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
     )
-    def test_clip_stores_clip_data_with_none_as_false(self, given, expected):
-        """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+    def test_a_scalar_clip_is_stored_for_x_and_y_with_none_as_false(
+        self, given, expected
+    ):
+        """A scalar ``clip`` applies to both binned axes; z is never clipped.
 
         ON FAILURE: the code is wrong.
         """
-        clip = Hist2D(self.X, self.X, clip_data=given).clip
-        assert clip == expected
-        assert type(clip) is type(expected)
+        clip = Hist2D(self.X, self.X, clip=given).clip
+        assert clip == ClipAxes(x=expected, y=expected, z=False)
+        assert type(clip.x) is type(expected)
+
+    @pytest.mark.parametrize(
+        "clip, expected",
+        [
+            ({"x": True}, [0, 10, 0]),  # both x outliers move to the middle bin
+            ({"y": True}, [1, 8, 1]),  # x is not clipped: nothing moves
+        ],
+        ids=["x named", "only y named"],
+    )
+    def test_a_clip_mapping_clips_only_the_axes_it_names(self, clip, expected):
+        """``{"x": True}`` moves the x outliers; ``{"y": True}`` leaves x alone.
+
+        The x counts are those of ``test_clip_clips_the_tails_it_names``; y
+        is constant, so clipping it moves nothing.
+        ON FAILURE: the code is wrong.
+        """
+        y = pd.Series(0.5, index=self.X.index)
+        h = Hist2D(self.X, y, clip=clip, nbins=[self.XEDGES, np.array([0.0, 1.0])])
+        grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
+        counts = grid.fillna(0).sum(axis=0)  # empty x-bins count 0
+        assert counts.to_numpy() == exact(expected)
 
 
 class TestAggregatedValues:

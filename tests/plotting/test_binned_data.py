@@ -8,21 +8,28 @@ themselves, not by numeric edges), and from ``numpy.histogram``, whose last
 bin also holds its right edge. Edges ``0, 1, 2, 3`` give three bins.
 
 The plot classes' side of the contract is tested here too: a plot given a
-``BinnedData`` as ``nbins`` takes its bins and codes by column name, and every
-plot constructor checks its caller ``mask`` the way ``BinnedData`` does.
+``BinnedData`` as ``nbins`` takes its bins, codes, log and clip settings by
+column name, and keeps only the rows its mask keeps; every plot constructor
+checks its caller ``mask`` the way ``BinnedData`` does; and ``clip`` is set per
+axis, read back as a ``ClipAxes``.
 """
 
 import numpy as np
 import pandas as pd
 import pytest
+import matplotlib
 
-from solarwindpy.instabilities.beta_ani import BetaRPlot
-from solarwindpy.plotting.binned import BinnedData
-from solarwindpy.plotting.hist1d import Hist1D
-from solarwindpy.plotting.hist2d import Hist2D
-from solarwindpy.plotting.scatter import Scatter
-from solarwindpy.plotting.spiral import SpiralPlot2D
-from tests.tolerances import exact
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.plotting.base import ClipAxes, LogAxes  # noqa: E402
+from solarwindpy.plotting.binned import BinnedData  # noqa: E402
+from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
+from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+from solarwindpy.plotting.scatter import Scatter  # noqa: E402
+from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 EDGES = np.array([0.0, 1.0, 2.0, 3.0])
 
@@ -311,20 +318,19 @@ class TestSharedBinnedData:
         assert got.index.tolist() == expected.index.tolist()
         assert got.to_numpy() == exact(expected.to_numpy(dtype=float))
 
-    def test_rows_the_binned_data_excludes_are_in_no_bin_of_the_plot(self):
-        """A row b's own mask drops is kept in data, but in no bin.
+    def test_rows_the_binned_data_excludes_are_not_the_plots_rows(self):
+        """A row b's own mask drops is not kept: rows = notna & mask & b's mask.
 
-        b drops "c"; the plot keeps c (its x, y are finite) with NaN bins,
-        exactly as a value outside the edges. That shows the plot uses b's
-        codes, not bins of its own.
+        b drops "c" and the plot's mask drops "b", so the plot keeps a, d and
+        e, the rows that can contribute to a bin (author's ruling).
         ON FAILURE: the code is wrong.
         """
         b_mask = pd.Series([label != "c" for label in LABELS], index=LABELS)
         b = BinnedData(POINTS, GRID, mask=b_mask)
         h = Hist2D(POINTS.vx, POINTS.vy, nbins=b, mask=MASK)
-        assert h.data.index.tolist() == KEPT
-        assert h.cut.loc["c"].isna().all()
-        assert h.cut.drop("c").notna().all().all()
+        assert h.data.index.tolist() == ["a", "d", "e"]
+        assert h.cut.index.tolist() == ["a", "d", "e"]
+        assert h.cut.notna().all().all()
 
     def test_a_subset_of_the_rows_is_taken_by_label(self):
         """x on labels e, a (a subset, reordered) gets the bins of e and a.
@@ -380,17 +386,18 @@ class TestSharedBinnedData:
     @pytest.mark.parametrize(
         "binned_with, plot_with, match",
         [
-            ({"log": {"vx": True}}, {}, "logx=False conflicts"),
+            ({"log": {"vx": True}}, {"logx": False}, "logx=False conflicts"),
             ({}, {"logy": True}, "logy=True conflicts"),
-            ({"clip": {"vy": True}}, {}, "clip_data=False conflicts"),
-            ({"clip": {"vx": "u", "vy": "u"}}, {"clip_data": "l"}, "clip_data='l'"),
+            ({"clip": {"vy": True}}, {"clip": False}, "clip=False for y conflicts"),
+            ({"clip": {"vx": "u", "vy": "u"}}, {"clip": "l"}, "clip='l' for x"),
+            ({"clip": {"vy": "u"}}, {"clip": {"y": "l"}}, "clip='l' for y"),
         ],
-        ids=["log in b", "log in plot", "clip in b", "other tail"],
+        ids=["log in b", "log in plot", "clip in b", "other tail", "mapping"],
     )
-    def test_log_or_clip_differing_from_the_binned_data_raises(
+    def test_an_explicit_log_or_clip_differing_from_the_binned_data_raises(
         self, binned_with, plot_with, match
     ):
-        """The plot's logx, logy and clip_data must equal b's for its columns.
+        """An explicit logx, logy or clip must equal b's setting for its column.
 
         ON FAILURE: the code is wrong.
         """
@@ -486,3 +493,321 @@ def test_no_plot_class_offers_set_data(cls):
     ON FAILURE: the code is wrong.
     """
     assert not hasattr(cls, "set_data")
+
+
+# ---------------------------------------------------------------------------
+# Passthrough: log and clip inherited from a shared BinnedData by column name
+# ---------------------------------------------------------------------------
+
+# The kept points, all positive, so every column can be logged. Their hand
+# log10 values, on labels a, c, d, e.
+POSITIVE = POINTS.loc[KEPT]
+LOG10_VX = [np.log10(0.5), np.log10(2.5), np.log10(0.5), np.log10(0.5)]
+LOG10_VY = [np.log10(0.5), np.log10(1.5), np.log10(2.5), np.log10(0.5)]
+# Edges on log10 of the kept values, which lie in (-1, 1].
+LOG_EDGES = [-1.0, 0.0, 1.0]
+
+
+@pytest.fixture
+def ax():
+    _, axis = plt.subplots()
+    yield axis
+    plt.close("all")
+
+
+class TestPassthrough:
+    """None means inherit from a shared BinnedData; an explicit value must agree."""
+
+    def test_log_is_inherited_per_column_by_name(self, ax):
+        """b logs vy only: Hist2D(vx, vy, nbins=b) logs y, not x.
+
+        The stored y is log10 of the hand values, x is unchanged, and
+        ``make_plot`` sets a log y-axis and a linear x-axis.
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(POSITIVE, {"vx": EDGES, "vy": LOG_EDGES}, log={"vy": True})
+        h = Hist2D(POSITIVE.vx, POSITIVE.vy, nbins=b)
+        assert h.log == LogAxes(x=False, y=True)
+        assert h.data.loc[:, "y"].tolist() == exact(LOG10_VY)
+        assert h.data.loc[:, "x"].tolist() == exact([0.5, 2.5, 0.5, 0.5])
+        h.make_plot(ax=ax, cbar=False)
+        assert (ax.get_xscale(), ax.get_yscale()) == ("linear", "log")
+
+    def test_hist1d_inherits_the_log_of_its_column(self):
+        """Hist1D(vx, nbins=b) with b logging vx stores log10 of x.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(POSITIVE, {"vx": LOG_EDGES}, log={"vx": True})
+        h = Hist1D(POSITIVE.vx, nbins=b)
+        assert h.log.x is True
+        assert h.data.loc[:, "x"].tolist() == exact(LOG10_VX)
+
+    def test_clip_is_inherited_per_column_by_name(self):
+        """b clips vx's upper tail only: the plot's clip is ClipAxes("u", False).
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(POSITIVE, GRID, clip={"vx": "u"})
+        assert Hist2D(POSITIVE.vx, POSITIVE.vy, nbins=b).clip == ClipAxes(
+            x="u", y=False, z=False
+        )
+        assert Hist1D(POSITIVE.vx, nbins=b).clip == ClipAxes(x="u", y=False, z=False)
+
+    def test_an_explicit_value_equal_to_the_binned_datas_is_accepted(self):
+        """logy=True and clip={"x": "u"} agree with b, so the plot is built.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(
+            POSITIVE,
+            {"vx": EDGES, "vy": LOG_EDGES},
+            log={"vy": True},
+            clip={"vx": "u"},
+        )
+        h = Hist2D(
+            POSITIVE.vx, POSITIVE.vy, nbins=b, logx=False, logy=True, clip={"x": "u"}
+        )
+        assert h.log == LogAxes(x=False, y=True)
+        assert h.clip == ClipAxes(x="u", y=False, z=False)
+
+    @pytest.mark.parametrize("cls", [Hist1D, Hist2D], ids=lambda c: c.__name__)
+    def test_bin_precision_with_a_binned_data_raises(self, cls):
+        """b's edges are fixed when it is built, so bin_precision is refused.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(POSITIVE, GRID)
+        args = (POSITIVE.vx,) if cls is Hist1D else (POSITIVE.vx, POSITIVE.vy)
+        with pytest.raises(ValueError, match="bin_precision=2"):
+            cls(*args, nbins=b, bin_precision=2)
+
+    def test_without_a_binned_data_none_means_linear_and_unclipped(self):
+        """With integer nbins, every default is today's False.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = Hist2D(POSITIVE.vx, POSITIVE.vy, nbins=3)
+        assert h.log == LogAxes(x=False, y=False)
+        assert h.clip == ClipAxes(x=False, y=False, z=False)
+        assert Hist1D(POSITIVE.vx, nbins=3).log.x is False
+
+    @pytest.mark.parametrize(
+        "binned_log, expected",
+        [
+            (None, LogAxes(x=True, y=True)),
+            ({}, LogAxes(x=False, y=False)),
+            ({"vx": True}, LogAxes(x=True, y=False)),
+        ],
+        ids=["no BinnedData", "linear BinnedData", "vx logged"],
+    )
+    def test_betar_plot_logs_by_default_only_without_a_binned_data(
+        self, binned_log, expected
+    ):
+        """BetaRPlot logs both axes by default; a BinnedData's log wins instead.
+
+        ON FAILURE: the code is wrong.
+        """
+        if binned_log is None:
+            nbins = 3
+        else:
+            bins = {
+                "vx": LOG_EDGES if binned_log.get("vx") else EDGES,
+                "vy": EDGES,
+            }
+            nbins = BinnedData(POSITIVE, bins, log=binned_log)
+        h = BetaRPlot(POSITIVE.vx, POSITIVE.vy, "p", nbins=nbins)
+        assert h.log == expected
+
+
+class TestClipAxes:
+    """``clip`` is set per axis; a record of False fields clips nothing."""
+
+    # One low and one high outlier on each axis. Clipping to the 0.01st and
+    # 99.99th percentiles moves -1000 and 1000 to about -999.1 and 999.1, from
+    # an outer bin into the middle bin (-999.5, 999.5] (as in test_hist1d).
+    OUTLIERS = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
+    OUTLIER_EDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
+
+    def _counts(self, clip):
+        """Counts per x bin and per y bin of a Hist2D of OUTLIERS on both axes."""
+        h = Hist2D(
+            self.OUTLIERS,
+            self.OUTLIERS.copy(),
+            clip=clip,
+            nbins=self.OUTLIER_EDGES,
+        )
+        x = h.cut.loc[:, "x"].value_counts(sort=False)
+        y = h.cut.loc[:, "y"].value_counts(sort=False)
+        return x.tolist(), y.tolist()
+
+    @pytest.mark.parametrize(
+        "clip, expected",
+        [
+            (ClipAxes(False, False), ([1, 8, 1], [1, 8, 1])),
+            ({"x": True}, ([0, 10, 0], [1, 8, 1])),
+            ({"y": "u"}, ([1, 8, 1], [1, 9, 0])),
+            (True, ([0, 10, 0], [0, 10, 0])),
+        ],
+        ids=["ClipAxes(False, False)", "x only", "y upper only", "scalar"],
+    )
+    def test_only_the_named_axes_are_clipped(self, clip, expected):
+        """Each axis moves its outliers only when its own field clips.
+
+        ``ClipAxes(False, False)`` is a truthy tuple, yet clips nothing.
+        ON FAILURE: the code is wrong.
+        """
+        assert self._counts(clip) == expected
+
+    def test_a_scalar_equals_the_mapping_naming_every_axis(self):
+        """clip=True is clip={"x": True, "y": True}: same record, same bins.
+
+        ON FAILURE: the code is wrong.
+        """
+        scalar = Hist2D(self.OUTLIERS, self.OUTLIERS, clip=True, nbins=3)
+        mapping = Hist2D(
+            self.OUTLIERS, self.OUTLIERS, clip={"x": True, "y": True}, nbins=3
+        )
+        assert scalar.clip == mapping.clip == ClipAxes(True, True, False)
+        pd.testing.assert_frame_equal(scalar.cut, mapping.cut, check_exact=True)
+
+    def test_scatter_clips_only_the_columns_it_names(self, ax):
+        """Scatter(clip={"z": True}) clips the colours, not the positions.
+
+        0..10000 with one far outlier on each end: z is clipped to numpy's
+        0.01st and 99.99th percentiles; x and y are drawn as given.
+        ON FAILURE: the code is wrong.
+        """
+        raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
+        s = pd.Series(raw)
+        Scatter(s, s, z=s, clip={"z": True}).make_plot(ax=ax, cbar=False)
+        collection = ax.collections[0]
+        offsets = np.asarray(collection.get_offsets())
+        np.testing.assert_array_equal(offsets[:, 0], raw)
+        np.testing.assert_array_equal(offsets[:, 1], raw)
+        expected_z = np.clip(raw, np.quantile(raw, 1e-4), np.quantile(raw, 1 - 1e-4))
+        np.testing.assert_array_equal(np.asarray(collection.get_array()), expected_z)
+
+    @pytest.mark.parametrize(
+        "clip, counts",
+        [({"y": True}, [1, 99, 1]), ({"x": True}, [np.nan, 101, np.nan])],
+        ids=["y only", "x only"],
+    )
+    def test_spiral_clips_only_the_axes_it_names(self, clip, counts):
+        """Only clipping x moves the x tails into the middle cell.
+
+        x is 1.99, 99 times 3 and 4.01 on cells [0, 2), [2, 4), [4, 6); its
+        quantiles 2.0001 and 3.9999 lie in [2, 4) (worked in test_spiral). y
+        is constant, so clipping y moves nothing.
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([1.99] + [3.0] * 99 + [4.01])
+        y = pd.Series([0.5] * 101)
+        edges = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
+        splot = SpiralPlot2D(x, y, initial_bins=edges, clip=clip)
+        splot.initialize_mesh(min_per_bin=101, progress=False)
+        splot.build_grouped()
+        assert splot.agg().tolist() == exact(counts, nan_ok=True)
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(POSITIVE.vx, clip_data=True),
+            lambda: Hist2D(POSITIVE.vx, POSITIVE.vy, clip_data=True),
+            lambda: BetaRPlot(POSITIVE.vx, POSITIVE.vy, "p", clip_data=True),
+            lambda: Scatter(POSITIVE.vx, POSITIVE.vy, clip_data=True),
+            lambda: SpiralPlot2D(POSITIVE.vx, POSITIVE.vy, clip_data=True),
+        ],
+        ids=["Hist1D", "Hist2D", "BetaRPlot", "Scatter", "SpiralPlot2D"],
+    )
+    def test_the_old_clip_data_keyword_is_rejected(self, build):
+        """The keyword is ``clip``; ``clip_data`` has no alias.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(TypeError, match="clip_data"):
+            build()
+
+
+class TestRowsWithASharedBinnedData:
+    """Rows b's mask excludes are absent from data and every selection."""
+
+    B_MASK = pd.Series([label != "c" for label in LABELS], index=LABELS)
+    # notna drops f; b's mask drops c.
+    ROWS = ["a", "b", "d", "e"]
+
+    def _plot(self):
+        b = BinnedData(POINTS, GRID, mask=self.B_MASK)
+        return Hist2D(POINTS.vx, POINTS.vy, nbins=b)
+
+    def test_data_and_cut_hold_only_rows_the_binned_data_keeps(self):
+        """notna(x, y) & b's mask: a, b, d and e.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = self._plot()
+        assert h.data.index.tolist() == self.ROWS
+        assert h.cut.index.tolist() == self.ROWS
+
+    def test_no_selection_returns_a_row_the_binned_data_excludes(self):
+        """Every selection's labels are among a, b, d and e (no c).
+
+        ``id_data_above_contour`` is left out: it raises for explicit edges
+        (found defect #12, fixed in Phase D).
+        ON FAILURE: the code is wrong.
+        """
+        h = self._plot()
+        ranges = pd.DataFrame(
+            {"bottom": 0.0, "top": 3.0}, index=h.agg().unstack("x").columns
+        )
+        subset, kept = h.get_subset_above_threshold(1)
+        selected = {
+            "plotted": h.get_plotted_data_boolean_series().index,
+            "above": subset.index,
+            "above mask": kept.index,
+            "yrange": pd.Index(
+                h.take_data_in_yrange_across_x(
+                    ranges,
+                    lambda key, expected_logx=False: (key.left, key.right),
+                    lambda row, expected_logy=False: (row.bottom, row.top),
+                )
+            ),
+            "project x": h.project_1d("x").data.index,
+            "project y": h.project_1d("y").data.index,
+        }
+        for name, labels in selected.items():
+            assert labels.tolist() == self.ROWS, name
+
+    def test_hist1d_drops_the_rows_the_binned_data_excludes(self):
+        """Hist1D keeps NaN x until how="any" (step 6), but never c.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = BinnedData(POINTS, GRID, mask=self.B_MASK)
+        h = Hist1D(POINTS.vx, nbins=b)
+        assert h.data.index.tolist() == ["a", "b", "d", "e", "f"]
+
+
+class TestIntegerInputOnALogAxis:
+    """Change f: integer x or y with a log axis gives float log10 values."""
+
+    VALUES = [1, 10, 100, 1000]
+    LOG10 = [np.log10(1), np.log10(10), np.log10(100), np.log10(1000)]
+
+    def test_hist1d_logs_integer_x(self):
+        """Hist1D(int x, logx=True) stores log10 of the hand values.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = Hist1D(pd.Series(self.VALUES, dtype="int64"), logx=True, nbins=3)
+        assert h.data.loc[:, "x"].tolist() == exact(self.LOG10)
+
+    def test_hist2d_logs_integer_x_and_y(self):
+        """Hist2D(int x, int y, logx=True, logy=True) stores log10 of both.
+
+        ON FAILURE: the code is wrong.
+        """
+        v = pd.Series(self.VALUES, dtype="int64")
+        h = Hist2D(v, v[::-1].reset_index(drop=True), logx=True, logy=True, nbins=3)
+        assert h.data.loc[:, "x"].tolist() == exact(self.LOG10)
+        assert h.data.loc[:, "y"].tolist() == exact(self.LOG10[::-1])

@@ -19,6 +19,7 @@ from . import labels
 from .tools import nan_gaussian_filter
 
 from .agg_plot import AggPlot
+from .binned import BinnedData
 from .hist1d import Hist1D
 
 
@@ -34,20 +35,28 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         counts its points.
     axnorm : str, optional
         Normalization of the aggregated values; see ``set_axnorm`` for the keys.
-    logx, logy : bool
-        If True, bin ``log10(abs(x))`` or ``log10(abs(y))``.
-    clip_data : bool or str
+    logx, logy : bool or None
+        If True, bin ``log10(abs(x))`` or ``log10(abs(y))``. None means
+        False, or, with a ``BinnedData`` as ``nbins``, its setting for that
+        axis's column.
+    clip : bool, str, Mapping or None
         If True, clip x and y to their 0.01st and 99.99th percentiles
         (``Base.clip_data``) when assigning points to bins; the bin edges
         are computed from the unclipped data. ``"l"`` or ``"u"`` clips only
-        the lower or upper tail.
+        the lower or upper tail. A mapping such as ``{"y": "u"}`` sets each
+        axis on its own. None means False, or, with a ``BinnedData`` as
+        ``nbins``, its setting for that axis's column. Stored as ``clip``, a
+        ``ClipAxes``.
     nbins : int or str or tuple or BinnedData
         Bin specification passed to ``calc_bins_intervals``. A
         ``BinnedData`` is shared: its bins and bin codes for the columns named
-        ``x.name`` and ``y.name`` are used, and ``logx``, ``logy`` and
-        ``clip_data`` must equal its settings for those columns.
+        ``x.name`` and ``y.name`` are used, ``logx``, ``logy`` and ``clip``
+        default to its settings for those columns (an explicit, differing
+        value raises ``ValueError``), and rows its own mask excludes are not
+        kept.
     bin_precision : int, optional
-        Decimal places to which bin edges are rounded. If None, 5.
+        Decimal places to which bin edges are rounded. If None, 5. Must be
+        None with a ``BinnedData``.
     mask : pd.Series of bool, optional
         Rows to keep, aligned by label to the index of x and y. A row is
         binned where it is True and x, y and z are not NaN. Selections are
@@ -66,17 +75,25 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         y,
         z=None,
         axnorm=None,
-        logx=False,
-        logy=False,
-        clip_data=False,
+        logx=None,
+        logy=None,
+        clip=None,
         nbins=101,
         bin_precision=None,
         mask=None,
     ):
         r"""Store the data, labels and normalization, then bin the data."""
         super().__init__()
-        self.set_log(x=logx, y=logy)
-        self._set_data(x, y, z, clip_data, mask=mask)
+        log, clip = self._inherit(
+            nbins,
+            {"x": getattr(x, "name", None), "y": getattr(y, "name", None)},
+            {"x": logx, "y": logy},
+            self._clip_by_axis(clip),
+            bin_precision,
+        )
+        self.set_log(**log)
+        within = nbins if isinstance(nbins, BinnedData) else None
+        self._set_data(x, y, z, clip, mask=mask, within=within)
         self.set_labels(
             x="x", y="y", z=labels.special.Count(norm=axnorm) if z is None else "z"
         )
@@ -861,7 +878,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             x,
             y=y,
             logx=logx,
-            clip_data=False,  # Any clipping will be addressed by bins.
+            clip=False,  # Any clipping will be addressed by bins.
             nbins=self.intervals[axis],  # Keeps which side each bin closes on.
             **kwargs,
         )

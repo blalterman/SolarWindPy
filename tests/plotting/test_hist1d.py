@@ -27,6 +27,7 @@ import matplotlib.colors as mcolors  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -590,15 +591,27 @@ class TestConstructCdf:
     "given, expected",
     [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
 )
-def test_clip_stores_clip_data_with_none_as_false(xy, given, expected):
-    """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+def test_clip_is_stored_for_x_only_with_none_as_false(xy, given, expected):
+    """``h.clip`` is a ``ClipAxes``: x holds ``clip``; y and z are False.
+
+    A Hist1D bins x only, so only x is clipped.
+    ON FAILURE: the code is wrong.
+    """
+    x, _ = xy
+    clip = Hist1D(x, clip=given).clip
+    assert clip == ClipAxes(x=expected, y=False, z=False)
+    assert type(clip.x) is type(expected)
+
+
+def test_a_clip_mapping_may_name_x_only(xy):
+    """``{"x": "u"}`` is x's setting; naming y raises KeyError.
 
     ON FAILURE: the code is wrong.
     """
     x, _ = xy
-    clip = Hist1D(x, clip_data=given).clip
-    assert clip == expected
-    assert type(clip) is type(expected)
+    assert Hist1D(x, clip={"x": "u"}).clip == ClipAxes(x="u", y=False, z=False)
+    with pytest.raises(KeyError, match="'y'"):
+        Hist1D(x, clip={"y": "u"})
 
 
 # One low and one high outlier. Clipping to the 0.01st percentile moves -1000
@@ -615,13 +628,13 @@ CLIP_CASES = [
 ]
 
 
-@pytest.mark.parametrize("clip_data, expected", CLIP_CASES)
-def test_clip_data_clips_the_tails_it_names(clip_data, expected):
+@pytest.mark.parametrize("clip, expected", CLIP_CASES)
+def test_clip_clips_the_tails_it_names(clip, expected):
     """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
 
     ON FAILURE: the code is wrong.
     """
-    hist = Hist1D(CLIP_X, clip_data=clip_data, nbins=CLIP_EDGES)
+    hist = Hist1D(CLIP_X, clip=clip, nbins=CLIP_EDGES)
     assert hist.agg().fillna(0).to_numpy() == exact(expected)
 
 

@@ -180,6 +180,9 @@ class _PlotSource:
     mask : pd.Series of bool, optional
         The caller's selection, aligned by label to the coordinates' index:
         a row is kept only where it is True, in addition to ``dropna``.
+    within : BinnedData, optional
+        A shared ``BinnedData``: a row its own mask excludes is not kept
+        either, so no kept row lacks a bin for that reason alone.
 
     Raises
     ------
@@ -200,13 +203,26 @@ class _PlotSource:
     """
 
     def __init__(
-        self, coords, value_name, value=None, *, log=None, dropna, owner, mask=None
+        self,
+        coords,
+        value_name,
+        value=None,
+        *,
+        log=None,
+        dropna,
+        owner,
+        mask=None,
+        within=None,
     ):
         frame = pd.DataFrame(dict(coords), copy=False)
         index = frame.index
         if value is not None:
             value = _align(value, index, value_name)
         selected = _mask_rows(mask, index)
+        if within is not None:
+            shared = within._kept_on(index)
+            if shared is not None:
+                selected = shared if selected is None else selected & shared
 
         rows = selected
         if dropna:
@@ -499,6 +515,7 @@ class BinnedData:
             )
 
         self._frame = view
+        self._keep = keep
         self._columns = columns
         self._log = log
         self._clip = clip
@@ -561,6 +578,29 @@ class BinnedData:
         else:
             out[keep] = placed
         return out
+
+    def _kept_on(self, index):
+        r"""Which labels of ``index`` this object's ``mask`` keeps.
+
+        Returns a boolean ndarray on ``index``, or None when it keeps them
+        all. A label absent from ``self.index`` counts as kept: whether the
+        labels are a subset is the plot's check, not this one's. So is an
+        index that differs from ``self.index`` while ``self.index`` repeats
+        labels; that case returns None.
+        """
+        keep = self._keep
+        if keep is None:
+            return None
+        own = self.index
+        if index.equals(own):
+            return keep
+        if not own.is_unique:
+            return None
+        positions = own.get_indexer(index)
+        found = positions != -1
+        kept = np.ones(index.size, dtype=bool)
+        kept[found] = keep[positions[found]]
+        return None if kept.all() else kept
 
     def _check(self, col):
         if col not in self._codes:

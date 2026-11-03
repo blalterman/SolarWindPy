@@ -27,6 +27,10 @@ from abc import ABC, abstractmethod
 from .binned import _PlotSource, _clip_to_quantiles
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
+#: Clip setting per axis: False, True, ``"l"`` or ``"u"`` (see ``Base.clip_data``).
+#: ``z`` is clipped by ``Scatter`` only. Test a field, never the record: a
+#: ``ClipAxes(False, False)`` is a non-empty tuple, so it is truthy.
+ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
@@ -65,10 +69,52 @@ class Base(ABC):
         r"""The plot's data, built from its source on each access."""
         return self._source.materialize()
 
+    #: The axes the ``clip`` argument applies to, in ``ClipAxes`` field order.
+    _clipped_axes = ("x", "y")
+
     @property
     def clip(self):
-        r"""Clipping option given to the constructor, None stored as False."""
+        r"""``ClipAxes`` of each axis's clip setting: False, True, "l" or "u".
+
+        Axes the plot does not clip are False.
+        """
         return self._clip
+
+    def _clip_by_axis(self, clip):
+        r"""Map each axis in ``_clipped_axes`` to its clip setting, None if unset.
+
+        Parameters
+        ----------
+        clip : bool, str, None, Mapping or ClipAxes
+            A scalar applies to every axis in ``_clipped_axes``. A mapping
+            gives an axis its own setting; unnamed axes are None. A
+            ``ClipAxes`` is read as a mapping of its fields, ignoring False
+            fields for axes this plot does not clip.
+
+        Raises
+        ------
+        KeyError
+            If a mapping names an axis this plot does not clip.
+        """
+        axes = self._clipped_axes
+        if isinstance(clip, ClipAxes):
+            clip = {k: v for k, v in clip._asdict().items() if k in axes or v}
+        if not isinstance(clip, Mapping):
+            return {k: clip for k in axes}
+        unknown = [k for k in clip if k not in axes]
+        if unknown:
+            raise KeyError(
+                f"{self.__class__.__name__} clips the axes {axes!r}; clip names "
+                f"{unknown!r}."
+            )
+        return {k: clip.get(k) for k in axes}
+
+    def _store_clip(self, clip):
+        r"""Store ``clip``, read by ``_clip_by_axis``, as ``ClipAxes``; None is False."""
+        by_axis = self._clip_by_axis(clip)
+        self._clip = ClipAxes(
+            **{k: False if v is None else v for k, v in by_axis.items()}
+        )
 
     @property
     def log(self):
@@ -105,8 +151,8 @@ class Base(ABC):
     def clip_data(data, clip):
         r"""Clip data to its 0.01st and 99.99th percentiles.
 
-        The one clipping rule every plot shares: each plot's ``clip_data``
-        option is handed here as ``clip``.
+        The one clipping rule every plot shares: each axis's setting in a
+        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``.
 
         Parameters
         ----------
@@ -454,7 +500,7 @@ class PlotWithZdata(Base):
 
         return agg.where(keep)
 
-    def _set_data(self, x, y, z=None, clip_data=False, mask=None):
+    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
         r"""Store x, y and z as the plot's source, keeping rows without NaN.
 
         Called only by the constructor.
@@ -465,18 +511,25 @@ class PlotWithZdata(Base):
             Coordinates of each point.
         z : pd.Series, optional
             Value at each point. If None, every point gets ``z = 1``.
-        clip_data : bool or str, optional
-            Stored as ``self.clip``, None as False. True clips both tails;
-            ``"l"`` or ``"u"`` clips only the lower or upper tail (see
+        clip : bool, str, Mapping or None, optional
+            Stored as ``self.clip``, a ``ClipAxes``, None as False. A scalar
+            applies to every axis in ``_clipped_axes``; a mapping such as
+            ``{"y": "u"}`` sets single axes. True clips both tails; ``"l"``
+            or ``"u"`` clips only the lower or upper tail (see
             ``Base.clip_data``).
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y; a row is
             kept where it is True and x, y and z are not NaN.
+        within : BinnedData, optional
+            The shared ``BinnedData`` passed as ``nbins``: rows its own mask
+            excludes are not kept either.
 
         Raises
         ------
         TypeError
             If ``mask`` is not a boolean ``pd.Series``.
+        KeyError
+            If ``clip`` names an axis the plot does not clip.
         ValueError
             If no row is left, or ``mask`` lacks a label or holds NaN.
         """
@@ -489,8 +542,9 @@ class PlotWithZdata(Base):
             dropna=True,
             owner=self.__class__.__name__,
             mask=mask,
+            within=within,
         )
-        self._clip = False if clip_data is None else clip_data
+        self._store_clip(clip)
         self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
         self._bin_index = getattr(x, "index", None)
 

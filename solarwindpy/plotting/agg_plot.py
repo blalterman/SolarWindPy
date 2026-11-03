@@ -24,6 +24,19 @@ from . import base
 from . import binned
 
 
+def _clip_kind(clip):
+    r"""What a clip setting does: False, ``"l"``, ``"u"`` or True (both tails).
+
+    Follows ``Base.clip_data``: a string starting with ``"l"`` or ``"u"``
+    clips one tail, any other true value clips both.
+    """
+    if not clip:
+        return False
+    if isinstance(clip, str) and clip.lower()[0] in "lu":
+        return clip.lower()[0]
+    return True
+
+
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
 
@@ -156,6 +169,97 @@ class AggPlot(base.Base):
         self._clim = (lower, upper)
 
     _edges_from_intervals = staticmethod(binned._edges_from_intervals)
+
+    @staticmethod
+    def _binned_columns(b, names):
+        r"""Map each axis to the column of ``b`` named like its input.
+
+        Raises
+        ------
+        KeyError
+            If ``b`` has no column of that name.
+        """
+        columns = {}
+        for k, col in names.items():
+            if col not in b.columns:
+                raise KeyError(
+                    f"The BinnedData has no column {col!r}, the name of {k}; "
+                    f"its columns are {b.columns!r}."
+                )
+            columns[k] = col
+        return columns
+
+    def _inherit(self, nbins, names, log, clip, precision=None):
+        r"""Resolve each binned axis's log and clip setting.
+
+        Without a ``BinnedData``, None means False. With one, None means the
+        setting ``nbins`` holds for the column named like that axis's input,
+        and a setting given explicitly must equal it.
+
+        Parameters
+        ----------
+        nbins : object
+            The plot's ``nbins``. Only a ``BinnedData`` is read.
+        names : dict of str to str
+            Each binned axis's input name, e.g. ``{"x": x.name}``.
+        log : dict of str to bool or None
+            ``logx``, ``logy`` per axis, as given.
+        clip : dict of str to bool, str or None
+            Each axis's clip setting, as given (see ``_clip_by_axis``).
+        precision : int or None
+            The plot's ``bin_precision``.
+
+        Returns
+        -------
+        log, clip : dict
+            The resolved settings per axis.
+
+        Raises
+        ------
+        KeyError
+            If ``nbins`` is a ``BinnedData`` without a column named like an
+            input.
+        ValueError
+            If ``nbins`` is a ``BinnedData`` and an explicit log or clip
+            setting differs from its setting for that column, or
+            ``precision`` is not None.
+        """
+        if not isinstance(nbins, binned.BinnedData):
+            log = {k: False if v is None else bool(v) for k, v in log.items()}
+            clip = {k: False if v is None else v for k, v in clip.items()}
+            return log, clip
+
+        b = nbins
+        if precision is not None:
+            raise ValueError(
+                f"bin_precision={precision!r} cannot round a BinnedData's edges, "
+                "which are fixed when it is built; pass precision to the "
+                "BinnedData instead."
+            )
+        columns = self._binned_columns(b, names)
+        resolved_log = {}
+        resolved_clip = {}
+        for k, col in columns.items():
+            held = b.log_of(col)
+            given = log.get(k)
+            if given is not None and bool(given) != held:
+                raise ValueError(
+                    f"log{k}={bool(given)} conflicts with the BinnedData, which "
+                    f"bins {col!r} with log={held}. Leave log{k} as None to "
+                    "inherit it."
+                )
+            resolved_log[k] = held
+
+            held = b.clip_of(col)
+            given = clip.get(k)
+            if given is not None and _clip_kind(given) != _clip_kind(held):
+                raise ValueError(
+                    f"clip={given!r} for {k} conflicts with the BinnedData, which "
+                    f"bins {col!r} with clip={held!r}. Leave clip as None to "
+                    "inherit it."
+                )
+            resolved_clip[k] = held
+        return resolved_log, resolved_clip
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.
@@ -293,6 +397,11 @@ class AggPlot(base.Base):
         within ``mask``) are unchanged; a row ``b`` places in no bin, or
         excludes by its own mask, is in no bin of the plot either.
 
+        The constructor already resolved the plot's log and clip from ``b``
+        (``_inherit``); they are checked again here, so a later
+        ``calc_bins_intervals(nbins=b)`` cannot bin by settings the plot's
+        data does not have.
+
         Raises
         ------
         KeyError
@@ -302,15 +411,7 @@ class AggPlot(base.Base):
             clip setting for an axis differs from ``b``'s for its column.
         """
         names = self._bin_names
-        columns = {}
-        for k in self._gb_axes:
-            col = names[k]
-            if col not in b.columns:
-                raise KeyError(
-                    f"The BinnedData has no column {col!r}, the name of {k}; "
-                    f"its columns are {b.columns!r}."
-                )
-            columns[k] = col
+        columns = self._binned_columns(b, {k: names[k] for k in self._gb_axes})
 
         index = self._bin_index
         if index is None:
@@ -324,18 +425,12 @@ class AggPlot(base.Base):
             if not index.isin(b.index).all():
                 raise ValueError("x's index is not a subset of the BinnedData's index.")
 
-        for k, col in columns.items():
-            log = bool(getattr(self.log, k))
-            if b.log_of(col) != log:
-                raise ValueError(
-                    f"log{k}={log} conflicts with the BinnedData, which bins "
-                    f"{col!r} with log={b.log_of(col)}."
-                )
-            if b.clip_of(col) != self.clip:
-                raise ValueError(
-                    f"clip_data={self.clip!r} conflicts with the BinnedData, which "
-                    f"bins {col!r} with clip={b.clip_of(col)!r}."
-                )
+        self._inherit(
+            b,
+            columns,
+            {k: getattr(self.log, k) for k in columns},
+            {k: getattr(self.clip, k) for k in columns},
+        )
 
         self._shared_binned = b
         self._shared_columns = columns
@@ -346,14 +441,14 @@ class AggPlot(base.Base):
     def _bin_source(self):
         r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
 
-        The bins keep their closure and edges; the source's log and the plot's
-        ``clip`` apply to every binned axis.
+        The bins keep their closure and edges; the source's log and each
+        axis's field of the plot's ``clip`` apply to that axis.
         """
         intervals = self.intervals
         clip = self.clip
         self._binned = self._source.binned(
             {k: intervals[k] for k in self._gb_axes},
-            clip={k: clip for k in self._gb_axes},
+            clip={k: getattr(clip, k) for k in self._gb_axes},
         )
         self._bin_columns = {k: k for k in self._gb_axes}
 
@@ -405,10 +500,11 @@ class AggPlot(base.Base):
         values beyond the clip lie outside every bin and go uncounted. Such
         bins are right-closed: an integer bin count that exhausts memory does
         so again on the clipped data, so only a rule reaches here. A value is
-        counted as ``make_cut`` bins it, after ``clip_data`` if set.
+        counted as ``make_cut`` bins it, after the axis's ``clip`` if set.
         """
-        if self.clip:
-            finite = self.clip_data(finite, self.clip)
+        clip = getattr(self.clip, axis)
+        if clip:
+            finite = self.clip_data(finite, clip)
         inside = (finite > edges[0]) & (finite <= edges[-1])
         self.logger.warning(
             f"The bins for {axis!r} did not fit in memory, so they were computed "

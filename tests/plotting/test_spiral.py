@@ -31,6 +31,7 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
@@ -1294,22 +1295,22 @@ CLIP_EDGES = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
 def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
     clip, counts
 ):
-    """``clip_data`` clips x and y to their 0.01%/99.99% quantiles before meshing.
+    """``clip`` clips x and y to their 0.01%/99.99% quantiles before meshing.
 
     True clips both tails, "l" and "u" one each (worked next to ``CLIP_X``).
     ``min_per_bin=101`` keeps the three initial cells unsplit.
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip_data=clip)
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip)
     splot.initialize_mesh(min_per_bin=101, progress=False)
     splot.build_grouped()
-    assert splot.clip == clip
+    assert splot.clip == ClipAxes(x=clip, y=clip, z=False)
     assert splot.agg().tolist() == exact(counts, nan_ok=True)
 
 
 def test_data_are_not_clipped_by_default():
-    """Without ``clip_data`` the tail samples stay in their own cells.
+    """Without ``clip`` the tail samples stay in their own cells.
 
     ON FAILURE: the code is wrong.
     """

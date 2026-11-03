@@ -161,11 +161,21 @@ def assert_same(live, legacy, where="value"):
 # ---------------------------------------------------------------------------
 
 
+def clip_kw(cls, clip):
+    """The clip keyword argument for ``cls``.
+
+    The live classes take ``clip`` and the legacy ones ``clip_data``: the
+    rename is intended change e, so only the keyword's name differs.
+    """
+    legacy = cls.__module__.startswith("tests.plotting._legacy")
+    return {"clip_data" if legacy else "clip": clip}
+
+
 def _hist1d(cls, case, nbins):
     x, y, z = case.inputs()
     # Hist1D aggregates y in bins of x; the counts case has no value to average.
     y = None if z is None else y
-    return cls(x, y=y, logx=case.logx, clip_data=case.clip_data, nbins=nbins)
+    return cls(x, y=y, logx=case.logx, nbins=nbins, **clip_kw(cls, case.clip_data))
 
 
 def _hist2d(cls, case, nbins):
@@ -176,15 +186,15 @@ def _hist2d(cls, case, nbins):
         z=z,
         logx=case.logx,
         logy=case.logy,
-        clip_data=case.clip_data,
         nbins=nbins,
+        **clip_kw(cls, case.clip_data),
     )
 
 
 def _betar(cls, case, nbins):
     x, y, z = case.inputs()
     # BetaRPlot bins log10|beta| and log10|R| by default.
-    return cls(x, y, "p", z=z, clip_data=case.clip_data, nbins=nbins)
+    return cls(x, y, "p", z=z, nbins=nbins, **clip_kw(cls, case.clip_data))
 
 
 HIST2D_KINDS = {
@@ -588,7 +598,7 @@ def test_scatter_matches_legacy(case):
 
     def build(cls):
         x, y, z = c.inputs()
-        return cls(x, y, z=z, clip_data=c.clip_data)
+        return cls(x, y, z=z, **clip_kw(cls, c.clip_data))
 
     live, legacy = attempt(build, Scatter), attempt(build, LegacyScatter)
     if built(live, legacy):
@@ -615,7 +625,7 @@ def build_spiral(case_name, spec_name):
             logx=case.logx,
             logy=case.logy,
             initial_bins=spiral_bins_spec(spec_name, case, log),
-            clip_data=case.clip_data,
+            **clip_kw(cls, case.clip_data),
         )
         splot.initialize_mesh(progress=False, min_per_bin=MIN_PER_BIN)
         return splot
@@ -754,9 +764,23 @@ def test_hist2d_from_shared_binned_data_matches_legacy_edges(case, spec):
     c = CASES[case]
     legacy_spec, bins = shared_spec(spec, c, ("x", "y"))
     x, y, z = c.inputs()
-    options = dict(z=z, logx=c.logx, logy=c.logy, clip_data=False)
-    live = attempt(Hist2D, x, y, nbins=shared_binned_data(c, bins), **options)
-    legacy = attempt(LegacyHist2D, x, y, nbins=legacy_spec, **options)
+    options = dict(z=z, logx=c.logx, logy=c.logy)
+    live = attempt(
+        Hist2D,
+        x,
+        y,
+        nbins=shared_binned_data(c, bins),
+        **options,
+        **clip_kw(Hist2D, False),
+    )
+    legacy = attempt(
+        LegacyHist2D,
+        x,
+        y,
+        nbins=legacy_spec,
+        **options,
+        **clip_kw(LegacyHist2D, False),
+    )
     if built(live, legacy):
         assert_same(everything_2d(live), everything_2d(legacy))
 
@@ -775,14 +799,23 @@ def test_hist2d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     c = CASES[case]
     mask = caller_mask(c)
     nbins = _spec(spec, c, ("x", "y"), {"x": c.logx, "y": c.logy})
-    options = dict(logx=c.logx, logy=c.logy, clip_data=c.clip_data, nbins=nbins)
-    live = attempt(Hist2D, c.x, c.y, z=c.z, mask=mask, **options)
+    options = dict(logx=c.logx, logy=c.logy, nbins=nbins)
+    live = attempt(
+        Hist2D,
+        c.x,
+        c.y,
+        z=c.z,
+        mask=mask,
+        **options,
+        **clip_kw(Hist2D, c.clip_data),
+    )
     legacy = attempt(
         LegacyHist2D,
         subset(c.x, mask),
         subset(c.y, mask),
         z=subset(c.z, mask),
         **options,
+        **clip_kw(LegacyHist2D, c.clip_data),
     )
     if built(live, legacy):
         assert_same(everything_2d(live), everything_2d(legacy))
@@ -802,9 +835,17 @@ def test_hist1d_from_shared_binned_data_matches_legacy_edges(case, spec):
     c = CASES[case]
     legacy_spec, bins = shared_spec(spec, c, ("x",))
     x, y, z = c.inputs()
-    options = dict(y=None if z is None else y, logx=c.logx, clip_data=False)
-    live = attempt(Hist1D, x, nbins=shared_binned_data(c, bins), **options)
-    legacy = attempt(LegacyHist1D, x, nbins=legacy_spec, **options)
+    options = dict(y=None if z is None else y, logx=c.logx)
+    live = attempt(
+        Hist1D,
+        x,
+        nbins=shared_binned_data(c, bins),
+        **options,
+        **clip_kw(Hist1D, False),
+    )
+    legacy = attempt(
+        LegacyHist1D, x, nbins=legacy_spec, **options, **clip_kw(LegacyHist1D, False)
+    )
     if built(live, legacy):
         assert_same(everything_1d(live), everything_1d(legacy))
 
@@ -824,8 +865,16 @@ def test_hist1d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     mask = caller_mask(c)
     nbins = _spec(spec, c, ("x",), {"x": c.logx})
     y = None if c.z is None else c.y
-    options = dict(logx=c.logx, clip_data=c.clip_data, nbins=nbins)
-    live = attempt(Hist1D, c.x, y=y, mask=mask, **options)
-    legacy = attempt(LegacyHist1D, subset(c.x, mask), y=subset(y, mask), **options)
+    options = dict(logx=c.logx, nbins=nbins)
+    live = attempt(
+        Hist1D, c.x, y=y, mask=mask, **options, **clip_kw(Hist1D, c.clip_data)
+    )
+    legacy = attempt(
+        LegacyHist1D,
+        subset(c.x, mask),
+        y=subset(y, mask),
+        **options,
+        **clip_kw(LegacyHist1D, c.clip_data),
+    )
     if built(live, legacy):
         assert_same(everything_1d(live), everything_1d(legacy))
