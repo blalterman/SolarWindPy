@@ -415,6 +415,9 @@ These change computed values; rerun any analysis that used them.
   every call; it now returns uW m^-2.
 - `Hist2D.id_data_above_contour` no longer raises `TypeError: Categorical is not ordered
   for operation min` for bin specifications whose bins came out unordered.
+- `Hist2D.get_border`, and so `plot_edges`, returns the highest and lowest occupied y bin
+  in each x bin. When some y bin was empty in every x bin, it returned the last- and
+  first-listed bins in order of first appearance instead, which could be a middle bin.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.

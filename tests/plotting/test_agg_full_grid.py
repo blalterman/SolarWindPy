@@ -214,3 +214,84 @@ def test_the_plotted_rows_are_the_binned_rows(spec):
     plotted = h.get_plotted_data_boolean_series()
     assert plotted.index.equals(X.index)
     assert plotted.tolist() == spec["plotted"]
+
+
+#: Border fixture B0 to B7, binned by right-closed edges 0..4 by 1 on both
+#: axes. No point sits on an edge. Each column lists its highest point first.
+#:
+#: - x (0, 1]: B0 at y (3, 4].
+#: - x (1, 2]: B1 at y (3, 4], then B2 and B3 at y (0, 1].
+#: - x (2, 3]: B4 and B5 at y (3, 4], then B6 at y (1, 2] and B7 at y (0, 1].
+#: - x (3, 4] and y (2, 3] hold no point.
+#:
+#: Top and bottom per occupied column, (y bin, count):
+#:
+#:   x (0, 1]: top y (3, 4] count 1, bottom y (3, 4] count 1
+#:   x (1, 2]: top y (3, 4] count 1, bottom y (0, 1] count 2
+#:   x (2, 3]: top y (3, 4] count 2, bottom y (0, 1] count 1
+#:
+#: Walking the bins x slowest, the y bins first appear as (3, 4] (x (0, 1]),
+#: (0, 1] (x (1, 2]), (1, 2] (x (2, 3]). With y rows in that order instead of
+#: sorted, ``last_valid_index`` / ``first_valid_index`` would give top (0, 1]
+#: and bottom (3, 4] in x (1, 2], and top (1, 2], a middle bin, and bottom
+#: (3, 4] in x (2, 3]. The empty y (2, 3] is what kept those rows unsorted
+#: before ``agg`` returned the full grid.
+BX = pd.Series([0.5, 1.5, 1.5, 1.5, 2.5, 2.5, 2.5, 2.5])
+BY = pd.Series([3.5, 3.5, 0.5, 0.5, 3.5, 3.5, 1.5, 0.5])
+B_BREAKS = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+B_BINS = pd.IntervalIndex.from_breaks(B_BREAKS, closed="right")
+
+#: (x bin, y bin, count) for each occupied column's top and bottom.
+B_TOP = [(0, 3, 1), (1, 3, 1), (2, 3, 2)]
+B_BOTTOM = [(0, 3, 1), (1, 0, 2), (2, 0, 1)]
+
+
+def _border_hist():
+    return Hist2D(BX, BY, nbins=(B_BREAKS, B_BREAKS))
+
+
+def _expected_edge(rows):
+    index = pd.MultiIndex.from_arrays(
+        [B_BINS[[y for _, y, _ in rows]], B_BINS[[x for x, _, _ in rows]]],
+        names=["y", "x"],
+    )
+    return index, [float(n) for _, _, n in rows]
+
+
+@pytest.mark.parametrize("which", ["top", "bottom"])
+def test_get_border_is_the_highest_and_lowest_occupied_y_bin_per_column(which):
+    """Per x bin, ``top`` is the highest occupied y bin and ``bottom`` the lowest.
+
+    Expected, by hand (see the fixture comment), in x (0, 1], (1, 2],
+    (2, 3]: top y (3, 4] in all three with counts 1, 1, 2; bottom y (3, 4],
+    (0, 1], (0, 1] with counts 1, 2, 1. The empty x (3, 4] is absent.
+
+    ON FAILURE: if x (1, 2] or x (2, 3] has top and bottom swapped, or a
+    top of y (1, 2], the y rows of ``agg().unstack("x")`` are in order of
+    first appearance rather than sorted, so ``get_border`` picks the
+    last-listed bin rather than the highest; otherwise the code is wrong.
+    """
+    border = _border_hist().get_border()
+    edge = getattr(border, which)
+    index, counts = _expected_edge(B_TOP if which == "top" else B_BOTTOM)
+    assert edge.index.equals(index)
+    assert edge.to_numpy(dtype=float) == exact(counts)
+
+
+def test_plot_edges_draws_the_border_bin_centres():
+    """``plot_edges`` draws the top and bottom at their bins' midpoints.
+
+    Unsmoothed, the top line runs through (0.5, 3.5), (1.5, 3.5),
+    (2.5, 3.5) and the bottom through (0.5, 3.5), (1.5, 0.5), (2.5, 0.5):
+    the midpoints of the hand-derived border bins above.
+
+    ON FAILURE: if ``get_border`` passes, ``plot_edges`` is drawing
+    something other than the border's bin midpoints; otherwise fix
+    ``get_border`` first.
+    """
+    _, ax = plt.subplots()
+    (top,), (bottom,) = _border_hist().plot_edges(ax, smooth=False)
+    assert np.asarray(top.get_xdata()) == exact([0.5, 1.5, 2.5])
+    assert np.asarray(top.get_ydata()) == exact([3.5, 3.5, 3.5])
+    assert np.asarray(bottom.get_xdata()) == exact([0.5, 1.5, 2.5])
+    assert np.asarray(bottom.get_ydata()) == exact([3.5, 0.5, 0.5])
