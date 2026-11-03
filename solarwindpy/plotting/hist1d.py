@@ -6,6 +6,7 @@ __all__ = [
 ]
 
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 
 from types import FunctionType
@@ -194,10 +195,13 @@ class Hist1D(AggPlot):
         Returns
         -------
         cdf: pd.DataFrame
+            Indexed by the original row labels of the measurements, in
+            ascending order of x.
             ``"x"`` column: the measurements in ascending order, in linear
             units even when ``logx`` is set.
             ``"position"`` column: the normalized position in the CDF, ``i /
-            (n - 1)`` for the i-th of n measurements, from 0 to 1.
+            (n - 1)`` for the measurement of rank i (0 to n - 1) among the n
+            sorted measurements, from 0 to 1.
             To plot the CDF::
 
                 cdf.plot(x="x", y="position")
@@ -208,13 +212,15 @@ class Hist1D(AggPlot):
             tk = tk & self.get_plotted_data_boolean_series()
 
         x = data.loc[tk, "x"]
-        cdf = x.sort_values().reset_index(drop=True)
+        # Stable sort, so tied x values keep their original label order.
+        cdf = x.sort_values(kind="mergesort")
 
         if self.log.x:
             cdf = 10.0**cdf
 
         cdf = cdf.to_frame()
-        cdf.loc[:, "position"] = cdf.index / cdf.index.max()
+        rank = pd.RangeIndex(cdf.shape[0])
+        cdf.loc[:, "position"] = (rank / rank.max()).to_numpy()
 
         return cdf
 
@@ -436,11 +442,22 @@ class Hist1D(AggPlot):
         Raises
         ------
         ValueError
-            If a range has ``left >= right`` or ``bottom >= top``.
+            If a range has ``left >= right`` or ``bottom >= top``, or if an
+            entry of `ranges_by_x` names an x-bin the histogram does not have.
+            Histogram x-bins that `ranges_by_x` omits only log a warning.
         """
 
         available_x = self.agg().index
-        assert not ranges_by_x.index.symmetric_difference(available_x).size
+        if ranges_by_x.index.symmetric_difference(available_x).size:
+            drop = ranges_by_x.index.symmetric_difference(available_x)
+            if not drop.isin(available_x).all():
+                raise ValueError(
+                    "Need a way to drop values in selector that aren't available."
+                )
+            else:
+                self.logger.warning(
+                    f"Dropping {drop.size} intervals from available for selecting."
+                )
 
         data = self.data
         logx = self.log.x
