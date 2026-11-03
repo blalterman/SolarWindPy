@@ -968,3 +968,65 @@ def test_hist1d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     )
     if built(live, legacy):
         assert_same(everything_1d(live), everything_1d(legacy))
+
+
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_scatter_with_mask_matches_legacy_on_subset_inputs(case):
+    """Scatter(x, y, z, mask=m) equals legacy Scatter(x[m], y[m], z[m]).
+
+    The stored data and the offsets and colours handed to matplotlib are
+    identical, so the plotted points keep their original labels.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    mask = caller_mask(c)
+    live = attempt(Scatter, c.x, c.y, z=c.z, mask=mask, **clip_kw(Scatter, c.clip_data))
+    legacy = attempt(
+        LegacyScatter,
+        subset(c.x, mask),
+        subset(c.y, mask),
+        z=subset(c.z, mask),
+        **clip_kw(LegacyScatter, c.clip_data),
+    )
+    if built(live, legacy):
+        assert_same(live.data, legacy.data, "data")
+        assert_same(scatter_drawn(live), scatter_drawn(legacy), "drawn")
+
+
+@pytest.mark.parametrize("spec", SPIRAL_NBINS)
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_spiral_with_mask_matches_legacy_on_subset_inputs(case, spec):
+    """SpiralPlot2D(x, y, z, mask=m) equals legacy SpiralPlot2D(x[m], y[m], z[m]).
+
+    Compared after ``initialize_mesh``: the stored data, initial bins, mesh
+    cells, ``bin_id``, cell categories, cell filter, ``agg`` for every fcn,
+    and the cell values handed to matplotlib.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    mask = caller_mask(c)
+    options = dict(
+        logx=c.logx,
+        logy=c.logy,
+        initial_bins=spiral_bins_spec(spec, c, {"x": c.logx, "y": c.logy}),
+    )
+
+    def build(cls, x, y, z, **kwargs):
+        splot = cls(x, y, z=z, **options, **kwargs, **clip_kw(cls, c.clip_data))
+        splot.initialize_mesh(progress=False, min_per_bin=MIN_PER_BIN)
+        return splot
+
+    live = attempt(build, SpiralPlot2D, c.x, c.y, c.z, mask=mask)
+    legacy = attempt(
+        build,
+        LegacySpiralPlot2D,
+        subset(c.x, mask),
+        subset(c.y, mask),
+        subset(c.z, mask),
+    )
+    if built(live, legacy):
+        assert_same(spiral_state(live), spiral_state(legacy))
