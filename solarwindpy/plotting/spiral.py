@@ -234,6 +234,8 @@ class SpiralMesh(object):
         r"""Store ``x`` and ``y`` as the columns of one DataFrame."""
         data = pd.concat({"x": x, "y": y}, axis=1)
         self._data = data  # SpiralMeshData(x, y)
+        # The leaf of each point found by `generate_mesh`, for these data.
+        self._placed = None
 
     def set_min_per_bin(self, new):
         r"""Store the split threshold as an int."""
@@ -364,9 +366,75 @@ class SpiralMesh(object):
             & np.isfinite(x)
             & np.isfinite(y)
         )
-        x = x[tk_data_in_mesh]
-        y = y[tk_data_in_mesh]
+        n_in_mesh = int(tk_data_in_mesh.sum())
 
+        report("""
+ Step      N      Elapsed Time
+======  =======  ==============""")
+
+        xedges, yedges = self._descent_edges(x, y)
+        if xedges is None:
+            final_bins = self._refine_by_counting(
+                initial_bins,
+                x[tk_data_in_mesh],
+                y[tk_data_in_mesh],
+                min_per_bin,
+                report,
+            )
+            placed = None
+        else:
+            del tk_data_in_mesh
+            final_bins, zbin = self._refine_by_descent(
+                initial_bins, xedges, yedges, x, y, min_per_bin, report
+            )
+            placed = (final_bins, zbin)
+
+        stop = datetime.now()
+        report(f"\nCompleted {self.__class__.__name__} at {stop}")
+        report(f"Elapsed time {stop - start}")
+        report(f"Split bin threshold {min_per_bin}")
+        report(
+            f"Generated {final_bins.shape[0]} bins for {n_in_mesh} spectra (~{n_in_mesh / final_bins.shape[0]:.3f} spectra per bin)\n"
+        )
+
+        self._mesh = final_bins
+        self._placed = placed
+
+    def _descent_edges(self, x, y):
+        r"""The initial x and y edges if ``_refine_by_descent`` applies, else Nones.
+
+        Descent assigns each point to one initial cell and then to one child
+        of each split cell. That equals testing every point against every
+        cell, as ``_refine_by_counting`` does, when the initial cells are
+        disjoint (edges non-decreasing), every midpoint is finite (edges
+        finite and at most half the largest float, so ``x0 + x1`` cannot
+        overflow), and the coordinates are real numbers.
+        """
+        xedges = np.asarray(self.initial_edges.x)
+        yedges = np.asarray(self.initial_edges.y)
+        limit = np.finfo(np.float64).max / 2
+        for edges in (xedges, yedges):
+            if (
+                edges.ndim != 1
+                or edges.size < 2
+                or edges.dtype.kind not in "iuf"
+                or not np.isfinite(edges).all()
+                or (np.abs(edges) > limit).any()
+                or (np.diff(edges) < 0).any()
+            ):
+                return None, None
+        if x.dtype.kind not in "iuf" or y.dtype.kind not in "iuf":
+            return None, None
+        return xedges.astype(np.float64), yedges.astype(np.float64)
+
+    @classmethod
+    def _refine_by_counting(cls, initial_bins, x, y, min_per_bin, report):
+        r"""Split cells until none is overfull, counting every point per cell.
+
+        Each step counts the in-mesh points ``x``, ``y`` in every new cell
+        (``process_one_spiral_step``). Returns the leaves: unsplit cells of
+        each step in order, rows with a non-finite edge dropped.
+        """
         initial_cell_count = _get_counts_per_bin(initial_bins, x, y)
         bins_to_replace = initial_cell_count > min_per_bin
         nbins_to_replace = bins_to_replace.sum()
@@ -374,13 +442,10 @@ class SpiralMesh(object):
         list_of_bins = [initial_bins]
         active_bins = initial_bins
 
-        report("""
- Step      N      Elapsed Time
-======  =======  ==============""")
         step_start = datetime.now()
         step = 0
         while nbins_to_replace > 0:
-            active_bins, nbins_to_replace = self.process_one_spiral_step(
+            active_bins, nbins_to_replace = cls.process_one_spiral_step(
                 active_bins, x, y, min_per_bin
             )
             now = datetime.now()
@@ -392,17 +457,103 @@ class SpiralMesh(object):
         list_of_bins = [b for b in list_of_bins if b is not None]
         final_bins = np.vstack(list_of_bins)
         valid_bins = np.isfinite(final_bins).all(axis=1)
-        final_bins = final_bins[valid_bins]
+        return final_bins[valid_bins]
 
-        stop = datetime.now()
-        report(f"\nCompleted {self.__class__.__name__} at {stop}")
-        report(f"Elapsed time {stop - start}")
-        report(f"Split bin threshold {min_per_bin}")
-        report(
-            f"Generated {final_bins.shape[0]} bins for {x.size} spectra (~{x.size / final_bins.shape[0]:.3f} spectra per bin)\n"
-        )
+    @staticmethod
+    def _refine_by_descent(initial_bins, xedges, yedges, x, y, min_per_bin, report):
+        r"""Split cells until none is overfull, moving each point down the tree.
 
-        self._mesh = final_bins
+        Gives the leaves ``_refine_by_counting`` gives, in the same order, and
+        the leaf of every point. Each point is placed in its initial cell
+        once, by ``searchsorted`` on the edges. A step then counts the points
+        of each current cell with ``bincount``, splits the overfull cells
+        into the quarters ``process_one_spiral_step`` makes, in the same
+        order and at the same midpoints, and moves only those cells' points
+        to a quarter, by comparing them with the midpoints. Cells are
+        half-open, so a point in a cell lies in exactly one of its quarters,
+        and in no other new cell.
+
+        Parameters
+        ----------
+        initial_bins : np.ndarray
+            Shape (nx * ny, 4) initial cells, row ``i * ny + j`` for x-bin i
+            and y-bin j.
+        xedges, yedges : np.ndarray of float
+            Their edges, finite and non-decreasing.
+        x, y : np.ndarray
+            Every point, in or out of the mesh.
+        min_per_bin : int
+            A cell holding more points than this is split.
+        report : callable
+            Writes one progress line per step.
+
+        Returns
+        -------
+        mesh : np.ndarray
+            Shape (N, 4) leaves: each step's unsplit cells, in order.
+        zbin : np.ndarray of np.int64
+            Row of ``mesh`` holding each point; -9999 for a point in none.
+        """
+        nx = xedges.size - 1
+        ny = yedges.size - 1
+        # The last cell holding each point: e[i] <= v < e[i + 1].
+        ix = np.searchsorted(xedges, x, side="right") - 1
+        iy = np.searchsorted(yedges, y, side="right") - 1
+        pos = np.flatnonzero((ix >= 0) & (ix < nx) & (iy >= 0) & (iy < ny))
+        cell = ix[pos] * ny + iy[pos]
+        del ix, iy
+        px = x[pos]
+        py = y[pos]
+
+        zbin = np.full(x.size, -9999, dtype=np.int64)
+        leaves = []
+        n_leaves = 0
+        bins = initial_bins
+        step = 0
+        step_start = datetime.now()
+        while True:
+            overfull = np.bincount(cell, minlength=bins.shape[0]) > min_per_bin
+            n_split = int(overfull.sum())
+            if step or n_split:
+                now = datetime.now()
+                report(f"{step:>6}  {n_split:>7}  {(now - step_start)}")
+                step_start = now
+
+            leaf = ~overfull
+            leaves.append(bins[leaf])
+            done = leaf[cell]
+            zbin[pos[done]] = n_leaves + (np.cumsum(leaf) - 1)[cell[done]]
+            n_leaves += bins.shape[0] - n_split
+            if not n_split:
+                break
+
+            parents = bins[overfull]
+            x0, x1, y0, y1 = parents.T
+            xh = 0.5 * (x0 + x1)
+            yh = 0.5 * (y0 + y1)
+            children = np.empty((4 * n_split, 4), dtype=np.float64)
+            children[0::4] = np.column_stack([x0, xh, y0, yh])
+            children[1::4] = np.column_stack([xh, x1, y0, yh])
+            children[2::4] = np.column_stack([xh, x1, yh, y1])
+            children[3::4] = np.column_stack([x0, xh, yh, y1])
+
+            moving = ~done
+            pos = pos[moving]
+            px = px[moving]
+            py = py[moving]
+            parent = (np.cumsum(overfull) - 1)[cell[moving]]
+            right = px >= xh[parent]
+            top = py >= yh[parent]
+            # Quarters in `process_one_spiral_step` order: lower left, lower
+            # right, upper right, upper left.
+            cell = 4 * parent + np.where(
+                top, np.where(right, 2, 3), np.where(right, 1, 0)
+            )
+
+            bins = children
+            step += 1
+
+        return np.vstack(leaves), zbin
 
     def calculate_bin_number(self):
         r"""Assign each point to its mesh cell and store the result in ``bin_id``.
@@ -418,13 +569,21 @@ class SpiralMesh(object):
         logger.warning(
             f"Calculating {self.__class__.__name__} bin_number at {datetime.now()}"
         )
-        x = self.data.loc[:, "x"].values
-        y = self.data.loc[:, "y"].values
         mesh = self.mesh
         nbins = mesh.shape[0]
 
         start = datetime.now()
-        zbin, fill, bin_visited = _calculate_bin_number_with_numba(mesh, x, y)
+        placed = self._placed
+        if placed is not None and placed[0] is mesh:
+            # `generate_mesh` placed every point while splitting: each cell
+            # is visited once.
+            zbin = placed[1]
+            fill = -9999
+            bin_visited = np.ones(nbins, dtype=np.int64)
+        else:
+            x = self.data.loc[:, "x"].values
+            y = self.data.loc[:, "y"].values
+            zbin, fill, bin_visited = _calculate_bin_number_with_numba(mesh, x, y)
         stop = datetime.now()
 
         logger.warning(f"Elapsed time {stop - start}")
@@ -689,9 +848,10 @@ data : {z.size}
         field of ``clip`` is set is clipped with ``Base.clip_data`` before
         the points are placed in the mesh.
         """
-        data = self.data
-        x = data.loc[:, "x"]
-        y = data.loc[:, "y"]
+        # The coordinates only, as `data` holds them: no copy when every row
+        # is kept and the axis is linear.
+        x = self._source.logged("x")
+        y = self._source.logged("y")
         if self.clip.x:
             x = self.clip_data(x, self.clip.x)
         if self.clip.y:
@@ -728,6 +888,9 @@ data : {z.size}
     ):
         r"""Draw each mesh cell as a rectangle colored by its aggregated z-value.
 
+        The cells are drawn as one ``PolyCollection`` built from a single
+        array of their corners.
+
         Parameters
         ----------
         ax : Axes, optional
@@ -747,8 +910,8 @@ data : {z.size}
         Returns
         -------
         ax : Axes
-        cbar_or_mappable : Colorbar or matplotlib.collections.PatchCollection
-            The colorbar if ``cbar``, otherwise the patch collection.
+        cbar_or_mappable : Colorbar or matplotlib.collections.PolyCollection
+            The colorbar if ``cbar``, otherwise the cells' collection.
 
         Raises
         ------
@@ -769,29 +932,32 @@ data : {z.size}
         if self.log.y:
             ymesh = 10.0**ymesh
 
-        # (x,y) of bin's lower left corner.
-        xy = zip(xmesh[:, 0], ymesh[:, 0])
-        dx = xmesh[:, 1] - xmesh[:, 0]
-        dy = ymesh[:, 1] - ymesh[:, 0]
-
         start1 = datetime.now()
         self.logger.warning("Making patches")
         self.logger.warning(f"Start {start1}")
 
-        patches = [
-            mpl.patches.Rectangle(this_xy, this_dx, this_dy)
-            for this_xy, this_dx, this_dy in zip(xy, dx, dy)
-        ]
+        # One (N, 4, 2) array of each cell's corners, counter-clockwise from
+        # the lower left, as a Rectangle traces them.
+        x0, x1 = xmesh[:, 0], xmesh[:, 1]
+        y0, y1 = ymesh[:, 0], ymesh[:, 1]
+        verts = np.stack(
+            [
+                np.column_stack([x0, y0]),
+                np.column_stack([x1, y0]),
+                np.column_stack([x1, y1]),
+                np.column_stack([x0, y1]),
+            ],
+            axis=1,
+        )
 
         stop1 = datetime.now()
         self.logger.warning(f"Stop {stop1}")
         self.logger.warning(f"Elapsed {stop1 - start1}")
 
-        # TODO: `match_original=False` if calculate alpha for each patch.
         edgecolors = "none"
         linewidth = 0.0
-        collection = mpl.collections.PatchCollection(
-            patches, linewidth=linewidth, edgecolors=edgecolors
+        collection = mpl.collections.PolyCollection(
+            verts, closed=True, linewidth=linewidth, edgecolors=edgecolors
         )
 
         collection.set_array(C)

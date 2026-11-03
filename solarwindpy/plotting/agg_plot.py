@@ -320,7 +320,6 @@ class AggPlot(base.Base):
             )
         self._shared_binned = None
 
-        data = self.data
         intervals = {}
 
         # An `IntervalIndex` keeps its edges unless the caller sets a precision.
@@ -329,12 +328,11 @@ class AggPlot(base.Base):
             precision = 5
 
         nbins = self._nbins_by_axis(nbins)
+        finite = self._finite_by_axis(nbins)
 
         for k in self._gb_axes:
             b = nbins[k]
-            # Numpy and Astropy don't like NaNs when calculating bins.
-            # Infinities in bins (typically from log10(0)) also create problems.
-            d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+            d = finite[k]
 
             if isinstance(b, str):
                 b = b.lower()
@@ -358,7 +356,8 @@ class AggPlot(base.Base):
 
             else:
                 try:
-                    b = np.histogram_bin_edges(d, b)
+                    # Edges given (``d`` is None) are only validated.
+                    b = np.histogram_bin_edges(np.empty(0) if d is None else d, b)
                 except MemoryError:
                     # Clip the extremely large values and extremely small outliers.
                     lo, up = d.quantile([0.0005, 0.9995])
@@ -388,6 +387,31 @@ class AggPlot(base.Base):
 
         intervals = tuple(intervals.items())
         self._categoricals = intervals
+
+    def _finite_by_axis(self, nbins):
+        r"""Each binned axis's finite values in ``data``, for computing its edges.
+
+        Numpy and Astropy don't like NaNs when calculating bins. Infinities in
+        bins (typically from log10(0)) also create problems. An axis whose
+        specification is an ``IntervalIndex`` or edges gets None: its bins do
+        not depend on the data, so ``data`` is built only for a count or a
+        rule.
+        """
+        given = {
+            k: isinstance(nbins[k], pd.IntervalIndex) or np.ndim(nbins[k]) == 1
+            for k in self._gb_axes
+        }
+        if all(given.values()):
+            return dict.fromkeys(self._gb_axes)
+        data = self.data
+        return {
+            k: (
+                None
+                if given[k]
+                else data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+            )
+            for k in self._gb_axes
+        }
 
     def _use_binned_data(self, b):
         r"""Take the bins and bin codes of each axis from the ``BinnedData`` ``b``.

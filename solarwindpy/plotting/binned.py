@@ -305,7 +305,30 @@ class _PlotSource:
             if self._rows is not None:
                 value = value.loc[self._rows]
             return value
-        return self._frame_on_rows().loc[:, col]
+        values = self._frame.loc[:, col]
+        if self._rows is not None:
+            values = values.loc[self._rows]
+        return values
+
+    def logged(self, col):
+        r"""A coordinate on ``rows`` as ``materialize`` returns it.
+
+        Parameters
+        ----------
+        col : str
+            A coordinate name.
+
+        Returns
+        -------
+        pd.Series
+            ``take(col)``, as ``log10(abs())`` where ``log`` sets it. When
+            every row is kept and ``col`` is not logged, it shares the source's
+            values and index.
+        """
+        values = self.take(col)
+        if self._log.get(col, False):
+            values = np.log10(np.abs(values))
+        return values
 
     def binned(self, bins, *, clip=None):
         r"""A ``BinnedData`` over the coordinates, on ``rows``, logged as stored.
@@ -426,6 +449,109 @@ def _code_dtype(nbins):
         if nbins <= np.iinfo(dtype).max:
             return dtype
     return np.int64
+
+
+def _guess_and_check_codes(arr, edges, closed):
+    r"""``searchsorted(edges, arr) - 1`` for floats, -1 outside the edges or NaN.
+
+    Each value's bin is guessed by linear interpolation between the outer
+    edges, then checked against that bin's own two edges with the comparison
+    ``searchsorted`` makes; only values whose guess fails are searched. The
+    result is therefore exactly ``searchsorted``'s, and as fast as the guess
+    is good: for even edges, nearly every guess holds.
+
+    Parameters
+    ----------
+    arr : np.ndarray of float
+        Values to bin.
+    edges : np.ndarray of float
+        Strictly increasing, finite bin edges.
+    closed : {"left", "right"}
+        The side each bin is closed on.
+
+    Returns
+    -------
+    np.ndarray of np.int64
+        A new array: the bin of each value, or -1.
+    """
+    n_bins = edges.size - 1
+    lo, hi = edges[0], edges[-1]
+    if closed == "right":
+        side = "left"
+        inside = (arr > lo) & (arr <= hi)
+    else:
+        side = "right"
+        inside = (arr >= lo) & (arr < hi)
+
+    guess = arr - lo
+    guess *= n_bins / (hi - lo)
+    np.clip(guess, 0, n_bins - 1, out=guess)
+    np.copyto(guess, 0, where=~inside)
+    out = guess.astype(np.int64)
+
+    below, above = edges[out], edges[out + 1]
+    if closed == "right":
+        wrong = (arr <= below) | (arr > above)
+    else:
+        wrong = (arr < below) | (arr >= above)
+    wrong &= inside
+    if wrong.any():
+        out[wrong] = np.searchsorted(edges, arr[wrong], side=side) - 1
+    out[~inside] = -1
+    return out
+
+
+def _cut_codes(values, edges, closed):
+    r"""Position of each value's bin in ``edges``, -1 where it has none.
+
+    Equals ``pd.cut(values, edges, right=(closed == "right"), labels=False)``
+    with NaN as -1, except that, as in :func:`numpy.histogram`, the last
+    left-closed bin also holds its right edge. A float or signed-integer
+    column is searched directly, as ``pd.cut`` searches it; any other dtype
+    goes through ``pd.cut``.
+
+    Parameters
+    ----------
+    values : pd.Series
+        Values to bin.
+    edges : np.ndarray
+        Strictly increasing bin edges.
+    closed : {"left", "right"}
+        The side each bin is closed on.
+
+    Returns
+    -------
+    np.ndarray of np.int64
+        A new array, one code per value.
+    """
+    n_bins = edges.size - 1
+    arr = values.to_numpy() if isinstance(values, pd.Series) else np.asarray(values)
+    if arr.dtype.kind == "f" and edges.dtype.kind == "f" and np.isfinite(edges).all():
+        out = _guess_and_check_codes(arr, edges, closed)
+        last = arr == edges[-1]
+    elif arr.dtype.kind in "fi":
+        # `pd.cut`'s own rule: `searchsorted` on the edges, then no bin at
+        # either end or for NaN.
+        side = "left" if closed == "right" else "right"
+        ids = np.searchsorted(edges, arr, side=side)
+        out = ids - 1
+        off = (ids == 0) | (ids == edges.size)
+        if arr.dtype.kind == "f":
+            off |= np.isnan(arr)
+        out[off] = -1
+        last = arr == edges[-1]
+    else:
+        values = pd.Series(values, copy=False)
+        found = pd.cut(values, edges, right=(closed == "right"), labels=False)
+        found = np.array(found, dtype=float)
+        out = np.full(found.size, -1, dtype=np.int64)
+        inside = ~np.isnan(found)
+        out[inside] = found[inside]
+        last = (values == edges[-1]).to_numpy(dtype=bool, na_value=False)
+    if closed == "left":
+        # As in `np.histogram`, the last bin also holds its right edge.
+        out[last] = n_bins - 1
+    return out
 
 
 def _read_only(arr):
@@ -551,26 +677,28 @@ class BinnedData:
 
     @staticmethod
     def _assign(values, edges, closed, keep, log, clip):
-        r"""Bin code of every row of ``values``: -1 off the bins or the mask."""
-        n_bins = edges.size - 1
-        out = np.full(values.size, -1, dtype=_code_dtype(n_bins))
+        r"""Bin code of every row of ``values``: -1 off the bins or the mask.
+
+        A linear, unclipped column is binned whole and the mask applied after,
+        since a row's bin does not depend on the other rows. Otherwise the
+        kept rows are taken first: clip quantiles are computed over them, and
+        ``log10`` would warn on a zero in a row that is not kept.
+        """
+        dtype = _code_dtype(edges.size - 1)
+        if not (log or clip):
+            out = _cut_codes(values, edges, closed)
+            if keep is not None:
+                out[~keep] = -1
+            return out.astype(dtype)
+
+        out = np.full(values.size, -1, dtype=dtype)
         if keep is not None:
             values = values.iloc[keep]
         if log:
             values = np.log10(np.abs(values))
         if clip:
             values = _clip_to_quantiles(values, clip)
-
-        found = pd.cut(values, edges, right=(closed == "right"), labels=False)
-        found = np.array(found, dtype=float)
-        if closed == "left":
-            # As in `np.histogram`, the last bin also holds its right edge.
-            last = (values == edges[-1]).to_numpy(dtype=bool, na_value=False)
-            found[last] = n_bins - 1
-        inside = ~np.isnan(found)
-        placed = np.full(found.size, -1, dtype=out.dtype)
-        placed[inside] = found[inside]
-
+        placed = _cut_codes(values, edges, closed)
         if keep is None:
             out[:] = placed
         else:

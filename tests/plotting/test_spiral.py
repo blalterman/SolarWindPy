@@ -26,7 +26,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.collections import PatchCollection  # noqa: E402
+from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
@@ -747,7 +747,7 @@ class TestMakePlot:
         splot = _plot(2, log=log)
         _, ax = plt.subplots()
         ax, coll = splot.make_plot(ax=ax, cbar=False)
-        assert isinstance(coll, PatchCollection)
+        assert isinstance(coll, PolyCollection)
         expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
         assert np.asarray(_rectangles(coll)) == exact(expected)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
@@ -774,7 +774,7 @@ class TestMakePlot:
         _, ax = plt.subplots()
         _, cbar = splot.make_plot(ax=ax)
         assert isinstance(cbar, Colorbar)
-        assert isinstance(cbar.mappable, PatchCollection)
+        assert isinstance(cbar.mappable, PolyCollection)
         assert cbar.mappable in ax.collections
 
     def test_unexpected_keyword_is_rejected(self):

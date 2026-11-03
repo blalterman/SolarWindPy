@@ -8,6 +8,7 @@ implement specific visualizations.
 
 __all__ = [
     "LogAxes",
+    "ClipAxes",
     "AxesLabels",
     "RangeLimits",
     "Base",
