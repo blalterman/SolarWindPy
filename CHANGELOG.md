@@ -418,6 +418,13 @@ These change computed values; rerun any analysis that used them.
 - `Hist2D.get_border`, and so `plot_edges`, returns the highest and lowest occupied y bin
   in each x bin. When some y bin was empty in every x bin, it returned the last- and
   first-listed bins in order of first appearance instead, which could be a middle bin.
+- `Hist1D.construct_cdf` returns its rows indexed by the original row labels, sorted by x
+  with ties in input order, instead of a reset 0..n-1 index. The `x` and `position`
+  values are unchanged; `position` is computed from each row's rank.
+- `Hist1D.take_data_in_yrange_across_x` raises `ValueError` instead of failing an
+  `assert` when `ranges_by_x` names x bins the histogram does not have, and, like
+  `Hist2D`, logs a warning and selects within the named bins when `ranges_by_x` omits
+  some of them.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
