@@ -1030,3 +1030,5 @@ def test_spiral_with_mask_matches_legacy_on_subset_inputs(case, spec):
     )
     if built(live, legacy):
         assert_same(spiral_state(live), spiral_state(legacy))
+
+# Spent-Mark: served; migration green under two seeds incl. real Spiral agg and drawn comparisons (d3390351); real-data comparison 90 of 90 cell-14 h2_set histograms identical on 12 objects, old vs new and shared BinnedData+mask (Session C, snapshot 6578e94a), with author-reviewed figures; condition-3 coverage audit closed by d3390351
