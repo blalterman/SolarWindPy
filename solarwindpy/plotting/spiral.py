@@ -23,6 +23,7 @@ from matplotlib import pyplot as plt
 from . import base
 from . import labels
 from .agg_plot import AggPlot
+from .binned import BinnedData
 
 _InitialSpiralEdges = namedtuple("_InitialSpiralEdges", "x,y")
 _SpiralMeshBinID = namedtuple("_SpiralMeshBinID", "id,fill,visited")
@@ -482,7 +483,15 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
     """
 
     def __init__(
-        self, x, y, z=None, logx=False, logy=False, initial_bins=5, clip_data=False
+        self,
+        x,
+        y,
+        z=None,
+        logx=False,
+        logy=False,
+        initial_bins=5,
+        clip_data=False,
+        mask=None,
     ):
         r"""Store the data and labels, then compute the initial bin edges.
 
@@ -502,15 +511,32 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
             initial bin edges are computed from the unclipped data. ``"l"`` or
             ``"u"`` clips only the lower or upper tail. Clipping limits x and
             y only; z is aggregated unclipped. Stored as ``clip``.
+        mask : pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y. A point
+            is placed in the mesh where it is True and x, y and z are not NaN.
+
+        Raises
+        ------
+        TypeError
+            If ``initial_bins`` is or holds a ``BinnedData``: the mesh adapts
+            to the data, so its cells cannot be shared bins.
         """
+        if isinstance(initial_bins, BinnedData) or (
+            isinstance(initial_bins, (tuple, list))
+            and any(isinstance(b, BinnedData) for b in initial_bins)
+        ):
+            raise TypeError(
+                "SpiralPlot2D builds an adaptive mesh from its own data and "
+                "cannot use a shared BinnedData; pass x and y instead."
+            )
         super().__init__()
         self.set_log(x=logx, y=logy)
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip_data, mask=mask)
         self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
         self.calc_initial_bins(initial_bins)
         self.set_clim(None, None)
 
-    # ``set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
+    # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
     _log_data = True
 
     @property

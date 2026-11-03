@@ -13,7 +13,7 @@ from . import base
 class Scatter(base.PlotWithZdata, base._CbarMaker):
     r"""Scatter plot of y against x, optionally colored by z."""
 
-    def __init__(self, x, y, z=None, clip_data=False):
+    def __init__(self, x, y, z=None, clip_data=False, mask=None):
         r"""Initialize scatter plot data.
 
         Parameters
@@ -26,9 +26,12 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             If True, ``make_plot`` clips each column to its 0.01st and 99.99th
             percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
             the lower or upper tail.
+        mask: pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y. A point
+            is plotted where it is True and x, y and z are not NaN.
         """
         super(Scatter, self).__init__()
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip_data, mask=mask)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
         self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)

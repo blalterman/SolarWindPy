@@ -1554,18 +1554,17 @@ def test_default_labels_name_the_axes_and_count_without_z():
     assert (valued.labels.x, valued.labels.y, valued.labels.z) == ("x", "y", "z")
 
 
-def test_grouping_data_of_another_length_than_the_mesh_is_rejected():
-    """``build_grouped`` raises when the data no longer match the mesh.
+def test_other_data_is_plotted_by_a_new_plot_whose_mesh_holds_only_it():
+    """A plot's data cannot be replaced; a new plot on p0-p4 groups only them.
 
-    Replacing the data after ``initialize_mesh`` leaves the mesh's cells for
-    6 samples and z for 5.
+    The mesh and the z values grouped by it then always come from the same
+    samples: 5 points with z summing to 1 + 3 + 2 + 5 + 9 = 20 (ROWS).
 
     ON FAILURE: the code is wrong.
     """
-    splot = _plot(1)
-    splot.set_data(X[:5], Y[:5], Z[:5], False)
-    with pytest.raises(ValueError, match="`cat` must have same size"):
-        splot.build_grouped()
+    splot = _plot(1, rows=ROWS[:5])
+    assert splot.grouped.size().sum() == 5
+    assert splot.grouped.sum().sum() == exact(20.0)
 
 
 class TestMakePlotOptions:

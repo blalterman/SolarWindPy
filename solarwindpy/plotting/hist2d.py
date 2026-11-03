@@ -41,10 +41,17 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         (``Base.clip_data``) when assigning points to bins; the bin edges
         are computed from the unclipped data. ``"l"`` or ``"u"`` clips only
         the lower or upper tail.
-    nbins : int or str or tuple
-        Bin specification passed to ``calc_bins_intervals``.
+    nbins : int or str or tuple or BinnedData
+        Bin specification passed to ``calc_bins_intervals``. A
+        ``BinnedData`` is shared: its bins and bin codes for the columns named
+        ``x.name`` and ``y.name`` are used, and ``logx``, ``logy`` and
+        ``clip_data`` must equal its settings for those columns.
     bin_precision : int, optional
         Decimal places to which bin edges are rounded. If None, 5.
+    mask : pd.Series of bool, optional
+        Rows to keep, aligned by label to the index of x and y. A row is
+        binned where it is True and x, y and z are not NaN. Selections are
+        returned on the original labels.
 
     Notes
     -----
@@ -64,11 +71,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         clip_data=False,
         nbins=101,
         bin_precision=None,
+        mask=None,
     ):
         r"""Store the data, labels and normalization, then bin the data."""
         super().__init__()
         self.set_log(x=logx, y=logy)
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip_data, mask=mask)
         self.set_labels(
             x="x", y="y", z=labels.special.Count(norm=axnorm) if z is None else "z"
         )
@@ -78,7 +86,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         self.make_cut()
         self.set_clim(None, None)
 
-    # ``set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
+    # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
     _log_data = True
 
     @property

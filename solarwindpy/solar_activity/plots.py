@@ -28,7 +28,7 @@ class IndicatorPlot(base.Base):
 
     def __init__(self, indicator, ykey, plasma_index=None):
         r"""Store the indicator and set linear axes with a year x-label."""
-        self.set_data(indicator, ykey, plasma_index)
+        self._set_data(indicator, ykey, plasma_index)
         self.set_log(x=False, y=False)
         self._labels = base.AxesLabels(x=labels.datetime.DateTime("Year"), y="y")
 
@@ -98,8 +98,11 @@ class IndicatorPlot(base.Base):
 
         self._path = path
 
-    def set_data(self, indicator, ykey, plasma_index):
-        r"""Set :attr:`indicator`, :attr:`ykey`, and :attr:`plasma_index`."""
+    def _set_data(self, indicator, ykey, plasma_index):
+        r"""Set :attr:`indicator`, :attr:`ykey`, and :attr:`plasma_index`.
+
+        Called only by the constructor.
+        """
         self._indicator = indicator
         self._plasma_index = plasma_index
         self._ykey = ykey

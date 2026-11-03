@@ -87,7 +87,7 @@ class LinePlot(PlotWithZdata):
 
     def __init__(self, x, y, z=None, clip_data=False):
         super().__init__()
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip_data)
 
     def make_plot(self, ax):
         d = self.data
@@ -154,7 +154,7 @@ def test_str_and_logger_name_the_concrete_class():
 
 
 # ---------------------------------------------------------------------------
-# PlotWithZdata.set_data
+# PlotWithZdata._set_data, through the constructor
 # ---------------------------------------------------------------------------
 
 

@@ -27,7 +27,7 @@ class Hist1D(AggPlot):
 
     Methods
     -------
-    set_path, set_data, agg, _format_axis, make_plot
+    set_path, agg, _format_axis, make_plot
     """
 
     def __init__(
@@ -39,6 +39,7 @@ class Hist1D(AggPlot):
         clip_data=False,
         nbins=101,
         bin_precision=None,
+        mask=None,
     ):
         """Create a one-dimensional histogram.
 
@@ -58,16 +59,22 @@ class Hist1D(AggPlot):
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
             (see ``Base.clip_data``). None is stored as False.
-        nbins : int or array-like, optional
+        nbins : int or array-like or BinnedData, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
-            :func:`pandas.cut` depending on the input type.
+            :func:`pandas.cut` depending on the input type. A ``BinnedData``
+            is shared: its bins and bin codes for the column named ``x.name``
+            are used, and ``logx`` and ``clip_data`` must equal its settings
+            for that column.
         bin_precision : int, optional
             Precision for decimal bin edges.
+        mask : pandas.Series of bool, optional
+            Rows to keep, aligned by label to the index of ``x``. Selections
+            are returned on the original labels.
         """
         super(Hist1D, self).__init__()
         self.set_log(x=logx)
         self.set_axnorm(axnorm)
-        self.set_data(x, y, clip_data)
+        self._set_data(x, y, clip_data, mask=mask)
         self.set_labels(
             x="x", y=labels.special.Count(norm=axnorm) if y is None else "y"
         )
@@ -98,12 +105,13 @@ class Hist1D(AggPlot):
 
     set_path.__doc__ = base.Base.set_path.__doc__
 
-    def set_data(self, x, y, clip):
-        r"""Store x, and y aligned to it, keeping every row.
+    def _set_data(self, x, y, clip, mask=None):
+        r"""Store x, and y aligned to it, keeping every row ``mask`` keeps.
 
-        ``x`` is stored as ``log10(abs(x))`` when ``self.log.x`` is set. If
-        ``y`` is None, every point gets ``y = 1``. ``clip`` is stored as
-        ``self.clip``, None as False.
+        Called only by the constructor. ``x`` is stored as ``log10(abs(x))``
+        when ``self.log.x`` is set. If ``y`` is None, every point gets
+        ``y = 1``. ``clip`` is stored as ``self.clip``, None as False.
+        ``mask`` is a boolean Series aligned by label to the index of ``x``.
         """
         self._source = _PlotSource(
             {"x": x},
@@ -112,8 +120,11 @@ class Hist1D(AggPlot):
             log={"x": self.log.x},
             dropna=False,
             owner=self.__class__.__name__,
+            mask=mask,
         )
         self._clip = False if clip is None else clip
+        self._bin_names = {"x": getattr(x, "name", None)}
+        self._bin_index = getattr(x, "index", None)
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.

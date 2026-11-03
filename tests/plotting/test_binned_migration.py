@@ -35,6 +35,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.plotting.binned import BinnedData  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
@@ -660,3 +661,171 @@ def test_spiral_matches_legacy(case, spec):
     live, legacy = build_spiral(case, spec)
     if built(live, legacy):
         assert_same(spiral_state(live), spiral_state(legacy))
+
+
+# ---------------------------------------------------------------------------
+# A shared BinnedData through nbins, and a caller mask
+# ---------------------------------------------------------------------------
+
+#: Explicit bin specifications a ``BinnedData`` accepts.
+SHARED_SPECS = ("edges", "intervals_left", "per_axis")
+
+#: Seed of the mask drawn for a case that has none.
+MASK_SEED = 20261103
+
+
+def shared_spec(name, case, axes):
+    """The legacy ``nbins`` and the equivalent ``BinnedData`` bins per axis.
+
+    ``"edges"`` and ``"intervals_left"`` give every axis the same bins, as
+    ``nbins_spec`` builds them. ``"per_axis"`` gives each axis its own edges
+    (x) or left-closed intervals (y), legacy as one entry per axis.
+    """
+    log = {"x": case.logx, "y": case.logy}
+    if name in ("edges", "intervals_left"):
+        spec = nbins_spec(name, case, axes, log)
+        return spec, {k: spec for k in axes}
+    x_edges = nbins_spec("mixed", case, ("x",), log)[0]
+    if axes == ("x",):
+        return (x_edges,), {"x": x_edges}
+    y_intervals = nbins_spec("mixed", case, axes, log)[1]
+    return (x_edges, y_intervals), {"x": x_edges, "y": y_intervals}
+
+
+def shared_binned_data(case, bins):
+    """A ``BinnedData`` over the case's full, unmasked columns.
+
+    The plot is given the case's inputs, which the case's mask may subset,
+    so its rows are then taken from the ``BinnedData`` by label.
+    """
+    frame = pd.DataFrame({"x": case.x, "y": case.y})
+    log = {"x": case.logx, "y": case.logy}
+    return BinnedData(frame, bins, log={k: log[k] for k in bins})
+
+
+def caller_mask(case):
+    """The case's mask, or a seeded one, on the union of x's and y's labels."""
+    if case.mask is not None:
+        return case.mask
+    index = pd.DataFrame({"x": case.x, "y": case.y}).index
+    rng = np.random.default_rng(MASK_SEED)
+    return pd.Series(rng.random(index.size) < 0.7, index=index)
+
+
+def subset(series, mask):
+    """``series`` on the labels ``mask`` keeps, as a caller subsets beforehand."""
+    if series is None:
+        return None
+    return series.loc[mask.reindex(series.index).to_numpy(dtype=bool)]
+
+
+def everything_2d(h):
+    """Data, bins, cut, agg grids, selections and drawn arrays of a 2-D plot."""
+    return {
+        "binning": binning(h),
+        "aggs": hist2d_aggs(h),
+        "selections": hist2d_selections(h),
+        "drawn": hist2d_drawn(h),
+    }
+
+
+def everything_1d(h):
+    """Data, bins, cut, aggregates, selections and drawn lines of a Hist1D."""
+    return {
+        "binning": binning(h),
+        "aggs": hist1d_aggs(h),
+        "selections": hist1d_selections(h),
+        "drawn": hist1d_drawn(h),
+    }
+
+
+@pytest.mark.parametrize("spec", SHARED_SPECS)
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_hist2d_from_shared_binned_data_matches_legacy_edges(case, spec):
+    """Hist2D(nbins=BinnedData) equals legacy Hist2D(nbins=<the same bins>).
+
+    The BinnedData bins the case's full columns; the plot is given the
+    case's (possibly subset) inputs. Without clipping, data, cut, every agg
+    grid, every selection and the matplotlib arrays are identical.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    legacy_spec, bins = shared_spec(spec, c, ("x", "y"))
+    x, y, z = c.inputs()
+    options = dict(z=z, logx=c.logx, logy=c.logy, clip_data=False)
+    live = attempt(Hist2D, x, y, nbins=shared_binned_data(c, bins), **options)
+    legacy = attempt(LegacyHist2D, x, y, nbins=legacy_spec, **options)
+    if built(live, legacy):
+        assert_same(everything_2d(live), everything_2d(legacy))
+
+
+@pytest.mark.parametrize("spec", NBINS)
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_hist2d_with_mask_matches_legacy_on_subset_inputs(case, spec):
+    """Hist2D(x, y, z, mask=m) equals legacy Hist2D(x[m], y[m], z[m]).
+
+    Data, cut, every agg grid, every selection and the matplotlib arrays
+    are identical, so selections come back on the original labels.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    mask = caller_mask(c)
+    nbins = _spec(spec, c, ("x", "y"), {"x": c.logx, "y": c.logy})
+    options = dict(logx=c.logx, logy=c.logy, clip_data=c.clip_data, nbins=nbins)
+    live = attempt(Hist2D, c.x, c.y, z=c.z, mask=mask, **options)
+    legacy = attempt(
+        LegacyHist2D,
+        subset(c.x, mask),
+        subset(c.y, mask),
+        z=subset(c.z, mask),
+        **options,
+    )
+    if built(live, legacy):
+        assert_same(everything_2d(live), everything_2d(legacy))
+
+
+@pytest.mark.parametrize("spec", SHARED_SPECS)
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_hist1d_from_shared_binned_data_matches_legacy_edges(case, spec):
+    """Hist1D(nbins=BinnedData) equals legacy Hist1D(nbins=<the same bins>).
+
+    Without clipping, data, cut, every aggregate, every selection and the
+    drawn lines are identical.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    legacy_spec, bins = shared_spec(spec, c, ("x",))
+    x, y, z = c.inputs()
+    options = dict(y=None if z is None else y, logx=c.logx, clip_data=False)
+    live = attempt(Hist1D, x, nbins=shared_binned_data(c, bins), **options)
+    legacy = attempt(LegacyHist1D, x, nbins=legacy_spec, **options)
+    if built(live, legacy):
+        assert_same(everything_1d(live), everything_1d(legacy))
+
+
+@pytest.mark.parametrize("spec", NBINS)
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_hist1d_with_mask_matches_legacy_on_subset_inputs(case, spec):
+    """Hist1D(x, y, mask=m) equals legacy Hist1D(x[m], y[m]).
+
+    Data, cut, every aggregate, every selection and the drawn lines are
+    identical, so selections come back on the original labels.
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    mask = caller_mask(c)
+    nbins = _spec(spec, c, ("x",), {"x": c.logx})
+    y = None if c.z is None else c.y
+    options = dict(logx=c.logx, clip_data=c.clip_data, nbins=nbins)
+    live = attempt(Hist1D, c.x, y=y, mask=mask, **options)
+    legacy = attempt(LegacyHist1D, subset(c.x, mask), y=subset(y, mask), **options)
+    if built(live, legacy):
+        assert_same(everything_1d(live), everything_1d(legacy))

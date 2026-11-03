@@ -177,11 +177,17 @@ class _PlotSource:
         keep every row.
     owner : str
         Name of the plot class, used in the error message.
+    mask : pd.Series of bool, optional
+        The caller's selection, aligned by label to the coordinates' index:
+        a row is kept only where it is True, in addition to ``dropna``.
 
     Raises
     ------
+    TypeError
+        If ``mask`` is not a boolean ``pd.Series``.
     ValueError
-        If ``dropna`` is True and no row is kept.
+        If ``dropna`` is True and no row is kept, or ``mask`` lacks a label
+        of the index or holds NaN.
 
     Attributes
     ----------
@@ -193,23 +199,27 @@ class _PlotSource:
         averages. Decided once, here.
     """
 
-    def __init__(self, coords, value_name, value=None, *, log=None, dropna, owner):
+    def __init__(
+        self, coords, value_name, value=None, *, log=None, dropna, owner, mask=None
+    ):
         frame = pd.DataFrame(dict(coords), copy=False)
         index = frame.index
         if value is not None:
             value = _align(value, index, value_name)
+        selected = _mask_rows(mask, index)
 
-        rows = None
+        rows = selected
         if dropna:
             keep = frame.notna().all(axis=1).to_numpy()
             if value is not None:
                 keep = keep & value.notna().to_numpy()
+            if selected is not None:
+                keep = keep & selected
             if not keep.any():
                 raise ValueError(
                     "You can't build a %s with data that is exclusively NaNs" % owner
                 )
-            if not keep.all():
-                rows = keep
+            rows = None if keep.all() else keep
 
         self._frame = frame
         self._value_name = value_name
@@ -228,6 +238,11 @@ class _PlotSource:
     def columns(self):
         r"""Column names: the coordinates, then the value column."""
         return tuple(self._frame.columns) + (self._value_name,)
+
+    @property
+    def index(self):
+        r"""Labels of every row, kept or not."""
+        return self._frame.index
 
     @property
     def rows(self):

@@ -38,7 +38,7 @@ class AggPlot(base.Base):
         Set property <>.
 
     calc_bins, make_cut, agg, clip_data, make_plot
-    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot (abstract)
+    __init__, set_labels.y, set_path, _set_data, _format_axis, make_plot (abstract)
     """
 
     @property
@@ -55,14 +55,15 @@ class AggPlot(base.Base):
 
     @property
     def cut(self):
-        r"""Bin of each row ``make_cut`` binned: a DataFrame of categoricals.
+        r"""Bin of each row the plot keeps: a DataFrame of categoricals.
 
-        One column per binned axis, indexed by the rows kept when ``make_cut``
-        ran. Built on each access from the bin codes.
+        One column per binned axis, indexed by the kept rows' labels. Built on
+        each access from the bin codes.
         """
-        on = self._cut_rows
+        on = self._cut_on()
+        columns = self._bin_columns
         return pd.DataFrame(
-            {k: self._binned.categorical(k, on=on) for k in self._gb_axes},
+            {k: self._binned.categorical(columns[k], on=on) for k in self._gb_axes},
             copy=False,
         )
 
@@ -159,7 +160,10 @@ class AggPlot(base.Base):
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.
 
-        nbins: int, str, array-like
+        nbins: int, str, array-like, BinnedData
+            If a :class:`~solarwindpy.plotting.binned.BinnedData`, use its bins
+            and bin codes for the columns named like the plot's inputs (e.g.
+            ``x.name``); see ``_use_binned_data``.
             If an integer (a Python or numpy int), use
             :func:`numpy.histogram_bin_edges` to calculate that many bins.
             If str and nbins == "knuth", use `astropy.stats.knuth_bin_width`
@@ -181,6 +185,9 @@ class AggPlot(base.Base):
         ------
         ValueError
             If ``nbins`` is none of the above, e.g. a float, a bool or None.
+        TypeError
+            If a per-axis sequence holds a ``BinnedData``: one ``BinnedData``
+            bins every axis.
 
         Notes
         -----
@@ -196,6 +203,19 @@ class AggPlot(base.Base):
         0.05th and 99.95th percentiles. The values outside the resulting bins
         are not counted, and a warning gives their number.
         """
+        # Checked before `_nbins_by_axis`: a BinnedData is never a per-axis spec.
+        if isinstance(nbins, binned.BinnedData):
+            self._use_binned_data(nbins)
+            return
+        if isinstance(nbins, (tuple, list)) and any(
+            isinstance(b, binned.BinnedData) for b in nbins
+        ):
+            raise TypeError(
+                "A BinnedData bins every axis: pass it as nbins itself, not "
+                "inside a per-axis sequence."
+            )
+        self._shared_binned = None
+
         data = self.data
         intervals = {}
 
@@ -264,7 +284,64 @@ class AggPlot(base.Base):
 
         intervals = tuple(intervals.items())
         self._categoricals = intervals
-        self._bin_source()
+
+    def _use_binned_data(self, b):
+        r"""Take the bins and bin codes of each axis from the ``BinnedData`` ``b``.
+
+        Each axis reads the column named like the input given for it (e.g.
+        ``x.name``), on the rows of ``x.index``. The plot's own rows (no NaN,
+        within ``mask``) are unchanged; a row ``b`` places in no bin, or
+        excludes by its own mask, is in no bin of the plot either.
+
+        Raises
+        ------
+        KeyError
+            If ``b`` has no column of that name.
+        ValueError
+            If ``x.index`` is not a subset of ``b.index``, or the plot's log or
+            clip setting for an axis differs from ``b``'s for its column.
+        """
+        names = self._bin_names
+        columns = {}
+        for k in self._gb_axes:
+            col = names[k]
+            if col not in b.columns:
+                raise KeyError(
+                    f"The BinnedData has no column {col!r}, the name of {k}; "
+                    f"its columns are {b.columns!r}."
+                )
+            columns[k] = col
+
+        index = self._bin_index
+        if index is None:
+            index = self._source.index
+        if not index.equals(b.index):
+            if not b.index.is_unique:
+                raise ValueError(
+                    "The BinnedData's index repeats labels and differs from x's "
+                    "index, so x's rows cannot be found in it by label."
+                )
+            if not index.isin(b.index).all():
+                raise ValueError("x's index is not a subset of the BinnedData's index.")
+
+        for k, col in columns.items():
+            log = bool(getattr(self.log, k))
+            if b.log_of(col) != log:
+                raise ValueError(
+                    f"log{k}={log} conflicts with the BinnedData, which bins "
+                    f"{col!r} with log={b.log_of(col)}."
+                )
+            if b.clip_of(col) != self.clip:
+                raise ValueError(
+                    f"clip_data={self.clip!r} conflicts with the BinnedData, which "
+                    f"bins {col!r} with clip={b.clip_of(col)!r}."
+                )
+
+        self._shared_binned = b
+        self._shared_columns = columns
+        self._categoricals = tuple(
+            (k, pd.CategoricalIndex(b.intervals(col))) for k, col in columns.items()
+        )
 
     def _bin_source(self):
         r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
@@ -274,12 +351,21 @@ class AggPlot(base.Base):
         """
         intervals = self.intervals
         clip = self.clip
-        source = self._source
-        self._binned = source.binned(
+        self._binned = self._source.binned(
             {k: intervals[k] for k in self._gb_axes},
             clip={k: clip for k in self._gb_axes},
         )
-        self._binned_for = (source, clip)
+        self._bin_columns = {k: k for k in self._gb_axes}
+
+    def _cut_on(self):
+        r"""The rows ``cut`` takes from ``self._binned``, as its ``on`` argument."""
+        rows = self._source.rows
+        if self._shared_binned is None:
+            return rows
+        index = self._source.index
+        if index.equals(self._binned.index):
+            return rows
+        return index if rows is None else index[rows]
 
     def _nbins_by_axis(self, nbins):
         r"""Map each binned axis to its bin specification.
@@ -332,15 +418,18 @@ class AggPlot(base.Base):
         )
 
     def make_cut(self):
-        r"""Assign the plot's current rows to the bins in ``intervals``.
+        r"""Assign the plot's rows to the bins in ``intervals``.
 
-        ``cut`` then gives those rows' bins. Data set after this call is not
-        binned until ``make_cut`` runs again.
+        ``cut`` then gives those rows' bins. With a shared ``BinnedData`` the
+        rows were assigned when it was built, and its codes are used as they
+        are.
         """
-        source, clip = self._binned_for
-        if source is not self._source or clip != self.clip:
+        b = self._shared_binned
+        if b is None:
             self._bin_source()
-        self._cut_rows = self._source.rows
+        else:
+            self._binned = b
+            self._bin_columns = dict(self._shared_columns)
 
     def _agg_reindexer(self, agg):
         # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError

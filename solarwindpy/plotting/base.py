@@ -35,8 +35,9 @@ class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
     Holds the axis labels, the log-scale flags, and the save path that every
-    concrete plot shares. Subclasses implement ``set_data``, ``set_path`` and
-    ``make_plot``.
+    concrete plot shares. Subclasses implement ``_set_data``, which only their
+    constructors call, ``set_path`` and ``make_plot``. To plot other data,
+    build a new plot.
     """
 
     @abstractmethod
@@ -61,12 +62,12 @@ class Base(ABC):
 
     @property
     def data(self):
-        r"""Data stored by ``set_data``, built from the plot's source on each access."""
+        r"""The plot's data, built from its source on each access."""
         return self._source.materialize()
 
     @property
     def clip(self):
-        r"""Clipping option stored by ``set_data``."""
+        r"""Clipping option given to the constructor, None stored as False."""
         return self._clip
 
     @property
@@ -253,8 +254,12 @@ class Base(ABC):
         ax.tick_params(axis="both", which="both", direction="inout")
 
     @abstractmethod
-    def set_data(self):
-        r"""Store the data to plot. Implemented by each subclass."""
+    def _set_data(self):
+        r"""Store the data to plot. Implemented by each subclass.
+
+        Called only by the constructor, so a plot's data never changes after
+        it is built.
+        """
         pass
 
     @abstractmethod
@@ -352,7 +357,7 @@ class PlotWithZdata(Base):
 
     _alim = (None, None)
     _alim_kind = "value"
-    # True where ``set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
     _log_data = False
 
     @property
@@ -449,8 +454,10 @@ class PlotWithZdata(Base):
 
         return agg.where(keep)
 
-    def set_data(self, x, y, z=None, clip_data=False):
-        r"""Store x, y and z as columns of one DataFrame, dropping rows with NaN.
+    def _set_data(self, x, y, z=None, clip_data=False, mask=None):
+        r"""Store x, y and z as the plot's source, keeping rows without NaN.
+
+        Called only by the constructor.
 
         Parameters
         ----------
@@ -462,11 +469,16 @@ class PlotWithZdata(Base):
             Stored as ``self.clip``, None as False. True clips both tails;
             ``"l"`` or ``"u"`` clips only the lower or upper tail (see
             ``Base.clip_data``).
+        mask : pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y; a row is
+            kept where it is True and x, y and z are not NaN.
 
         Raises
         ------
+        TypeError
+            If ``mask`` is not a boolean ``pd.Series``.
         ValueError
-            If no row is left after dropping NaNs.
+            If no row is left, or ``mask`` lacks a label or holds NaN.
         """
         log = self.log._asdict() if self._log_data else None
         self._source = _PlotSource(
@@ -476,8 +488,11 @@ class PlotWithZdata(Base):
             log=log,
             dropna=True,
             owner=self.__class__.__name__,
+            mask=mask,
         )
         self._clip = False if clip_data is None else clip_data
+        self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
+        self._bin_index = getattr(x, "index", None)
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.

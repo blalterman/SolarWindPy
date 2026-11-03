@@ -98,10 +98,9 @@ class TestHist1DBasicFunctionality:
         # Should have the custom path
         assert hist.path == Path("custom")
 
-    def test_hist1d_set_data_with_clipping(self):
-        """Test set_data(x, y, clip=True) stores DataFrame with columns x,y & clip."""
-        hist = Hist1D(self.x_data)
-        hist.set_data(self.x_data, self.y_data, clip=True)
+    def test_hist1d_with_y_and_clipping(self):
+        """Hist1D(x, y, clip_data=True) stores columns x and y, and clip True."""
+        hist = Hist1D(self.x_data, self.y_data, clip_data=True)
 
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
