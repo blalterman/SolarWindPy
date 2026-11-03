@@ -429,13 +429,17 @@ class TestSharedBinnedData:
         """Through nbins=b: z 1, 3 in (0,1]x(0,1] and 10 in (2,3]x(1,2]: means 2 and 10.
 
         Points a and e share (0, 1] x (0, 1]; c is alone in (2, 3] x (1, 2].
+        ``agg`` holds all 3 x 3 bins, x slowest; the other seven are empty, NaN.
         ON FAILURE: the code is wrong.
         """
         frame = POINTS.loc[["a", "c", "e"]]
         z = pd.Series([1.0, 10.0, 3.0], index=["a", "c", "e"])
         b = BinnedData(frame, GRID)
         h = Hist2D(frame.vx, frame.vy, z=z, nbins=b)
-        assert h.agg().to_numpy() == exact([2.0, 10.0])  # hand: (1 + 3) / 2, 10
+        nan = np.nan
+        # hand: (1 + 3) / 2 at (x0, y0), 10 at (x2, y1)
+        expected = [2.0, nan, nan, nan, nan, nan, nan, 10.0, nan]
+        assert h.agg().to_numpy() == exact(expected, nan_ok=True)
 
 
 #: Every plot class's constructor, given x and y and a mask.
@@ -936,14 +940,20 @@ class TestIntegerZ:
     def test_integer_z_is_averaged_per_bin(self):
         """int64 z = 1, 4 in (0, 1] x (0, 1] and 2, 2 in (1, 2] x (0, 1]: means 2.5, 2.
 
+        ``agg`` holds all 3 x 3 bins, x slowest; the other seven are empty, NaN.
+
         ON FAILURE: the code is wrong.
         """
         x = pd.Series([0.5, 0.5, 1.5, 1.5])
         y = pd.Series([0.5, 0.5, 0.5, 0.5])
         z = pd.Series([1, 4, 2, 2], dtype="int64")
         h = Hist2D(x, y, z=z, nbins=EDGES)
-        assert h.agg().to_numpy() == exact([2.5, 2.0])  # hand: (1 + 4) / 2, (2 + 2) / 2
-        assert h.agg(fcn="count").to_numpy() == exact([2.0, 2.0])  # hand
+        nan = np.nan
+        # hand: (1 + 4) / 2 at (x0, y0), (2 + 2) / 2 at (x1, y0)
+        means = [2.5, nan, nan, 2.0, nan, nan, nan, nan, nan]
+        counts = [2.0, nan, nan, 2.0, nan, nan, nan, nan, nan]  # hand
+        assert h.agg().to_numpy() == exact(means, nan_ok=True)
+        assert h.agg(fcn="count").to_numpy() == exact(counts, nan_ok=True)
 
 
 # log10 of 2, 20, 200, 2000 is not an integer, so a result cast back to int64

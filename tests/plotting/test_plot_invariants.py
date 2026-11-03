@@ -83,14 +83,6 @@ class VacuousFixture(AssertionError):
 #: far fewer identical (x, y) points than this, so no cell splits forever.
 MIN_PER_BIN = 40
 
-DEFECT_12 = (
-    "defect #12, fixed in Phase D unit D0: Hist2D.id_data_above_contour raises "
-    "TypeError 'Categorical is not ordered for operation min' because the bins "
-    "are stored as an unordered CategoricalIndex; remove this marker when D0 "
-    "lands"
-)
-
-
 # ---------------------------------------------------------------------------
 # The plot classes
 # ---------------------------------------------------------------------------
@@ -508,88 +500,6 @@ def _sorted_keys(keys):
 # Parametrization
 # ---------------------------------------------------------------------------
 
-#: (class, case, variant) where ``id_data_above_contour`` raises defect #12.
-#: Strict: when D0 stores the bins as an IntervalIndex every entry XPASSes,
-#: and the set is deleted with the marker.
-DEFECT_12_RAISES = {
-    ("BetaRPlot", "clean", "private:auto"),
-    ("BetaRPlot", "clean", "private:knuth"),
-    ("BetaRPlot", "clip_outlier", "private:auto"),
-    ("BetaRPlot", "clip_outlier", "private:int"),
-    ("BetaRPlot", "clip_outlier", "private:knuth"),
-    ("BetaRPlot", "counts", "private:auto"),
-    ("BetaRPlot", "counts", "private:knuth"),
-    ("BetaRPlot", "integer_z", "private:auto"),
-    ("BetaRPlot", "integer_z", "private:knuth"),
-    ("BetaRPlot", "log_zero_negative", "private:auto"),
-    ("BetaRPlot", "log_zero_negative", "private:knuth"),
-    ("BetaRPlot", "mask", "private:auto"),
-    ("BetaRPlot", "mask", "private:knuth"),
-    ("BetaRPlot", "mismatched_index", "private:auto"),
-    ("BetaRPlot", "mismatched_index", "private:int"),
-    ("BetaRPlot", "mismatched_index", "private:knuth"),
-    ("BetaRPlot", "multiindex", "private:auto"),
-    ("BetaRPlot", "multiindex", "private:knuth"),
-    ("BetaRPlot", "nan_x", "private:auto"),
-    ("BetaRPlot", "nan_x", "private:knuth"),
-    ("BetaRPlot", "nan_y", "private:auto"),
-    ("BetaRPlot", "nan_y", "private:knuth"),
-    ("BetaRPlot", "nan_z", "private:auto"),
-    ("Hist2D", "clean", "private:auto"),
-    ("Hist2D", "clean", "private:edges"),
-    ("Hist2D", "clean", "private:intervals_left"),
-    ("Hist2D", "clean", "private:knuth"),
-    ("Hist2D", "clean", "shared:edges"),
-    ("Hist2D", "clean", "shared:intervals_left"),
-    ("Hist2D", "clip_outlier", "private:auto"),
-    ("Hist2D", "clip_outlier", "private:edges"),
-    ("Hist2D", "clip_outlier", "private:int"),
-    ("Hist2D", "clip_outlier", "private:intervals_left"),
-    ("Hist2D", "clip_outlier", "private:knuth"),
-    ("Hist2D", "clip_outlier", "shared:edges"),
-    ("Hist2D", "clip_outlier", "shared:intervals_left"),
-    ("Hist2D", "counts", "private:auto"),
-    ("Hist2D", "counts", "private:edges"),
-    ("Hist2D", "counts", "private:intervals_left"),
-    ("Hist2D", "counts", "private:knuth"),
-    ("Hist2D", "counts", "shared:edges"),
-    ("Hist2D", "counts", "shared:intervals_left"),
-    ("Hist2D", "integer_z", "private:auto"),
-    ("Hist2D", "integer_z", "private:knuth"),
-    ("Hist2D", "log_zero_negative", "private:auto"),
-    ("Hist2D", "log_zero_negative", "private:knuth"),
-    ("Hist2D", "mask", "private:edges"),
-    ("Hist2D", "mask", "private:intervals_left"),
-    ("Hist2D", "mask", "shared:edges"),
-    ("Hist2D", "mask", "shared:intervals_left"),
-    ("Hist2D", "mismatched_index", "private:auto"),
-    ("Hist2D", "mismatched_index", "private:edges"),
-    ("Hist2D", "mismatched_index", "private:intervals_left"),
-    ("Hist2D", "mismatched_index", "shared:edges"),
-    ("Hist2D", "mismatched_index", "shared:intervals_left"),
-    ("Hist2D", "multiindex", "private:auto"),
-    ("Hist2D", "multiindex", "private:knuth"),
-    ("Hist2D", "nan_x", "private:auto"),
-    ("Hist2D", "nan_x", "private:edges"),
-    ("Hist2D", "nan_x", "private:intervals_left"),
-    ("Hist2D", "nan_x", "private:knuth"),
-    ("Hist2D", "nan_x", "shared:edges"),
-    ("Hist2D", "nan_x", "shared:intervals_left"),
-    ("Hist2D", "nan_y", "private:auto"),
-    ("Hist2D", "nan_y", "private:edges"),
-    ("Hist2D", "nan_y", "private:intervals_left"),
-    ("Hist2D", "nan_y", "private:knuth"),
-    ("Hist2D", "nan_y", "shared:edges"),
-    ("Hist2D", "nan_y", "shared:intervals_left"),
-    ("Hist2D", "nan_z", "private:auto"),
-    ("Hist2D", "nan_z", "private:edges"),
-    ("Hist2D", "nan_z", "private:intervals_left"),
-    ("Hist2D", "nan_z", "private:knuth"),
-    ("Hist2D", "nan_z", "shared:edges"),
-    ("Hist2D", "nan_z", "shared:intervals_left"),
-}
-
-
 DEFECT_13 = (
     "defect #13, fixed in Phase D group D2 with #5: Hist2D.project_1d passes the "
     "stored log10|x| through as a linear y when the other axis is x (it converts "
@@ -640,12 +550,6 @@ def _params(classes, methods=None, known=None):
             for case_name in CASES:
                 for variant in variants:
                     marks = ()
-                    if method == "id_data_above_contour" and (
-                        (cls.__name__, case_name, variant) in DEFECT_12_RAISES
-                    ):
-                        marks = pytest.mark.xfail(
-                            strict=True, raises=TypeError, reason=DEFECT_12
-                        )
                     key = (cls.__name__, case_name, variant)
                     if methods is not None:
                         key = (cls.__name__, method, case_name, variant)

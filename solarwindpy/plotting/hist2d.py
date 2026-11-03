@@ -185,23 +185,19 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         elif axnorm == "d":
             N = agg.sum().sum()
             # Widths are in the binned variable, log10 on a log axis.
-            dx = self._bin_widths(agg.index.get_level_values("x").unique())
-            dy = self._bin_widths(agg.index.get_level_values("y").unique())
+            dx = self._bin_widths(self.intervals["x"])
+            dy = self._bin_widths(self.intervals["y"])
             agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
 
         elif axnorm == "cd":
             N = agg.groupby(level="x").sum()
-            dy = self._bin_widths(
-                pd.IntervalIndex(agg.index.get_level_values("y").unique()).sort_values()
-            )
+            dy = self._bin_widths(self.intervals["y"])
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="x").divide(dy, level="y")
 
         elif axnorm == "rd":
             N = agg.groupby(level="y").sum()
-            dx = self._bin_widths(
-                pd.IntervalIndex(agg.index.get_level_values("x").unique()).sort_values()
-            )
+            dx = self._bin_widths(self.intervals["x"])
             # Divide by total in each column and each row's width
             agg = agg.divide(N, level="y").divide(dx, level="x")
 
@@ -210,13 +206,11 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     def agg(self, **kwargs):
         r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
 
-        Every bin is present in the result; bins outside ``alim`` are NaN.
-        ``kwargs`` are passed to ``AggPlot.agg``.
+        Every (x, y) bin is present in the result, indexed by its x and y
+        intervals; a bin no row falls in, or outside ``alim``, is NaN.
+        ``kwargs`` are passed to ``AggPlot.agg``, which normalizes.
         """
-        agg = super().agg(**kwargs)
-        agg = self._axis_normalizer(agg)
-        agg = self._agg_reindexer(agg)
-        return self._apply_alim(agg)
+        return self._apply_alim(super().agg(**kwargs))
 
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(
@@ -277,17 +271,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         if use_edges:
             x = self.edges["x"]
             y = self.edges["y"]
-            expected_offset = 1  # edges have n+1 points for n bins
         else:
             x = self.intervals["x"].mid
             y = self.intervals["y"].mid
-            expected_offset = 0  # centers have n points for n bins
-
-        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
-        if x.size != agg.shape[1] + expected_offset:
-            agg = agg.reindex(columns=self.categoricals["x"])
-        if y.size != agg.shape[0] + expected_offset:
-            agg = agg.reindex(index=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
@@ -341,12 +327,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
         y = self.edges["y"]
-
-        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
-        if x.size != agg.shape[1] + 1:
-            agg = agg.reindex(columns=self.categoricals["x"])
-        if y.size != agg.shape[0] + 1:
-            agg = agg.reindex(index=self.categoricals["y"])
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -768,12 +748,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.intervals["x"].mid
         y = self.intervals["y"].mid
-
-        # HACK: Works around `gb.agg(observed=False)` pandas bug. (GH32381)
-        if x.size != agg.shape[1]:
-            agg = agg.reindex(columns=self.categoricals["x"])
-        if y.size != agg.shape[0]:
-            agg = agg.reindex(index=self.categoricals["y"])
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 

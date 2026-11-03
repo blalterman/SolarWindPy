@@ -56,15 +56,23 @@ class AggPlot(base.Base):
 
     @property
     def edges(self):
-        return {k: v.left.union(v.right) for k, v in self.intervals.items()}
+        r"""Bin edges per axis, a float ``pd.Index`` each.
 
-    @property
-    def categoricals(self):
-        return dict(self._categoricals)
+        The edges the rows were binned by, as the plot's ``BinnedData`` stores
+        them.
+        """
+        columns = self._bin_columns
+        return {k: pd.Index(self._binned.edges(columns[k])) for k in self._gb_axes}
 
     @property
     def intervals(self):
-        return {k: pd.IntervalIndex(v) for k, v in self.categoricals.items()}
+        r"""Bins per axis, a ``pd.IntervalIndex`` each."""
+        return dict(self._intervals)
+
+    @property
+    def categoricals(self):
+        r"""Alias of ``intervals``: the bins per axis, a ``pd.IntervalIndex`` each."""
+        return self.intervals
 
     @property
     def cut(self):
@@ -130,16 +138,15 @@ class AggPlot(base.Base):
 
         Parameters
         ----------
-        bins : array-like of pd.Interval
-            The bins, e.g. an ``IntervalIndex`` or a categorical index of
-            intervals.
+        bins : pd.IntervalIndex
+            The bins.
 
         Returns
         -------
         pd.Series
             Each bin's width, indexed by ``bins``.
         """
-        return pd.Series(pd.IntervalIndex(bins).length, index=bins)
+        return pd.Series(bins.length, index=bins)
 
     @staticmethod
     def _divide_by_max(agg):
@@ -380,13 +387,9 @@ class AggPlot(base.Base):
             if clipped_for_memory:
                 self._warn_values_outside_bins(k, d, b)
 
-            zipped = zip(b[:-1], b[1:])
-            i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
+            intervals[k] = pd.IntervalIndex.from_breaks(b, closed=closed)
 
-            intervals[k] = pd.CategoricalIndex(i)
-
-        intervals = tuple(intervals.items())
-        self._categoricals = intervals
+        self._intervals = tuple(intervals.items())
 
     def _finite_by_axis(self, nbins):
         r"""Each binned axis's finite values in ``data``, for computing its edges.
@@ -458,9 +461,7 @@ class AggPlot(base.Base):
 
         self._shared_binned = b
         self._shared_columns = columns
-        self._categoricals = tuple(
-            (k, pd.CategoricalIndex(b.intervals(col))) for k, col in columns.items()
-        )
+        self._intervals = tuple((k, b.intervals(col)) for k, col in columns.items())
 
     def _bin_source(self):
         r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
@@ -551,18 +552,44 @@ class AggPlot(base.Base):
             self._binned = b
             self._bin_columns = dict(self._shared_columns)
 
-    def _agg_reindexer(self, agg):
-        # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError
-        # with mixed Categoricals and NaNs. (20200229)
-        # Ensure all bins are represented in the data. (20190605)
-        for k, v in self.categoricals.items():
-            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-            # Name the bins so a 1-D result keeps its axis name, e.g. "x".
-            agg = agg.reindex(
-                index=v.rename(k), level=k if agg.index.nlevels > 1 else None
-            )
+    def _kept_index(self):
+        r"""Labels of the rows the plot keeps, the index of ``cut``."""
+        rows = self._source.rows
+        index = self._source.index
+        return index if rows is None else index[rows]
 
-        return agg
+    def _bin_codes(self):
+        r"""Bin code of each kept row on each binned axis, -1 off the bins."""
+        on = self._cut_on()
+        columns = self._bin_columns
+        return {k: self._binned.codes(columns[k], on=on) for k in self._gb_axes}
+
+    def _grouped_by_bin(self):
+        r"""The aggregated column on the binned rows, grouped by joint bin.
+
+        The group keys are positions in the full bin grid of ``_bin_grid``:
+        the joint bin's codes, the first axis's varying slowest.
+        """
+        intervals = self.intervals
+        flat = None
+        inside = None
+        for k, codes in self._bin_codes().items():
+            codes = codes.astype(np.intp)
+            if flat is None:
+                flat = codes
+                inside = codes >= 0
+            else:
+                flat = flat * len(intervals[k]) + codes
+                inside &= codes >= 0
+        target = self._source.take(self.agg_axes)
+        return target[inside].groupby(flat[inside])
+
+    def _bin_grid(self):
+        r"""Every bin: an ``IntervalIndex`` in 1-D, their product in 2-D."""
+        intervals = [self.intervals[k].rename(k) for k in self._gb_axes]
+        if len(intervals) == 1:
+            return intervals[0]
+        return pd.MultiIndex.from_product(intervals, names=list(self._gb_axes))
 
     def agg(self, fcn=None, **kwargs):
         r"""Perform the aggregation along the agg axes.
@@ -572,17 +599,20 @@ class AggPlot(base.Base):
         `fcn` allows you to specify a specific function for aggregation. Otherwise,
         automatically choose "count" or "mean" based on the uniqueness of the aggregated
         values.
+
+        The occupied bins are normalized by ``_axis_normalizer``. Every bin is
+        then in the result, indexed by its interval on each axis
+        (``intervals``); a bin no row falls in is NaN.
         """
-        cut = self.cut
         tko = self.agg_axes
 
         lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
         self.logger.info(
-            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({list(self._gb_axes)})\n%s",
             "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
         )
 
-        gb = self.grouped
+        gb = self._grouped_by_bin()
 
         if fcn is None:
             fcn = "count" if self._source.counts else "mean"
@@ -600,6 +630,15 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
+        # Normalize the occupied bins only, so sums over bins never see the
+        # NaN of an empty one; then fill the grid.
+        grid = self._bin_grid()
+        agg = agg.set_axis(grid[agg.index.to_numpy()])
+        agg = self._axis_normalizer(agg)
+        return agg.reindex(grid)
+
+    def _axis_normalizer(self, agg):
+        r"""Normalize ``agg``, the occupied bins, by ``axnorm``; identity here."""
         return agg
 
     def _joint_bin_mask(self, kept):
@@ -616,19 +655,17 @@ class AggPlot(base.Base):
             True where the observation's bin across every column of ``cut``
             (e.g. the joint (x, y) bin in 2-D) is in ``kept``.
         """
-        cut = self.cut
+        intervals = self.intervals
         observed = []
         selected = []
-        for k, v in cut.items():
-            # Compare category codes: the Categoricals fail with some pandas numpy
-            # ufuncs (20200611), and both sides are coded by the same categories.
-            categories = v.cat.categories
-            observed.append(v.cat.codes.to_numpy())
-            selected.append(categories.get_indexer(kept.get_level_values(k)))
+        # Compare bin codes: both sides are positions in `intervals`.
+        for k, codes in self._bin_codes().items():
+            observed.append(codes)
+            selected.append(intervals[k].get_indexer(kept.get_level_values(k)))
 
         observed = pd.MultiIndex.from_arrays(observed)
         selected = pd.MultiIndex.from_arrays(selected)
-        return pd.Series(observed.isin(selected), index=cut.index)
+        return pd.Series(observed.isin(selected), index=self._kept_index())
 
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.

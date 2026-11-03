@@ -1870,23 +1870,13 @@ class TestIdDataAboveContour:
         labelled = known_hist.id_data_above_contour(level)
         assert labelled.notna().sum() < known_hist.data.index.size
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=TypeError,
-        reason=(
-            "defect #12, fixed in Phase D unit D0: Hist2D.id_data_above_contour "
-            "raises TypeError 'Categorical is not ordered for operation min' "
-            "(hist2d.py id_data_above_contour, bins stored as an unordered "
-            "CategoricalIndex); remove this marker when D0 lands"
-        ),
-    )
     def test_rows_in_bins_at_or_above_the_level_are_labelled_by_their_x_bin(self):
         """Counts (0,1]x(0,1]: 2, (0,1]x(1,2]: 1, (1,2]x(0,1]: 1; level 2 labels rows 0, 1.
 
         By hand: only bin (0, 1] x (0, 1] reaches 2, so rows 0 and 1 get the x
         bin (0, 1]; rows 2 and 3 sit in bins of count 1 and stay NaN.
 
-        ON FAILURE: (unexpected pass) the D0 fix has landed; drop the xfail marker.
+        ON FAILURE: the code is wrong.
         """
         edges = np.array([0.0, 1.0, 2.0, 3.0])
         x = pd.Series([0.5, 0.5, 0.5, 1.5])

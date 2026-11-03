@@ -663,8 +663,10 @@ class BinnedData:
 
     >>> h = Hist2D(frame["a"], frame["b"], nbins=b)
     >>> low_c = Hist2D(frame["a"], frame["b"], nbins=b, mask=frame["c"] < 0.5)
-    >>> h.agg().shape, low_c.agg().shape
-    ((24,), (22,))
+    >>> h.agg().shape, low_c.agg().shape  # every (a, b) bin, NaN where empty
+    ((32,), (32,))
+    >>> int(h.agg().count()), int(low_c.agg().count())
+    (24, 22)
     >>> int(h.agg().sum()), int(low_c.agg().sum()), int((frame["c"] < 0.5).sum())
     (1000, 519, 519)
 

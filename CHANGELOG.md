@@ -241,6 +241,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `PolyCollection`. Each cell's vertices are its mesh edges exactly, where a
     `Rectangle` placed its far corners at the lower-left corner plus the width and height.
     Colours and the cells drawn are unchanged.
+  - Bins are stored once as an `IntervalIndex`: `intervals`, `categoricals` (now an alias
+    for the same object) and the levels of `agg()`'s index are `IntervalIndex`, not
+    `CategoricalIndex`. `edges` is a float `pd.Index` of the bin edges.
+  - `Hist2D.agg()` returns the full bin grid, one row per (x, y) bin pair, with NaN where a
+    bin is empty, as its docstring states. It previously returned the occupied bins only,
+    so the length of `agg()` changes for every caller, and a count grid with an empty bin
+    is float. Values in occupied bins, the arrays `make_plot` and `plot_contours` draw, and
+    every selection are unchanged.
 
 ### Changed
 
@@ -405,6 +413,8 @@ These change computed values; rerun any analysis that used them.
   labelled. Values were 9.2 times too small; ratios and trends are unchanged.
 - `Ion.kinetic_energy_flux` / `Plasma.kinetic_energy_flux` raised `AttributeError` on
   every call; it now returns uW m^-2.
+- `Hist2D.id_data_above_contour` no longer raises `TypeError: Categorical is not ordered
+  for operation min` for bin specifications whose bins came out unordered.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.

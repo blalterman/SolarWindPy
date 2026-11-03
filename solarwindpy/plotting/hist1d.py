@@ -6,7 +6,6 @@ __all__ = [
 ]
 
 import numpy as np
-import pandas as pd
 import matplotlib as mpl
 
 from types import FunctionType
@@ -246,11 +245,7 @@ class Hist1D(AggPlot):
             if (fcn != "count") & (fcn is not None):
                 raise ValueError("Unable to calculate a PDF with non-count aggregation")
 
-        agg = super(Hist1D, self).agg(**kwargs)
-        agg = self._axis_normalizer(agg)
-        agg = self._agg_reindexer(agg)
-
-        return agg
+        return super(Hist1D, self).agg(**kwargs)
 
     def set_labels(self, **kwargs):
         if "z" in kwargs:
@@ -310,7 +305,7 @@ class Hist1D(AggPlot):
             and ``linestyle`` default to the central line's.
         """
         agg = self.agg(fcn=fcn)
-        x = pd.IntervalIndex(agg.index).mid
+        x = agg.index.mid
 
         dx = None  # Initialize default value. Necessary for `transpose_axes`.
         if fcn is None or isinstance(fcn, (str, FunctionType)):
