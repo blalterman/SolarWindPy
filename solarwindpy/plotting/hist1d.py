@@ -137,8 +137,9 @@ class Hist1D(AggPlot):
         ``y = 1``. ``clip`` is stored as ``self.clip``, a ``ClipAxes``, None
         as False. ``mask`` is a boolean Series aligned by label to the index
         of ``x``. Rows the mask of ``within``, a shared ``BinnedData``,
-        excludes are not kept either.
+        excludes are not kept either. A second call raises ``ValueError``.
         """
+        self._claim_data()
         self._source = _PlotSource(
             {"x": x},
             "y",
@@ -170,7 +171,6 @@ class Hist1D(AggPlot):
 
         self._axnorm = new
 
-    @base._selection_call
     def construct_cdf(self, only_plotted=True):
         r"""Build the empirical cumulative distribution of the observed x values.
 
@@ -256,7 +256,6 @@ class Hist1D(AggPlot):
 
         super(Hist1D, self).set_labels(y=y, **kwargs)
 
-    @base._plot_call
     def make_plot(
         self,
         ax=None,
@@ -402,7 +401,6 @@ class Hist1D(AggPlot):
 
         return ax, out
 
-    @base._selection_call
     def take_data_in_yrange_across_x(
         self,
         ranges_by_x,

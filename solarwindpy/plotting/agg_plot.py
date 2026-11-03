@@ -438,13 +438,6 @@ class AggPlot(base.Base):
             (k, pd.CategoricalIndex(b.intervals(col))) for k, col in columns.items()
         )
 
-    def _source_status(self):
-        r"""A shared ``BinnedData``'s ``source_status``, else the source's."""
-        shared = getattr(self, "_shared_binned", None)
-        if shared is not None:
-            return shared.source_status()
-        return super()._source_status()
-
     def _bin_source(self):
         r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
 
@@ -613,7 +606,6 @@ class AggPlot(base.Base):
         selected = pd.MultiIndex.from_arrays(selected)
         return pd.Series(observed.isin(selected), index=cut.index)
 
-    @base._selection_call
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
 
@@ -631,7 +623,6 @@ class AggPlot(base.Base):
 
         return tk
 
-    @base._selection_call
     def get_subset_above_threshold(self, threshold, fcn="count"):
         r"""Get the subset of data above a given threshold using `fcn` to.
 

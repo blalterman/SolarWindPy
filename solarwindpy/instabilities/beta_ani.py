@@ -3,7 +3,6 @@
 __all__ = ["BetaRPlot"]
 
 
-from ..plotting.base import _plot_call
 from ..plotting.binned import BinnedData
 from ..plotting.hist2d import Hist2D
 from ..plotting.labels.base import TeXlabel
@@ -75,7 +74,6 @@ class BetaRPlot(Hist2D):
         self.set_path("auto")
         self.set_clim(5, None)
 
-    @_plot_call
     def make_plot(self, **kwargs):
         """Plot the histogram.
 

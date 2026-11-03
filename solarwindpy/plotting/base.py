@@ -14,8 +14,6 @@ __all__ = [
     "PlotWithZdata",
 ]
 
-import functools
-import inspect
 import logging
 import numpy as np
 import pandas as pd
@@ -36,85 +34,6 @@ ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
-#: Logged when a plot's source no longer holds the values it was binned from.
-_SOURCE_CHANGED = (
-    "source changed since binning; plots reflect data at binning time; "
-    "rebuild BinnedData to update"
-)
-#: Logged when the frame a plot's source came from has been garbage collected.
-_SOURCE_GONE = (
-    "source frame no longer exists; cannot verify it is unchanged since binning"
-)
-
-_ROLES = ("plot", "selection")
-
-
-def _role_call(role):
-    r"""Decorator giving a method ``role`` and checking the plot's source.
-
-    The check runs once per outermost call on an instance: a per-instance
-    depth counter skips it for any decorated method called, on the same
-    plot, while another is running. The wrapper keeps the method's name,
-    docstring and signature (``functools.wraps``) and carries
-    ``__swp_role__ = role``.
-    """
-
-    def decorate(method):
-        @functools.wraps(method)
-        def checked(self, *args, **kwargs):
-            depth = self.__dict__.get("_swp_call_depth", 0)
-            self._swp_call_depth = depth + 1
-            try:
-                if depth == 0:
-                    self._check_source()
-                return method(self, *args, **kwargs)
-            finally:
-                self._swp_call_depth = depth
-
-        checked.__swp_role__ = role
-        return checked
-
-    return decorate
-
-
-#: Marks a method that draws: it checks the plot's source once per outermost call.
-_plot_call = _role_call("plot")
-#: Marks a method that selects measurements: it checks the source likewise.
-_selection_call = _role_call("selection")
-
-
-def methods_with_role(cls, role):
-    r"""Names of the methods of ``cls`` that have ``role``, inherited ones included.
-
-    A method with a role checks, once per outermost call, that the data the
-    plot was built from is unchanged, and logs a warning if it is not.
-
-    Parameters
-    ----------
-    cls : type
-        A plot class.
-    role : {"plot", "selection"}
-        ``"plot"`` for methods that draw, ``"selection"`` for methods that
-        select measurements.
-
-    Returns
-    -------
-    frozenset of str
-
-    Raises
-    ------
-    ValueError
-        If ``role`` is not ``"plot"`` or ``"selection"``.
-    """
-    if role not in _ROLES:
-        raise ValueError(f"role must be one of {_ROLES!r}, got {role!r}.")
-    return frozenset(
-        name
-        for name in dir(cls)
-        if getattr(inspect.getattr_static(cls, name, None), "__swp_role__", None)
-        == role
-    )
-
 
 class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
@@ -123,6 +42,13 @@ class Base(ABC):
     concrete plot shares. Subclasses implement ``_set_data``, which only their
     constructors call, ``set_path`` and ``make_plot``. To plot other data,
     build a new plot.
+
+    A built plot is a snapshot of its data. ``_set_data`` runs once per plot
+    (``_claim_data`` raises ``ValueError`` on a second call), and pandas
+    copies on write, so editing the caller's frame or Series afterwards does
+    not change the plot. Not guarded: editing a NumPy array that a Series
+    wraps without a copy (``pd.Series(arr, copy=False)``) after the plot is
+    built changes what the plot holds.
     """
 
     @abstractmethod
@@ -149,23 +75,6 @@ class Base(ABC):
     def data(self):
         r"""The plot's data, built from its source on each access."""
         return self._source.materialize()
-
-    def _source_status(self):
-        r"""``source_status`` of what the plot reads: see ``_check_source``."""
-        return self._source.source_status()
-
-    def _check_source(self):
-        r"""Log a warning if the plot's source changed since it was binned.
-
-        Run by every method with a role, once per outermost call. With a
-        shared ``BinnedData`` it checks the frame that object was built from;
-        otherwise, the columns the plot holds.
-        """
-        status = self._source_status()
-        if status == "changed":
-            self.logger.warning(_SOURCE_CHANGED)
-        elif status == "unverifiable":
-            self.logger.warning(_SOURCE_GONE)
 
     #: The axes the ``clip`` argument applies to, in ``ClipAxes`` field order.
     _clipped_axes = ("x", "y")
@@ -402,9 +311,24 @@ class Base(ABC):
         r"""Store the data to plot. Implemented by each subclass.
 
         Called only by the constructor, so a plot's data never changes after
-        it is built.
+        it is built. Each implementation calls ``_claim_data`` first.
         """
         pass
+
+    def _claim_data(self):
+        r"""Mark the plot's data as set; raise if it already was.
+
+        Raises
+        ------
+        ValueError
+            If ``_set_data`` already ran on this plot.
+        """
+        if self.__dict__.get("_data_set", False):
+            raise ValueError(
+                f"{self.__class__.__name__} data is set once, by the constructor; "
+                "to plot other data, build a new plot."
+            )
+        self._data_set = True
 
     @abstractmethod
     def make_plot(self):
@@ -629,8 +553,10 @@ class PlotWithZdata(Base):
         KeyError
             If ``clip`` names an axis the plot does not clip.
         ValueError
-            If no row is left, or ``mask`` lacks a label or holds NaN.
+            If no row is left, or ``mask`` lacks a label or holds NaN; or if
+            the plot's data is already set.
         """
+        self._claim_data()
         log = self.log._asdict() if self._log_data else None
         self._source = _PlotSource(
             {"x": x, "y": y},

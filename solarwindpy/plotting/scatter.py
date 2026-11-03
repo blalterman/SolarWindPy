@@ -56,7 +56,6 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
         ax.update_datalim(corners)
         ax.autoscale_view()
 
-    @base._plot_call
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
 

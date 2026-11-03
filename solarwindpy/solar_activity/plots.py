@@ -101,8 +101,9 @@ class IndicatorPlot(base.Base):
     def _set_data(self, indicator, ykey, plasma_index):
         r"""Set :attr:`indicator`, :attr:`ykey`, and :attr:`plasma_index`.
 
-        Called only by the constructor.
+        Called only by the constructor; a second call raises ``ValueError``.
         """
+        self._claim_data()
         self._indicator = indicator
         self._plasma_index = plasma_index
         self._ykey = ykey
