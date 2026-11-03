@@ -78,6 +78,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         self.make_cut()
         self.set_clim(None, None)
 
+    # ``set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
+    _log_data = True
+
     @property
     def _gb_axes(self):
         return ("x", "y")
@@ -102,16 +105,6 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             z.build_label()
 
         super().set_labels(z=z, **kwargs)
-
-    def set_data(self, x, y, z, clip):
-        r"""Store the data, taking ``log10(abs())`` of each axis flagged in ``self.log``."""
-        super().set_data(x, y, z, clip)
-        data = self.data
-        if self.log.x:
-            data.loc[:, "x"] = np.log10(np.abs(data.loc[:, "x"]))
-        if self.log.y:
-            data.loc[:, "y"] = np.log10(np.abs(data.loc[:, "y"]))
-        self._data = data
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
@@ -339,7 +332,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         self._format_axis(ax)
 
-        color_plot = self.data.loc[:, self.agg_axes].dropna().unique().size > 1
+        color_plot = not self._source.counts
         if (alpha_fcn is not None) and color_plot:
             self.logger.warning(
                 "Make sure you verify alpha actually set. I don't yet trust this."
@@ -825,7 +818,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         data = self.data
 
-        if data.loc[:, "z"].unique().size >= 2:
+        if not self._source.counts:
             # Without z every point stores z = 1, so two or more distinct values
             # (two included) mean the caller passed z.
             other = "z"
@@ -835,12 +828,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             other = possible_axes.pop()
 
         logx = self.log._asdict()[axis]
-        x = self.data.loc[:, axis]
+        x = data.loc[:, axis]
         if logx:
             # Need to convert back to regular from log-space for data setting.
             x = 10.0**x
 
-        y = self.data.loc[:, other] if not project_counts else None
+        y = data.loc[:, other] if not project_counts else None
         logy = False  # Defined b/c project_counts option.
         if y is not None and (other == "y"):
             # Only select y-values plotted: those the histogram puts in a y-bin,
@@ -977,10 +970,11 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             `level`. This object is purposely the same length as the data stored by
             Hist2D and can be used in groupby operations.
         """
-        x = self.data.x
-        y = self.data.y
+        data = self.data
+        x = data.x
+        y = data.y
         # Object dtype, because the values written below are `pd.Interval`s.
-        above_contour = pd.Series(np.nan, self.data.index, dtype=object)
+        above_contour = pd.Series(np.nan, data.index, dtype=object)
         for k, v in self.agg().unstack("x").items():
             tk = v >= level
             if not tk.any():

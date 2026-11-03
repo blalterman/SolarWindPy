@@ -63,7 +63,7 @@ class AggPlot(base.Base):
     @property
     def agg_axes(self):
         r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
-        tko = [c for c in self.data.columns if c not in self._gb_axes]
+        tko = [c for c in self._source.columns if c not in self._gb_axes]
         assert len(tko) == 1
         tko = tko[0]
         return tko
@@ -72,13 +72,10 @@ class AggPlot(base.Base):
     def joint(self):
         r"""Combines the categorical and continuous data for `Groupby`."""
         cut = self.cut
-        tk_target = self.agg_axes
-        target = self.data.loc[cut.index, tk_target]
+        target = self._source.take(self.agg_axes)
 
         mi = pd.MultiIndex.from_frame(cut)
-        target.index = mi
-
-        return target
+        return target.set_axis(mi)
 
     @property
     def grouped(self):
@@ -397,11 +394,7 @@ class AggPlot(base.Base):
         gb = self.grouped
 
         if fcn is None:
-            other = self.data.loc[cut.index, tko]
-            if other.dropna().unique().size == 1:
-                fcn = "count"
-            else:
-                fcn = "mean"
+            fcn = "count" if self._source.counts else "mean"
 
         agg = gb.agg(fcn, **kwargs)  # .loc[:, tko]
 

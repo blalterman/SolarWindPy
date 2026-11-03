@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 from . import base
 from . import labels
 from .agg_plot import AggPlot
+from .binned import _PlotSource
 
 
 class Hist1D(AggPlot):
@@ -98,13 +99,20 @@ class Hist1D(AggPlot):
     set_path.__doc__ = base.Base.set_path.__doc__
 
     def set_data(self, x, y, clip):
-        data = pd.DataFrame({"x": np.log10(np.abs(x)) if self.log.x else x})
+        r"""Store x, and y aligned to it, keeping every row.
 
-        if y is None:
-            y = pd.Series(1, index=x.index)
-        data.loc[:, "y"] = y
-
-        self._data = data
+        ``x`` is stored as ``log10(abs(x))`` when ``self.log.x`` is set. If
+        ``y`` is None, every point gets ``y = 1``. ``clip`` is stored as
+        ``self.clip``, None as False.
+        """
+        self._source = _PlotSource(
+            {"x": x},
+            "y",
+            y,
+            log={"x": self.log.x},
+            dropna=False,
+            owner=self.__class__.__name__,
+        )
         self._clip = False if clip is None else clip
 
     def set_axnorm(self, new):

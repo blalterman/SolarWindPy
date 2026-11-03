@@ -510,6 +510,9 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
         self.calc_initial_bins(initial_bins)
         self.set_clim(None, None)
 
+    # ``set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
+    _log_data = True
+
     @property
     def clim(self):
         r"""``RangeLimits`` of the minimum and maximum counts per cell."""
@@ -539,10 +542,7 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
         self.logger.debug("aggregating z-data")
 
         if fcn is None:
-            if self.data.loc[:, "z"].unique().size == 1:
-                fcn = "count"
-            else:
-                fcn = "mean"
+            fcn = "count" if self._source.counts else "mean"
 
         gb = self.grouped
         agg = gb.agg(fcn)
@@ -576,7 +576,7 @@ class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
             If the mesh categories and the data differ in length.
         """
         cat = self.mesh.cat
-        z = self.data.loc[:, "z"]
+        z = self._source.take("z")
 
         if not (cat.size == z.size):
             raise ValueError(f"""`cat` must have same size as data's first dimesion
@@ -661,8 +661,9 @@ data : {z.size}
         and y are clipped with ``AggPlot.clip_data`` before they are placed
         in the mesh.
         """
-        x = self.data.loc[:, "x"]
-        y = self.data.loc[:, "y"]
+        data = self.data
+        x = data.loc[:, "x"]
+        y = data.loc[:, "y"]
         if self.clip:
             x = AggPlot.clip_data(x, self.clip)
             y = AggPlot.clip_data(y, self.clip)
@@ -686,16 +687,6 @@ data : {z.size}
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
         self._clim = base.RangeLimits(lower, upper)
-
-    def set_data(self, x, y, z, clip):
-        r"""Store the data, taking ``log10(abs())`` of each axis flagged in ``log``."""
-        super().set_data(x, y, z, clip)
-        data = self.data
-        if self.log.x:
-            data.loc[:, "x"] = np.log10(np.abs(data.loc[:, "x"]))
-        if self.log.y:
-            data.loc[:, "y"] = np.log10(np.abs(data.loc[:, "y"]))
-        self._data = data
 
     def make_plot(
         self,

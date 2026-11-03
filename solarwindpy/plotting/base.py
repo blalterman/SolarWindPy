@@ -24,6 +24,8 @@ from collections import namedtuple
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
+from .binned import _PlotSource
+
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
@@ -59,8 +61,8 @@ class Base(ABC):
 
     @property
     def data(self):
-        r"""Data stored by ``set_data``."""
-        return self._data
+        r"""Data stored by ``set_data``, built from the plot's source on each access."""
+        return self._source.materialize()
 
     @property
     def clip(self):
@@ -369,6 +371,8 @@ class PlotWithZdata(Base):
 
     _alim = (None, None)
     _alim_kind = "value"
+    # True where ``set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    _log_data = False
 
     @property
     def alim(self):
@@ -483,19 +487,15 @@ class PlotWithZdata(Base):
         ValueError
             If no row is left after dropping NaNs.
         """
-        data = pd.DataFrame({"x": x, "y": y})
-
-        if z is None:
-            z = pd.Series(1, index=data.index)
-
-        data.loc[:, "z"] = z
-        data = data.dropna()
-        if not data.shape[0]:
-            raise ValueError(
-                "You can't build a %s with data that is exclusively NaNs"
-                % self.__class__.__name__
-            )
-        self._data = data
+        log = self.log._asdict() if self._log_data else None
+        self._source = _PlotSource(
+            {"x": x, "y": y},
+            "z",
+            z,
+            log=log,
+            dropna=True,
+            owner=self.__class__.__name__,
+        )
         self._clip = False if clip_data is None else clip_data
 
     def set_path(self, new, add_scale=True):
