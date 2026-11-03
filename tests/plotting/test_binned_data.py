@@ -779,13 +779,13 @@ class TestRowsWithASharedBinnedData:
             assert labels.tolist() == self.ROWS, name
 
     def test_hist1d_drops_the_rows_the_binned_data_excludes(self):
-        """Hist1D keeps NaN x until how="any" (step 6), but never c.
+        """notna(vx) & b's mask: Hist1D drops f (NaN vx) and c, as Hist2D does.
 
         ON FAILURE: the code is wrong.
         """
         b = BinnedData(POINTS, GRID, mask=self.B_MASK)
         h = Hist1D(POINTS.vx, nbins=b)
-        assert h.data.index.tolist() == ["a", "b", "d", "e", "f"]
+        assert h.data.index.tolist() == self.ROWS
 
 
 class TestIntegerInputOnALogAxis:

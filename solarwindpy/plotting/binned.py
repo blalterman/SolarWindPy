@@ -159,6 +159,9 @@ def _has_one_distinct_value(values):
 class _PlotSource:
     r"""A plot's input columns and the rows it keeps.
 
+    A row is kept only where no coordinate and not the value is NaN
+    (how="any"), ``mask`` keeps it, and ``within`` keeps it.
+
     Parameters
     ----------
     coords : dict of str to pd.Series
@@ -172,14 +175,11 @@ class _PlotSource:
         every row has the value 1, which is generated on access, not stored.
     log : dict of str to bool, optional
         Columns that ``materialize`` returns as ``log10(abs())``.
-    dropna : bool
-        If True, keep only the rows where every column is non-NaN. If False,
-        keep every row.
     owner : str
         Name of the plot class, used in the error message.
     mask : pd.Series of bool, optional
         The caller's selection, aligned by label to the coordinates' index:
-        a row is kept only where it is True, in addition to ``dropna``.
+        a row is kept only where it is True.
     within : BinnedData, optional
         A shared ``BinnedData``: a row its own mask excludes is not kept
         either, so no kept row lacks a bin for that reason alone.
@@ -189,8 +189,8 @@ class _PlotSource:
     TypeError
         If ``mask`` is not a boolean ``pd.Series``.
     ValueError
-        If ``dropna`` is True and no row is kept, or ``mask`` lacks a label
-        of the index or holds NaN.
+        If no row is kept, or ``mask`` lacks a label of the index or holds
+        NaN.
 
     Attributes
     ----------
@@ -209,7 +209,6 @@ class _PlotSource:
         value=None,
         *,
         log=None,
-        dropna,
         owner,
         mask=None,
         within=None,
@@ -224,18 +223,17 @@ class _PlotSource:
             if shared is not None:
                 selected = shared if selected is None else selected & shared
 
-        rows = selected
-        if dropna:
-            keep = frame.notna().all(axis=1).to_numpy()
-            if value is not None:
-                keep = keep & value.notna().to_numpy()
-            if selected is not None:
-                keep = keep & selected
-            if not keep.any():
-                raise ValueError(
-                    "You can't build a %s with data that is exclusively NaNs" % owner
-                )
-            rows = None if keep.all() else keep
+        # A row is kept only if no column is NaN (how="any").
+        keep = frame.notna().all(axis=1).to_numpy()
+        if value is not None:
+            keep = keep & value.notna().to_numpy()
+        if selected is not None:
+            keep = keep & selected
+        if not keep.any():
+            raise ValueError(
+                "You can't build a %s with data that is exclusively NaNs" % owner
+            )
+        rows = None if keep.all() else keep
 
         self._frame = frame
         self._value_name = value_name

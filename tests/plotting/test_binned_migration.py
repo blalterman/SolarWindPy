@@ -13,6 +13,17 @@ arrays handed to matplotlib. Comparisons are exact; there is no tolerance.
 When both classes raise, the test asserts they raise the same exception type
 with the same message.
 
+Intended change a (Hist1D drops rows with NaN in x or y, as Hist2D does)
+changes only the legacy side of every ``Hist1D`` comparison: the expected
+``Hist1D`` is the legacy one built on the rows the live one keeps,
+``LegacyHist1D(x[valid], y[valid])`` with the same settings, where ``valid``
+means neither x nor y (aligned to x) is NaN (``hist1d_kept``). This covers
+the ``Hist1D`` that legacy ``Hist2D.project_1d`` builds, whose y carries a NaN
+placeholder for a y outside the y-bins (``_LegacyHist1DOnKeptRows``). The live
+side is unchanged. ``test_hist1d_drops_exactly_the_legacy_nan_rows`` checks
+that the rows the live ``Hist1D`` drops are exactly the legacy rows with a NaN
+x or y. Every other comparison is unchanged.
+
 The legacy copy is the oracle only until the migration is proven. This file
 and ``tests/plotting/_legacy/`` are deleted together, in one commit, once all
 three conditions hold:
@@ -50,6 +61,7 @@ from tests.plotting._cases import (  # noqa: E402
 from tests.plotting._legacy.beta_ani import (  # noqa: E402
     BetaRPlot as LegacyBetaRPlot,
 )
+from tests.plotting._legacy import hist2d as legacy_hist2d_module  # noqa: E402
 from tests.plotting._legacy.hist1d import Hist1D as LegacyHist1D  # noqa: E402
 from tests.plotting._legacy.hist2d import Hist2D as LegacyHist2D  # noqa: E402
 from tests.plotting._legacy.scatter import Scatter as LegacyScatter  # noqa: E402
@@ -78,6 +90,43 @@ def _close_figures():
     """Close every figure a test opens."""
     yield
     plt.close("all")
+
+
+def hist1d_kept(x, y):
+    """``x`` and ``y`` on the rows a live ``Hist1D`` keeps (intended change a).
+
+    ``y`` is aligned to ``x`` by label, as ``Hist1D`` aligns it, and a row is
+    kept where neither is NaN; with ``y`` None, where ``x`` is not NaN. When
+    every row is kept, ``x`` and ``y`` are returned as given, so the legacy
+    side is built exactly as before.
+    """
+    if y is None:
+        keep = x.notna().to_numpy()
+    else:
+        y_on_x = y.reindex(x.index)
+        keep = (x.notna() & y_on_x.notna()).to_numpy()
+    if keep.all():
+        return x, y
+    return x[keep], None if y is None else y_on_x[keep]
+
+
+class _LegacyHist1DOnKeptRows(LegacyHist1D):
+    """Legacy ``Hist1D`` built on ``hist1d_kept(x, y)``, otherwise unchanged."""
+
+    def __init__(self, x, y=None, **kwargs):
+        x, y = hist1d_kept(x, y)
+        super().__init__(x, y=y, **kwargs)
+
+
+@pytest.fixture(autouse=True)
+def _legacy_projection_on_kept_rows(monkeypatch):
+    """Legacy ``Hist2D.project_1d`` builds its ``Hist1D`` on the kept rows.
+
+    Intended change a: the live projection no longer carries a NaN-y
+    placeholder, so its expected side is the legacy ``Hist1D`` on the rows
+    whose projected y is not NaN. Only ``project_1d`` reads this name.
+    """
+    monkeypatch.setattr(legacy_hist2d_module, "Hist1D", _LegacyHist1DOnKeptRows)
 
 
 # ---------------------------------------------------------------------------
@@ -171,10 +220,12 @@ def clip_kw(cls, clip):
     return {"clip_data" if legacy else "clip": clip}
 
 
-def _hist1d(cls, case, nbins):
+def _hist1d(cls, case, nbins, kept_rows=False):
     x, y, z = case.inputs()
     # Hist1D aggregates y in bins of x; the counts case has no value to average.
     y = None if z is None else y
+    if kept_rows:
+        x, y = hist1d_kept(x, y)
     return cls(x, y=y, logx=case.logx, nbins=nbins, **clip_kw(cls, case.clip_data))
 
 
@@ -214,7 +265,13 @@ def build_hist1d(case_name, spec_name):
     case = CASES[case_name]
     log = {"x": case.logx}
     live = attempt(_hist1d, Hist1D, case, _spec(spec_name, case, ("x",), log))
-    legacy = attempt(_hist1d, LegacyHist1D, case, _spec(spec_name, case, ("x",), log))
+    legacy = attempt(
+        _hist1d,
+        LegacyHist1D,
+        case,
+        _spec(spec_name, case, ("x",), log),
+        kept_rows=True,
+    )
     return live, legacy
 
 
@@ -443,6 +500,30 @@ def test_the_comparator_tells_two_binnings_apart():
 # ---------------------------------------------------------------------------
 # Hist1D
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("case", CASE_IDS)
+def test_hist1d_drops_exactly_the_legacy_nan_rows(case):
+    """The rows the live Hist1D drops are exactly the legacy rows with NaN x or y.
+
+    Both are built on the case's full inputs. The legacy ``Hist1D`` keeps
+    every row, so its own stored data says which rows hold a NaN x or y; the
+    live ``Hist1D`` keeps the others, in the legacy order (intended change a).
+
+    ON FAILURE: the code is wrong, unless the author lists this difference
+    among the migration's intended behaviour changes.
+    """
+    c = CASES[case]
+    live = _hist1d(Hist1D, c, 7)
+    legacy = _hist1d(LegacyHist1D, c, 7)
+    legacy_index = legacy.data.index
+    nan_rows = legacy.data.isna().any(axis=1).to_numpy()
+    assert_same(live.data.index, legacy_index[~nan_rows])
+    dropped = legacy_index.difference(live.data.index, sort=False)
+    assert_same(dropped, legacy_index[nan_rows])
+    x, y, z = c.inputs()
+    kept_x, _ = hist1d_kept(x, None if z is None else y)
+    assert_same(live.data.index, kept_x.index)
 
 
 @pytest.mark.parametrize("spec", NBINS)
@@ -843,8 +924,15 @@ def test_hist1d_from_shared_binned_data_matches_legacy_edges(case, spec):
         **options,
         **clip_kw(Hist1D, False),
     )
+    # Intended change a: the expected side is built on the kept rows.
+    legacy_x, legacy_y = hist1d_kept(x, options.pop("y"))
     legacy = attempt(
-        LegacyHist1D, x, nbins=legacy_spec, **options, **clip_kw(LegacyHist1D, False)
+        LegacyHist1D,
+        legacy_x,
+        y=legacy_y,
+        nbins=legacy_spec,
+        **options,
+        **clip_kw(LegacyHist1D, False),
     )
     if built(live, legacy):
         assert_same(everything_1d(live), everything_1d(legacy))
@@ -869,10 +957,12 @@ def test_hist1d_with_mask_matches_legacy_on_subset_inputs(case, spec):
     live = attempt(
         Hist1D, c.x, y=y, mask=mask, **options, **clip_kw(Hist1D, c.clip_data)
     )
+    # Intended change a: the expected side is built on the kept rows.
+    legacy_x, legacy_y = hist1d_kept(subset(c.x, mask), subset(y, mask))
     legacy = attempt(
         LegacyHist1D,
-        subset(c.x, mask),
-        y=subset(y, mask),
+        legacy_x,
+        y=legacy_y,
         **options,
         **clip_kw(LegacyHist1D, c.clip_data),
     )

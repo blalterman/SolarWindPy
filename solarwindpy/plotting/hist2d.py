@@ -830,7 +830,8 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             :class:`~solarwindpy.plotting.hist1d.Hist1D`, which then counts it.
             Otherwise, also send the values to aggregate: the z-values when the
             histogram has them, else the other axis, NaN wherever the
-            histogram does not bin that axis's value.
+            histogram does not bin that axis's value; the ``Hist1D`` drops
+            those rows.
         kwargs:
             Passed to `Hist1D`. Primarily to allow specifying `bin_precision`.
 

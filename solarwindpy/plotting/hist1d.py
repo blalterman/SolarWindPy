@@ -48,8 +48,9 @@ class Hist1D(AggPlot):
         x : pandas.Series
             Data from which to create bins.
         y : pandas.Series or None, optional
-            Values to aggregate in bins of ``x``. If ``None``, counts of
-            ``x`` are used.
+            Values to aggregate in bins of ``x``, aligned to it by label. If
+            ``None``, counts of ``x`` are used. Rows where ``x`` or ``y`` is
+            NaN are dropped, as in ``Hist2D``.
         logx : bool or None, optional
             If ``True``, compute bins in logarithmic space. None means False,
             or, with a ``BinnedData`` as ``nbins``, its setting for ``x``'s
@@ -127,9 +128,11 @@ class Hist1D(AggPlot):
     set_path.__doc__ = base.Base.set_path.__doc__
 
     def _set_data(self, x, y, clip=None, mask=None, within=None):
-        r"""Store x, and y aligned to it, keeping every row ``mask`` keeps.
+        r"""Store x, and y aligned to it, keeping the rows with neither NaN.
 
-        Called only by the constructor. ``x`` is stored as ``log10(abs(x))``
+        Called only by the constructor. A row is kept only if neither x nor y
+        is NaN (a y label missing from x's index is NaN) and ``mask`` keeps
+        it. ``x`` is stored as ``log10(abs(x))``
         when ``self.log.x`` is set. If ``y`` is None, every point gets
         ``y = 1``. ``clip`` is stored as ``self.clip``, a ``ClipAxes``, None
         as False. ``mask`` is a boolean Series aligned by label to the index
@@ -141,7 +144,6 @@ class Hist1D(AggPlot):
             "y",
             y,
             log={"x": self.log.x},
-            dropna=False,
             owner=self.__class__.__name__,
             mask=mask,
             within=within,
@@ -171,8 +173,9 @@ class Hist1D(AggPlot):
     def construct_cdf(self, only_plotted=True):
         r"""Build the empirical cumulative distribution of the observed x values.
 
-        The CDF is built from x alone; any y stored with the histogram is
-        ignored.
+        The CDF is built from the x values of the rows the histogram keeps.
+        Rows whose y is NaN are not kept, so their x is not in the CDF; y is
+        otherwise ignored.
 
         Parameters
         ----------

@@ -539,7 +539,6 @@ class PlotWithZdata(Base):
             "z",
             z,
             log=log,
-            dropna=True,
             owner=self.__class__.__name__,
             mask=mask,
             within=within,

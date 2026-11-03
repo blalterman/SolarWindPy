@@ -1561,11 +1561,15 @@ class TestProject1D:
         ]
         assert projected.to_numpy() == exact(expected)
 
-    def test_y_outside_the_edges_is_nan_in_the_projection(self):
-        """With ``only_plotted=False``, y outside the parent's y-edges is NaN.
+    def test_y_outside_the_edges_is_dropped_from_the_projection(self):
+        """With ``only_plotted=False``, a y outside the parent's y-edges is dropped.
 
-        The y-edges ``[0.2, 0.4, 0.6]`` are narrower than the data, so 0.1 and
-        0.9 lie outside every y-bin.
+        The y-edges ``[0.2, 0.4, 0.6]`` give right-closed bins (0.2, 0.4] and
+        (0.4, 0.6], so y = 0.1 (label 0) and y = 0.9 (label 3) lie in no y-bin
+        and the projection drops their rows; labels 1 and 2 stay. Expected
+        aggregates, by hand from ``XEDGES``: x = 0.125 and 0.875 have no kept
+        row, so their x-bins are NaN; x = 0.375 in (0.25, 0.5] holds only
+        y = 0.3, and x = 0.625 in (0.5, 0.75] holds only y = 0.5.
 
         ON FAILURE: the code is wrong.
         """
@@ -1575,29 +1579,42 @@ class TestProject1D:
 
         projected = h.project_1d("x", only_plotted=False)
 
-        expected = [np.nan, 0.3, 0.5, np.nan]  # outside, inside, inside, outside
-        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+        assert projected.agg().to_numpy() == exact(
+            [np.nan, 0.3, 0.5, np.nan], nan_ok=True
+        )
+        assert list(projected.data.index) == [1, 2]
+        assert list(projected.get_plotted_data_boolean_series().index) == [1, 2]
 
     @pytest.mark.parametrize(
-        "y, nbins, expected",
+        "y, nbins, kept, expected",
         [
             # Explicit edges give right-closed bins (0.2, 0.4], (0.4, 0.6]:
-            # 0.2 is in no bin, 0.6 is in the last one.
+            # 0.2 (label 0) and 0.7 (label 3) are in no bin; 0.6 is in the
+            # last one. By hand from XEDGES: x-bin (0.25, 0.5] holds y = 0.3,
+            # (0.5, 0.75] holds y = 0.6, and the outer x-bins hold no kept row.
             (
                 [0.2, 0.3, 0.6, 0.7],
                 [XEDGES, np.array([0.2, 0.4, 0.6])],
+                [1, 2],
                 [np.nan, 0.3, 0.6, np.nan],
             ),
-            # An integer bin count gives numpy's bins [0, 2), [2, 4]: both
-            # outer edges are inside.
-            ([0.0, 1.0, 2.0, 4.0], 2, [0.0, 1.0, 2.0, 4.0]),
+            # An integer bin count gives numpy's left-closed bins: y edges
+            # [0, 2, 4], so [0, 2), [2, 4] hold every y, both outer edges
+            # included; x edges [0.125, 0.5, 0.875], so [0.125, 0.5) holds
+            # x = 0.125, 0.375 (y = 0, 1: mean 0.5) and [0.5, 0.875] holds
+            # x = 0.625, 0.875 (y = 2, 4: mean 3).
+            ([0.0, 1.0, 2.0, 4.0], 2, [0, 1, 2, 3], [0.5, 3.0]),
         ],
         ids=["right-closed", "left-closed"],
     )
-    def test_projection_keeps_exactly_the_y_values_the_parent_bins(
-        self, y, nbins, expected
+    def test_projection_keeps_exactly_the_rows_the_parent_bins_in_y(
+        self, y, nbins, kept, expected
     ):
         """A y on an outer y-edge is kept exactly when the parent bins it.
+
+        The projection keeps the rows whose y the parent bins and averages
+        their y per x-bin; the expected labels and means are by hand, in the
+        parametrization comments.
 
         ON FAILURE: the code is wrong.
         """
@@ -1606,7 +1623,9 @@ class TestProject1D:
 
         projected = h.project_1d("x", only_plotted=False)
 
-        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+        assert list(projected.data.index) == kept
+        assert list(projected.get_plotted_data_boolean_series().index) == kept
+        assert projected.agg().to_numpy() == exact(expected, nan_ok=True)
 
     def test_log_axes_round_trip_through_the_projection(self):
         """A log-log projection stores the caller's x and y and stays log-log.
