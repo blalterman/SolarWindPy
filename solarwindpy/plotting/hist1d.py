@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 from . import base
 from . import labels
 from .agg_plot import AggPlot
+from .binned import BinnedData, _PlotSource
 
 
 class Hist1D(AggPlot):
@@ -26,18 +27,19 @@ class Hist1D(AggPlot):
 
     Methods
     -------
-    set_path, set_data, agg, _format_axis, make_plot
+    set_path, agg, _format_axis, make_plot
     """
 
     def __init__(
         self,
         x,
         y=None,
-        logx=False,
+        logx=None,
         axnorm=None,
-        clip_data=False,
+        clip=None,
         nbins=101,
         bin_precision=None,
+        mask=None,
     ):
         """Create a one-dimensional histogram.
 
@@ -46,33 +48,68 @@ class Hist1D(AggPlot):
         x : pandas.Series
             Data from which to create bins.
         y : pandas.Series or None, optional
-            Values to aggregate in bins of ``x``. If ``None``, counts of
-            ``x`` are used.
-        logx : bool, optional
-            If ``True``, compute bins in logarithmic space.
+            Values to aggregate in bins of ``x``, aligned to it by label. If
+            ``None``, counts of ``x`` are used. Rows where ``x`` or ``y`` is
+            NaN are dropped, as in ``Hist2D``.
+        logx : bool or None, optional
+            If ``True``, compute bins in logarithmic space. None means False,
+            or, with a ``BinnedData`` as ``nbins``, its setting for ``x``'s
+            column.
         axnorm : {"t", "d", None}, optional
             Normalisation applied to the histogram. ``"t"`` divides by the
             maximum (peak equals 1) and ``"d"`` yields a density.
-        clip_data : bool or str, optional
+        clip : bool, str, Mapping or None, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
-            (see ``Base.clip_data``). None is stored as False.
-        nbins : int or array-like, optional
+            (see ``Base.clip_data``). A mapping may name ``"x"`` only. None
+            means False, or, with a ``BinnedData`` as ``nbins``, its setting
+            for ``x``'s column. Stored as ``clip``, a ``ClipAxes``.
+        nbins : int or array-like or BinnedData, optional
             Binning strategy passed to :func:`numpy.histogram_bin_edges` or
-            :func:`pandas.cut` depending on the input type.
+            :func:`pandas.cut` depending on the input type. A ``BinnedData``
+            is shared: its bins and bin codes for the column named ``x.name``
+            are used, ``logx`` and ``clip`` default to its settings for that
+            column, and rows its own mask excludes are not kept.
         bin_precision : int, optional
-            Precision for decimal bin edges.
+            Precision for decimal bin edges. Must be None with a
+            ``BinnedData``.
+        mask : pandas.Series of bool, optional
+            Rows to keep, aligned by label to the index of ``x``. Selections
+            are returned on the original labels. A label missing from
+            ``mask``, or a NaN in it, raises ``ValueError``; neither is
+            treated as False.
+
+        Raises
+        ------
+        KeyError
+            If ``nbins`` is a ``BinnedData`` without a column named
+            ``x.name``.
+        ValueError
+            If ``nbins`` is a ``BinnedData`` and ``logx`` or ``clip`` is given
+            and differs from its setting, ``bin_precision`` is given, or
+            ``x.index`` is not a subset of its index. Also if no row is left
+            to bin.
         """
         super(Hist1D, self).__init__()
-        self.set_log(x=logx)
+        log, clip = self._inherit(
+            nbins,
+            {"x": getattr(x, "name", None)},
+            {"x": logx},
+            self._clip_by_axis(clip),
+            bin_precision,
+        )
+        self.set_log(**log)
         self.set_axnorm(axnorm)
-        self.set_data(x, y, clip_data)
+        within = nbins if isinstance(nbins, BinnedData) else None
+        self._set_data(x, y, clip, mask=mask, within=within)
         self.set_labels(
             x="x", y=labels.special.Count(norm=axnorm) if y is None else "y"
         )
         self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
         self.make_cut()
         self.set_clim(None, None)
+
+    _clipped_axes = ("x",)
 
     @property
     def _gb_axes(self):
@@ -97,15 +134,31 @@ class Hist1D(AggPlot):
 
     set_path.__doc__ = base.Base.set_path.__doc__
 
-    def set_data(self, x, y, clip):
-        data = pd.DataFrame({"x": np.log10(np.abs(x)) if self.log.x else x})
+    def _set_data(self, x, y, clip=None, mask=None, within=None):
+        r"""Store x, and y aligned to it, keeping the rows with neither NaN.
 
-        if y is None:
-            y = pd.Series(1, index=x.index)
-        data.loc[:, "y"] = y
-
-        self._data = data
-        self._clip = False if clip is None else clip
+        Called only by the constructor. A row is kept only if neither x nor y
+        is NaN (a y label missing from x's index is NaN) and ``mask`` keeps
+        it. ``x`` is stored as ``log10(abs(x))``
+        when ``self.log.x`` is set. If ``y`` is None, every point gets
+        ``y = 1``. ``clip`` is stored as ``self.clip``, a ``ClipAxes``, None
+        as False. ``mask`` is a boolean Series aligned by label to the index
+        of ``x``. Rows the mask of ``within``, a shared ``BinnedData``,
+        excludes are not kept either. A second call raises ``ValueError``.
+        """
+        self._claim_data()
+        self._source = _PlotSource(
+            {"x": x},
+            "y",
+            y,
+            log={"x": self.log.x},
+            owner=self.__class__.__name__,
+            mask=mask,
+            within=within,
+        )
+        self._store_clip(clip)
+        self._bin_names = {"x": getattr(x, "name", None)}
+        self._bin_index = getattr(x, "index", None)
 
     def set_axnorm(self, new):
         r"""The method by which the gridded data is normalized.
@@ -128,8 +181,9 @@ class Hist1D(AggPlot):
     def construct_cdf(self, only_plotted=True):
         r"""Build the empirical cumulative distribution of the observed x values.
 
-        The CDF is built from x alone; any y stored with the histogram is
-        ignored.
+        The CDF is built from the x values of the rows the histogram keeps.
+        Rows whose y is NaN are not kept, so their x is not in the CDF; y is
+        otherwise ignored.
 
         Parameters
         ----------
@@ -141,10 +195,13 @@ class Hist1D(AggPlot):
         Returns
         -------
         cdf: pd.DataFrame
+            Indexed by the original row labels of the measurements, in
+            ascending order of x.
             ``"x"`` column: the measurements in ascending order, in linear
             units even when ``logx`` is set.
             ``"position"`` column: the normalized position in the CDF, ``i /
-            (n - 1)`` for the i-th of n measurements, from 0 to 1.
+            (n - 1)`` for the measurement of rank i (0 to n - 1) among the n
+            sorted measurements, from 0 to 1.
             To plot the CDF::
 
                 cdf.plot(x="x", y="position")
@@ -155,13 +212,15 @@ class Hist1D(AggPlot):
             tk = tk & self.get_plotted_data_boolean_series()
 
         x = data.loc[tk, "x"]
-        cdf = x.sort_values().reset_index(drop=True)
+        # Stable sort, so tied x values keep their original label order.
+        cdf = x.sort_values(kind="mergesort")
 
         if self.log.x:
             cdf = 10.0**cdf
 
         cdf = cdf.to_frame()
-        cdf.loc[:, "position"] = cdf.index / cdf.index.max()
+        rank = pd.RangeIndex(cdf.shape[0])
+        cdf.loc[:, "position"] = (rank / rank.max()).to_numpy()
 
         return cdf
 
@@ -192,11 +251,7 @@ class Hist1D(AggPlot):
             if (fcn != "count") & (fcn is not None):
                 raise ValueError("Unable to calculate a PDF with non-count aggregation")
 
-        agg = super(Hist1D, self).agg(**kwargs)
-        agg = self._axis_normalizer(agg)
-        agg = self._agg_reindexer(agg)
-
-        return agg
+        return super(Hist1D, self).agg(**kwargs)
 
     def set_labels(self, **kwargs):
         if "z" in kwargs:
@@ -256,7 +311,7 @@ class Hist1D(AggPlot):
             and ``linestyle`` default to the central line's.
         """
         agg = self.agg(fcn=fcn)
-        x = pd.IntervalIndex(agg.index).mid
+        x = agg.index.mid
 
         dx = None  # Initialize default value. Necessary for `transpose_axes`.
         if fcn is None or isinstance(fcn, (str, FunctionType)):
@@ -382,16 +437,32 @@ class Hist1D(AggPlot):
         -------
         taken: np.ndarray 1D
             Array of indices for selecting data in interval: the points with
-            ``left < x <= right`` and ``bottom < y <= top``.
+            x between `left` and `right` and ``bottom < y <= top``. x compares
+            on the side its bins close: ``left < x <= right`` for right-closed
+            bins (explicit edges), ``left <= x < right`` for left-closed bins
+            (an integer `nbins`), whose last bin also holds its right edge, so
+            ``x == right`` is kept when `right` is that edge. y is not binned,
+            so its range stays closed on the top.
 
         Raises
         ------
         ValueError
-            If a range has ``left >= right`` or ``bottom >= top``.
+            If a range has ``left >= right`` or ``bottom >= top``, or if an
+            entry of `ranges_by_x` names an x-bin the histogram does not have.
+            Histogram x-bins that `ranges_by_x` omits only log a warning.
         """
 
         available_x = self.agg().index
-        assert not ranges_by_x.index.symmetric_difference(available_x).size
+        if ranges_by_x.index.symmetric_difference(available_x).size:
+            drop = ranges_by_x.index.symmetric_difference(available_x)
+            if not drop.isin(available_x).all():
+                raise ValueError(
+                    "Need a way to drop values in selector that aren't available."
+                )
+            else:
+                self.logger.warning(
+                    f"Dropping {drop.size} intervals from available for selecting."
+                )
 
         data = self.data
         logx = self.log.x
@@ -406,7 +477,14 @@ class Hist1D(AggPlot):
             if not b < t:
                 raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
 
-            tkx = (l < data.x) & (data.x <= r)
+            bins = self.intervals["x"]
+            if bins.closed == "left":
+                tkx = (l <= data.x) & (data.x < r)
+                if r == bins.right[-1]:
+                    # The last left-closed bin also holds its right edge.
+                    tkx |= data.x == r
+            else:
+                tkx = (l < data.x) & (data.x <= r)
             tky = (b < data.y) & (data.y <= t)
             tk = tkx & tky
             tk = tk.loc[tk].index

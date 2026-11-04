@@ -26,6 +26,7 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from solarwindpy.plotting.base import (  # noqa: E402
     AxesLabels,
     Base,
+    ClipAxes,
     LogAxes,
     PlotWithZdata,
     RangeLimits,
@@ -85,9 +86,9 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
 class LinePlot(PlotWithZdata):
     """Minimal concrete plot: points coloured by z."""
 
-    def __init__(self, x, y, z=None, clip_data=False):
+    def __init__(self, x, y, z=None, clip=None):
         super().__init__()
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip)
 
     def make_plot(self, ax):
         d = self.data
@@ -154,7 +155,7 @@ def test_str_and_logger_name_the_concrete_class():
 
 
 # ---------------------------------------------------------------------------
-# PlotWithZdata.set_data
+# PlotWithZdata._set_data, through the constructor
 # ---------------------------------------------------------------------------
 
 
@@ -208,17 +209,45 @@ def test_set_data_with_only_nan_rows_raises_value_error_naming_the_class():
     "given, expected",
     [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
 )
-def test_clip_stores_clip_data_with_none_as_false(given, expected):
-    """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+def test_a_scalar_clip_is_stored_for_x_and_y_with_none_as_false(given, expected):
+    """A scalar ``clip`` applies to x and y; ``h.clip`` is a ``ClipAxes``.
 
-    ``"l"`` and ``"u"`` select one tail in ``AggPlot.clip_data``, so they must
-    survive storage.
+    ``"l"`` and ``"u"`` select one tail in ``Base.clip_data``, so they must
+    survive storage. z is clipped by ``Scatter`` only, so it stays False.
 
     ON FAILURE: the code is wrong.
     """
-    clip = LinePlot(X, Y, clip_data=given).clip
-    assert clip == expected
-    assert type(clip) is type(expected)
+    clip = LinePlot(X, Y, clip=given).clip
+    assert type(clip) is ClipAxes
+    assert clip == ClipAxes(x=expected, y=expected, z=False)
+    assert type(clip.x) is type(expected)
+    assert type(clip.y) is type(expected)
+
+
+@pytest.mark.parametrize(
+    "given, expected",
+    [
+        ({"y": "u"}, ClipAxes(x=False, y="u", z=False)),
+        ({"x": True, "y": None}, ClipAxes(x=True, y=False, z=False)),
+        ({}, ClipAxes(x=False, y=False, z=False)),
+    ],
+    ids=["y only", "x only", "empty"],
+)
+def test_a_clip_mapping_sets_each_axis_it_names(given, expected):
+    """A mapping sets only the axes it names; the others are False.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert LinePlot(X, Y, clip=given).clip == expected
+
+
+def test_a_clip_mapping_naming_an_axis_the_plot_does_not_clip_raises():
+    """A 2-D plot clips x and y: a mapping naming z raises KeyError.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(KeyError, match="'z'"):
+        LinePlot(X, Y, clip={"z": True})
 
 
 # ---------------------------------------------------------------------------

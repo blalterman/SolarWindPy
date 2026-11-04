@@ -198,9 +198,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Hist2D.take_data_in_yrange_across_x` raises `ValueError` ("Need left < right ..." or
   "Need bottom < top ...") for a zero-width or inverted range, instead of
   `AssertionError`.
+- Every plot class (`Hist1D`, `Hist2D`, `BetaRPlot`, `Scatter`, `SpiralPlot2D`) draws its
+  data through one path, a `BinnedData` it shares or builds from its own columns (see
+  Added). Every output not listed here is unchanged:
+  - `Hist1D` drops rows where x or y is NaN, as `Hist2D` does:
+    - `Hist1D.data` and every `Hist1D` selection exclude those rows.
+    - Edges from an integer or string `nbins` are computed from the remaining rows.
+    - The `construct_cdf` docstring no longer says y is ignored: rows whose y is NaN are
+      dropped, so their x is not in the CDF.
+    - A `Hist1D` whose y is all NaN raises `ValueError` ("exclusively NaNs").
+    - `project_1d(only_plotted=False)` no longer carries NaN-y placeholders. Its
+      aggregates are unchanged.
+  - A plot's `clip` is a `ClipAxes(x, y, z)` record (z is used by `Scatter` only, whose
+    `make_plot` clips every column), and the `clip` argument takes a scalar, applied to
+    every binned axis, or a per-axis mapping such as `clip={"y": "u"}`. `Hist1D` clips x
+    only. Test a field (`h.clip.y`), not the record: `ClipAxes(False, False)` is truthy.
+  - `logx`, `logy` and `clip` default to None. Without a `BinnedData`, None means False,
+    as before. With one passed as `nbins`, None inherits its setting for the column named
+    like the input; an explicit, differing value raises `ValueError`, as does a non-None
+    `bin_precision`. `BetaRPlot` defaults to log axes only when `nbins` is not a
+    `BinnedData`.
+  - A plot's `data` is built on each access. In-place edits to it no longer persist, and
+    the arrays of its columns are read-only. A built plot is a snapshot: pandas
+    copy-on-write keeps later edits to the caller's frame or Series out of it. One case
+    is not guarded: writing into a NumPy array that a Series wraps without a copy
+    (`pd.Series(arr, copy=False)`) after the plot is built changes its `data`, though not
+    its bins.
+  - One clip name, `clip`: the constructor keyword `clip_data` of `Hist1D`, `Hist2D`,
+    `Scatter` and `SpiralPlot2D` (and so `BetaRPlot`), the `set_data` keywords and the
+    `BinnedData` keyword are all `clip`. No `clip_data` alias is kept; `clip_data=` raises
+    `TypeError`. `Base.clip_data`, the clipping function, keeps its name.
+  - `set_data` is private, `_set_data`, and called only by the constructor; a second call
+    raises `ValueError`. To plot other data, build a new plot. The stale-plot case
+    (`set_data` followed by `agg()` without rebinning, which raised `KeyError`) no longer
+    exists. A subclass of `solarwindpy.plotting.base.Base` implements `_set_data`
+    instead of `set_data`; no alias is kept.
+  - Integer x or y with a log axis gives the float `log10` values. It previously raised a
+    pandas 3 `TypeError`.
+  - `SpiralPlot2D.make_plot` draws one `matplotlib.collections.PolyCollection` built from
+    a single vertex array, instead of one `Rectangle` per cell gathered into a
+    `PatchCollection`, so the mappable it returns with `cbar=False` is a
+    `PolyCollection`. Each cell's vertices are its mesh edges exactly, where a
+    `Rectangle` placed its far corners at the lower-left corner plus the width and height.
+    Colours and the cells drawn are unchanged.
+  - Bins are stored once as an `IntervalIndex`: `intervals`, `categoricals` (now an alias
+    for the same object) and the levels of `agg()`'s index are `IntervalIndex`, not
+    `CategoricalIndex`. `edges` is a float `pd.Index` of the bin edges.
+  - `Hist2D.agg()` returns the full bin grid, one row per (x, y) bin pair, with NaN where a
+    bin is empty, as its docstring states. It previously returned the occupied bins only,
+    so the length of `agg()` changes for every caller, and a count grid with an empty bin
+    is float. Values in occupied bins, the arrays `make_plot` and `plot_contours` draw, and
+    every selection are unchanged.
+  - `set_log` on a built plot raises `ValueError` if it would change the log of an axis
+    its data and bins were built on (x for `Hist1D`; x and y for `Hist2D` and
+    `SpiralPlot2D`). Build a new plot or `BinnedData` instead. Axes only drawn on a log
+    scale (`Hist1D` y, `Scatter`) can still be changed, and repeating the current
+    setting is allowed.
+  - `Hist2D.project_1d(..., bin_precision=...)` raises `ValueError`: the projection's
+    bins are the parent's and are not re-rounded.
 
 ### Changed
 
+- A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
+  edges or project. At 1M rows with 10% NaN, `Hist2D.project_1d` is about 25% faster,
+  and `agg()` and construction about 15-20% faster.
 - `ICMECAT(cache_dir=...)` caches the catalog as `icmecat.csv`, the format it downloads
   in, instead of `icmecat.parquet`, so caching needs no parquet engine (it raised
   `ImportError` without one). An existing `icmecat.parquet` cache is ignored, so the
@@ -306,6 +367,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI no longer installs the HDF5 system packages (`libhdf5-dev`, `pkg-config`); the h5py
   and tables wheels bundle HDF5. `publish.yml`'s Linux cells keep the step, with a
   5-minute timeout and apt retries, so a dead mirror fails fast instead of hanging.
+- Plots build faster and hold less memory (measured on pandas 3.1):
+  - Building a plot from its own columns takes about 0.4 to 0.6 times the previous time at
+    1M rows.
+  - Building a plot from a shared `BinnedData` takes about 0.08 times the previous time.
+  - `SpiralPlot2D`'s mesh builds in about 0.74 s instead of 31.7 s at 4.6M rows, with the
+    same split order, midpoints and cells.
+  - Each plot retains about 3 bytes per row instead of about 31: it stores which rows it
+    keeps and their bin codes, not a copy of its data.
 
 ### Added
 
@@ -319,6 +388,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `solarwindpy.examples.load_plasma()` returns a small example `Plasma`: three rows with
   species `a`, `e`, `p1` and `p2`, and a Parker Solar Probe trajectory in HCI. The data
   ships in `core/data/example_*.csv`; docstring examples start from it.
+- `solarwindpy.plotting.binned.BinnedData(frame, bins, *, log=None, clip=None,
+  mask=None, precision=None)` holds columns of a frame, their explicit bins (edges or a
+  `pandas.IntervalIndex` per column, with per-column `log` and `clip`) and the bin of
+  every row, computed once and cached as int8 codes (int16 above 127 bins). Pass it as
+  `nbins` to `Hist1D`, `Hist2D` or `BetaRPlot`, e.g.
+  `Hist2D(joint.sc_raw, joint.ahe, z=joint.vsw, nbins=b)`, and the plots share its bins
+  and codes instead of each binning, and copying, the same columns. A plot finds its
+  columns by `x.name` and `y.name` and takes the rows of `x.index`: an unknown name raises
+  `KeyError`, and an index that is not a subset of the `BinnedData`'s raises
+  `ValueError`. Integer and string bin rules are refused with `TypeError`, since their
+  edges depend on which rows each plot keeps; pass those to the plot's `nbins`.
+  `SpiralPlot2D` refuses a `BinnedData` with `TypeError`, because its mesh adapts to its
+  own data. Its read-only API is `columns`, `index`, `log_of`, `clip_of`, `edges`,
+  `intervals`, `codes` and `categorical`.
+- `mask=` on every plot constructor (`Hist1D`, `Hist2D`, `BetaRPlot`, `Scatter`,
+  `SpiralPlot2D`) and on `BinnedData`: a boolean `pandas.Series` aligned by label to the
+  data's index, which keeps a row where it is True. It replaces subsets made beforehand
+  with `x.loc[idx]` or `x.drop(idx)`, and selections return the original labels. A
+  missing label or a NaN raises `ValueError`; neither is ever treated as False. A plot
+  sharing a `BinnedData` also drops the rows that object's own mask excludes.
+- `solarwindpy.plotting.base.ClipAxes(x, y, z)`, the per-axis clip record a plot's
+  `clip` returns, exported next to `LogAxes`.
 
 ### Fixed
 
@@ -332,6 +423,61 @@ These change computed values; rerun any analysis that used them.
   labelled. Values were 9.2 times too small; ratios and trends are unchanged.
 - `Ion.kinetic_energy_flux` / `Plasma.kinetic_energy_flux` raised `AttributeError` on
   every call; it now returns uW m^-2.
+- `Hist2D.id_data_above_contour` no longer raises `TypeError: Categorical is not ordered
+  for operation min` for bin specifications whose bins came out unordered.
+- `Hist2D.get_border`, and so `plot_edges`, returns the highest and lowest occupied y bin
+  in each x bin. When some y bin was empty in every x bin, it returned the last- and
+  first-listed bins in order of first appearance instead, which could be a middle bin.
+- `Hist1D.construct_cdf` returns its rows indexed by the original row labels, sorted by x
+  with ties in input order, instead of a reset 0..n-1 index. The `x` and `position`
+  values are unchanged; `position` is computed from each row's rank.
+- `Hist1D.take_data_in_yrange_across_x` raises `ValueError` instead of failing an
+  `assert` when `ranges_by_x` names x bins the histogram does not have, and, like
+  `Hist2D`, logs a warning and selects within the named bins when `ranges_by_x` omits
+  some of them.
+- Plots keep no row whose x, y or z is +-inf, in the input or after `log10(abs())` on a
+  logarithmic axis (so a 0 there), just as they drop NaN. This applies to `Hist1D`,
+  `Hist2D`, `BetaRPlot`, `Scatter` and `SpiralPlot2D`, including plots sharing a
+  `BinnedData`. `BinnedData` codes +-inf as -1 even when clipped or when an edge is
+  infinite.
+- `Base.clip_data` computes its quantiles over finite values only, so +inf no longer
+  makes the upper quantile NaN. +-inf is clipped to the quantile on the clipped tail; NaN
+  is unchanged.
+- `SpiralMesh.generate_mesh` (and so `SpiralPlot2D.initialize_mesh`) raises `ValueError`
+  instead of never terminating when more than `min_per_bin` points are identical in x and
+  y. The message names the points and the usual causes (duplicated rows, fill values,
+  clipping both axes). Meshes of other inputs are unchanged.
+- `Hist1D.take_data_in_yrange_across_x`, `Hist2D.take_data_in_yrange_across_x` and
+  `Hist2D.id_data_above_contour` compare each binned axis on the side its bins close:
+  `[a, b)` for an integer `nbins`, with the last bin also holding its right edge, and
+  `(a, b]` for explicit edges. They previously always compared `(a, b]`. `Hist1D`'s y
+  range, which is not binned, stays `(bottom, top]`.
+- `get_subset_above_threshold` returns the caller's values on the kept rows. It
+  previously applied `10**` to every axis flagged as log, which inflated a linear y
+  after `project_1d` and dropped the sign of a logged axis.
+- `Hist2D.project_1d` reuses the parent's bins and bin codes, so the side panels bin each
+  row exactly as the 2-D plot does, including rows clipped into an edge bin, and the
+  projected counts are the parent's marginal sums. It averages the measured z or
+  other-axis values in linear units, sign included; a log other axis was previously
+  passed as `log10|x|`. A log other axis now sets the projection's `log.y` whichever
+  axis is projected, and with `only_plotted=False` rows outside the other axis's bins
+  are dropped, as documented.
+- `clip` accepts True/False and the strings "l", "lower", "u", "upper" and "both", in
+  any case. Any other string, the empty one included, raises `ValueError` naming them,
+  from every plot constructor, `BinnedData` and `Base.clip_data`. Previously `""` raised
+  `IndexError`, an unknown string clipped both tails, and any string starting with "l"
+  or "u" (e.g. "lo") was accepted.
+- x, y and z whose indexes differ, where a column to be aligned repeats a label, raise a
+  `ValueError` naming that column and saying the alignment is ambiguous, instead of
+  pandas' "cannot reindex on an axis with duplicate labels". Identical indexes with
+  repeated labels, and unique labels aligned onto repeated ones, work as before.
+- Edges from an integer `nbins` enclose every sample when the data are so large that
+  `10**-precision` is below their float spacing (above about 9e10 at the default
+  precision). Previously the extreme sample could fall outside the edges and go
+  uncounted.
+- An object-dtype column of numbers is binned, logged and checked for NaN and +-inf as
+  the numeric column it holds. Previously an inf in it was kept (e.g. a bin mean of
+  inf), and integer `nbins` or `logx` raised `AttributeError` or `TypeError`.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
@@ -449,6 +595,16 @@ These change computed values; rerun any analysis that used them.
   `pandas.DataFrame`.
 - Drop rows with missing timestamps (`NaT`) before building a `Plasma`, `Spacecraft`,
   `Ion`, `Vector`, `Tensor` or `BField`, e.g. `data = data.loc[data.index.notna()]`.
+- Plotting: rename `clip_data=` to `clip=`; pass `True`/`False` or one of "l", "lower",
+  "u", "upper", "both" (a prefix such as "lo" raises).
+- Plotting: edit the source data before building a plot, not `h.data`. `h.data` is
+  rebuilt on each access, so edits to it are silently lost.
+- Plotting: build a new plot instead of calling `set_data`, or `set_log` on a binned
+  axis. A `Base` subclass implements `_set_data`.
+- Plotting: replace subsets built with `x.loc[idx]` or `x.drop(idx)` with `mask=`, and
+  share bins across many histograms by passing one `BinnedData` as `nbins`.
+- Plotting: `Hist2D.agg()` returns every bin; call `.dropna()` for the occupied bins
+  only. Its index levels are `IntervalIndex`.
 
 ## [0.3.0] - 2025-12-24
 

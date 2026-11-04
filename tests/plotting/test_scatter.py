@@ -6,7 +6,7 @@ by z when z varies, with a colorbar labelled ``labels.z``. Expectations come
 from the hand-typed ``ROWS`` table; assertions read the real ``PathCollection``
 (offsets, colour array, sizes), ``Axes`` and ``Colorbar`` on the Agg backend.
 
-Clipping both tails (``clip_data=True``) is tested in
+Clipping both tails (``clip=True``) is tested in
 ``tests/test_source_plotting_defects.py``, beside the defect it fixed; the
 one-tailed ``"l"`` and ``"u"`` are tested here.
 """
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
 
-from solarwindpy.plotting.base import AxesLabels, LogAxes  # noqa: E402
+from solarwindpy.plotting.base import AxesLabels, ClipAxes, LogAxes  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ def test_new_scatter_has_linear_axes_and_default_labels():
     assert Scatter(X, Y).log == LogAxes(False, False)
     assert Scatter(X, Y).labels == AxesLabels("x", "y", None)
     assert Scatter(X, Y, Z).labels == AxesLabels("x", "y", "z")
-    assert Scatter(X, Y).clip is False
+    assert Scatter(X, Y).clip == ClipAxes(x=False, y=False, z=False)
 
 
 def test_points_handed_to_matplotlib_are_the_complete_rows(ax):
@@ -341,8 +341,8 @@ def test_quantile_alim_with_one_finite_z_still_masks_the_infinite_ones(ax):
     np.testing.assert_array_equal(ax.collections[0].get_offsets(), [[0.0, 5.0]])
 
 
-@pytest.mark.parametrize("clip_data", ["l", "u"])
-def test_one_tailed_clip_data_clips_only_that_tail(ax, clip_data):
+@pytest.mark.parametrize("clip", ["l", "u"])
+def test_one_tailed_clip_clips_only_that_tail(ax, clip):
     """``"l"`` clips only the low tail of each column, ``"u"`` only the high.
 
     The input is 0..10000 with one far outlier on each end. The clipped tail
@@ -351,9 +351,9 @@ def test_one_tailed_clip_data_clips_only_that_tail(ax, clip_data):
     ON FAILURE: the code is wrong.
     """
     raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
-    Scatter(pd.Series(raw), pd.Series(raw), clip_data=clip_data).make_plot(ax=ax)
+    Scatter(pd.Series(raw), pd.Series(raw), clip=clip).make_plot(ax=ax)
     # Percentiles from the Base.clip_data docstring.
-    if clip_data == "l":
+    if clip == "l":
         expected = np.clip(raw, np.quantile(raw, 1e-4), None)
         assert expected[-1] == 1e6
     else:

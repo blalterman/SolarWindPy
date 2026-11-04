@@ -13,7 +13,9 @@ from . import base
 class Scatter(base.PlotWithZdata, base._CbarMaker):
     r"""Scatter plot of y against x, optionally colored by z."""
 
-    def __init__(self, x, y, z=None, clip_data=False):
+    _clipped_axes = ("x", "y", "z")
+
+    def __init__(self, x, y, z=None, clip=None, mask=None):
         r"""Initialize scatter plot data.
 
         Parameters
@@ -22,13 +24,19 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             Data defining (x, y) coordinates.
         z: pd.Series, optional
             If not None, used to specify the color for each point.
-        clip_data: bool or str
-            If True, ``make_plot`` clips each column to its 0.01st and 99.99th
+        clip: bool, str, Mapping or None
+            If True, ``make_plot`` clips x, y and z to their 0.01st and 99.99th
             percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
-            the lower or upper tail.
+            the lower or upper tail. A mapping such as ``{"z": "u"}`` sets
+            each column on its own. None means False. Stored as ``clip``, a
+            ``ClipAxes``.
+        mask: pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y. A point
+            is plotted where it is True and x, y and z are not NaN. A label
+            missing from ``mask``, or a NaN in it, raises ``ValueError``.
         """
         super(Scatter, self).__init__()
-        self.set_data(x, y, z, clip_data)
+        self._set_data(x, y, z, clip, mask=mask)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
         self._log = base.LogAxes(x=False, y=False)
         self.set_path(None)
@@ -73,8 +81,9 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             fig, ax = plt.subplots()
 
         data = self.data
-        if self.clip:
-            data = self.clip_data(data, self.clip)
+        for k, clip in self.clip._asdict().items():
+            if clip:
+                data[k] = self.clip_data(data.loc[:, k], clip)
 
         data = data.loc[self._apply_alim(data.loc[:, "z"]).notna()]
 

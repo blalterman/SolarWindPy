@@ -8,6 +8,7 @@ implement specific visualizations.
 
 __all__ = [
     "LogAxes",
+    "ClipAxes",
     "AxesLabels",
     "RangeLimits",
     "Base",
@@ -24,7 +25,13 @@ from collections import namedtuple
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
+from .binned import _PlotSource, _clip_kind, _clip_to_quantiles
+
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
+#: Clip setting per axis: False, True, or a clip string (see ``Base.clip_data``).
+#: ``z`` is clipped by ``Scatter`` only. Test a field, never the record: a
+#: ``ClipAxes(False, False)`` is a non-empty tuple, so it is truthy.
+ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
@@ -33,8 +40,16 @@ class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
     Holds the axis labels, the log-scale flags, and the save path that every
-    concrete plot shares. Subclasses implement ``set_data``, ``set_path`` and
-    ``make_plot``.
+    concrete plot shares. Subclasses implement ``_set_data``, which only their
+    constructors call, ``set_path`` and ``make_plot``. To plot other data,
+    build a new plot.
+
+    A built plot is a snapshot of its data. ``_set_data`` runs once per plot
+    (``_claim_data`` raises ``ValueError`` on a second call), and pandas
+    copies on write, so editing the caller's frame or Series afterwards does
+    not change the plot. Not guarded: editing a NumPy array that a Series
+    wraps without a copy (``pd.Series(arr, copy=False)``) after the plot is
+    built changes what the plot holds.
     """
 
     @abstractmethod
@@ -59,13 +74,74 @@ class Base(ABC):
 
     @property
     def data(self):
-        r"""Data stored by ``set_data``."""
-        return self._data
+        r"""The plot's data: a new DataFrame built from its source on each access.
+
+        It holds the rows the plot keeps (no NaN or +/-inf in any column,
+        a logarithmic axis taken after ``log10(abs())``, so no 0 there;
+        within the caller's ``mask`` and a shared ``BinnedData``'s mask),
+        with each logarithmic axis as ``log10(abs())``. Nothing is stored between
+        accesses, so edits to the returned frame do not persist, and the
+        arrays of its columns (``to_numpy()``) are read-only. The plot's data
+        is set once, by its constructor; to plot other data, build a new
+        plot.
+        """
+        return self._source.materialize()
+
+    #: The axes the ``clip`` argument applies to, in ``ClipAxes`` field order.
+    _clipped_axes = ("x", "y")
 
     @property
     def clip(self):
-        r"""Clipping option stored by ``set_data``."""
+        r"""``ClipAxes`` of each axis's clip setting: False, True, or a clip string.
+
+        Axes the plot does not clip are False.
+        """
         return self._clip
+
+    def _clip_by_axis(self, clip):
+        r"""Map each axis in ``_clipped_axes`` to its clip setting, None if unset.
+
+        Parameters
+        ----------
+        clip : bool, str, None, Mapping or ClipAxes
+            A scalar applies to every axis in ``_clipped_axes``. A mapping
+            gives an axis its own setting; unnamed axes are None. A
+            ``ClipAxes`` is read as a mapping of its fields, ignoring False
+            fields for axes this plot does not clip.
+
+        Raises
+        ------
+        KeyError
+            If a mapping names an axis this plot does not clip.
+        """
+        axes = self._clipped_axes
+        if isinstance(clip, ClipAxes):
+            clip = {k: v for k, v in clip._asdict().items() if k in axes or v}
+        if not isinstance(clip, Mapping):
+            return {k: clip for k in axes}
+        unknown = [k for k in clip if k not in axes]
+        if unknown:
+            raise KeyError(
+                f"{self.__class__.__name__} clips the axes {axes!r}; clip names "
+                f"{unknown!r}."
+            )
+        return {k: clip.get(k) for k in axes}
+
+    def _store_clip(self, clip):
+        r"""Store ``clip``, read by ``_clip_by_axis``, as ``ClipAxes``; None is False.
+
+        Raises
+        ------
+        ValueError
+            If an axis's setting is a string other than those
+            ``Base.clip_data`` accepts.
+        """
+        by_axis = self._clip_by_axis(clip)
+        for v in by_axis.values():
+            _clip_kind(v)
+        self._clip = ClipAxes(
+            **{k: False if v is None else v for k, v in by_axis.items()}
+        )
 
     @property
     def log(self):
@@ -85,10 +161,24 @@ class Base(ABC):
     def set_log(self, x=None, y=None):
         r"""Set which axes use a logarithmic scale.
 
+        A plot's constructor sets the log of the axes its data is built on:
+        which rows it keeps, the values it holds (``log10(abs())``) and its
+        bins depend on it. Once the plot is built, ``set_log`` cannot change
+        those axes; build a new plot (or a new ``BinnedData``) instead. Axes
+        only drawn on a log scale, such as the y of a ``Hist1D`` or both axes
+        of a ``Scatter``, can still be changed.
+
         Parameters
         ----------
         x, y : bool, optional
             If True, the axis is logarithmic. None keeps the current value.
+
+        Raises
+        ------
+        ValueError
+            If the plot is built and the call would change the log of an axis
+            its data and bins were built on. Passing the value it already has
+            is allowed.
         """
         if x is None:
             x = self.log.x
@@ -96,22 +186,41 @@ class Base(ABC):
             y = self.log.y
 
         log = LogAxes(bool(x), bool(y))
+        source = self.__dict__.get("_source")
+        if source is not None:
+            changed = [
+                k
+                for k in source.log_columns
+                if k in log._fields and getattr(log, k) != getattr(self.log, k)
+            ]
+            if changed:
+                raise ValueError(
+                    f"Can't change the log of {changed!r} on a built "
+                    f"{self.__class__.__name__}: its data and bins depend on "
+                    "log. To use another scale, build a new plot or "
+                    "BinnedData."
+                )
         self._log = log
 
     @staticmethod
     def clip_data(data, clip):
         r"""Clip data to its 0.01st and 99.99th percentiles.
 
-        The one clipping rule every plot shares: each plot's ``clip_data``
-        option is handed here as ``clip``.
+        The one clipping rule every plot shares: each axis's setting in a
+        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``. The
+        percentiles are computed over the finite values only; +/-inf is
+        clipped to them like any other value beyond a percentile, when that
+        tail is clipped, and NaN stays NaN. A column with no finite value is
+        unchanged.
 
         Parameters
         ----------
         data : pd.Series or pd.DataFrame
             Data to clip. A DataFrame is clipped column by column.
         clip : bool or str
-            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails.
+            ``"l"`` or ``"lower"`` clips the lower tail only, ``"u"`` or
+            ``"upper"`` the upper tail only, in any case; ``"both"`` and any
+            value that is not a string clip both tails.
 
         Returns
         -------
@@ -122,27 +231,10 @@ class Base(ABC):
         ------
         TypeError
             If ``data`` is neither a Series nor a DataFrame.
+        ValueError
+            If ``clip`` is any other string, the empty string included.
         """
-        if isinstance(data, pd.Series):
-            ax = 0
-        elif isinstance(data, pd.DataFrame):
-            ax = 1
-        else:
-            raise TypeError("Unexpected object %s" % type(data))
-
-        q0 = 0.0001
-        q1 = 0.9999
-        pct = data.quantile([q0, q1])
-        lo = pct.loc[q0]
-        up = pct.loc[q1]
-
-        if isinstance(clip, str) and clip.lower()[0] == "l":
-            data = data.clip(lower=lo, axis=ax)
-        elif isinstance(clip, str) and clip.lower()[0] == "u":
-            data = data.clip(upper=up, axis=ax)
-        else:
-            data = data.clip(lo, up, axis=ax)
-        return data
+        return _clip_to_quantiles(data, clip)
 
     def set_labels(self, **kwargs):
         r"""Set or update the x, y, or z labels.
@@ -270,9 +362,28 @@ class Base(ABC):
         ax.tick_params(axis="both", which="both", direction="inout")
 
     @abstractmethod
-    def set_data(self):
-        r"""Store the data to plot. Implemented by each subclass."""
+    def _set_data(self):
+        r"""Store the data to plot. Implemented by each subclass.
+
+        Called only by the constructor, so a plot's data never changes after
+        it is built. Each implementation calls ``_claim_data`` first.
+        """
         pass
+
+    def _claim_data(self):
+        r"""Mark the plot's data as set; raise if it already was.
+
+        Raises
+        ------
+        ValueError
+            If ``_set_data`` already ran on this plot.
+        """
+        if self.__dict__.get("_data_set", False):
+            raise ValueError(
+                f"{self.__class__.__name__} data is set once, by the constructor; "
+                "to plot other data, build a new plot."
+            )
+        self._data_set = True
 
     @abstractmethod
     def make_plot(self):
@@ -369,6 +480,8 @@ class PlotWithZdata(Base):
 
     _alim = (None, None)
     _alim_kind = "value"
+    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    _log_data = False
 
     @property
     def alim(self):
@@ -464,8 +577,10 @@ class PlotWithZdata(Base):
 
         return agg.where(keep)
 
-    def set_data(self, x, y, z=None, clip_data=False):
-        r"""Store x, y and z as columns of one DataFrame, dropping rows with NaN.
+    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
+        r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
+
+        Called only by the constructor.
 
         Parameters
         ----------
@@ -473,30 +588,45 @@ class PlotWithZdata(Base):
             Coordinates of each point.
         z : pd.Series, optional
             Value at each point. If None, every point gets ``z = 1``.
-        clip_data : bool or str, optional
-            Stored as ``self.clip``, None as False. True clips both tails;
-            ``"l"`` or ``"u"`` clips only the lower or upper tail (see
+        clip : bool, str, Mapping or None, optional
+            Stored as ``self.clip``, a ``ClipAxes``, None as False. A scalar
+            applies to every axis in ``_clipped_axes``; a mapping such as
+            ``{"y": "u"}`` sets single axes. True clips both tails; ``"l"``
+            or ``"u"`` clips only the lower or upper tail (see
             ``Base.clip_data``).
+        mask : pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y; a row is
+            kept where it is True and x, y and z are neither NaN nor +/-inf,
+            a logarithmic axis taken after ``log10(abs())``.
+        within : BinnedData, optional
+            The shared ``BinnedData`` passed as ``nbins``: rows its own mask
+            excludes are not kept either.
 
         Raises
         ------
+        TypeError
+            If ``mask`` is not a boolean ``pd.Series``.
+        KeyError
+            If ``clip`` names an axis the plot does not clip.
         ValueError
-            If no row is left after dropping NaNs.
+            If no row is left, or ``mask`` lacks a label or holds NaN; if
+            ``clip`` holds a string ``Base.clip_data`` does not accept; or if
+            the plot's data is already set.
         """
-        data = pd.DataFrame({"x": x, "y": y})
-
-        if z is None:
-            z = pd.Series(1, index=data.index)
-
-        data.loc[:, "z"] = z
-        data = data.dropna()
-        if not data.shape[0]:
-            raise ValueError(
-                "You can't build a %s with data that is exclusively NaNs"
-                % self.__class__.__name__
-            )
-        self._data = data
-        self._clip = False if clip_data is None else clip_data
+        self._claim_data()
+        log = self.log._asdict() if self._log_data else None
+        self._source = _PlotSource(
+            {"x": x, "y": y},
+            "z",
+            z,
+            log=log,
+            owner=self.__class__.__name__,
+            mask=mask,
+            within=within,
+        )
+        self._store_clip(clip)
+        self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
+        self._bin_index = getattr(x, "index", None)
 
     def set_path(self, new, add_scale=True):
         # Bug: path doesn't auto-set log information.

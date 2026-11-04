@@ -30,6 +30,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 from scipy.signal import savgol_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
+from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -584,7 +586,7 @@ class TestBinContract:
 
 
 class TestClipData:
-    """``clip_data`` clips the tails it names when points are binned."""
+    """``clip`` clips the tails it names when points are binned."""
 
     # One low and one high x outlier. Clipping to the 0.01st percentile moves
     # -1000 to about -999.1 and clipping to the 99.99th moves 1000 to about
@@ -594,7 +596,7 @@ class TestClipData:
     XEDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
 
     @pytest.mark.parametrize(
-        "clip_data, expected",
+        "clip, expected",
         [
             (None, [1, 8, 1]),  # nothing moves
             (False, [1, 8, 1]),
@@ -603,7 +605,7 @@ class TestClipData:
             ("u", [1, 9, 0]),  # only the high outlier moves
         ],
     )
-    def test_clip_data_clips_the_tails_it_names(self, clip_data, expected):
+    def test_clip_clips_the_tails_it_names(self, clip, expected):
         """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
 
         ON FAILURE: the code is wrong.
@@ -612,7 +614,7 @@ class TestClipData:
         h = Hist2D(
             self.X,
             y,
-            clip_data=clip_data,
+            clip=clip,
             nbins=[self.XEDGES, np.array([0.0, 1.0])],
         )
         grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
@@ -623,14 +625,84 @@ class TestClipData:
         "given, expected",
         [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
     )
-    def test_clip_stores_clip_data_with_none_as_false(self, given, expected):
-        """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+    def test_a_scalar_clip_is_stored_for_x_and_y_with_none_as_false(
+        self, given, expected
+    ):
+        """A scalar ``clip`` applies to both binned axes; z is never clipped.
 
         ON FAILURE: the code is wrong.
         """
-        clip = Hist2D(self.X, self.X, clip_data=given).clip
-        assert clip == expected
-        assert type(clip) is type(expected)
+        clip = Hist2D(self.X, self.X, clip=given).clip
+        assert clip == ClipAxes(x=expected, y=expected, z=False)
+        assert type(clip.x) is type(expected)
+
+    @pytest.mark.parametrize(
+        "clip, expected",
+        [
+            ({"x": True}, [0, 10, 0]),  # both x outliers move to the middle bin
+            ({"y": True}, [1, 8, 1]),  # x is not clipped: nothing moves
+        ],
+        ids=["x named", "only y named"],
+    )
+    def test_a_clip_mapping_clips_only_the_axes_it_names(self, clip, expected):
+        """``{"x": True}`` moves the x outliers; ``{"y": True}`` leaves x alone.
+
+        The x counts are those of ``test_clip_clips_the_tails_it_names``; y
+        is constant, so clipping it moves nothing.
+        ON FAILURE: the code is wrong.
+        """
+        y = pd.Series(0.5, index=self.X.index)
+        h = Hist2D(self.X, y, clip=clip, nbins=[self.XEDGES, np.array([0.0, 1.0])])
+        grid = h.agg().unstack("x").reindex(columns=h.intervals["x"])
+        counts = grid.fillna(0).sum(axis=0)  # empty x-bins count 0
+        assert counts.to_numpy() == exact(expected)
+
+
+# log10 of 0, 1, 10, 100 is -inf, 0, 1, 2.
+ZERO_FIRST = pd.Series([0.0, 1.0, 10.0, 100.0])
+Y4 = pd.Series([1.0, 2.0, 3.0, 4.0])
+
+
+class TestZeroOnALogAxis:
+    """log10(0) = -inf on a log axis: it moves no edge and falls in no bin."""
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(ZERO_FIRST, logx=True, nbins=2),
+            lambda: Hist2D(ZERO_FIRST, Y4, logx=True, nbins=2),
+        ],
+        ids=["Hist1D", "Hist2D"],
+    )
+    def test_a_zero_on_a_log_axis_moves_no_edge_and_is_counted_in_no_bin(self, build):
+        """x = 0 on a log axis: edges from log10 of 1, 10, 100, and 0 is not counted.
+
+        By hand: numpy's 2 equal bins over 0, 1, 2 have edges 0, 1, 2, left-closed
+        with the last edge inside: [0, 1) holds 1 point, [1, 2] holds 2. The zero
+        (log10 -inf) is in no bin, so 3 of 4 rows are counted.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = build()
+        assert h.edges["x"].to_numpy() == exact([0.0, 1.0, 2.0])  # hand: numpy edges
+        counts = h.cut.loc[:, "x"].value_counts(sort=False).sort_index()
+        assert counts.tolist() == [1, 2]  # hand: [0, 1) and [1, 2]
+        assert 0 not in h.cut.dropna().index  # hand: -inf is in no bin
+
+    @pytest.mark.parametrize(
+        "build",
+        [
+            lambda: Hist1D(ZERO_FIRST, logx=True, nbins=2),
+            lambda: Hist2D(ZERO_FIRST, Y4, logx=True, nbins=2),
+        ],
+        ids=["Hist1D", "Hist2D"],
+    )
+    def test_a_row_whose_log_is_infinite_is_not_a_plot_row(self, build):
+        """A zero on a log axis is dropped like NaN (author ruling #3): rows 1, 2, 3.
+
+        ON FAILURE: the code is wrong.
+        """
+        assert build().data.index.tolist() == [1, 2, 3]  # hand: label 0 is log10(0)
 
 
 class TestAggregatedValues:
@@ -1537,11 +1609,15 @@ class TestProject1D:
         ]
         assert projected.to_numpy() == exact(expected)
 
-    def test_y_outside_the_edges_is_nan_in_the_projection(self):
-        """With ``only_plotted=False``, y outside the parent's y-edges is NaN.
+    def test_y_outside_the_edges_is_dropped_from_the_projection(self):
+        """With ``only_plotted=False``, a y outside the parent's y-edges is dropped.
 
-        The y-edges ``[0.2, 0.4, 0.6]`` are narrower than the data, so 0.1 and
-        0.9 lie outside every y-bin.
+        The y-edges ``[0.2, 0.4, 0.6]`` give right-closed bins (0.2, 0.4] and
+        (0.4, 0.6], so y = 0.1 (label 0) and y = 0.9 (label 3) lie in no y-bin
+        and the projection drops their rows; labels 1 and 2 stay. Expected
+        aggregates, by hand from ``XEDGES``: x = 0.125 and 0.875 have no kept
+        row, so their x-bins are NaN; x = 0.375 in (0.25, 0.5] holds only
+        y = 0.3, and x = 0.625 in (0.5, 0.75] holds only y = 0.5.
 
         ON FAILURE: the code is wrong.
         """
@@ -1551,29 +1627,42 @@ class TestProject1D:
 
         projected = h.project_1d("x", only_plotted=False)
 
-        expected = [np.nan, 0.3, 0.5, np.nan]  # outside, inside, inside, outside
-        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+        assert projected.agg().to_numpy() == exact(
+            [np.nan, 0.3, 0.5, np.nan], nan_ok=True
+        )
+        assert list(projected.data.index) == [1, 2]
+        assert list(projected.get_plotted_data_boolean_series().index) == [1, 2]
 
     @pytest.mark.parametrize(
-        "y, nbins, expected",
+        "y, nbins, kept, expected",
         [
             # Explicit edges give right-closed bins (0.2, 0.4], (0.4, 0.6]:
-            # 0.2 is in no bin, 0.6 is in the last one.
+            # 0.2 (label 0) and 0.7 (label 3) are in no bin; 0.6 is in the
+            # last one. By hand from XEDGES: x-bin (0.25, 0.5] holds y = 0.3,
+            # (0.5, 0.75] holds y = 0.6, and the outer x-bins hold no kept row.
             (
                 [0.2, 0.3, 0.6, 0.7],
                 [XEDGES, np.array([0.2, 0.4, 0.6])],
+                [1, 2],
                 [np.nan, 0.3, 0.6, np.nan],
             ),
-            # An integer bin count gives numpy's bins [0, 2), [2, 4]: both
-            # outer edges are inside.
-            ([0.0, 1.0, 2.0, 4.0], 2, [0.0, 1.0, 2.0, 4.0]),
+            # An integer bin count gives numpy's left-closed bins: y edges
+            # [0, 2, 4], so [0, 2), [2, 4] hold every y, both outer edges
+            # included; x edges [0.125, 0.5, 0.875], so [0.125, 0.5) holds
+            # x = 0.125, 0.375 (y = 0, 1: mean 0.5) and [0.5, 0.875] holds
+            # x = 0.625, 0.875 (y = 2, 4: mean 3).
+            ([0.0, 1.0, 2.0, 4.0], 2, [0, 1, 2, 3], [0.5, 3.0]),
         ],
         ids=["right-closed", "left-closed"],
     )
-    def test_projection_keeps_exactly_the_y_values_the_parent_bins(
-        self, y, nbins, expected
+    def test_projection_keeps_exactly_the_rows_the_parent_bins_in_y(
+        self, y, nbins, kept, expected
     ):
         """A y on an outer y-edge is kept exactly when the parent bins it.
+
+        The projection keeps the rows whose y the parent bins and averages
+        their y per x-bin; the expected labels and means are by hand, in the
+        parametrization comments.
 
         ON FAILURE: the code is wrong.
         """
@@ -1582,7 +1671,9 @@ class TestProject1D:
 
         projected = h.project_1d("x", only_plotted=False)
 
-        assert projected.data.y.to_numpy() == exact(expected, nan_ok=True)
+        assert list(projected.data.index) == kept
+        assert list(projected.get_plotted_data_boolean_series().index) == kept
+        assert projected.agg().to_numpy() == exact(expected, nan_ok=True)
 
     def test_log_axes_round_trip_through_the_projection(self):
         """A log-log projection stores the caller's x and y and stays log-log.
@@ -1613,16 +1704,16 @@ class TestProject1D:
         projected = known_hist.project_1d("x", project_counts=True)
         assert projected.log == (False, False)
 
-    def test_bin_precision_reaches_the_projection(self, known_hist):
-        """``bin_precision`` is passed to ``Hist1D``, which rounds the edges.
+    def test_bin_precision_cannot_reround_the_parent_bins(self, known_hist):
+        """``bin_precision`` raises: the projection's bins are the parent's.
 
-        numpy rounds the parent's edges to one decimal place for the
-        expectation.
+        The projection reuses the parent's bin codes, so its edges are the
+        parent's and cannot be rounded differently.
 
         ON FAILURE: the code is wrong.
         """
-        projected = known_hist.project_1d("x", project_counts=True, bin_precision=1)
-        assert projected.edges["x"].to_numpy() == exact(np.round(XEDGES, 1))
+        with pytest.raises(ValueError, match="bin_precision"):
+            known_hist.project_1d("x", project_counts=True, bin_precision=1)
 
     def test_projection_does_not_clip_an_outlier_into_another_bin(self):
         """An x outlier keeps its bin: the marginal equals the parent's columns.
@@ -1771,6 +1862,22 @@ class TestIdDataAboveContour:
         level = known_counts.max()  # no column other than the peak's clears this
         labelled = known_hist.id_data_above_contour(level)
         assert labelled.notna().sum() < known_hist.data.index.size
+
+    def test_rows_in_bins_at_or_above_the_level_are_labelled_by_their_x_bin(self):
+        """Counts (0,1]x(0,1]: 2, (0,1]x(1,2]: 1, (1,2]x(0,1]: 1; level 2 labels rows 0, 1.
+
+        By hand: only bin (0, 1] x (0, 1] reaches 2, so rows 0 and 1 get the x
+        bin (0, 1]; rows 2 and 3 sit in bins of count 1 and stay NaN.
+
+        ON FAILURE: the code is wrong.
+        """
+        edges = np.array([0.0, 1.0, 2.0, 3.0])
+        x = pd.Series([0.5, 0.5, 0.5, 1.5])
+        y = pd.Series([0.5, 0.5, 1.5, 0.5])
+        h = Hist2D(x, y, nbins=(edges, edges))
+        labelled = h.id_data_above_contour(2)
+        assert labelled.iloc[:2].tolist() == [pd.Interval(0.0, 1.0)] * 2  # hand
+        assert labelled.iloc[2:].isna().all()  # hand: count-1 bins
 
 
 class TestTakeDataInYRangeAcrossX:

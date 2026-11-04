@@ -98,22 +98,21 @@ class TestHist1DBasicFunctionality:
         # Should have the custom path
         assert hist.path == Path("custom")
 
-    def test_hist1d_set_data_with_clipping(self):
-        """Test set_data(x, y, clip=True) stores DataFrame with columns x,y & clip."""
-        hist = Hist1D(self.x_data)
-        hist.set_data(self.x_data, self.y_data, clip=True)
+    def test_hist1d_with_y_and_clipping(self):
+        """Hist1D(x, y, clip=True) stores columns x and y, and clips x."""
+        hist = Hist1D(self.x_data, self.y_data, clip=True)
 
         assert "x" in hist.data.columns
         assert "y" in hist.data.columns
-        assert hist.clip is True
+        assert hist.clip.x is True
 
     def test_hist1d_clip_attribute(self):
         """Test that .clip attribute equals clip flag."""
-        hist_no_clip = Hist1D(self.x_data, clip_data=False)
-        hist_with_clip = Hist1D(self.x_data, clip_data=True)
+        hist_no_clip = Hist1D(self.x_data, clip=False)
+        hist_with_clip = Hist1D(self.x_data, clip=True)
 
-        assert hist_no_clip.clip is False
-        assert hist_with_clip.clip is True
+        assert hist_no_clip.clip.x is False
+        assert hist_with_clip.clip.x is True
 
 
 class TestHist1DAxisNormalization:

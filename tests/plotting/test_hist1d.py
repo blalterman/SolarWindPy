@@ -27,6 +27,7 @@ import matplotlib.colors as mcolors  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -586,19 +587,139 @@ class TestConstructCdf:
         )
 
 
+class TestRowsWithNaN:
+    """A row with NaN in x or y is dropped, as in Hist2D (how="any")."""
+
+    # Label 11 holds y = NaN; its x = 3.9 would otherwise fall in (3, 4].
+    X = pd.Series([0.5, 3.9, 2.5, 3.5, 1.5], index=[10, 11, 12, 13, 14])
+    Y = pd.Series([1.0, np.nan, 3.0, 4.0, 5.0], index=[10, 11, 12, 13, 14])
+    STEPS = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    KEPT = [10, 12, 13, 14]
+
+    def test_nan_y_row_is_absent_from_data_and_every_selection(self):
+        """Label 11 (y = NaN) is in neither data nor any selection.
+
+        Hand values on right-closed bins (0, 1], (1, 2], (2, 3], (3, 4]: the
+        kept labels are 10, 12, 13 and 14, one per bin, so the mean of y per
+        bin is 1, 5, 3, 4; the sorted x of the kept rows is 0.5, 1.5, 2.5,
+        3.5.
+
+        ON FAILURE: the code is wrong.
+        """
+        h = Hist1D(self.X, self.Y, nbins=self.STEPS)
+
+        assert h.data.index.tolist() == self.KEPT
+        assert h.cut.index.tolist() == self.KEPT
+        assert h.agg().to_numpy() == exact([1.0, 5.0, 3.0, 4.0])
+        assert h.get_plotted_data_boolean_series().index.tolist() == self.KEPT
+        above, _ = h.get_subset_above_threshold(1, fcn="count")
+        assert above.index.tolist() == self.KEPT
+        cdf = h.construct_cdf(only_plotted=False)
+        assert cdf["x"].to_numpy() == exact([0.5, 1.5, 2.5, 3.5])
+        ranges = pd.DataFrame({"bottom": 0.0, "top": 10.0}, index=h.agg().index)
+        taken = h.take_data_in_yrange_across_x(
+            ranges,
+            lambda key, expected_logx=False: (key.left, key.right),
+            lambda row: (row.bottom, row.top),
+        )
+        assert list(taken) == self.KEPT
+
+    def test_nan_x_row_is_dropped_with_or_without_y(self):
+        """A NaN x is dropped whether Hist1D aggregates y or counts x.
+
+        Label 12's x is NaN, so labels 10, 11, 13 and 14 remain (hand).
+
+        ON FAILURE: the code is wrong.
+        """
+        x = self.X.copy()
+        x.loc[12] = np.nan
+        y = self.Y.fillna(2.0)
+
+        assert Hist1D(x, nbins=self.STEPS).data.index.tolist() == [10, 11, 13, 14]
+        assert Hist1D(x, y, nbins=self.STEPS).data.index.tolist() == [10, 11, 13, 14]
+
+    def test_integer_nbins_edges_come_from_the_kept_rows_by_hand(self):
+        """x = 1, 2, 3, 9 with y = NaN at x = 9: 2 bins give edges 1, 2, 3.
+
+        numpy's 2 equal bins over the kept x (1, 2, 3) have edges 1, 2, 3,
+        already on the 5-place grid; with x = 9 kept they would be 1, 5, 9.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([1.0, 2.0, 3.0, 9.0])
+        y = pd.Series([5.0, 6.0, 7.0, np.nan])
+
+        h = Hist1D(x, y, nbins=2)
+
+        assert h.edges["x"].to_numpy() == exact([1.0, 2.0, 3.0])
+
+    def test_integer_nbins_edges_equal_numpy_on_the_kept_rows(self):
+        """Integer edges are numpy's edges of the hand-filtered x, rounded outward.
+
+        y is NaN at the smallest and largest x, so the kept rows span less
+        than the full sample. The expected edges are
+        ``np.histogram_bin_edges`` of the x whose y is not NaN, rounded to 5
+        places with the outer edges moved outward to enclose every kept x.
+
+        ON FAILURE: the code is wrong.
+        """
+        rng = np.random.default_rng(20261103)
+        x = pd.Series(rng.normal(0.0, 1.0, 200))
+        y = pd.Series(rng.normal(5.0, 1.0, 200))
+        y.iloc[[x.idxmin(), x.idxmax()]] = np.nan
+        kept = x.to_numpy()[y.notna().to_numpy()]
+
+        edges = np.histogram_bin_edges(kept, 7)
+        scale = 1e5
+        lo = np.floor(edges[0] * scale) / scale
+        hi = np.ceil(edges[-1] * scale) / scale
+        expected = edges.round(5)
+        expected[0] = lo if lo <= kept.min() else lo - 1 / scale
+        expected[-1] = hi if hi >= kept.max() else hi + 1 / scale
+        assert expected[0] > x.min() and expected[-1] < x.max()
+
+        h = Hist1D(x, y, nbins=7)
+
+        assert h.edges["x"].to_numpy() == exact(expected)
+        assert h.agg(fcn="count").sum() == kept.size
+
+    def test_all_nan_y_raises(self):
+        """Every y NaN leaves no row: ``ValueError``, as for Hist2D.
+
+        ON FAILURE: the code is wrong.
+        """
+        x = pd.Series([1.0, 2.0, 3.0])
+        y = pd.Series([np.nan, np.nan, np.nan])
+
+        with pytest.raises(ValueError, match="exclusively NaNs"):
+            Hist1D(x, y)
+
+
 @pytest.mark.parametrize(
     "given, expected",
     [(None, False), (False, False), (True, True), ("l", "l"), ("u", "u")],
 )
-def test_clip_stores_clip_data_with_none_as_false(xy, given, expected):
-    """``clip`` keeps ``clip_data`` as given, except None, which becomes False.
+def test_clip_is_stored_for_x_only_with_none_as_false(xy, given, expected):
+    """``h.clip`` is a ``ClipAxes``: x holds ``clip``; y and z are False.
+
+    A Hist1D bins x only, so only x is clipped.
+    ON FAILURE: the code is wrong.
+    """
+    x, _ = xy
+    clip = Hist1D(x, clip=given).clip
+    assert clip == ClipAxes(x=expected, y=False, z=False)
+    assert type(clip.x) is type(expected)
+
+
+def test_a_clip_mapping_may_name_x_only(xy):
+    """``{"x": "u"}`` is x's setting; naming y raises KeyError.
 
     ON FAILURE: the code is wrong.
     """
     x, _ = xy
-    clip = Hist1D(x, clip_data=given).clip
-    assert clip == expected
-    assert type(clip) is type(expected)
+    assert Hist1D(x, clip={"x": "u"}).clip == ClipAxes(x="u", y=False, z=False)
+    with pytest.raises(KeyError, match="'y'"):
+        Hist1D(x, clip={"y": "u"})
 
 
 # One low and one high outlier. Clipping to the 0.01st percentile moves -1000
@@ -615,13 +736,13 @@ CLIP_CASES = [
 ]
 
 
-@pytest.mark.parametrize("clip_data, expected", CLIP_CASES)
-def test_clip_data_clips_the_tails_it_names(clip_data, expected):
+@pytest.mark.parametrize("clip, expected", CLIP_CASES)
+def test_clip_clips_the_tails_it_names(clip, expected):
     """``"l"`` clips the lower tail, ``"u"`` the upper, True both, None neither.
 
     ON FAILURE: the code is wrong.
     """
-    hist = Hist1D(CLIP_X, clip_data=clip_data, nbins=CLIP_EDGES)
+    hist = Hist1D(CLIP_X, clip=clip, nbins=CLIP_EDGES)
     assert hist.agg().fillna(0).to_numpy() == exact(expected)
 
 

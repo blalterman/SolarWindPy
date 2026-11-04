@@ -3,6 +3,7 @@
 __all__ = ["BetaRPlot"]
 
 
+from ..plotting.binned import BinnedData
 from ..plotting.hist2d import Hist2D
 from ..plotting.labels.base import TeXlabel
 
@@ -19,8 +20,9 @@ class BetaRPlot(Hist2D):
     species : str
         Label used to generate axis titles.
     **kwargs
-        Additional options forwarded to ``Hist2D``. By default the
-        x- and y-axes use logarithmic scaling.
+        Additional options forwarded to ``Hist2D``. Unless ``nbins`` is a
+        ``BinnedData``, the x- and y-axes default to logarithmic scaling;
+        with one, ``logx`` and ``logy`` default to its settings.
 
     Examples
     --------
@@ -50,14 +52,19 @@ class BetaRPlot(Hist2D):
             Label used to generate axis titles.
         **kwargs
             Additional options forwarded to
-            :class:`~solarwindpy.plotting.hist2d.Hist2D`.
+            :class:`~solarwindpy.plotting.hist2d.Hist2D`, e.g. ``nbins``,
+            which may be a ``BinnedData`` holding columns named like ``beta``
+            and ``ani``, and ``mask``. ``logx`` and ``logy`` default to True,
+            or, with a ``BinnedData``, to its settings for those columns.
         """
 
         x = beta
         y = ani
 
-        logx = kwargs.pop("logx", True)
-        logy = kwargs.pop("logy", True)
+        # A shared BinnedData sets the log of its columns; see Hist2D.
+        default = None if isinstance(kwargs.get("nbins"), BinnedData) else True
+        logx = kwargs.pop("logx", default)
+        logy = kwargs.pop("logy", default)
 
         super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, **kwargs)
         self.set_labels(

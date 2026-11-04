@@ -21,6 +21,7 @@ except ModuleNotFoundError:
     pass
 
 from . import base
+from . import binned
 
 
 class AggPlot(base.Base):
@@ -37,24 +38,42 @@ class AggPlot(base.Base):
         Set property <>.
 
     calc_bins, make_cut, agg, clip_data, make_plot
-    __init__, set_labels.y, set_path, set_data, _format_axis, make_plot (abstract)
+    __init__, set_labels.y, set_path, _set_data, _format_axis, make_plot (abstract)
     """
 
     @property
     def edges(self):
-        return {k: v.left.union(v.right) for k, v in self.intervals.items()}
+        r"""Bin edges per axis, a float ``pd.Index`` each.
 
-    @property
-    def categoricals(self):
-        return dict(self._categoricals)
+        The edges the rows were binned by, as the plot's ``BinnedData`` stores
+        them.
+        """
+        columns = self._bin_columns
+        return {k: pd.Index(self._binned.edges(columns[k])) for k in self._gb_axes}
 
     @property
     def intervals(self):
-        return {k: pd.IntervalIndex(v) for k, v in self.categoricals.items()}
+        r"""Bins per axis, a ``pd.IntervalIndex`` each."""
+        return dict(self._intervals)
+
+    @property
+    def categoricals(self):
+        r"""Alias of ``intervals``: the bins per axis, a ``pd.IntervalIndex`` each."""
+        return self.intervals
 
     @property
     def cut(self):
-        return self._cut
+        r"""Bin of each row the plot keeps: a DataFrame of categoricals.
+
+        One column per binned axis, indexed by the kept rows' labels. Built on
+        each access from the bin codes.
+        """
+        on = self._cut_on()
+        columns = self._bin_columns
+        return pd.DataFrame(
+            {k: self._binned.categorical(columns[k], on=on) for k in self._gb_axes},
+            copy=False,
+        )
 
     @property
     def clim(self):
@@ -63,7 +82,7 @@ class AggPlot(base.Base):
     @property
     def agg_axes(self):
         r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
-        tko = [c for c in self.data.columns if c not in self._gb_axes]
+        tko = [c for c in self._source.columns if c not in self._gb_axes]
         assert len(tko) == 1
         tko = tko[0]
         return tko
@@ -72,13 +91,10 @@ class AggPlot(base.Base):
     def joint(self):
         r"""Combines the categorical and continuous data for `Groupby`."""
         cut = self.cut
-        tk_target = self.agg_axes
-        target = self.data.loc[cut.index, tk_target]
+        target = self._source.take(self.agg_axes)
 
         mi = pd.MultiIndex.from_frame(cut)
-        target.index = mi
-
-        return target
+        return target.set_axis(mi)
 
     @property
     def grouped(self):
@@ -109,16 +125,15 @@ class AggPlot(base.Base):
 
         Parameters
         ----------
-        bins : array-like of pd.Interval
-            The bins, e.g. an ``IntervalIndex`` or a categorical index of
-            intervals.
+        bins : pd.IntervalIndex
+            The bins.
 
         Returns
         -------
         pd.Series
             Each bin's width, indexed by ``bins``.
         """
-        return pd.Series(pd.IntervalIndex(bins).length, index=bins)
+        return pd.Series(bins.length, index=bins)
 
     @staticmethod
     def _divide_by_max(agg):
@@ -147,40 +162,108 @@ class AggPlot(base.Base):
         assert isinstance(upper, Number) or upper is None
         self._clim = (lower, upper)
 
-    @staticmethod
-    def _edges_from_intervals(intervals):
-        """Return the edges of contiguous bins and the side they close on.
+    _edges_from_intervals = staticmethod(binned._edges_from_intervals)
 
-        The empty test comes first, and ``or`` short-circuits on it, so the
-        contiguity test never sees empty intervals. That test alone would
-        pass them: comparing ``intervals.left[1:]`` with
-        ``intervals.right[:-1]`` gives an empty array, whose ``all()`` is
-        True. Empty intervals would then reach ``intervals.right[-1]`` and
-        raise :class:`IndexError` instead of the :class:`ValueError` below.
+    @staticmethod
+    def _binned_columns(b, names):
+        r"""Map each axis to the column of ``b`` named like its input.
 
         Raises
         ------
-        ValueError
-            If the intervals are empty, not contiguous and increasing, or
-            closed on neither or both sides.
+        KeyError
+            If ``b`` has no column of that name.
         """
-        if intervals.closed not in ("left", "right"):
+        columns = {}
+        for k, col in names.items():
+            if col not in b.columns:
+                raise KeyError(
+                    f"The BinnedData has no column {col!r}, the name of {k}; "
+                    f"its columns are {b.columns!r}."
+                )
+            columns[k] = col
+        return columns
+
+    def _inherit(self, nbins, names, log, clip, precision=None):
+        r"""Resolve each binned axis's log and clip setting.
+
+        Without a ``BinnedData``, None means False. With one, None means the
+        setting ``nbins`` holds for the column named like that axis's input,
+        and a setting given explicitly must equal it.
+
+        Parameters
+        ----------
+        nbins : object
+            The plot's ``nbins``. Only a ``BinnedData`` is read.
+        names : dict of str to str
+            Each binned axis's input name, e.g. ``{"x": x.name}``.
+        log : dict of str to bool or None
+            ``logx``, ``logy`` per axis, as given.
+        clip : dict of str to bool, str or None
+            Each axis's clip setting, as given (see ``_clip_by_axis``).
+        precision : int or None
+            The plot's ``bin_precision``.
+
+        Returns
+        -------
+        log, clip : dict
+            The resolved settings per axis.
+
+        Raises
+        ------
+        KeyError
+            If ``nbins`` is a ``BinnedData`` without a column named like an
+            input.
+        ValueError
+            If ``nbins`` is a ``BinnedData`` and an explicit log or clip
+            setting differs from its setting for that column, or
+            ``precision`` is not None.
+        """
+        if not isinstance(nbins, binned.BinnedData):
+            log = {k: False if v is None else bool(v) for k, v in log.items()}
+            clip = {k: False if v is None else v for k, v in clip.items()}
+            return log, clip
+
+        b = nbins
+        if precision is not None:
             raise ValueError(
-                f"Need intervals closed on the left or right, got {intervals.closed!r}."
+                f"bin_precision={precision!r} cannot round a BinnedData's edges, "
+                "which are fixed when it is built; pass precision to the "
+                "BinnedData instead."
             )
-        if (
-            intervals.empty
-            or not intervals.is_monotonic_increasing
-            or not (intervals.left[1:] == intervals.right[:-1]).all()
-        ):
-            raise ValueError(f"Need contiguous, increasing intervals, got {intervals}.")
-        edges = np.append(intervals.left.to_numpy(), intervals.right[-1])
-        return edges, intervals.closed
+        columns = self._binned_columns(b, names)
+        resolved_log = {}
+        resolved_clip = {}
+        for k, col in columns.items():
+            held = b.log_of(col)
+            given = log.get(k)
+            if given is not None and bool(given) != held:
+                raise ValueError(
+                    f"log{k}={bool(given)} conflicts with the BinnedData, which "
+                    f"bins {col!r} with log={held}. Leave log{k} as None to "
+                    "inherit it."
+                )
+            resolved_log[k] = held
+
+            held = b.clip_of(col)
+            given = clip.get(k)
+            if given is not None and (
+                binned._clip_kind(given) != binned._clip_kind(held)
+            ):
+                raise ValueError(
+                    f"clip={given!r} for {k} conflicts with the BinnedData, which "
+                    f"bins {col!r} with clip={held!r}. Leave clip as None to "
+                    "inherit it."
+                )
+            resolved_clip[k] = held
+        return resolved_log, resolved_clip
 
     def calc_bins_intervals(self, nbins=101, precision=None):
         r"""Calculate histogram bins.
 
-        nbins: int, str, array-like
+        nbins: int, str, array-like, BinnedData
+            If a :class:`~solarwindpy.plotting.binned.BinnedData`, use its bins
+            and bin codes for the columns named like the plot's inputs (e.g.
+            ``x.name``); see ``_use_binned_data``.
             If an integer (a Python or numpy int), use
             :func:`numpy.histogram_bin_edges` to calculate that many bins.
             If str and nbins == "knuth", use `astropy.stats.knuth_bin_width`
@@ -202,6 +285,9 @@ class AggPlot(base.Base):
         ------
         ValueError
             If ``nbins`` is none of the above, e.g. a float, a bool or None.
+        TypeError
+            If a per-axis sequence holds a ``BinnedData``: one ``BinnedData``
+            bins every axis.
 
         Notes
         -----
@@ -217,7 +303,19 @@ class AggPlot(base.Base):
         0.05th and 99.95th percentiles. The values outside the resulting bins
         are not counted, and a warning gives their number.
         """
-        data = self.data
+        # Checked before `_nbins_by_axis`: a BinnedData is never a per-axis spec.
+        if isinstance(nbins, binned.BinnedData):
+            self._use_binned_data(nbins)
+            return
+        if isinstance(nbins, (tuple, list)) and any(
+            isinstance(b, binned.BinnedData) for b in nbins
+        ):
+            raise TypeError(
+                "A BinnedData bins every axis: pass it as nbins itself, not "
+                "inside a per-axis sequence."
+            )
+        self._shared_binned = None
+
         intervals = {}
 
         # An `IntervalIndex` keeps its edges unless the caller sets a precision.
@@ -226,12 +324,11 @@ class AggPlot(base.Base):
             precision = 5
 
         nbins = self._nbins_by_axis(nbins)
+        finite = self._finite_by_axis(nbins)
 
         for k in self._gb_axes:
             b = nbins[k]
-            # Numpy and Astropy don't like NaNs when calculating bins.
-            # Infinities in bins (typically from log10(0)) also create problems.
-            d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+            d = finite[k]
 
             if isinstance(b, str):
                 b = b.lower()
@@ -255,7 +352,8 @@ class AggPlot(base.Base):
 
             else:
                 try:
-                    b = np.histogram_bin_edges(d, b)
+                    # Edges given (``d`` is None) are only validated.
+                    b = np.histogram_bin_edges(np.empty(0) if d is None else d, b)
                 except MemoryError:
                     # Clip the extremely large values and extremely small outliers.
                     lo, up = d.quantile([0.0005, 0.9995])
@@ -270,26 +368,116 @@ class AggPlot(base.Base):
 
             if from_count:
                 # Round the outer edges outward so they enclose every sample.
-                scale = 10.0**precision
-                lo = np.floor(b[0] * scale) / scale
-                hi = np.ceil(b[-1] * scale) / scale
-                b = b.round(precision)
-                b[0] = lo if lo <= d.min() else lo - 1 / scale
-                b[-1] = hi if hi >= d.max() else hi + 1 / scale
+                b = binned._round_edges(b, precision, enclose=d)
                 closed = "left"
             elif round_intervals or not given_intervals:
-                b = b.round(precision)
+                b = binned._round_edges(b, precision)
 
             if clipped_for_memory:
                 self._warn_values_outside_bins(k, d, b)
 
-            zipped = zip(b[:-1], b[1:])
-            i = [pd.Interval(*b0b1, closed=closed) for b0b1 in zipped]
+            intervals[k] = pd.IntervalIndex.from_breaks(b, closed=closed)
 
-            intervals[k] = pd.CategoricalIndex(i)
+        self._intervals = tuple(intervals.items())
 
-        intervals = tuple(intervals.items())
-        self._categoricals = intervals
+    def _finite_by_axis(self, nbins):
+        r"""Each binned axis's finite values in ``data``, for computing its edges.
+
+        Numpy and Astropy don't like NaNs when calculating bins. Infinities in
+        bins (typically from log10(0)) also create problems. An axis whose
+        specification is an ``IntervalIndex`` or edges gets None: its bins do
+        not depend on the data, so values are taken only for a count or a
+        rule.
+        """
+        given = {
+            k: isinstance(nbins[k], pd.IntervalIndex) or np.ndim(nbins[k]) == 1
+            for k in self._gb_axes
+        }
+        if all(given.values()):
+            return dict.fromkeys(self._gb_axes)
+        # The axes as ``data`` holds them, by position: edges need no labels.
+        source = self._source
+        return {
+            k: (
+                None
+                if given[k]
+                else source.logged(k, labels=False)
+                .replace([-np.inf, np.inf], np.nan)
+                .dropna()
+            )
+            for k in self._gb_axes
+        }
+
+    def _use_binned_data(self, b):
+        r"""Take the bins and bin codes of each axis from the ``BinnedData`` ``b``.
+
+        Each axis reads the column named like the input given for it (e.g.
+        ``x.name``), on the rows of ``x.index``. The plot's own rows (no NaN,
+        within ``mask``) are unchanged; a row ``b`` places in no bin, or
+        excludes by its own mask, is in no bin of the plot either.
+
+        The constructor already resolved the plot's log and clip from ``b``
+        (``_inherit``); they are checked again here, so a later
+        ``calc_bins_intervals(nbins=b)`` cannot bin by settings the plot's
+        data does not have.
+
+        Raises
+        ------
+        KeyError
+            If ``b`` has no column of that name.
+        ValueError
+            If ``x.index`` is not a subset of ``b.index``, or the plot's log or
+            clip setting for an axis differs from ``b``'s for its column.
+        """
+        names = self._bin_names
+        columns = self._binned_columns(b, {k: names[k] for k in self._gb_axes})
+
+        index = self._bin_index
+        if index is None:
+            index = self._source.index
+        if not index.equals(b.index):
+            if not b.index.is_unique:
+                raise ValueError(
+                    "The BinnedData's index repeats labels and differs from x's "
+                    "index, so x's rows cannot be found in it by label."
+                )
+            if not index.isin(b.index).all():
+                raise ValueError("x's index is not a subset of the BinnedData's index.")
+
+        self._inherit(
+            b,
+            columns,
+            {k: getattr(self.log, k) for k in columns},
+            {k: getattr(self.clip, k) for k in columns},
+        )
+
+        self._shared_binned = b
+        self._shared_columns = columns
+        self._intervals = tuple((k, b.intervals(col)) for k, col in columns.items())
+
+    def _bin_source(self):
+        r"""Bin the plot's source by ``intervals`` into a private ``BinnedData``.
+
+        The bins keep their closure and edges; the source's log and each
+        axis's field of the plot's ``clip`` apply to that axis.
+        """
+        intervals = self.intervals
+        clip = self.clip
+        self._binned = self._source.binned(
+            {k: intervals[k] for k in self._gb_axes},
+            clip={k: getattr(clip, k) for k in self._gb_axes},
+        )
+        self._bin_columns = {k: k for k in self._gb_axes}
+
+    def _cut_on(self):
+        r"""The rows ``cut`` takes from ``self._binned``, as its ``on`` argument."""
+        rows = self._source.rows
+        if self._shared_binned is None:
+            return rows
+        index = self._source.index
+        if index.equals(self._binned.index):
+            return rows
+        return index if rows is None else index[rows]
 
     def _nbins_by_axis(self, nbins):
         r"""Map each binned axis to its bin specification.
@@ -329,10 +517,11 @@ class AggPlot(base.Base):
         values beyond the clip lie outside every bin and go uncounted. Such
         bins are right-closed: an integer bin count that exhausts memory does
         so again on the clipped data, so only a rule reaches here. A value is
-        counted as ``make_cut`` bins it, after ``clip_data`` if set.
+        counted as ``make_cut`` bins it, after the axis's ``clip`` if set.
         """
-        if self.clip:
-            finite = self.clip_data(finite, self.clip)
+        clip = getattr(self.clip, axis)
+        if clip:
+            finite = self.clip_data(finite, clip)
         inside = (finite > edges[0]) & (finite <= edges[-1])
         self.logger.warning(
             f"The bins for {axis!r} did not fit in memory, so they were computed "
@@ -342,39 +531,61 @@ class AggPlot(base.Base):
         )
 
     def make_cut(self):
-        r"""Calculate the `Categorical` quantities for the aggregation axes."""
+        r"""Assign the plot's rows to the bins in ``intervals``.
+
+        ``cut`` then gives those rows' bins. With a shared ``BinnedData`` the
+        rows were assigned when it was built, and its codes are used as they
+        are.
+        """
+        b = self._shared_binned
+        if b is None:
+            self._bin_source()
+        else:
+            self._binned = b
+            self._bin_columns = dict(self._shared_columns)
+
+    def _kept_index(self):
+        r"""Labels of the rows the plot keeps, the index of ``cut``."""
+        rows = self._source.rows
+        index = self._source.index
+        return index if rows is None else index[rows]
+
+    def _bin_codes(self):
+        r"""Bin code of each kept row on each binned axis, -1 off the bins."""
+        on = self._cut_on()
+        columns = self._bin_columns
+        return {k: self._binned.codes(columns[k], on=on) for k in self._gb_axes}
+
+    def _grouped_by_bin(self):
+        r"""The aggregated column on the binned rows, grouped by joint bin.
+
+        The group keys are positions in the full bin grid of ``_bin_grid``:
+        the joint bin's codes, the first axis's varying slowest.
+        """
         intervals = self.intervals
-        data = self.data
+        flat = None
+        inside = None
+        for k, codes in self._bin_codes().items():
+            codes = codes.astype(np.intp)
+            if flat is None:
+                flat = codes
+                inside = codes >= 0
+            else:
+                flat = flat * len(intervals[k]) + codes
+                inside &= codes >= 0
+        # By position: the groups are keyed by `flat`, never by row label.
+        target = self._source.take(self.agg_axes, labels=False)
+        if not inside.all():
+            target = pd.Series(target.array[inside], name=target.name, copy=False)
+            flat = flat[inside]
+        return target.groupby(flat)
 
-        cut = {}
-        for k in self._gb_axes:
-            d = data.loc[:, k]
-            i = intervals[k]
-
-            if self.clip:
-                d = self.clip_data(d, self.clip)
-
-            c = pd.cut(d, i)
-            if i.closed == "left":
-                # As in `np.histogram`, the last bin also holds its right edge.
-                c[d == i[-1].right] = i[-1]
-            cut[k] = c
-
-        cut = pd.DataFrame.from_dict(cut, orient="columns")
-        self._cut = cut
-
-    def _agg_reindexer(self, agg):
-        # `self.grouped` uses `observed=True`: `observed=False` raised a TypeError
-        # with mixed Categoricals and NaNs. (20200229)
-        # Ensure all bins are represented in the data. (20190605)
-        for k, v in self.categoricals.items():
-            # if > 1 intervals, pass level. Otherwise, don't as this raises a NotImplementedError. (20190619)
-            # Name the bins so a 1-D result keeps its axis name, e.g. "x".
-            agg = agg.reindex(
-                index=v.rename(k), level=k if agg.index.nlevels > 1 else None
-            )
-
-        return agg
+    def _bin_grid(self):
+        r"""Every bin: an ``IntervalIndex`` in 1-D, their product in 2-D."""
+        intervals = [self.intervals[k].rename(k) for k in self._gb_axes]
+        if len(intervals) == 1:
+            return intervals[0]
+        return pd.MultiIndex.from_product(intervals, names=list(self._gb_axes))
 
     def agg(self, fcn=None, **kwargs):
         r"""Perform the aggregation along the agg axes.
@@ -384,24 +595,23 @@ class AggPlot(base.Base):
         `fcn` allows you to specify a specific function for aggregation. Otherwise,
         automatically choose "count" or "mean" based on the uniqueness of the aggregated
         values.
+
+        The occupied bins are normalized by ``_axis_normalizer``. Every bin is
+        then in the result, indexed by its interval on each axis
+        (``intervals``); a bin no row falls in is NaN.
         """
-        cut = self.cut
         tko = self.agg_axes
 
         lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
         self.logger.info(
-            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({cut.columns.values})\n%s",
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko}) in ({list(self._gb_axes)})\n%s",
             "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
         )
 
-        gb = self.grouped
+        gb = self._grouped_by_bin()
 
         if fcn is None:
-            other = self.data.loc[cut.index, tko]
-            if other.dropna().unique().size == 1:
-                fcn = "count"
-            else:
-                fcn = "mean"
+            fcn = "count" if self._source.counts else "mean"
 
         agg = gb.agg(fcn, **kwargs)  # .loc[:, tko]
 
@@ -416,6 +626,15 @@ class AggPlot(base.Base):
 
             agg = agg.where(tk)
 
+        # Normalize the occupied bins only, so sums over bins never see the
+        # NaN of an empty one; then fill the grid.
+        grid = self._bin_grid()
+        agg = agg.set_axis(grid[agg.index.to_numpy()])
+        agg = self._axis_normalizer(agg)
+        return agg.reindex(grid)
+
+    def _axis_normalizer(self, agg):
+        r"""Normalize ``agg``, the occupied bins, by ``axnorm``; identity here."""
         return agg
 
     def _joint_bin_mask(self, kept):
@@ -432,19 +651,17 @@ class AggPlot(base.Base):
             True where the observation's bin across every column of ``cut``
             (e.g. the joint (x, y) bin in 2-D) is in ``kept``.
         """
-        cut = self.cut
+        intervals = self.intervals
         observed = []
         selected = []
-        for k, v in cut.items():
-            # Compare category codes: the Categoricals fail with some pandas numpy
-            # ufuncs (20200611), and both sides are coded by the same categories.
-            categories = v.cat.categories
-            observed.append(v.cat.codes.to_numpy())
-            selected.append(categories.get_indexer(kept.get_level_values(k)))
+        # Compare bin codes: both sides are positions in `intervals`.
+        for k, codes in self._bin_codes().items():
+            observed.append(codes)
+            selected.append(intervals[k].get_indexer(kept.get_level_values(k)))
 
         observed = pd.MultiIndex.from_arrays(observed)
         selected = pd.MultiIndex.from_arrays(selected)
-        return pd.Series(observed.isin(selected), index=cut.index)
+        return pd.Series(observed.isin(selected), index=self._kept_index())
 
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
@@ -468,6 +685,15 @@ class AggPlot(base.Base):
 
         aggregate. If `axnorm` set, this is used. A row is kept when its joint
         bin (e.g. its (x, y) bin in 2-D) meets `threshold`.
+
+        Returns
+        -------
+        subset : pd.DataFrame
+            The kept rows, one column per column of ``data``, holding the
+            values the caller passed: never logged, sign included, whatever
+            ``log`` says.
+        tk : pd.Series of bool
+            True for each kept row, on the index of ``data``.
         """
         agg = self.agg(fcn=fcn)
         tk = agg >= threshold
@@ -475,11 +701,15 @@ class AggPlot(base.Base):
 
         tk_h2 = self._joint_bin_mask(tk.index)
 
-        # Boolean selection returns a new frame; the stored data is untouched.
-        subset = self.data.loc[tk_h2]
-        for k, log in self.log._asdict().items():
-            if log:
-                subset.loc[:, k] = 10 ** subset.loc[:, k]
+        # The source's values on the kept rows: no 10** round trip, so only
+        # what was stored logged differs from `data`, and it is not inverted.
+        source = self._source
+        subset = pd.DataFrame(
+            {k: source.take(k) for k in source.columns},
+            index=self._kept_index(),
+            copy=False,
+        )
+        subset = subset.loc[tk_h2.to_numpy(dtype=bool)]
 
         return subset, tk_h2
 

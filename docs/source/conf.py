@@ -118,15 +118,17 @@ numpydoc_xref_aliases = {
     "vector.Vector": "solarwindpy.core.vector.Vector",
     "Ion": "solarwindpy.core.ions.Ion",
     "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
+    "BinnedData": "solarwindpy.plotting.binned.BinnedData",
 }
 
 # Words of numpydoc type-spec grammar ("array-like, optional", "list of str",
-# "default False", "shape (N,)"). They qualify a type; they are not names, so
-# linking them can only fail.
+# "dict of str to bool", "default False", "shape (N,)"). They qualify a type;
+# they are not names, so linking them can only fail.
 numpydoc_xref_ignore = {
     "optional",
     "default",
     "of",
+    "to",
     "or",
     "and",
     "shape",

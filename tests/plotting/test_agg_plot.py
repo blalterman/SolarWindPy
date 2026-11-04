@@ -18,6 +18,7 @@ the data. An ``IntervalIndex`` keeps the side its bins close on.
 import numpy as np
 import pandas as pd
 import pytest
+from astropy.stats import knuth_bin_width
 from scipy.stats import binned_statistic_2d
 
 from solarwindpy.plotting.hist1d import Hist1D
@@ -105,10 +106,9 @@ class TestBinEdges:
 
         ON FAILURE: the code is wrong.
         """
-        astropy_stats = pytest.importorskip("astropy.stats")
         x, _, _ = xyz
         h = Hist1D(x, nbins="knuth")
-        _, bins = astropy_stats.knuth_bin_width(x, return_bins=True)
+        _, bins = knuth_bin_width(x, return_bins=True)
         np.testing.assert_array_equal(h.edges["x"], bins.round(5))
 
     def test_explicit_edges_are_used_as_given(self, xyz):
@@ -267,7 +267,7 @@ class TestCut:
     def test_clip_data_moves_an_outlier_to_the_bin_of_its_clipped_value(
         self, clip, expected_right
     ):
-        """``clip_data=True`` bins the outlier at its 99.99th-percentile value.
+        """``clip=True`` bins the outlier at its 99.99th-percentile value.
 
         x = 0..9 and 1000: numpy's linear quantile at 0.9999 sits at position
         9.999, so 9 + 0.999 * 991 = 999.009, which is in (5, 999.5]; unclipped,
@@ -276,7 +276,7 @@ class TestCut:
         ON FAILURE: the code is wrong.
         """
         x = pd.Series(np.r_[np.arange(10.0), 1000.0])
-        h = Hist1D(x, clip_data=clip, nbins=[-1.0, 5.0, 999.5, 1001.0])
+        h = Hist1D(x, clip=clip, nbins=[-1.0, 5.0, 999.5, 1001.0])
         assert h.cut["x"].iloc[-1].right == expected_right
         assert np.quantile(x, 0.9999) == exact(999.009)
 
@@ -724,7 +724,7 @@ class TestNbinsAndEdges:
         assert h.edges["x"].to_numpy() == exact(expected)
 
     def test_out_of_memory_count_follows_clip_data(self, caplog):
-        """With ``clip_data="u"`` the outliers clipped onto the top edge are counted.
+        """With ``clip="u"`` the outliers clipped onto the top edge are counted.
 
         The top 20 samples of the bulk are 1.0, so the 99.95th and 99.99th
         percentiles are both 1.0 (numpy.quantile, asserted): clipping moves
@@ -740,7 +740,7 @@ class TestNbinsAndEdges:
         for clip in (False, "u"):
             caplog.clear()
             with caplog.at_level("WARNING", logger="solarwindpy.plotting"):
-                h = Hist1D(x, nbins="fd", clip_data=clip)
+                h = Hist1D(x, nbins="fd", clip=clip)
             counted[clip] = int(h.agg().sum())
             assert f"{x.size - counted[clip]} of {x.size} finite values" in caplog.text
 

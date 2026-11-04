@@ -26,11 +26,12 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.collections import PatchCollection  # noqa: E402
+from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
 from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
 from scipy.ndimage import gaussian_filter  # noqa: E402
 
+from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from solarwindpy.plotting.spiral import (  # noqa: E402
     SpiralMesh,
@@ -746,7 +747,7 @@ class TestMakePlot:
         splot = _plot(2, log=log)
         _, ax = plt.subplots()
         ax, coll = splot.make_plot(ax=ax, cbar=False)
-        assert isinstance(coll, PatchCollection)
+        assert isinstance(coll, PolyCollection)
         expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
         assert np.asarray(_rectangles(coll)) == exact(expected)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
@@ -773,7 +774,7 @@ class TestMakePlot:
         _, ax = plt.subplots()
         _, cbar = splot.make_plot(ax=ax)
         assert isinstance(cbar, Colorbar)
-        assert isinstance(cbar.mappable, PatchCollection)
+        assert isinstance(cbar.mappable, PolyCollection)
         assert cbar.mappable in ax.collections
 
     def test_unexpected_keyword_is_rejected(self):
@@ -1060,13 +1061,14 @@ def test_samples_outside_the_mesh_are_excluded_from_the_aggregation(outside, log
 
     Source of the contract: ``calculate_bin_number`` logs that out-of-mesh
     samples "will be replaced by NaNs and excluded from the aggregation." In
-    the log case the sample's x is 0, whose log10 is -inf.
+    the log case the sample's x is 0, whose log10 is -inf: like NaN, it is
+    not kept as a row (author ruling #3), so it never reaches the mesh.
 
     ON FAILURE: the code is wrong.
     """
     splot = _plot(1, z=None, log=log, rows=ROWS + [outside])
     if log:
-        assert splot.data["x"].min() == -np.inf  # the zero reached the mesh
+        assert len(splot.data) == len(ROWS)  # the zero is not a row
     np.testing.assert_array_equal(splot.agg().values, _expected_agg(splot, len))
     assert np.nansum(splot.agg().values) == len(ROWS)
 
@@ -1294,22 +1296,22 @@ CLIP_EDGES = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
 def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
     clip, counts
 ):
-    """``clip_data`` clips x and y to their 0.01%/99.99% quantiles before meshing.
+    """``clip`` clips x and y to their 0.01%/99.99% quantiles before meshing.
 
     True clips both tails, "l" and "u" one each (worked next to ``CLIP_X``).
     ``min_per_bin=101`` keeps the three initial cells unsplit.
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip_data=clip)
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip)
     splot.initialize_mesh(min_per_bin=101, progress=False)
     splot.build_grouped()
-    assert splot.clip == clip
+    assert splot.clip == ClipAxes(x=clip, y=clip, z=False)
     assert splot.agg().tolist() == exact(counts, nan_ok=True)
 
 
 def test_data_are_not_clipped_by_default():
-    """Without ``clip_data`` the tail samples stay in their own cells.
+    """Without ``clip`` the tail samples stay in their own cells.
 
     ON FAILURE: the code is wrong.
     """
@@ -1554,18 +1556,17 @@ def test_default_labels_name_the_axes_and_count_without_z():
     assert (valued.labels.x, valued.labels.y, valued.labels.z) == ("x", "y", "z")
 
 
-def test_grouping_data_of_another_length_than_the_mesh_is_rejected():
-    """``build_grouped`` raises when the data no longer match the mesh.
+def test_other_data_is_plotted_by_a_new_plot_whose_mesh_holds_only_it():
+    """A plot's data cannot be replaced; a new plot on p0-p4 groups only them.
 
-    Replacing the data after ``initialize_mesh`` leaves the mesh's cells for
-    6 samples and z for 5.
+    The mesh and the z values grouped by it then always come from the same
+    samples: 5 points with z summing to 1 + 3 + 2 + 5 + 9 = 20 (ROWS).
 
     ON FAILURE: the code is wrong.
     """
-    splot = _plot(1)
-    splot.set_data(X[:5], Y[:5], Z[:5], False)
-    with pytest.raises(ValueError, match="`cat` must have same size"):
-        splot.build_grouped()
+    splot = _plot(1, rows=ROWS[:5])
+    assert splot.grouped.size().sum() == 5
+    assert splot.grouped.sum().sum() == exact(20.0)
 
 
 class TestMakePlotOptions:
@@ -1633,3 +1634,261 @@ class TestMakePlotOptions:
         buf = io.BytesIO()
         fig.savefig(buf, format="png")
         assert buf.getvalue().startswith(b"\x89PNG\r\n\x1a\n")
+
+
+# ---------------------------------------------------------------------------
+# The mesh, every point's cell and the per-cell counts against a brute-force
+# quadtree, on both routes generate_mesh can take: descent (each point moved
+# down the tree) and per-cell counting, its fallback for edges descent cannot
+# handle. Expected values come from `_ordered_leaves` and `_brute_bin_ids`:
+# point-in-rectangle tests with the half-open [x0, x1) x [y0, y1) rule.
+# ---------------------------------------------------------------------------
+
+# On the interior edges x=2, y=1, y=2; on the lower outer edges; on the upper
+# outer edges x=6, y=4 (outside, cells being half-open); outside; non-finite;
+# and on the midpoints (4, 3) of [2,6)x[2,4) and (3, 2.5) of [2,4)x[2,3),
+# which the cluster below splits.
+EDGE_POINTS = [
+    (2.0, 0.5),
+    (1.0, 1.0),
+    (1.0, 2.0),
+    (2.0, 2.0),
+    (0.0, 0.5),
+    (1.0, 0.0),
+    (0.0, 0.0),
+    (6.0, 1.0),
+    (1.0, 4.0),
+    (-1.0, 1.0),
+    (3.0, 5.0),
+    (np.nan, 1.0),
+    (1.0, np.inf),
+    (4.0, 3.0),
+    (4.0, 2.5),
+    (3.0, 2.5),
+    (3.0, 2.2),
+    (2.5, 3.0),
+    (5.0, 3.0),
+]
+
+
+def _descent_points(seed=2026):
+    """EDGE_POINTS, a seeded cluster in [2,4)x[2,3), and seeded points on the grid."""
+    rng = np.random.default_rng(seed)
+    cluster = np.column_stack([rng.uniform(2.0, 4.0, 40), rng.uniform(2.0, 3.0, 40)])
+    spread = np.column_stack([rng.uniform(0.0, 6.0, 80), rng.uniform(0.0, 4.0, 80)])
+    pts = np.vstack([np.array(EDGE_POINTS), cluster, spread])
+    return pd.Series(pts[:, 0]), pd.Series(pts[:, 1])
+
+
+def _ordered_leaves(xedges, yedges, points, min_per_bin):
+    """Brute-force leaves in mesh order.
+
+    The documented split order: the initial cells x-major, then each step's
+    unsplit cells in order, a split cell's quarters being lower left, lower
+    right, upper right, upper left, at the midpoint.
+    """
+    cells = _grid_cells(xedges, yedges)
+    leaves = []
+    while cells:
+        split = []
+        for cell in cells:
+            if sum(_inside(cell, x, y) for x, y in points) > min_per_bin:
+                x0, x1, y0, y1 = cell
+                xh, yh = 0.5 * (x0 + x1), 0.5 * (y0 + y1)
+                split += [
+                    (x0, xh, y0, yh),
+                    (xh, x1, y0, yh),
+                    (xh, x1, yh, y1),
+                    (x0, xh, yh, y1),
+                ]
+            else:
+                leaves.append(cell)
+        cells = split
+    return np.array(leaves)
+
+
+def _brute_bin_ids(leaves, points):
+    """Row of the one leaf holding each point, FILL for none."""
+    ids = []
+    for x, y in points:
+        holding = [i for i, c in enumerate(leaves) if _inside(tuple(c), x, y)]
+        assert len(holding) <= 1  # leaves are disjoint
+        ids.append(holding[0] if holding else FILL)
+    return np.array(ids)
+
+
+# Initial edges that give the same cells as XEDGES on both routes: finite
+# float edges take descent; a trailing +inf edge (its column of cells is
+# empty, so unsplit and dropped as non-finite) and object-dtype edges take
+# the counting fallback.
+ROUTES = {
+    "descent": np.array(XEDGES),
+    "counting-inf-edge": np.append(XEDGES, np.inf),
+    "counting-object-edges": np.array(XEDGES, dtype=object),
+}
+
+
+def _route_mesh(route, min_per_bin, x=None, y=None):
+    if x is None:
+        x, y = _descent_points()
+    mesh = SpiralMesh(x, y, ROUTES[route], np.array(YEDGES), min_per_bin=min_per_bin)
+    mesh.place_spectra_in_mesh(progress=False)
+    return mesh
+
+
+def test_route_fixture_separates_descent_from_counting():
+    """The ROUTES edges select descent and counting, and the points probe edges.
+
+    Uses the private ``SpiralMesh._descent_edges``: which route
+    ``generate_mesh`` takes is not public, and only the fixture's validity
+    depends on it. The points include one on a split midpoint at both
+    refinement depths, and the cluster makes [2,4)x[2,3) split.
+
+    ON FAILURE: the fixture no longer separates descent from per-cell counting, or no longer puts points on split edges; fix the fixture.
+    """
+    x, y = _descent_points()
+    for route, xedges in ROUTES.items():
+        mesh = SpiralMesh(x, y, xedges, np.array(YEDGES), min_per_bin=3)
+        found, _ = mesh._descent_edges(x.values, y.values)
+        assert (found is not None) == (route == "descent"), route
+    leaves = {tuple(c) for c in _ordered_leaves(XEDGES, YEDGES, _points_of(x, y), 3)}
+    # A leaf's lower-left corner at each midpoint: (4, 3) depth 1, (3, 2.5) depth 2.
+    assert any(c[0] == 4.0 and c[2] == 3.0 for c in leaves)
+    assert any(c[0] == 3.0 and c[2] == 2.5 for c in leaves)
+    assert not any(c[1] == np.inf for c in leaves)
+
+
+def _points_of(x, y):
+    return list(zip(x.tolist(), y.tolist()))
+
+
+@pytest.mark.parametrize("min_per_bin", [1, 3, 10])
+@pytest.mark.parametrize("route", list(ROUTES))
+class TestMeshEqualsBruteForce:
+    """Mesh rows, ``bin_id`` and counts equal a point-in-rectangle brute force."""
+
+    def test_mesh_rows_are_the_brute_force_leaves_in_split_order(
+        self, route, min_per_bin
+    ):
+        """``mesh`` equals the brute-force leaves, row for row.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = _route_mesh(route, min_per_bin)
+        x, y = _descent_points()
+        expected = _ordered_leaves(XEDGES, YEDGES, _points_of(x, y), min_per_bin)
+        np.testing.assert_array_equal(mesh.mesh, expected)
+
+    def test_bin_id_is_the_row_of_the_leaf_holding_each_point(self, route, min_per_bin):
+        """``bin_id.id`` is each point's leaf row, -9999 off the mesh or non-finite.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = _route_mesh(route, min_per_bin)
+        x, y = _descent_points()
+        pts = _points_of(x, y)
+        expected = _brute_bin_ids(
+            _ordered_leaves(XEDGES, YEDGES, pts, min_per_bin), pts
+        )
+        np.testing.assert_array_equal(mesh.bin_id.id, expected)
+        assert mesh.bin_id.fill == FILL
+
+    def test_counts_per_cell_are_the_brute_force_counts(self, route, min_per_bin):
+        """Points per mesh cell equal a brute-force count and none exceeds the limit.
+
+        ON FAILURE: the code is wrong.
+        """
+        mesh = _route_mesh(route, min_per_bin)
+        x, y = _descent_points()
+        pts = _points_of(x, y)
+        leaves = _ordered_leaves(XEDGES, YEDGES, pts, min_per_bin)
+        expected = [sum(_inside(tuple(c), px, py) for px, py in pts) for c in leaves]
+        ids = mesh.bin_id.id
+        counts = np.bincount(ids[ids != FILL], minlength=mesh.mesh.shape[0])
+        np.testing.assert_array_equal(counts, expected)
+        assert max(expected) <= min_per_bin
+
+
+@pytest.mark.parametrize("seed", [3, 4])
+@pytest.mark.parametrize("min_per_bin", [2, 5])
+def test_descent_and_counting_give_identical_meshes_and_bin_ids(seed, min_per_bin):
+    """On the same points, descent and the counting fallback agree exactly.
+
+    Identity: both routes refine the same initial cells by the same rule.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = _descent_points(seed)
+    descent = _route_mesh("descent", min_per_bin, x, y)
+    for route in ("counting-inf-edge", "counting-object-edges"):
+        counting = _route_mesh(route, min_per_bin, x, y)
+        np.testing.assert_array_equal(counting.mesh, descent.mesh)
+        np.testing.assert_array_equal(counting.bin_id.id, descent.bin_id.id)
+
+
+def test_a_new_mesh_on_the_same_object_places_the_points_again():
+    """After ``set_data``, ``bin_id`` holds the new points' leaves.
+
+    The placement found while splitting belongs to the data it was found
+    for; new data and a new mesh give the brute-force ids of the new data.
+
+    ON FAILURE: the code is wrong.
+    """
+    mesh = _route_mesh("descent", 3)
+    x, y = _descent_points(7)
+    mesh.set_data(x, y)
+    mesh.place_spectra_in_mesh(progress=False)
+    pts = _points_of(x, y)
+    expected = _brute_bin_ids(_ordered_leaves(XEDGES, YEDGES, pts, 3), pts)
+    np.testing.assert_array_equal(mesh.bin_id.id, expected)
+
+
+def test_spiral_plot_bin_ids_equal_brute_force_on_its_edges():
+    """SpiralPlot2D's mesh and ``bin_id`` are the brute force on its own edges.
+
+    The plot raises the top edges by 1% and drops NaN rows; the brute force
+    uses its ``initial_bins`` and the rows of ``data``.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = _descent_points()
+    splot = SpiralPlot2D(x, y, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
+    splot.initialize_mesh(min_per_bin=3, progress=False)
+    xe, ye = splot.initial_bins["x"], splot.initial_bins["y"]
+    pts = _points_of(splot.data.x, splot.data.y)
+    leaves = _ordered_leaves(tuple(xe), tuple(ye), pts, 3)
+    np.testing.assert_array_equal(splot.mesh.mesh, leaves)
+    np.testing.assert_array_equal(splot.mesh.bin_id.id, _brute_bin_ids(leaves, pts))
+
+
+@pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+def test_drawn_polygons_are_the_mesh_cells_corner_by_corner(log):
+    """One closed polygon per mesh cell: (x0,y0), (x1,y0), (x1,y1), (x0,y1).
+
+    Expected: the corners of each row of ``mesh.mesh`` (10**edges on log
+    axes), in mesh order, counter-clockwise from the lower left.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = _descent_points()
+    if log:
+        x, y = 10.0**x, 10.0**y
+    splot = SpiralPlot2D(
+        x,
+        y,
+        logx=log,
+        logy=log,
+        initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+    )
+    splot.initialize_mesh(min_per_bin=3, progress=False)
+    splot.build_grouped()
+    _, coll = splot.make_plot(cbar=False)
+    assert isinstance(coll, PolyCollection)
+    m = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
+    paths = coll.get_paths()
+    assert len(paths) == m.shape[0]  # one polygon per mesh cell
+    for path, (x0, x1, y0, y1) in zip(paths, m):
+        v = path.vertices
+        np.testing.assert_array_equal(v[:4], [[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+        np.testing.assert_array_equal(v[-1], v[0])  # closed
+    assert coll.get_array().size == m.shape[0]  # one value per polygon
