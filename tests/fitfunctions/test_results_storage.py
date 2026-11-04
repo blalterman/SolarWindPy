@@ -235,3 +235,32 @@ def test_make_fit_constructs_no_dataframe(monkeypatch, failing):
 
     fit.results
     assert built, "results built no table"
+
+
+@pytest.mark.parametrize("case", list(CASES))
+def test_results_quality_columns_satisfy_their_defining_identities(case):
+    """On noisy unweighted data each quality column equals its definition.
+
+    linear chisq_dof = sum(residuals**2) / dof; robust chisq_dof = twice the
+    optimizer's cost over dof; rsq = 1 - SS_res / SS_tot; each uncertainty is
+    the square root of the covariance diagonal. Noise keeps linear and robust
+    apart, so a swap between them fails.
+
+    ON FAILURE: the code is wrong.
+    """
+    cls, y, kwargs, _ = CASES[case]
+    noise = np.random.default_rng(7).normal(0.0, 0.2, X.size)
+    fit = cls(X, y + noise, **kwargs)
+    fit.make_fit()
+    row = fit.results.iloc[0]
+    resid = fit.residuals()
+    used_y = fit.observations.used.y
+    dof = used_y.size - len(fit.argnames)
+
+    assert row[("chisq_dof", "linear")] == exact((resid**2).sum() / dof)
+    assert row[("chisq_dof", "robust")] == exact(2.0 * fit.fit_result.cost / dof)
+    ss_tot = ((used_y - used_y.mean()) ** 2).sum()
+    assert row[("rsq", "")] == exact(1.0 - (resid**2).sum() / ss_tot)
+    sigma = np.sqrt(np.diag(fit.pcov))
+    for name, s in zip(fit.argnames, sigma):
+        assert row[(name, "uncertainty")] == exact(s)
