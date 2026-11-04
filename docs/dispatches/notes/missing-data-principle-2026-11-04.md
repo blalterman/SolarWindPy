@@ -205,3 +205,4 @@ Open:
   species' value; (c) offer a species-count or coverage series beside totals; (d) extend
   `number_density`'s `skipna` argument to the other totals so a caller can require every species.
   Recommendation: (a) now, (d) if a caller asks.
+## Spent-Mark: M1 landed (fix in 50ad2d5c lineage); the rule lives in docs/source/missing_data.rst
