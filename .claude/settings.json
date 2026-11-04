@@ -34,7 +34,6 @@
       "Bash(git add setup.py)",
       "Bash(git add pyproject.toml)",
       "Bash(git add solarwindpy.yml)",
-      "Bash(git add solarwindpy-dev.yml)",
       "Bash(git add .gitignore)",
       "Bash(git status)",
       "Bash(git diff)",
@@ -51,7 +50,6 @@
       "Bash(find .claude/ -name *.py -type f)",
       "Bash(find .claude/ -name *.sh -type f)",
       "Bash(conda env create -f solarwindpy.yml)",
-      "Bash(conda env create -f solarwindpy-dev.yml)",
       "Bash(conda activate :*)",
       "Bash(pre-commit:*)",
       "Bash(tox:*)"
