@@ -28,6 +28,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
+from matplotlib.tri import Triangulation  # noqa: E402
+from scipy.stats import multivariate_normal  # noqa: E402
 
 from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
@@ -199,6 +201,19 @@ def _occupied_centers(splot, fcn=np.mean, rows=ROWS):
         y = 10.0**y
     ok = np.isfinite(values)
     return x[ok], y[ok], values[ok]
+
+
+def _drawn_triangulation(splot, x, y):
+    """The occupied centres ``x``, ``y`` triangulated as the contours need.
+
+    Delaunay in plot coordinates (log10 on a log axis), each axis divided by
+    its span so neither axis's units dominate the distances; the triangles
+    are then placed at ``x``, ``y`` in data units for drawing.
+    """
+    px = np.log10(x) if splot.log.x else x
+    py = np.log10(y) if splot.log.y else y
+    triangles = Triangulation(px / np.ptp(px), py / np.ptp(py)).triangles
+    return Triangulation(x, y, triangles=triangles)
 
 
 def _assert_same_segments(qset, ref):
@@ -842,11 +857,28 @@ class TestPlotContours:
         assert (1.0, 0.5, 1.0) in zip(x.tolist(), y.tolist(), z.tolist())
         assert len(z) == len(ROWS)
 
-    @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
+    @pytest.mark.parametrize(
+        "log",
+        [
+            False,
+            pytest.param(
+                True,
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    reason="Ruling o25: triangulate in scaled plot coordinates",
+                ),
+            ),
+        ],
+        ids=["linear", "log"],
+    )
     def test_tricontour_triangulates_the_occupied_centres(self, log):
-        """The contours triangulate exactly the occupied cells' centres.
+        """The contours triangulate the occupied cells' centres in plot coordinates.
 
         Empty cells are excluded; on log axes centres are 10**(mid-edge).
+        The triangles are Delaunay's in plot coordinates (log10 on a log
+        axis) with each axis scaled to its span, drawn in data units. On log
+        axes ROWS' centres triangulate differently in data units, so the
+        reference is shown to separate the two; on linear axes they agree.
 
         ON FAILURE: the code is wrong.
         """
@@ -854,8 +886,12 @@ class TestPlotContours:
         _, qset, _ = self._contour(splot)
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
-        _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
+        ref = ax.tricontour(_drawn_triangulation(splot, x, y), z, self.LEVELS)
+        _assert_same_segments(qset, ref)
         assert list(qset.levels) == self.LEVELS
+        if log:
+            _, ax = plt.subplots()
+            assert _segments_differ(ref, ax.tricontour(x, y, z, self.LEVELS))
 
     def test_use_contourf_fills_the_same_field(self):
         """``use_contourf=True`` draws filled contours of the same field.
@@ -867,7 +903,8 @@ class TestPlotContours:
         assert qset.filled
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
-        _assert_same_segments(qset, ax.tricontourf(x, y, z, self.LEVELS))
+        tri = _drawn_triangulation(splot, x, y)
+        _assert_same_segments(qset, ax.tricontourf(tri, z, self.LEVELS))
 
     def test_colorbar_and_contour_set_are_returned(self):
         """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` None.
@@ -1236,7 +1273,9 @@ class TestPlotContoursCalls:
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
         _, ref_ax = plt.subplots()
-        _assert_same_segments(qset, ref_ax.tricontour(x, y, z))
+        _assert_same_segments(
+            qset, ref_ax.tricontour(_drawn_triangulation(splot, x, y), z)
+        )
 
     def test_every_option_reaches_the_drawing(self):
         """Each option changes the drawing as documented.
@@ -1271,7 +1310,8 @@ class TestPlotContoursCalls:
         x, y, z = _occupied_centers(splot, fcn=max)
         assert 5.0 in z.tolist()
         _, ref_ax = plt.subplots()
-        _assert_same_segments(qset, ref_ax.tricontour(x, y, z, levels))
+        tri = _drawn_triangulation(splot, x, y)
+        _assert_same_segments(qset, ref_ax.tricontour(tri, z, levels))
 
     def test_one_level_with_a_colorbar_is_a_clear_error(self):
         """A single contour level with ``cbar=True`` raises a ValueError saying why.
@@ -1285,6 +1325,112 @@ class TestPlotContoursCalls:
             splot.plot_contours(levels=[3.0])
         _, qset, cbar = splot.plot_contours(levels=[3.0], cbar=False)
         assert cbar is None and list(qset.levels) == [3.0]
+
+
+# ---------------------------------------------------------------------------
+# Contour accuracy against a known density.
+# ---------------------------------------------------------------------------
+
+#: Two bivariate normals in (v [km/s], log10 n [cm^-3]), slow and fast wind:
+#: weight, mean v, mean log10 n, sd v, sd log10 n, correlation.
+_WIND = (
+    (0.75, 380.0, np.log10(8.0), 40.0, 0.15, -0.3),
+    (0.25, 650.0, np.log10(3.0), 50.0, 0.12, 0.0),
+)
+#: Each case's evaluation grid in v and in plot y (log10 n, or n).
+_WIND_GRID = {
+    True: (np.linspace(250.0, 800.0, 120), np.linspace(-0.2, 1.5, 120)),
+    False: (np.linspace(250.0, 800.0, 120), np.linspace(0.6, 30.0, 120)),
+}
+
+
+def _wind_laws():
+    for w, mv, mu, sv, su, rho in _WIND:
+        cov = [[sv**2, rho * sv * su], [rho * sv * su, su**2]]
+        yield w, multivariate_normal([mv, mu], cov)
+
+
+def _wind_sample(size, seed=20261104):
+    """``size`` draws of (v, n) from ``_WIND``."""
+    rng = np.random.default_rng(seed)
+    laws = list(_wind_laws())
+    counts = rng.multinomial(size, [w for w, _ in laws])
+    draws = np.concatenate(
+        [law.rvs(size=k, random_state=rng) for (_, law), k in zip(laws, counts)]
+    )
+    return draws[:, 0], 10.0 ** draws[:, 1]
+
+
+def _wind_density(v, n, log):
+    """The true density SpiralPlot2D's ``axnorm="d"`` estimates.
+
+    Per (km/s dex) on a log n axis; per (km/s cm^-3) on a linear one, the
+    log density times d(log10 n)/dn = 1 / (n ln 10).
+    """
+    vu = np.stack([v, np.log10(n)], axis=-1)
+    pdf = sum(w * law.pdf(vu) for w, law in _wind_laws())
+    return pdf if log else pdf / (n * np.log(10.0))
+
+
+def _misclassified(qset, points, truth):
+    """Fraction of ``points`` whose inclusion in the filled ``qset`` != ``truth``."""
+    inside = np.zeros(len(points), dtype=bool)
+    for path in qset.get_paths():
+        if len(path.vertices):
+            inside |= path.contains_points(points)
+    return np.mean(inside != truth)
+
+
+@pytest.mark.xfail(
+    strict=True, reason="Ruling o25: triangulate in scaled plot coordinates"
+)
+@pytest.mark.parametrize("log", [True, False], ids=["log n", "linear n"])
+def test_density_contours_misclassify_less_than_data_unit_triangles(log):
+    """Contours of a known density are closer to the truth than data-unit ones.
+
+    20,000 (v, n) draws from ``_WIND``, contoured as a density. For the
+    levels enclosing 99% and 90% of the draws under the true density, each
+    filled region above the level is compared on a 120 x 120 grid in plot
+    coordinates with where the true density lies above it. Delaunay
+    triangles in data units, as plot_contours drew before (v spans ~500
+    km/s, log10 n ~1.5), are slivers; scaled plot coordinates must
+    misclassify at most 0.85 of their area at each level. Over eight seeds
+    the ratio was at most 0.77 (99%) and 0.56 (90%) on log n, 0.57 and 0.64
+    on linear n. At the 50% level the two are within sampling noise at this
+    size on log n, so it is not asserted.
+
+    ON FAILURE: the code is wrong -- plot_contours triangulates in data
+    units again, or without scaling each axis to its span.
+    """
+    v, n = _wind_sample(20_000)
+    splot = SpiralPlot2D(
+        pd.Series(v), pd.Series(n), logy=log, axnorm="d", min_per_bin=50
+    )
+    agg = splot.agg().to_numpy()
+    occupied = np.isfinite(agg)
+    cells = splot.mesh.mesh[occupied]
+    cx = cells[:, :2].mean(axis=1)
+    cy = cells[:, 2:].mean(axis=1)
+    if log:
+        cy = 10.0**cy
+
+    gv, gy = np.meshgrid(*_WIND_GRID[log])
+    gn = 10.0**gy if log else gy
+    points = np.column_stack([gv.ravel(), gn.ravel()])
+    true_on_grid = _wind_density(points[:, 0], points[:, 1], log)
+    # 1.0 lies far above any density here (the peak is below 0.03).
+    for level in np.quantile(_wind_density(v, n, log), [0.01, 0.10]):
+        truth = true_on_grid > level
+        _, ax = plt.subplots()
+        _, drawn, _ = splot.plot_contours(
+            ax=ax, levels=[level, 1.0], use_contourf=True, cbar=False
+        )
+        _, ref_ax = plt.subplots()
+        data_units = ref_ax.tricontourf(cx, cy, agg[occupied], [level, 1.0])
+        got = _misclassified(drawn, points, truth)
+        before = _misclassified(data_units, points, truth)
+        assert got <= 0.85 * before, (level, got, before)
+        plt.close("all")
 
 
 # ---------------------------------------------------------------------------
