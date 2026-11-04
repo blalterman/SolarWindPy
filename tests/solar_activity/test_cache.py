@@ -307,14 +307,6 @@ def http_server():
     server.server_close()
 
 
-_STATUS_XFAIL = pytest.mark.xfail(
-    strict=True,
-    reason="cache.DownloadError has no status and fetch has no fallback "
-    "switch; remove this marker when both land",
-)
-
-
-@_STATUS_XFAIL
 @pytest.mark.parametrize("code", [404, 500])
 def test_a_failed_http_download_reports_its_status(http_server, code):
     """``DownloadError.status`` is the HTTP status the server answered.
@@ -332,7 +324,6 @@ def test_a_failed_http_download_reports_its_status(http_server, code):
     assert info.value.status == code
 
 
-@_STATUS_XFAIL
 def test_a_failure_without_an_http_answer_has_no_status(tmp_path):
     """A download that never got an HTTP answer has ``status`` None.
 
@@ -349,7 +340,6 @@ def test_a_failure_without_an_http_answer_has_no_status(tmp_path):
     assert info.value.status is None
 
 
-@_STATUS_XFAIL
 def test_without_fallback_a_failed_refresh_raises_despite_a_cached_copy(
     http_server, seed_cache
 ):
@@ -372,7 +362,6 @@ def test_without_fallback_a_failed_refresh_raises_despite_a_cached_copy(
     assert info.value.status == 404
 
 
-@_STATUS_XFAIL
 def test_fall_back_returns_the_cached_copy_and_warns_its_age(seed_cache):
     """``fall_back`` returns a cached copy with a warning naming its age.
 
@@ -392,7 +381,6 @@ def test_fall_back_returns_the_cached_copy_and_warns_its_age(seed_cache):
     assert path.read_text() == "old\n"
 
 
-@_STATUS_XFAIL
 def test_fall_back_with_nothing_cached_raises_with_the_status(http_server):
     """``fall_back`` raises ``DownloadError`` carrying the error's status.
 

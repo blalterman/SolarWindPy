@@ -6,7 +6,10 @@ is honoured when that directory exists). :func:`fetch` returns the cached copy
 while it is younger than the source's freshness window and downloads again
 once it is older. If that download fails, the cached copy is returned with a
 :class:`StaleCacheWarning` naming its age, because a stale copy is better than
-none; only a source never downloaded raises :class:`DownloadError`.
+none; only a source never downloaded raises :class:`DownloadError`. A caller
+that must react to the failure itself, for example to an HTTP 404, passes
+``fallback=False``, reads :attr:`DownloadError.status`, and calls
+:func:`fall_back` when it wants the cached copy after all.
 
 astropy names each cached file by a hash of its URL, so :func:`cache_contents`
 lists which URL each file holds and how old it is. To remove entries, use
@@ -18,6 +21,7 @@ __all__ = [
     "DownloadError",
     "StaleCacheWarning",
     "fetch",
+    "fall_back",
     "cached_age",
     "cache_contents",
 ]
@@ -25,6 +29,7 @@ __all__ = [
 import http.client
 import logging
 import time
+import urllib.error
 import warnings
 
 from pathlib import Path
@@ -45,7 +50,25 @@ _DOWNLOAD_ERRORS = (OSError, http.client.HTTPException)
 
 
 class DownloadError(RuntimeError):
-    """Raised when a download fails and there is no cached copy to fall back on."""
+    """Raised when a download fails and there is no cached copy to fall back on.
+
+    Parameters
+    ----------
+    message : str
+        Description of the failure.
+    status : int, optional
+        HTTP status the server answered, e.g. 404.
+
+    Attributes
+    ----------
+    status : int or None
+        HTTP status the server answered, or None when no HTTP answer came
+        (no connection, DNS failure, timeout, a local file).
+    """
+
+    def __init__(self, message, status=None):
+        super().__init__(message)
+        self.status = status
 
 
 class StaleCacheWarning(UserWarning):
@@ -60,6 +83,17 @@ def _download_file(url, cache):
     return _astropy_data.download_file(
         url, cache=cache, show_progress=False, pkgname=PKGNAME
     )
+
+
+def _http_status(error):
+    """HTTP status in ``error`` or the errors it was raised from, else None."""
+    seen = set()
+    while error is not None and id(error) not in seen:
+        seen.add(id(error))
+        if isinstance(error, urllib.error.HTTPError):
+            return error.code
+        error = error.__cause__ or error.__context__
+    return None
 
 
 def _cached_urls():
@@ -94,7 +128,7 @@ def cached_age(url):
     return None if path is None else _age(path)
 
 
-def fetch(url, max_age):
+def fetch(url, max_age, fallback=True):
     """Return a local copy of ``url``, downloading it if the cached one is stale.
 
     Parameters
@@ -105,6 +139,11 @@ def fetch(url, max_age):
     max_age : pandas.Timedelta or str
         Freshness window: a cached copy younger than this is returned without
         downloading. Anything :class:`pandas.Timedelta` accepts.
+    fallback : bool, optional
+        If True (default), a failed download returns the cached copy through
+        :func:`fall_back`. If False, it raises :class:`DownloadError` even
+        when a copy is cached, so the caller can inspect
+        :attr:`DownloadError.status` first.
 
     Returns
     -------
@@ -114,8 +153,8 @@ def fetch(url, max_age):
     Raises
     ------
     DownloadError
-        If the download fails and no copy is cached, or a local path does not
-        exist.
+        If the download fails and no copy is cached (or ``fallback`` is
+        False), or a local path does not exist.
 
     Warns
     -----
@@ -140,19 +179,55 @@ def fetch(url, max_age):
     try:
         return Path(_download_file(url, cache="update"))
     except _DOWNLOAD_ERRORS as exc:
-        if cached is None:
+        if not fallback:
             raise DownloadError(
-                f"Could not download {url} and there is no cached copy to fall "
-                f"back on. Underlying error: {exc!r}"
+                f"Could not download {url}. Underlying error: {exc!r}",
+                status=_http_status(exc),
             ) from exc
-        days = _age(cached) / pd.Timedelta(days=1)
-        message = (
-            f"Could not download {url} ({exc!r}); using the cached copy that "
-            f"is {days:.1f} days old: {cached}"
-        )
-        warnings.warn(message, StaleCacheWarning, stacklevel=2)
-        _logger.warning(message)
-        return cached
+        return fall_back(url, exc)
+
+
+def fall_back(url, error):
+    """Return the cached copy of ``url`` after its download failed with ``error``.
+
+    Parameters
+    ----------
+    url : str
+        URL whose download failed.
+    error : BaseException
+        The failure, named in the warning or chained to the raised error.
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the cached copy.
+
+    Raises
+    ------
+    DownloadError
+        If ``url`` is not cached; its ``status`` is the HTTP status in
+        ``error``, if any.
+
+    Warns
+    -----
+    StaleCacheWarning
+        Naming the cached copy's age.
+    """
+    cached = _cached_urls().get(url)
+    if cached is None:
+        raise DownloadError(
+            f"Could not download {url} and there is no cached copy to fall "
+            f"back on. Underlying error: {error!r}",
+            status=_http_status(error),
+        ) from error
+    days = _age(cached) / pd.Timedelta(days=1)
+    message = (
+        f"Could not download {url} ({error!r}); using the cached copy that "
+        f"is {days:.1f} days old: {cached}"
+    )
+    warnings.warn(message, StaleCacheWarning, stacklevel=3)
+    _logger.warning(message)
+    return cached
 
 
 def cache_contents():
