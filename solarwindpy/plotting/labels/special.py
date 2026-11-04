@@ -160,8 +160,8 @@ class ManualLabel(ArbitraryLabel):
     def with_units(self):
         r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
         result = base.format_with_units(
-            r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units, sized=False
-        ).replace(r" \; []", "")
+            r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units
+        ).replace(r" \; \left[\right]", "")
         return self._format_with_description(result)
 
     @property
@@ -232,7 +232,7 @@ class CarringtonRotation(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#", sized=False)
+        result = base.format_with_units(self.tex, r"\#")
         return self._format_with_description(result)
 
     @property
@@ -273,7 +273,7 @@ class Count(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units, sized=False)
+        result = base.format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property
@@ -353,7 +353,7 @@ class Power(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units, sized=False)
+        result = base.format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property
@@ -384,7 +384,7 @@ class Probability(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units, sized=False)
+        result = base.format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property
@@ -462,7 +462,7 @@ class CountOther(ArbitraryLabel):
 
     def __str__(self):
         result = base.format_with_units(
-            self.tex, self.units, sized=False, new_line=self.new_line_for_units
+            self.tex, self.units, new_line=self.new_line_for_units
         )
         return self._format_with_description(result)
 
@@ -555,7 +555,7 @@ class MathFcn(ArbitraryLabel):
 
     def __str__(self):
         result = base.format_with_units(
-            self.tex, self.units, sized=True, new_line=self.new_line_for_units
+            self.tex, self.units, new_line=self.new_line_for_units
         )
         return self._format_with_description(result)
 
@@ -676,7 +676,7 @@ class AbsoluteValue(ArbitraryLabel):
 
     def __str__(self):
         result = base.format_with_units(
-            self.tex, self.units, sized=True, new_line=self.new_line_for_units
+            self.tex, self.units, new_line=self.new_line_for_units
         )
         return self._format_with_description(result)
 
@@ -744,9 +744,7 @@ class Distance2Sun(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(
-            self.tex, r"\mathrm{%s}" % self.units, sized=False
-        )
+        result = base.format_with_units(self.tex, r"\mathrm{%s}" % self.units)
         return self._format_with_description(result)
 
     @property
@@ -800,7 +798,7 @@ class SSN(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#", sized=False)
+        result = base.format_with_units(self.tex, r"\#")
         return self._format_with_description(result)
 
     @property
@@ -866,7 +864,7 @@ class ComparisonLabel(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units, sized=False)
+        result = base.format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property
@@ -1018,7 +1016,7 @@ class Xcorr(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units, sized=False)
+        result = base.format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property

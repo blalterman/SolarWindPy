@@ -581,7 +581,7 @@ class SIDC(ActivityIndicator):
             (overlay,) = cax.plot(
                 y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
             )
-            cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
+            cax.set_xlabel(r"$\mathrm{SSN} \; \left[\#\right]$")
             x0, x1 = cax.get_xlim()
 
             # We force the maximum value to be even and minimum value to be
@@ -597,7 +597,7 @@ class SIDC(ActivityIndicator):
             (overlay,) = cax.plot(
                 x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
             )
-            cax.set_ylabel(r"$\mathrm{SSN} \; [\#]$")
+            cax.set_ylabel(r"$\mathrm{SSN} \; \left[\#\right]$")
             x0, x1 = cax.get_ylim()
 
             # We force the maximum value to be even and minimum value to be

@@ -1,11 +1,10 @@
 # Spent-When: PERMANENT(the repository stops maintaining a test suite)
 # Supersedes: none
-r"""The label-with-units form ``$tex <sep> [units]$`` has one home (F130).
+r"""The label-with-units form ``$tex <sep> \left[units\right]$`` has one home (F130).
 
 Every label class builds its ``with_units`` string through
-:func:`solarwindpy.plotting.labels.base.format_with_units`. Which bracket form a
-class uses (plain ``[ ]`` or sized ``\left[ \right]``) is left as it was: the
-author decides whether to unify it.
+:func:`solarwindpy.plotting.labels.base.format_with_units`. The author ruled one
+bracket form, sized ``\left[ \right]``, for every class.
 """
 
 import re
@@ -39,14 +38,9 @@ def test_no_label_module_writes_the_closing_bracket_itself():
 @pytest.mark.parametrize(
     "kwargs, expected",
     [
-        # Chosen inputs; each form is the one the label classes render today.
-        ({"sized": False}, r"$n_{p} \; [\mathrm{cm}^{-3}]$"),
-        ({"sized": True}, r"$n_{p} \; \left[\mathrm{cm}^{-3}\right]$"),
-        (
-            {"sized": True, "new_line": True},
-            "$n_{p} $\n$ " + r"\left[\mathrm{cm}^{-3}\right]$",
-        ),
-        ({"sized": False, "new_line": True}, "$n_{p} $\n$ " + r"[\mathrm{cm}^{-3}]$"),
+        # Chosen inputs.
+        ({}, r"$n_{p} \; \left[\mathrm{cm}^{-3}\right]$"),
+        ({"new_line": True}, "$n_{p} $\n$ " + r"\left[\mathrm{cm}^{-3}\right]$"),
     ],
 )
 def test_format_with_units_writes_tex_separator_and_bracketed_units(kwargs, expected):
@@ -61,10 +55,7 @@ def test_format_with_units_writes_tex_separator_and_bracketed_units(kwargs, expe
 
 # --- one bracket form (the author's F130 ruling) ------------------------------
 
-_SIZED = "the author ruled sized brackets for every label; the code follows next"
 
-
-@pytest.mark.xfail(strict=True, reason=_SIZED)
 def test_format_with_units_always_sizes_the_brackets():
     r"""Units sit in ``\left[ \right]``, which grow with fractional units.
 
@@ -89,7 +80,7 @@ def _v_xa():
     return TeXlabel(("v", "x", "a"))
 
 
-_PLAIN_TODAY = {
+_PLAIN_BEFORE_F130 = {
     "Timedelta": lambda s, d: d.Timedelta("2h"),
     "ManualLabel": lambda s, d: s.ManualLabel("Test Label", "b"),
     "CarringtonRotation": lambda s, d: s.CarringtonRotation(),
@@ -104,10 +95,11 @@ _PLAIN_TODAY = {
 }
 
 
-@pytest.mark.xfail(strict=True, reason=_SIZED)
-@pytest.mark.parametrize("make", list(_PLAIN_TODAY.values()), ids=list(_PLAIN_TODAY))
+@pytest.mark.parametrize(
+    "make", list(_PLAIN_BEFORE_F130.values()), ids=list(_PLAIN_BEFORE_F130)
+)
 def test_every_label_class_sizes_its_unit_brackets(make):
-    r"""Each label class that bracketed units plainly now sizes them.
+    r"""Each label class that bracketed units plainly before F130 now sizes them.
 
     ON FAILURE: the code is wrong.
     """

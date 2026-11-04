@@ -92,10 +92,12 @@ def _units_of(key):
     return entry.units
 
 
-def format_with_units(tex, units, *, sized, new_line=False):
-    r"""Return the label-with-units string ``$tex <sep> [units]$``.
+def format_with_units(tex, units, *, new_line=False):
+    r"""Return the label-with-units string ``$tex <sep> \left[units\right]$``.
 
-    The one home of this form: every label class builds its string here.
+    The one home of this form: every label class builds its string here. The
+    brackets are sized, ``\left[ \right]``, so they grow with their content,
+    such as a fractional unit.
 
     Parameters
     ----------
@@ -103,9 +105,6 @@ def format_with_units(tex, units, *, sized, new_line=False):
         TeX of the quantity, without ``$``.
     units : str
         TeX of the units, without ``$``.
-    sized : bool
-        If True, bracket the units with ``\left[ \right]``, which grow with
-        their content; if False, with plain ``[ ]``.
     new_line : bool, default False
         If True, the units go on a new line; otherwise ``\;`` separates them.
 
@@ -115,7 +114,7 @@ def format_with_units(tex, units, *, sized, new_line=False):
         The label as a TeX math string.
     """
     sep = "$\n$" if new_line else r"\;"
-    left, right = (r"\left[", r"\right]") if sized else ("[", "]")
+    left, right = r"\left[", r"\right]"
     return f"${tex} {sep} {left}{units}{right}$"
 
 
@@ -193,7 +192,7 @@ class Base(ABC):
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
-        result = format_with_units(self.tex, self.units, sized=True)
+        result = format_with_units(self.tex, self.units)
         return self._format_with_description(result)
 
     @property
@@ -435,9 +434,7 @@ template   : %s
             tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
             path = path / (axnorm.upper() + "norm")
 
-        with_units = format_with_units(
-            tex, units, sized=True, new_line=self.new_line_for_units
-        )
+        with_units = format_with_units(tex, units, new_line=self.new_line_for_units)
 
         # Apply description formatting
         with_units = self._format_with_description(with_units)

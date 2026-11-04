@@ -236,12 +236,12 @@ class FFPlot(object):
             ax.set_xscale("log", nonpositive="clip")
 
         if pct:
-            ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
+            ax.set_ylabel(r"$\mathrm{Residual} \; \left[\%\right]$")
             ax.set_yscale("symlog", linthresh=10)
             ax.set_ylim(-100, 100)
 
         else:
-            ax.set_ylabel(r"$\mathrm{Residual} \; [\#]$")
+            ax.set_ylabel(r"$\mathrm{Residual} \; \left[\#\right]$")
 
         x = self.observations.raw.x
         if x.size:

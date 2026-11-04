@@ -843,7 +843,7 @@ def test_residual_axes_carry_labels_scales_and_grid():
 
     rax = plot.plot_residuals(pct=True)
     assert rax.get_xlabel() == "time"
-    assert rax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
+    assert rax.get_ylabel() == r"$\mathrm{Residual} \; \left[\%\right]$"
     assert rax.get_xscale() == "log"
     assert rax.get_yscale() == "symlog"
     assert rax.yaxis.get_transform().linthresh == 10
@@ -852,7 +852,7 @@ def test_residual_axes_carry_labels_scales_and_grid():
 
     plot.set_log(x=False)
     rax = plot.plot_residuals(pct=False)
-    assert rax.get_ylabel() == r"$\mathrm{Residual} \; [\#]$"
+    assert rax.get_ylabel() == r"$\mathrm{Residual} \; \left[\#\right]$"
     assert rax.get_yscale() == "linear"
     assert tuple(rax.dataLim.intervalx) == (obs.raw.x[0], obs.raw.x[-1])
     assert rax.dataLim.intervaly[0] == SIMPLE.min()
@@ -900,7 +900,7 @@ def test_stacked_plot_is_a_3_to_1_fit_over_residual_layout():
     labels = [t.get_text() for t in hax.get_legend().get_texts()]
     assert labels == [r"$\mathrm{Obs}$", r"$\mathrm{Used}$", r"$\mathrm{Fit}$"]
     assert len(annotations(hax, tex)) == 1
-    assert rax.get_ylabel() == r"$\mathrm{Residual} \; [\%]$"
+    assert rax.get_ylabel() == r"$\mathrm{Residual} \; \left[\%\right]$"
     hax2, _ = plot.plot_raw_used_fit_resid(annotate=False)
     assert annotations(hax2, tex) == []
 
@@ -927,7 +927,7 @@ def test_stacked_plot_passes_keywords_through():
     (resid,) = rax.get_lines()
     assert resid.get_ydata() == exact(SIMPLE)
     assert to_rgba(resid.get_color()) == to_rgba("r")
-    assert rax.get_ylabel() == r"$\mathrm{Residual} \; [\#]$"
+    assert rax.get_ylabel() == r"$\mathrm{Residual} \; \left[\#\right]$"
     raw = line_labelled(hax, r"$\mathrm{Obs}$")
     assert to_rgba(raw.get_color()) == to_rgba("b")
 
