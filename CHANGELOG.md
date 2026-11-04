@@ -453,6 +453,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IndicatorPlot.make_plot` and `SSNPlot.make_plot` from returning nothing to `(ax, line,
   None)`.
 
+- `StabilityContours.plot_contours` from returning nothing to `(ax, lines, None)`, with
+  `lines` a dict of `(growth_rate, instability)` to `Line2D`; `SIDC.plot_on_colorbar` from
+  returning nothing to `(cax, underlay, overlay, None)`.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
