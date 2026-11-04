@@ -58,6 +58,8 @@ class ExponentialPlusC(FitFunction):
     Parameters are ``k`` (rate), ``A`` (amplitude) and ``y0`` (offset).
     """
 
+    _TeX_argnames = {"y0": "y_0"}
+
     @property
     def function(self):
         r"""The model :math:`A e^{-k x} + y_0` as ``f(x, k, A, y0)``."""

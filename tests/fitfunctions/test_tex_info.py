@@ -524,7 +524,6 @@ def _offset_fit_cases():
     ]
 
 
-@pytest.mark.xfail(strict=True, reason="x0 and y0 not yet subscripted in TeX")
 @pytest.mark.parametrize(
     "cls, x, y, expected",
     _offset_fit_cases(),

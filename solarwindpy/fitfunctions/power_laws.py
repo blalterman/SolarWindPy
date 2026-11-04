@@ -62,7 +62,7 @@ class PowerLawPlusC(FitFunction):
     Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``y0`` (offset).
     """
 
-    _TeX_argnames = _ALPHA_TEX
+    _TeX_argnames = {**_ALPHA_TEX, "y0": "y_0"}
 
     @property
     def function(self):
@@ -101,7 +101,7 @@ class PowerLawOffCenter(FitFunction):
     the smallest used ``x``, within any bounds the caller passes.
     """
 
-    _TeX_argnames = _ALPHA_TEX
+    _TeX_argnames = {**_ALPHA_TEX, "x0": "x_0"}
 
     def _prepare_fit(self, kwargs):
         r"""Bound ``x0`` below the smallest used ``x``.
