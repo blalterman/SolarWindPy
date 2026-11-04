@@ -89,10 +89,18 @@ def test_logx_false_bins_beta_linearly():
     "species,beta_label,ani_label",
     [
         ("p", ("beta", "par", "p"), ("R", "T", "p")),
-        ("p_bimax", ("beta", "par", "p"), ("R", "T", "p")),
+        pytest.param(
+            "p_bimax",
+            ("beta", "par", "p_bimax"),
+            ("R", "T", "p_bimax"),
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="the author ruled the _bimax strip deleted; the code follows",
+            ),
+        ),
         ("p1+p2", ("beta", "par", "p1+p2"), ("R", "P", "p1+p2")),
     ],
-    ids=["single", "bimax-suffix-dropped", "summed-species-uses-pressure"],
+    ids=["single", "bimax-species-names-the-fit", "summed-species-uses-pressure"],
 )
 def test_axes_are_labelled_parallel_beta_and_anisotropy_of_species(
     species, beta_label, ani_label

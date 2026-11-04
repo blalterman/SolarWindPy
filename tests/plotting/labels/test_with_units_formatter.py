@@ -57,3 +57,62 @@ def test_format_with_units_writes_tex_separator_and_bracketed_units(kwargs, expe
     from solarwindpy.plotting.labels.base import format_with_units
 
     assert format_with_units(r"n_{p}", r"\mathrm{cm}^{-3}", **kwargs) == expected
+
+
+# --- one bracket form (the author's F130 ruling) ------------------------------
+
+_SIZED = "the author ruled sized brackets for every label; the code follows next"
+
+
+@pytest.mark.xfail(strict=True, reason=_SIZED)
+def test_format_with_units_always_sizes_the_brackets():
+    r"""Units sit in ``\left[ \right]``, which grow with fractional units.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.plotting.labels.base import format_with_units
+
+    assert format_with_units(r"n_{p}", r"\mathrm{cm}^{-3}") == (
+        r"$n_{p} \; \left[\mathrm{cm}^{-3}\right]$"
+    )
+
+
+def _n_p1():
+    from solarwindpy.plotting.labels.base import TeXlabel
+
+    return TeXlabel(("n", "", "p1"))
+
+
+def _v_xa():
+    from solarwindpy.plotting.labels.base import TeXlabel
+
+    return TeXlabel(("v", "x", "a"))
+
+
+_PLAIN_TODAY = {
+    "Timedelta": lambda s, d: d.Timedelta("2h"),
+    "ManualLabel": lambda s, d: s.ManualLabel("Test Label", "b"),
+    "CarringtonRotation": lambda s, d: s.CarringtonRotation(),
+    "Count": lambda s, d: s.Count(),
+    "Power": lambda s, d: s.Power(),
+    "Probability": lambda s, d: s.Probability(_n_p1(), "> 5"),
+    "CountOther": lambda s, d: s.CountOther(_n_p1(), "> 5"),
+    "Distance2Sun": lambda s, d: s.Distance2Sun("m"),
+    "SSN": lambda s, d: s.SSN("M13"),
+    "ComparisonLabel": lambda s, d: s.ComparisonLabel(_n_p1(), _n_p1(), "add"),
+    "Xcorr": lambda s, d: s.Xcorr(_n_p1(), _v_xa(), "pearson"),
+}
+
+
+@pytest.mark.xfail(strict=True, reason=_SIZED)
+@pytest.mark.parametrize("make", list(_PLAIN_TODAY.values()), ids=list(_PLAIN_TODAY))
+def test_every_label_class_sizes_its_unit_brackets(make):
+    r"""Each label class that bracketed units plainly now sizes them.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.plotting.labels import datetime, special
+
+    label = str(make(special, datetime))
+    assert r" \; \left[" in label
+    assert label.endswith(r"\right]$")
