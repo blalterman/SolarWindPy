@@ -204,6 +204,80 @@ def test_identifiable_power_law_warns_only_below_the_default_threshold():
         fit.make_fit(degeneracy_threshold=0.999)
 
 
+def test_degenerate_follows_the_class_threshold_after_the_fit():
+    """``degenerate`` is recomputed from ``pcov`` with the current class threshold.
+
+    ON FAILURE: the code is wrong.
+    """
+
+    class _Line(Line):
+        degeneracy_threshold = 0.99999
+
+    x = np.linspace(2, 3, 21)
+    y = 3 * x + 2 + np.random.default_rng(1).normal(0, 0.1, x.size)
+    fit = _Line(x, y, weights=np.full(x.size, 0.1))
+    fit.make_fit()
+    assert fit.degenerate == []
+
+    # On x in [2, 3] slope and intercept correlate beyond 0.99.
+    _Line.degeneracy_threshold = 0.99
+    corr = _correlation(fit, "m", "b")
+    assert fit.degenerate == [("m", "b", exact(corr))]
+
+
+def test_degenerate_keeps_the_threshold_given_to_make_fit():
+    """A ``degeneracy_threshold`` keyword outlasts a later class change.
+
+    ON FAILURE: the code is wrong.
+    """
+
+    class _Line(Line):
+        degeneracy_threshold = 0.99999
+
+    x = np.linspace(2, 3, 21)
+    y = 3 * x + 2 + np.random.default_rng(1).normal(0, 0.1, x.size)
+    fit = _Line(x, y, weights=np.full(x.size, 0.1))
+    with pytest.warns(FitDegeneracyWarning):
+        fit.make_fit(degeneracy_threshold=0.99)
+    _Line.degeneracy_threshold = 0.99999
+    assert [pair[:2] for pair in fit.degenerate] == [("m", "b")]
+
+
+def test_degeneracy_warning_names_exactly_the_degenerate_pairs():
+    """The warning prints one sentence per pair ``degenerate`` lists, with its correlation.
+
+    ``degeneracy_threshold=0`` flags every correlated pair of the Gaussian.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit, _ = _gaussian_plus_heavyside()
+    with pytest.warns(FitDegeneracyWarning) as record:
+        fit.make_fit(degeneracy_threshold=0)
+    message = str(record[0].message)
+    pairs = fit.degenerate
+    assert len(pairs) > 1
+    for a, b, c in pairs:
+        assert f"{a} and {b} are degenerate (correlation {c:.6f})" in message
+    assert message.count("are degenerate") == len(pairs)
+
+
+def test_threshold_one_silences_correlations_but_not_non_finite_covariance():
+    """At 1.0 an exact trade-off passes; an infinite covariance still warns.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _one_branch_hinge()
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FitDegeneracyWarning)
+        fit.make_fit(degeneracy_threshold=1.0)
+    assert fit.degenerate == []
+
+    line = Line(np.array([0.0, 1.0]), np.array([2.0, 5.0]))
+    with pytest.warns(FitDegeneracyWarning, match="non-finite covariance"):
+        with pytest.warns(OptimizeWarning):
+            line.make_fit(degeneracy_threshold=1.0)
+
+
 @pytest.mark.parametrize("threshold", [-0.1, 1.5, np.nan])
 def test_degeneracy_threshold_outside_zero_to_one_raises(threshold):
     """A threshold that is not a correlation from 0 to 1 raises ValueError.

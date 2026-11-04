@@ -164,9 +164,16 @@ class TrendFit(object):
         same location, so Python's default warning filter shows only the
         first degenerate bin. Each fit's
         :attr:`~solarwindpy.fitfunctions.core.FitFunction.degenerate` lists
-        its own degenerate parameter pairs; collect the degenerate bins with::
+        its own degenerate parameter pairs. Collect the degenerate bins,
+        skipping any entry that is not a fitted FitFunction, with::
 
-            degenerate = {k: f.degenerate for k, f in tf.ffuncs.items() if f.degenerate}
+            from solarwindpy.fitfunctions.core import FitFunction
+
+            degenerate = {
+                k: f.degenerate
+                for k, f in tf.ffuncs.items()
+                if isinstance(f, FitFunction) and f.degenerate
+            }
         """
         # Successful fits return None, which pandas treats as NaN.
         return_exception = kwargs.pop("return_exception", True)
