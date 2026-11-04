@@ -398,10 +398,12 @@ def test_position_is_pos_with_the_symbol_r(plasma):
 
 # --- frame radii (o28) --------------------------------------------------------
 
-# IAU 2015 Resolution B3 nominal values, Prsa et al. (2016), AJ 152, 41,
-# doi:10.3847/0004-6256/152/2/41.
-IAU_2015_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
-IAU_2015_SOLAR_RADIUS = 695.7e6  # [m]
+# IAU 2015 Resolution B3 nominal values, kept in one place beside the other
+# constant oracles.
+from tests.core.test_units_constants import (  # noqa: E402
+    IAU_2015_EARTH_EQUATORIAL_RADIUS,
+    IAU_2015_SOLAR_RADIUS,
+)
 
 
 @pytest.mark.parametrize(
