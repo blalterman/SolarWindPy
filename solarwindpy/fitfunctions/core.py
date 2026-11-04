@@ -52,6 +52,10 @@ _UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
 _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
+# What make_fit records, success or failure: popt and psigma in argnames
+# order, the covariance, the quality numbers and counts at fit time, and the
+# status. The results table is built from it on first read.
+_FitOutcome = namedtuple("_FitOutcome", "popt,psigma,pcov,chisq,rsq,nobs,dof,status")
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
 
 
@@ -105,7 +109,7 @@ _QUALITY_COLUMNS = (
 _STATUS_OK = "ok"
 _KINDS = ("value", "uncertainty")
 
-# What a successful fit stores beyond the results table; make_fit clears them
+# What a successful fit stores beyond its outcome; make_fit clears them
 # before each attempt, so a failed refit leaves none from an earlier success.
 _SUCCESS_ONLY = ("_fit_result", "_fit_p0", "_fit_bounds", "_TeX_info", "_plotter")
 
@@ -295,7 +299,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # Documented in the class docstring (see FitFunctionMeta).
         self._init_logger()
         self._set_argnames()
-        self._results = None
+        self._results_table = None
         self._error = None
 
         if weights is None:
@@ -445,7 +449,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def chisq_dof(self):
-        r"""Chisq per degree of freedom :math:`\chi^2_\nu`, read from :attr:`results`.
+        r"""Chisq per degree of freedom :math:`\chi^2_\nu`, as in :attr:`results`.
 
         Returns
         -------
@@ -457,10 +461,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
-        row = self.results.iloc[0]
-        return _ChisqPerDegreeOfFreedom(
-            row[("chisq_dof", "linear")], row[("chisq_dof", "robust")]
-        )
+        return self._fitted("_outcome").chisq
 
     @property
     def dof(self):
@@ -547,6 +548,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             after a successful fit; after a failed one it is the exception's
             class name, the values and quality numbers are NaN, and the
             exception is :attr:`error`. A copy, so editing it changes nothing.
+            ``make_fit`` stores the outcome without building the table; the
+            first read builds it and later reads copy it.
 
         Raises
         ------
@@ -565,9 +568,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         >>> fit.results.loc[:, ("status", "")].item()
         'ok'
         """
-        if self._results is None:
-            raise self._not_fitted()
-        return self._results.copy()
+        if self._results_table is None:
+            self._results_table = self._results_row(self._fitted("_outcome"))
+        return self._results_table.copy()
 
     @property
     def error(self):
@@ -578,24 +581,22 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
-        if self._results is None:
-            raise self._not_fitted()
+        self._fitted("_outcome")
         return self._error
 
-    def _results_kind(self, kind):
-        r"""The ``kind`` column of each parameter, as ``{name: value}``."""
-        row = self.results.xs(kind, level="K", axis=1).iloc[0]
-        return {name: row[name] for name in self.argnames}
+    def _by_argname(self, field):
+        r"""Outcome ``field``, one entry per parameter, as a new ``{name: value}``."""
+        return dict(zip(self.argnames, getattr(self._fitted("_outcome"), field)))
 
     @property
     def popt(self):
-        r"""Optimized fit parameters, ``{name: value}``, read from :attr:`results`."""
-        return self._results_kind("value")
+        r"""Optimized fit parameters, ``{name: value}``; the ``value`` entries of :attr:`results`."""
+        return self._by_argname("popt")
 
     @property
     def psigma(self):
-        r"""Parameter uncertainties, ``{name: uncertainty}``, read from :attr:`results`."""
-        return self._results_kind("uncertainty")
+        r"""Parameter uncertainties, ``{name: uncertainty}``; the ``uncertainty`` entries of :attr:`results`."""
+        return self._by_argname("psigma")
 
     @property
     def pcov(self):
@@ -608,11 +609,11 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
-        return self._fitted("_pcov").copy()
+        return self._fitted("_outcome").pcov.copy()
 
     @property
     def rsq(self):
-        r"""Coefficient of determination, read from :attr:`results`.
+        r"""Coefficient of determination, as in :attr:`results`.
 
         Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
 
@@ -624,7 +625,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             ``nan`` is returned without a divide-by-zero warning. NaN after a
             failed fit.
         """
-        return self.results.loc[:, ("rsq", "")].item()
+        return float(self._fitted("_outcome").rsq)
 
     def _calc_rsq(self, popt):
         r"""The :attr:`rsq` of parameters ``popt``, in :attr:`argnames` order."""
@@ -1140,20 +1141,22 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return popt, pcov, psigma, all_chisq
 
-    def _results_row(self, popt, psigma, chisq, rsq, status):
-        r"""Build the one-row :attr:`results` table; every row is built here.
+    def _results_row(self, outcome):
+        r"""Build the one-row :attr:`results` table of ``outcome``; every row is built here.
 
         Parameters
         ----------
-        popt, psigma : array-like
-            One value and one uncertainty per parameter, in :attr:`argnames`
-            order.
-        chisq : solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom
-        rsq : float
-        status : str
+        outcome : solarwindpy.fitfunctions.core._FitOutcome
         """
-        values = [v for pair in zip(popt, psigma) for v in pair]
-        values += [chisq.linear, chisq.robust, rsq, self.nobs, self.dof, status]
+        values = [v for pair in zip(outcome.popt, outcome.psigma) for v in pair]
+        values += [
+            outcome.chisq.linear,
+            outcome.chisq.robust,
+            outcome.rsq,
+            outcome.nobs,
+            outcome.dof,
+            outcome.status,
+        ]
         return pd.DataFrame([values], columns=self.results_columns)
 
     @property
@@ -1169,18 +1172,36 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         columns += list(_QUALITY_COLUMNS)
         return pd.MultiIndex.from_tuples(columns, names=["P", "K"])
 
-    def _record_failure(self, error):
-        r"""Store a NaN :attr:`results` row whose status names ``error``."""
-        nan = np.full(len(self.argnames), np.nan)
-        self._results = self._results_row(
-            nan,
-            nan,
-            _ChisqPerDegreeOfFreedom(np.nan, np.nan),
-            np.nan,
-            type(error).__name__,
+    def _record_outcome(self, popt, psigma, pcov, chisq, rsq, error):
+        r"""Store the outcome :attr:`results` describes; ``error`` is None on success.
+
+        Every outcome is stored here, with the counts at fit time, and the
+        table built from the previous one is dropped.
+        """
+        self._outcome = _FitOutcome(
+            popt=np.array(popt, dtype=float),
+            psigma=np.array(psigma, dtype=float),
+            pcov=pcov,
+            chisq=_ChisqPerDegreeOfFreedom(*np.asarray(chisq, dtype=float)),
+            rsq=rsq,
+            nobs=self.nobs,
+            dof=self.dof,
+            status=_STATUS_OK if error is None else type(error).__name__,
         )
-        self._pcov = np.full((nan.size, nan.size), np.nan)
+        self._results_table = None
         self._error = error
+
+    def _record_failure(self, error):
+        r"""Store a NaN outcome whose status names ``error``."""
+        nan = np.full(len(self.argnames), np.nan)
+        self._record_outcome(
+            nan,
+            nan,
+            np.full((nan.size, nan.size), np.nan),
+            (np.nan, np.nan),
+            np.nan,
+            error,
+        )
 
     def _prepare_fit(self, kwargs):
         r"""Return the keywords :meth:`make_fit` passes to the optimizer.
@@ -1246,11 +1267,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             self._record_failure(e)
             raise
 
-        self._results = self._results_row(
-            popt, psigma, all_chisq, self._calc_rsq(popt), _STATUS_OK
+        self._record_outcome(
+            popt, psigma, pcov, all_chisq, self._calc_rsq(popt), error=None
         )
-        self._error = None
-        self._pcov = pcov
         self._fit_result = res
         self._fit_p0 = tuple(p0)
 

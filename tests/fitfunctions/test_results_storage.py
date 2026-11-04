@@ -204,13 +204,6 @@ class DataFrameBuiltError(AssertionError):
     """make_fit constructed a pandas DataFrame."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=DataFrameBuiltError,
-    reason="make_fit builds the results DataFrame on every fit; ruling o16d "
-    "defers it to the first results read; remove this marker when make_fit "
-    "stores plain arrays",
-)
 @pytest.mark.parametrize("failing", [False, True], ids=["ok", "failed"])
 def test_make_fit_constructs_no_dataframe(monkeypatch, failing):
     """``make_fit`` stores arrays and builds no DataFrame; ``results`` builds one.
