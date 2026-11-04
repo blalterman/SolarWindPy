@@ -295,12 +295,23 @@ class GaussianLn(FitFunction):
 
     @property
     def normal_parameters(self):
-        r"""Calculate the normal parameters from log-normal parameters.
+        r"""Linear-space mean and standard deviation of the log-normal variable.
+
+        The fit models :math:`\ln X \sim \mathcal{N}(m, s^2)`, with the
+        natural logarithm. This returns the mean :math:`\mu` and the
+        standard deviation :math:`\sigma` of :math:`X` itself, not of
+        :math:`\ln X`:
 
         .. math::
 
-            \mu = \exp[m + (s^2)/2]
-            \sigma = \sqrt{\exp[s^2 + 2m] (\exp[s^2] - 1)}
+            \mu = \exp[m + s^2/2]
+
+            \sigma = \sqrt{\exp[2m + s^2] (\exp[s^2] - 1)}
+
+        Returns
+        -------
+        dict
+            ``mu`` and ``sigma``, from the fitted ``m`` and ``s``.
         """
         m = self.popt["m"]
         s = self.popt["s"]
