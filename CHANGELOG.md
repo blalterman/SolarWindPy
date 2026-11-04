@@ -844,6 +844,10 @@ These change computed values; rerun any analysis that used them.
 
 - The wheel no longer installs a stray top-level `tests` package beside solarwindpy.
 
+- SpiralPlot2D.plot_contours triangulates the cell centers in plot coordinates (log10 on a log
+  axis), each axis scaled to its span, instead of in data units, where one axis dominated and
+  the contours misplaced the outer levels.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
@@ -904,6 +908,11 @@ These change computed values; rerun any analysis that used them.
   each read. To save elsewhere, join it: `Path("figs") / plot.path`.
 
 - The `auto_update_path` keyword of `set_labels`; passing it now raises `KeyError`.
+
+- SpiralPlot2D.plot_contours no longer smooths: the method, rbf_neighbors, rbf_smoothing,
+  rbf_kernel, grid_resolution, gaussian_filter_std, interpolation and nan_aware_filter
+  parameters are removed, and the default drawing changes from an RBF interpolation to
+  ax.tricontour over the occupied cells' centers.
 
 ### Migration
 
