@@ -320,8 +320,6 @@ def test_units_holds_exactly_the_registry_si_factors():
 
 # --- the author's rulings on names (o9) --------------------------------------
 
-_RULED = "the author ruled this name; the code follows in the next commit"
-
 
 @pytest.mark.parametrize(
     "alias",
@@ -387,7 +385,6 @@ def test_fast_magnetosonic_speed_is_not_in_the_registry():
     assert not hasattr(units_constants.Units(), "cfms")
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_magnetic_pressure_is_capital_p_like_every_pressure():
     """Magnetic pressure renders P_B, as thermal pressure renders P.
 

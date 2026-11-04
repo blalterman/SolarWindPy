@@ -243,7 +243,7 @@ class BField(Vector):
         The magnetic pressure is calculated using
 
         .. math::
-           p_B = \frac{1}{2\mu_0} B^2
+           P_B = \frac{1}{2\mu_0} B^2
         """
         bsq = self.mag.pow(2.0)
         const = self.units.b**2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)

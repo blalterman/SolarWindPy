@@ -100,7 +100,7 @@ QUANTITIES = MappingProxyType(
         "fdoy": Quantity(r"\mathrm{Fractional \; Day \; of \; Year}", r"\mathrm{fdoy}"),
         # Plasma measurements.
         "b": Quantity(r"B_{$C}", _U["b"], si=1e-9),
-        "pb": Quantity(r"p_B", _U["pPa"]),
+        "pb": Quantity(r"P_B", _U["pPa"]),
         "n": Quantity(r"n_{$S}", _U["cm-3"], si=1e6),
         "rho": Quantity(r"\rho_{$S}", r"m_p \; " + _U["cm-3"], si=1e6 * constants.m_p),
         "v": Quantity(r"{v}_{{$C};{$S}}", _U["kms"], si=1e3),
