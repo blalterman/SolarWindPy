@@ -8,7 +8,7 @@ once it is older. If that download fails, the cached copy is returned with a
 :class:`StaleCacheWarning` naming its age, because a stale copy is better than
 none; only a source never downloaded raises :class:`DownloadError`. A caller
 that must react to the failure itself, for example to an HTTP 404, passes
-``fallback=False``, reads :attr:`DownloadError.status`, and calls
+``fallback=False``, reads the error's ``status``, and calls
 :func:`fall_back` when it wants the cached copy after all.
 
 astropy names each cached file by a hash of its URL, so :func:`cache_contents`
@@ -148,7 +148,7 @@ def fetch(url, max_age, fallback=True):
         If True (default), a failed download returns the cached copy through
         :func:`fall_back`. If False, it raises :class:`DownloadError` even
         when a copy is cached, so the caller can inspect
-        :attr:`DownloadError.status` first.
+        the error's ``status`` first.
 
     Returns
     -------
