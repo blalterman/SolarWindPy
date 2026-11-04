@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Tests for Alfvenic turbulence calculations."""
 
+import inspect
 import numpy as np
 import pandas as pd
 import logging
@@ -674,6 +675,39 @@ def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
 
     pdt.assert_frame_equal(v, v_before)
     pdt.assert_frame_equal(b, b_before)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="set_data(sc_vector=) is renamed sc=, the package's spacecraft name; "
+    "remove this marker when the rename lands",
+)
+def test_the_spacecraft_argument_is_named_sc():
+    """The constructor and ``set_data`` take the Spacecraft as ``sc``.
+
+    Passed as ``sc``, the spacecraft drives the GSE-to-RTN aid: the polarity
+    of rows 0-3 of ``_gse_inputs`` is +1, -1, -1, +1. Neither signature still
+    names ``sc_vector``.
+
+    ON FAILURE: the code is wrong.
+    """
+    v, b, rho, sc = _gse_inputs()
+    kwargs = dict(window="10h", min_periods=1, center=True)
+
+    ot = turb.AlfvenicTurbulence(
+        v, b, rho, "p1", raffaella_version=True, sc=sc, **kwargs
+    )
+    raw_db = ot.data.loc[:, "b"].to_numpy()[:4]
+    polarity = np.array([1.0, -1.0, -1.0, 1.0])
+    assert ot.b.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+
+    # Without ``sc``, Raffaella's version raises ValueError.
+    ot.set_data(v, b, rho, "p1", raffaella_version=True, sc=sc, **kwargs)
+    assert ot.b.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+
+    for method in (turb.AlfvenicTurbulence, turb.AlfvenicTurbulence.set_data):
+        names = inspect.signature(method).parameters
+        assert "sc" in names and "sc_vector" not in names, method
 
 
 def test_raffaella_version_without_a_spacecraft_raises_value_error():
