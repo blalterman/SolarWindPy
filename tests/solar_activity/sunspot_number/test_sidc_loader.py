@@ -399,16 +399,20 @@ def test_download_data_yearly_round_trip(make_loader, tmp_path):
     np.testing.assert_allclose(written.loc[:, "std_error"].values, std / np.sqrt(n_obs))
 
 
+@pytest.mark.xfail(
+    strict=True, reason="B7: hemispheric columns are named '<h>std_error'"
+)
 def test_download_data_hemispheric_standard_errors(make_loader, tmp_path):
-    """Each hemisphere's standard error is its own std over its own sqrt(count).
+    """Each hemisphere's standard error is ``<h>_std_error``, its std over sqrt(count).
 
     Identity per hemisphere: the total, northern and southern standard errors
     are formed from the matching standard deviation and observation count, so
-    a mis-paired column would show up as a wrong value here rather than as a
-    renamed column.
+    a mis-paired column would show up as a wrong value here. Each is named
+    after its standard deviation column, ``<h>_std``, with ``_error``
+    appended.
 
-    ON FAILURE: hemispheric uncertainties are paired with the wrong counts.
-    The code is wrong.
+    ON FAILURE: hemispheric uncertainties are misnamed or paired with the
+    wrong counts. The code is wrong.
     """
     rows = [
         (2015, 1, 2015.042, 67.0, 40.0, 27.0, 9.0, 6.0, 4.0, 900, 400, 500, 1),
@@ -426,16 +430,11 @@ def test_download_data_hemispheric_standard_errors(make_loader, tmp_path):
         ("north", "north_std", "n_north"),
         ("south", "south_std", "n_south"),
     ):
-        derived = [
-            column for column in written.columns if column.startswith(hemisphere)
-        ]
-        error_column = [column for column in derived if column.endswith("std_error")]
-        assert len(error_column) == 1, f"no unique std_error column for {hemisphere}"
+        error_column = f"{std_column}_error"
+        assert error_column in written.columns, f"no {error_column} column"
 
         expected = written.loc[:, std_column] / np.sqrt(written.loc[:, count_column])
-        np.testing.assert_allclose(
-            written.loc[:, error_column[0]].values, expected.values
-        )
+        np.testing.assert_allclose(written.loc[:, error_column].values, expected.values)
 
 
 def test_download_data_removes_the_superseded_cache_file(make_loader, tmp_path):
