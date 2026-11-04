@@ -104,7 +104,7 @@ def test_the_authors_example_recovers_the_reference_hinge():
         HingeAtPoint,
         y=("mu", "value"),
         yerr=("sigma", "value"),
-        trend_kwargs={"guess_h": 433.0},
+        trend_kwargs={"guess_xh": 433.0},
     )
     tf.make_fit()
 
@@ -114,7 +114,7 @@ def test_the_authors_example_recovers_the_reference_hinge():
         tf.trend.observations.raw.w, tf.bin_results.loc[:, ("sigma", "value")]
     )
     hinge = tf.trend.results.xs("value", level="K", axis=1).iloc[0]
-    assert [hinge["h"], hinge["yh"]] == noise_free([H, YH])  # the generating hinge
+    assert [hinge["xh"], hinge["yh"]] == noise_free([H, YH])  # the generating hinge
     assert (tf.bin_results.loc[:, ("in_trend", "")]).all()
 
 

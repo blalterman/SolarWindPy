@@ -271,14 +271,14 @@ HINGE_IMPOSSIBLE = [
         TwoLine,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 425.0},
+        {"guess_xh": 425.0},
         id="TwoLine",
     ),
     _case(
         Saturation,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 425.0},
+        {"guess_xh": 425.0},
         id="Saturation",
     ),
     # Plateau x = [3, 3, 4] repeats x with a rise: slope inf.
@@ -286,7 +286,7 @@ HINGE_IMPOSSIBLE = [
         HingeSaturation,
         [0.0, 1, 2, 3, 3, 4],
         [0.0, 1, 2, 2, 2.5, 2.5],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         id="HingeSaturation",
     ),
     # Flat plateau: zero slope, so no x-intercept x2.
@@ -294,14 +294,14 @@ HINGE_IMPOSSIBLE = [
         HingeMin,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 2, 2],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         id="Min",
     ),
     _case(
         HingeMax,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 2, 2],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         id="Max",
     ),
     # Lower side x = [0, 0, 1] repeats x with a rise: slope inf.
@@ -309,7 +309,7 @@ HINGE_IMPOSSIBLE = [
         HingeAtPoint,
         [0.0, 0, 1, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         id="HingeAtPoint",
     ),
 ]
@@ -530,11 +530,11 @@ def _reference_hinge_in_hinge_notes():
     notes = _notes(inspect.getdoc(Hinge))
     number = r"(-?[0-9.]+)"
     patterns = {
-        "h, yh": rf"\(h, y_h\) = \({number}, {number}\)",
+        "xh, yh": rf"\(x_h, y_h\) = \({number}, {number}\)",
         "x1": rf"x_1 = {number}`",
-        "m1": rf"m_1 = y_h / \(h - x_1\) = {number} / {number}`",
+        "m1": rf"m_1 = y_h / \(x_h - x_1\) = {number} / {number}`",
         "m2": rf"m_2 = {number}\\,m_1",
-        "x2": rf"x_2 = h - y_h / m_2 = {number}`",
+        "x2": rf"x_2 = x_h - y_h / m_2 = {number}`",
     }
     found = {}
     for name, pattern in patterns.items():
@@ -548,18 +548,18 @@ def test_the_hinge_notes_state_the_stored_reference_hinge():
     """The numbers in ``Hinge``'s Notes are the stored reference hinge.
 
     The Notes are the one place the reference hinge is written for readers;
-    ``_H``, ``_YH``, ``_X1``, ``_M1``, ``_M2`` and ``_X2`` are what ``p0``
-    returns. m1 is written as yh / (h - x1), m2 as a multiple of m1.
+    ``_XH``, ``_YH``, ``_X1``, ``_M1``, ``_M2`` and ``_X2`` are what ``p0``
+    returns. m1 is written as yh / (xh - x1), m2 as a multiple of m1.
 
     ON FAILURE: the Notes and the constants disagree. The author decides which
     is right; update the other.
     """
     found = _reference_hinge_in_hinge_notes()
-    assert found["h, yh"] == [Hinge._H, Hinge._YH], found
+    assert found["xh, yh"] == [Hinge._XH, Hinge._YH], found
     assert found["x1"] == [Hinge._X1], found
     yh, run = found["m1"]
     assert yh == Hinge._YH, found
-    assert run == Hinge._H - Hinge._X1, found
+    assert run == Hinge._XH - Hinge._X1, found
     assert yh / run == exact(Hinge._M1), found
     (factor,) = found["m2"]
     assert factor * Hinge._M1 == exact(Hinge._M2), found
@@ -595,7 +595,7 @@ NORMAL = [
         TwoLine,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         [0.0, 5.0, 1.0, -1.0],
         id="TwoLine",
     ),
@@ -603,7 +603,7 @@ NORMAL = [
         HingeMin,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         [1.0, 0.0, 5.0, 2.5],
         id="HingeMin",
     ),
@@ -612,7 +612,7 @@ NORMAL = [
         HingeAtPoint,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         [2.5, 2.0, 1.0, -1.0],
         id="HingeAtPoint",
     ),
@@ -645,7 +645,7 @@ HY = np.array([0.0, 1, 2, 2, 1, 0])
 
 
 @pytest.mark.parametrize(
-    "cls, kwarg", [(HingeMin, "guess_h"), (HingeAtPoint, "guess_h")]
+    "cls, kwarg", [(HingeMin, "guess_xh"), (HingeAtPoint, "guess_xh")]
 )
 @pytest.mark.parametrize(
     "hinge", [-1.0, 0.5, 4.5], ids=["none-below", "one-below", "one-above"]
@@ -679,13 +679,13 @@ def test_hinge_side_with_fewer_than_two_points_gives_the_reference_start(
 #  HingeSaturation at (3.5, 2): the rising least-squares slope through
 #   (0, 0), (1, 1), (2, 2), (3, 2) is 3.5 / 5 = 0.7, so x1 = 3.5 - 2 / 0.7.
 TWO_POINT_SIDES = [
-    _case(HingeMin, HX, HY, {"guess_h": 1.5}, [1.0, 0.0, 5.0, 1.5], id="Min-below"),
-    _case(HingeMin, HX, HY, {"guess_h": 3.5}, [1.0, 0.0, 5.0, 3.5], id="Min-above"),
+    _case(HingeMin, HX, HY, {"guess_xh": 1.5}, [1.0, 0.0, 5.0, 1.5], id="Min-below"),
+    _case(HingeMin, HX, HY, {"guess_xh": 3.5}, [1.0, 0.0, 5.0, 3.5], id="Min-above"),
     _case(
         HingeAtPoint,
         HX,
         HY,
-        {"guess_h": 1.5},
+        {"guess_xh": 1.5},
         [1.5, 1.0, 1.0, -1.0],
         id="AtPoint-below",
     ),
@@ -693,7 +693,7 @@ TWO_POINT_SIDES = [
         HingeAtPoint,
         HX,
         HY,
-        {"guess_h": 3.5},
+        {"guess_xh": 3.5},
         [3.5, 2.0, 1.0, -1.0],
         id="AtPoint-above",
     ),
@@ -701,7 +701,7 @@ TWO_POINT_SIDES = [
         HingeSaturation,
         HX,
         HY,
-        {"guess_h": 3.5},
+        {"guess_xh": 3.5},
         [3.5, 2.0, 3.5 - 2.0 / 0.7, -1.0],
         id="Saturation-plateau",
     ),
@@ -734,22 +734,22 @@ def test_hinge_side_with_exactly_two_points_gives_an_estimate(
 AX = np.array([0.0, 1, 2, 3, 4, 5, 6])
 AY = np.array([0.0, 1, 5, 4, 4, 6, 8])
 AT_THE_HINGE = [
-    _case(HingeMin, AX, AY, {"guess_h": 2.0}, [1.0, 0.0, -1.0, 2.0], id="Min"),
-    _case(HingeAtPoint, AX, AY, {"guess_h": 2.0}, [2.0, 5.0, 1.0, 1.0], id="AtPoint"),
+    _case(HingeMin, AX, AY, {"guess_xh": 2.0}, [1.0, 0.0, -1.0, 2.0], id="Min"),
+    _case(HingeAtPoint, AX, AY, {"guess_xh": 2.0}, [2.0, 5.0, 1.0, 1.0], id="AtPoint"),
     _case(
         HingeSaturation,
         AX,
         AY,
-        {"guess_h": 2.0},
+        {"guess_xh": 2.0},
         [2.0, 5.0, -3.0, 1.0],
         id="HingeSaturation",
     ),
-    _case(TwoLine, AX, AY, {"guess_h": 2.0}, [0.0, 2.0, 2.5, 2.0], id="TwoLine"),
+    _case(TwoLine, AX, AY, {"guess_xh": 2.0}, [0.0, 2.0, 2.5, 2.0], id="TwoLine"),
     _case(
         Saturation,
         AX,
         AY,
-        {"guess_h": 2.0},
+        {"guess_xh": 2.0},
         [0.0, 2.0, 2.5, np.arctan(1.0 / 12.0)],
         id="Saturation",
     ),
@@ -771,9 +771,9 @@ def test_a_point_at_the_hinge_belongs_to_the_documented_side(
 @pytest.mark.parametrize(
     "cls, kwargs",
     [
-        (HingeMin, {"guess_h": 2.5}),
-        (HingeAtPoint, {"guess_h": 2.5}),
-        (HingeSaturation, {"guess_h": 2.5}),
+        (HingeMin, {"guess_xh": 2.5}),
+        (HingeAtPoint, {"guess_xh": 2.5}),
+        (HingeSaturation, {"guess_xh": 2.5}),
     ],
 )
 def test_repeated_point_on_the_upper_side_gives_no_estimate(cls, kwargs):
@@ -802,7 +802,7 @@ def test_a_repeated_point_on_twoline_lower_side_is_skipped():
     """
     x = np.array([0.0, 0, 1, 2, 3, 4])
     y = np.array([0.0, 0, 1, 3, 2, 1])
-    assert TwoLine(x, y, guess_h=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
+    assert TwoLine(x, y, guess_xh=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
 
 
 def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
@@ -818,7 +818,7 @@ def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
     y = np.array([1.0, 0, 1, 3, 2, 1])
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        assert TwoLine(x, y, guess_h=1.5).p0 == exact(HINGE_START[TwoLine])
+        assert TwoLine(x, y, guess_xh=1.5).p0 == exact(HINGE_START[TwoLine])
 
 
 @pytest.mark.parametrize(
@@ -843,7 +843,7 @@ def test_saturation_estimates_the_angle_between_the_lines(y, expected):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        p0 = Saturation(HX, np.array(y), guess_h=2.5).p0
+        p0 = Saturation(HX, np.array(y), guess_xh=2.5).p0
     assert p0 == exact(expected)
 
 
@@ -853,16 +853,16 @@ def test_saturation_estimates_the_angle_between_the_lines(y, expected):
         # One rising point (x = 0): x1 is the data minimum, 0. yh is y at the
         # x nearest 0.5, the first of the tie x = 0, 1: 0. Plateau x = 1..5,
         # slopes [1, 0, -1, -1], median -0.5.
-        (HY, {"guess_h": 0.5}, [0.5, 0.0, 0.0, -0.5]),
+        (HY, {"guess_xh": 0.5}, [0.5, 0.0, 0.0, -0.5]),
         # Flat rising region: x1 is the data minimum, 0. Plateau slope 1.
         (
             [2.0, 2, 2, 3, 4, 5],
-            {"guess_h": 2.5},
+            {"guess_xh": 2.5},
             [2.5, 2.0, 0.0, 1.0],
         ),
         # One plateau point (x = 5): m2 is 0. Rising least-squares slope
         # through x = 0..4, y = [0, 1, 2, 2, 1] is 3 / 10, so x1 = 4.5 - 1 / 0.3.
-        (HY, {"guess_h": 4.5}, [4.5, 1.0, 4.5 - 1.0 / 0.3, 0.0]),
+        (HY, {"guess_xh": 4.5}, [4.5, 1.0, 4.5 - 1.0 / 0.3, 0.0]),
     ],
     ids=["one-rising-point", "flat-rising", "one-plateau-point"],
 )
@@ -884,4 +884,4 @@ def test_hinge_guess_defaults_are_the_documented_values(cls):
     ON FAILURE: the code is wrong, unless the author changed the default; then
     update the docstring and this test.
     """
-    assert cls(HX, HY).guess_h is None
+    assert cls(HX, HY).guess_xh is None

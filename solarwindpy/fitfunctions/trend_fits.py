@@ -59,7 +59,7 @@ class TrendFit(object):
         trend is plotted on a logarithmic x-axis.
     bin_kwargs, trend_kwargs : dict, optional
         Passed to the constructor of each bin fit and of the trend fit, for
-        example ``xmax=`` or ``guess_h=``. ``trend_kwargs`` cannot hold
+        example ``xmax=`` or ``guess_xh=``. ``trend_kwargs`` cannot hold
         ``weights``, which ``yerr`` selects.
 
     Raises
@@ -79,7 +79,7 @@ class TrendFit(object):
         tf = TrendFit(
             agged, Gaussian, HingeAtPoint,
             y=("mu", "value"), yerr=("sigma", "value"),
-            trend_kwargs={"guess_h": 433},
+            trend_kwargs={"guess_xh": 433},
         )
         tf.make_fit()
         tf.bin_results       # one row per column
