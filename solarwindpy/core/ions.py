@@ -240,7 +240,7 @@ class Ion(base.Base):
         """
         m = self.constants.m.loc[self.species]
         w = self.w.data * self.units.w
-        coeff = 0.5 * m / (self.constants.kb.J * self.units.temperature)
+        coeff = 0.5 * m / (self.constants.kb.J * self.units.T)
         temp = coeff * w.pow(2)
         temp.name = "T"
         return temp
@@ -293,7 +293,7 @@ class Ion(base.Base):
         rho = self.rho * self.units.rho
         v = self.v.mag * self.units.v
         w = rho.multiply(v.pow(3)).multiply(0.5)
-        w /= self.units.kinetic_energy_flux
+        w /= self.units.Wk
 
         w.name = "Wk"
         return w

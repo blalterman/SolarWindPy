@@ -3,7 +3,8 @@
 
 The values are derived from :mod:`scipy.constants`. All quantities stored in
 the :class:`~solarwindpy.core.plasma.Plasma` object have a corresponding entry
-in :class:`Constants` and can be converted using :class:`Units`.
+in :class:`Constants` and can be converted using :class:`Units`, which reads
+its factors from :mod:`solarwindpy.core.quantities`.
 """
 
 __all__ = [
@@ -11,12 +12,14 @@ __all__ = [
     "Units",
 ]
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, make_dataclass
 
 import pandas as pd
 
 from scipy import constants
 from scipy.constants import physical_constants
+
+from . import quantities
 
 # We rely on views via DataFrame.xs to reduce memory size and do not
 # `.copy(deep=True)`, so we want to make sure that this doesn't
@@ -143,64 +146,22 @@ class Constants:
                 raise TypeError("Constant values must be pandas Series")
 
 
-@dataclass
-class Units:
-    r"""Common unit conversion factors.
+def _build_units():
+    """Make ``Units``: one field per registry quantity that has an SI factor."""
+    fields_ = [
+        (key, float, field(default=q.si))
+        for key, q in quantities.QUANTITIES.items()
+        if q.si is not None
+    ]
+    doc = r"""SI value of one display unit for each quantity ``core`` converts.
 
-    Attributes
-    ----------
-    bfield : float
-        Magnetic field units :math:`[\mathrm{nT}]`.
-    v : float
-        Velocity units :math:`[\mathrm{km\,s^{-1}}]`.
-    pth : float
-        Thermal pressure units :math:`[\mathrm{pPa}]`.
-    temperature : float
-        Temperature units :math:`[10^{5}\,\mathrm{K}]`.
-    n : float
-        Number density units :math:`[\mathrm{cm^{-3}}]`.
-    beta : float
-        Dimensionless beta units.
-    lnlambda : float
-        Dimensionless Coulomb log units.
-    nuc : float
-        Collision frequency units :math:`[10^{-7}\,\mathrm{Hz}]`.
-    nc : float
-        Dimensionless count units.
-    qpar : float
-        Parallel heat flux units :math:`[\mathrm{\mu W\,m^{-2}}]`.
-    kinetic_energy_flux : float
-        Kinetic energy flux units :math:`[\mathrm{\mu W\,m^{-2}}]`, matching ``qpar``.
-    distance2sun : float
-        Distance to sun units ``[m]``.
+    Multiply a stored value by its field to convert it to SI. The fields and
+    their values come from :data:`~solarwindpy.core.quantities.QUANTITIES`, keyed
+    by canonical name; the TeX of each display unit is the entry's ``units``.
     """
+    return make_dataclass(
+        "Units", fields_, namespace={"__doc__": doc, "__module__": __name__}
+    )
 
-    bfield: float = 1e-9
-    b: float = field(init=False)
-    v: float = 1e3
-    w: float = field(init=False)
-    dv: float = field(init=False)
-    ca: float = field(init=False)
-    cs: float = field(init=False)
-    cfms: float = field(init=False)
-    pth: float = 1e-12
-    temperature: float = 1e5
-    n: float = 1e6
-    rho: float = field(init=False)
-    beta: float = 1.0
-    lnlambda: float = 1.0
-    nuc: float = 1e-7
-    nc: float = 1.0
-    qpar: float = 1e-6
-    kinetic_energy_flux: float = 1e-6
-    distance2sun: float = 1.0
 
-    def __post_init__(self) -> None:
-        """Compute derived unit conversions."""
-        self.b = self.bfield
-        self.w = self.v
-        self.dv = self.v
-        self.ca = self.v
-        self.cs = self.v
-        self.cfms = self.v
-        self.rho = self.n * constants.m_p
+Units = _build_units()

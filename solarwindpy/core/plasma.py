@@ -1689,8 +1689,8 @@ species: {}
         n0 = self.ions.loc[s0].n * units.n
         n1 = self.ions.loc[s1].n * units.n
 
-        T0 = self.ions.loc[s0].temperature.scalar * units.temperature * constants.kb.eV
-        T1 = self.ions.loc[s1].temperature.scalar * units.temperature * constants.kb.eV
+        T0 = self.ions.loc[s0].temperature.scalar * units.T * constants.kb.eV
+        T1 = self.ions.loc[s1].temperature.scalar * units.T * constants.kb.eV
 
         r0 = n0.multiply(z0**2.0).divide(T0, axis=0)
         r1 = n1.multiply(z1**2.0).divide(T1, axis=0)
@@ -2094,7 +2094,7 @@ species: {}
             qs = qs.sum(axis=1, min_count=1)
             qs.name = "+".join(species)
 
-        coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
+        coeff = self.units.rho * (self.units.v**3.0) / self.units.q
         q = coeff * qs
         return q
 

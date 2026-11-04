@@ -83,32 +83,32 @@ _AT = "AlfvenicTurbulence"
 
 CASES = [
     # Plasma: the method name is the label; the Series is named by species.
-    (_P, "n", lambda p, t: p.n("p1"), "M", False, _NO_REGISTRY),
-    (_P, "rho", lambda p, t: p.rho("p1"), "M", False, _NO_REGISTRY),
-    (_P, "v", lambda p, t: p.v("p1"), "M", False, _NO_REGISTRY),
-    (_P, "w", lambda p, t: p.w("p1"), "M", False, _NO_REGISTRY),
-    (_P, "b", lambda p, t: p.b, "M", False, _NO_REGISTRY),
-    (_P, "pth", lambda p, t: p.pth("p1"), "M", False, _NO_REGISTRY),
+    (_P, "n", lambda p, t: p.n("p1"), "M", False, None),
+    (_P, "rho", lambda p, t: p.rho("p1"), "M", False, None),
+    (_P, "v", lambda p, t: p.v("p1"), "M", False, None),
+    (_P, "w", lambda p, t: p.w("p1"), "M", False, None),
+    (_P, "b", lambda p, t: p.b, "M", False, None),
+    (_P, "pth", lambda p, t: p.pth("p1"), "M", False, None),
     (_P, "T", lambda p, t: p.T("p1"), "M", False, _RENAME),
-    (_P, "beta", lambda p, t: p.beta("p1"), "M", False, _NO_REGISTRY),
+    (_P, "beta", lambda p, t: p.beta("p1"), "M", False, None),
     (_P, "R", lambda p, t: p.R("p1"), "M", False, _RENAME),
-    (_P, "dv", lambda p, t: p.dv("p1", "a"), "M", False, _NO_REGISTRY),
-    (_P, "pdv", lambda p, t: p.pdv("p1"), "M", False, _NO_REGISTRY),
+    (_P, "dv", lambda p, t: p.dv("p1", "a"), "M", False, None),
+    (_P, "pdv", lambda p, t: p.pdv("p1", "a"), "M", False, None),
     (
         _P,
         "pdynamic",
-        lambda p, t: p.pdynamic("p1"),
+        lambda p, t: p.pdynamic("p1", "a"),
         "M",
         False,
         _author("dynamic pressure is `pdynamic` (.name) and `pdv` (TeX key)"),
     ),
-    (_P, "cs", lambda p, t: p.cs("p1"), "M", False, _NO_REGISTRY),
-    (_P, "ca", lambda p, t: p.ca("p1"), "M", False, _NO_REGISTRY),
-    (_P, "afsq", lambda p, t: p.afsq("p1"), "M", False, _NO_REGISTRY),
-    (_P, "caani", lambda p, t: p.caani("p1"), "M", False, _NO_REGISTRY),
-    (_P, "lnlambda", lambda p, t: p.lnlambda("p1", "a"), "M", False, _NO_REGISTRY),
-    (_P, "nuc", lambda p, t: p.nuc("p1", "a"), "M", False, _NO_REGISTRY),
-    (_P, "nc", lambda p, t: p.nc("p1", "a"), "M", False, _NO_REGISTRY),
+    (_P, "cs", lambda p, t: p.cs("p1"), "M", False, None),
+    (_P, "ca", lambda p, t: p.ca("p1"), "M", False, None),
+    (_P, "afsq", lambda p, t: p.afsq("p1"), "M", False, None),
+    (_P, "caani", lambda p, t: p.caani("p1"), "M", False, None),
+    (_P, "lnlambda", lambda p, t: p.lnlambda("p1", "a"), "M", False, None),
+    (_P, "nuc", lambda p, t: p.nuc("p1", "a"), "M", False, None),
+    (_P, "nc", lambda p, t: p.nc("p1", "a"), "M", False, None),
     (
         _P,
         "vdf_ratio",
@@ -137,27 +137,27 @@ CASES = [
         False,
         _author("heat flux: see `heat_flux`"),
     ),
-    (_P, "Wk", lambda p, t: p.Wk("p1"), "M", False, _NO_REGISTRY),
+    (_P, "Wk", lambda p, t: p.Wk("p1"), "M", False, None),
     # Ion: a Series result carries the label as its `.name`.
-    (_I, "n", lambda p, t: p.p1.n, "M", True, _NO_REGISTRY),
-    (_I, "rho", lambda p, t: p.p1.rho, "M", True, _NO_REGISTRY),
-    (_I, "v", lambda p, t: p.p1.v, "M", False, _NO_REGISTRY),
-    (_I, "w", lambda p, t: p.p1.w, "M", False, _NO_REGISTRY),
-    (_I, "pth", lambda p, t: p.p1.pth, "M", False, _NO_REGISTRY),
+    (_I, "n", lambda p, t: p.p1.n, "M", True, None),
+    (_I, "rho", lambda p, t: p.p1.rho, "M", True, None),
+    (_I, "v", lambda p, t: p.p1.v, "M", False, None),
+    (_I, "w", lambda p, t: p.p1.w, "M", False, None),
+    (_I, "pth", lambda p, t: p.p1.pth, "M", False, None),
     (_I, "T", lambda p, t: p.p1.T, "M", False, _RENAME),
     (_I, "R", lambda p, t: p.p1.R, "M", True, _RENAME),
-    (_I, "cs", lambda p, t: p.p1.cs, "M", False, _NO_REGISTRY),
-    (_I, "Wk", lambda p, t: p.p1.Wk, "M", True, _NO_REGISTRY),
+    (_I, "cs", lambda p, t: p.p1.cs, "M", False, None),
+    (_I, "Wk", lambda p, t: p.p1.Wk, "M", True, None),
     # Vector and BField.
-    (_V, "mag", lambda p, t: p.p1.v.mag, "C", True, _NO_REGISTRY),
+    (_V, "mag", lambda p, t: p.p1.v.mag, "C", True, None),
     # The xy-plane magnitude shares the string `rho` with mass density (F74),
     # one level apart.
-    (_V, "rho", lambda p, t: p.p1.v.rho, "C", True, _NO_REGISTRY),
+    (_V, "rho", lambda p, t: p.p1.v.rho, "C", True, None),
     (_V, "colat", lambda p, t: p.p1.v.colat, "C", True, _RENAME),
     (_V, "lat", lambda p, t: p.p1.v.lat, "C", True, _RENAME),
     (_V, "lon", lambda p, t: p.p1.v.lon, "C", True, _RENAME),
     (_V, "cos_theta", lambda p, t: p.p1.v.cos_theta(p.b), "M", True, _RENAME),
-    (_B, "pb", lambda p, t: p.b.pb, "M", True, _NO_REGISTRY),
+    (_B, "pb", lambda p, t: p.b.pb, "M", True, None),
     # Tensor.
     (_T, "mag", lambda p, t: p.p1.w.mag, "C", True, _RENAME),
     # Spacecraft.
@@ -172,14 +172,14 @@ CASES = [
             "renaming the stored label changes saved files"
         ),
     ),
-    (_SC, "v", lambda p, t: p.sc.v, "M", False, _NO_REGISTRY),
+    (_SC, "v", lambda p, t: p.sc.v, "M", False, None),
     (_SC, "carr", lambda p, t: p.sc.carr, "M", False, _RENAME),
-    (_SC, "distance2sun", lambda p, t: p.sc.distance2sun, "M", True, _NO_REGISTRY),
+    (_SC, "distance2sun", lambda p, t: p.sc.distance2sun, "M", True, None),
     # AlfvenicTurbulence.
-    (_AT, "v", lambda p, t: t.v, "M", False, _NO_REGISTRY),
-    (_AT, "b", lambda p, t: t.b, "M", False, _NO_REGISTRY),
-    (_AT, "zp", lambda p, t: t.zp, "M", False, _NO_REGISTRY),
-    (_AT, "zm", lambda p, t: t.zm, "M", False, _NO_REGISTRY),
+    (_AT, "v", lambda p, t: t.v, "M", False, None),
+    (_AT, "b", lambda p, t: t.b, "M", False, None),
+    (_AT, "zp", lambda p, t: t.zp, "M", False, None),
+    (_AT, "zm", lambda p, t: t.zm, "M", False, None),
     (_AT, "ep", lambda p, t: t.ep, "M", True, _RENAME),
     (_AT, "em", lambda p, t: t.em, "M", True, _RENAME),
     (_AT, "ev", lambda p, t: t.ev, "M", True, _RENAME),
@@ -313,10 +313,10 @@ def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
 #: Registry keys with an SI factor that no method returns, each with why.
 SI_KEYS_FOR_THE_AUTHOR = {
     "cfms": "the fast magnetosonic speed has a display unit but no method or label",
+    "q": "heat flux is returned by `heat_flux` and `qpar`, which the author names",
 }
 
 
-@_xfail(_NO_REGISTRY)
 def test_every_converted_quantity_is_returned_by_a_method():
     """Every registry key with an SI factor is the label of some core quantity.
 
@@ -329,7 +329,6 @@ def test_every_converted_quantity_is_returned_by_a_method():
     assert sorted(converted - returned - set(SI_KEYS_FOR_THE_AUTHOR)) == []
 
 
-@_xfail(_NO_REGISTRY)
 def test_every_registry_entry_is_used_by_a_method_or_a_label():
     """Every quantity is either returned by a method or labelled with TeX.
 
@@ -347,7 +346,6 @@ def test_every_registry_entry_is_used_by_a_method_or_a_label():
     assert sorted(unused) == []
 
 
-@_xfail(_NO_REGISTRY)
 def test_units_holds_exactly_the_registry_si_factors():
     """``Units`` holds the registry's SI factors, under the registry keys.
 
@@ -365,7 +363,6 @@ def test_units_holds_exactly_the_registry_si_factors():
 # --- species (F128) ----------------------------------------------------------
 
 
-@_xfail(_NO_REGISTRY)
 def test_registry_knows_every_species_core_knows():
     """Every species with a mass in core has a TeX symbol in the registry.
 

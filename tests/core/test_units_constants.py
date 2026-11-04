@@ -89,15 +89,15 @@ DISPLAY_UNIT_IN_SI = {
     "cs": constants.kilo,  # km s^-1, sound speed
     "cfms": constants.kilo,  # km s^-1, fast magnetosonic speed
     "pth": constants.pico,  # pPa
-    "temperature": 1e5,  # 10^5 K
+    "T": 1e5,  # 10^5 K
     "n": constants.centi**-3,  # cm^-3
     "rho": PROTON_MASS * constants.centi**-3,  # m_p cm^-3
     "beta": 1.0,  # dimensionless
     "lnlambda": 1.0,  # dimensionless
     "nuc": 1e-7,  # 10^-7 Hz
     "nc": 1.0,  # dimensionless count
-    "qpar": constants.micro,  # uW m^-2
-    "kinetic_energy_flux": constants.micro,  # uW m^-2
+    "q": constants.micro,  # uW m^-2
+    "Wk": constants.micro,  # uW m^-2
     "distance2sun": 1.0,  # m
 }
 
@@ -291,7 +291,7 @@ def test_pressure_unit_is_consistent_with_n_k_t():
     """
     u = uc.Units()
     kb = uc.Constants().kb["J"]
-    p = (1.0 * u.n) * kb * (1.0 * u.temperature) / u.pth
+    p = (1.0 * u.n) * kb * (1.0 * u.T) / u.pth
     assert p == exact(1.380649)
 
 
@@ -300,7 +300,7 @@ def test_temperature_unit_is_8_617_ev():
 
     ON FAILURE: the code is wrong.
     """
-    kt = uc.Units().temperature * uc.Constants().kb["eV"]
+    kt = uc.Units().T * uc.Constants().kb["eV"]
     assert kt == printed(8.617333262, decimals=9)
 
 
@@ -314,5 +314,5 @@ def test_kinetic_energy_flux_of_5_per_cc_protons_at_400_km_s_is_267_6_uw_m2():
     u = uc.Units()
     rho = 5.0 * u.rho
     v = 400.0 * u.v
-    flux = 0.5 * rho * v**3 / u.kinetic_energy_flux
+    flux = 0.5 * rho * v**3 / u.Wk
     assert flux == printed(267.6, decimals=1)
