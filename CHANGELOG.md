@@ -559,6 +559,10 @@ These change computed values; rerun any analysis that used them.
   density after the swap, and raises if not. The previous check compared `n_p2` with itself
   and could never fail.
 
+- The `beta_ani_inst` docstring example now uses the published A/IC fit at
+  `gamma / Omega_p = 10^-4` (Verscharen et al. 2016, Table 1). It had passed the FM/W `a` as
+  `b`, so it printed thresholds for no published instability.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
