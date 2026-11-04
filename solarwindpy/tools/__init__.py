@@ -36,6 +36,33 @@ import numpy as np
 import pandas as pd
 
 
+def _check_core_dominates(data):
+    """Raise unless ``n_p2 / n_p1 <= 1`` on every row where the ratio is defined.
+
+    The post-condition of :func:`swap_protons`: after the swap the core (p1) is at
+    least as dense as the beam (p2). Rows whose ratio is NaN (either density NaN,
+    or both 0) are skipped, as they are by the swap itself.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Frame with ``("n", "", "p1")`` and ``("n", "", "p2")`` columns.
+
+    Raises
+    ------
+    AssertionError
+        If any row has ``n_p2 > n_p1``.
+    """
+    ratio = data.loc[:, ("n", "", "p2")].divide(data.loc[:, ("n", "", "p1")], axis=0)
+    bad = ratio.dropna() > 1.0
+    if bad.any():
+        raise AssertionError(
+            "n_p2 > n_p1 after swapping protons at index {}".format(
+                list(bad.index[bad])
+            )
+        )
+
+
 def swap_protons(data, logger=None):
     """Swap beam and core proton labels when the beam density dominates.
 
@@ -100,10 +127,7 @@ def swap_protons(data, logger=None):
     # restore the caller's (M, C, S) so the output can be swapped again.
     new_data.columns = new_data.columns.set_names(data.columns.names)
 
-    chk = new_data.loc[:, ("n", "", "p2")].divide(
-        new_data.loc[:, ("n", "", "p2")], axis=0
-    )
-    assert (chk.dropna() <= 1.0).all()
+    _check_core_dominates(new_data)
 
     if logger is None:
         logger = logging.getLogger("main.{}".format(__name__))
