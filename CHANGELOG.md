@@ -261,6 +261,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   No alias is kept; the old names raise `AttributeError`. The name `S` collided with the
   species level of the column MultiIndex.
 
+- `StabilityCondition.stability_bin` is an integer Series, as documented, not float64. A
+  point outside every bin carries the fill value `-9999` (`StabilityCondition.fill`,
+  previously the float `-9999.0`).
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
