@@ -14,28 +14,45 @@ from solarwindpy.fitfunctions.power_laws import (
     PowerLawOffCenter,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.exponentials import Exponential, ExponentialPlusC
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 from tests.fitfunctions._attempt import attempt_fit
+
+
+_EXPONENT_FIRST = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="power laws take (A, alpha); remove this marker when they take "
+    "the exponent first, (alpha, A)",
+)
 
 
 @pytest.mark.parametrize(
     "cls, expected_params, sample_args, expected_value",
     [
         # 3 * 2^1.5 = 6 sqrt(2)
-        (PowerLaw, ("x", "A", "alpha"), (2.0, 3.0, 1.5), 6 * np.sqrt(2.0)),
+        pytest.param(
+            PowerLaw,
+            ("x", "alpha", "A"),
+            (2.0, 1.5, 3.0),
+            6 * np.sqrt(2.0),
+            marks=_EXPONENT_FIRST,
+        ),
         # 6 sqrt(2) + 1
-        (
+        pytest.param(
             PowerLawPlusC,
-            ("x", "A", "alpha", "y0"),
-            (2.0, 3.0, 1.5, 1.0),
+            ("x", "alpha", "A", "y0"),
+            (2.0, 1.5, 3.0, 1.0),
             6 * np.sqrt(2.0) + 1,
+            marks=_EXPONENT_FIRST,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
-        (
+        pytest.param(
             PowerLawOffCenter,
-            ("x", "A", "alpha", "x0"),
-            (2.0, 3.0, 1.5, 0.5),
+            ("x", "alpha", "A", "x0"),
+            (2.0, 1.5, 3.0, 0.5),
             4.5 * np.sqrt(1.5),
+            marks=_EXPONENT_FIRST,
         ),
     ],
 )
@@ -54,6 +71,31 @@ def test_function_signature_and_output(
     assert tuple(sig.parameters.keys()) == expected_params
 
     assert obj.function(*sample_args) == exact(expected_value)
+
+
+@pytest.mark.parametrize(
+    "cls",
+    [
+        Exponential,
+        ExponentialPlusC,
+        pytest.param(PowerLaw, marks=_EXPONENT_FIRST),
+        pytest.param(PowerLawPlusC, marks=_EXPONENT_FIRST),
+        pytest.param(PowerLawOffCenter, marks=_EXPONENT_FIRST),
+    ],
+)
+def test_exponent_then_amplitude_across_exponential_and_power_law_siblings(cls):
+    """The exponential and power-law fits list the exponent, then the amplitude.
+
+    The author ruled one parameter order for these siblings: ``k`` then ``A``
+    for the exponentials, ``alpha`` then ``A`` for the power laws. The order
+    sets the positional ``function`` arguments, ``p0`` and ``bounds``.
+
+    ON FAILURE: the code is wrong.
+    """
+    exponent = "k" if issubclass(cls, (Exponential, ExponentialPlusC)) else "alpha"
+    x = np.array([1.0, 2.0, 3.0])
+    obj = cls(x, np.array([1.0, 4.0, 9.0]))
+    assert list(obj.argnames[:2]) == [exponent, "A"]
 
 
 @pytest.fixture
