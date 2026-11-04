@@ -23,14 +23,8 @@ import numpy as np
 import pytest
 
 import solarwindpy
-from solarwindpy.fitfunctions.composite import (
-    GaussianPlusHeavySide,
-    GaussianTimesHeavySide,
-    GaussianTimesHeavySidePlusHeavySide,
-)
 from solarwindpy.fitfunctions.core import FitFunction, InsufficientDataError
 from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
-from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.hinge import (
     Hinge,
     HingeAtPoint,
@@ -117,23 +111,6 @@ def test_wrong_length_caller_p0_names_entries_by_position():
     msg = r"^_NoGuessLine initial guess is not finite: p0\[1\]=nan\."
     with pytest.raises(ValueError, match=msg):
         fit.make_fit(p0=[2.0, np.nan, 1.0])
-
-
-def test_malformed_bounds_with_no_guess_are_returned_by_the_x0_scan():
-    """``GaussianPlusHeavySide`` with ``p0`` None returns, not raises, a bounds error.
-
-    y summing to zero gives ``p0`` None, so ``make_fit`` builds the feasible
-    default from ``bounds``. A three-element ``bounds`` is malformed (it must
-    be a (lower, upper) pair); with ``return_exception=True`` the resulting
-    ValueError comes back, as the base ``make_fit`` documents.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.arange(6.0)
-    fit = GaussianPlusHeavySide(x, np.array([1.0, -1, 1, -1, 1, -1]))
-    assert fit.p0 is None, fit.p0
-    err = fit.make_fit(return_exception=True, bounds=(0.0, 1.0, 2.0))
-    assert isinstance(err, ValueError), err
 
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
@@ -283,34 +260,6 @@ IMPOSSIBLE = [
     _case(GaussianNormalized, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="GaussianNorm"),
     # y sums to zero: no weighted mean of ln x.
     _case(GaussianLn, np.exp([0.0, 1, 2, 3]), [1.0, -1, 1, -1], {}, id="GaussianLn"),
-    # No data above guess_x0 = 20.
-    _case(
-        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {"guess_x0": 20.0}, id="Step"
-    ),
-    # y sums to zero: no weighted mean.
-    _case(
-        GaussianPlusHeavySide,
-        [0.0, 1, 2, 3, 4, 5],
-        [1.0, -1, 1, -1, 1, -1],
-        {},
-        id="GaussianPlusHeavySide",
-    ),
-    # No data above guess_x0 = 20 (was "There is no maximum of a zero-size array").
-    _case(
-        GaussianTimesHeavySide,
-        [0.0, 1, 2, 3, 4],
-        [1.0, 2, 3, 2, 1],
-        {"guess_x0": 20.0},
-        id="GaussianTimesHeavySide",
-    ),
-    # No data at or below guess_x0 = -1: no level y1.
-    _case(
-        GaussianTimesHeavySidePlusHeavySide,
-        [0.0, 1, 2, 3, 4, 5],
-        [1.0, 2, 3, 2, 1, 0.5],
-        {"guess_x0": -1.0},
-        id="GaussianTimesHeavySidePlusHeavySide",
-    ),
 ]
 
 
@@ -620,40 +569,6 @@ NORMAL = [
         [1.0, S, 2.0],
         id="GaussianLn",
     ),
-    # x0 = midpoint 2; median y above is 2, below is 5, so y1 = 3.
-    _case(
-        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {}, [2.0, 2.0, 3.0], id="Step"
-    ),
-    # Weighted mean (3 + 8 + 10 + 6) / 6 = 4.5 (variance 11/12) gives x0 = 3.375
-    # and y1 = 0.8 * 2; above x0, x = [4, 5, 6] weighted by [2, 2, 1] has mean
-    # 24/5 and variance 2.8/5 = 0.56, a width 0.75 above half the spacing 0.5.
-    _case(
-        GaussianPlusHeavySide,
-        [1.0, 2, 3, 4, 5, 6],
-        [0.0, 0, 1, 2, 2, 1],
-        {},
-        [3.375, 0.0, 1.6, 4.8, np.sqrt(0.56), 2.0],
-        id="GaussianPlusHeavySide",
-    ),
-    # Above x0 = 0.5 the data are the [1, 2, 1] case.
-    _case(
-        GaussianTimesHeavySide,
-        [0.0, 1, 2, 3],
-        [7.0, 1, 2, 1],
-        {"guess_x0": 0.5},
-        [0.5, 2.0, S, 2.0],
-        id="GaussianTimesHeavySide",
-    ),
-    # y1 is the mean y at or below x0 = 1.5, which is 7; above x0, x = [2, 3, 4]
-    # weighted by [1, 2, 1] has mean 3 and variance 0.5.
-    _case(
-        GaussianTimesHeavySidePlusHeavySide,
-        [0.0, 1, 2, 3, 4],
-        [7.0, 7, 1, 2, 1],
-        {"guess_x0": 1.5},
-        [1.5, 7.0, 3.0, S, 2.0],
-        id="GaussianTimesHeavySidePlusHeavySide",
-    ),
     # Below 2.5: y = x, so m1 = 1, x1 = 0. Above: y = 5 - x, so m2 = -1, x2 = 5.
     _case(
         TwoLine,
@@ -699,19 +614,7 @@ def test_insufficient_data_still_raises_from_p0():
     ON FAILURE: the code is wrong.
     """
     with pytest.raises(InsufficientDataError, match="insufficient data"):
-        HeavySide(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0
-
-
-def test_heavyside_uses_both_level_guesses_when_given():
-    """With ``guess_y0`` and ``guess_y1``, ``p0`` returns them as the levels.
-
-    ``x0`` is the midpoint of the x range, 2; the levels are the chosen 7, 9.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.array([0.0, 1, 2, 3, 4])
-    fit = HeavySide(x, np.array([5.0, 5, 5, 2, 2]), guess_y0=7.0, guess_y1=9.0)
-    assert fit.p0 == exact([2.0, 7.0, 9.0])
+        Gaussian(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0
 
 
 # The hinge data below: x = 0..5 and y = [0, 1, 2, 2, 1, 0], two lines of slope

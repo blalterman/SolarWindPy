@@ -22,8 +22,8 @@ Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of
 :class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations
 enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,
 ``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few
-subclasses add their own, such as the ``guess_x0`` initial step position of
-:class:`~solarwindpy.fitfunctions.composite.GaussianTimesHeavySide`.
+subclasses add their own, such as the ``guess_h`` initial hinge position of
+:class:`~solarwindpy.fitfunctions.hinge.HingeMin`.
 
 How a fit runs
 --------------
@@ -70,11 +70,9 @@ in each bin of 2-D aggregated data and a second to the trend of the results.
 
 __all__ = [
     "available",
-    "composite",
     "core",
     "exponentials",
     "gaussians",
-    "heaviside",
     "hinge",
     "lines",
     "plots",
@@ -85,11 +83,9 @@ __all__ = [
 
 from inspect import isabstract
 
-from . import composite
 from . import core
 from . import exponentials
 from . import gaussians
-from . import heaviside
 from . import hinge
 from . import lines
 from . import plots

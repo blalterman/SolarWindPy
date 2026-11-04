@@ -1,3 +1,4 @@
+import pickle
 import warnings
 
 import matplotlib.pyplot as plt
@@ -593,3 +594,23 @@ def test_keywords_reach_the_1d_and_trend_fit_functions():
     raising.make_ffunc1ds(xmax=1.0)  # one point per column: too few
     with pytest.raises(InsufficientDataError):
         raising.make_1dfits(return_exception=False)
+
+
+def test_trend_fit_popt1d_keys_survive_pickle_round_trip():
+    """``TrendFit.popt1d_keys`` pickles and unpickles to an equal value.
+
+    Its namedtuple was created with typename ``"Popt1Dkeys"`` but bound to
+    ``Popt1DKeys``, so pickle's lookup of the class by name failed.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.fitfunctions.lines import Line
+    from solarwindpy.fitfunctions.trend_fits import TrendFit
+
+    agged = pd.DataFrame(
+        {0: [1.0, 2.0, 3.0], 1: [2.0, 3.0, 4.0]},
+        index=pd.interval_range(0, 3, periods=3),
+    )
+    keys = TrendFit(agged, Line, ykey1d="mu", wkey1d="sigma").popt1d_keys
+
+    assert pickle.loads(pickle.dumps(keys)) == ("mu", "sigma")

@@ -51,15 +51,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.fitfunctions.FitFunction` | `solarwindpy.fitfunctions.core.FitFunction` |
   | `solarwindpy.fitfunctions.TrendFit` | `solarwindpy.fitfunctions.trend_fits.TrendFit` |
   | `solarwindpy.fitfunctions.Exponential` | `solarwindpy.fitfunctions.exponentials.Exponential` |
-  | `solarwindpy.fitfunctions.ExponentialCDF` | `solarwindpy.fitfunctions.exponentials.ExponentialCDF` |
+  | `solarwindpy.fitfunctions.ExponentialCDF` | none (removed; see Removed) |
   | `solarwindpy.fitfunctions.ExponentialPlusC` | `solarwindpy.fitfunctions.exponentials.ExponentialPlusC` |
   | `solarwindpy.fitfunctions.Gaussian` | `solarwindpy.fitfunctions.gaussians.Gaussian` |
   | `solarwindpy.fitfunctions.GaussianLn` | `solarwindpy.fitfunctions.gaussians.GaussianLn` |
   | `solarwindpy.fitfunctions.GaussianNormalized` | `solarwindpy.fitfunctions.gaussians.GaussianNormalized` |
-  | `solarwindpy.fitfunctions.GaussianPlusHeavySide` | `solarwindpy.fitfunctions.composite.GaussianPlusHeavySide` |
-  | `solarwindpy.fitfunctions.GaussianTimesHeavySide` | `solarwindpy.fitfunctions.composite.GaussianTimesHeavySide` |
-  | `solarwindpy.fitfunctions.GaussianTimesHeavySidePlusHeavySide` | `solarwindpy.fitfunctions.composite.GaussianTimesHeavySidePlusHeavySide` |
-  | `solarwindpy.fitfunctions.HeavySide` | `solarwindpy.fitfunctions.heaviside.HeavySide` |
+  | `solarwindpy.fitfunctions.GaussianPlusHeavySide` | none (removed; see Removed) |
+  | `solarwindpy.fitfunctions.GaussianTimesHeavySide` | none (removed; see Removed) |
+  | `solarwindpy.fitfunctions.GaussianTimesHeavySidePlusHeavySide` | none (removed; see Removed) |
+  | `solarwindpy.fitfunctions.HeavySide` | none (removed; see Removed) |
   | `solarwindpy.fitfunctions.HingeAtPoint` | `solarwindpy.fitfunctions.hinge.HingeAtPoint` |
   | `solarwindpy.fitfunctions.HingeMax` | `solarwindpy.fitfunctions.hinge.HingeMax` |
   | `solarwindpy.fitfunctions.HingeMin` | `solarwindpy.fitfunctions.hinge.HingeMin` |
@@ -280,12 +280,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every fit function's `p0` follows one contract, stated in `FitFunction.p0`: it returns
   one finite guess per parameter, or `None` when the data make a guess impossible, and
   `make_fit` then starts from the feasible start (ones when unbounded), as `curve_fit`
-  does. `None` replaces NaN or infinite guesses in the Gaussian, Heaviside and composite
-  fit functions (for example, `y` summing to zero, or no data on one side of a step). `HeavySide.p0` no longer substitutes the mean `y`
-  or a zero step for a level it cannot estimate, and
-  `GaussianTimesHeavySidePlusHeavySide.p0` no longer substitutes 0 for `y1`; both return
-  `None`. `GaussianTimesHeavySide` with no data above `guess_x0` no longer raises
-  `ValueError: There is no maximum of a zero-size array`.
+  does. `None` replaces NaN or infinite guesses in the Gaussian fit functions (for
+  example, `y` summing to zero).
 - When the data give no estimate (no data on one side of the hinge, repeated `x`, or a
   zero slope where an x-intercept is needed), `HingeSaturation`, `TwoLine`,
   `Saturation`, `HingeMin` and `HingeAtPoint` log a warning and their `p0` returns the
@@ -308,7 +304,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   section. `FitFunction`'s arguments (`xmin`, `weights`, `logy` and the rest) are
   documented in its class docstring and inherited by every fit function, and
   `FitFunction.__init__` no longer carries a docstring of its own. `Exponential`,
-  `ExponentialPlusC`, `ExponentialCDF`, `Gaussian`, `GaussianNormalized`, `Line`,
+  `ExponentialPlusC`, `Gaussian`, `GaussianNormalized`, `Line`,
   `LineXintercept`, `PowerLaw`, `PowerLawPlusC` and `PowerLawOffCenter` no longer define
   an `__init__` that only forwarded `xobs`, `yobs` and `**kwargs`; their signatures now
   show every `FitFunction` argument.
@@ -317,8 +313,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   y-weighted mean and standard deviation of ln x, and `A` is the peak `y` (not logged).
   It previously returned the logs of the mean and variance of `x` and of the peak, which
   match none of the model's parameters.
-- The Gaussian fit functions (`Gaussian`, `GaussianNormalized`, `GaussianLn` and the
-  composite Gaussian-plus-step models) return `p0 = None` when the estimated width is
+- The Gaussian fit functions (`Gaussian`, `GaussianNormalized` and `GaussianLn`) return
+  `p0 = None` when the estimated width is
   under half the smallest spacing between distinct `x`, including all the weight at one
   `x`. That width cannot be resolved by the samples; a zero width previously made
   `make_fit` fail with "Residuals are not finite in the initial point".
@@ -591,6 +587,12 @@ These change computed values; rerun any analysis that used them.
   unreachable: `Plasma(data, "a,p1")` already fails in `set_data`.
 - `.github/WORKFLOWS.md`, which described a stale CI setup; the workflow files are the
   reference.
+- The Heaviside step fit functions and `ExponentialCDF`: the modules
+  `solarwindpy.fitfunctions.heaviside` (`HeavySide`) and `solarwindpy.fitfunctions.composite`
+  (`GaussianPlusHeavySide`, `GaussianTimesHeavySide`,
+  `GaussianTimesHeavySidePlusHeavySide`) are removed, as is
+  `solarwindpy.fitfunctions.exponentials.ExponentialCDF`. No alias is kept; importing
+  them raises `ImportError` or `AttributeError`.
 
 ### Migration
 

@@ -9,6 +9,7 @@ it has the constructor case it needs.
 """
 
 import importlib
+import importlib.util
 import inspect
 import pkgutil
 
@@ -44,11 +45,9 @@ X = np.linspace(2.0, 10.0, 33)
 Y = 3.0 * np.exp(-0.5 * ((X - 5.0) / 1.5) ** 2) + 1.0
 
 # Constructor keywords a class requires, and set-up it needs before a fit.
-REQUIRED_KWARGS = {
-    "GaussianTimesHeavySide": {"guess_x0": 4.0},
-    "GaussianTimesHeavySidePlusHeavySide": {"guess_x0": 4.0},
-}
-SETUP = {"ExponentialCDF": lambda fit: fit.set_y0(4.0)}
+# No current class needs either.
+REQUIRED_KWARGS = {}
+SETUP = {}
 
 
 def _build(name, **kwargs):
@@ -58,14 +57,49 @@ def _build(name, **kwargs):
 
 
 def test_every_class_has_a_case():
-    """The discovery found the package's fit functions, and each constructs.
+    """The module scan finds exactly the package's fit functions, and each constructs.
 
-    ON FAILURE: a fit function needs a constructor keyword or set-up that
-    ``REQUIRED_KWARGS`` or ``SETUP`` does not give it; add it there.
+    ``CLASSES`` comes from importing every module and reading what it defines.
+    ``fitfunctions._fit_function_classes`` walks the ``FitFunction`` subclass
+    tree instead. The two discoveries must agree and find at least one class,
+    so every fit function the package lists is checked by these tests.
+
+    ON FAILURE: the code is wrong if the two discoveries differ; otherwise a
+    fit function needs a constructor keyword or set-up that ``REQUIRED_KWARGS``
+    or ``SETUP`` does not give it; add it there.
     """
-    assert len(CLASSES) >= 20, sorted(CLASSES)
+    by_subclass_tree = {cls.__name__ for cls in ff._fit_function_classes()}
+    assert CLASSES, "the module scan found no fit function"
+    assert set(CLASSES) == by_subclass_tree
     for name in CLASSES:
         _build(name)
+
+
+def test_the_heaviside_step_models_and_exponential_cdf_are_removed():
+    """The step-function modules and ``ExponentialCDF`` no longer exist.
+
+    The author removed ``heaviside`` (``HeavySide``), ``composite`` (the three
+    Gaussian-with-step models) and ``exponentials.ExponentialCDF``.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.fitfunctions import exponentials
+
+    for module in ("heaviside", "composite"):
+        assert importlib.util.find_spec(f"{ff.__name__}.{module}") is None, module
+    assert not hasattr(exponentials, "ExponentialCDF")
+
+
+@pytest.mark.parametrize("name", ff.__all__)
+def test_every_name_in_the_package_all_resolves(name):
+    """Each name in ``fitfunctions.__all__`` is a submodule or a package object.
+
+    ON FAILURE: the code is wrong; ``fitfunctions.__all__`` names something
+    the package no longer defines.
+    """
+    if not hasattr(ff, name):
+        importlib.import_module(f"{ff.__name__}.{name}")
+    assert hasattr(ff, name), name
 
 
 def _generic_start(name, n):
@@ -90,8 +124,7 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
 
     The author decided an explicit ``p0=None`` means the generic start,
     whatever the class's own guess. Same start and same solver give the same
-    exception or the same popt. ``GaussianPlusHeavySide`` used to read its
-    own guess instead.
+    exception or the same popt.
 
     ON FAILURE: the code is wrong.
     """

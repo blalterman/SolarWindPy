@@ -9,12 +9,9 @@ Each defines the model, an initial guess, and its LaTeX form.
 __all__ = [
     "Exponential",
     "ExponentialPlusC",
-    "ExponentialCDF",
 ]
 
 import numpy as np
-
-from numbers import Number
 
 from .core import FitFunction
 
@@ -90,62 +87,3 @@ class ExponentialPlusC(FitFunction):
         r"""LaTeX form of the model."""
         TeX = r"f(x)=A \cdot e^{-cx} + d"
         return TeX
-
-
-class ExponentialCDF(FitFunction):
-    r"""Exponential CDF shape :math:`f(x) = y_0 (1 - e^{-c x})`.
-
-    Only the rate ``c`` is fitted. The amplitude :attr:`y0` (written ``A``
-    in :attr:`TeX_function`) is fixed by the caller with :meth:`set_y0`,
-    which must be called before :meth:`make_fit`; otherwise the fit
-    raises ``AttributeError``. The TeX info reports it after ``c`` as
-    ``A``, without an uncertainty.
-    """
-
-    @property
-    def function(self):
-        r"""The model :math:`y_0 (1 - e^{-c x})` as ``f(x, c)``."""
-
-        def exp_cdf(x, c):
-            """Evaluate ``y0 * (1 - exp(-c * x))`` with the instance's ``y0``."""
-            return self.y0 * (1.0 - np.exp(-(c * x)))
-
-        return exp_cdf
-
-    @property
-    def y0(self):
-        r"""Amplitude of the CDF."""
-        return self._y0
-
-    def set_y0(self, new):
-        r"""Set the fixed amplitude :attr:`y0`.
-
-        Parameters
-        ----------
-        new : numbers.Number
-            Amplitude the fitted CDF approaches as ``x`` grows.
-        """
-        assert isinstance(new, Number)
-        self._y0 = new
-
-    @property
-    def p0(self):
-        r"""Return initial guess ``[c]`` for the fit."""
-        self._require_sufficient_data()
-
-        y = self.observations.used.y
-
-        c = y.mean()
-
-        p0 = [c]
-        return p0
-
-    @property
-    def TeX_function(self):
-        r"""LaTeX form of the model, writing :attr:`y0` as ``A``."""
-        TeX = r"f(x)=A \left(1 - e^{-cx}\right)"
-        return TeX
-
-    def _TeX_extra_params(self):
-        r"""The fixed amplitude :attr:`y0`, reported in the TeX info as ``A``."""
-        return {"A": self.y0}
