@@ -173,6 +173,21 @@ def test_properties_return_what_was_set():
     np.testing.assert_array_equal(plot.y_fit, obs2.raw.y)
 
 
+@pytest.mark.xfail(
+    strict=True, reason="B9: fitfunctions.plots redefines the plotting namedtuples"
+)
+@pytest.mark.parametrize("name", ["AxesLabels", "LogAxes"])
+def test_axes_namedtuples_are_the_plotting_base_ones(name):
+    """``AxesLabels`` and ``LogAxes`` are the ``plotting.base`` classes, re-exported.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.plotting import base
+
+    assert name in plots.__all__
+    assert getattr(plots, name) is getattr(base, name)
+
+
 @pytest.mark.parametrize("extra", [1, -1])
 def test_set_observations_refuses_a_y_fit_of_another_length(extra):
     """A model longer or shorter than the raw observations is refused.
