@@ -4,8 +4,8 @@
 # -----
 # [1] <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt>
 #
-# Cycle 25 Max is the peak of the SILSO 13-month smoothed series (160.9 in
-# 2024-10), pending a SILSO entry; [1] listed none when checked 2026-10-23.
+# Cycles 1-25 match [1], except Cycle 25 Max (2024-10), which [1] has not listed
+# yet: it is the peak (160.9) of the 13-month smoothed series SN_ms_tot_V2.0.
 #
 # To update extrema, use the following an manually copy
 #
