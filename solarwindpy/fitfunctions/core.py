@@ -12,6 +12,7 @@ __all__ = [
     "InsufficientDataError",
     "FitFailedError",
     "InvalidParameterError",
+    "FitDegeneracyWarning",
     "FitFunctionMeta",
     "FitFunction",
 ]
@@ -24,6 +25,7 @@ import pandas as pd
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from itertools import combinations
 from inspect import cleandoc, getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
@@ -51,6 +53,7 @@ _UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
 _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
+_MultiStartInfo = namedtuple("_MultiStartInfo", "starts,cost,best")
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
 
 
@@ -74,6 +77,22 @@ class FitFailedError(FitFunctionError):
 
 class InvalidParameterError(FitFunctionError):
     """Raised when invalid parameters are provided to fit functions."""
+
+    pass
+
+
+class FitDegeneracyWarning(UserWarning):
+    """Warned when a fit leaves parameters unconstrained.
+
+    :meth:`FitFunction.make_fit` warns it when the fitted covariance holds a
+    non-finite entry, or when two parameters are correlated beyond
+    :attr:`FitFunction.degeneracy_threshold`. Their uncertainties
+    (:attr:`FitFunction.psigma`) are then not meaningful. Filter or escalate it
+    with :mod:`warnings`; :attr:`FitFunction.degenerate` holds the same pairs.
+
+    It is a :class:`UserWarning`, not a :class:`RuntimeWarning`, so code that
+    escalates NumPy's floating-point ``RuntimeWarning`` to an error still fits.
+    """
 
     pass
 
@@ -238,6 +257,13 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
     {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
     """
+
+    #: Largest absolute correlation between two fitted parameters that
+    #: :meth:`make_fit` accepts without warning
+    #: :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`. A subclass
+    #: may set its own; ``make_fit(degeneracy_threshold=...)`` overrides it for
+    #: one fit.
+    degeneracy_threshold = 0.999
 
     def __init__(
         self,
@@ -459,6 +485,55 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     def pcov(self):
         r"""Returns a copy so that the matrix isn't accidentally edited."""
         return self._pcov.copy()
+
+    @property
+    def degenerate(self):
+        r"""The parameter pairs the last successful fit left unconstrained, or None.
+
+        A pair is listed when its covariance, or either parameter's variance,
+        is not finite, or when the absolute correlation
+        :math:`|C_{ij}| / \sqrt{C_{ii} C_{jj}}` of the covariance :attr:`pcov`
+        exceeds the threshold the fit used (:attr:`degeneracy_threshold`
+        unless :meth:`make_fit` was given one). :meth:`make_fit` warns
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` naming
+        the same pairs. A pair whose correlation is undefined because a
+        variance is zero is not listed.
+
+        Returns
+        -------
+        list of tuple or None
+            ``[(name_i, name_j, correlation), ...]`` in :attr:`argnames`
+            order, with ``correlation`` NaN for a non-finite covariance; an
+            empty list when the fit is constrained; None before a fit
+            succeeds. A one-parameter model with a non-finite variance is
+            listed as ``(name, name, nan)``.
+        """
+        try:
+            return list(self._degenerate)
+        except AttributeError:
+            return None
+
+    @property
+    def multistart(self):
+        r"""The starts the last successful fit tried and their costs, or None.
+
+        None when :meth:`make_fit` was not given ``starts``, or before a fit
+        succeeds.
+
+        Returns
+        -------
+        namedtuple or None
+            Fields ``starts``, a :class:`pandas.DataFrame` of each start's
+            initial guess (one row per start, one column per parameter);
+            ``cost``, a :class:`pandas.Series` of the
+            :func:`scipy.optimize.least_squares` ``cost`` each start reached,
+            NaN for a start whose fit failed; and ``best``, the row label of
+            the start the fit kept.
+        """
+        try:
+            return self._multistart
+        except AttributeError:
+            return None
 
     @property
     def rsq(self):
@@ -975,6 +1050,156 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return popt, pcov, psigma, all_chisq
 
+    def _start_p0s(self, starts, kwargs):
+        r"""Return the initial guess of each start ``starts`` describes.
+
+        Parameters
+        ----------
+        starts : dict or list of dict
+            As accepted by :meth:`make_fit`.
+        kwargs : dict
+            The other keywords given to :meth:`make_fit`, read for ``p0`` and
+            ``bounds``.
+
+        Returns
+        -------
+        list of numpy.ndarray
+            One full initial guess per start, in :attr:`argnames` order.
+
+        Raises
+        ------
+        ValueError
+            If ``starts`` is empty, names a parameter the model does not have,
+            or is a dict whose sequences differ in length.
+        """
+        names = self.argnames
+        if isinstance(starts, dict):
+            values = {
+                k: np.atleast_1d(np.asarray(v, dtype=float)) for k, v in starts.items()
+            }
+            lengths = {k: v.size for k, v in values.items()}
+            if len(set(lengths.values())) > 1:
+                raise ValueError(
+                    "starts given as a dict pair their values by position, so "
+                    f"every sequence needs the same length; got {lengths}."
+                )
+            n = next(iter(lengths.values()), 0)
+            starts = [{k: v[i] for k, v in values.items()} for i in range(n)]
+        else:
+            starts = [dict(start) for start in starts]
+
+        if not starts:
+            raise ValueError("starts holds no start.")
+
+        unknown = sorted({k for start in starts for k in start} - set(names))
+        if unknown:
+            raise ValueError(
+                f"starts names {unknown}, which are not parameters of "
+                f"{self.__class__.__name__}: {names}."
+            )
+
+        base = None
+        if any(set(start) != set(names) for start in starts):
+            base = kwargs["p0"] if "p0" in kwargs else self.p0
+            if base is None:
+                base = self._fallback_p0(kwargs.get("bounds", (-np.inf, np.inf)))
+            base = np.atleast_1d(np.asarray(base, dtype=float))
+
+        p0s = []
+        for start in starts:
+            p0 = np.full(len(names), np.nan) if base is None else base.copy()
+            for k, v in start.items():
+                p0[names.index(k)] = v
+            p0s.append(p0)
+        return p0s
+
+    def _run_multistart(self, starts, **kwargs):
+        r"""Fit from each start and keep the fit with the lowest cost.
+
+        Returns
+        -------
+        res : scipy.optimize.OptimizeResult
+            The :func:`scipy.optimize.least_squares` result with the lowest
+            ``cost``; the first such start wins a tie.
+        p0 : numpy.ndarray
+            The start of that fit.
+        info : _MultiStartInfo
+            As :attr:`multistart` returns it.
+
+        Raises
+        ------
+        RuntimeError, ValueError or FitFailedError
+            The last start's error, when every start fails.
+        """
+        p0s = self._start_p0s(starts, kwargs)
+        kwargs.pop("p0", None)
+
+        best = None
+        costs = []
+        error = None
+        for i, start in enumerate(p0s):
+            try:
+                res, p0 = self._run_least_squares(p0=start, **kwargs)
+            except (RuntimeError, ValueError, FitFailedError) as e:
+                self.logger.debug("start %s %s failed: %s", i, start, e)
+                error = e
+                costs.append(np.nan)
+                continue
+            costs.append(res.cost)
+            if best is None or res.cost < best[0].cost:
+                best = (res, p0, i)
+
+        if best is None:
+            raise error
+
+        res, p0, i = best
+        info = _MultiStartInfo(
+            pd.DataFrame(np.array(p0s), columns=self.argnames),
+            pd.Series(costs, name="cost"),
+            i,
+        )
+        return res, p0, info
+
+    def _find_degenerate(self, pcov, threshold):
+        r"""Return the parameter pairs ``pcov`` leaves unconstrained.
+
+        See :attr:`degenerate`.
+        """
+        names = self.argnames
+        n = pcov.shape[0]
+        var = np.diag(pcov)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            corr = pcov / np.sqrt(np.outer(var, var))
+
+        pairs = combinations(range(n), 2) if n > 1 else [(0, 0)]
+        found = []
+        for i, j in pairs:
+            if not np.isfinite([pcov[i, i], pcov[j, j], pcov[i, j]]).all():
+                found.append((names[i], names[j], np.nan))
+            elif i != j and np.isfinite(corr[i, j]) and abs(corr[i, j]) > threshold:
+                found.append((names[i], names[j], float(corr[i, j])))
+        return found
+
+    def _degeneracy_message(self, degenerate):
+        r"""The :class:`FitDegeneracyWarning` text naming ``degenerate``."""
+        parts = []
+        for a, b, c in degenerate:
+            if a == b:
+                parts.append(
+                    f"{a} has a non-finite variance; its uncertainty is not meaningful."
+                )
+            elif np.isnan(c):
+                parts.append(
+                    f"{a} and {b} have a non-finite covariance; their "
+                    "uncertainties are not meaningful."
+                )
+            else:
+                parts.append(
+                    f"{a} and {b} are degenerate (correlation {c:.6f}); their "
+                    "uncertainties are not meaningful."
+                )
+        return f"{self.__class__.__name__}: " + " ".join(parts)
+
     def make_fit(self, return_exception=False, **kwargs):
         """Fit the function with the independent `xobs` and dependent `yobs`.
 
@@ -991,19 +1216,44 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
-                ============= ======================================
+                ==================== ======================================
                     kwarg                    default
-                ============= ======================================
-                 p0            Setup by `{self.__class__.__name__}`
-                 return_full   False
-                 method        "trf"
-                 loss          "huber"
-                 max_nfev      10000
-                 f_scale       0.1
-                ============= ======================================
+                ==================== ======================================
+                 p0                   Setup by `{self.__class__.__name__}`
+                 return_full          False
+                 method               "trf"
+                 loss                 "huber"
+                 max_nfev             10000
+                 f_scale              0.1
+                 starts               None
+                 degeneracy_threshold :attr:`degeneracy_threshold`
+                ==================== ======================================
 
             An explicit ``p0=None`` starts from the feasible default that
             a :attr:`p0` of None gives, without reading :attr:`p0`.
+
+            ``starts`` runs the fit once per start and keeps the fit with
+            the lowest :func:`scipy.optimize.least_squares` ``cost``, the
+            objective of the configured ``loss`` and ``f_scale``. It is a
+            dict ``{name: sequence}`` overriding the named parameters of the
+            initial guess (``p0``, or :attr:`p0`), the sequences paired by
+            position (zipped, not a product), e.g.
+            ``starts={"xh": [380, 403, 420]}`` is three fits; or a list of
+            dicts, each overriding the named parameters of one start. The
+            initial guess itself is not tried unless listed. A start whose
+            fit fails is skipped; when every start fails, the last error is
+            raised (returned when ``return_exception``). :attr:`multistart`
+            records each start, its cost and the start kept. None, the
+            default, runs one fit from the initial guess.
+
+            ``degeneracy_threshold`` is the largest absolute correlation
+            between two parameters accepted without warning, from 0 to 1.
+
+        Warns
+        -----
+        ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
+            When the fit leaves parameters unconstrained, naming each pair
+            :attr:`degenerate` lists.
         """
         try:
             self._require_sufficient_data()
@@ -1017,8 +1267,21 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
 
+        starts = kwargs.pop("starts", None)
+        threshold = kwargs.pop("degeneracy_threshold", None)
+        if threshold is None:
+            threshold = self.degeneracy_threshold
+        if not 0 <= threshold <= 1:
+            raise ValueError(
+                f"degeneracy_threshold is a correlation from 0 to 1; got {threshold}."
+            )
+
         try:
-            res, p0 = self._run_least_squares(**kwargs)
+            if starts is None:
+                res, p0 = self._run_least_squares(**kwargs)
+                multistart = None
+            else:
+                res, p0, multistart = self._run_multistart(starts, **kwargs)
         except (RuntimeError, ValueError, FitFailedError) as e:
             if return_exception:
                 return e
@@ -1033,6 +1296,15 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self._chisq_dof = all_chisq
         self._fit_result = res
         self._fit_p0 = tuple(p0)
+        self._multistart = multistart
+        self._degenerate = self._find_degenerate(pcov, threshold)
 
         self.build_TeX_info()
         self.build_plotter()
+
+        if self._degenerate:
+            warnings.warn(
+                self._degeneracy_message(self._degenerate),
+                category=FitDegeneracyWarning,
+                stacklevel=2,
+            )
