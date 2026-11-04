@@ -1,8 +1,7 @@
 """Consolidated test configuration for SolarWindPy.
 
-This file provides shared test configuration for all tests in the consolidated /tests/
-directory structure. It enables external package imports for migrated tests from
-solarwindpy/tests/.
+Shared test configuration for every test under tests/. Tests import the
+installed package (``import solarwindpy``), not relative modules.
 """
 
 import os

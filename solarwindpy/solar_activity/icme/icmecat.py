@@ -227,7 +227,7 @@ class ICMECAT:
         except cache.DownloadError as exc:
             raise ICMECATDownloadError(
                 f"Failed to download ICMECAT {_PINNED_VERSION} from {ICMECAT_URL}. "
-                f"Edit solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL) "
+                f"Edit solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL "
                 f"to point at a working catalog version, see "
                 f"https://helioforecast.space/icmecat for the current URL. "
                 f"Underlying error: {exc!r}"

@@ -11,8 +11,6 @@ import re
 import subprocess
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCANNED_PATHS = ["solarwindpy", "tests", "docs/source", "README.rst", "CLAUDE.md"]
 
@@ -47,7 +45,6 @@ def find_line_pointers():
     return hits
 
 
-@pytest.mark.xfail(strict=True, reason="pointers: live files still name lines")
 def test_no_line_number_pointers():
     """No tracked live file names a ``file.py`` line number."""
     hits = find_line_pointers()
