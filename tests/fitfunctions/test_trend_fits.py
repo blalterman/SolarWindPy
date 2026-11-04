@@ -10,7 +10,7 @@ from matplotlib.container import ErrorbarContainer
 from scipy.optimize import OptimizeWarning
 
 from solarwindpy.fitfunctions import gaussians, trend_fits, lines
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import FitDegeneracyWarning, InsufficientDataError
 from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
 from tests.tolerances import exact, noise_free
@@ -39,9 +39,13 @@ def trend_fit(agged):
     tf.make_ffunc1ds()
     tf.make_1dfits()
     tf.make_trend_func()
+    # Two 1D fits for a two-parameter trend: the covariance is not finite.
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=OptimizeWarning)
-        tf.trend_func.make_fit()
+        with pytest.warns(
+            FitDegeneracyWarning, match="m and b have a non-finite covariance"
+        ):
+            tf.trend_func.make_fit()
     return tf
 
 

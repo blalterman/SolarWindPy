@@ -385,17 +385,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FitFunction.make_fit` warns `fitfunctions.core.FitDegeneracyWarning` (a
   `UserWarning`) when a fit leaves parameters unconstrained: a non-finite covariance
   entry, or two parameters whose correlation from `pcov` exceeds
-  `FitFunction.degeneracy_threshold` (0.999; a subclass may set its own, and
+  `FitFunction.degeneracy_threshold` (0.99999; a subclass may set its own, and
   `make_fit(degeneracy_threshold=...)` overrides it for one fit). The warning names each
   pair, e.g. "xh and yh are degenerate (correlation 1.000000); their uncertainties are
   not meaningful", and `FitFunction.degenerate` lists the same pairs.
-- `FitFunction.make_fit(starts=...)` fits from several initial guesses and keeps the
-  lowest `least_squares` cost. `starts={"xh": [380, 403, 420]}` overrides the named
-  parameters of the initial guess, one fit per position (values of several parameters
-  are zipped, not crossed); a list of dicts gives one start each. A failed start is
-  skipped; when all fail, the last error is raised. `FitFunction.multistart` records each
-  start, its cost and the start kept. The default, `starts=None`, fits as before.
-  `TrendFit.make_1dfits` and `TrendFit.trend_func.make_fit` pass it through.
 - `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
   `m` and `s`, e.g. `base=10` for a base-10 log-normal. The default is unchanged.
 - `Hist1D.set_axnorm("t")` (and `Hist1D(axnorm="t")`) divides the histogram by its

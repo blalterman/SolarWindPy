@@ -48,8 +48,6 @@ computes the optimized parameters, their covariance and
   root of its diagonal.
 - With ``return_exception=True``, a failed fit returns the exception instead
   of raising it, for loops over many fits.
-- ``starts=`` fits from several initial guesses and keeps the lowest cost;
-  :attr:`~solarwindpy.fitfunctions.core.FitFunction.multistart` records them.
 - A fit that leaves parameters unconstrained warns
   :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, naming the
   degenerate pairs, which
