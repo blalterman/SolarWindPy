@@ -304,6 +304,45 @@ class TestGaussianLn:
         obj.make_fit()
         assert self._reported(str(obj.TeX_info), MEAN) is not None
 
+    @pytest.mark.xfail(strict=True, reason="except AttributeError swallows it")
+    def test_a_bug_reading_TeX_info_is_not_taken_for_not_fitted(self, lognormal_data):
+        """An AttributeError inside ``TeX_info`` propagates from the flag setter.
+
+        Only NotFittedError means "not fitted yet"; any other AttributeError
+        is a bug and must not be silenced.
+
+        ON FAILURE: the code is wrong.
+        """
+
+        class Broken(GaussianLn):
+            @property
+            def TeX_info(self):
+                raise AttributeError("boom")
+
+        x, y, _ = lognormal_data
+        with pytest.raises(AttributeError, match="boom"):
+            Broken(x, y).set_TeX_report_normal_parameters(True)
+
+    @pytest.mark.xfail(strict=True, reason="except AttributeError swallows it")
+    def test_a_bug_computing_normal_parameters_is_not_taken_for_not_fitted(
+        self, lognormal_data
+    ):
+        """An AttributeError inside ``normal_parameters`` reaches the TeX info.
+
+        ON FAILURE: the code is wrong.
+        """
+
+        class Broken(GaussianLn):
+            @property
+            def normal_parameters(self):
+                raise AttributeError("boom")
+
+        x, y, _ = lognormal_data
+        obj = Broken(x, y)
+        obj.set_TeX_report_normal_parameters(True)
+        with pytest.raises(AttributeError, match="boom"):
+            obj._TeX_extra_params()
+
     def test_make_fit_success(self, lognormal_data):
         """GaussianLn fitted to noise-free log-normal data recovers mu, |sigma|, A.
 
