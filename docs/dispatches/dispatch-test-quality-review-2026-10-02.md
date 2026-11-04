@@ -324,3 +324,5 @@ holds only after `docs/dispatches/batch-test-quality-fixes-2026-10-02.md` lands.
 ### Commits
 
 - `b8afd536` docs(review): record test-quality findings and the fix program
+
+## Spent-Mark: executed; author ruled served 2026-11-04
