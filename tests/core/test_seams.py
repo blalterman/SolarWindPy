@@ -220,13 +220,6 @@ def test_a_reduction_refuses_columns_without_its_level():
 
 # --- Vector and Tensor hold one species ----------------------------------
 
-_NO_GUARD = (
-    "a Vector or Tensor built from several species silently mixes them "
-    "(.mag sums over every species); expected ValueError naming a and p1; "
-    "remove this marker when fix(core)! adds the single-species guard. Tensor "
-    "already refuses these columns, but with a message about missing columns"
-)
-
 _BUILDERS = {
     "vector": (vector.Vector, ("x", "y", "z")),
     "bfield": (vector.BField, ("x", "y", "z")),
@@ -234,9 +227,6 @@ _BUILDERS = {
 }
 
 
-@pytest.mark.xfail(
-    strict=True, raises=(pytest.fail.Exception, AssertionError), reason=_NO_GUARD
-)
 @pytest.mark.parametrize("cls, labels", list(_BUILDERS.values()), ids=list(_BUILDERS))
 def test_several_species_are_refused_naming_them(cls, labels):
     r"""Building from columns whose ``S`` level holds a and p1 raises ValueError.

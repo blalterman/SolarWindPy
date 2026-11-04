@@ -50,8 +50,8 @@ class Vector(base._ComponentFrame):
         Raises
         ------
         ValueError
-            If ``new`` does not contain the required columns, or its time
-            index holds missing timestamps (``NaT``).
+            If ``new`` does not contain the required columns, holds more than
+            one species, or its time index holds missing timestamps (``NaT``).
         """
         new = self._put_in_time_order_unless_checked(new)
         super().set_data(new)

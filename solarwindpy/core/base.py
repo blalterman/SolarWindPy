@@ -633,8 +633,31 @@ class _ComponentFrame(Base):
 
     Holds what :class:`~solarwindpy.core.vector.Vector` and
     :class:`~solarwindpy.core.tensor.Tensor` share, so neither copies it:
-    calling the object with a component label.
+    calling the object with a component label, and refusing data that hold
+    more than one species. Both are single-species by design: a magnitude or
+    projection of columns spanning several species would reduce across them.
     """
+
+    def set_data(self, new: pd.DataFrame) -> None:
+        r"""Refuse ``new`` if its species level holds several species, then set it.
+
+        Raises
+        ------
+        ValueError
+            If ``new``'s columns have a level ``"S"`` holding more than one
+            species, naming them; or as :meth:`Base.set_data` raises.
+        """
+        columns = getattr(new, "columns", None)
+        if isinstance(columns, pd.MultiIndex) and "S" in columns.names:
+            species = sorted(columns.unique(level="S"))
+            if len(species) > 1:
+                raise ValueError(
+                    f"A {self.__class__.__name__} holds one species; these "
+                    f"columns hold {len(species)}: "
+                    f"{', '.join(repr(s) for s in species)}. Select one, "
+                    "e.g. with `.xs(species, axis=1, level='S')`."
+                )
+        super().set_data(new)
 
     def __call__(self, component: str) -> pd.Series:
         r"""Return one component.
