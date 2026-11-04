@@ -399,3 +399,27 @@ def test_fall_back_with_nothing_cached_raises_with_the_status(http_server):
         cache.fall_back(url, error)
 
     assert info.value.status == 404
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="cache._http_status follows __context__, so a failure raised while "
+    "handling a 404 reports 404; remove this marker when it follows __cause__ only",
+)
+def test_a_failure_raised_while_handling_a_404_has_no_status(http_server, tmp_path):
+    """A failure's status is its own, not that of an error being handled.
+
+    Chosen input: inside the handler for a 404, a missing ``file://`` source
+    fails with no HTTP answer, as a probe of a second URL would.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    try:
+        cache.fetch(f"{http_server}404.csv", max_age=pd.Timedelta(days=1))
+    except cache.DownloadError:
+        with pytest.raises(cache.DownloadError) as info:
+            cache.fetch((tmp_path / "gone.csv").as_uri(), max_age="1D")
+
+    assert info.value.status is None
