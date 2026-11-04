@@ -551,6 +551,10 @@ These change computed values; rerun any analysis that used them.
   `SSNExtrema.cycle_intervals` Fall runs from the maximum to today), and `SIDC`
   `extremum` labels those below half the cycle maximum `"26-Min"` instead of `"25-Min"`.
 
+- `Vector` and `Tensor` calls return the named component, e.g. `plasma.b("x")` or
+  `ion.w("par")`; they previously always raised `AttributeError`. An unknown component
+  raises `KeyError` listing the available components.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
