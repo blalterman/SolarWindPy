@@ -405,6 +405,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Spacecraft` defines its supported names (PSP, WIND) and frames (GSE, HCI) in one table,
   and an unsupported name or frame raises `NotImplementedError` naming the supported values.
 
+- `SSNPlot` scales its y axis to the plotted peak rounded up to 100 (at least 100), instead
+  of a fixed 0 to 200 that clipped cycles above 200. `SIDC.plot_on_colorbar` shares the
+  rule through `SIDC.ssn_scale_top`.
+
 ### Added
 
 - `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
