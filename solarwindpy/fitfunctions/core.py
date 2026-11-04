@@ -273,6 +273,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
     """
 
+    #: TeX of each parameter whose name is not its symbol, e.g.
+    #: ``{"mu": r"\mu"}``; the TeX info labels the parameter with it.
+    _TeX_argnames = None
+
     def __init__(
         self,
         xobs,
@@ -857,6 +861,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             initial_guess_info=self.initial_guess_info,
             extra_params=self._TeX_extra_params(),
         )
+        if self._TeX_argnames:
+            tex_info.set_TeX_argnames(**self._TeX_argnames)
         self._TeX_info = tex_info
         return tex_info
 

@@ -84,6 +84,8 @@ class Gaussian(FitFunction):
     Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)
     """
 
+    _TeX_argnames = {"mu": r"\mu", "sigma": r"\sigma"}
+
     @property
     def function(self):
         r"""The model as ``f(x, mu, sigma, A)``."""
@@ -126,15 +128,6 @@ class Gaussian(FitFunction):
         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
-    def make_fit(self, *args, **kwargs):
-        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        result = super().make_fit(*args, **kwargs)
-        try:
-            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
-        except AttributeError:  # Fit failed
-            pass
-        return result
-
 
 class GaussianNormalized(FitFunction):
     """Normalized Gaussian distribution where integral equals n.
@@ -147,6 +140,8 @@ class GaussianNormalized(FitFunction):
     the Gaussian curve, useful for fitting probability distributions
     or particle count distributions.
     """
+
+    _TeX_argnames = {"mu": r"\mu", "sigma": r"\sigma"}
 
     @property
     def function(self):
@@ -187,15 +182,6 @@ class GaussianNormalized(FitFunction):
         r"""LaTeX form of the model."""
         TeX = r"f(x)=\frac{n}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
-
-    def make_fit(self, *args, **kwargs):
-        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        result = super().make_fit(*args, **kwargs)
-        try:
-            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
-        except AttributeError:  # Fit failed
-            pass
-        return result
 
 
 class GaussianLn(FitFunction):
