@@ -487,6 +487,18 @@ class StabilityContours(object):
             ``color``, ``linestyle`` and ``marker`` and is labelled with its
             instability, with ``markersize=10``, ``markeredgewidth=0.5``,
             ``markeredgecolor="k"`` and ``markevery=10``.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        lines : dict
+            Maps each drawn ``(growth_rate, instability)`` pair, e.g.
+            ``(-3, "MM")``, to its :class:`matplotlib.lines.Line2D`, in
+            drawing order. Only the curves drawn are keys.
+        cbar : None
+            The contours are lines, not a mappable, so no colorbar is drawn;
+            the slot keeps the return order ``(ax, artists..., cbar)``
+            shared by every plot.
         """
         assert isinstance(ax, mpl.axes.Axes)
 
@@ -516,6 +528,7 @@ class StabilityContours(object):
         if tk_kind is not None:
             target_contours = target_contours.loc[:, tk_kind]
         target_contours = target_contours.stack()
+        lines = {}
 
         if growth_rate is not None:
             growth_rate = int(growth_rate)
@@ -539,6 +552,7 @@ class StabilityContours(object):
             im = ax.plot(self.beta, v, **style)
             # only want line object, not list of them. so im[0].
             images_for_table_legend.loc[rate, itype] = im[0]
+            lines[(rate, itype)] = im[0]
 
         if fix_scale:
             ax.set_xscale("log")
@@ -554,6 +568,8 @@ class StabilityContours(object):
                 framealpha=0,
                 ncol=2,
             )
+
+        return ax, lines, None
 
     @staticmethod
     def _add_table_legend(ax, images):

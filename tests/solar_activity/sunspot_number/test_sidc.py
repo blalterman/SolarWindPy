@@ -985,7 +985,6 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
         plt.close(figure)
 
 
-@pytest.mark.xfail(strict=True, reason="A3: SIDC.plot_on_colorbar returns nothing")
 @pytest.mark.parametrize("vertical", [True, False])
 def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
     """``plot_on_colorbar`` returns ``(cax, underlay, overlay, None)``.

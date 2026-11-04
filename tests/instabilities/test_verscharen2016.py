@@ -347,9 +347,6 @@ def test_plot_contours_draws_every_published_threshold_on_log_axes():
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
 
 
-@pytest.mark.xfail(
-    strict=True, reason="A3: StabilityContours.plot_contours returns nothing"
-)
 def test_plot_contours_returns_ax_lines_and_no_colorbar():
     """``plot_contours`` returns ``(ax, lines, None)``, the shared plot order.
 
@@ -377,9 +374,6 @@ def test_plot_contours_returns_ax_lines_and_no_colorbar():
         plt.close(fig)
 
 
-@pytest.mark.xfail(
-    strict=True, reason="A3: StabilityContours.plot_contours returns nothing"
-)
 def test_plot_contours_returns_only_the_curves_it_draws():
     """Filtering by growth rate and instability returns only the drawn curves.
 

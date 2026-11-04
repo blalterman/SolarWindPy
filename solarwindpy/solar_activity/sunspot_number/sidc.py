@@ -537,6 +537,29 @@ class SIDC(ActivityIndicator):
         ``[0, top]``, where ``top`` is :meth:`ssn_scale_top` of the window, so
         the line always stays inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
         minor ticks fall every 25.
+
+        Parameters
+        ----------
+        cax : matplotlib.axes.Axes
+            The colour bar's axes.
+        t0, t1 : datetime-like
+            Start and end of the window plotted.
+        vertical_cbar : bool
+            If True, the colour bar is vertical: time runs along its y-axis
+            and the SSN scale along its x-axis.
+
+        Returns
+        -------
+        cax : matplotlib.axes.Axes
+        underlay : matplotlib.lines.Line2D
+            The solid white line drawn under the overlay.
+        overlay : matplotlib.lines.Line2D
+            The dash-dotted black sunspot-number line.
+        cbar : None
+            The method receives only the colour bar's axes, not the
+            :class:`matplotlib.colorbar.Colorbar`, so the slot is always None;
+            it keeps the return order ``(ax, artists..., cbar)`` shared by
+            every plot.
         """
         # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
         ssn = self.data.loc[t0:t1, "ssn"]
@@ -554,8 +577,10 @@ class SIDC(ActivityIndicator):
         y = ((y / s1) * dy) + y0
 
         if vertical_cbar:
-            cax.plot(y, x, ls="-", color="w", lw=1)
-            cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+            (underlay,) = cax.plot(y, x, ls="-", color="w", lw=1)
+            (overlay,) = cax.plot(
+                y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
+            )
             cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
             x0, x1 = cax.get_xlim()
 
@@ -568,8 +593,10 @@ class SIDC(ActivityIndicator):
             cax.yaxis.set_tick_params(left=True)
 
         else:
-            cax.plot(x, y, ls="-", color="w", lw=1)
-            cax.plot(x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+            (underlay,) = cax.plot(x, y, ls="-", color="w", lw=1)
+            (overlay,) = cax.plot(
+                x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
+            )
             cax.set_ylabel(r"$\mathrm{SSN} \; [\#]$")
             x0, x1 = cax.get_ylim()
 
@@ -582,6 +609,8 @@ class SIDC(ActivityIndicator):
             cax.xaxis.set_tick_params(top=True)
             cax.xaxis.set_ticks_position("top")
             cax.xaxis.set_label_position("top")
+
+        return cax, underlay, overlay, None
 
 
 class SSNExtrema(IndicatorExtrema):
