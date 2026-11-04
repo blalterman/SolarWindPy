@@ -456,14 +456,18 @@ class Plasma(base.Base):
             raise ValueError(msg)
 
         plasma = cls(data, *species, **kwargs)
+        # The plasma keeps its own copy of the columns it uses. Release the
+        # file's frame so it is not held through the reads below.
+        shape, index = data.shape, data.index
+        del data
 
         plasma.logger.warning(
             "Loaded plasma from file\nFile:  %s\n\ndkey  :  %s\nshape : %s\nstart : %s\nstop  : %s",
             str(fname),
             dkey,
-            data.shape,
-            data.index.min(),
-            data.index.max(),
+            shape,
+            index.min(),
+            index.max(),
         )
 
         if sckey:
@@ -477,7 +481,7 @@ class Plasma(base.Base):
                 )
 
             if start is not None or stop is not None:
-                sc = sc.loc[data.index]
+                sc = sc.loc[index]
 
             sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
@@ -491,7 +495,7 @@ class Plasma(base.Base):
             aux.columns.names = ("M", "C", "S")
 
             if start is not None or stop is not None:
-                aux = aux.loc[data.index]
+                aux = aux.loc[index]
 
             plasma.set_auxiliary_data(aux)
             plasma.logger.warning(
@@ -913,7 +917,10 @@ class Plasma(base.Base):
             list(self.species) + [""],
         ]
 
-        data = new.loc[:, tk_plasma].sort_index(axis=1)
+        data = new.loc[:, tk_plasma]
+        # `sort_index` copies even sorted columns, so sort only when needed.
+        if not data.columns.is_monotonic_increasing:
+            data = data.sort_index(axis=1)
         dropped = new.drop(data.columns, axis=1)
         data = data.loc[:, ~data.columns.duplicated()]
         self._mask_invalid_species(data)
@@ -978,7 +985,17 @@ class Plasma(base.Base):
                 ["n", "v", "w"], ["", "x", "y", "z", "par", "per"], list(self.species)
             ],
         ]
-        invalid = moments.isna().T.groupby(level="S").any().T
+        isna = moments.isna()
+        # `moments` is a view of `data`: while it lives, the writes below
+        # copy the masked columns (copy-on-write) and leave the rest of
+        # `data` pinned to its original, larger array.
+        del moments
+        # Sorted, as `groupby(level="S")` orders the species.
+        invalid = {
+            s: isna.xs(s, axis=1, level="S").any(axis=1)
+            for s in sorted(isna.columns.unique(level="S"))
+        }
+        del isna
         species = data.columns.get_level_values("S")
         for s, missing in invalid.items():
             count = int(missing.sum())

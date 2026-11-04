@@ -2856,6 +2856,41 @@ def test_species_missing_any_moment_is_masked_at_that_time(caplog):
     ]
 
 
+def test_masked_species_warnings_are_logged_in_sorted_species_order(caplog):
+    r"""The per-species masking warnings follow sorted species order, not column order.
+
+    The plasma is built with species ``("p1", "a")``, out of sorted order, then given
+    new data by `set_data` in which the alphas have no density column at all, so the
+    first moment column of the alphas comes after the proton density. The alphas
+    lack v_x on row 0 and the protons on rows 0 and 1, of 3. Masking groups the
+    moments by species as ``groupby(level="S")`` does, in sorted order, so the
+    warnings read a then p1 and each species is NaN on its own rows. Iterating the
+    species in the order their moment columns are selected logs p1 first.
+
+    ON FAILURE: the code is wrong, unless the author revises the order of the
+    masking warnings.
+    """
+    full = (1.0, (400.0, 0.0, 0.0), 30.0, 30.0)
+    p = _hand_plasma([{"p1": full, "a": full}] * 3, "p1", "a")
+    new = p.data.drop(columns=[("n", "", "a")])
+    new.loc[new.index[0], ("v", "x", "a")] = np.nan
+    new.loc[new.index[:2], ("v", "x", "p1")] = np.nan
+
+    caplog.clear()
+    with caplog.at_level("WARNING", logger="solarwindpy"):
+        p.set_data(new)
+
+    tail = ": a density, velocity or thermal speed component is missing"
+    assert _warnings(caplog, "masked species") == [
+        "masked species a at 1 of 3 times" + tail,
+        "masked species p1 at 2 of 3 times" + tail,
+    ]
+    alpha = p.data.xs("a", axis=1, level="S")
+    proton = p.data.xs("p1", axis=1, level="S")
+    assert alpha.isna().all(axis=1).tolist() == [True, False, False]
+    assert proton.isna().all(axis=1).tolist() == [True, True, False]
+
+
 def test_density_totals_are_nan_where_no_species_is_present():
     r"""`n("a+p1")` and `rho("a+p1")` are partial sums, NaN where no species is present.
 

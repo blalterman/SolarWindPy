@@ -375,6 +375,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     same split order, midpoints and cells.
   - Each plot retains about 3 bytes per row instead of about 31: it stores which rows it
     keeps and their bin codes, not a copy of its data.
+- `Plasma.load_from_file` releases the file's frame before reading the auxiliary table,
+  and masking invalid species writes to the plasma's own data, not a view. Peak memory
+  loading the Wind bimax file drops from 6.8 to 4.8 GB and the load from 2.43 to 2.03 s;
+  loaded values are bitwise identical.
 
 ### Added
 
