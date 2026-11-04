@@ -29,21 +29,28 @@ SSN = 50.0 + np.arange(MONTHS.size)  # month i after 2000-01 has SSN 50 + i
 STD = 2.0
 
 
-def silso_m13():
-    """The chosen series as SILSO writes it (year; month; frac; ssn; std; n; def)."""
+def silso_m13(ssn=SSN):
+    """``ssn`` as SILSO writes it (year; month; frac; ssn; std; n; def)."""
     return "".join(
         f"{t.year};{t.month:02d};{t.year + (t.month - 0.5) / 12:.3f};"
         f"{s:6.1f};{STD:5.1f};  100;1\n"
-        for t, s in zip(MONTHS, SSN)
+        for t, s in zip(MONTHS, ssn)
     )
 
 
 @pytest.fixture
 def sidc(tmp_path, monkeypatch):
-    """A real ``SIDC("m13")`` downloaded from a local SILSO file.
+    """A real ``SIDC("m13")`` downloaded from a local SILSO file of ``SSN``."""
+    return sidc_from_silso(tmp_path, monkeypatch, SSN)
+
+
+def sidc_from_silso(tmp_path, monkeypatch, ssn):
+    """A real ``SIDC("m13")`` downloaded from a local SILSO file of ``ssn``.
 
     ``DataLoader`` reads the cache date from an 8-digit run anywhere in the
     cache's absolute path, so a ``tmp_path`` that holds one would be misread.
+    Build one per test: a second ``SIDC("m13")`` under the same home reads
+    today's cache instead of the new file.
     """
     if re.search(r"\d{8}", str(tmp_path)):
         pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
@@ -51,7 +58,7 @@ def sidc(tmp_path, monkeypatch):
     home.mkdir()
     remote = tmp_path / "remote"
     remote.mkdir()
-    (remote / "snmstotcsv.php").write_text(silso_m13())
+    (remote / "snmstotcsv.php").write_text(silso_m13(ssn))
 
     base = remote.as_uri() + "/"
     monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
@@ -213,6 +220,80 @@ def test_ssn_axis_spans_zero_to_two_hundred(sidc):
     fig, ax = plt.subplots()
     SSNPlot(sidc).make_plot(ax)
     assert ax.get_ylim() == (0.0, 200.0)
+
+
+# An active series peaking above 200 (cycle 19 peaked near 285) and a quiet
+# one peaking below 100. A peak between 100 and 200 cannot tell a fixed 0-200
+# range from the round-up rule.
+ACTIVE_SSN = 2.0 * SSN
+QUIET_SSN = SSN / 4.0
+
+
+def test_the_rule_fixtures_bracket_the_old_fixed_range():
+    """The active series peaks above 200 and the quiet one below 100.
+
+    ON FAILURE: the fixtures no longer separate the round-up rule from a
+    fixed 0-200 range; fix the fixtures.
+    """
+    assert ACTIVE_SSN.max() > 200
+    assert QUIET_SSN.max() < 100
+
+
+@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
+def test_ssn_axis_tops_an_active_series_at_its_peak_rounded_up_to_100(
+    tmp_path, monkeypatch
+):
+    """An SSN plot's y range starts at 0 and tops the peak at the next 100.
+
+    The top is a multiple of 100, at or above the plotted peak, and less
+    than 100 above it, so no part of a strong cycle is clipped.
+
+    ON FAILURE: the code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, ACTIVE_SSN)
+    plot = SSNPlot(indicator)
+    fig, ax = plt.subplots()
+    plot.make_plot(ax)
+
+    bottom, top = ax.get_ylim()
+    peak = plot.plot_data.max()
+    assert bottom == 0
+    assert top % 100 == 0
+    assert peak <= top < peak + 100
+
+
+@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
+def test_ssn_axis_of_a_quiet_series_tops_at_100(tmp_path, monkeypatch):
+    """A series peaking below 100 gets the rule's floor, 0 to 100.
+
+    ON FAILURE: the code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, QUIET_SSN)
+    fig, ax = plt.subplots()
+    SSNPlot(indicator).make_plot(ax)
+
+    assert ax.get_ylim() == (0.0, 100.0)
+
+
+@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
+@pytest.mark.parametrize("ssn", [ACTIVE_SSN, QUIET_SSN], ids=["active", "quiet"])
+def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
+    """SSNPlot and ``SIDC.plot_on_colorbar`` scale the same series to one top.
+
+    ``plot_on_colorbar`` labels its scale top as the last major tick.
+
+    ON FAILURE: the two SSN scales have diverged. The code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, ssn)
+    fig, ax = plt.subplots()
+    SSNPlot(indicator).make_plot(ax)
+
+    cbar_fig, cax = plt.subplots()
+    index = indicator.data.index
+    indicator.plot_on_colorbar(cax, index[0], index[-1], vertical_cbar=True)
+    cbar_top = float(cax.xaxis.get_ticklabels()[-1].get_text())
+
+    assert ax.get_ylim()[1] == cbar_top
 
 
 @pytest.mark.parametrize("logx, logy", [(True, False), (False, True)])
