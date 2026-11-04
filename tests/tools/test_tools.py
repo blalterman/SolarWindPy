@@ -201,6 +201,57 @@ class TestSwapProtons:
             raise HandlersAccumulated(f"handlers added by a second call: {grew}")
 
 
+class TestCoreDominatesCheck:
+    """The post-swap check rejects a frame where the beam is denser than the core.
+
+    ``swap_protons`` itself always produces frames that satisfy the check, so the
+    check is exercised directly on hand-edited frames.
+    """
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AttributeError,
+        reason="B5: swap_protons' post-swap check divides n_p2 by n_p2 and is "
+        "never false; expected solarwindpy.tools._check_core_dominates; remove "
+        "this marker when the check compares n_p2 to n_p1",
+    )
+    def test_check_raises_where_beam_is_denser_than_core(
+        self, protons, restore_logging
+    ):
+        """A swapped frame with one row's beam made denser than its core raises.
+
+        ON FAILURE: the code is wrong.
+        """
+        import solarwindpy.tools as tools
+
+        new, _ = swap_protons(protons, logger=logging.getLogger("tests.swap"))
+        new.loc[0, ("n", "", "p2")] = 2.0 * new.loc[0, ("n", "", "p1")]
+        with pytest.raises(AssertionError, match="n_p2 > n_p1"):
+            tools._check_core_dominates(new)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AttributeError,
+        reason="B5: swap_protons' post-swap check divides n_p2 by n_p2 and is "
+        "never false; expected solarwindpy.tools._check_core_dominates; remove "
+        "this marker when the check compares n_p2 to n_p1",
+    )
+    def test_check_passes_a_correct_swap_with_equal_and_nan_rows(
+        self, protons, restore_logging
+    ):
+        """A correct swap's output passes, with its equal row 2 and NaN row 4.
+
+        A row with both densities 0 (ratio NaN) is appended and also passes.
+        ON FAILURE: the code is wrong.
+        """
+        import solarwindpy.tools as tools
+
+        new, _ = swap_protons(protons, logger=logging.getLogger("tests.swap"))
+        zeros = new.iloc[[0]].copy()
+        zeros.loc[:, [("n", "", "p1"), ("n", "", "p2")]] = 0.0
+        tools._check_core_dominates(pd.concat([new, zeros], ignore_index=True))
+
+
 # ---------------------------------------------------------------------------
 # solarwindpy.tools.normal_parameters
 # ---------------------------------------------------------------------------
