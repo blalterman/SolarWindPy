@@ -593,6 +593,11 @@ These change computed values; rerun any analysis that used them.
   `GaussianTimesHeavySidePlusHeavySide`) are removed, as is
   `solarwindpy.fitfunctions.exponentials.ExponentialCDF`. No alias is kept; importing
   them raises `ImportError` or `AttributeError`.
+- `solar_activity/sunspot_number/ssn_extrema.csv.silso`, an unread older copy of
+  `ssn_extrema.csv` (cycle 25 maximum still the 2030-12-01 placeholder). `SSNExtrema`
+  reads `ssn_extrema.csv`, the only one packaged. Also
+  `tests/test_contracts_dataframe.py`, which tested pandas MultiIndex behaviour without
+  importing solarwindpy.
 
 ### Migration
 
