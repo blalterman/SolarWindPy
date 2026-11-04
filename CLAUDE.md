@@ -19,7 +19,7 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 
 ## Checks
 
-- Full suite: `conda run -n solarwindpy pytest -q` (about two minutes).
+- Full suite: `conda run -n solarwindpy pytest -q` (about one minute).
 - One file: `conda run -n solarwindpy pytest -q tests/core/test_plasma.py`
 - Network and slow tests are skipped unless you pass `--run-drift` or set `SWP_RUN_DRIFT=1`.
 - Import layering: `conda run -n solarwindpy lint-imports`
@@ -62,7 +62,7 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 
 ## Gotchas
 
-- `tests/test_hooks.py` tests the Claude Code hooks in `.claude/settings.json`. Change both
-  together.
+- `tests/test_hooks.py` checks `.claude/settings.json`: documented keys only, no hooks
+  registered, and pushes ask first. Change both together.
 - Untracked directories inside `solarwindpy/` belong to the author. Do not edit, move, or commit
   them.
