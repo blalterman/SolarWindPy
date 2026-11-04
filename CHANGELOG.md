@@ -455,6 +455,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `lines` a dict of `(growth_rate, instability)` to `Line2D`; `SIDC.plot_on_colorbar` from
   returning nothing to `(cax, underlay, overlay, None)`.
 
+- ICMECATDownloadError now tells users to edit
+  solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL instead of a line number in icmecat.py
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
