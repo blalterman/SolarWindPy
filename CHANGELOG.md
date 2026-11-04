@@ -458,6 +458,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ICMECATDownloadError now tells users to edit
   solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL instead of a line number in icmecat.py
 
+- Plasma.pdynamic is removed; call Plasma.pdv. afsq and caani take pdv= instead of pdynamic=.
+  Plasma.pdv(...).name is "pdv".
+
+- Plasma.heat_flux is removed; call Plasma.qpar. Units.q is Units.qpar, and the label key
+  ("q", "par", s) is ("qpar", "", s).
+
+- The label key ("VDFratio", ...) is ("vdf_ratio", ...).
+
+- Units().cfms is removed.
+
+- The magnetic-pressure label renders P_B instead of p_B.
+
+- Unit brackets in every label render as \left[ \right]; the sized= keyword of
+  format_with_units is removed.
+
+- BetaRPlot axis labels keep a fit species' _bimax suffix.
+
+- SpiralPlot2D.plot_contours with axnorm="d" colours on a LogNorm unless norm= is passed.
+
+- The eighth default contour level of Hist2D.plot_hist_with_contours is drawn (0, (7, 3, 1, 3,
+  1, 3)), as in plot_contours.
+
+- SpiralPlot2D.make_plot ignores alpha_fcn, with a warning, on a count plot, as Hist2D does.
+
+- Hist1D.categoricals and Hist2D.categoricals are removed; use intervals.
+
+- SpiralPlot2D(..., progress=True) writes the mesh-building table to stderr; the default stays
+  silent, reversing the 2026-10-16 default of printing it.
+
+- Hinge fits name the hinge x xh, not h (popt["xh"], results ("xh", ...), TwoLine.xh), and
+  take guess_xh= instead of guess_h=.
+
+- PowerLaw, PowerLawPlusC and PowerLawOffCenter name the exponent alpha, not b (popt["alpha"],
+  results ("alpha", ...)).
+
+- Exponential and ExponentialPlusC name the rate k, not c. ExponentialPlusC names its constant
+  c, not d. Warning: for ExponentialPlusC, old code reading popt["c"] now silently gets the
+  constant, not the rate; every other old key raises KeyError.
+
+- GaussianLn names its parameters mu and sigma, not m and s. GaussianLn.normal_parameters
+  returns {"mean", "std"}, not {"mu", "sigma"}, and the optional TeX report labels them
+  mean(x) and std(x).
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
