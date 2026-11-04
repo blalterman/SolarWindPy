@@ -22,18 +22,18 @@ from tests.fitfunctions._attempt import attempt_fit
     "cls, expected_params, sample_args, expected_value",
     [
         # 3 * 2^1.5 = 6 sqrt(2)
-        (PowerLaw, ("x", "A", "b"), (2.0, 3.0, 1.5), 6 * np.sqrt(2.0)),
+        (PowerLaw, ("x", "A", "alpha"), (2.0, 3.0, 1.5), 6 * np.sqrt(2.0)),
         # 6 sqrt(2) + 1
         (
             PowerLawPlusC,
-            ("x", "A", "b", "c"),
+            ("x", "A", "alpha", "c"),
             (2.0, 3.0, 1.5, 1.0),
             6 * np.sqrt(2.0) + 1,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
         (
             PowerLawOffCenter,
-            ("x", "A", "b", "x0"),
+            ("x", "A", "alpha", "x0"),
             (2.0, 3.0, 1.5, 0.5),
             4.5 * np.sqrt(1.5),
         ),
@@ -65,9 +65,9 @@ def power_law_data():
     """
     rng = np.random.default_rng(42)
     x = np.linspace(0.5, 5.0, 20)
-    A, b = 2.0, -1.5
+    A, alpha = 2.0, -1.5
     noise = rng.normal(0, 0.02, size=x.shape)
-    y = A * x**b + noise
+    y = A * x**alpha + noise
     w = np.ones_like(x)
     return x, y, w
 
@@ -107,9 +107,9 @@ def test_power_law_p0_is_fixed(cls, power_law_data):
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (PowerLaw, r"f(x)=A x^b"),
-        (PowerLawPlusC, r"f(x)=A x^b + c"),
-        (PowerLawOffCenter, r"f(x)=A (x-x_0)^b"),
+        (PowerLaw, r"f(x)=A x^{\alpha}"),
+        (PowerLawPlusC, r"f(x)=A x^{\alpha} + c"),
+        (PowerLawOffCenter, r"f(x)=A (x-x_0)^{\alpha}"),
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -126,9 +126,9 @@ def test_TeX_function_strings(cls, expected_tex):
 @pytest.mark.parametrize(
     "cls, truth",
     [
-        (PowerLaw, {"A": 2.0, "b": -1.5}),
-        (PowerLawPlusC, {"A": 2.0, "b": -1.5, "c": 0.0}),
-        (PowerLawOffCenter, {"A": 2.0, "b": -1.5, "x0": 0.0}),
+        (PowerLaw, {"A": 2.0, "alpha": -1.5}),
+        (PowerLawPlusC, {"A": 2.0, "alpha": -1.5, "c": 0.0}),
+        (PowerLawOffCenter, {"A": 2.0, "alpha": -1.5, "x0": 0.0}),
     ],
 )
 def test_make_fit_success(cls, truth, power_law_data):
@@ -165,54 +165,54 @@ def test_make_fit_insufficient_data(cls):
 
 
 def test_power_law_perfect_fit():
-    """PowerLaw recovers A = 16, b = -2 from 16, 4, 1, 0.25 at x = 1, 2, 4, 8.
+    """PowerLaw recovers A = 16, alpha = -2 from 16, 4, 1, 0.25 at x = 1, 2, 4, 8.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    A, b = 16.0, -2.0
+    A, alpha = 16.0, -2.0
     y = np.array([16.0, 4.0, 1.0, 0.25])
 
     obj = PowerLaw(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["alpha"] == noise_free(alpha)
     assert obj(x) == noise_free(y)
 
 
 def test_power_law_plus_c_perfect_fit():
-    """PowerLawPlusC recovers A = 16, b = -2, c = 2 from 18, 6, 3, 2.25.
+    """PowerLawPlusC recovers A = 16, alpha = -2, c = 2 from 18, 6, 3, 2.25.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    A, b, c = 16.0, -2.0, 2.0
+    A, alpha, c = 16.0, -2.0, 2.0
     y = np.array([18.0, 6.0, 3.0, 2.25])
 
     obj = PowerLawPlusC(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["alpha"] == noise_free(alpha)
     assert obj.popt["c"] == noise_free(c)
     assert obj(x) == noise_free(y)
 
 
 def test_power_law_off_center_perfect_fit():
-    """PowerLawOffCenter recovers A = 4, b = 2, x0 = 1 from 4, 16, 64, 256.
+    """PowerLawOffCenter recovers A = 4, alpha = 2, x0 = 1 from 4, 16, 64, 256.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([2.0, 3.0, 5.0, 9.0])
-    A, b, x0 = 4.0, 2.0, 1.0
+    A, alpha, x0 = 4.0, 2.0, 1.0
     y = np.array([4.0, 16.0, 64.0, 256.0])  # 4 * (1, 2, 4, 8)^2
 
     obj = PowerLawOffCenter(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["alpha"] == noise_free(alpha)
     assert obj.popt["x0"] == noise_free(x0)
     assert obj(x) == noise_free(y)
 
@@ -233,7 +233,7 @@ def test_power_law_numerical_stability():
 
 
 def test_power_law_zero_handling():
-    """PowerLaw is x itself at b = 1 near zero, and the constant A at b = 0.
+    """PowerLaw is x itself at alpha = 1 near zero, and the constant A at alpha = 0.
 
     ON FAILURE: the code is wrong.
     """
@@ -324,7 +324,7 @@ def test_power_law_off_center_bound_respects_the_caller(x0_upper, expected):
     obj.make_fit(bounds=([0.0, -5.0, -3.0], [100.0, 5.0, x0_upper]))
 
     assert obj.fit_bounds["A"] == (0.0, 100.0)
-    assert obj.fit_bounds["b"] == (-5.0, 5.0)
+    assert obj.fit_bounds["alpha"] == (-5.0, 5.0)
     assert obj.fit_bounds["x0"] == (-3.0, expected)
 
 
@@ -348,13 +348,13 @@ def test_power_law_off_center_fits_data_at_or_below_zero(x, x0):
     ON FAILURE: the code is wrong.
     """
     x = np.array(x)
-    y = 4.0 * (x - x0) ** 2  # A = 4, b = 2
+    y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
     assert obj.p0[2] < x.min()
 
     obj.make_fit()
     assert obj.popt["A"] == noise_free(4.0)
-    assert obj.popt["b"] == noise_free(2.0)
+    assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
 
 
@@ -495,13 +495,13 @@ def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0, 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    y = 4.0 * (x - x0) ** 2  # A = 4, b = 2
+    y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
     assert obj.p0[2] == exact(0.0)
 
     obj.make_fit(bounds=([0.0, -5.0, x0_bounds[0]], [100.0, 5.0, x0_bounds[1]]))
     assert obj.popt["A"] == noise_free(4.0)
-    assert obj.popt["b"] == noise_free(2.0)
+    assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
     assert obj.initial_guess_info["x0"].p0 == exact(start)
 
@@ -523,12 +523,12 @@ def test_power_law_with_weights():
     obj = PowerLaw(x, y, weights=sigma)
     obj.make_fit()
 
-    def model(x, A, b):
-        return A * x**b
+    def model(x, A, alpha):
+        return A * x**alpha
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0])
-    assert [obj.popt["A"], obj.popt["b"]] == noise_free(weighted)
+    assert [obj.popt["A"], obj.popt["alpha"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
@@ -536,7 +536,7 @@ def test_power_law_with_weights():
 
 
 def test_power_law_scaling_behavior():
-    """A fit to 2/x scales by 2^b = 1/2 when x doubles.
+    """A fit to 2/x scales by 2^alpha = 1/2 when x doubles.
 
     ON FAILURE: the code is wrong.
     """
@@ -592,7 +592,7 @@ def test_power_law_integer_vs_float_exponents():
 
 
 def test_power_law_edge_case_exponents():
-    """b = 1, 0, -1 give a line, a constant, and an inverse.
+    """alpha = 1, 0, -1 give a line, a constant, and an inverse.
 
     ON FAILURE: the code is wrong.
     """

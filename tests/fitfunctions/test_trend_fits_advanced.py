@@ -128,13 +128,13 @@ class TestResidualsEnhancement:
         y[0] = 0.5  # nonzero y where f == 0: unguarded, 0.5 / 0 is inf
         ff = PowerLaw(x, y)
         ff.make_fit()
-        assert ff.popt["b"] > 0
+        assert ff.popt["alpha"] > 0
 
         with warnings.catch_warnings():
             warnings.simplefilter("error", RuntimeWarning)
             r_pct = ff.residuals(pct=True)
 
-        fitted = ff.popt["A"] * x[1:] ** ff.popt["b"]
+        fitted = ff.popt["A"] * x[1:] ** ff.popt["alpha"]
         assert np.isnan(r_pct[0])
         # The same arithmetic, evaluated from popt.
         assert r_pct[1:] == exact(100.0 * (y[1:] - fitted) / fitted, nan_ok=True)

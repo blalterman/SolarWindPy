@@ -2,7 +2,7 @@
 r"""Power-law fit functions.
 
 This module provides :class:`~solarwindpy.fitfunctions.core.FitFunction`
-subclasses for power laws of the form :math:`f(x) = A x^b`, with an
+subclasses for power laws of the form :math:`f(x) = A x^{\alpha}`, with an
 optional additive constant or a shifted origin. Their initial guesses are
 fixed values, not estimated from the data, except that
 :class:`PowerLawOffCenter` starts ``x0`` below the data when any used ``x`` is
@@ -19,26 +19,31 @@ import numpy as np
 
 from .core import FitFunction
 
+#: The exponent renders as a Greek alpha in the TeX info.
+_ALPHA_TEX = {"alpha": r"\alpha"}
+
 
 class PowerLaw(FitFunction):
-    r"""Power law :math:`f(x) = A x^b`.
+    r"""Power law :math:`f(x) = A x^{\alpha}`.
 
-    Parameters are ``A`` (amplitude) and ``b`` (exponent).
+    Parameters are ``A`` (amplitude) and ``alpha`` (exponent).
     """
+
+    _TeX_argnames = _ALPHA_TEX
 
     @property
     def function(self):
-        r"""The model :math:`A x^b` as ``f(x, A, b)``."""
+        r"""The model :math:`A x^{\alpha}` as ``f(x, A, alpha)``."""
 
-        def power_law(x, A, b):
-            """Evaluate ``A * x**b``."""
-            return A * (x**b)
+        def power_law(x, A, alpha):
+            """Evaluate ``A * x**alpha``."""
+            return A * (x**alpha)
 
         return power_law
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, b]`` for the fit."""
+        r"""Return initial guesses ``[A, alpha]`` for the fit."""
         self._require_sufficient_data()
 
         p0 = [1, 1]
@@ -47,29 +52,31 @@ class PowerLaw(FitFunction):
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A x^b"
+        TeX = r"f(x)=A x^{\alpha}"
         return TeX
 
 
 class PowerLawPlusC(FitFunction):
-    r"""Power law with an additive constant, :math:`f(x) = A x^b + c`.
+    r"""Power law with an additive constant, :math:`f(x) = A x^{\alpha} + c`.
 
-    Parameters are ``A`` (amplitude), ``b`` (exponent) and ``c`` (offset).
+    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``c`` (offset).
     """
+
+    _TeX_argnames = _ALPHA_TEX
 
     @property
     def function(self):
-        r"""The model :math:`A x^b + c` as ``f(x, A, b, c)``."""
+        r"""The model :math:`A x^{\alpha} + c` as ``f(x, A, alpha, c)``."""
 
-        def power_law(x, A, b, c):
-            """Evaluate ``A * x**b + c``."""
-            return (A * (x**b)) + c
+        def power_law(x, A, alpha, c):
+            """Evaluate ``A * x**alpha + c``."""
+            return (A * (x**alpha)) + c
 
         return power_law
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, b, c]`` for the fit."""
+        r"""Return initial guesses ``[A, alpha, c]`` for the fit."""
         self._require_sufficient_data()
 
         p0 = [1, 1, 0]
@@ -78,14 +85,14 @@ class PowerLawPlusC(FitFunction):
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A x^b + c"
+        TeX = r"f(x)=A x^{\alpha} + c"
         return TeX
 
 
 class PowerLawOffCenter(FitFunction):
-    r"""Power law about a shifted origin, :math:`f(x) = A (x - x_0)^b`.
+    r"""Power law about a shifted origin, :math:`f(x) = A (x - x_0)^{\alpha}`.
 
-    Parameters are ``A`` (amplitude), ``b`` (exponent) and ``x0`` (origin).
+    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``x0`` (origin).
 
     Notes
     -----
@@ -93,6 +100,8 @@ class PowerLawOffCenter(FitFunction):
     real non-integer power. :meth:`make_fit` therefore bounds ``x0`` below
     the smallest used ``x``, within any bounds the caller passes.
     """
+
+    _TeX_argnames = _ALPHA_TEX
 
     def _prepare_fit(self, kwargs):
         r"""Bound ``x0`` below the smallest used ``x``.
@@ -157,19 +166,19 @@ class PowerLawOffCenter(FitFunction):
 
     @property
     def function(self):
-        r"""The model :math:`A (x - x_0)^b` as ``f(x, A, b, x0)``."""
+        r"""The model :math:`A (x - x_0)^{\alpha}` as ``f(x, A, alpha, x0)``."""
 
-        def power_law(x, A, b, x0):
-            """Evaluate ``A * (x - x0)**b``."""
-            return A * ((x - x0) ** b)
+        def power_law(x, A, alpha, x0):
+            """Evaluate ``A * (x - x0)**alpha``."""
+            return A * ((x - x0) ** alpha)
 
         return power_law
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, b, x0]`` for the fit.
+        r"""Return initial guesses ``[A, alpha, x0]`` for the fit.
 
-        ``A`` and ``b`` start at 1. ``x0`` starts at 0 when every used ``x``
+        ``A`` and ``alpha`` start at 1. ``x0`` starts at 0 when every used ``x``
         is positive; otherwise it starts below the smallest used ``x`` by the
         range of the used ``x`` (by 1 when they are all equal), inside the
         bound :meth:`make_fit` places on ``x0``.
@@ -189,5 +198,5 @@ class PowerLawOffCenter(FitFunction):
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A (x-x_0)^b"
+        TeX = r"f(x)=A (x-x_0)^{\alpha}"
         return TeX
