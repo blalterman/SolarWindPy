@@ -173,7 +173,7 @@ not applied): only what a session cannot infer from the code, each line checked 
 ### Pass 2. Coherence review, layer by layer
 
 Layers: the package; each subpackage (`core`, `fitfunctions`, `instabilities`, `plotting`,
-`solar_activity`, `tools`, `examples`, `plans`); then modules, classes, and functions where the
+`solar_activity`, `tools`, `examples`); then modules, classes, and functions where the
 layer above flags a problem; and the test tree against the code tree. At each layer write
 `**Predicted:**` before reading below and `**Found:**` after. Apply P1 to P9. Take the
 test-quality program's open units (`docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`
