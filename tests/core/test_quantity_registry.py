@@ -30,11 +30,6 @@ import solarwindpy as swp
 # --- xfail reasons -----------------------------------------------------------
 
 
-def _author(why):
-    """Reason for a name the naming rule and the author's rulings leave open."""
-    return f"for the author: {why}; remove this marker when the author decides"
-
-
 def _xfail(reason):
     return pytest.mark.xfail(strict=True, reason=reason)
 
