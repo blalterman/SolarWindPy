@@ -265,6 +265,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   point outside every bin carries the fill value `-9999` (`StabilityCondition.fill`,
   previously the float `-9999.0`).
 
+- `FFPlot.residuals` and `FFPlot.plot_residuals` (simple, percent and robust) return
+  observed minus fitted, the sign of `FitFunction.residuals`; they returned model minus
+  observed. Robust residuals are `-fit_result.fun`. `FFPlot` takes a required keyword-only
+  `residuals_func`, which `FitFunction.plotter` supplies.
+- `AxesLabels` and `LogAxes` in `fitfunctions.plots` are the `plotting.base` classes. They
+  remain importable from `fitfunctions.plots` but leave its `__all__`, so
+  `from solarwindpy.fitfunctions.plots import *` no longer brings them.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
