@@ -40,8 +40,6 @@ AUTHOR_LINESTYLES = [
     (0, (7, 3, 1, 3, 1, 3)),
 ]
 
-_RULED = "the author ruled this default; the code follows in a later commit"
-
 
 def _points(n=4000, seed=7):
     rng = np.random.default_rng(seed)
@@ -172,7 +170,6 @@ def test_bins_are_named_intervals_only():
 _TABLE_HEADER = " Step      N      Elapsed Time"
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_spiral_writes_the_progress_table_when_asked(capsys):
     """``progress=True`` writes the mesh-building table to stderr.
 

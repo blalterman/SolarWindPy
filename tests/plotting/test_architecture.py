@@ -288,6 +288,7 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
                 "initial_bins",
                 "min_per_bin",
                 "mask",
+                "progress",
             ],
         ),
         pytest.param(Scatter, ["x", "y", "z", "logx", "logy", "clip", "mask"]),
@@ -297,7 +298,8 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
 def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
     """Every plot constructor orders its parameters variables, log, axnorm, the rest.
 
-    The rest share one order: clip, the bins, mask.
+    The rest share one order: clip, the bins, mask, then any keyword-only
+    option of one class (Spiral's ``progress``).
 
     ON FAILURE: the code is wrong.
     """

@@ -699,7 +699,7 @@ class AdaptiveMesh(Binning):
     binned scale. The mesh's ``cell_filter`` is applied as ``postfilter``.
     """
 
-    def __init__(self, source, initial_bins, *, min_per_bin, clip):
+    def __init__(self, source, initial_bins, *, min_per_bin, clip, progress=False):
         r"""Compute the initial edges, build the mesh and place the rows in it.
 
         Parameters
@@ -714,6 +714,9 @@ class AdaptiveMesh(Binning):
             Each of x and y whose field is set is clipped with
             ``Base.clip_data`` before the points are placed; the initial
             edges are computed from the unclipped data.
+        progress : bool, default False
+            If True, write the mesh's progress table to ``sys.stderr``; see
+            ``SpiralMesh.generate_mesh``.
         """
         self._initial_bins = self.initial_edges(source, initial_bins)
         # The coordinates only, as the plot's `data` holds them: no copy when
@@ -729,7 +732,7 @@ class AdaptiveMesh(Binning):
         mesh = SpiralMesh(x, y, edges["x"], edges["y"], min_per_bin=min_per_bin)
         # Attach the mesh before refining it, which makes debugging easier.
         self._mesh = mesh
-        mesh.place_spectra_in_mesh(progress=False)
+        mesh.place_spectra_in_mesh(progress=progress)
         mesh.build_cat()
 
     @staticmethod
@@ -867,6 +870,8 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         initial_bins=5,
         min_per_bin=250,
         mask=None,
+        *,
+        progress=False,
     ):
         r"""Store the data and labels, then build the adaptive mesh.
 
@@ -897,6 +902,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y. A point
             is placed in the mesh where it is True and x, y and z are not NaN.
+        progress : bool, default False
+            If True, write the progress table of mesh building to
+            ``sys.stderr`` (``SpiralMesh.generate_mesh``). Off by default:
+            a mesh of 1e6 points builds in well under a second.
 
         Raises
         ------
@@ -919,7 +928,11 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         self.set_log(x=bool(logx), y=bool(logy))
         self._set_data(x, y, z, clip, mask=mask)
         self._binning = AdaptiveMesh(
-            self._source, initial_bins, min_per_bin=min_per_bin, clip=self.clip
+            self._source,
+            initial_bins,
+            min_per_bin=min_per_bin,
+            clip=self.clip,
+            progress=progress,
         )
         self.set_clim(None, None)
         self.set_axnorm(axnorm)
