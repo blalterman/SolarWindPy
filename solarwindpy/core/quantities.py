@@ -116,7 +116,7 @@ QUANTITIES = MappingProxyType(
         "p": Quantity(r"{p}_{{$C};{$S}}", _U["pPa"]),
         "pth": Quantity(r"{P}_{{$C};{$S}}", _U["pPa"], si=1e-12),
         "T": Quantity(r"{T}_{{$C};{$S}}", r"10^5 \, \mathrm{K}", si=1e5),
-        "q": Quantity(r"q_{{$C};{$S}}", _FLUX_DENSITY, si=1e-6),
+        "qpar": Quantity(r"q_{{\parallel};{$S}}", _FLUX_DENSITY, si=1e-6),
         "qhat": Quantity(r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"]),
         "Qhat": Quantity(r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"]),
         "Wk": Quantity(r"W_{K;{$S}}", _FLUX_DENSITY, si=1e-6),

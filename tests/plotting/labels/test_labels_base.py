@@ -458,7 +458,7 @@ class TestDescriptionFeature:
 @pytest.mark.parametrize(
     "mcs, tex",
     [
-        (("q", "par", "p1"), "q_{{\\parallel};{p_1}}"),
+        (("qpar", "", "p1"), "q_{{\\parallel};{p_1}}"),
         (("Wk", "", "p1"), "W_{K;{p_1}}"),
         (("Wk", "", "a"), "W_{K;{\\alpha}}"),
     ],
@@ -468,7 +468,7 @@ def test_energy_flux_labels_match_author_declared_contract(labels_base, mcs, tex
     """Heat flux is labelled q and kinetic energy flux W_K, both in uW m^-2.
 
     The symbols are the author's declared contract; the unit matches what
-    Plasma.heat_flux and Plasma.Wk report.
+    Plasma.qpar and Plasma.Wk report.
 
     ON FAILURE: the label changed; confirm with the author before updating.
     """

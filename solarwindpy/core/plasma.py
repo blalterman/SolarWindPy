@@ -1994,13 +1994,13 @@ species: {}
 
         return electrons
 
-    def heat_flux(self, *species):
+    def qpar(self, *species):
         r"""Calculate the parallel-parallel component of the heat flux tensor.
 
         For each species :math:`s` this is the third moment of its velocity
         distribution along the magnetic field, taken in the center-of-mass
         frame of the species passed to this method, and only those: for
-        ``heat_flux("a+p1")`` or ``heat_flux("a", "p1")`` it is the a+p1
+        ``qpar("a+p1")`` or ``qpar("a", "p1")`` it is the a+p1
         center of mass, not that of every species in the plasma,
 
             :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,
@@ -2052,13 +2052,9 @@ species: {}
             qs = self._species_total(qs)
             qs.name = "+".join(species)
 
-        coeff = self.units.rho * (self.units.v**3.0) / self.units.q
+        coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
         q = coeff * qs
         return q
-
-    def qpar(self, *species):
-        r"""Shortcut to :py:meth:`heat_flux`."""
-        return self.heat_flux(*species)
 
     def build_alfvenic_turbulence(self, species, **kwargs):
         r"""Create an Alfvenic turbulence instance.

@@ -96,7 +96,7 @@ DISPLAY_UNIT_IN_SI = {
     "lnlambda": 1.0,  # dimensionless
     "nuc": 1e-7,  # 10^-7 Hz
     "nc": 1.0,  # dimensionless count
-    "q": constants.micro,  # uW m^-2
+    "qpar": constants.micro,  # uW m^-2
     "Wk": constants.micro,  # uW m^-2
     "distance2sun": 1.0,  # m
 }

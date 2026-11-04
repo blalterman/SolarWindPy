@@ -1534,7 +1534,7 @@ class PlasmaTestBase(ABC):
         if len(slist) == 1:
             msg = "Must have >1 species to calculate heatflux."
             with self.assertRaisesRegex(ValueError, msg):
-                self.object_testing.heat_flux(*slist)
+                self.object_testing.qpar(*slist)
             return None  # Exit test.
 
         m = self.mass_in_mp
@@ -1612,13 +1612,8 @@ class PlasmaTestBase(ABC):
             )
 
         ot = self.object_testing
-        pdt.assert_frame_equal(q, ot.heat_flux(*slist))
         pdt.assert_frame_equal(q, ot.qpar(*slist))
-        pdt.assert_series_equal(qtot, ot.heat_flux(scom))
         pdt.assert_series_equal(qtot, ot.qpar(scom))
-
-        pdt.assert_frame_equal(ot.heat_flux(*slist), ot.qpar(*slist))
-        pdt.assert_series_equal(ot.heat_flux(scom), ot.qpar(scom))
 
     def test_set_auxiliary_data(self):
         r"""Auxiliary data round-trips through `aux`, clears to None, and rejects dupes.
@@ -2835,8 +2830,8 @@ def test_pair_quantities_are_nan_where_either_species_is_missing():
         assert np.isnan(result.iloc[1])
 
 
-def test_heat_flux_matches_its_docstring_formula():
-    r"""`heat_flux` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
+def test_qpar_matches_its_docstring_formula():
+    r"""`qpar` is Q_s = rho_s (v_s^3 + 3/2 v_s w_par,s^2), v_s along b in the CM frame.
 
     Two proton populations of 5 cm^-3 move along b = (3, 4, 0) nT at 400 and
     500 km/s, so the centre of mass moves at 450 km/s and v = -50, +50 km/s along
@@ -2846,7 +2841,7 @@ def test_heat_flux_matches_its_docstring_formula():
     p2: 5 ( 125000 + 120000) = 1225000 ->  2.048961859 uW m^-2
     sum: 262500 -> 0.4390632556 uW m^-2.
 
-    ON FAILURE: the code is wrong, unless the author revises the `heat_flux`
+    ON FAILURE: the code is wrong, unless the author revises the `qpar`
     docstring formula.
     """
     uv = np.array([0.6, 0.8, 0.0])  # unit vector along b = (3, 4, 0)
@@ -2863,7 +2858,7 @@ def test_heat_flux_matches_its_docstring_formula():
         v, w = v * KM, w * KM
         expected[s] = rho * (v**3 + 1.5 * v * w**2) / MICRO  # docstring formula
 
-    each = p.heat_flux("p1", "p2")
+    each = p.qpar("p1", "p2")
     total = p.qpar("p1+p2")
     for s in ("p1", "p2"):
         assert each.loc[:, s].iloc[0] == exact(expected[s])
@@ -2875,8 +2870,8 @@ def test_heat_flux_matches_its_docstring_formula():
     assert total.iloc[0] == printed(0.4390632556, decimals=10)
 
 
-def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
-    r"""A `heat_flux` species sum is partial over the species present, NaN where none is.
+def test_qpar_species_sum_is_nan_where_no_species_is_present():
+    r"""A `qpar` species sum is partial over the species present, NaN where none is.
 
     Per the author, a sum with some species present is a partial sum and a sum
     with none present is NaN, not 0. b is present on every row.
@@ -2885,7 +2880,7 @@ def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
     its drift is 0 and Q = rho (0 + 0) = 0. Row 1 has no species: NaN.
 
     "a+p1+p2": row 0 has the two proton populations of
-    `test_heat_flux_matches_its_docstring_formula` and no alphas, so the partial
+    `test_qpar_matches_its_docstring_formula` and no alphas, so the partial
     sum is that test's hand value, 0.4390632556 uW m^-2. Row 1 has no species: NaN.
 
     ON FAILURE: the code is wrong.
@@ -2898,7 +2893,7 @@ def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
         "a",
         "p1",
     )
-    q = p.heat_flux("a+p1")
+    q = p.qpar("a+p1")
     assert q.iloc[0] == 0.0  # exact: the lone species' drift is 400 - 400 = 0
     assert np.isnan(q.iloc[1])
 
@@ -2915,7 +2910,7 @@ def test_heat_flux_species_sum_is_nan_where_no_species_is_present():
         "p2",
         b=[(3.0, 4.0, 0.0)] * 2,
     )
-    q = p.heat_flux("a+p1+p2")
+    q = p.qpar("a+p1+p2")
     # It uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
     assert q.iloc[0] == printed(0.4390632556, decimals=10)
     assert np.isnan(q.iloc[1])
@@ -2946,7 +2941,7 @@ def _missing_b_plasma(*species):
     )
 
 
-def test_heat_flux_per_species_is_nan_where_b_is_missing():
+def test_qpar_per_species_is_nan_where_b_is_missing():
     r"""Without b there is no parallel direction, so each species' Q_par is NaN.
 
     `Vector.project` returns NaN on rows missing from either vector (author
@@ -2954,12 +2949,12 @@ def test_heat_flux_per_species_is_nan_where_b_is_missing():
 
     ON FAILURE: the code is wrong.
     """
-    q = _missing_b_plasma("a", "p1").heat_flux("a", "p1")
+    q = _missing_b_plasma("a", "p1").qpar("a", "p1")
     assert np.isfinite(q.iloc[0]).all()
     assert q.iloc[1].isna().all()
 
 
-def test_heat_flux_species_sum_is_nan_where_b_is_missing():
+def test_qpar_species_sum_is_nan_where_b_is_missing():
     r"""Without b, no species contributes to Q_par, so the species sum is NaN, not 0.
 
     A partial sum keeps the species that are present; where none is, a zero heat
@@ -2967,12 +2962,10 @@ def test_heat_flux_species_sum_is_nan_where_b_is_missing():
 
     ON FAILURE: the code is wrong.
     """
-    q = _missing_b_plasma("a", "p1").heat_flux("a+p1")
+    q = _missing_b_plasma("a", "p1").qpar("a+p1")
     assert np.isfinite(q.iloc[0])
     if not np.isnan(q.iloc[1]):
-        raise MissingFieldGaveNumber(
-            f'heat_flux("a+p1") is {q.iloc[1]} where b is missing'
-        )
+        raise MissingFieldGaveNumber(f'qpar("a+p1") is {q.iloc[1]} where b is missing')
 
 
 def test_vdf_ratio_is_nan_where_b_is_missing():

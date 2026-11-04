@@ -108,26 +108,7 @@ CASES = [
         False,
         _author("`vdf_ratio` (method) and `VDFratio` (TeX key) differ"),
     ),
-    (
-        _P,
-        "heat_flux",
-        lambda p, t: p.heat_flux("p1"),
-        "M",
-        False,
-        _author(
-            "heat flux is `heat_flux` and `qpar` (methods) and `q` with C `par` "
-            "(registry key); `q` would name the whole vector, the method returns "
-            "only its parallel component"
-        ),
-    ),
-    (
-        _P,
-        "qpar",
-        lambda p, t: p.qpar("p1"),
-        "M",
-        False,
-        _author("heat flux: see `heat_flux`"),
-    ),
+    (_P, "qpar", lambda p, t: p.qpar("p1+a"), "M", False, None),
     (_P, "Wk", lambda p, t: p.Wk("p1"), "M", False, None),
     # Ion: a Series result carries the label as its `.name`.
     (_I, "n", lambda p, t: p.p1.n, "M", True, None),
@@ -304,7 +285,6 @@ def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
 #: Registry keys with an SI factor that no method returns, each with why.
 SI_KEYS_FOR_THE_AUTHOR = {
     "cfms": "the fast magnetosonic speed has a display unit but no method or label",
-    "q": "heat flux is returned by `heat_flux` and `qpar`, which the author names",
 }
 
 
@@ -360,7 +340,7 @@ _RULED = "the author ruled this name; the code follows in the next commit"
     "alias",
     [
         "pdynamic",
-        pytest.param("heat_flux", marks=_xfail(_RULED)),
+        "heat_flux",
     ],
 )
 def test_plasma_has_one_name_per_quantity(alias):
@@ -385,7 +365,6 @@ def test_dynamic_pressure_keyword_is_pdv(plasma, method):
         getattr(plasma, method)("p1", pdv=True)
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_heat_flux_is_qpar_at_every_layer():
     """Heat flux is ``qpar``: the registry key and the ``Units`` field; ``q`` is free.
 
