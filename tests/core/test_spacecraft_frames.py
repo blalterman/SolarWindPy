@@ -2,11 +2,15 @@
 # Supersedes: none
 """Supported spacecraft and frames live in one table that every check reads."""
 
+import dataclasses
+
 import numpy as np
+import pandas.testing as pdt
 import pytest
+from scipy import constants
 
 import solarwindpy as swp
-from solarwindpy.core import spacecraft
+from solarwindpy.core import quantities, spacecraft
 
 
 def _position_data():
@@ -67,3 +71,40 @@ def test_a_refusal_names_the_supported_values(name, frame, supported):
         spacecraft.Spacecraft(_position_data(), name, frame)
     for value in supported:
         assert value in str(excinfo.value)
+
+
+@pytest.mark.xfail(strict=True, reason="o28: the frame entries carry no SI radius yet")
+@pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
+def test_every_supported_frame_has_a_registry_unit(frame):
+    r"""Each supported frame has a registry entry with an SI factor and a TeX unit.
+
+    The table and the registry are two lists, so a frame added to one and not
+    the other would be accepted but neither convertible nor labelled.
+
+    ON FAILURE: the code is wrong.
+    """
+    entry = quantities.QUANTITIES[frame.lower()]
+    assert entry.si is not None
+    assert entry.units is not None
+
+
+@pytest.mark.xfail(strict=True, reason="o28: distance2sun reads Constants().misc")
+@pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
+def test_distance_reads_the_frame_radius_from_the_registry(monkeypatch, frame):
+    r"""``distance2sun`` scales position by the registry's radius for its frame.
+
+    With the radius replaced by 2 m, HCI distance is twice ``pos.mag`` and GSE
+    distance is from (1 AU - 2 x, 2 y, 2 z) m.
+
+    ON FAILURE: the code is wrong.
+    """
+    registry = dict(quantities.QUANTITIES)
+    key = frame.lower()
+    registry[key] = dataclasses.replace(registry[key], si=2.0)
+    monkeypatch.setattr(quantities, "QUANTITIES", registry)
+    sc = spacecraft.Spacecraft(_position_data(), "PSP", frame)
+    pos = sc.pos.data * 2.0
+    if frame == "GSE":
+        pos = pos.assign(x=constants.au - pos.loc[:, "x"])
+    expected = np.sqrt(pos.pow(2).sum(axis=1)).rename("distance2sun")
+    pdt.assert_series_equal(sc.distance2sun, expected)

@@ -26,6 +26,7 @@ import pandas as pd
 import pytest
 
 import solarwindpy as swp
+from tests.tolerances import exact
 
 # --- xfail reasons -----------------------------------------------------------
 
@@ -254,13 +255,20 @@ def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
 def test_every_converted_quantity_is_returned_by_a_method():
     """Every registry key with an SI factor is the label of some core quantity.
 
-    ON FAILURE: the code is wrong, unless the entry was added for a new method;
-    then add the method to CASES.
+    A frame entry (``gse``, ``hci``) is the exception: it labels stored position,
+    which ``Spacecraft.distance2sun`` converts with the frame's factor.
+
+    ON FAILURE: the code is wrong, unless the entry was added for a new method
+    or a new supported frame; then add the method to CASES or the frame to
+    ``spacecraft._SUPPORTED``.
     """
+    from solarwindpy.core import spacecraft
+
     quantities = _quantities()
     returned = {c[1] for c in CASES if c[3] == "M"}
+    frames = {f.lower() for f in spacecraft._SUPPORTED["frame"]}
     converted = {k for k, q in quantities.QUANTITIES.items() if q.si is not None}
-    assert sorted(converted - returned) == []
+    assert sorted(converted - returned - frames) == []
 
 
 def test_every_registry_entry_is_used_by_a_method_or_a_label():
@@ -386,6 +394,41 @@ def test_position_is_pos_with_the_symbol_r(plasma):
     assert plasma.sc.pos.data.equals(plasma.sc.data.xs("pos", axis=1, level="M"))
     assert quantities.QUANTITIES["pos"].tex.startswith(r"\mathbf{r}")
     assert "r" in quantities.COMPONENTS
+
+
+# --- frame radii (o28) --------------------------------------------------------
+
+# IAU 2015 Resolution B3 nominal values, Prsa et al. (2016), AJ 152, 41,
+# doi:10.3847/0004-6256/152/2/41.
+IAU_2015_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
+IAU_2015_SOLAR_RADIUS = 695.7e6  # [m]
+
+
+@_xfail("o28: the frame entries carry no SI radius yet")
+@pytest.mark.parametrize(
+    "frame, radius",
+    [("gse", IAU_2015_EARTH_EQUATORIAL_RADIUS), ("hci", IAU_2015_SOLAR_RADIUS)],
+)
+def test_frame_unit_is_the_iau_2015_nominal_radius(frame, radius):
+    r"""A frame's position unit is its body's IAU 2015 nominal radius, in metres.
+
+    GSE positions are in Earth equatorial radii, HCI positions in solar radii.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert _quantities().QUANTITIES[frame].si == exact(radius)
+
+
+@_xfail("o28: the radii still live in Constants().misc")
+@pytest.mark.parametrize("key", ["Re [m]", "Rs [m]"])
+def test_constants_hold_no_frame_radius(key):
+    r"""The frame radii live only in the registry, not in ``Constants().misc``.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import units_constants
+
+    assert key not in units_constants.Constants().misc.index
 
 
 # --- species (F128) ----------------------------------------------------------

@@ -98,6 +98,8 @@ DISPLAY_UNIT_IN_SI = {
     "qpar": constants.micro,  # uW m^-2
     "Wk": constants.micro,  # uW m^-2
     "distance2sun": 1.0,  # m
+    "gse": IAU_2015_EARTH_EQUATORIAL_RADIUS,  # R_E, IAU 2015 Resolution B3
+    "hci": IAU_2015_SOLAR_RADIUS,  # R_sun, IAU 2015 Resolution B3
 }
 
 
