@@ -501,6 +501,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   returns {"mean", "std"}, not {"mu", "sigma"}, and the optional TeX report labels them
   mean(x) and std(x).
 
+- FitFunction.make_fit no longer builds the results DataFrame; results builds it on first read
+  and keeps it until the next make_fit, and popt, psigma, chisq_dof and rsq no longer go through
+  the table. Their values and the table's contents are unchanged; a fit is about 45%
+  faster when results is not read.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
