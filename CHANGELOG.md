@@ -256,6 +256,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     setting is allowed.
   - `Hist2D.project_1d(..., bin_precision=...)` raises `ValueError`: the projection's
     bins are the parent's and are not re-rounded.
+- Specific entropy is removed: `Ion.specific_entropy`, `Ion.S`, `Plasma.specific_entropy`,
+  `Plasma.S` and `Units.specific_entropy`, with the `"S"` and `"entropy"` plot label keys.
+  No alias is kept; the old names raise `AttributeError`. The name `S` collided with the
+  species level of the column MultiIndex.
 
 ### Changed
 

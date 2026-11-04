@@ -277,33 +277,6 @@ class Ion(base.Base):
         return cs
 
     @property
-    def specific_entropy(self) -> pd.Series:
-        """Calculate the specific entropy S = p_th * ρ^(-γ).
-
-        Returns
-        -------
-        pd.Series
-            Specific entropy of the ion.
-
-        References
-        ----------
-        Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp. 11-100).
-        https://doi.org/10.1007/978-94-009-7194-3_2
-        """
-        comp = "scalar"
-        gamma = self.constants.polytropic_index.loc[comp]
-        pth = self.pth.loc[:, comp] * self.units.pth
-        rho = self.rho * self.units.rho
-        out = pth.multiply(rho.pow(-gamma)) / self.units.specific_entropy
-        out.name = "S"
-        return out
-
-    @property
-    def S(self) -> pd.Series:
-        """Alias for specific_entropy property."""
-        return self.specific_entropy
-
-    @property
     def kinetic_energy_flux(self):
         r"""Calculate the kinetic energy flux.
 

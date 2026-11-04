@@ -99,10 +99,6 @@ DISPLAY_UNIT_IN_SI = {
     "qpar": constants.micro,  # uW m^-2
     "kinetic_energy_flux": constants.micro,  # uW m^-2
     "distance2sun": 1.0,  # m
-    # eV cm^2 m_p^-5/3
-    "specific_entropy": codata("electron volt")
-    * constants.centi**2
-    * PROTON_MASS ** (-5.0 / 3.0),
 }
 
 
@@ -320,17 +316,3 @@ def test_kinetic_energy_flux_of_5_per_cc_protons_at_400_km_s_is_267_6_uw_m2():
     v = 400.0 * u.v
     flux = 0.5 * rho * v**3 / u.kinetic_energy_flux
     assert flux == printed(267.6, decimals=1)
-
-
-def test_specific_entropy_unit_is_p_over_rho_to_five_thirds():
-    """1 cm^-3 protons at kT = 1 eV have p / rho^(5/3) = 1 eV cm^2 m_p^-5/3.
-
-    p = 1 eV cm^-3 and rho = 1 m_p cm^-3, so p / rho^(5/3) is one display unit,
-    computed here in SI from the `Units` density and mass-density units.
-
-    ON FAILURE: the code is wrong.
-    """
-    u = uc.Units()
-    p = u.n * codata("electron volt")  # 1 eV per cm^3, in Pa
-    s = p / u.rho ** (5.0 / 3.0)
-    assert s / u.specific_entropy == exact(1.0)

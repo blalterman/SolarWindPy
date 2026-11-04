@@ -171,8 +171,6 @@ class Units:
         Parallel heat flux units :math:`[\mathrm{\mu W\,m^{-2}}]`.
     kinetic_energy_flux : float
         Kinetic energy flux units :math:`[\mathrm{\mu W\,m^{-2}}]`, matching ``qpar``.
-    specific_entropy : float
-        Specific entropy units :math:`[\mathrm{eV\,cm^{2}\,m_p^{-5/3}}]`.
     distance2sun : float
         Distance to sun units ``[m]``.
     """
@@ -196,7 +194,6 @@ class Units:
     qpar: float = 1e-6
     kinetic_energy_flux: float = 1e-6
     distance2sun: float = 1.0
-    specific_entropy: float = field(init=False)
 
     def __post_init__(self) -> None:
         """Compute derived unit conversions."""
@@ -207,5 +204,3 @@ class Units:
         self.cs = self.v
         self.cfms = self.v
         self.rho = self.n * constants.m_p
-        # eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
-        self.specific_entropy = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)

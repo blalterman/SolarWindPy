@@ -2146,54 +2146,6 @@ species: {}
 
         return turb
 
-    def S(self, *species):
-        r"""Shortcut to :py:meth:`specific_entropy`."""
-        return self.specific_entropy(*species)
-
-    def specific_entropy(self, *species):
-        r"""Calculate the specific entropy following [1] as.
-
-            :math:`p_\mathrm{th} \rho^{-\gamma}`
-
-        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
-        and :math:`rho` is the mass density.
-
-        Parameters
-        ----------
-        species: str or list-like of str
-            Comma separated strings ("a,p1") are invalid.
-            Comma separated lists ("a", "p1") are valid.
-            Total effective species ("a+p1") are valid and use
-
-                :math:`p_\mathrm{th} = \sum_s p_{\mathrm{th},s}`
-                :math:`\rho = \sum_s \rho_s`.
-
-        References
-        ----------
-        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
-            11–100). <https://doi.org/10.1007/978-94-009-7194-3_2>.
-        """
-        multi_species = len(species) > 1
-        gamma = self.constants.polytropic_index["scalar"]
-
-        pth = self.pth(*species).xs(
-            "scalar", axis=1, level="C" if multi_species else None
-        )
-        rho = self.rho(*species)
-
-        pth *= self.units.pth
-        rho *= self.units.rho
-
-        out = pth.multiply(
-            rho.pow(-gamma),
-            axis=1 if multi_species else 0,
-            level="S" if multi_species else None,
-        )
-        out /= self.units.specific_entropy
-        out.name = "S"
-
-        return out
-
     def kinetic_energy_flux(self, *species):
         r"""Calculate the plasma kinetic energy flux.
 

@@ -2027,58 +2027,6 @@ class PlasmaTestBase(ABC):
             with self.assertRaisesRegex(ValueError, msg0):
                 ot.vdf_ratio(scomma, ssum)
 
-    def test_specific_entropy(self):
-        r"""Specific entropy S = p_th rho^-gamma with gamma = 5/3.
-
-        ON FAILURE: the code is wrong, per Siscoe (1983),
-        doi:10.1007/978-94-009-7194-3_2, cited in the `specific_entropy` docstring.
-        """
-        ot = self.object_testing
-
-        gamma = 5.0 / 3.0
-        # [S] = eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
-        units = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)
-        for s in self.species_combinations:
-            multi_species = len(s) > 1
-            pth = ot.pth(*s).xs("scalar", axis=1, level="C" if multi_species else None)
-            rho = ot.rho(*s)
-
-            pth *= 1e-12
-            rho *= 1e6 * constants.m_p
-
-            by_species = (
-                pth.multiply(
-                    rho.pow(-gamma),
-                    axis=1 if multi_species else 0,
-                    level="S" if multi_species else None,
-                )
-                / units
-            )
-            by_species.name = "S"
-
-            test_fcn = (
-                pdt.assert_frame_equal if multi_species else pdt.assert_series_equal
-            )
-            test_fcn(by_species, ot.specific_entropy(*s))
-            test_fcn(ot.specific_entropy(*s), ot.S(*s))
-
-            if multi_species:
-                stotal = "+".join(s)
-                pth_total = pth.sum(axis=1)
-                rho_total = rho.sum(axis=1)
-                total = pth_total.multiply(rho_total.pow(-gamma), axis=0) / units
-                total.name = "S"
-
-                pdt.assert_series_equal(total, ot.specific_entropy(stotal))
-                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.S(stotal))
-                pdt.assert_series_equal(ot.specific_entropy(stotal), ot.S(stotal))
-
-                # comma-separated species list fails
-                with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.specific_entropy(",".join(s))
-                with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.S(",".join(s))
-
 
 #####
 # Tests
@@ -2261,9 +2209,9 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
 # b [nT]. Thermal speeds follow m w^2 = 2 k T (`Plasma.__init__` Notes;
 # `Ion.temperature` and `Ion.pth` = rho w^2 / 2 in solarwindpy/core/ions.py),
 # the convention Hernandez & Marsch (1985) state after their Eq. 5. Outputs are
-# in `Units`: rho [m_p cm^-3], nuc [1e-7 Hz], qpar and Wk [uW m^-2], cs [km/s],
-# specific_entropy [eV cm^2 m_p^-5/3]. Expected values are computed here in SI
-# from the named source and converted to those units.
+# in `Units`: rho [m_p cm^-3], nuc [1e-7 Hz], qpar and Wk [uW m^-2], cs [km/s].
+# Expected values are computed here in SI from the named source and converted
+# to those units.
 # ---------------------------------------------------------------------------
 
 M_P = constants.m_p
@@ -3093,44 +3041,6 @@ def test_vdf_ratio_is_nan_where_b_is_missing():
     assert np.isfinite(f2f1.iloc[0])
     if not np.isnan(f2f1.iloc[1]):
         raise MissingFieldGaveNumber(f"vdf_ratio is {f2f1.iloc[1]} where b is missing")
-
-
-def test_specific_entropy_per_species_and_species_sum():
-    r"""S = p rho^-gamma per species, and sum(p) sum(rho)^-gamma for "a+p1".
-
-    Siscoe (1983), doi:10.1007/978-94-009-7194-3_2, as cited by
-    `specific_entropy`, in eV cm^2 m_p^-5/3. Hand case for protons alone:
-    S = k T n^(-2/3) with k T = m_p (30 km/s)^2 / 2 = 4.697858218 eV and
-    n = 5 cm^-3, so S = 4.697858218 / 5^(2/3) = 1.606644911. Species are requested
-    as ("p1", "a") so a swapped column fails.
-
-    ON FAILURE: the code is wrong, unless the author rejects the Siscoe (1983)
-    definition or its species sum.
-    """
-    rows = [
-        {
-            "a": (0.2, (450.0, 0.0, 0.0), 50.0, 40.0),
-            "p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0),
-        }
-    ]
-    p = _hand_plasma(rows, "a", "p1")
-    rho = {"a": 0.2 * PER_CC * M_ALPHA, "p1": 5.0 * PER_CC * M_P}
-    wsq = {"a": (50.0**2 + 2 * 40.0**2) / 3 * KM**2, "p1": 30.0**2 * KM**2}
-    pth = {s: 0.5 * rho[s] * wsq[s] for s in rho}  # p = rho w^2 / 2
-    unit = constants.e * 1e-4 * M_P ** (-GAMMA)  # eV cm^2 m_p^-5/3 in SI
-
-    each = p.S("p1", "a")
-    for s in ("a", "p1"):
-        expected = pth[s] * rho[s] ** (-GAMMA) / unit
-        assert each.loc[:, s].iloc[0] / expected == printed(
-            1.0, decimals=CODATA_JOINT_DECIMALS
-        )
-    # It uses m_p and e from CODATA 2022 (scipy.constants, scipy 1.18.1).
-    assert each.loc[:, "p1"].iloc[0] == printed(1.606644911, decimals=9)
-
-    expected_sum = sum(pth.values()) * sum(rho.values()) ** (-GAMMA) / unit
-    total = p.specific_entropy("a+p1")
-    assert total.iloc[0] / expected_sum == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
 
 def test_estimate_electrons_weights_each_species_by_its_own_charge():

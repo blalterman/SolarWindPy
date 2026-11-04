@@ -134,22 +134,6 @@ class IonTestBase(ABC):
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.temperature)
 
-    def test_specific_entropy(self):
-        rho = self.mass * self.data.n * 1e6
-        w = self.data.w.xs("scalar", axis=1) * 1e3
-        pth = w.pow(2).multiply(0.5 * rho, axis=0)
-
-        gamma = 5.0 / 3.0
-        # [S] = eV cm^2 m_p^-5/3 in SI: e [J/eV] * 1e-4 [m^2/cm^2] * m_p^-5/3.
-        units = constants.e * 1e-4 * constants.m_p ** (-5.0 / 3.0)
-        S = pth.multiply(rho.pow(-gamma)) / units
-        S.name = "S"
-
-        ot = self.object_testing
-        pdt.assert_series_equal(S, ot.specific_entropy)
-        pdt.assert_series_equal(S, ot.S)
-        pdt.assert_series_equal(ot.S, ot.specific_entropy)
-
     def test_cs(self):
         m = self.mass
         n = self.data.n * 1e6
@@ -271,24 +255,3 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     assert ions.Ion(data, "p1").kinetic_energy_flux.iloc[0] == exact(expected)
     # Guard the hand value in the docstring against the formula above.
     assert expected == printed(267.6, decimals=1)
-
-
-def test_specific_entropy_of_a_hand_computed_proton_population():
-    """S = kT / n^(2/3) in eV cm^2 m_p^-5/3, with kT = m_p w^2 / 2.
-
-    5 cm^-3 protons with w = 50 km/s have kT = 13.05 eV, so S = 4.463.
-
-    ON FAILURE: the code is wrong.
-    """
-    cols = pd.MultiIndex.from_tuples(
-        [("n", ""), ("v", "x"), ("v", "y"), ("v", "z")]
-        + [("w", c) for c in ("par", "per", "scalar")],
-        names=["M", "C"],
-    )
-    data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
-    kt_ev = 0.5 * constants.m_p * (50e3) ** 2 / constants.e
-    expected = kt_ev / 5.0 ** (2.0 / 3.0)
-    assert ions.Ion(data, "p1").specific_entropy.iloc[0] == exact(expected)
-    # Guard the hand values in the docstring against the formula above.
-    assert kt_ev == printed(13.05, decimals=2)
-    assert expected == printed(4.463, decimals=3)

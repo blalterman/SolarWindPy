@@ -161,7 +161,6 @@ _trans_units = {
     "dbeta": _inU["dimless"],
     "pdv": _inU["pPa"],
     "edv": _inU["dimless"],
-    "S": r"\mathrm{eV \, cm^2 \, m_p^{-5/3}}",  # Specific Entropy
     # Flux
     "flux": r"10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
     # Collisional things
@@ -200,7 +199,6 @@ _trans_units = {
     "k": _inU["dimless"],
     "insta_power": _inU["unknown"],
     # MISC
-    "entropy": r"\mathrm{ln}(K \, \mathrm{cm}^{-3/2})",
     # Spectral things
     "spectral_exponent": _inU["dimless"],
     "MeV/nuc": r"\mathrm{MeV/nuc}",
@@ -248,7 +246,6 @@ _templates = {
     "rho": r"\rho_{$S}",
     "q": r"q_{{$C};{$S}}",  # heat flux
     "Wk": r"W_{K;{$S}}",  # kinetic energy flux
-    "S": r"S_{$S}",  # Specific entropy logarithm
     "ratio": r"\mathrm{Ratio}",
     "cos": r"\cos",
     "cos_theta": r"\cos \theta_{{$C}_{$S}}",
@@ -270,7 +267,6 @@ _templates = {
     "pdv": r"P_{\Delta v_{$S}}",
     "ab": r"A_{$S}",
     "e": r"e\left({$C}_{$S}\right)",
-    "entropy": r"\mathrm{S}_{$S}",
     # Alfvenic Turbulence
     "zp": r"Z^+_{{$S}}",
     "zm": r"Z^-_{{$S}}",
