@@ -313,15 +313,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     R), and StabilityCondition.anisotropy -> R; BetaRPlot(beta, ani, species) -> BetaRPlot(beta,
     R, species).
 
+- SIDC sunspot-number data are cached in SolarWindPy's download cache (the astropy download
+  cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with
+  astropy 7.2; `cache_contents()` shows the path)) instead of
+  `~/solarwindpy/data/sidc/<key>/YYYYMMDD.csv`, and downloaded again once the cached copy is
+  more than one day old. If that download fails, the cached series is loaded with a
+  `StaleCacheWarning` naming its age.
+
+- `ICMECAT` always caches the catalog in SolarWindPy's download cache (the astropy download
+  cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with
+  astropy 7.2; `cache_contents()` shows the path), downloads it again once the cached copy is
+  more than 30 days old, and falls back to the cached copy with a `StaleCacheWarning` if that
+  download fails.
+
+- `ICMECATDownloadError` subclasses `solarwindpy.solar_activity.cache.DownloadError` (still a
+  `RuntimeError`).
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
   edges or project. At 1M rows with 10% NaN, `Hist2D.project_1d` is about 25% faster,
   and `agg()` and construction about 15-20% faster.
-- `ICMECAT(cache_dir=...)` caches the catalog as `icmecat.csv`, the format it downloads
-  in, instead of `icmecat.parquet`, so caching needs no parquet engine (it raised
-  `ImportError` without one). An existing `icmecat.parquet` cache is ignored, so the
-  catalog downloads once more.
 - `FitFunction.rsq` returns NaN when the fitted `y` have no spread (a single point, or
   constant data), where R^2 is undefined. It previously divided by zero, warning and
   returning -inf or NaN.
@@ -473,6 +485,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sharing a `BinnedData` also drops the rows that object's own mask excludes.
 - `solarwindpy.plotting.base.ClipAxes(x, y, z)`, the per-axis clip record a plot's
   `clip` returns, exported next to `LogAxes`.
+
+- `solarwindpy.solar_activity.cache` with `fetch(url, max_age)`, one download cache for every
+  solar-activity source: inside its freshness window the cached copy is used, past it the data
+  are downloaded again, and if that download fails the cached copy is used with a
+  `StaleCacheWarning` that names its age. `DownloadError` is raised only when nothing is
+  cached.
+
+- `solarwindpy.solar_activity.cache.cache_contents()`, a table of each cached URL with its
+  local path and age. Files live in astropy's download cache for package `solarwindpy`, the
+  astropy download cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8,
+  `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path); remove entries
+  with `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
 
 ### Fixed
 
@@ -681,6 +705,14 @@ These change computed values; rerun any analysis that used them.
   `tests/test_contracts_dataframe.py`, which tested pandas MultiIndex behaviour without
   importing solarwindpy.
 
+- `DataLoader.data_path`, `get_data_ctime`, `get_data_age`, `maybe_update_stale_data` and
+  `download_data(new_data_path, old_data_path)`. A `DataLoader` subclass now defines `max_age`
+  (a `pandas.Timedelta`) and `read_data(path)`, which parses the downloaded file;
+  `SIDCLoader.download_data` became `SIDCLoader.read_data(path)`.
+
+- The `ICMECAT(cache_dir=...)` parameter. Catalogs cached under a `cache_dir` are not
+  migrated; the first `ICMECAT()` downloads again, and the old `icmecat.csv` can be deleted.
+
 ### Migration
 
 - Catch `ValueError` where you caught `AssertionError` or `KeyError` from
@@ -700,6 +732,10 @@ These change computed values; rerun any analysis that used them.
   share bins across many histograms by passing one `BinnedData` as `nbins`.
 - Plotting: `Hist2D.agg()` returns every bin; call `.dropna()` for the occupied bins
   only. Its index levels are `IntervalIndex`.
+- Files under `~/solarwindpy/data` are not migrated (they hold processed tables; the new cache
+  holds SILSO's raw download). The first `SIDC(...)` after upgrading downloads again; delete
+  `~/solarwindpy/data` afterwards.
+
 
 ## [0.3.0] - 2025-12-24
 
