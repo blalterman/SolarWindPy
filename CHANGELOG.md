@@ -537,6 +537,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   PowerLawPlusC, PowerLawOffCenter and LineXintercept as y_0 and x_0 instead of y0 and x0,
   matching their model strings; popt keys stay x0 and y0.
 
+- The Earth equatorial radius and the solar radius moved from Constants().misc ("Re [m]", "Rs
+  [m]") to the quantity registry, as QUANTITIES["gse"].si and QUANTITIES["hci"].si, so Units
+  also gains gse and hci fields; Constants().misc["Re [m]"] and Constants().misc["Rs [m]"] now
+  raise KeyError. Spacecraft.distance2sun reads the radius from the registry and returns the
+  same values.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
@@ -710,6 +716,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ICMECAT probes v24 to v28 when the pinned v23 answers 404, records the loaded catalog in
   ICMECAT.version, and warns about spacecraft names outside SPACECRAFT_NAMES.
+
+- Spacecraft.pos_units, the TeX of the position unit for the spacecraft's frame, read from the
+  quantity registry (Earth radii in GSE, solar radii in HCI).
 
 ### Fixed
 
