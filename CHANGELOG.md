@@ -78,10 +78,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `solarwindpy.plotting.subplots` | `solarwindpy.plotting.tools.subplots` |
   | `solarwindpy.plotting.save` | `solarwindpy.plotting.tools.save` |
   | `solarwindpy.plotting.nan_gaussian_filter` | `solarwindpy.plotting.tools.nan_gaussian_filter` |
-  | `solarwindpy.plotting.histograms.agg_plot` | `solarwindpy.plotting.agg_plot` |
+  | `solarwindpy.plotting.histograms.agg_plot` | `solarwindpy.plotting.base` (`BinnedPlot`) and `solarwindpy.plotting.binning` |
   | `solarwindpy.plotting.histograms.hist1d` | `solarwindpy.plotting.hist1d` |
   | `solarwindpy.plotting.histograms.hist2d` | `solarwindpy.plotting.hist2d` |
-  | `solarwindpy.plotting.histograms.AggPlot` | `solarwindpy.plotting.agg_plot.AggPlot` |
+  | `solarwindpy.plotting.histograms.AggPlot` | `solarwindpy.plotting.base.BinnedPlot` |
   | `solarwindpy.plotting.histograms.Hist1D` | `solarwindpy.plotting.hist1d.Hist1D` |
   | `solarwindpy.plotting.histograms.Hist2D` | `solarwindpy.plotting.hist2d.Hist2D` |
   | `solarwindpy.plotting.labels.TeXlabel` | `solarwindpy.plotting.labels.base.TeXlabel` |
@@ -241,9 +241,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `PolyCollection`. Each cell's vertices are its mesh edges exactly, where a
     `Rectangle` placed its far corners at the lower-left corner plus the width and height.
     Colours and the cells drawn are unchanged.
-  - Bins are stored once as an `IntervalIndex`: `intervals`, `categoricals` (now an alias
-    for the same object) and the levels of `agg()`'s index are `IntervalIndex`, not
-    `CategoricalIndex`. `edges` is a float `pd.Index` of the bin edges.
+  - Bins are stored once as an `IntervalIndex`: `intervals` and the levels of `agg()`'s
+    index are `IntervalIndex`, not `CategoricalIndex`. `edges` is a float `pd.Index` of the
+    bin edges.
   - `Hist2D.agg()` returns the full bin grid, one row per (x, y) bin pair, with NaN where a
     bin is empty, as its docstring states. It previously returned the occupied bins only,
     so the length of `agg()` changes for every caller, and a count grid with an empty bin
@@ -326,13 +326,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ICMECATDownloadError` subclasses `solarwindpy.solar_activity.cache.DownloadError` (still a
   `RuntimeError`).
 
-- Solarwindpy.plotting.agg_plot.AggPlot -> solarwindpy.plotting.base.BinnedPlot, with its
+- solarwindpy.plotting.agg_plot.AggPlot -> solarwindpy.plotting.base.BinnedPlot, with its
   binning in solarwindpy.plotting.binning.FixedGrid
 
-- Solarwindpy.plotting.base.PlotWithZdata -> solarwindpy.plotting.base.ColorPlot;
+- solarwindpy.plotting.base.PlotWithZdata -> solarwindpy.plotting.base.ColorPlot;
   base._CbarMaker -> ColorPlot
 
-- Solarwindpy.plotting.__all__ lists binning instead of agg_plot
+- solarwindpy.plotting.__all__ lists binning instead of agg_plot
 
 - Hist1D/Hist2D calc_bins_intervals() and make_cut() -> removed; the constructor bins (see
   plot.binning)
@@ -493,9 +493,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PowerLaw, PowerLawPlusC and PowerLawOffCenter name the exponent alpha, not b (popt["alpha"],
   results ("alpha", ...)).
 
-- Exponential and ExponentialPlusC name the rate k, not c. ExponentialPlusC names its constant
-  c, not d. Warning: for ExponentialPlusC, old code reading popt["c"] now silently gets the
-  constant, not the rate; every other old key raises KeyError.
+- Exponential and ExponentialPlusC name the rate k, not c. ExponentialPlusC's constant is
+  y0, not d (see the y0 entry below).
 
 - GaussianLn names its parameters mu and sigma, not m and s. GaussianLn.normal_parameters
   returns {"mean", "std"}, not {"mu", "sigma"}, and the optional TeX report labels them
