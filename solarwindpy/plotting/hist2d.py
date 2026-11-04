@@ -220,7 +220,8 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         alpha_fcn: None, str
             If not None, the function used to aggregate the data for setting alpha
-            value.
+            value; see ``ColorPlot._apply_alpha_fcn``. Ignored, with a warning,
+            when the plot counts points.
         kwargs:
             Passed to `ax.pcolormesh`. `norm` defaults to ten colour bands on
             [0, 1] for row or column normalized data and to a `LogNorm` for
@@ -260,31 +261,10 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         self._format_axis(ax)
 
-        color_plot = not self._source.counts
-        if (alpha_fcn is not None) and color_plot:
-            self.logger.warning(
-                "Make sure you verify alpha actually set. I don't yet trust this."
-            )
-            alpha_agg = self.agg(fcn=alpha_fcn)
-            alpha_agg = alpha_agg.unstack("x")
-            alpha_agg = np.ma.masked_invalid(alpha_agg.values.ravel())
-            # Feature scale then invert so smallest STD
-            # is most opaque.
-            alpha = 1 - mpl.colors.Normalize()(alpha_agg)
-            self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha**0.25
-
-            # Set masked values to zero. Otherwise, masked
-            # values are rendered as black.
-            alpha = alpha.filled(0)
-            # Must draw to initialize `facecolor`s
-            plt.draw()
-            colors = pc.get_facecolors()
-            colors[:, 3] = alpha
-            pc.set_facecolor(colors)
-
-        elif alpha_fcn is not None:
-            self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
+        # The mesh's faces run along x within each y row, as `unstack("x")` does.
+        self._apply_alpha_fcn(
+            pc, alpha_fcn, lambda fcn: self.agg(fcn=fcn).unstack("x").to_numpy().ravel()
+        )
 
         return ax, pc, cbar
 

@@ -135,7 +135,6 @@ _IGNORED = "Ignoring `alpha_fcn` because plotting counts"
         pytest.param(
             lambda: SpiralPlot2D(*_points(), min_per_bin=100),
             id="SpiralPlot2D",
-            marks=pytest.mark.xfail(strict=True, reason=_RULED),
         ),
     ],
 )

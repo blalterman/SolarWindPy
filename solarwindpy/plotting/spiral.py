@@ -969,7 +969,8 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             Aggregation function passed to ``agg``.
         alpha_fcn : str, optional
             If given, cells are made more transparent the larger this
-            aggregation of z is.
+            aggregation of z is; see ``ColorPlot._apply_alpha_fcn``. Ignored,
+            with a warning, when the plot counts points.
         **kwargs
             Only ``cmap`` and ``norm`` are accepted.
 
@@ -1060,24 +1061,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         self._format_axis(ax)
 
-        if alpha_fcn is not None:
-            alpha_agg = np.ma.masked_invalid(self.agg(fcn=alpha_fcn).values)
-            # Feature scale then invert so smallest STD
-            # is most opaque.
-            alpha_agg = mpl.colors.Normalize()(alpha_agg)
-            alpha = 1 - alpha_agg
-            self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha**0.25
-
-            # Set masked values to zero. Otherwise, masked
-            # values are rendered as black.
-            alpha = alpha.filled(0)
-
-            # Must draw to initialize `facecolor`s
-            plt.draw()
-            colors = collection.get_facecolors()
-            colors[:, 3] = alpha
-            collection.set_facecolor(colors)
+        # Cells are drawn in the order of `agg`.
+        self._apply_alpha_fcn(
+            collection, alpha_fcn, lambda fcn: self.agg(fcn=fcn).to_numpy()
+        )
 
         return ax, collection, cbar
 

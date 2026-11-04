@@ -22,6 +22,7 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 from numbers import Number
 from pathlib import Path
@@ -537,6 +538,54 @@ class ColorPlot(Base):
         self._store_clip(clip)
         self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
         self._bin_index = getattr(x, "index", None)
+
+    def _apply_alpha_fcn(self, artist, alpha_fcn, face_values):
+        r"""Make ``artist``'s faces more transparent the larger ``alpha_fcn`` of z is.
+
+        The one home of ``make_plot``'s ``alpha_fcn`` for every colour plot.
+        The values are scaled to [0, 1] and inverted, so the smallest (e.g.
+        the smallest standard deviation) is the most opaque, then raised to
+        the power 0.25. A face with no value is transparent.
+
+        Parameters
+        ----------
+        artist : matplotlib.collections.Collection
+            The drawn faces.
+        alpha_fcn : str, callable or None
+            The aggregation of z per face. None leaves the faces as drawn.
+        face_values : callable
+            Called with ``alpha_fcn``; returns its value for each face of
+            ``artist``, in the order of the faces.
+
+        Notes
+        -----
+        A count plot has no z to aggregate, so there ``alpha_fcn`` is
+        ignored, with a warning, and the faces stay as drawn.
+        """
+        if alpha_fcn is None:
+            return
+        if self._source.counts:
+            self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
+            return
+
+        self.logger.warning(
+            "Make sure you verify alpha actually set. I don't yet trust this."
+        )
+        values = np.ma.masked_invalid(np.asarray(face_values(alpha_fcn), dtype=float))
+        # Feature scale then invert so smallest STD
+        # is most opaque.
+        alpha = 1 - mpl.colors.Normalize()(values)
+        self.logger.warning("Scaling alpha filter as alpha**0.25")
+        alpha = alpha**0.25
+
+        # Set masked values to zero. Otherwise, masked
+        # values are rendered as black.
+        alpha = alpha.filled(0)
+        # Must draw to initialize `facecolor`s
+        plt.draw()
+        colors = artist.get_facecolors()
+        colors[:, 3] = alpha
+        artist.set_facecolor(colors)
 
     @staticmethod
     def _default_norm(axnorm):
