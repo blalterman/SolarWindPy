@@ -143,6 +143,11 @@ class SSNPlot(IndicatorPlot):
         self.set_labels(y=labels.special.SSN(indicator.id.key))
 
     def _format_axis(self, ax):
-        r"""Format ``ax`` as :class:`IndicatorPlot` does, with SSN from 0 to 200."""
+        r"""Format ``ax`` as :class:`IndicatorPlot` does, with SSN from 0 to a top.
+
+        The top is the indicator's
+        :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
+        of :attr:`plot_data`, the same scale ``SIDC.plot_on_colorbar`` uses.
+        """
         super(SSNPlot, self)._format_axis(ax)
-        ax.set_ylim(0, 200)
+        ax.set_ylim(0, self.indicator.ssn_scale_top(self.plot_data))

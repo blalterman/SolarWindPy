@@ -509,13 +509,33 @@ class SIDC(ActivityIndicator):
         self._ssn_band_intervals = intervals
         return cut
 
+    @staticmethod
+    def ssn_scale_top(ssn):
+        r"""Top of an SSN scale that starts at 0 and holds all of ``ssn``.
+
+        The peak of ``ssn`` rounded up to the next multiple of 100, and never
+        less than 100, so the series always stays inside the scale and a
+        quiet or empty series cannot give a zero-height scale.
+
+        Parameters
+        ----------
+        ssn : pandas.Series
+            Sunspot numbers to fit on the scale.
+
+        Returns
+        -------
+        int
+            The scale top.
+        """
+        # Python's max keeps 100 when the peak is NaN (an empty series).
+        return int(max(100, np.ceil(ssn.max() / 100.0) * 100))
+
     def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
         r"""Plot SSN on the color bar.
 
         The sunspot numbers are scaled onto the colour bar's value axis over
-        ``[0, top]``, where ``top`` is the window's peak SSN rounded up to the
-        next multiple of 100 and never less than 100, so the line always stays
-        inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
+        ``[0, top]``, where ``top`` is :meth:`ssn_scale_top` of the window, so
+        the line always stays inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
         minor ticks fall every 25.
         """
         # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
@@ -530,9 +550,7 @@ class SIDC(ActivityIndicator):
             y0, y1 = cax.get_ylim()
 
         dy = y1 - y0
-        # Round the peak up to the next 100, never below 100, so the line
-        # stays inside the scale and a quiet window cannot divide by zero.
-        s0, s1 = 0, int(max(100, np.ceil(ssn.max() / 100.0) * 100))
+        s0, s1 = 0, self.ssn_scale_top(ssn)
         y = ((y / s1) * dy) + y0
 
         if vertical_cbar:

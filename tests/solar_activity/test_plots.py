@@ -210,12 +210,12 @@ def test_date_ticks_are_labelled_by_year(sidc):
     assert formatter(june_2005) == "2005"
 
 
-def test_ssn_axis_spans_zero_to_two_hundred(sidc):
-    """The SSN plot fixes its y range to 0-200 whatever the data span.
+def test_ssn_axis_of_a_peak_between_100_and_200_spans_zero_to_200(sidc):
+    """A series peaking between 100 and 200 gets an SSN range of 0-200.
 
-    Chosen input: the series peaks at SSN 169, below the upper limit.
+    Chosen input: the series peaks at SSN 169, which rounds up to 200.
 
-    ON FAILURE: the code is wrong, unless the author changed the SSN range.
+    ON FAILURE: the code is wrong.
     """
     fig, ax = plt.subplots()
     SSNPlot(sidc).make_plot(ax)
@@ -239,7 +239,6 @@ def test_the_rule_fixtures_bracket_the_old_fixed_range():
     assert QUIET_SSN.max() < 100
 
 
-@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
 def test_ssn_axis_tops_an_active_series_at_its_peak_rounded_up_to_100(
     tmp_path, monkeypatch
 ):
@@ -262,7 +261,6 @@ def test_ssn_axis_tops_an_active_series_at_its_peak_rounded_up_to_100(
     assert peak <= top < peak + 100
 
 
-@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
 def test_ssn_axis_of_a_quiet_series_tops_at_100(tmp_path, monkeypatch):
     """A series peaking below 100 gets the rule's floor, 0 to 100.
 
@@ -275,7 +273,6 @@ def test_ssn_axis_of_a_quiet_series_tops_at_100(tmp_path, monkeypatch):
     assert ax.get_ylim() == (0.0, 100.0)
 
 
-@pytest.mark.xfail(strict=True, reason="B6: SSNPlot fixes its y range at 0-200")
 @pytest.mark.parametrize("ssn", [ACTIVE_SSN, QUIET_SSN], ids=["active", "quiet"])
 def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
     """SSNPlot and ``SIDC.plot_on_colorbar`` scale the same series to one top.
