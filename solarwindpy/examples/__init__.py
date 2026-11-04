@@ -96,4 +96,4 @@ def load_plasma():
     ).sort_index(axis=1)
     spacecraft = Spacecraft(psp, "PSP", "HCI")
 
-    return Plasma(data, *species, spacecraft=spacecraft)
+    return Plasma(data, *species, sc=spacecraft)

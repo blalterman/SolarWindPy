@@ -31,7 +31,7 @@ def _example_plasma():
         index=p.epoch,
     )
     aux.columns.names = ["M", "C", "S"]
-    p.set_auxiliary_data(aux)
+    p.set_aux(aux)
     return p
 
 
@@ -57,7 +57,7 @@ def test_save_and_load(tmp_path):
     plas = plasma.Plasma(data, "a", "p1")
     fname = tmp_path / "plasma.h5"
     plas.save(fname)
-    loaded = plasma.Plasma.load_from_file(fname, "a", "p1", sckey=None, akey=None)
+    loaded = plasma.Plasma.load_from_file(fname, "a", "p1", sckey=None, auxkey=None)
     assert loaded == plas
     assert loaded.species == plas.species
 
@@ -223,7 +223,7 @@ def test_load_from_file_loads_only_the_species_passed(tmp_path):
     p = _example_plasma()
     fname = tmp_path / "plasma.h5"
     p.save(fname)
-    loaded = plasma.Plasma.load_from_file(fname, "p1", sckey=None, akey=None)
+    loaded = plasma.Plasma.load_from_file(fname, "p1", sckey=None, auxkey=None)
     assert loaded.species == ("p1",)
     assert loaded.ions.index.tolist() == ["p1"]
 
@@ -231,8 +231,8 @@ def test_load_from_file_loads_only_the_species_passed(tmp_path):
 def test_load_from_file_passes_extra_keywords_to_plasma(tmp_path):
     """Keywords `load_from_file` does not name go to `Plasma.__init__`.
 
-    With ``akey=None`` nothing is read from the file's aux key, so the
-    auxiliary data can only come from the ``auxiliary_data`` keyword.
+    With ``auxkey=None`` nothing is read from the file's aux key, so the
+    auxiliary data can only come from the ``aux`` keyword.
 
     ON FAILURE: the code is wrong.
     """
@@ -240,19 +240,10 @@ def test_load_from_file_passes_extra_keywords_to_plasma(tmp_path):
     fname = tmp_path / "plasma.h5"
     p.save(fname)
     aux = p.aux.drop(columns="chisq", level="M")
-    loaded = plasma.Plasma.load_from_file(
-        fname, sckey=None, akey=None, auxiliary_data=aux
-    )
+    loaded = plasma.Plasma.load_from_file(fname, sckey=None, auxkey=None, aux=aux)
     pdt.assert_frame_equal(loaded.aux, aux)
 
 
-_O9C = (
-    "author's ruling o9c: sc and aux are written under the names they are read "
-    "by (set_sc, set_aux, sc=, aux=, auxkey=); remove this marker when it lands"
-)
-
-
-@pytest.mark.xfail(strict=True, reason=_O9C)
 def test_sc_and_aux_are_written_under_the_names_they_are_read_by():
     """``plasma.sc`` and ``plasma.aux`` are set by ``set_sc`` and ``set_aux``.
 
@@ -277,7 +268,6 @@ def test_sc_and_aux_are_written_under_the_names_they_are_read_by():
         assert "akey" not in params
 
 
-@pytest.mark.xfail(strict=True, reason=_O9C)
 def test_sc_and_aux_keywords_round_trip_at_a_chosen_aux_key(tmp_path):
     """A plasma built with ``sc=`` and ``aux=`` saves and loads at ``auxkey``.
 

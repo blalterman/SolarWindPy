@@ -72,9 +72,9 @@ class Plasma(base.Base):
         Dictionary-like access to individual ion species objects.
     species : tuple of str
         Available ion species identifiers in the plasma, sorted.
-    spacecraft : Spacecraft, optional
+    sc : Spacecraft, optional
         Spacecraft trajectory and velocity information.
-    auxiliary_data : pandas.DataFrame, optional
+    aux : pandas.DataFrame, optional
         Additional measurements such as quality flags or derived parameters.
 
     Notes
@@ -129,8 +129,8 @@ class Plasma(base.Base):
         self,
         data,
         *species,
-        spacecraft=None,
-        auxiliary_data=None,
+        sc=None,
+        aux=None,
     ):
         r"""Initialize a :class:`Plasma` instance.
 
@@ -145,12 +145,12 @@ class Plasma(base.Base):
             order are sorted with a warning (see Notes).
         *species : str
             Iterable of species contained in ``data``.
-        spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+        sc : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
             Spacecraft trajectory and velocity information, at the times of
             ``data`` (see Notes), with column levels named exactly
             ``("M", "C")`` in that order. If ``None``, the Coulomb number
             :py:meth:`~Plasma.nc` method will raise a :class:`ValueError`.
-        auxiliary_data : :class:`pandas.DataFrame`, optional
+        aux : :class:`pandas.DataFrame`, optional
             Additional measurements to carry with the plasma, for example data
             quality flags, at the times of ``data`` (see Notes). Its column
             levels must be named exactly ``("M", "C", "S")`` in that order.
@@ -227,14 +227,14 @@ class Plasma(base.Base):
         self._init_logger()
         self._require_dataframe(data, "Plasma data")
         # Nothing is attached yet, so `set_data` sorts rather than refusing.
-        self._spacecraft = None
-        self._auxiliary_data = None
+        self._sc = None
+        self._aux = None
         source = data.index
         self._set_species(*species)
         super(Plasma, self).__init__(data)
         self._set_ions()
-        self.set_spacecraft(spacecraft)
-        self._set_auxiliary_data(auxiliary_data, source)
+        self.set_sc(sc)
+        self._set_aux(aux, source)
 
     def __getattr__(self, attr):
         r"""Return the :class:`~solarwindpy.core.ions.Ion` named ``attr``.
@@ -277,7 +277,7 @@ class Plasma(base.Base):
     @property
     def sc(self):
         r"""`Spacecraft` object stored in `plasma`."""
-        return self._spacecraft
+        return self._sc
 
     @property
     def aux(self):
@@ -290,14 +290,14 @@ class Plasma(base.Base):
             -ion number density
             -ion thermal speed
         """
-        return self._auxiliary_data
+        return self._aux
 
     def save(
         self,
         fname,
         dkey="FC",
         sckey="SC",
-        akey="FC_AUX",
+        auxkey="FC_AUX",
         data_modifier_fcn=None,
         sc_modifier_fcn=None,
         aux_modifier_fcn=None,
@@ -310,12 +310,12 @@ class Plasma(base.Base):
             File name pointing to the save location.
             The typical use when creating a data file in `Create_Datafile.ipynb`
             is `fname("swe", "h5", strip_date=True)`.
-        dkey: None
+        dkey: str, "FC"
             The HDF5 file key at which to store the data.
-        sckey: None
+        sckey: str, "SC"
             The HDF5 file key at which to store the spacecraft data.
-        akey: None
-            The HDF5 file key at which to store the auxiliary_data.
+        auxkey: str, "FC_AUX"
+            The HDF5 file key at which to store the auxiliary data.
         data_modifier_fcn: None, FunctionType
             A function to modify the data saved, e.g. if you don't want to save
             a specific species in the data file, you can pass.
@@ -324,11 +324,11 @@ class Plasma(base.Base):
                     return data.drop("a", axis=1, level="S")
 
             It can only take one argument, `data`.
-        spacecraft_modifier_fcn: None, FunctionType
+        sc_modifier_fcn: None, FunctionType
             A function to modifie the spacecraft data saved. See `data_modifier_fcn`
             for syntax.
         aux_modifier_fcn: None, FunctionType
-            A function to modify the auxiliary_data saved. See
+            A function to modify the auxiliary data saved. See
             `data_modifier_fcn` for syntax.
         """
         from types import FunctionType
@@ -383,13 +383,13 @@ class Plasma(base.Base):
                     raise TypeError(msg % type(aux_modifier_fcn))
                 aux = aux_modifier_fcn(aux)
 
-            aux.to_hdf(fname, key=akey)
+            aux.to_hdf(fname, key=auxkey)
             self.logger.info(
                 "aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
-                    "file", "akey", "shape"
+                    "file", "auxkey", "shape"
                 ),
                 fname,
-                akey,
+                auxkey,
                 aux.shape,
             )
         else:
@@ -402,7 +402,7 @@ class Plasma(base.Base):
         *species,
         dkey="FC",
         sckey="SC",
-        akey="FC_AUX",
+        auxkey="FC_AUX",
         sc_frame=None,
         sc_name=None,
         start=None,
@@ -422,7 +422,7 @@ class Plasma(base.Base):
             The key for getting data from HDF5 file.
         sckey: str, "SC"
             The key for getting spacecraft data from the HDF5 file.
-        akey: str, "FC_AUX"
+        auxkey: str, "FC_AUX"
             key for getting auxiliary data from HDF5 file.
         start, stop: None, parsable by `pd.to_datetime`
             If not None, time to start/stop for loading data.
@@ -475,21 +475,23 @@ class Plasma(base.Base):
 
             sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
-            plasma.set_spacecraft(sc)
+            plasma.set_sc(sc)
             plasma.logger.warning(
-                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.data.shape
+                "Spacecraft data loaded\nsckey: %s\nshape: %s", sckey, sc.data.shape
             )
 
-        if akey:
-            aux = pd.read_hdf(fname, key=akey)
+        if auxkey:
+            aux = pd.read_hdf(fname, key=auxkey)
             aux.columns.names = ("M", "C", "S")
 
             if start is not None or stop is not None:
                 aux = aux.loc[index]
 
-            plasma.set_auxiliary_data(aux)
+            plasma.set_aux(aux)
             plasma.logger.warning(
-                "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
+                "Auxiliary data loaded from file\nauxkey: %s\nshape: %s",
+                auxkey,
+                aux.shape,
             )
 
         return plasma
@@ -598,12 +600,12 @@ class Plasma(base.Base):
         new = Plasma(
             data,
             *remaining,
-            spacecraft=self.sc,
-            auxiliary_data=aux,
+            sc=self.sc,
+            aux=aux,
         )
         return new
 
-    def set_spacecraft(self, new):
+    def set_sc(self, new):
         """Set or update the spacecraft trajectory data.
 
         Parameters
@@ -635,10 +637,10 @@ class Plasma(base.Base):
 
         Setting ``None`` logs "No spacecraft data passed to Plasma" at INFO:
 
-        >>> plasma.set_spacecraft(None)
+        >>> plasma.set_sc(None)
         >>> plasma.sc is None
         True
-        >>> plasma.set_spacecraft(psp)
+        >>> plasma.set_sc(psp)
         >>> plasma.sc.name
         'PSP'
         >>> plasma.sc.pos.data.loc[:, "x"].tolist()  # trajectory
@@ -657,9 +659,9 @@ class Plasma(base.Base):
             # spacecraft only has a 2-level MultiIndex.
 
         self._log_if_missing(new, "spacecraft")
-        self._spacecraft = new
+        self._sc = new
 
-    def set_auxiliary_data(self, new):
+    def set_aux(self, new):
         """Set or update auxiliary measurement data.
 
         Parameters
@@ -695,13 +697,13 @@ class Plasma(base.Base):
         >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1, 0]},
         ...                              index=plasma.epoch)
         >>> quality_flags.columns.names = ["M", "C", "S"]
-        >>> plasma.set_auxiliary_data(quality_flags)
+        >>> plasma.set_aux(quality_flags)
         >>> plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data
         [0, 1, 0]
         """
-        self._set_auxiliary_data(new)
+        self._set_aux(new)
 
-    def _set_auxiliary_data(self, new, source=None):
+    def _set_aux(self, new, source=None):
         """Set the auxiliary data; ``source`` is the index the plasma data arrived on.
 
         Auxiliary data on ``source`` share the plasma data's origin and are put
@@ -718,8 +720,8 @@ class Plasma(base.Base):
             if order is not None:
                 new = new.iloc[order]
 
-        self._log_if_missing(new, "auxiliary_data")
-        self._auxiliary_data = new
+        self._log_if_missing(new, "auxiliary")
+        self._aux = new
 
     def _log_if_missing(self, new, name):
         """Log at INFO that the optional input ``name`` was not passed."""
@@ -845,7 +847,7 @@ class Plasma(base.Base):
             or differs from the current time index.
         """
         refusal = None
-        if self._spacecraft is not None or self._auxiliary_data is not None:
+        if self._sc is not None or self._aux is not None:
             refusal = (
                 "sorting would misalign the attached spacecraft or auxiliary "
                 "data, so sort the data first"
@@ -900,7 +902,7 @@ class Plasma(base.Base):
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
-        #       multiple spacecraft to `auxiliary_data`. (20190216)
+        #       multiple spacecraft to `aux`. (20190216)
         tk_plasma = pd.IndexSlice[
             ["b", "n", "v", "w"],
             ["", "x", "y", "z", "per", "par"],

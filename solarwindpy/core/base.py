@@ -149,7 +149,7 @@ class Core(ABC):
         another level of the data model, such as ``"S"`` when ``level`` is
         ``"C"``; an unnamed or otherwise named flat Index is taken as
         ``level``, so that a frame whose level names are checked elsewhere
-        (as :meth:`~solarwindpy.core.plasma.Plasma.set_spacecraft` checks a
+        (as :meth:`~solarwindpy.core.plasma.Plasma.set_sc` checks a
         spacecraft's) is refused there, as before.
 
         Raises

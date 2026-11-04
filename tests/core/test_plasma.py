@@ -1098,7 +1098,7 @@ class PlasmaTestBase(ABC):
             )
 
     def test_spacecraft_in_plasma(self):
-        r"""`set_spacecraft` stores the spacecraft and exposes it as `spacecraft` and `sc`.
+        r"""`set_sc` stores the spacecraft and exposes it as `spacecraft` and `sc`.
 
         ON FAILURE: the code is wrong.
         """
@@ -1125,18 +1125,18 @@ class PlasmaTestBase(ABC):
         PSP = spacecraft.Spacecraft(PSP, "PSP", "HCI")
 
         ot = self.object_testing
-        ot.set_spacecraft(None)
+        ot.set_sc(None)
         self.assertIsNone(ot.sc)
 
-        ot.set_spacecraft(Wind)
+        ot.set_sc(Wind)
         self.assertEqual(ot.sc, Wind)
 
-        ot.set_spacecraft(PSP)
+        ot.set_sc(PSP)
         self.assertEqual(ot.sc, PSP)
 
         self.assertNotEqual(ot.sc, Wind)
 
-        ot.set_spacecraft(None)
+        ot.set_sc(None)
 
     def test_nc_without_spacecraft(self):
         r"""`nc` raises when no spacecraft is set, since it has no expansion time.
@@ -1145,7 +1145,7 @@ class PlasmaTestBase(ABC):
         expansion time would be silently meaningless.
         """
         ot = self.object_testing
-        ot.set_spacecraft(None)
+        ot.set_sc(None)
         combos2 = [x for x in self.species_combinations if len(x) == 2]
         for combo in combos2:
             sa, sb = combo
@@ -1226,7 +1226,7 @@ class PlasmaTestBase(ABC):
             sa, sb = combo
 
             for sc, tau_exp in zip((Wind, PSP), (tau_exp_Wind, tau_exp_PSP)):
-                ot.set_spacecraft(sc)
+                ot.set_sc(sc)
 
                 nuab = ot.nuc(sa, sb, both_species=False)
                 nuba = ot.nuc(sb, sa, both_species=False)
@@ -1254,7 +1254,7 @@ class PlasmaTestBase(ABC):
                 )
 
         # Ensure spacecraft is None
-        ot.set_spacecraft(None)
+        ot.set_sc(None)
 
         with self.assertRaisesRegex(ValueError, individual_msg):
             ot.nc("+".join(combo), sa)
@@ -1615,7 +1615,7 @@ class PlasmaTestBase(ABC):
         pdt.assert_frame_equal(q, ot.qpar(*slist))
         pdt.assert_series_equal(qtot, ot.qpar(scom))
 
-    def test_set_auxiliary_data(self):
+    def test_set_aux(self):
         r"""Auxiliary data round-trips through `aux`, clears to None, and rejects dupes.
 
         ON FAILURE: the code is wrong.
@@ -1624,14 +1624,14 @@ class PlasmaTestBase(ABC):
         data = base.SyntheticData().combined_data
         drop = data.columns.isin(ot.data.columns)
         aux = data.loc[:, ~drop]
-        ot.set_auxiliary_data(aux)
+        ot.set_aux(aux)
         pdt.assert_frame_equal(aux, ot.aux)
 
-        ot.set_auxiliary_data(None)
+        ot.set_aux(None)
         self.assertIsNone(ot.aux)
 
         with self.assertRaises(ValueError):
-            ot.set_auxiliary_data(ot.data)
+            ot.set_aux(ot.data)
 
     def test_epoch(self):
         r"""Plasma preserves the DatetimeIndex it was constructed with.
@@ -3249,7 +3249,7 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
 
     caplog.clear()
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        p = plasma.Plasma(data, *ref.species, spacecraft=sc, auxiliary_data=aux)
+        p = plasma.Plasma(data, *ref.species, sc=sc, aux=aux)
 
     assert len(_warnings(caplog, "earlier than the row before")) == 1
     assert not _warnings(caplog, "in another order")
@@ -3273,11 +3273,11 @@ def test_setters_refuse_a_mismatched_index_with_value_error():
     aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=shifted)
     aux.columns.names = ["M", "C", "S"]
     with pytest.raises(ValueError, match="index"):
-        p.set_auxiliary_data(aux)
+        p.set_aux(aux)
 
     sc_data = p.sc.data.set_axis(shifted, axis=0)
     with pytest.raises(ValueError, match="index"):
-        p.set_spacecraft(spacecraft.Spacecraft(sc_data, "PSP", "HCI"))
+        p.set_sc(spacecraft.Spacecraft(sc_data, "PSP", "HCI"))
 
 
 def test_missing_timestamps_raise_value_error_naming_the_count():
@@ -3313,7 +3313,7 @@ def test_out_of_order_data_with_nat_raise_before_any_order_warning(caplog):
 def _plasma_alone():
     """The example plasma with its spacecraft detached and no auxiliary data."""
     p = swp.examples.load_plasma()
-    p.set_spacecraft(None)
+    p.set_sc(None)
     return p
 
 
@@ -3380,7 +3380,7 @@ def _example_with_aux_only():
     p = _plasma_alone()
     aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=p.epoch)
     aux.columns.names = ["M", "C", "S"]
-    p.set_auxiliary_data(aux)
+    p.set_aux(aux)
     return p
 
 
@@ -3400,7 +3400,7 @@ def test_set_data_refuses_out_of_order_data_while_frames_are_attached(attached):
     assert p.data is before
 
 
-def test_set_auxiliary_data_refuses_missing_timestamps():
+def test_set_aux_refuses_missing_timestamps():
     r"""Auxiliary data with NaT in their index raise, naming the count.
 
     A spacecraft cannot reach its setter with NaT: `Spacecraft` refuses it when
@@ -3413,10 +3413,10 @@ def test_set_auxiliary_data_refuses_missing_timestamps():
     aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=times)
     aux.columns.names = ["M", "C", "S"]
     with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
-        p.set_auxiliary_data(aux)
+        p.set_aux(aux)
 
 
-def test_set_auxiliary_data_reorders_the_plasma_times_given_in_another_order(caplog):
+def test_set_aux_reorders_the_plasma_times_given_in_another_order(caplog):
     r"""Auxiliary data at the plasma's times, reordered, are put in its order.
 
     The rows are passed in order 2, 0, 1. Per the author, the setter called
@@ -3429,7 +3429,7 @@ def test_set_auxiliary_data_reorders_the_plasma_times_given_in_another_order(cap
     aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0]}, index=p.epoch)
     aux.columns.names = ["M", "C", "S"]
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        p.set_auxiliary_data(aux.iloc[[2, 0, 1]])
+        p.set_aux(aux.iloc[[2, 0, 1]])
 
     assert len(_warnings(caplog, "in another order")) == 1
     assert p.aux.index.equals(p.epoch)
@@ -3459,25 +3459,23 @@ def _built_out_of_order():
     data = ref.data.iloc[_PERM]
     sc_data = ref.sc.data.iloc[_PERM]
     sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
-    return plasma.Plasma(
-        data, *ref.species, spacecraft=sc, auxiliary_data=_example_aux(data.index)
-    )
+    return plasma.Plasma(data, *ref.species, sc=sc, aux=_example_aux(data.index))
 
 
 def _set_data_then_attach():
     """`set_data` with rows 2, 0, 1 on a bare plasma, then both frames attached."""
     p = _plasma_alone()
     p.set_data(swp.examples.load_plasma().data.iloc[_PERM])
-    p.set_spacecraft(_example_sc([0, 1, 2]))
-    p.set_auxiliary_data(_example_aux(p.epoch))
+    p.set_sc(_example_sc([0, 1, 2]))
+    p.set_aux(_example_aux(p.epoch))
     return p
 
 
 def _setters_given_another_order():
     """Both setters given the plasma's times in order 2, 0, 1."""
     p = _plasma_alone()
-    p.set_spacecraft(_example_sc(_PERM))
-    p.set_auxiliary_data(_example_aux(p.epoch[_PERM]))
+    p.set_sc(_example_sc(_PERM))
+    p.set_aux(_example_aux(p.epoch[_PERM]))
     return p
 
 
@@ -3489,7 +3487,7 @@ def _dropped_species():
 def _self_sorted_spacecraft_attached():
     """A standalone spacecraft built from rows 2, 0, 1 attached to the example."""
     p = _example_with_aux_only()
-    p.set_spacecraft(_example_sc(_PERM))
+    p.set_sc(_example_sc(_PERM))
     return p
 
 
@@ -3576,7 +3574,7 @@ def test_one_repeated_time_in_ordered_data_logs_only_the_repeat_and_copies_nothi
     aux = pd.DataFrame({("q", "", ""): [0.0, 1.0, 2.0, 3.0]}, index=times)
     aux.columns.names = ["M", "C", "S"]
     with caplog.at_level("WARNING", logger="solarwindpy"):
-        p = plasma.Plasma(_protons_at(times), "p1", auxiliary_data=aux)
+        p = plasma.Plasma(_protons_at(times), "p1", aux=aux)
 
     warned = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
     assert len(warned) == 1 and "repeat an earlier timestamp" in warned[0]
@@ -3690,7 +3688,7 @@ def test_auxiliary_data_levels_out_of_order_raise_value_error():
     aux.columns.names = ["M", "C", "S"]
     aux = aux.reorder_levels(["S", "M", "C"], axis=1)
     with pytest.raises(ValueError, match="levels named"):
-        p.set_auxiliary_data(aux)
+        p.set_aux(aux)
 
 
 def _one_row_spacecraft(p):
@@ -3708,8 +3706,8 @@ def _one_row_aux(p):
 @pytest.mark.parametrize(
     "setter, frame",
     [
-        ("set_spacecraft", _one_row_spacecraft),
-        ("set_auxiliary_data", _one_row_aux),
+        ("set_sc", _one_row_spacecraft),
+        ("set_aux", _one_row_aux),
     ],
 )
 def test_setters_refuse_a_one_row_frame_naming_both_lengths(setter, frame):
@@ -3738,7 +3736,7 @@ def test_auxiliary_index_differing_at_one_row_raises_value_error_naming_it():
     aux = pd.DataFrame({("q", "", ""): [0, 1, 0]}, index=pd.DatetimeIndex(times))
     aux.columns.names = ["M", "C", "S"]
     with pytest.raises(ValueError, match="first difference at row 1"):
-        p.set_auxiliary_data(aux)
+        p.set_aux(aux)
 
 
 def test_plasma_refuses_data_that_is_not_a_dataframe():
@@ -3817,7 +3815,7 @@ def _example_with_species_aux():
         index=p.epoch,
         columns=pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"]),
     )
-    p.set_auxiliary_data(aux)
+    p.set_aux(aux)
     return p
 
 
@@ -3892,7 +3890,7 @@ def test_auxiliary_data_with_wrong_level_names_raises_value_error():
     aux = pd.DataFrame({("quality", "", ""): [0, 1, 0]}, index=p.epoch)
     aux.columns.names = ["M", "C", "X"]
     with pytest.raises(ValueError, match="levels named"):
-        p.set_auxiliary_data(aux)
+        p.set_aux(aux)
 
 
 def test_spacecraft_with_wrong_level_names_raises_value_error():
@@ -3904,7 +3902,7 @@ def test_spacecraft_with_wrong_level_names_raises_value_error():
     sc_data = p.sc.data.rename_axis(columns=["M", "X"])
     sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
     with pytest.raises(ValueError, match="levels named"):
-        p.set_spacecraft(sc)
+        p.set_sc(sc)
 
 
 @pytest.mark.parametrize("third", ["X", None, 3])

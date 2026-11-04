@@ -32,7 +32,7 @@ def _species_masked_plasma():
     data.loc[t[1], ("w", "per", "a")] = np.nan
     data.loc[t[2], ("w", "par", "p1")] = np.nan
     data.loc[t[2], ("w", "per", "a")] = np.nan
-    return Plasma(data, *base.species, spacecraft=base.sc)
+    return Plasma(data, *base.species, sc=base.sc)
 
 
 def _position_masked_plasma():
@@ -41,7 +41,7 @@ def _position_masked_plasma():
     sc = base.sc.data.copy()
     sc.loc[sc.index[0], ("pos", "x")] = np.nan
     spacecraft = Spacecraft(sc, base.sc.name, base.sc.frame)
-    return Plasma(base.data, *base.species, spacecraft=spacecraft)
+    return Plasma(base.data, *base.species, sc=spacecraft)
 
 
 def test_one_species_anisotropy_matches_the_ion_and_is_nan_where_masked():

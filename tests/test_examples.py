@@ -127,9 +127,9 @@ def test_plasma_logs_each_optional_input_not_passed(caplog):
     with caplog.at_level(logging.INFO, logger="solarwindpy"):
         Plasma(plasma.data, "p1")
     assert "No spacecraft data passed to Plasma" in caplog.messages
-    assert "No auxiliary_data data passed to Plasma" in caplog.messages
+    assert "No auxiliary data passed to Plasma" in caplog.messages
 
     caplog.clear()
     with caplog.at_level(logging.INFO, logger="solarwindpy"):
-        Plasma(plasma.data, "p1", spacecraft=plasma.sc, auxiliary_data=flags)
+        Plasma(plasma.data, "p1", sc=plasma.sc, aux=flags)
     assert not [m for m in caplog.messages if m.startswith("No ")]
