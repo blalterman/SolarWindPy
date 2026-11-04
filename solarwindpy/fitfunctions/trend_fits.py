@@ -160,9 +160,15 @@ class TrendFit(object):
         # Successful fits return None, which pandas treats as NaN.
         return_exception = kwargs.pop("return_exception", True)
 
-        fit_success = self.ffuncs.apply(
-            lambda x: x.make_fit(return_exception=return_exception, **kwargs)
-        )
+        def fit(ff):
+            try:
+                ff.make_fit(**kwargs)
+            except core._FIT_FAILURES as e:
+                if not return_exception:
+                    raise
+                return e
+
+        fit_success = self.ffuncs.apply(fit)
 
         # Handle failed fits
         bad_idx = fit_success.dropna().index

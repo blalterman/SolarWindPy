@@ -17,7 +17,7 @@ __all__ = [
 
 import numpy as np
 
-from .core import FitFunction, InsufficientDataError
+from .core import FitFunction
 
 
 class PowerLaw(FitFunction):
@@ -94,8 +94,8 @@ class PowerLawOffCenter(FitFunction):
     the smallest used ``x``, within any bounds the caller passes.
     """
 
-    def make_fit(self, return_exception=False, **kwargs):
-        r"""Fit with ``x0`` bounded below the smallest used ``x``.
+    def _prepare_fit(self, kwargs):
+        r"""Bound ``x0`` below the smallest used ``x``.
 
         The upper bound on ``x0`` is the largest float below the smallest used
         ``x``, or the caller's upper bound if that is lower. When the caller
@@ -108,8 +108,8 @@ class PowerLawOffCenter(FitFunction):
         ValueError
             If the caller's lower bound on ``x0`` leaves it no room below the
             smallest used ``x``, or the caller's ``p0`` starts ``x0`` outside
-            its bounds or at NaN or infinity. Returned instead when
-            ``return_exception``.
+            its bounds or at NaN or infinity. ``make_fit`` records it as a
+            failed fit.
         """
         x = self.observations.used.x
         n = len(self.argnames)
@@ -118,52 +118,42 @@ class PowerLawOffCenter(FitFunction):
                 kwargs.get("bounds", (-np.inf, np.inf)), n
             )
         except (TypeError, ValueError):
-            # Malformed bounds: the base fit reports them, honouring
-            # return_exception.
-            lb = None
-        if x.size and lb is not None:
-            i = self.argnames.index("x0")
-            ub[i] = min(ub[i], np.nextafter(x.min(), -np.inf))
-            e = None
-            if lb[i] >= ub[i]:
-                e = f"the lower bound on x0 is {lb[i]}"
-            elif kwargs.get("p0") is not None:
-                try:
-                    p0 = np.atleast_1d(np.asarray(kwargs["p0"], dtype=float))
-                except (TypeError, ValueError):
-                    # Malformed p0: the base fit reports it.
-                    p0 = None
-                if p0 is not None and p0.size == n and not np.isfinite(p0[i]):
-                    e = f"the initial guess p0 starts x0 at {p0[i]}, not a finite number"
-                elif p0 is not None and p0.size == n and p0[i] > ub[i]:
-                    e = (
-                        f"the initial guess p0 starts x0 at {p0[i]}, above its "
-                        f"upper bound {ub[i]}"
-                    )
-                elif p0 is not None and p0.size == n and p0[i] < lb[i]:
-                    e = (
-                        f"the initial guess p0 starts x0 at {p0[i]}, below its "
-                        f"lower bound {lb[i]}"
-                    )
-            elif "p0" not in kwargs:
-                try:
-                    p0 = list(self.p0)
-                except InsufficientDataError:
-                    # The base fit reports it, honouring return_exception.
-                    pass
-                else:
-                    p0[i] = float(np.clip(p0[i], lb[i], ub[i]))
-                    kwargs["p0"] = p0
-            if e is not None:
-                e = ValueError(
-                    f"{type(self).__name__} needs x0 below the smallest used x "
-                    f"({x.min()}), where the model is defined, but {e}."
+            # Malformed bounds: the base fit reports them.
+            return kwargs
+        i = self.argnames.index("x0")
+        ub[i] = min(ub[i], np.nextafter(x.min(), -np.inf))
+        e = None
+        if lb[i] >= ub[i]:
+            e = f"the lower bound on x0 is {lb[i]}"
+        elif kwargs.get("p0") is not None:
+            try:
+                p0 = np.atleast_1d(np.asarray(kwargs["p0"], dtype=float))
+            except (TypeError, ValueError):
+                # Malformed p0: the base fit reports it.
+                p0 = None
+            if p0 is not None and p0.size == n and not np.isfinite(p0[i]):
+                e = f"the initial guess p0 starts x0 at {p0[i]}, not a finite number"
+            elif p0 is not None and p0.size == n and p0[i] > ub[i]:
+                e = (
+                    f"the initial guess p0 starts x0 at {p0[i]}, above its "
+                    f"upper bound {ub[i]}"
                 )
-                if return_exception:
-                    return e
-                raise e
-            kwargs["bounds"] = (lb, ub)
-        return super().make_fit(return_exception=return_exception, **kwargs)
+            elif p0 is not None and p0.size == n and p0[i] < lb[i]:
+                e = (
+                    f"the initial guess p0 starts x0 at {p0[i]}, below its "
+                    f"lower bound {lb[i]}"
+                )
+        elif "p0" not in kwargs:
+            p0 = list(self.p0)
+            p0[i] = float(np.clip(p0[i], lb[i], ub[i]))
+            kwargs["p0"] = p0
+        if e is not None:
+            raise ValueError(
+                f"{type(self).__name__} needs x0 below the smallest used x "
+                f"({x.min()}), where the model is defined, but {e}."
+            )
+        kwargs["bounds"] = (lb, ub)
+        return kwargs
 
     @property
     def function(self):

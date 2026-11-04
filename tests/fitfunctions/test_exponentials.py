@@ -11,6 +11,7 @@ from solarwindpy.fitfunctions.exponentials import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free, printed
+from tests.fitfunctions._attempt import attempt_fit
 
 E_INV = 0.36787944117144233  # e^-1
 
@@ -145,7 +146,7 @@ def test_make_fit_insufficient_data():
         with pytest.raises(InsufficientDataError):
             obj.make_fit()
 
-        result = obj.make_fit(return_exception=True)
+        result = attempt_fit(obj)
         assert isinstance(result, InsufficientDataError)
         assert "insufficient data" in str(result).lower()
 

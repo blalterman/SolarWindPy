@@ -11,6 +11,7 @@ from solarwindpy.fitfunctions.lines import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
@@ -132,7 +133,7 @@ def test_make_fit_insufficient_data(cls):
     with pytest.raises(InsufficientDataError):
         obj.make_fit()
 
-    result = obj.make_fit(return_exception=True)
+    result = attempt_fit(obj)
     assert isinstance(result, InsufficientDataError)
     assert "insufficient data" in str(result).lower()
 
@@ -450,7 +451,7 @@ def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
     ``make_fit`` falls back to a default starting point when ``p0`` is
     ``None``. It used to import ``getargspec_no_self`` from SciPy's private
     ``scipy._lib._util``, which current SciPy no longer has, so the fit raised
-    ``ImportError`` even with ``return_exception=True``.
+    ``ImportError``, which make_fit does not record as a failed fit.
 
     ON FAILURE: the code is wrong.
     """
@@ -458,5 +459,5 @@ def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
     fit = Line(x, 2.0 * x + 1.0)
     assert fit.p0 is None  # the input exists to exercise this branch
 
-    assert fit.make_fit(return_exception=True) is None
+    assert attempt_fit(fit) is None
     assert fit.popt == noise_free({"m": 2.0, "b": 1.0})

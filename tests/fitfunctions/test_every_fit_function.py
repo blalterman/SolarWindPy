@@ -19,6 +19,7 @@ import pytest
 import solarwindpy.fitfunctions as ff
 from solarwindpy.fitfunctions.core import FitFunction
 from solarwindpy.fitfunctions.hinge import HingeMax
+from tests.fitfunctions._attempt import attempt_fit
 
 
 def _concrete_fit_functions():
@@ -132,8 +133,8 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
     generic = _build(name)
     n = len(generic.argnames)
 
-    got = explicit_none.make_fit(return_exception=True, p0=None)
-    expected = generic.make_fit(return_exception=True, p0=_generic_start(name, n))
+    got = attempt_fit(explicit_none, p0=None)
+    expected = attempt_fit(generic, p0=_generic_start(name, n))
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
     if got is None:
@@ -152,7 +153,7 @@ def test_explicit_p0_none_does_not_read_the_class_guess():
     fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_h=2.5)
     with pytest.raises(NotImplementedError):
         fit.p0
-    got = fit.make_fit(return_exception=True, p0=None)
+    got = attempt_fit(fit, p0=None)
     assert not isinstance(got, NotImplementedError), got
 
 

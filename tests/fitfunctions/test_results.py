@@ -18,12 +18,6 @@ from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.power_laws import PowerLawOffCenter
 from tests.tolerances import exact, noise_free
 
-_STEP1 = pytest.mark.xfail(
-    strict=True,
-    reason="FitFunction.results and the failed-fit status row do not exist yet; "
-    "remove this marker when the results table lands",
-)
-
 # The quality and status columns that follow the parameter columns, in order.
 QUALITY = [
     ("chisq_dof", "linear"),
@@ -41,7 +35,6 @@ def _gaussian(n=41):
     return x, 10.0 * np.exp(-0.5 * ((x - 2.0) / 0.5) ** 2)
 
 
-@_STEP1
 def test_results_is_one_row_of_parameter_value_uncertainty_then_quality_columns():
     """The table's columns are (P, K): each parameter's value and uncertainty, then quality.
 
@@ -59,7 +52,6 @@ def test_results_is_one_row_of_parameter_value_uncertainty_then_quality_columns(
     assert list(res.columns) == params + QUALITY
 
 
-@_STEP1
 def test_results_hold_the_recovered_parameters_and_ok_status():
     """A noise-free Gaussian's row recovers mu=2, sigma=0.5, A=10 with status ok.
 
@@ -79,7 +71,6 @@ def test_results_hold_the_recovered_parameters_and_ok_status():
     assert fit.error is None
 
 
-@_STEP1
 def test_popt_and_psigma_read_the_results_table():
     """``popt``, ``psigma`` and ``chisq_dof`` are read from the table.
 
@@ -98,7 +89,6 @@ def test_popt_and_psigma_read_the_results_table():
     assert robust == exact(row[("chisq_dof", "robust")])
 
 
-@_STEP1
 def test_a_fit_with_too_few_points_raises_and_leaves_a_nan_row_with_its_status():
     """Two points cannot fit three parameters: make_fit raises and records why.
 
@@ -117,7 +107,6 @@ def test_a_fit_with_too_few_points_raises_and_leaves_a_nan_row_with_its_status()
     assert isinstance(fit.error, InsufficientDataError)
 
 
-@_STEP1
 def test_a_failed_fit_evaluates_to_nans_the_shape_of_x():
     """Calling a failed fit returns NaN in ``x``'s shape, as the class docstring says.
 
@@ -133,7 +122,6 @@ def test_a_failed_fit_evaluates_to_nans_the_shape_of_x():
     assert all(np.isnan(v) for v in fit.popt.values())
 
 
-@_STEP1
 def test_an_optimizer_failure_is_recorded_as_fit_failed():
     """One function evaluation stops the optimizer; the status names FitFailedError.
 
@@ -147,7 +135,6 @@ def test_an_optimizer_failure_is_recorded_as_fit_failed():
     assert isinstance(fit.error, FitFailedError)
 
 
-@_STEP1
 def test_a_subclass_precheck_failure_is_recorded_too():
     """PowerLawOffCenter's own bound check fails through the same status row.
 
@@ -160,7 +147,6 @@ def test_a_subclass_precheck_failure_is_recorded_too():
     assert fit.results.loc[:, ("status", "")].item() == "ValueError"
 
 
-@_STEP1
 def test_a_failed_refit_replaces_a_successful_one():
     """A later failure shows as failed; a later success clears it.
 
@@ -180,7 +166,6 @@ def test_a_failed_refit_replaces_a_successful_one():
     assert fit.popt["mu"] == noise_free(2.0)  # the generating mu
 
 
-@_STEP1
 def test_results_before_a_fit_raise_not_fitted():
     """Before ``make_fit`` there is no table: ``results`` raises NotFittedError.
 
@@ -193,7 +178,6 @@ def test_results_before_a_fit_raise_not_fitted():
         Gaussian(x, y).results
 
 
-@_STEP1
 def test_two_fits_compare_by_concatenating_their_tables():
     """Tables from two setups concatenate into one frame keyed by setup.
 
@@ -213,7 +197,6 @@ def test_two_fits_compare_by_concatenating_their_tables():
     assert nobs["core"] == ((x >= 1.0) & (x <= 3.0)).sum()  # the xmin/xmax window
 
 
-@_STEP1
 def test_combined_popt_psigma_is_gone():
     """``results`` replaces ``combined_popt_psigma``: one table, one name.
 

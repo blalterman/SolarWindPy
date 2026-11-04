@@ -127,8 +127,8 @@ class TestDocstringInheritance:
         from solarwindpy.fitfunctions.lines import Line
 
         class ChildFit(Line):
-            def make_fit(self, return_exception=False, **kwargs):
-                return super().make_fit(return_exception, **kwargs)
+            def make_fit(self, **kwargs):
+                return super().make_fit(**kwargs)
 
         summary = FitFunction.make_fit.__doc__.strip().splitlines()[0]
         assert summary in ChildFit.make_fit.__doc__

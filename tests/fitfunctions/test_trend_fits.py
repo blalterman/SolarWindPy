@@ -15,6 +15,7 @@ from solarwindpy.fitfunctions.core import InsufficientDataError
 from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
 from tests.tolerances import exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.fixture
@@ -106,7 +107,7 @@ def test_make_1dfits_moves_bad_fit():
     assert list(tf.bad_fits.index) == [ybins[1]]
     assert list(tf.ffuncs.index) == [ybins[0]]
     bad = tf.bad_fits.loc[ybins[1]]
-    assert isinstance(bad.make_fit(return_exception=True), InsufficientDataError)
+    assert isinstance(attempt_fit(bad), InsufficientDataError)
 
 
 def test_make_trend_func_success_and_failure(trend_fit, agged_empty):

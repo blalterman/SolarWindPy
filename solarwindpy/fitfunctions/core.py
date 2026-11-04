@@ -12,6 +12,7 @@ __all__ = [
     "InsufficientDataError",
     "FitFailedError",
     "InvalidParameterError",
+    "NotFittedError",
     "FitFunctionMeta",
     "FitFunction",
 ]
@@ -76,6 +77,37 @@ class InvalidParameterError(FitFunctionError):
     """Raised when invalid parameters are provided to fit functions."""
 
     pass
+
+
+class NotFittedError(FitFunctionError, AttributeError):
+    """Raised when a fit result is read before ``make_fit`` has run.
+
+    It is an ``AttributeError`` too, so ``hasattr`` reports a result that does
+    not exist yet as missing.
+    """
+
+    pass
+
+
+# The exceptions make_fit records as a failed fit: its status names the class.
+_FIT_FAILURES = (FitFunctionError, RuntimeError, ValueError)
+
+# The fit-quality and status columns of every results table, after the
+# parameters' (value, uncertainty) pairs.
+_QUALITY_COLUMNS = (
+    ("chisq_dof", "linear"),
+    ("chisq_dof", "robust"),
+    ("rsq", ""),
+    ("nobs", ""),
+    ("dof", ""),
+    ("status", ""),
+)
+_STATUS_OK = "ok"
+_KINDS = ("value", "uncertainty")
+
+# What a successful fit stores beyond the results table; make_fit clears them
+# before each attempt, so a failed refit leaves none from an earlier success.
+_SUCCESS_ONLY = ("_fit_result", "_fit_p0", "_fit_bounds", "_TeX_info", "_plotter")
 
 
 # Combine ABC and docstring inheritance metaclasses. ABCMeta comes first:
@@ -162,9 +194,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     r"""Fit a model to observed data: the base class of every fit function.
 
     A subclass defines the model (``function`` and ``TeX_function``) and its
-    initial guess (``p0``); ``make_fit`` runs the fit. Instances are callable.
-    If the fit fails, calling the instance will return an array of NaNs the
-    same shape as the x-values.
+    initial guess (``p0``); ``make_fit`` runs the fit, and :attr:`results`
+    holds its outcome as one table. Instances are callable. If the fit fails,
+    ``make_fit`` raises, :attr:`results` records the failure, and calling the
+    instance returns an array of NaNs the same shape as the x-values.
 
     Parameters
     ----------
@@ -210,6 +243,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     See Also
     --------
     make_fit : Execute the fitting procedure
+    results : The fit's parameters, uncertainties, quality and status
     popt : Access optimized parameters
     rsq : Calculate coefficient of determination
 
@@ -257,6 +291,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # Documented in the class docstring (see FitFunctionMeta).
         self._init_logger()
         self._set_argnames()
+        self._results = None
+        self._error = None
 
         if weights is None:
             assert wmin is None
@@ -291,6 +327,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # numerical function.
 
         popt_ = self.popt
+        if self._error is not None:
+            # A failed fit has no model: NaN in x's shape, without evaluating
+            # the function at NaN parameters.
+            return np.full(np.shape(x), np.nan)
         popt_ = [popt_[k] for k in self.argnames]
 
         # NOTE
@@ -374,14 +414,20 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def chisq_dof(self):
-        r"""Chisq per degree of freedom :math:`\chi^2_\nu`.
+        r"""Chisq per degree of freedom :math:`\chi^2_\nu`, read from :attr:`results`.
 
-        If None, not calculated by `make_fit_old`. If `np.nan`, fit failed.
+        Returns
+        -------
+        _ChisqPerDegreeOfFreedom
+            ``(linear, robust)``. NaN after a failed fit, and before a fit
+            returns None.
         """
-        try:
-            return self._chisq_dof
-        except AttributeError:
+        if self._results is None:
             return None
+        row = self._results.iloc[0]
+        return _ChisqPerDegreeOfFreedom(
+            row[("chisq_dof", "linear")], row[("chisq_dof", "robust")]
+        )
 
     @property
     def dof(self):
@@ -435,25 +481,67 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         return self._plotter
 
     @property
-    def popt(self):
-        r"""Optimized fit parameters."""
-        return dict(self._popt)
+    def results(self):
+        r"""The fit's outcome as one table: parameters, uncertainties, quality, status.
 
-    @property
-    def psigma(self):
-        return dict(self._psigma)
-
-    @property
-    def combined_popt_psigma(self):
-        r"""Return optimized parameters and uncertainties as a DataFrame.
+        Every fit exposes its results in this form, so two fits, functions or
+        setups compare with :func:`pandas.concat`.
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with columns 'popt' and 'psigma', indexed by parameter names.
-            Relative uncertainty can be computed as: df['psigma'] / df['popt']
+        pandas.DataFrame
+            One row. The columns are a MultiIndex with levels ``P`` (the
+            parameter or quality name) and ``K`` (the kind): ``(name,
+            "value")`` and ``(name, "uncertainty")`` for each parameter in
+            :attr:`argnames` order, then ``("chisq_dof", "linear")``,
+            ``("chisq_dof", "robust")``, ``("rsq", "")``, ``("nobs", "")``,
+            ``("dof", "")`` and ``("status", "")``. ``status`` is ``"ok"``
+            after a successful fit; after a failed one it is the exception's
+            class name, the values and quality numbers are NaN, and the
+            exception is :attr:`error`. A copy, so editing it changes nothing.
+
+        Raises
+        ------
+        NotFittedError
+            Before :meth:`make_fit` has run.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from solarwindpy.fitfunctions.lines import Line
+        >>> x = np.arange(10.0)
+        >>> fit = Line(x, 2.0 * x + 1.0)
+        >>> fit.make_fit()
+        >>> fit.results.loc[:, ("m", "value")].round(6).item()
+        2.0
+        >>> fit.results.loc[:, ("status", "")].item()
+        'ok'
         """
-        return pd.DataFrame({"popt": self.popt, "psigma": self.psigma})
+        if self._results is None:
+            raise NotFittedError(
+                f"{type(self).__name__} has no results: call make_fit first."
+            )
+        return self._results.copy()
+
+    @property
+    def error(self):
+        r"""The exception that made the last :meth:`make_fit` fail, or None."""
+        return self._error
+
+    def _results_kind(self, kind):
+        r"""The ``kind`` column of each parameter, as ``{name: value}``."""
+        row = self.results.xs(kind, level="K", axis=1).iloc[0]
+        return {name: row[name] for name in self.argnames}
+
+    @property
+    def popt(self):
+        r"""Optimized fit parameters, ``{name: value}``, read from :attr:`results`."""
+        return self._results_kind("value")
+
+    @property
+    def psigma(self):
+        r"""Parameter uncertainties, ``{name: uncertainty}``, read from :attr:`results`."""
+        return self._results_kind("uncertainty")
 
     @property
     def pcov(self):
@@ -462,7 +550,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def rsq(self):
-        r"""Coefficient of determination.
+        r"""Coefficient of determination, read from :attr:`results`.
 
         Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
 
@@ -471,14 +559,19 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         float
             ``1 - SS_res / SS_tot``. When the used ``y`` have no spread (a single
             point, or constant data), ``SS_tot = 0`` and R² is undefined, so
-            ``nan`` is returned without a divide-by-zero warning.
+            ``nan`` is returned without a divide-by-zero warning. NaN after a
+            failed fit.
         """
+        return self.results.loc[:, ("rsq", "")].item()
+
+    def _calc_rsq(self, popt):
+        r"""The :attr:`rsq` of parameters ``popt``, in :attr:`argnames` order."""
         y = self.observations.used.y
         if np.ptp(y) == 0:
             return np.nan
 
         ybar = y.mean()
-        yfit = self(self.observations.used.x)
+        yfit = self.function(self.observations.used.x, *popt)
         sum_squares_total = ((y - ybar) ** 2).sum()
         sum_squares_residual = ((y - yfit) ** 2).sum()
         rsq = 1 - (sum_squares_residual / sum_squares_total)
@@ -976,19 +1069,55 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return popt, pcov, psigma, all_chisq
 
-    def make_fit(self, return_exception=False, **kwargs):
-        """Fit the function with the independent `xobs` and dependent `yobs`.
-
-        Uses `least_squares` and returns the `OptimizeResult` object, but
-        treats weights as in `curve_fit`.
+    def _results_row(self, popt, psigma, chisq, rsq, status):
+        r"""Build the one-row :attr:`results` table; every row is built here.
 
         Parameters
         ----------
-        return_exception: bool
-            If True, return exceptions from fitting routine, instead of raising.
-            This is useful when looping through many fits and wanting to
-            identify failed fits after the fact.
+        popt, psigma : array-like
+            One value and one uncertainty per parameter, in :attr:`argnames`
+            order.
+        chisq : _ChisqPerDegreeOfFreedom
+        rsq : float
+        status : str
+        """
+        columns = [(name, kind) for name in self.argnames for kind in _KINDS]
+        columns += list(_QUALITY_COLUMNS)
+        values = [v for pair in zip(popt, psigma) for v in pair]
+        values += [chisq.linear, chisq.robust, rsq, self.nobs, self.dof, status]
+        columns = pd.MultiIndex.from_tuples(columns, names=["P", "K"])
+        return pd.DataFrame([values], columns=columns)
 
+    def _record_failure(self, error):
+        r"""Store a NaN :attr:`results` row whose status names ``error``."""
+        nan = np.full(len(self.argnames), np.nan)
+        self._results = self._results_row(
+            nan,
+            nan,
+            _ChisqPerDegreeOfFreedom(np.nan, np.nan),
+            np.nan,
+            type(error).__name__,
+        )
+        self._pcov = np.full((nan.size, nan.size), np.nan)
+        self._error = error
+
+    def _prepare_fit(self, kwargs):
+        r"""Return the keywords :meth:`make_fit` passes to the optimizer.
+
+        Unchanged by default. A class that needs to adjust or check the
+        caller's ``bounds`` or ``p0`` overrides it; an exception it raises is
+        recorded as a failed fit, like any other.
+        """
+        return kwargs
+
+    def make_fit(self, **kwargs):
+        """Fit the function with the independent `xobs` and dependent `yobs`.
+
+        Uses `least_squares`, but treats weights as in `curve_fit`. The
+        outcome is :attr:`results`, whether the fit succeeds or fails.
+
+        Parameters
+        ----------
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
@@ -1005,33 +1134,39 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
             An explicit ``p0=None`` starts from the feasible default that
             a :attr:`p0` of None gives, without reading :attr:`p0`.
-        """
-        try:
-            self._require_sufficient_data()
-        except (ValueError, InsufficientDataError) as e:
-            if return_exception:
-                return e
-            else:
-                raise e
 
+        Raises
+        ------
+        InsufficientDataError, FitFailedError, ValueError, RuntimeError
+            When the fit fails. Before raising, :attr:`results` records the
+            failure: NaN values and the exception's class name as ``status``.
+            The exception is also kept as :attr:`error`. To fit many data sets
+            and inspect failures afterwards, catch the exception and read the
+            status.
+        NotImplementedError
+            If ``absolute_sigma=True``; nothing is recorded.
+        """
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
 
+        for name in _SUCCESS_ONLY:
+            self.__dict__.pop(name, None)
+
         try:
+            self._require_sufficient_data()
+            kwargs = self._prepare_fit(kwargs)
             res, p0 = self._run_least_squares(**kwargs)
-        except (RuntimeError, ValueError, FitFailedError) as e:
-            if return_exception:
-                return e
-            else:
-                raise
+            popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+        except _FIT_FAILURES as e:
+            self._record_failure(e)
+            raise
 
-        popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
-
-        self._popt = list(zip(self.argnames, popt))
-        self._psigma = list(zip(self.argnames, psigma))
+        self._results = self._results_row(
+            popt, psigma, all_chisq, self._calc_rsq(popt), _STATUS_OK
+        )
+        self._error = None
         self._pcov = pcov
-        self._chisq_dof = all_chisq
         self._fit_result = res
         self._fit_p0 = tuple(p0)
 

@@ -15,6 +15,7 @@ from solarwindpy.fitfunctions.power_laws import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
@@ -158,7 +159,7 @@ def test_make_fit_insufficient_data(cls):
     with pytest.raises(InsufficientDataError):
         obj.make_fit()
 
-    result = obj.make_fit(return_exception=True)
+    result = attempt_fit(obj)
     assert isinstance(result, InsufficientDataError)
     assert "insufficient data" in str(result).lower()
 
@@ -361,8 +362,8 @@ def test_power_law_off_center_fits_data_at_or_below_zero(x, x0):
 def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_lower):
     """A caller's lower bound on ``x0`` at or above the smallest x raises ValueError.
 
-    The error names ``x0`` and the smallest used x, and ``return_exception``
-    returns it. The positive control fits the same data with the lower bound
+    The error names ``x0`` and the smallest used x, and ``make_fit``
+    records it. The positive control fits the same data with the lower bound
     moved below the data.
 
     ON FAILURE: the code is wrong.
@@ -374,7 +375,7 @@ def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_low
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(bounds=bounds)
-    assert re.search(match, str(obj.make_fit(return_exception=True, bounds=bounds)))
+    assert re.search(match, str(attempt_fit(obj, bounds=bounds)))
 
     # Positive control: a lower bound below the data fits.
     bounds[0][2] = -3.0
@@ -388,7 +389,7 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
     """A caller's ``p0`` starting ``x0`` at or above the smallest x raises ValueError.
 
     The error names ``x0``, the smallest used x and the start, in place of
-    scipy's "x0 is infeasible", and ``return_exception`` returns it. The
+    scipy's "x0 is infeasible", and ``make_fit`` records it. The
     positive control fits the same data from a start below the data.
 
     ON FAILURE: the code is wrong.
@@ -403,7 +404,7 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0)
-    assert re.search(match, str(obj.make_fit(return_exception=True, p0=p0)))
+    assert re.search(match, str(attempt_fit(obj, p0=p0)))
 
     # Positive control: a start below the data fits.
     p0[2] = -1.0
@@ -416,7 +417,7 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     """A caller's ``p0`` starting ``x0`` below its lower bound raises ValueError.
 
     The error names ``x0``, the start and the bound, in place of scipy's
-    "x0 is infeasible", and ``return_exception`` returns it. The positive
+    "x0 is infeasible", and ``make_fit`` records it. The positive
     control fits the same data from a start inside the bounds.
 
     ON FAILURE: the code is wrong.
@@ -432,7 +433,7 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0, bounds=bounds)
-    got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+    got = attempt_fit(obj, p0=p0, bounds=bounds)
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a start inside the bounds fits.
@@ -447,7 +448,7 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
     """A caller's ``p0`` starting ``x0`` at NaN or infinity raises ValueError.
 
     The error names ``x0``, the smallest used x and the start, and
-    ``return_exception`` returns it. The positive control fits the same data
+    ``make_fit`` records it. The positive control fits the same data
     from a finite start.
 
     ON FAILURE: the code is wrong.
@@ -463,7 +464,7 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0)
-    got = obj.make_fit(return_exception=True, p0=p0)
+    got = attempt_fit(obj, p0=p0)
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a finite start below the data fits.
@@ -643,7 +644,7 @@ def test_power_law_off_center_accepts_a_start_on_a_bound(p0, bounds):
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+        got = attempt_fit(obj, p0=p0, bounds=bounds)
     assert "p0 starts x0" not in str(got), got
 
 
@@ -658,6 +659,6 @@ def test_power_law_off_center_leaves_malformed_input_to_the_base_fit(kwargs):
     ON FAILURE: the code is wrong.
     """
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
-    got = obj.make_fit(return_exception=True, **kwargs)
+    got = attempt_fit(obj, **kwargs)
     assert isinstance(got, ValueError), repr(got)
     assert "needs x0 below" not in str(got), got

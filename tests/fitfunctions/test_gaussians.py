@@ -12,6 +12,7 @@ from solarwindpy.fitfunctions.gaussians import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import exact, noise_free, printed
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
@@ -164,27 +165,27 @@ def test_make_fit_TeX_argnames_failure(cls):
     x = np.linspace(0.0, 1.0, 2)
     y = np.ones_like(x)
     obj = cls(x, y)
-    obj.make_fit(return_exception=True)
+    attempt_fit(obj)
     with pytest.raises(AttributeError):
         obj.TeX_info
 
 
 class FailedFitReturnedNone(AssertionError):
-    """make_fit(return_exception=True) returned None for a fit that failed."""
+    """A fit that failed recorded no error."""
 
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
 def test_make_fit_returns_exception_for_insufficient_data(cls):
-    """Two points cannot fit three parameters, and the exception comes back.
+    """Two points cannot fit three parameters, and the exception is recorded.
 
-    FitFunction.make_fit(return_exception=True) returns the exception instead
-    of raising it; a subclass override must pass it on.
+    FitFunction.make_fit records the exception as ``error`` before raising
+    it; a subclass override must pass it on.
 
     ON FAILURE: the code is wrong.
     """
     x = np.linspace(0.0, 1.0, 2)
     obj = cls(x, np.ones_like(x))
-    err = obj.make_fit(return_exception=True)
+    err = attempt_fit(obj)
     if err is None:
         raise FailedFitReturnedNone(cls.__name__)
     assert isinstance(err, InsufficientDataError)
@@ -418,13 +419,3 @@ def test_a_width_equal_to_half_the_spacing_of_two_distinct_x_is_resolved():
     """
     p0 = Gaussian(np.array([1.0, 1, 3, 3]), np.ones(4)).p0
     assert p0 == exact([2.0, 1.0, 1.0])
-
-
-@pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
-def test_make_fit_takes_return_exception_by_position(cls):
-    """``make_fit(True)`` returns the insufficient-data error, as the base does.
-
-    ON FAILURE: the code is wrong.
-    """
-    obj = cls(np.array([1.0, 2.0]), np.array([1.0, 2.0]))
-    assert isinstance(obj.make_fit(True), InsufficientDataError)

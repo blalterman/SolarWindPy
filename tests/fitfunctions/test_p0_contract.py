@@ -35,6 +35,7 @@ from solarwindpy.fitfunctions.hinge import (
     TwoLine,
 )
 from tests.tolerances import exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 def _line(x, m, b):
@@ -84,7 +85,7 @@ def test_nan_in_a_subclass_guess_raises_value_error_naming_class_and_parameter()
     msg = r"^_NanGuessLine initial guess is not finite: m=nan\."
     with pytest.raises(ValueError, match=msg):
         fit.make_fit()
-    err = fit.make_fit(return_exception=True)
+    err = attempt_fit(fit)
     assert isinstance(err, ValueError) and "m=nan" in str(err), repr(err)
 
 
@@ -329,9 +330,9 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     fit = cls(x, y, **kwargs)
     assert fit.p0 is None, fit.p0
 
-    got = fit.make_fit(return_exception=True)
+    got = attempt_fit(fit)
     explicit = cls(x, y, **kwargs)
-    expected = explicit.make_fit(return_exception=True, p0=np.ones(len(fit.argnames)))
+    expected = attempt_fit(explicit, p0=np.ones(len(fit.argnames)))
     assert "initial guess is not finite" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
@@ -364,7 +365,7 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
         values = fit.function(np.linspace(0.0, 1000.0, 101), *start)
     assert np.all(np.isfinite(values)), values
 
-    got = fit.make_fit(return_exception=True)
+    got = attempt_fit(fit)
     assert "Residuals are not finite" not in str(got), got
     assert "initial guess is not finite" not in str(got), got
 
@@ -399,8 +400,8 @@ def test_hingemax_without_estimate_raises_not_implemented(caplog):
     """HingeMax has no reference start yet: ``p0`` raises without a warning.
 
     The "data gave no estimate" warning announces a reference start, which
-    HingeMax does not return. ``make_fit`` returns the NotImplementedError
-    under ``return_exception``.
+    HingeMax does not return. ``make_fit`` records the NotImplementedError
+    as ``error``.
 
     ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
     start; then test that start as the other hinge classes are tested.
@@ -410,7 +411,7 @@ def test_hingemax_without_estimate_raises_not_implemented(caplog):
         with pytest.raises(NotImplementedError, match="no reference start"):
             fit.p0
     assert NO_ESTIMATE not in caplog.text, caplog.text
-    got = fit.make_fit(return_exception=True)
+    got = attempt_fit(fit)
     assert isinstance(got, NotImplementedError), got
 
 
@@ -426,7 +427,7 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     """
     fit = _hingemax_without_estimate()
     start = [1.0, 0.0, 0.5, 2.0]
-    got = fit.make_fit(return_exception=True, p0=start)
+    got = attempt_fit(fit, p0=start)
     assert not isinstance(got, NotImplementedError), got
     assert [v.p0 for v in fit.initial_guess_info.values()] == exact(start)
 

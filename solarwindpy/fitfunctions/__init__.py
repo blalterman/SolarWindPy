@@ -46,8 +46,11 @@ computes the optimized parameters, their covariance and
 - The covariance is the pseudo-inverse of :math:`J^T J` from the final
   Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square
   root of its diagonal.
-- With ``return_exception=True``, a failed fit returns the exception instead
-  of raising it, for loops over many fits.
+- ``results`` holds the outcome as one table: each parameter's value and
+  uncertainty, :math:`\chi^2_\nu`, :math:`R^2`, the observation counts and a
+  ``status``. A failed fit raises, but first records a row of NaN values whose
+  ``status`` names the exception, so a loop over many fits can catch the
+  exception and keep going.
 
 Failures are reported with
 :class:`~solarwindpy.fitfunctions.core.FitFunctionError` and its subclasses
