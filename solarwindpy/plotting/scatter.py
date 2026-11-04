@@ -43,7 +43,6 @@ class Scatter(base.ColorPlot):
         self._set_data(x, y, z, clip, mask=mask)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
         self.set_log(x=bool(logx), y=bool(logy))
-        self.set_path(None)
 
     def _format_axis(self, ax, collection, data):
         super()._format_axis(ax)

@@ -64,7 +64,7 @@ Z = pd.Series([r[3] for r in ROWS], index=INDEX)
 DECADES = pd.Series([1.0, 10.0, 100.0, 1000.0])
 
 # Label objects for the path tests: a plain x label and a column-normalized z
-# label, whose path ends in "norm" and so takes set_path's norm branch.
+# label, whose path ends in "norm" and so takes the path's norm branch.
 PLAIN_XLABEL = TeXlabel(("v", "x", "p1"))
 NORM_ZLABEL = TeXlabel(("n", "", "p1"), axnorm="c")
 
@@ -302,7 +302,7 @@ def test_set_labels_changes_only_the_labels_passed():
 
 
 def test_set_labels_rejects_unknown_keywords_naming_each():
-    """Any keyword other than x, y, z, auto_update_path raises ``KeyError``.
+    """Any keyword other than x, y, z raises ``KeyError``.
 
     ON FAILURE: the code is wrong.
     """
@@ -313,8 +313,8 @@ def test_set_labels_rejects_unknown_keywords_naming_each():
     assert plot.labels.x == "x"  # base.py Base.__init__: AxesLabels(x="x", y="y")
 
 
-def test_set_labels_rebuilds_the_path_unless_told_not_to():
-    """By default the save path follows the new labels; opt-out leaves it.
+def test_path_follows_the_labels_on_every_read():
+    """The save path is read from the current labels, after every change.
 
     ON FAILURE: the code is wrong.
     """
@@ -322,41 +322,37 @@ def test_set_labels_rebuilds_the_path_unless_told_not_to():
     plot.set_labels(x="vx", y="np", z="T")
     assert plot.path == _expected_path("LinePlot", "vx", "np", "T")
 
-    plot.set_labels(x="vy", auto_update_path=False)
-    assert plot.labels.x == "vy"
-    assert plot.path == _expected_path("LinePlot", "vx", "np", "T")
+    plot.set_labels(x="vy")
+    assert plot.path == _expected_path("LinePlot", "vy", "np", "T")
 
 
 # ---------------------------------------------------------------------------
-# set_path
+# path
 # ---------------------------------------------------------------------------
 
 
 def test_auto_path_is_class_then_labels_then_scale():
-    """``set_path("auto")`` builds class/x/y/z/scale, scale read at call time.
+    """``path`` is class/x/y[/z]/scale, the scale read when it is read.
 
-    Spaces become hyphens; a missing or ``"None"`` label falls back to the
-    axis name. The literal path was written by hand from reading
-    ``Base.set_path`` and ``ColorPlot.set_path`` in ``base.py``: class
-    name ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
-    ``"None"`` and ``None`` fall back to ``"y"`` and ``"z"``; ``add_scale``
-    defaults to True, giving ``"logX"`` and ``"linY"`` joined by ``"-"`` and
-    appended because ``"z"`` does not end in ``norm``.
+    Spaces become hyphens; a ``"None"`` x or y label falls back to the axis
+    name, and a None z label leaves the z part out. The literal path was
+    written by hand from reading ``Base.path`` in ``base.py``: class name
+    ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
+    ``"None"`` falls back to ``"y"``; no z part; ``"logX"`` and ``"linY"``
+    joined by ``"-"`` and appended because ``"y"`` does not end in ``norm``.
 
     ON FAILURE: the code is wrong.
     """
     plot = LinePlot(X, Y, Z)
-    plot.set_labels(x="bulk speed", y="None", z=None, auto_update_path=False)
+    plot.set_labels(x="bulk speed", y="None", z=None)
     plot.set_log(x=True)
-    plot.set_path("auto")
-    assert plot.path == _expected_path("LinePlot", "bulk-speed", "y", "z", True)
-    assert plot.path == Path("LinePlot/bulk-speed/y/z/logX-linY")  # hand-derived
+    assert plot.path == Path("LinePlot/bulk-speed/y/logX-linY")  # hand-derived
 
 
 def test_norm_label_path_ends_in_norm_and_plain_label_path_does_not():
     """The column-normalized z label reaches the norm branch; the x label not.
 
-    ``set_path`` treats a path whose last part ends in ``norm`` specially, so
+    ``path`` treats a path whose last part ends in ``norm`` specially, so
     the next test needs one label that does and one that does not.
 
     ON FAILURE: the fixture no longer separates a normalized label path from a plain one; fix the fixture.
@@ -378,28 +374,6 @@ def test_auto_path_uses_texlabel_paths_and_puts_scale_before_norm():
     plot.set_labels(x=xl, y="y", z=zl)
     norm = "{}-{}".format(_scale(False, False), zl.path.name)
     expected = Path("LinePlot", xl.path, "y", zl.path.parent, norm)
-    assert plot.path == expected
-
-
-@pytest.mark.parametrize(
-    "add_scale, expected",
-    [
-        (False, Path("figs", "run1")),
-        (True, Path("figs/run1/linX-logY")),
-    ],
-)
-def test_explicit_path_is_used_as_given_plus_optional_scale(add_scale, expected):
-    """A path other than "auto" is used verbatim; ``add_scale`` appends scale.
-
-    The expected paths were written by hand from reading ``set_path`` in
-    ``base.py``: a non-"auto" ``new`` becomes ``Path(new)``, and with linear x
-    and log y the scale tag is ``"linX"`` and ``"logY"`` joined by ``"-"``.
-
-    ON FAILURE: the code is wrong.
-    """
-    plot = LinePlot(X, Y)
-    plot.set_log(y=True)
-    plot.set_path("figs/run1", add_scale=add_scale)
     assert plot.path == expected
 
 

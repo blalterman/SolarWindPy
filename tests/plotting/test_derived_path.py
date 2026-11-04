@@ -29,7 +29,6 @@ from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from solarwindpy.solar_activity.plots import IndicatorPlot  # noqa: E402
 
-DERIVED = "the save path is stored at build time, not derived from current state"
 
 RNG = np.random.default_rng(7)
 N = 400
@@ -51,7 +50,6 @@ def _indicator_plot():
     return LinePlot(SimpleNamespace(data=data), "ssn")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_scatter_path_has_no_z_part_without_z():
     """A Scatter without z has a path of x, y and scale, with no literal z.
 
@@ -60,7 +58,6 @@ def test_scatter_path_has_no_z_part_without_z():
     assert Scatter(X, Y).path == Path("Scatter", "x", "y", "linX-linY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_scatter_path_has_a_z_part_with_z():
     """A Scatter with z has class / x / y / z / scale.
 
@@ -69,7 +66,6 @@ def test_scatter_path_has_a_z_part_with_z():
     assert Scatter(X, Y, Z).path == Path("Scatter", "x", "y", "z", "linX-linY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_scatter_path_follows_set_log():
     """``set_log`` on a Scatter changes the scale tag of its path.
 
@@ -80,7 +76,6 @@ def test_scatter_path_follows_set_log():
     assert plot.path == Path("Scatter", "x", "y", "logX-logY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_scatter_path_follows_set_labels():
     """``set_labels`` on a Scatter changes the label parts of its path.
 
@@ -91,7 +86,6 @@ def test_scatter_path_follows_set_labels():
     assert plot.path == Path("Scatter", "bulk-speed", "np", "linX-linY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_hist1d_path_carries_both_scales_and_follows_set_log():
     """A Hist1D path has both axis scales, and the y scale follows ``set_log``.
 
@@ -103,7 +97,6 @@ def test_hist1d_path_carries_both_scales_and_follows_set_log():
     assert plot.path == Path("Hist1D", "x", "count", "logX-logY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_hist1d_path_takes_the_scale_before_the_norm():
     """A normalized Hist1D count folds the scale tag before its norm part.
 
@@ -113,7 +106,6 @@ def test_hist1d_path_takes_the_scale_before_the_norm():
     assert plot.path == Path("Hist1D", "x", "count", "linX-linY-Tnorm")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_hist2d_path_follows_set_axnorm():
     """``set_axnorm`` after construction changes the norm part of the path.
 
@@ -124,7 +116,6 @@ def test_hist2d_path_follows_set_axnorm():
     assert plot.path == Path("Hist2D", "x", "y", "count", "logX-linY-Cnorm")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_spiral_path_follows_set_axnorm():
     """``set_axnorm`` on a SpiralPlot2D changes the norm part of the path.
 
@@ -135,7 +126,6 @@ def test_spiral_path_follows_set_axnorm():
     assert plot.path == Path("SpiralPlot2D", "x", "y", "count", "linX-linY-Tnorm")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_beta_r_path_follows_set_axnorm():
     """A BetaRPlot path uses its TeX label paths and follows ``set_axnorm``.
 
@@ -147,7 +137,6 @@ def test_beta_r_path_follows_set_axnorm():
     assert plot.path == Path("BetaRPlot", xl, yl, "count", "logX-logY-Rnorm")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 def test_indicator_plot_path_follows_set_log():
     """An IndicatorPlot path follows ``set_log`` without any other call.
 
@@ -158,7 +147,6 @@ def test_indicator_plot_path_follows_set_log():
     assert plot.path == Path("LinePlot", plot.labels.x.path, "y", "linX-logY")
 
 
-@pytest.mark.xfail(strict=True, reason=DERIVED)
 @pytest.mark.parametrize(
     "build",
     [

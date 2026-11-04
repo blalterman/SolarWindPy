@@ -45,10 +45,10 @@ RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
-    Holds the axis labels, the log-scale flags, and the save path that every
-    concrete plot shares. Subclasses implement ``_set_data``, which only their
-    constructors call, ``set_path`` and ``make_plot``. To plot other data,
-    build a new plot.
+    Holds the axis labels and the log-scale flags that every concrete plot
+    shares, and derives the save path from them. Subclasses implement
+    ``_set_data``, which only their constructors call, and ``make_plot``. To
+    plot other data, build a new plot.
 
     A built plot is a snapshot of its data. ``_set_data`` runs once per plot
     (``_claim_data`` raises ``ValueError`` on a second call), and pandas
@@ -60,11 +60,10 @@ class Base(ABC):
 
     @abstractmethod
     def __init__(self):
-        r"""Set default labels ``x`` and ``y``, linear axes, and an automatic path."""
+        r"""Set default labels ``x`` and ``y`` and linear axes."""
         self._init_logger()
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
-        self.set_path("auto")
 
     def __str__(self):
         return self.__class__.__name__
@@ -161,8 +160,47 @@ class Base(ABC):
 
     @property
     def path(self):
-        r"""Path for saving figure."""
-        return self._path
+        r"""Save path describing the plot as it is now.
+
+        Derived on every read, never stored: ``class / x / y [/ z] / scale``.
+        Each axis contributes its label's ``path``, or the label string with
+        spaces as hyphens; a label that is neither falls back to the axis
+        name. The z part is present only when ``labels.z`` is not None. The
+        scale tag is ``linX`` or ``logX``, then ``linY`` or ``logY``, joined
+        by ``-``. When the last part ends in ``norm`` (a normalized ``Count``
+        label, e.g. ``count/Cnorm``), the scale tag goes before it, so the
+        last part reads the x, y and z scaling in order
+        (``.../count/linX-linY-Cnorm``).
+
+        Returns
+        -------
+        pathlib.Path
+            Relative path; join it to a directory to save under, e.g.
+            ``Path("figs") / plot.path``.
+        """
+        labels = self.labels
+        parts = [self._path_part(labels.x, "x"), self._path_part(labels.y, "y")]
+        if not (labels.z is None or (isinstance(labels.z, str) and labels.z == "None")):
+            parts.append(self._path_part(labels.z, "z"))
+        path = Path(self.__class__.__name__, *parts)
+
+        scale = "{}X-{}Y".format(
+            "log" if self.log.x else "lin", "log" if self.log.y else "lin"
+        )
+        if path.name.endswith("norm"):
+            return path.with_name(f"{scale}-{path.name}")
+        return path / scale
+
+    @staticmethod
+    def _path_part(label, axis):
+        r"""One axis's part of ``path``: the label's own ``path``, or its string."""
+        try:
+            return Path(label.path)
+        except AttributeError:
+            pass
+        if isinstance(label, str) and label != "None":
+            return Path(label.replace(" ", "-"))
+        return Path(axis)
 
     def set_log(self, x=None, y=None):
         r"""Set which axes use a logarithmic scale.
@@ -251,16 +289,12 @@ class Base(ABC):
         ----------
         x, y, z : str or solarwindpy.plotting.labels.base.TeXlabel, optional
             New axis labels.
-        auto_update_path : bool, optional
-            If True (default), rebuild the save path from the new labels.
 
         Raises
         ------
         KeyError
             If any other keyword is passed.
         """
-        auto_update_path = kwargs.pop("auto_update_path", True)
-
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
         z = kwargs.pop("z", self.labels.z)
@@ -270,71 +304,6 @@ class Base(ABC):
             raise KeyError("Unexpected kwarg\n{}".format(extra))
 
         self._labels = AxesLabels(x, y, z)
-
-        if auto_update_path:
-            self.set_path("auto")
-
-    @abstractmethod
-    def set_path(self, new, add_scale=False):
-        r"""Build the plot save path.
-
-        Parameters
-        ----------
-        new : str or Path
-            If ``"auto"``, build the path from ``self.labels``. Otherwise,
-            use ``Path(new)``.
-        add_scale : bool
-            If True, add information about the axis scales to the end of the path.
-        """
-        # TODO: move "auto" methods here to iterate through `AxesLabels` named tuple
-        #       and pull the strings for creating the path. Also check for each
-        #       label's scale and add that information.
-
-        if new == "auto":
-            try:
-                x = self.labels.x.path
-            except AttributeError:
-                x = self.labels.x
-                if not (isinstance(x, str) and x != "None"):
-                    x = "x"
-                elif isinstance(x, str):
-                    x = x.replace(" ", "-")
-
-            try:
-                y = self.labels.y.path
-            except AttributeError:
-                y = self.labels.y
-                if not (isinstance(y, str) and y != "None"):
-                    y = "y"
-                elif isinstance(y, str):
-                    y = y.replace(" ", "-")
-
-            try:
-                z = self.labels.z.path
-            except AttributeError:
-                z = self.labels.z
-                if not (isinstance(z, str) and z != "None"):
-                    z = "z"
-                elif isinstance(z, str):
-                    z = z.replace(" ", "-")
-
-            path = Path(self.__class__.__name__)
-
-        elif new is None:
-            path = Path("")
-            x = y = z = None
-
-        else:
-            path = Path(new)
-            x = y = z = None
-
-        scale_info = None
-        if add_scale:
-            xscale = "logX" if self.log.x else "linX"
-            yscale = "logY" if self.log.y else "linY"
-            scale_info = [xscale, yscale]
-
-        return path, x, y, z, scale_info
 
     def _add_axis_labels(self, ax, transpose_axes=False):
         xlbl = self.labels.x
@@ -557,35 +526,6 @@ class ColorPlot(Base):
         self._store_clip(clip)
         self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
         self._bin_index = getattr(x, "index", None)
-
-    def set_path(self, new, add_scale=True):
-        # Bug: path doesn't auto-set log information.
-        path, x, y, z, scale_info = super().set_path(new, add_scale)
-
-        if new == "auto":
-            path = path / x / y / z
-
-        else:
-            assert x is None
-            assert y is None
-            assert z is None
-
-        if add_scale:
-            assert scale_info is not None
-
-            scale_info = "-".join(scale_info)
-
-            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
-                # Insert <norm> at end of path so scale order is (x, y, z).
-                path = path.parts
-                path = path[:-1] + (scale_info + "-" + path[-1],)
-                path = Path(*path)
-            else:
-                path = path / scale_info
-
-        self._path = path
-
-    set_path.__doc__ = Base.set_path.__doc__
 
     @staticmethod
     def _default_norm(axnorm):

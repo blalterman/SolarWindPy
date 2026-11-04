@@ -72,32 +72,6 @@ class IndicatorPlot(base.Base):
             pidx = pidx.min()
         return self.indicator.data.loc[pidx:, self.ykey]
 
-    def set_path(self, new, add_scale=True):
-        r"""Set the path figures are saved under.
-
-        Parameters
-        ----------
-        new : str or pathlib.Path
-            ``"auto"`` builds the path from the axis labels.
-        add_scale : bool, optional
-            If True, append the axis scales to the path.
-        """
-        path, x, y, z, scale_info = super(IndicatorPlot, self).set_path(new, add_scale)
-
-        if new == "auto":
-            path = path / x / y
-
-        else:
-            assert x is None
-            assert y is None
-
-        if add_scale:
-            assert scale_info is not None
-            scale_info = "-".join(scale_info)
-            path = path / scale_info
-
-        self._path = path
-
     def _set_data(self, indicator, ykey, plasma_index):
         r"""Set :attr:`indicator`, :attr:`ykey`, and :attr:`plasma_index`.
 

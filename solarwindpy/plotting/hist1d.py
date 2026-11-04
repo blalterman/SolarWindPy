@@ -94,25 +94,6 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
     _clipped_axes = ("x",)
     _grid_axes = ("x",)
 
-    def set_path(self, new, add_scale=True):
-        path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
-
-        if new == "auto":
-            path = path / x / y
-
-        else:
-            assert x is None
-            assert y is None
-
-        if add_scale:
-            assert scale_info is not None
-            scale_info = scale_info[0]
-            path = path / scale_info
-
-        self._path = path
-
-    set_path.__doc__ = base.Base.set_path.__doc__
-
     def _set_data(self, x, y, clip=None, mask=None, within=None):
         r"""Store x, and y aligned to it, keeping the rows with neither NaN.
 

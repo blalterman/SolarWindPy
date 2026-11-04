@@ -73,8 +73,6 @@ class BetaRPlot(Hist2D):
                 ("R", "P" if "+" in species else "T", species.replace("_bimax", ""))
             ),
         )
-
-        self.set_path("auto")
         self.set_clim(5, None)
 
     def make_plot(self, **kwargs):

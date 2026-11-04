@@ -318,18 +318,4 @@ def test_auto_path_is_built_from_class_labels_and_scales(sidc):
     assert plot.path == expected
 
     plot.set_log(y=True)
-    plot.set_path("auto")
     assert plot.path == expected.with_name("linX-logY")
-
-
-def test_explicit_path_is_used_with_or_without_scales(sidc):
-    """An explicit path is kept, with the scale suffix only when asked.
-
-    ON FAILURE: the code is wrong.
-    """
-    plot = SSNPlot(sidc)
-    plot.set_path("figures/ssn")
-    assert plot.path == Path("figures", "ssn", "linX-linY")
-
-    plot.set_path("figures/ssn", add_scale=False)
-    assert plot.path == Path("figures", "ssn")

@@ -404,7 +404,6 @@ EXEMPT = {
     "set_clim": "setter",
     "set_labels": "setter",
     "set_log": "setter",
-    "set_path": "setter",
 }
 
 

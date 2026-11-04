@@ -78,25 +78,13 @@ class TestHist1DBasicFunctionality:
         assert hist.data["x"].min() >= 0  # log10(1) = 0
         assert hist.data["x"].max() <= 2  # log10(100) = 2
 
-    def test_hist1d_set_path_auto(self):
-        """Test set_path('auto') builds path from labels."""
+    def test_hist1d_path_follows_labels(self):
+        """Test the path is built from the labels set after construction."""
         hist = Hist1D(self.x_data)
         hist.set_labels(x="density", y="count")
 
-        hist.set_path("auto")
-
         # Documented layout: class, x label, y label, scale tag.
-        assert hist.path == Path("Hist1D", "density", "count", "linX")
-
-    def test_hist1d_set_path_custom(self):
-        """Test set_path('custom', add_scale=False) sets _path to Path('custom')."""
-        from pathlib import Path
-
-        hist = Hist1D(self.x_data)
-        hist.set_path("custom", add_scale=False)
-
-        # Should have the custom path
-        assert hist.path == Path("custom")
+        assert hist.path == Path("Hist1D", "density", "count", "linX-linY")
 
     def test_hist1d_with_y_and_clipping(self):
         """Hist1D(x, y, clip=True) stores columns x and y, and clips x."""
