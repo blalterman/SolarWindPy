@@ -51,6 +51,25 @@ def test_every_result_raises_not_fitted_before_make_fit(name):
         READS[name](_line())
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="FitFunction.error returns None before a fit; remove this marker when "
+    "it raises NotFittedError like every other result",
+)
+def test_error_raises_not_fitted_before_make_fit():
+    """``error`` is a result too: before ``make_fit`` it raises, after one it is set.
+
+    None before a fit would read as "no failure", the answer a success gives.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _line()
+    with pytest.raises(NotFittedError, match="make_fit"):
+        fit.error
+    fit.make_fit()
+    assert fit.error is None
+
+
 def test_not_fitted_is_an_attribute_error():
     """NotFittedError is an AttributeError, so ``hasattr`` reports a missing result.
 
