@@ -159,7 +159,7 @@ CASES = [
         lambda p, t: t.cross_helicity,
         "M",
         True,
-        _author("cross helicity is `cross_helicity` (method) and `xhel` (TeX key)"),
+        _UNNAMED,
     ),
     (
         _AT,
@@ -167,7 +167,7 @@ CASES = [
         lambda p, t: t.rA,
         "M",
         True,
-        _author("the Alfven ratio is `rA` (method) and `ra` (TeX key)"),
+        _UNNAMED,
     ),
     (
         _AT,
@@ -175,9 +175,7 @@ CASES = [
         lambda p, t: t.rE,
         "M",
         True,
-        _author(
-            "the Elsasser ratio is `rE` (method) and `re` (TeX key, also Earth radii)"
-        ),
+        _UNNAMED,
     ),
 ]
 
