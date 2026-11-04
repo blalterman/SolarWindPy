@@ -244,3 +244,53 @@ def test_load_from_file_passes_extra_keywords_to_plasma(tmp_path):
         fname, sckey=None, akey=None, auxiliary_data=aux
     )
     pdt.assert_frame_equal(loaded.aux, aux)
+
+
+_O9C = (
+    "author's ruling o9c: sc and aux are written under the names they are read "
+    "by (set_sc, set_aux, sc=, aux=, auxkey=); remove this marker when it lands"
+)
+
+
+@pytest.mark.xfail(strict=True, reason=_O9C)
+def test_sc_and_aux_are_written_under_the_names_they_are_read_by():
+    """``plasma.sc`` and ``plasma.aux`` are set by ``set_sc`` and ``set_aux``.
+
+    The constructor takes ``sc=`` and ``aux=``, and ``save`` and
+    ``load_from_file`` take ``auxkey=`` beside ``sckey=``. The long names are
+    gone.
+
+    ON FAILURE: the code is wrong.
+    """
+    import inspect
+
+    cls = plasma.Plasma
+    assert hasattr(cls, "set_sc") and hasattr(cls, "set_aux")
+    assert not hasattr(cls, "set_spacecraft")
+    assert not hasattr(cls, "set_auxiliary_data")
+    init = inspect.signature(cls.__init__).parameters
+    assert {"sc", "aux"} <= set(init)
+    assert not {"spacecraft", "auxiliary_data"} & set(init)
+    for method in (cls.save, cls.load_from_file):
+        params = inspect.signature(method).parameters
+        assert {"sckey", "auxkey"} <= set(params)
+        assert "akey" not in params
+
+
+@pytest.mark.xfail(strict=True, reason=_O9C)
+def test_sc_and_aux_keywords_round_trip_at_a_chosen_aux_key(tmp_path):
+    """A plasma built with ``sc=`` and ``aux=`` saves and loads at ``auxkey``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _example_plasma()
+    built = plasma.Plasma(p.data, *p.species, sc=p.sc, aux=p.aux)
+    fname = tmp_path / "plasma.h5"
+    built.save(fname, auxkey="AUX")
+    with pd.HDFStore(fname, mode="r") as store:
+        assert sorted(store.keys()) == ["/AUX", "/FC", "/SC"]
+    loaded = plasma.Plasma.load_from_file(
+        fname, auxkey="AUX", sc_name=SC_NAME, sc_frame=SC_FRAME
+    )
+    _assert_same_frame(loaded.sc.data, p.sc.data)
+    _assert_same_frame(loaded.aux, p.aux)
