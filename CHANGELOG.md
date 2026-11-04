@@ -427,8 +427,6 @@ These change computed values; rerun any analysis that used them.
   plot label. The previous factor produced values in units of 1e-7 W m^-2 while the
   label said mW cm^-2, a factor of 1e8 apart; values are now 10 times smaller than
   before.
-- `Ion.specific_entropy` / `Plasma.specific_entropy` is now in eV cm^2 m_p^-5/3 as
-  labelled. Values were 9.2 times too small; ratios and trends are unchanged.
 - `Ion.kinetic_energy_flux` / `Plasma.kinetic_energy_flux` raised `AttributeError` on
   every call; it now returns uW m^-2.
 - `Hist2D.id_data_above_contour` no longer raises `TypeError: Categorical is not ordered
