@@ -93,7 +93,7 @@ dependencies = [
   "astropy>=8",        # one download-cache location, ~/.cache/solarwindpy
   "numba>=0.59",       # Minimum for NumPy 2.0 support
   "tabulate>=0.9",
-  "docstring-inheritance>=3.0,<4",  # 3.x: inheritance switched on by solarwindpy/__init__.py
+  "docstring-inheritance>=3.0,<4",  # 3.x: inheritance switched on by src/solarwindpy/__init__.py
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",

@@ -10,6 +10,9 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 - A stale env produces failures that look like code bugs. Before debugging a surprising failure,
   check that the env imports this checkout and a pandas inside the `pyproject.toml` range:
   `conda run -n solarwindpy python -c "import solarwindpy, pandas; print(solarwindpy.__file__, pandas.__version__)"`
+- The editable install maps `solarwindpy` to one checkout's `src/`. In any other worktree,
+  prefix commands with `PYTHONPATH=$PWD/src`, `git commit` included because its hook runs the
+  suite; without it they test the other checkout.
 - Rebuild the env: `solarwindpy.yml` leaves the Python version to CI, so pin it in a copy
   (`python=3.12`) and run `conda env create -f <copy>`, then
   `conda run -n solarwindpy pip install -e ".[dev]"`. Plain `pip install -e .` leaves out
@@ -26,7 +29,7 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 - Format and lint at the versions CI pins:
   `conda run -n solarwindpy pre-commit run ruff-check --files <paths>` and
   `conda run -n solarwindpy pre-commit run ruff-format --files <paths>`.
-- Doctests: `conda run -n solarwindpy pytest --doctest-modules solarwindpy -q`
+- Doctests: `conda run -n solarwindpy pytest --doctest-modules src/solarwindpy -q`
 - The pre-commit hook runs the full suite with a coverage floor in
   `.claude/hooks/pre-commit-tests.sh`. The floor is a ratchet below measured coverage, not a
   target; raise it as coverage rises.
@@ -64,5 +67,5 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 
 - `tests/test_hooks.py` checks `.claude/settings.json`: documented keys only, no hooks
   registered, and pushes ask first. Change both together.
-- Untracked directories inside `solarwindpy/` belong to the author. Do not edit, move, or commit
+- Untracked directories inside `src/solarwindpy/` belong to the author. Do not edit, move, or commit
   them.

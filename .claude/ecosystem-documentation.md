@@ -156,9 +156,9 @@ cp .claude/backups/LATEST_BACKUP .claude/settings.local.json
 ### Routing Logic
 
 **File Patterns:**
-- `solarwindpy/core/*.py` → DataFrameArchitect
-- `solarwindpy/instabilities/*.py` → FitFunctionSpecialist
-- `solarwindpy/plotting/*.py` → PlottingEngineer
+- `src/solarwindpy/core/*.py` → DataFrameArchitect
+- `src/solarwindpy/instabilities/*.py` → FitFunctionSpecialist
+- `src/solarwindpy/plotting/*.py` → PlottingEngineer
 - `tests/*.py` → TestEngineer
 
 **Keywords:**
