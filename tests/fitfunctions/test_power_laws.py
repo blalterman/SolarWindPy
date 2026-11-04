@@ -199,6 +199,30 @@ def test_power_law_plus_c_perfect_fit():
     assert obj(x) == noise_free(y)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="o27: the added constant is renamed c -> y0; "
+    "remove this marker when the rename lands",
+)
+def test_power_law_plus_c_names_its_constant_y0():
+    """PowerLawPlusC calls its added constant ``y0``, and no parameter ``c``.
+
+    An old ``popt["c"]`` must raise KeyError. Data are 16 x^-2 + 2 at
+    x = 1, 2, 4, 8: 18, 6, 3, 2.25.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawPlusC(x, np.array([18.0, 6.0, 3.0, 2.25]))
+    obj.make_fit()
+
+    assert set(obj.popt) == {"A", "alpha", "y0"}
+    assert obj.popt["y0"] == noise_free(2.0)
+    with pytest.raises(KeyError):
+        obj.popt["c"]
+    assert obj.TeX_function == r"f(x)=A x^{\alpha} + y_0"
+
+
 def test_power_law_off_center_perfect_fit():
     """PowerLawOffCenter recovers A = 4, alpha = 2, x0 = 1 from 4, 16, 64, 256.
 

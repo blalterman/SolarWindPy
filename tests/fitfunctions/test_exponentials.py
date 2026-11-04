@@ -95,6 +95,30 @@ def test_exponential_plus_c_p0_estimation():
     assert obj.popt["c"] == noise_free(0.5)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="o27: the added constant is renamed c -> y0; "
+    "remove this marker when the rename lands",
+)
+def test_exponential_plus_c_names_its_constant_y0():
+    """ExponentialPlusC calls its added constant ``y0``, and no parameter ``c``.
+
+    The rate was once ``c``, so an old ``popt["c"]`` must raise KeyError rather
+    than silently return the constant. Data are 3 exp(-0.8 x) + 0.5.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.linspace(0, 3, 30)
+    obj = ExponentialPlusC(x, 3.0 * np.exp(-0.8 * x) + 0.5)
+    obj.make_fit()
+
+    assert set(obj.popt) == {"k", "A", "y0"}
+    assert obj.popt["y0"] == noise_free(0.5)
+    with pytest.raises(KeyError):
+        obj.popt["c"]
+    assert obj.TeX_function == r"f(x)=A \cdot e^{-kx} + y_0"
+
+
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
