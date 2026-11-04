@@ -179,6 +179,39 @@ def assert_set_equal(
         )
 
 
+def assert_extrema_listed(
+    pinned: Mapping[tuple, str],
+    observed: Mapping[tuple, str],
+    *,
+    fact: str = "every published extremum is pinned unchanged",
+    location: str = "",
+    remedy: str = "",
+) -> None:
+    """Assert each ``observed`` extremum is in ``pinned`` with the same value.
+
+    Both map ``(cycle, kind)`` to a ``"YYYY-MM"`` string. A pinned extremum
+    the source does not list yet is allowed; one the source lists that is
+    absent from, or different in, ``pinned`` fails.
+    """
+    missing = {k: v for k, v in observed.items() if k not in pinned}
+    changed = {
+        k: (pinned[k], v) for k, v in observed.items() if k in pinned and pinned[k] != v
+    }
+    if missing or changed:
+        raise AssertionError(
+            drift_message(
+                fact=fact,
+                pinned=f"{len(pinned)} extrema",
+                observed=(
+                    f"not pinned={dict(sorted(missing.items()))!r} "
+                    f"changed (pinned, observed)={dict(sorted(changed.items()))!r}"
+                ),
+                location=location,
+                remedy=remedy,
+            )
+        )
+
+
 def find_line_index(path, prefix: str) -> Optional[int]:
     """Return the 0-based index of the first line starting with ``prefix``.
 
