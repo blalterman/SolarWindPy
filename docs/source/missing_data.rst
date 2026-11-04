@@ -40,7 +40,7 @@ average over the species present.
 
 A quantity built from a pair of species needs both. The combined thermal speed
 and the mass-density ratio in :py:meth:`~solarwindpy.core.plasma.Plasma.nuc`,
-and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdynamic`, are
+and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdv`, are
 NaN at a time when either species is missing.
 
 Thermal speeds do not add across species, so

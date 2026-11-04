@@ -1384,7 +1384,7 @@ species: {}
 
         return dv
 
-    def pdynamic(self, *species, project_m2q=False):
+    def pdv(self, *species, project_m2q=False):
         r"""Calculate the dynamic or drift pressure for the given species.
 
             :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
@@ -1442,13 +1442,9 @@ species: {}
             pdv = dvsq.multiply(mu, axis=0)
 
         pdv = pdv.multiply(const)
-        pdv.name = "pdynamic"
+        pdv.name = "pdv"
 
         return pdv
-
-    def pdv(self, *species, project_m2q=False):
-        r"""Shortcut to :py:meth:`pdynamic`."""
-        return self.pdynamic(*species, project_m2q=project_m2q)
 
     def cs(self, *species):
         r"""Calculate the sound speed.
@@ -1507,7 +1503,7 @@ species: {}
 
         return ca
 
-    def afsq(self, *species, pdynamic=False):
+    def afsq(self, *species, pdv=False):
         r"""Calculate the square of anisotropy factor.
 
             :math:`AF^2 = 1 + \frac{\mu_0}{B^2}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`
@@ -1528,7 +1524,7 @@ species: {}
             contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
-        pdynamic: bool, str
+        pdv: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 
@@ -1537,7 +1533,7 @@ species: {}
         afsq : pd.Series or pd.DataFrame
             Depends on the number of `species` passed.
         """
-        if pdynamic:
+        if pdv:
             raise NotImplementedError(
                 "Youngest beams analysis shows "
                 "that dynamic pressure is probably not useful."
@@ -1564,7 +1560,7 @@ species: {}
 
         return afsq
 
-    def caani(self, *species, pdynamic=False):
+    def caani(self, *species, pdv=False):
         r"""
         Calculate the anisotropic MHD Alfven speed:
 
@@ -1578,7 +1574,7 @@ species: {}
             a pd.Series is returned. This addresses complications from
             combining the mass density in :py:meth:`ca` with the pressures in
             :py:meth:`afsq`, the latter via :py:meth:`pth`.
-        pdynamic: bool, str
+        pdv: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 
@@ -1596,7 +1592,7 @@ species: {}
         ssum = "+".join(stuple)
 
         ca = self.ca(ssum)
-        afsq = self.afsq(ssum, pdynamic=pdynamic)
+        afsq = self.afsq(ssum, pdv=pdv)
         caani = ca.multiply(afsq.pipe(np.sqrt))
 
         return caani

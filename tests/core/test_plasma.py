@@ -785,7 +785,7 @@ class PlasmaTestBase(ABC):
         r"""Squared anisotropy factor AF^2 = 1 + mu_0 (p_perp - p_par) / B^2.
 
         ON FAILURE: the code is wrong, unless the author rejects the form of AF^2
-        recomputed here. Only the `pdynamic=False` branch is exercised, so the
+        recomputed here. Only the `pdv=False` branch is exercised, so the
         -p_dv term in `Plasma.afsq` is not covered. That expression carries no
         citation in either this test or `plasma.py`, so a disagreement in the
         expression itself is the author's call.
@@ -817,11 +817,11 @@ class PlasmaTestBase(ABC):
 
         for combo in self.species_combinations:
             with self.assertRaisesRegex(NotImplementedError, msg):
-                self.object_testing.afsq(*combo, pdynamic=True)
+                self.object_testing.afsq(*combo, pdv=True)
             if len(combo) == 1:
                 pdt.assert_series_equal(
                     ions_.loc[:, combo[0]],
-                    self.object_testing.afsq(*combo, pdynamic=False),
+                    self.object_testing.afsq(*combo, pdv=False),
                 )
             else:
                 pdt.assert_frame_equal(
@@ -887,9 +887,9 @@ class PlasmaTestBase(ABC):
                 self.object_testing.caani("+".join(combo)),
             )
             with self.assertRaisesRegex(NotImplementedError, regex_msg):
-                self.object_testing.caani(*combo, pdynamic=True)
+                self.object_testing.caani(*combo, pdv=True)
             with self.assertRaisesRegex(NotImplementedError, regex_msg):
-                self.object_testing.caani("+".join(combo), pdynamic=True)
+                self.object_testing.caani("+".join(combo), pdv=True)
 
     def test_lnlambda(self):
         r"""Coulomb logarithm between two species, and its species-argument contract.
@@ -1345,7 +1345,7 @@ class PlasmaTestBase(ABC):
                 "There should not be e- data in plasma data.",
             )
 
-    def test_pdynamic_without_m2q_projection(self):
+    def test_pdv_without_m2q_projection(self):
         r"""Dynamic pressure p_dv = (1/2) sum_s rho_s (v_s - v_com)^2.
 
         ON FAILURE: the code is wrong; the expectation is recomputed here from
@@ -1356,7 +1356,7 @@ class PlasmaTestBase(ABC):
         if len(slist) == 1:
             msg = "Must have >1 species to calculate dynamic pressure."
             with self.assertRaisesRegex(ValueError, msg):
-                self.object_testing.pdynamic(*slist)
+                self.object_testing.pdv(*slist)
             return None  # Exit test.
 
         v = self.data.v
@@ -1381,7 +1381,7 @@ class PlasmaTestBase(ABC):
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
-                    ot.pdynamic(*combo)
+                    ot.pdv(*combo)
                 continue  # Skip this test case.
 
             scom = "+".join(combo)
@@ -1405,39 +1405,36 @@ class PlasmaTestBase(ABC):
             )  # [m_p] * [n] * [dv]**2 / [p]
             pdv = dvsq_rho.multiply(const)
 
-            pdv.name = "pdynamic"
-            pdt.assert_series_equal(pdv, ot.pdynamic(*combo))
+            pdv.name = "pdv"
             pdt.assert_series_equal(pdv, ot.pdv(*combo))
-            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdv(*combo))
-            pdt.assert_series_equal(ot.pdv(*combo), ot.pdynamic(*combo))
-            pdt.assert_series_equal(ot.pdynamic(*combo), pdv)
-            pdt.assert_series_equal(ot.pdynamic(*combo), ot.pdynamic(*combo[::-1]))
+            pdt.assert_series_equal(ot.pdv(*combo), pdv)
+            pdt.assert_series_equal(ot.pdv(*combo), ot.pdv(*combo[::-1]))
 
             invalid_msg = "Invalid species"
             # dynamic pressure shouldn't work with a comma separated list or sub-list.
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(",".join(combo))
+                ot.pdv(",".join(combo))
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(",".join(combo), combo[0])
+                ot.pdv(",".join(combo), combo[0])
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(combo[0], ",".join(combo))
+                ot.pdv(combo[0], ",".join(combo))
 
             # dynamic pressure should work with sum of species, but not a sub-list
             # that includes a sum.
-            pdt.assert_series_equal(pdv, self.object_testing.pdynamic(scom))
+            pdt.assert_series_equal(pdv, self.object_testing.pdv(scom))
 
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(combo[0], scom)
+                ot.pdv(combo[0], scom)
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(scom, combo[0])
+                ot.pdv(scom, combo[0])
 
             # dynamic pressure should fail when each element is a sum or comma list.
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(scom, ",".join(combo))
+                ot.pdv(scom, ",".join(combo))
             with self.assertRaisesRegex(ValueError, invalid_msg):
-                ot.pdynamic(",".join(combo), scom)
+                ot.pdv(",".join(combo), scom)
 
-    def test_pdynamic_with_m2q_projection(self):
+    def test_pdv_with_m2q_projection(self):
         r"""Dynamic pressure in reduced-mass form, p_dv = (1/2) mu dv^2.
 
         ON FAILURE: the code is wrong in the reduced-mass form. The projected dv is
@@ -1448,7 +1445,7 @@ class PlasmaTestBase(ABC):
         if len(slist) == 1:
             msg = "Must have >1 species to calculate dynamic pressure."
             with self.assertRaisesRegex(ValueError, msg):
-                self.object_testing.pdynamic(*slist)
+                self.object_testing.pdv(*slist)
             return None  # Exit test.
 
         # Neither `n` nor `rho` units b/c Vcom divides out
@@ -1471,7 +1468,7 @@ class PlasmaTestBase(ABC):
             if len(combo) == 1:
                 msg = "Must have >1 species to calculate dynamic pressure."
                 with self.assertRaisesRegex(ValueError, msg):
-                    self.object_testing.pdynamic(*combo)
+                    self.object_testing.pdv(*combo)
                 continue  # Skip this test case.
 
             elif len(combo) == 2:
@@ -1479,53 +1476,48 @@ class PlasmaTestBase(ABC):
                 rho_s = rho.loc[:, combo]
                 mu = rho_s.product(axis=1).divide(rho_s.sum(axis=1))
                 pdv = dvsq.multiply(mu, axis=0).multiply(const)
-                pdv.name = "pdynamic"
+                pdv.name = "pdv"
 
-                pdt.assert_series_equal(pdv, ot.pdynamic(*combo, project_m2q=True))
                 pdt.assert_series_equal(pdv, ot.pdv(*combo, project_m2q=True))
-                pdt.assert_series_equal(
-                    ot.pdv(*combo, project_m2q=True),
-                    ot.pdynamic(*combo, project_m2q=True),
-                )
 
                 for s in combo:
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(scom, s, project_m2q=True)
+                        ot.pdv(scom, s, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(s, scom, project_m2q=True)
+                        ot.pdv(s, scom, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(comma, s, project_m2q=True)
+                        ot.pdv(comma, s, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(s, comma, project_m2q=True)
+                        ot.pdv(s, comma, project_m2q=True)
 
             elif len(combo) == 3:
                 for s in combo:
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(scom, s, project_m2q=True)
+                        ot.pdv(scom, s, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(s, scom, project_m2q=True)
+                        ot.pdv(s, scom, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(comma, s, project_m2q=True)
+                        ot.pdv(comma, s, project_m2q=True)
                     with self.assertRaisesRegex(ValueError, invalid_msg):
-                        ot.pdynamic(s, comma, project_m2q=True)
+                        ot.pdv(s, comma, project_m2q=True)
 
             else:
                 raise NotImplementedError("Unrecognized combo length: {}".format(combo))
 
             for s in combo:
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.pdynamic(comma, s, project_m2q=True)
+                    ot.pdv(comma, s, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.pdynamic(s, comma, project_m2q=True)
+                    ot.pdv(s, comma, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.pdynamic(scom, s, project_m2q=True)
+                    ot.pdv(scom, s, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.pdynamic(s, scom, project_m2q=True)
+                    ot.pdv(s, scom, project_m2q=True)
 
             with self.assertRaisesRegex(ValueError, "Invalid species"):
-                ot.pdynamic(scom, comma, project_m2q=True)
+                ot.pdv(scom, comma, project_m2q=True)
             with self.assertRaisesRegex(ValueError, "Invalid species"):
-                ot.pdynamic(comma, scom, project_m2q=True)
+                ot.pdv(comma, scom, project_m2q=True)
 
     def test_heatflux(self):
         r"""Parallel heat flux q_par = rho (dv_par^3 + (3/2) dv_par w_par^2).
@@ -2688,7 +2680,7 @@ def test_afsq_follows_the_two_level_missing_data_rule():
     assert each.loc[:, "p2"].iloc[1:].isna().all()
 
 
-def test_pdynamic_follows_the_two_level_missing_data_rule():
+def test_pdv_follows_the_two_level_missing_data_rule():
     r"""p_dyn = 1/2 sum_s rho_s |v_s - v_cm|^2 over species with a full velocity.
 
     p1: 3 cm^-3 at (400, 0, 0); p2: 1 cm^-3 at (600, 0, 0) km/s, both of proton
@@ -2711,12 +2703,12 @@ def test_pdynamic_follows_the_two_level_missing_data_rule():
     p = _hand_plasma(rows, "p1", "p2")
     row0 = 0.5 * 30000.0 * PER_CC * M_P * KM**2 / 1e-12  # in 1e-12 Pa
 
-    pdv = p.pdynamic("p1", "p2")
+    pdv = p.pdv("p1", "p2")
     assert pdv.iloc[0] == exact(row0)
     assert pdv.iloc[1] == 0.0
     assert np.isnan(pdv.iloc[2])
 
-    m2q = p.pdynamic("p1", "p2", project_m2q=True)
+    m2q = p.pdv("p1", "p2", project_m2q=True)
     assert m2q.iloc[0] == exact(row0)
     assert m2q.iloc[1:].isna().all()
 
@@ -2818,13 +2810,13 @@ def test_density_totals_are_nan_where_no_species_is_present():
 
 
 def test_pair_quantities_are_nan_where_either_species_is_missing():
-    r"""`nuc` and `pdynamic(project_m2q=True)` need both species at a time.
+    r"""`nuc` and `pdv(project_m2q=True)` need both species at a time.
 
     Row 0 is `NUC_ROWS[0]`; on row 1 the alphas lack w_par, so per the author
     the alphas are invalid there and every pair quantity is NaN: `nuc`'s
     W_ab = sqrt(w_a^2 + w_b^2) and rho_a / rho_b, and the reduced mass
-    rho_a rho_b / (rho_a + rho_b) in `pdynamic` (docs page `missing_data`). Row 0
-    stays finite. Without species masking, `pdynamic` ignores the missing w_par
+    rho_a rho_b / (rho_a + rho_b) in `pdv` (docs page `missing_data`). Row 0
+    stays finite. Without species masking, `pdv` ignores the missing w_par
     and returns a number on row 1. Once the alphas are masked, other factors (lnL,
     the drift) also carry their NaN, so this pins the result rather than
     isolating the pair sums.
@@ -2837,7 +2829,7 @@ def test_pair_quantities_are_nan_where_either_species_is_missing():
     for result in (
         p.nuc("a", "p1", both_species=False),
         p.nuc("a", "p1", both_species=True),
-        p.pdynamic("a", "p1", project_m2q=True),
+        p.pdv("a", "p1", project_m2q=True),
     ):
         assert np.isfinite(result.iloc[0])
         assert np.isnan(result.iloc[1])

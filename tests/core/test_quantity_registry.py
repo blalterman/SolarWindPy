@@ -93,14 +93,6 @@ CASES = [
     (_P, "R", lambda p, t: p.R("p1"), "M", False, None),
     (_P, "dv", lambda p, t: p.dv("p1", "a"), "M", False, None),
     (_P, "pdv", lambda p, t: p.pdv("p1", "a"), "M", False, None),
-    (
-        _P,
-        "pdynamic",
-        lambda p, t: p.pdynamic("p1", "a"),
-        "M",
-        False,
-        _author("dynamic pressure is `pdynamic` (.name) and `pdv` (TeX key)"),
-    ),
     (_P, "cs", lambda p, t: p.cs("p1"), "M", False, None),
     (_P, "ca", lambda p, t: p.ca("p1"), "M", False, None),
     (_P, "afsq", lambda p, t: p.afsq("p1"), "M", False, None),
@@ -367,7 +359,7 @@ _RULED = "the author ruled this name; the code follows in the next commit"
 @pytest.mark.parametrize(
     "alias",
     [
-        pytest.param("pdynamic", marks=_xfail(_RULED)),
+        "pdynamic",
         pytest.param("heat_flux", marks=_xfail(_RULED)),
     ],
 )
@@ -381,7 +373,6 @@ def test_plasma_has_one_name_per_quantity(alias):
     assert not hasattr(plasma.Plasma, alias)
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 @pytest.mark.parametrize("method", ["afsq", "caani"])
 def test_dynamic_pressure_keyword_is_pdv(plasma, method):
     """The keyword that would add dynamic pressure is ``pdv=``, the method's name.
