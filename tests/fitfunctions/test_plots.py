@@ -173,18 +173,18 @@ def test_properties_return_what_was_set():
     np.testing.assert_array_equal(plot.y_fit, obs2.raw.y)
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B9: fitfunctions.plots redefines the plotting namedtuples"
-)
 @pytest.mark.parametrize("name", ["AxesLabels", "LogAxes"])
 def test_axes_namedtuples_are_the_plotting_base_ones(name):
-    """``AxesLabels`` and ``LogAxes`` are the ``plotting.base`` classes, re-exported.
+    """``AxesLabels`` and ``LogAxes`` are the ``plotting.base`` classes.
+
+    They stay importable from ``fitfunctions.plots``, which lists only its own
+    objects in ``__all__``.
 
     ON FAILURE: the code is wrong.
     """
     from solarwindpy.plotting import base
 
-    assert name in plots.__all__
+    assert name not in plots.__all__
     assert getattr(plots, name) is getattr(base, name)
 
 

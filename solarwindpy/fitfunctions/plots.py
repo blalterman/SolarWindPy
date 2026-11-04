@@ -6,8 +6,6 @@ models, residuals and associated annotations.
 """
 
 __all__ = [
-    "AxesLabels",
-    "LogAxes",
     "FFPlot",
 ]
 
@@ -17,11 +15,9 @@ import numpy as np
 import matplotlib as mpl
 
 from pathlib import Path
-from collections import namedtuple
 from matplotlib import pyplot as plt
 
-AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
-LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
+from ..plotting.base import AxesLabels, LogAxes
 
 # The single source of FFPlot's default styles. Each plot method merges the
 # caller's normalised Line2D keywords over its entry, so a caller's keyword
