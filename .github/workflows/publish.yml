@@ -134,7 +134,7 @@ jobs:
       - name: Run full test suite
         run: |
           pip install pre-commit
-          pre-commit run flake8 --files $(git ls-files 'solarwindpy/*.py')
+          pre-commit run ruff-check --files $(git ls-files 'solarwindpy/*.py')
           pytest -q
       
       - name: Build package

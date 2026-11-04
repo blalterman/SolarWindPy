@@ -15,8 +15,7 @@ updates:
       development:
         patterns:
           - "pytest*"
-          - "black"
-          - "flake8*"
+          - "ruff"
           - "doc8"
       documentation:
         patterns:

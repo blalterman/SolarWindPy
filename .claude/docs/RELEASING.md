@@ -42,15 +42,15 @@ python scripts/check_release_ready.py
 pytest -v
 
 # Check code quality (production code only)
-flake8 solarwindpy/
+ruff check solarwindpy/
 
 # Apply code formatting if needed
-black solarwindpy/ tests/
+ruff format solarwindpy/ tests/
 ```
 
 **Expected Results**:
 - ✅ All tests pass
-- ✅ No flake8 warnings in `solarwindpy/` (production code)
+- ✅ No ruff check warnings in `solarwindpy/` (production code)
 - ⚠️ Test code warnings acceptable (tracked separately via GitHub Issues)
 - ✅ Coverage ≥95% (see [DEVELOPMENT.md](./DEVELOPMENT.md#testing-automated--testengineer-agent))
 
@@ -461,16 +461,16 @@ git add .gitignore
 git commit -m "chore: add tmp/ to .gitignore"
 ```
 
-### Issue: Flake8 Warnings in Tests
+### Issue: Lint Warnings in Tests
 
-**Symptom**: `check_release_ready.py` reports flake8 warnings
+**Symptom**: `check_release_ready.py` reports ruff check warnings
 
 **Decision**:
 - Production code (`solarwindpy/`) must be clean
 - Test code warnings acceptable (CI only checks production)
 - Create tracking issue for test code cleanup
 
-**Rationale**: Publish workflow runs `flake8 solarwindpy/` (not `flake8 tests/`)
+**Rationale**: Publish workflow runs `ruff check` on `solarwindpy/` (not `tests/`)
 
 **Code Quality Standards**: See [DEVELOPMENT.md](./DEVELOPMENT.md#code-quality-standards) for comprehensive linting and formatting requirements.
 
@@ -536,7 +536,7 @@ Use this checklist for each release:
 
 ### Pre-Release
 - [ ] All tests passing locally (`pytest -v`)
-- [ ] Production code linting clean (`flake8 solarwindpy/`)
+- [ ] Production code linting clean (`ruff check solarwindpy/`)
 - [ ] Coverage ≥95% ([DEVELOPMENT.md](./DEVELOPMENT.md#testing-automated--testengineer-agent))
 - [ ] CHANGELOG.md updated with version section
 - [ ] CHANGELOG committed and pushed

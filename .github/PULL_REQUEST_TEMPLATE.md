@@ -21,8 +21,8 @@
 ## Code Quality
 
 - [ ] Code follows NumPy docstring conventions
-- [ ] Formatted with black (`black solarwindpy/ tests/`)
-- [ ] Linted with flake8 (`flake8 solarwindpy/ tests/`)
+- [ ] Formatted with ruff (`ruff format solarwindpy/ tests/`)
+- [ ] Linted with ruff (`ruff check solarwindpy/ tests/`)
 - [ ] Conventional commit messages used
 - [ ] Documentation built locally without warnings (`cd docs && make html`)
 - [ ] `doc8` check passed

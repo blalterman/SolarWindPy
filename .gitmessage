@@ -17,7 +17,7 @@
 # [ ] Tests added/updated (coverage at or above the pre-commit hook's floor)
 # [ ] Physics validation passed (if applicable)
 # [ ] Documentation updated (docstrings, README)
-# [ ] Code formatted (black) and linted (flake8)
+# [ ] Code formatted (ruff format) and linted (ruff check)
 # [ ] External code attributed (if applicable)
 # [ ] Algorithm citations added (if applicable)
 # [ ] Backward compatibility maintained

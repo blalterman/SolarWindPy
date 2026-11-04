@@ -24,7 +24,6 @@ dependencies:
 - astropy
 - astropy-iers-data
 - babel
-- black
 - python-blosc2
 - bottleneck
 - certifi
@@ -39,8 +38,6 @@ dependencies:
 - docstring-inheritance
 - docutils
 - filelock
-- flake8
-- flake8-docstrings
 - fonttools
 - h5py
 - identify
@@ -53,7 +50,6 @@ dependencies:
 - llvmlite
 - markupsafe
 - matplotlib
-- mccabe
 - msgpack-python
 - mypy_extensions
 - ndindex
@@ -72,11 +68,8 @@ dependencies:
 - py-cpuinfo
 - pybtex
 - pybtex-docutils
-- pycodestyle
-- pydocstyle
 - pyenchant
 - pyerfa
-- pyflakes
 - pygments
 - pyparsing
 - pytest
@@ -88,6 +81,7 @@ dependencies:
 - requests
 - restructuredtext_lint
 - roman-numerals
+- ruff
 - roman-numerals-py
 - scipy
 - six

@@ -24,8 +24,8 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 - Network and slow tests are skipped unless you pass `--run-drift` or set `SWP_RUN_DRIFT=1`.
 - Import layering: `conda run -n solarwindpy lint-imports`
 - Format and lint at the versions CI pins:
-  `conda run -n solarwindpy pre-commit run black --files <paths>` and
-  `conda run -n solarwindpy pre-commit run flake8 --files <paths>`.
+  `conda run -n solarwindpy pre-commit run ruff-check --files <paths>` and
+  `conda run -n solarwindpy pre-commit run ruff-format --files <paths>`.
 - Doctests: `conda run -n solarwindpy pytest --doctest-modules solarwindpy -q`
 - The pre-commit hook runs the full suite with a coverage floor in
   `.claude/hooks/pre-commit-tests.sh`. The floor is a ratchet below measured coverage, not a

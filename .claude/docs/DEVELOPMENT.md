@@ -66,8 +66,8 @@ git add pyproject.toml
 ```
 
 ## Code Quality Standards
-- **Formatting**: Black for code formatting (88 characters)
-- **Linting**: Flake8 for style checking (88 characters)
+- **Formatting**: `ruff format` (88 characters)
+- **Linting**: `ruff check`, with pycodestyle, pyflakes, mccabe and numpy-convention pydocstyle rules
 - **Documentation**: NumPy-style docstrings with doc8 validation (100 characters)
 - **Commits**: Conventional Commits format; AI-written commits carry the `Co-Authored-By` trailer
 - **Testing**: All tests must pass before committing
@@ -118,7 +118,7 @@ References
 ### Documentation Standards (doc8)
 
 **Line Length Guidelines**:
-- **Code lines**: 88 characters (black/flake8)
+- **Code lines**: 88 characters (ruff)
 - **Documentation lines**: 100 characters (doc8)
 
 **Scientific Documentation Best Practices**:

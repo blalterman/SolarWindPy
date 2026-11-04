@@ -1,15 +1,37 @@
-[tool.black]
-target-version = ["py312"]
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.eggs
-  | \.
-  | build
-  | dist
-)/
-'''
+# Ruff is the linter and formatter, for Python sources only (not notebooks or
+# Markdown code blocks). Lint rules: pycodestyle (E, W), pyflakes (F), mccabe
+# (C90) and pydocstyle (D) under the numpy convention.
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+include = ["*.py", "*.pyi"]
+extend-exclude = ["__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "C90", "D"]
+ignore = [
+    "E231", "E501",
+    "D100", "D101", "D102", "D103", "D104", "D105",
+    "D200", "D202", "D209", "D214", "D215",
+    "D300",
+    "D400", "D401", "D403", "D404", "D405", "D409", "D412", "D414",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# `l` as a short loop or unpacking target (a left bound, a label).
+"solarwindpy/plotting/hist1d.py" = ["E741"]
+"solarwindpy/plotting/hist2d.py" = ["E741"]
+"solarwindpy/plotting/tools.py" = ["E741"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+# The defaults: double quotes, space indentation, magic trailing commas.
+quote-style = "double"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -124,10 +146,6 @@ dev = [
     "docstring-inheritance>=3.0,<4",
     "doc8>=1.1",
     # Development tools
-    "black>=24.0",
-    "flake8>=7.0",
-    "flake8-docstrings>=1.7",
-    "pydocstyle>=6.3",
     "tables>=3.9",  # PyTables for HDF5 testing
     "import-linter>=2.6",  # lint-imports; 2.6 adds the acyclic_siblings contract
     "pre-commit>=3.5",  # Git hook framework
@@ -137,7 +155,7 @@ dev = [
     "sybil>=10.1",  # run rst code-block examples under pytest
     "pytest-randomly>=5.0",  # random test order
     "vulture>=2.16",  # dead code
-    "ruff>=0.16",  # PT and B rule sets
+    "ruff>=0.16",  # linter and formatter
 ]
 analysis = [
     # Interactive analysis environment
