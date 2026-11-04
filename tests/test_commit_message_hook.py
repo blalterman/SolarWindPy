@@ -28,9 +28,6 @@ def test_plain_conventional_subjects_pass(tmp_path, message):
     assert _check(tmp_path, message) == 0
 
 
-@pytest.mark.xfail(
-    strict=True, reason="T2: the hook has no slot for ! or build/ci/revert"
-)
 @pytest.mark.parametrize(
     "message",
     ["refactor(core)!: x", "feat!: x", "build(deps): x", "ci: x", "revert: x"],

@@ -6,7 +6,7 @@ commit_msg_file="$1"
 commit_msg=$(cat "$commit_msg_file")
 
 # Define pattern in variable (required for bash [[ =~ ]] to work correctly)
-pattern='^(feat|fix|chore|docs|style|refactor|test|perf)(\(.+\))?: .+'
+pattern='^(feat|fix|chore|docs|style|refactor|test|perf|build|ci|revert)(\(.+\))?!?: .+'
 
 if [[ $commit_msg =~ $pattern ]]; then
     echo "✅ Valid conventional commit format"
@@ -15,9 +15,9 @@ else
     cat <<EOF
 ❌ Commit message must follow Conventional Commits format.
 
-Format: <type>(<scope>): <description>
+Format: <type>(<scope>)[!]: <description>   (! marks a breaking change)
 
-Types: feat, fix, docs, test, refactor, perf, chore
+Types: feat, fix, docs, style, test, refactor, perf, chore, build, ci, revert
 Scope: optional (e.g., 'labels', 'core', 'plotting')
 
 Examples:
