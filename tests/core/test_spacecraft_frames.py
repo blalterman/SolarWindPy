@@ -13,7 +13,6 @@ def _position_data():
     return swp.examples.load_plasma().spacecraft.data
 
 
-@pytest.mark.xfail(strict=True, reason="B8: no module-level table of supported values")
 def test_every_supported_frame_is_accepted_and_gives_a_finite_distance():
     r"""Each frame in the table constructs and converts to a distance to the Sun.
 
@@ -31,7 +30,6 @@ def test_every_supported_frame_is_accepted_and_gives_a_finite_distance():
         assert np.isfinite(sc.distance2sun.to_numpy()).all()
 
 
-@pytest.mark.xfail(strict=True, reason="B8: no module-level table of supported values")
 def test_every_supported_name_constructs():
     r"""Each spacecraft name in the table constructs and is stored upper-cased.
 
@@ -44,7 +42,6 @@ def test_every_supported_name_constructs():
         assert spacecraft.Spacecraft(data, name.lower(), "HCI").name == name
 
 
-@pytest.mark.xfail(strict=True, reason="B8: set_frame_name hard-codes its own lists")
 def test_the_name_check_reads_the_table(monkeypatch):
     r"""A name added to the table is accepted, so the check has no second list.
 

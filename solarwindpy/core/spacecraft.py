@@ -18,6 +18,14 @@ import numpy as np
 from . import base
 from . import vector
 
+# The spacecraft and frames SolarWindPy supports. Frame transformations are not
+# generalized, so a frame is listed only when `Spacecraft.distance2sun` converts
+# it, and `set_frame_name` refuses anything not listed here.
+_SUPPORTED = {
+    "frame": ("GSE", "HCI"),
+    "name": ("PSP", "WIND"),
+}
+
 
 class Spacecraft(base.Base):
     r"""Representation of a spacecraft trajectory.
@@ -175,7 +183,11 @@ class Spacecraft(base.Base):
             pos_SI = pos.multiply(rs)
 
         else:
-            raise NotImplementedError("Unrecognized reference frame `{}`".format(frame))
+            raise NotImplementedError(
+                "Unrecognized reference frame `{}`; supported frames are {}".format(
+                    frame, ", ".join(_SUPPORTED["frame"])
+                )
+            )
 
         # distance2sun units should be [m], so this shouldn't matter. However, just as
         # beta is treated in this way, we similarly treat distance2sun.
@@ -194,21 +206,21 @@ class Spacecraft(base.Base):
         Parameters
         ----------
         frame : str
-            Coordinate frame ('GSE' or 'HCI').
+            Coordinate frame, one of ``_SUPPORTED["frame"]``.
         name : str
-            Spacecraft name.
+            Spacecraft name, one of ``_SUPPORTED["name"]``.
 
         Raises
         ------
         NotImplementedError
-            If frame is not 'GSE' or 'HCI'.
+            If the frame or the name is not supported.
         """
         frame = frame.upper()
         name = name.upper()
 
-        if frame not in ("GSE", "HCI"):
+        if frame not in _SUPPORTED["frame"]:
             raise NotImplementedError("Unrecognized frame: {}".format(frame))
-        if name not in ("WIND", "PSP"):
+        if name not in _SUPPORTED["name"]:
             raise NotImplementedError("Unrecognized name: {}".format(name))
 
         self._frame = frame
