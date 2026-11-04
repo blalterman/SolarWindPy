@@ -25,10 +25,10 @@ from collections import namedtuple
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
-from .binned import _PlotSource, _clip_to_quantiles
+from .binned import _PlotSource, _clip_kind, _clip_to_quantiles
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
-#: Clip setting per axis: False, True, ``"l"`` or ``"u"`` (see ``Base.clip_data``).
+#: Clip setting per axis: False, True, or a clip string (see ``Base.clip_data``).
 #: ``z`` is clipped by ``Scatter`` only. Test a field, never the record: a
 #: ``ClipAxes(False, False)`` is a non-empty tuple, so it is truthy.
 ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
@@ -92,7 +92,7 @@ class Base(ABC):
 
     @property
     def clip(self):
-        r"""``ClipAxes`` of each axis's clip setting: False, True, "l" or "u".
+        r"""``ClipAxes`` of each axis's clip setting: False, True, or a clip string.
 
         Axes the plot does not clip are False.
         """
@@ -128,8 +128,17 @@ class Base(ABC):
         return {k: clip.get(k) for k in axes}
 
     def _store_clip(self, clip):
-        r"""Store ``clip``, read by ``_clip_by_axis``, as ``ClipAxes``; None is False."""
+        r"""Store ``clip``, read by ``_clip_by_axis``, as ``ClipAxes``; None is False.
+
+        Raises
+        ------
+        ValueError
+            If an axis's setting is a string other than those
+            ``Base.clip_data`` accepts.
+        """
         by_axis = self._clip_by_axis(clip)
+        for v in by_axis.values():
+            _clip_kind(v)
         self._clip = ClipAxes(
             **{k: False if v is None else v for k, v in by_axis.items()}
         )
@@ -209,8 +218,9 @@ class Base(ABC):
         data : pd.Series or pd.DataFrame
             Data to clip. A DataFrame is clipped column by column.
         clip : bool or str
-            A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-            tail only; any other value clips both tails.
+            ``"l"`` or ``"lower"`` clips the lower tail only, ``"u"`` or
+            ``"upper"`` the upper tail only, in any case; ``"both"`` and any
+            value that is not a string clip both tails.
 
         Returns
         -------
@@ -221,6 +231,8 @@ class Base(ABC):
         ------
         TypeError
             If ``data`` is neither a Series nor a DataFrame.
+        ValueError
+            If ``clip`` is any other string, the empty string included.
         """
         return _clip_to_quantiles(data, clip)
 
@@ -597,7 +609,8 @@ class PlotWithZdata(Base):
         KeyError
             If ``clip`` names an axis the plot does not clip.
         ValueError
-            If no row is left, or ``mask`` lacks a label or holds NaN; or if
+            If no row is left, or ``mask`` lacks a label or holds NaN; if
+            ``clip`` holds a string ``Base.clip_data`` does not accept; or if
             the plot's data is already set.
         """
         self._claim_data()

@@ -24,19 +24,6 @@ from . import base
 from . import binned
 
 
-def _clip_kind(clip):
-    r"""What a clip setting does: False, ``"l"``, ``"u"`` or True (both tails).
-
-    Follows ``Base.clip_data``: a string starting with ``"l"`` or ``"u"``
-    clips one tail, any other true value clips both.
-    """
-    if not clip:
-        return False
-    if isinstance(clip, str) and clip.lower()[0] in "lu":
-        return clip.lower()[0]
-    return True
-
-
 class AggPlot(base.Base):
     r"""ABC for aggregating data in 1D and 2D.
 
@@ -259,7 +246,9 @@ class AggPlot(base.Base):
 
             held = b.clip_of(col)
             given = clip.get(k)
-            if given is not None and _clip_kind(given) != _clip_kind(held):
+            if given is not None and (
+                binned._clip_kind(given) != binned._clip_kind(held)
+            ):
                 raise ValueError(
                     f"clip={given!r} for {k} conflicts with the BinnedData, which "
                     f"bins {col!r} with clip={held!r}. Leave clip as None to "
@@ -397,7 +386,7 @@ class AggPlot(base.Base):
         Numpy and Astropy don't like NaNs when calculating bins. Infinities in
         bins (typically from log10(0)) also create problems. An axis whose
         specification is an ``IntervalIndex`` or edges gets None: its bins do
-        not depend on the data, so ``data`` is built only for a count or a
+        not depend on the data, so values are taken only for a count or a
         rule.
         """
         given = {
@@ -406,12 +395,15 @@ class AggPlot(base.Base):
         }
         if all(given.values()):
             return dict.fromkeys(self._gb_axes)
-        data = self.data
+        # The axes as ``data`` holds them, by position: edges need no labels.
+        source = self._source
         return {
             k: (
                 None
                 if given[k]
-                else data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+                else source.logged(k, labels=False)
+                .replace([-np.inf, np.inf], np.nan)
+                .dropna()
             )
             for k in self._gb_axes
         }
@@ -581,8 +573,12 @@ class AggPlot(base.Base):
             else:
                 flat = flat * len(intervals[k]) + codes
                 inside &= codes >= 0
-        target = self._source.take(self.agg_axes)
-        return target[inside].groupby(flat[inside])
+        # By position: the groups are keyed by `flat`, never by row label.
+        target = self._source.take(self.agg_axes, labels=False)
+        if not inside.all():
+            target = pd.Series(target.array[inside], name=target.name, copy=False)
+            flat = flat[inside]
+        return target.groupby(flat)
 
     def _bin_grid(self):
         r"""Every bin: an ``IntervalIndex`` in 1-D, their product in 2-D."""

@@ -832,11 +832,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         r"""``values``, given on the kept rows, on every row of the source.
 
         Rows the histogram does not keep get NaN, or False for a boolean
-        Series. Placed by position, so repeated labels are kept apart.
+        Series. Placed by position, so repeated labels are kept apart, and
+        the index of ``values`` is not read.
         """
         rows = self._source.rows
         if rows is None:
-            return values
+            return values.set_axis(self._source.index)
         fill = False if values.dtype == bool else np.nan
         full = np.full(rows.size, fill, dtype=np.result_type(values.dtype, type(fill)))
         full[rows] = values.to_numpy()
@@ -891,7 +892,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             other = possible_axes.pop()
 
         # Rows sent to the Hist1D, among the rows this histogram keeps.
-        keep = np.ones(source.take(axis).size, dtype=bool)
+        # Values by position: `_on_source_index` places them by position.
+        x = source.take(axis, labels=False)
+        keep = np.ones(x.size, dtype=bool)
         if only_plotted:
             keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
         if not project_counts and other != "z":
@@ -901,16 +904,16 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         # its codes; the measured values are sent on the source's own index,
         # with a mask, so no row is looked up by label.
         column = self._bin_columns[axis]
-        x = self._on_source_index(source.take(axis)).rename(column)
+        x = self._on_source_index(x).rename(column)
         y = None
         if not project_counts:
-            y = self._on_source_index(source.take(other))
+            y = self._on_source_index(source.take(other, labels=False))
 
         h1 = Hist1D(
             x,
             y=y,
             nbins=self._binned,
-            mask=self._on_source_index(pd.Series(keep, index=self._kept_index())),
+            mask=self._on_source_index(pd.Series(keep)),
             **kwargs,
         )
 

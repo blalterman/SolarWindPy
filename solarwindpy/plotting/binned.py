@@ -18,6 +18,32 @@ from numbers import Integral
 import numpy as np
 import pandas as pd
 
+#: The clip strings, in lower case, and the tail each one clips.
+_CLIP_STRINGS = {"l": "l", "lower": "l", "u": "u", "upper": "u", "both": True}
+
+
+def _clip_kind(clip):
+    r"""What a clip setting clips: False, ``"l"``, ``"u"`` or True (both tails).
+
+    A string must be ``"l"``, ``"lower"``, ``"u"``, ``"upper"`` or ``"both"``,
+    in any case. Any other value is read by its truth: False (or None) clips
+    nothing, True both tails.
+
+    Raises
+    ------
+    ValueError
+        If ``clip`` is any other string, the empty string included.
+    """
+    if isinstance(clip, str):
+        try:
+            return _CLIP_STRINGS[clip.lower()]
+        except KeyError:
+            raise ValueError(
+                f"clip={clip!r} is not a clip setting: a clip string must be "
+                "'l', 'lower', 'u', 'upper' or 'both' (any case)."
+            ) from None
+    return bool(clip)
+
 
 def _clip_to_quantiles(data, clip):
     r"""Clip data to its 0.01st and 99.99th percentiles.
@@ -34,8 +60,9 @@ def _clip_to_quantiles(data, clip):
     data : pd.Series or pd.DataFrame
         Data to clip. A DataFrame is clipped column by column.
     clip : bool or str
-        A string starting with ``"l"`` or ``"u"`` selects the lower or upper
-        tail only; any other value clips both tails.
+        ``"l"`` or ``"lower"`` clips the lower tail only, ``"u"`` or
+        ``"upper"`` the upper tail only, in any case; ``"both"`` and any
+        value that is not a string clip both tails.
 
     Returns
     -------
@@ -46,7 +73,10 @@ def _clip_to_quantiles(data, clip):
     ------
     TypeError
         If ``data`` is neither a Series nor a DataFrame.
+    ValueError
+        If ``clip`` is any other string.
     """
+    kind = _clip_kind(clip)
     if isinstance(data, pd.Series):
         ax = 0
     elif isinstance(data, pd.DataFrame):
@@ -60,9 +90,9 @@ def _clip_to_quantiles(data, clip):
     lo = pct.loc[q0]
     up = pct.loc[q1]
 
-    if isinstance(clip, str) and clip.lower()[0] == "l":
+    if kind == "l":
         data = data.clip(lower=lo, axis=ax)
-    elif isinstance(clip, str) and clip.lower()[0] == "u":
+    elif kind == "u":
         data = data.clip(upper=up, axis=ax)
     else:
         data = data.clip(lo, up, axis=ax)
@@ -111,7 +141,9 @@ def _round_edges(edges, precision, enclose=None):
     enclose : pd.Series, optional
         The finite values the bins were computed from. If given, the outer
         edges are rounded outward so they enclose every value, as for edges
-        from an integer bin count.
+        from an integer bin count. Where ``10**-precision`` is below the
+        float spacing of the data, no step of it moves an edge, and an outer
+        edge is then the data's own extreme.
 
     Returns
     -------
@@ -122,12 +154,23 @@ def _round_edges(edges, precision, enclose=None):
         return edges.round(precision)
 
     scale = 10.0**precision
+    vmin = enclose.min()
+    vmax = enclose.max()
     lo = np.floor(edges[0] * scale) / scale
     hi = np.ceil(edges[-1] * scale) / scale
     edges = edges.round(precision)
-    edges[0] = lo if lo <= enclose.min() else lo - 1 / scale
-    edges[-1] = hi if hi >= enclose.max() else hi + 1 / scale
+    edges[0] = min(lo if lo <= vmin else lo - 1 / scale, vmin)
+    edges[-1] = max(hi if hi >= vmax else hi + 1 / scale, vmax)
     return edges
+
+
+def _ambiguous_alignment(names):
+    r"""The ValueError for columns that repeat labels and must be aligned."""
+    return ValueError(
+        f"{list(names)!r} repeat index labels and the indexes of the plot's "
+        "columns differ, so aligning them by label is ambiguous. Give every "
+        "column the same index, or drop the repeated labels."
+    )
 
 
 def _align(values, index, name):
@@ -137,14 +180,44 @@ def _align(values, index, name):
     labels of ``index`` missing from ``values`` get NaN. When the labels
     already match, the values are shared, not copied. Anything else is taken
     positionally.
+
+    Raises
+    ------
+    ValueError
+        If ``values`` is a Series whose index differs from ``index`` and
+        repeats a label: which of its rows a label of ``index`` takes is
+        ambiguous.
     """
     if isinstance(values, pd.Series):
         if values.index.equals(index):
             values = values.set_axis(index)
+        elif not values.index.is_unique:
+            raise _ambiguous_alignment([name])
         else:
             values = values.reindex(index)
         return values.rename(name)
     return pd.Series(values, index=index, name=name, copy=False)
+
+
+def _combine(coords):
+    r"""``pd.DataFrame(coords, copy=False)``, the columns aligned by label.
+
+    Raises
+    ------
+    ValueError
+        If the indexes differ and a column that pandas has to align repeats
+        a label, naming every coordinate that repeats one.
+    """
+    try:
+        return pd.DataFrame(coords, copy=False)
+    except ValueError as err:
+        series = {k: v for k, v in coords.items() if isinstance(v, pd.Series)}
+        indexes = [v.index for v in series.values()]
+        differ = any(not i.equals(indexes[0]) for i in indexes[1:])
+        repeated = [k for k, v in series.items() if not v.index.is_unique]
+        if not (differ and repeated):
+            raise
+        raise _ambiguous_alignment(repeated) from err
 
 
 def _has_one_distinct_value(values):
@@ -161,13 +234,31 @@ def _has_one_distinct_value(values):
     return values.unique().size == 1
 
 
+def _numeric_if_object(values):
+    r"""An object-dtype Series of numbers as the numeric Series it holds.
+
+    ``infer_objects`` gives the dtype the values share; a numeric one
+    (integer, float or bool) is returned, so NaN, +/-inf, ``log10`` and
+    binning treat the column as they treat a numeric one. Any other value,
+    and an object column whose values are not all numbers (strings,
+    timestamps, a mix), is returned unchanged.
+    """
+    if not (isinstance(values, pd.Series) and values.dtype == object):
+        return values
+    inferred = values.infer_objects()
+    if inferred.dtype.kind in "iufb":
+        return inferred
+    return values
+
+
 def _usable(values, log):
     r"""True where a value is neither NaN nor +/-inf, as the plot holds it.
 
     On a logged column the plot holds ``log10(abs(v))``, which is -inf where
     ``v`` is 0 and finite for every other finite ``v``, so 0 is not usable
     there either. A column whose dtype is neither float nor integer is only
-    tested for NaN.
+    tested for NaN; ``_PlotSource`` first turns an object column of numbers
+    into the numeric column it holds (``_numeric_if_object``).
 
     Parameters
     ----------
@@ -253,10 +344,10 @@ class _PlotSource:
         mask=None,
         within=None,
     ):
-        frame = pd.DataFrame(dict(coords), copy=False)
+        frame = _combine({k: _numeric_if_object(v) for k, v in dict(coords).items()})
         index = frame.index
         if value is not None:
-            value = _align(value, index, value_name)
+            value = _numeric_if_object(_align(value, index, value_name))
         selected = _mask_rows(mask, index)
         if within is not None:
             shared = within._kept_on(index)
@@ -289,11 +380,12 @@ class _PlotSource:
         self._log = {k: v for k, v in log.items() if v}
         self._rows = rows
 
+        self._n_kept = index.size if rows is None else int(rows.sum())
+
         if value is None:
-            n_kept = index.size if rows is None else int(rows.sum())
-            counts = n_kept > 0
+            counts = self._n_kept > 0
         else:
-            counts = _has_one_distinct_value(self.take(value_name))
+            counts = _has_one_distinct_value(self.take(value_name, labels=False))
         self._counts = counts
 
     @property
@@ -339,50 +431,61 @@ class _PlotSource:
             value = value.loc[self._rows]
         return value.set_axis(index)
 
-    def take(self, col):
+    def take(self, col, *, labels=True):
         r"""The source values of ``col`` on ``rows``, never logged.
 
         Parameters
         ----------
         col : str
             A name in ``columns``.
+        labels : bool, optional
+            If False, the values are indexed by position (a ``RangeIndex``)
+            instead of by the kept rows' labels, which are then not copied.
+            For callers that use the values by position only.
 
         Returns
         -------
         pd.Series
-            Indexed by the kept rows' labels and named ``col``.
+            Indexed by the kept rows' labels, or by position if ``labels`` is
+            False, and named ``col``.
         """
-        if col == self._value_name:
-            if self._value is None:
+        rows = self._rows
+        if col == self._value_name and self._value is None:
+            if labels:
                 index = self._frame.index
-                if self._rows is not None:
-                    index = index[self._rows]
-                return self._value_on(index)
-            value = self._value
-            if self._rows is not None:
-                value = value.loc[self._rows]
-            return value
-        values = self._frame.loc[:, col]
-        if self._rows is not None:
-            values = values.loc[self._rows]
-        return values
+                if rows is not None:
+                    index = index[rows]
+            else:
+                index = pd.RangeIndex(self._n_kept)
+            return self._value_on(index)
+        if col == self._value_name:
+            values = self._value
+        else:
+            values = self._frame.loc[:, col]
+        if labels:
+            return values if rows is None else values.loc[rows]
+        if rows is None:
+            return values.set_axis(pd.RangeIndex(values.size))
+        return pd.Series(values.array[rows], name=values.name, copy=False)
 
-    def logged(self, col):
+    def logged(self, col, *, labels=True):
         r"""A coordinate on ``rows`` as ``materialize`` returns it.
 
         Parameters
         ----------
         col : str
             A coordinate name.
+        labels : bool, optional
+            As for ``take``.
 
         Returns
         -------
         pd.Series
-            ``take(col)``, as ``log10(abs())`` where ``log`` sets it. When
-            every row is kept and ``col`` is not logged, it shares the source's
-            values and index.
+            ``take(col, labels=labels)``, as ``log10(abs())`` where ``log``
+            sets it. When every row is kept, ``col`` is not logged and
+            ``labels`` is True, it shares the source's values and index.
         """
-        values = self.take(col)
+        values = self.take(col, labels=labels)
         if self._log.get(col, False):
             values = np.log10(np.abs(values))
         return values
@@ -679,8 +782,9 @@ class BinnedData:
     KeyError
         If ``bins``, ``log`` or ``clip`` names a column ``frame`` lacks.
     ValueError
-        If edges are not strictly increasing, intervals are not contiguous, or
-        ``mask`` lacks a label or holds NaN.
+        If edges are not strictly increasing, intervals are not contiguous,
+        ``mask`` lacks a label or holds NaN, or a ``clip`` string is not one
+        ``Base.clip_data`` accepts.
 
     Notes
     -----
@@ -757,9 +861,14 @@ class BinnedData:
             raise KeyError(f"frame has no column(s) {unknown!r} to bin.")
 
         view = frame.loc[:, list(columns)]
+        for k in columns:
+            if view[k].dtype == object:
+                view[k] = _numeric_if_object(view[k])
         log = {k: bool(v) for k, v in _per_column(log, columns, "log", False).items()}
         clip = _per_column(clip, columns, "clip", False)
         clip = {k: False if v is None else v for k, v in clip.items()}
+        for v in clip.values():
+            _clip_kind(v)
         keep = _mask_rows(mask, view.index)
 
         intervals = {}

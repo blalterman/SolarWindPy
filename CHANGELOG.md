@@ -259,6 +259,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
+  edges or project. At 1M rows with 10% NaN, `Hist2D.project_1d` is about 25% faster,
+  and `agg()` and construction about 15-20% faster.
 - `ICMECAT(cache_dir=...)` caches the catalog as `icmecat.csv`, the format it downloads
   in, instead of `icmecat.parquet`, so caching needs no parquet engine (it raised
   `ImportError` without one). An existing `icmecat.parquet` cache is ignored, so the
@@ -459,6 +462,22 @@ These change computed values; rerun any analysis that used them.
   passed as `log10|x|`. A log other axis now sets the projection's `log.y` whichever
   axis is projected, and with `only_plotted=False` rows outside the other axis's bins
   are dropped, as documented.
+- `clip` accepts True/False and the strings "l", "lower", "u", "upper" and "both", in
+  any case. Any other string, the empty one included, raises `ValueError` naming them,
+  from every plot constructor, `BinnedData` and `Base.clip_data`. Previously `""` raised
+  `IndexError`, an unknown string clipped both tails, and any string starting with "l"
+  or "u" (e.g. "lo") was accepted.
+- x, y and z whose indexes differ, where a column to be aligned repeats a label, raise a
+  `ValueError` naming that column and saying the alignment is ambiguous, instead of
+  pandas' "cannot reindex on an axis with duplicate labels". Identical indexes with
+  repeated labels, and unique labels aligned onto repeated ones, work as before.
+- Edges from an integer `nbins` enclose every sample when the data are so large that
+  `10**-precision` is below their float spacing (above about 9e10 at the default
+  precision). Previously the extreme sample could fall outside the edges and go
+  uncounted.
+- An object-dtype column of numbers is binned, logged and checked for NaN and +-inf as
+  the numeric column it holds. Previously an inf in it was kept (e.g. a bin mean of
+  inf), and integer `nbins` or `logx` raised `AttributeError` or `TypeError`.
 - `hbar` is scipy's exact h/2pi (was the CODATA 2014 value), and the solar radius is
   the IAU 2015 nominal 695.7e6 m (was 695.508e6 m), shifting distances in solar radii
   by 0.028%.
