@@ -16,10 +16,10 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 def _tracked_package_modules():
-    """Every tracked ``*.py`` file under ``solarwindpy/``."""
+    """Every tracked ``*.py`` file under ``src/solarwindpy/``."""
     try:
         out = subprocess.run(
-            ["git", "ls-files", "solarwindpy/*.py"],
+            ["git", "ls-files", "src/solarwindpy/*.py"],
             cwd=REPO,
             capture_output=True,
             text=True,

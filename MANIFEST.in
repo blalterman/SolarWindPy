@@ -4,7 +4,7 @@
 include CITATION.rst
 include LICENSE
 include README.rst
-include solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv
+include src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv
 
 prune .claude
 prune .github

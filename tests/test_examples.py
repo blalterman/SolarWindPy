@@ -46,7 +46,7 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
     """
     installed = tmp_path / "site-packages"
     shutil.copytree(
-        REPO / "solarwindpy",
+        REPO / "src" / "solarwindpy",
         installed / "solarwindpy",
         ignore=shutil.ignore_patterns("__pycache__"),
     )
