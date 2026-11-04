@@ -362,11 +362,9 @@ class SIDC(ActivityIndicator):
         pandas.DataFrame
             Interpolated values; NaN outside the data's time range.
         """
-        interpolated = super(SIDC, self).interpolate_data(
+        return self._interpolate(
             self.data.loc[:, key].dropna(how="any", axis=0), target_index
         )
-        self._interpolated = interpolated
-        return interpolated
 
     def calculate_extrema_kind(self):
         r"""Determine whether an SSN observation belongs to a cycle Minimum or Maximum.

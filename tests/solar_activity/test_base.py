@@ -77,8 +77,8 @@ class Indicator(ActivityIndicator):
         self._init_logger()
         self._loader = loader
 
-    def interpolate_data(self, source_data, target_index):
-        return super().interpolate_data(source_data, target_index)
+    def interpolate_data(self, target_index):
+        pass
 
     @property
     def normalized(self):
@@ -380,7 +380,7 @@ def test_interpolation_reproduces_a_straight_line():
     ON FAILURE: the code is wrong.
     """
     target = pd.DatetimeIndex(["2020-01-02 12:00", "2020-01-04 06:00"])
-    out = Indicator().interpolate_data(LINEAR_SOURCE, target)
+    out = Indicator()._interpolate(LINEAR_SOURCE, target)
 
     assert list(out.columns) == ["flux"]
     assert out.index.equals(target)
@@ -393,7 +393,7 @@ def test_interpolation_blanks_targets_outside_the_source_span():
     ON FAILURE: the code is wrong.
     """
     target = pd.DatetimeIndex(["2019-12-31", "2020-01-03", "2020-01-06"])
-    out = Indicator().interpolate_data(LINEAR_SOURCE, target)["flux"]
+    out = Indicator()._interpolate(LINEAR_SOURCE, target)["flux"]
 
     assert np.isnan(out.iloc[0])
     assert out.iloc[1] == exact(20.0)
@@ -411,7 +411,7 @@ def test_interpolation_handles_each_column_and_keeps_the_result():
     source = pd.DataFrame({"flux": LINEAR_SOURCE, "double": 2 * LINEAR_SOURCE})
     target = pd.DatetimeIndex(["2020-01-02 12:00"])
     indicator = Indicator()
-    out = indicator.interpolate_data(source, target)
+    out = indicator._interpolate(source, target)
 
     assert out.loc[target[0], "flux"] == exact(15.0)
     assert out.loc[target[0], "double"] == exact(30.0)
@@ -426,7 +426,7 @@ def test_interpolation_refuses_a_source_with_nans():
     source = LINEAR_SOURCE.copy()
     source.iloc[2] = np.nan
     with pytest.raises(NotImplementedError, match="drop NaNs"):
-        Indicator().interpolate_data(source, LINEAR_SOURCE.index)
+        Indicator()._interpolate(source, LINEAR_SOURCE.index)
 
 
 # ---------------------------------------------------------------------------

@@ -294,10 +294,32 @@ class ActivityIndicator(Base):
         assert isinstance(new, ID)
         self._id = new
 
-    # Need to store `interpolated` in subclass. Allows normalized ssn to be interpolated.
     @abstractmethod
-    def interpolate_data(self, source_data, target_index):
-        """Interpolate ``source_data`` onto ``target_index``.
+    def interpolate_data(self, target_index):
+        r"""Interpolate the indicator onto ``target_index`` and store the result.
+
+        Subclasses choose which of their data to interpolate, may add
+        trailing options for that choice (e.g. a column key), and delegate
+        the interpolation itself to :meth:`_interpolate`, which also sets
+        :attr:`interpolated`.
+
+        Parameters
+        ----------
+        target_index : pandas.DatetimeIndex
+            Target time axis for the interpolation.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Data interpolated onto ``target_index``.
+        """
+        pass
+
+    def _interpolate(self, source_data, target_index):
+        """Interpolate ``source_data`` onto ``target_index``; store it as :attr:`interpolated`.
+
+        The engine behind every subclass's :meth:`interpolate_data`. Targets
+        outside the source's time span are NaN rather than extrapolated.
 
         Parameters
         ----------
@@ -321,7 +343,7 @@ class ActivityIndicator(Base):
         if nans:
             raise NotImplementedError(
                 "You must drop NaNs in the subclass's caller before "
-                "calling parent method."
+                "calling `_interpolate`."
             )
 
         x_target = target_index.asi8

@@ -825,9 +825,6 @@ def test_interpolate_data_skips_a_missing_month(fake_home, ramp_index):
     assert interpolated.loc[:, "ssn"].to_numpy() == exact(ramp_ssn(target))
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B11: the abstract interpolate_data takes source_data"
-)
 def test_sidc_interpolate_data_extends_the_abstract_interface():
     """The abstract ``interpolate_data`` declares the call SIDC answers.
 
@@ -844,9 +841,6 @@ def test_sidc_interpolate_data_extends_the_abstract_interface():
     assert concrete[: len(abstract)] == abstract
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B11: no shared engine ActivityIndicator._interpolate"
-)
 def test_sidc_interpolate_data_is_the_shared_engine_on_its_column(ramp_sidc):
     """SIDC's ``interpolate_data`` is the base engine run on the column's non-NaN data.
 
