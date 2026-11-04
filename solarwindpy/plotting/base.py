@@ -375,6 +375,17 @@ class ColorPlot(Base):
 
     _alim = RangeLimits(None, None)
     _alim_kind = "value"
+    #: Default linestyles of the contour levels, cycled when there are more.
+    _contour_linestyles = (
+        "-",
+        ":",
+        "--",
+        (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+        "--",
+        ":",
+        "-",
+        (0, (7, 3, 1, 3, 1, 3)),
+    )
     # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
     _log_data = False
 

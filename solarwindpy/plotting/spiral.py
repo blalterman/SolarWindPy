@@ -1287,19 +1287,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
-        linestyles = kwargs.pop(
-            "linestyles",
-            [
-                "-",
-                ":",
-                "--",
-                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-                "--",
-                ":",
-                "-",
-                (0, (7, 3, 1, 3, 1, 3)),
-            ],
-        )
+        linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if ax is None:
             fig, ax = plt.subplots()

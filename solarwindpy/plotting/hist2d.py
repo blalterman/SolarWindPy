@@ -396,19 +396,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_fcn = ax.contourf if use_contourf else ax.contour
 
         # Default linestyles for contour
-        linestyles = contour_kwargs.pop(
-            "linestyles",
-            [
-                "-",
-                ":",
-                "--",
-                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-                "--",
-                ":",
-                "-",
-                (0, (7, 3, 1, 3)),
-            ],
-        )
+        linestyles = contour_kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if levels is None:
             args = [XX_centers, YY_centers, C_centers]
@@ -639,19 +627,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         """
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
-        linestyles = kwargs.pop(
-            "linestyles",
-            [
-                "-",
-                ":",
-                "--",
-                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-                "--",
-                ":",
-                "-",
-                (0, (7, 3, 1, 3, 1, 3)),
-            ],
-        )
+        linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if ax is None:
             fig, ax = plt.subplots()

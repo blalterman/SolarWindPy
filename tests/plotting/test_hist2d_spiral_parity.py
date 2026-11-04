@@ -82,7 +82,6 @@ def _contour_set(result):
         pytest.param(
             lambda h, s: h.plot_hist_with_contours(cbar=False),
             id="Hist2D.plot_hist_with_contours",
-            marks=pytest.mark.xfail(strict=True, reason=_RULED),
         ),
         pytest.param(
             lambda h, s: s.plot_contours(cbar=False),
