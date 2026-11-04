@@ -86,13 +86,18 @@ def _download_file(url, cache):
 
 
 def _http_status(error):
-    """HTTP status in ``error`` or the errors it was raised from, else None."""
+    """HTTP status in ``error`` or the errors it was raised ``from``, else None.
+
+    Only the explicit ``__cause__`` chain is followed: ``__context__`` holds
+    whatever was being handled when ``error`` was raised, such as an earlier,
+    unrelated 404, and must not lend ``error`` its status.
+    """
     seen = set()
     while error is not None and id(error) not in seen:
         seen.add(id(error))
         if isinstance(error, urllib.error.HTTPError):
             return error.code
-        error = error.__cause__ or error.__context__
+        error = error.__cause__
     return None
 
 
@@ -179,6 +184,9 @@ def fetch(url, max_age, fallback=True):
     try:
         return Path(_download_file(url, cache="update"))
     except _DOWNLOAD_ERRORS as exc:
+        if isinstance(exc, urllib.error.HTTPError):
+            # The error holds the server's response open; nothing reads it.
+            exc.close()
         if not fallback:
             raise DownloadError(
                 f"Could not download {url}. Underlying error: {exc!r}",

@@ -401,11 +401,6 @@ def test_fall_back_with_nothing_cached_raises_with_the_status(http_server):
     assert info.value.status == 404
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="cache._http_status follows __context__, so a failure raised while "
-    "handling a 404 reports 404; remove this marker when it follows __cause__ only",
-)
 def test_a_failure_raised_while_handling_a_404_has_no_status(http_server, tmp_path):
     """A failure's status is its own, not that of an error being handled.
 
