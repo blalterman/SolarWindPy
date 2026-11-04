@@ -776,3 +776,98 @@ no trailing space; units: `cos_phi`, `ratio`, `Qhat`, `dbeta` dimensionless, `et
 bug list: `ManualLabel` exposes `units` and `with_units`; Frequency renders `^{-1}` (text and
 path); `ComparisonLabel.set_function` raises its intended ValueError; `ElementalAbundance`
 wraps the element in `\mathrm` once. Every test is exact-string.
+
+---
+
+## Empirical Findings (2026-11-04 trial run)
+
+Written up after the fact, from git and GitHub state, in the cleanup worktree on branch
+`cleanup/dispatch-records` (contains master b58e27df). No unit was executed in this session.
+
+### End-state metrics
+
+- Units in the batch: 37 headings (units, follow-ups, long-running, survivor, `rm-*`). Every
+  heading has a landing: 35 through `tq-fix/` pull requests, `mutation-recheck` and `linkcheck`
+  through direct findings commits.
+- Merged `tq-fix/` pull requests: 42, #475 (2026-10-05) to #521 (2026-11-02), from
+  `gh pr list --state merged --search "head:tq-fix"`. Open `tq-fix/` pull requests: 0 under the
+  same filter (the 42-row merged list is the control that the filter reaches live PRs).
+- Last recorded mutation re-measurement: 2026-10-08 (82240ad3). Mentions of any `rm-*` unit in
+  `findings-test-quality-review-2026-10-02.md`: 0.
+- Issue #507 (remaining mutation-test survivors): OPEN.
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| CHANGELOG lines for the six `rm-*` units (#516 to #521), which their PR bodies left for "a later unit" | DEFERRED -- no such unit or PR exists. CHANGELOG.md cites no PR numbers anywhere (a `50x`/`51x`/`52x` grep returns only an unrelated constant), so coverage was checked by content: some `rm-*` decisions appear (`construct_cdf` 2, `guess_yh` 1, `progress` 2, `ComparisonLabel` 1, "Instability" 1), others do not (`GEQ` 0, `_DEFAULT_STYLES`/default-style table 0, magnetic-obstacle end times 0, `guess_s` 0, `abundance_ratio` 0, no `FitFunction.logx` removal line). Partial; not audited line by line. Owed. |
+| Remaining-module re-measurement, on which § "Remaining modules (2026-10-15)" conditions the Governing Property report | DEFERRED -- not recorded. The findings file stops at the 2026-10-08 re-measurement. `tmp/test-quality-review/` does not exist on this machine, so any post-`rm-*` mutation results would be on the other machine. Owed. |
+| Survivors not targeted by a unit | DEFERRED to issue #507 (OPEN), per the author's Survivor-units decision to close the track with the rest named in the findings and an issue. |
+
+### Deviations from plan
+
+- The Governing Property was not reported after the remaining-module measurement, as § "Remaining
+  modules" required, because that measurement was never recorded. The batch carries its property
+  as a Governance paragraph, not a `## Governing Property` heading, so this section has no
+  Governing Property subsection. The mark below rests on the author's 2026-11-04 ruling that the
+  property is served, with #507 open and the two items above owed.
+- `mutation-recheck` and `linkcheck` landed as direct commits to the findings file (82240ad3,
+  59550929), not as pull requests, contrary to "opens a pull request, and does not merge".
+- #487 reverted docstring commit 6ed14f84, which reached master without review.
+- Units not named in the batch were added during execution: `revert-shared-plasma` (#487),
+  `approx-default` (#495), `changelog` (#502), `plasma-order-check-tests` (#511),
+  `close-507-followups` (#512), `polish` (#514), `changelog-2` (#515).
+- The `/session:empirical-findings` skill's basename guard refused this file (`ERROR: not a
+  dispatch or a routed plan; got: batch-test-quality-fixes-2026-10-02.md`). The section follows
+  the skill's template by hand.
+
+### Commits
+
+Merge commits on master, in merge order.
+
+- `93549b69` #475 quantities-and-vector
+- `92a0c354` #476 docstring-examples
+- `34ceb422` #477 plasma-physics-cases
+- `f4c10bc9` #478 icme-tests
+- `e2dce197` #479 sidc-docstring
+- `3df0f669` #480 hook-and-alias-tests
+- `ef397afe` #481 fitfunction-small-files
+- `d5845ddf` #482 hist2d-tests
+- `5c5ba0e9` #483 abundances-tests
+- `211be12f` #484 documented-examples
+- `d1487612` #485 dev-extras-and-coverage-figure
+- `1ace93ee` #486 abundances-2021-only
+- `624bbd0a` #487 revert-shared-plasma
+- `2de51e5b` #488 small-code-fixes
+- `783b1e05` #489 examples-and-logging-cleanup
+- `a800840b` #490 plasma-code-fixes
+- `595eebf3` #491 p0-contract
+- `623aabab` #492 loader-examples
+- `aa0d66f7` #493 tolerance-helpers
+- `59550929` linkcheck (direct commit)
+- `fe945943` #494 scalar-w-nan
+- `946d4929` #495 approx-default
+- `9e11466a` #496 p0-simplify
+- `7d818d82` #498 hist2d-no-clabel
+- `f816447b` #499 warning-fixes
+- `87f23f80` #501 plotting-and-docstring-cleanup
+- `95e2ff44` #502 changelog
+- `5fbb3522` #503 plasma-io-electrons
+- `01df13fc` #504 fit-and-sidc-gaps
+- `f75f81cf` #505 survivor-defect-fixes
+- `b747d38b` #508 hist2d-projection-tests
+- `37931962` #509 projection-bin-edges
+- `0c2f13de` #510 plasma-survivor-tests
+- `b92fd851` #511 plasma-order-check-tests
+- `f45332bd` #512 close-507-followups
+- `82240ad3` mutation-recheck (direct commit)
+- `a1e7ff39` #514 polish
+- `98152c5b` #515 changelog-2
+- `ba73c932` #516 rm-core-solar
+- `d99ecc3d` #517 rm-labels
+- `eaf33dcc` #518 rm-fit-models
+- `4bc1c08e` #519 rm-fit-plots
+- `03217802` #520 rm-spiral
+- `184c6d1c` #521 rm-hist-agg
+
+## Spent-Mark: units merged #475-#521; author ruled served 2026-11-04; #516-#521 changelog lines and remaining-module re-measurement owed; #507 open
