@@ -179,15 +179,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Tensor` and `BField` raise `ValueError: <Class> data time index has N of M timestamps
   missing (NaT); drop those rows first`, at construction and in `set_data`. They were
   previously kept, with an order warning.
-- `Plasma.set_data`, `set_spacecraft` and `set_auxiliary_data` refuse data at other
+- `Plasma.set_data`, `set_sc` and `set_aux` refuse data at other
   times than the plasma's with `ValueError` naming the row counts or the first differing
   row. `set_data` called directly sorts out-of-order rows with a warning. While
   spacecraft or auxiliary data are attached, it instead raises `ValueError` for rows out
   of order, since sorting would misalign the attached frames. It also raises then for
   rows at other times than the current index.
-- `set_auxiliary_data` refuses `NaT`. It reorders auxiliary data holding the plasma's
+- `set_aux` refuses `NaT`. It reorders auxiliary data holding the plasma's
   times in another order to the plasma's, with a warning.
-- `set_spacecraft` and `set_auxiliary_data` raise `ValueError` instead of
+- `set_sc` and `set_aux` raise `ValueError` instead of
   `AssertionError` for a mismatched time index or wrong column-level names, and wrong
   level names in `Plasma` data raise `ValueError` instead of `KeyError`. Plasma data's
   levels may come in any order; spacecraft data's must be exactly `("M", "C")` and
@@ -302,7 +302,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Ion.set_species -> Ion._set_species (private).
   - Vector: magnitude and r -> mag, colatitude -> colat, latitude -> lat, longitude -> lon
     (Series names follow), unit_vector -> uv; BField.pressure -> pb; Tensor.magnitude -> mag.
-  - Spacecraft: position, pos -> r (r is the position Vector; distance is r.mag), velocity -> v,
+  - Spacecraft: position -> pos (pos is the position Vector; distance is pos.mag), velocity -> v,
     carrington -> carr.
   - AlfvenicTurbulence: velocity -> v, bfield -> b, z_plus -> zp, z_minus -> zm, e_plus -> ep,
     e_minus -> em, kinetic_energy -> ev, magnetic_energy -> eb, total_energy -> etot,
@@ -505,6 +505,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and keeps it until the next make_fit, and popt, psigma, chisq_dof and rsq no longer go through
   the table. Their values and the table's contents are unchanged; a fit is about 45%
   faster when results is not read.
+
+- The quantity registry and label keys xhel, ra and re are cross_helicity, rA and rE, matching
+  AlfvenicTurbulence.cross_helicity, rA and rE; TeXlabel(("xhel", "", s)) is
+  TeXlabel(("cross_helicity", "", s)), and likewise for rA and rE.
+
+- AlfvenicTurbulence.ep, em, ev, eb, etot, eres, sigma_r, sigma_c, cross_helicity, rA and rE,
+  and Vector.cos_theta, return Series named after the attribute (e.g. turbulence.rA.name ==
+  "rA") instead of unnamed Series.
+
+- Spacecraft.r is Spacecraft.pos, the M label the position is stored under (plasma.sc.pos
+  replaces plasma.sc.r); the label key ("pos", c, "") renders \mathbf{r}_c. Saved files are
+  unchanged.
+
+- Plasma.set_spacecraft is Plasma.set_sc and Plasma.set_auxiliary_data is Plasma.set_aux;
+  Plasma(spacecraft=, auxiliary_data=) is Plasma(sc=, aux=), as are the keywords
+  load_from_file passes on; Plasma.save(akey=) and Plasma.load_from_file(akey=) are auxkey=.
+  The default file keys, and so saved files, are unchanged.
 
 ### Changed
 
@@ -917,7 +934,7 @@ These change computed values; rerun any analysis that used them.
 ### Migration
 
 - Catch `ValueError` where you caught `AssertionError` or `KeyError` from
-  `set_spacecraft`, `set_auxiliary_data`, the column-level-name checks and
+  `set_sc`, `set_aux`, the column-level-name checks and
   `Hist2D.take_data_in_yrange_across_x` (a zero-width or inverted range).
 - Catch `TypeError` where you caught `AttributeError` for input that is not a
   `pandas.DataFrame`.
