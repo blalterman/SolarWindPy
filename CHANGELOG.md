@@ -669,6 +669,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`~/.cache/solarwindpy`); remove entries with
   `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
 
+- solar_activity.cache gains DownloadError.status, fetch(..., fallback=False), and
+  cache.fall_back(url, error), so callers can tell an HTTP 404 from a network failure.
+
+- ICMECAT probes v24 to v28 when the pinned v23 answers 404, records the loaded catalog in
+  ICMECAT.version, and warns about spacecraft names outside SPACECRAFT_NAMES.
+
 ### Fixed
 
 These change computed values; rerun any analysis that used them.
