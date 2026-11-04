@@ -425,6 +425,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - FitFunction.error before a fit: None -> raises NotFittedError
 
+- `path` to follow `set_log`, `set_labels` and `set_axnorm` made after construction, instead
+  of keeping the value from build time.
+
+- `Scatter.path` from a bare scale tag (`linX-linY`) to `Scatter/x/y[/z]/linX-linY`.
+
+- `Hist1D.path` from `Hist1D/x/count[/Tnorm]/linX` to `Hist1D/x/count/linX-linY[-Tnorm]`, with
+  both axis scales.
+
+- A plot without a z label to leave the z part out of its path, instead of writing a literal
+  `z`.
+
+- `Hist2D.make_plot`, `SpiralPlot2D.make_plot` and `BetaRPlot.make_plot` from `(ax,
+  cbar_or_mappable)` to `(ax, mappable, cbar_or_None)`.
+
+- `Scatter.make_plot` from `(ax, cbar_or_None)` to `(ax, collection, cbar_or_None)`.
+
+- `Hist2D.plot_contours` and `SpiralPlot2D.plot_contours` from `(ax, cbar_or_qset, qset)` to
+  `(ax, qset, cbar_or_None)`.
+
+- `Hist2D.plot_hist_with_contours` from `(ax, cbar_or_mesh, qset)` to `(ax, mesh, qset,
+  cbar_or_None)`.
+
+- `Hist1D.make_plot` from `(ax, container)` or `(ax, (line, band))` to `(ax, line,
+  band_or_None, None)`; with `plot_window`, `line` is a `Line2D`, not a one-item list.
+
+- `IndicatorPlot.make_plot` and `SSNPlot.make_plot` from returning nothing to `(ax, line,
+  None)`.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
@@ -753,6 +781,9 @@ These change computed values; rerun any analysis that used them.
   - The Raffaella polarity, and the field built from it, are NaN at a missing `v_y` or
     `b_y`.
 
+- An `IndicatorPlot` subclass that never calls `set_labels` raising `AttributeError` on
+  `path`.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
@@ -808,6 +839,11 @@ These change computed values; rerun any analysis that used them.
 
 - The `ICMECAT(cache_dir=...)` parameter. Catalogs cached under a `cache_dir` are not
   migrated; the first `ICMECAT()` downloads again, and the old `icmecat.csv` can be deleted.
+
+- `set_path(new, add_scale)` from every plot; `path` is now a read-only property derived on
+  each read. To save elsewhere, join it: `Path("figs") / plot.path`.
+
+- The `auto_update_path` keyword of `set_labels`; passing it now raises `KeyError`.
 
 ### Migration
 

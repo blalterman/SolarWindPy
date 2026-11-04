@@ -580,3 +580,4 @@ for n in [int(a) for a in sys.argv[2:]]:
 11. **Do `IndicatorPlot`/`SSNPlot` and `FFPlot` belong in the same class structure,** or are they out of scope for this redesign?
 12. **`BetaRPlot`.** Is it a plot preset (labels, log, clim, cmap) that could become a factory over Hist2D, or a class you subclass further?
 13. **Spiral at your sizes.** At what n, and with what `min_per_bin`, do you run Spiral? At 1e7 points it now takes about 2.3 s (section C), and real data with duplicates may take the slower fallback.
+## Spent-Mark: plotting Candidate A, derived path and return order landed; leftover A3 tracked separately
