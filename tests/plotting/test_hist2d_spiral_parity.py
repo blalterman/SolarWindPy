@@ -108,7 +108,6 @@ def test_contours_default_to_the_authors_linestyles(hist, spiral, draw):
         pytest.param(
             lambda x, y: SpiralPlot2D(x, y, min_per_bin=100, axnorm="d"),
             id="SpiralPlot2D",
-            marks=pytest.mark.xfail(strict=True, reason=_RULED),
         ),
     ],
 )

@@ -1232,6 +1232,8 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         **kwargs
             Additional arguments passed to the contour function.
             Common options: ``levels``, ``cmap``, ``norm``, ``linestyles``.
+            ``norm`` defaults to the norm ``make_plot`` uses: a ``LogNorm``
+            for a density (``axnorm="d"``).
 
         Returns
         -------
@@ -1284,7 +1286,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         # Pop contour-specific kwargs
         levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", None)
+        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop(
             "linestyles",
             [
