@@ -363,21 +363,21 @@ def test_plot_contours_fix_scale_false_keeps_caller_scales():
 
 
 @pytest.mark.parametrize("growth_rate", GROWTH_RATES)
-def test_plot_gamma_draws_only_that_growth_rate(growth_rate):
-    """plot_gamma selects the four Table 1 curves of one growth rate.
+def test_growth_rate_draws_only_its_curves(growth_rate):
+    """growth_rate selects the four Table 1 curves of one growth rate.
 
     ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
-    sc.plot_contours(ax, plot_gamma=growth_rate)
+    sc.plot_contours(ax, growth_rate=growth_rate)
     assert sorted(_plotted_curves(ax, FINITE_BETA)) == [
         (k, growth_rate) for k in INSTABILITIES
     ]
 
 
 @pytest.mark.parametrize(
-    "tk_kind,plot_gamma,expected",
+    "tk_kind,growth_rate,expected",
     [
         ("mm", None, [("MM", g) for g in GROWTH_RATES]),
         (["aic", "OFI"], -3, [("AIC", -3), ("OFI", -3)]),
@@ -385,7 +385,7 @@ def test_plot_gamma_draws_only_that_growth_rate(growth_rate):
     ids=["one-kind-lowercase", "two-kinds-one-gamma"],
 )
 def test_tk_kind_selects_instabilities_case_insensitively(
-    tk_kind, plot_gamma, expected
+    tk_kind, growth_rate, expected
 ):
     """tk_kind restricts the curves to the named instabilities, in any letter case.
 
@@ -393,7 +393,7 @@ def test_tk_kind_selects_instabilities_case_insensitively(
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
-    sc.plot_contours(ax, tk_kind=tk_kind, plot_gamma=plot_gamma)
+    sc.plot_contours(ax, tk_kind=tk_kind, growth_rate=growth_rate)
     assert sorted(_plotted_curves(ax, FINITE_BETA)) == sorted(expected)
 
 
@@ -497,11 +497,11 @@ def test_table_legend_rows_and_columns_describe_their_curves(tk_kind, plotted):
 
 
 def test_user_visible_names_are_instability_growth_rate_and_stability():
-    """``insta_params`` rows are named Instability and Growth Rate; bins are "Stability".
+    """``insta_params`` rows are named Instability and growth_rate; bins are "Stability".
 
     ON FAILURE: the code is wrong.
     """
-    assert list(v16.insta_params.index.names) == ["Instability", "Growth Rate"]
+    assert list(v16.insta_params.index.names) == ["Instability", "growth_rate"]
     sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
     assert sc.stability_bin.name == "Stability"
 
@@ -556,7 +556,7 @@ def test_plot_contours_style_kwargs_override_every_default():
     fig, ax = plt.subplots()
     sc.plot_contours(
         ax,
-        plot_gamma=-3,
+        growth_rate=-3,
         c="r",
         ls=":",
         marker="s",

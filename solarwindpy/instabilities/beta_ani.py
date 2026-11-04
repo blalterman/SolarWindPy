@@ -15,7 +15,7 @@ class BetaRPlot(Hist2D):
     ----------
     beta : pandas.Series
         Proton parallel beta.
-    ani : pandas.Series
+    R : pandas.Series
         Temperature anisotropy.
     species : str
         Label used to generate axis titles.
@@ -31,22 +31,22 @@ class BetaRPlot(Hist2D):
     >>> import matplotlib.pyplot as plt
     >>> rng = np.random.default_rng(0)
     >>> beta = pd.Series(10.0 ** rng.uniform(-1, 1, 500), name="beta")
-    >>> ani = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="ani")
-    >>> br = BetaRPlot(beta, ani, "p")
+    >>> R = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="R")
+    >>> br = BetaRPlot(beta, R, "p")
     >>> ax, cbar = br.make_plot()
     >>> ax.get_xscale(), ax.get_yscale()
     ('log', 'log')
     >>> plt.close("all")
     """
 
-    def __init__(self, beta, ani, species, **kwargs):
+    def __init__(self, beta, R, species, **kwargs):
         """Instantiate the histogram plot.
 
         Parameters
         ----------
         beta : pandas.Series
             Proton parallel beta.
-        ani : pandas.Series
+        R : pandas.Series
             Temperature anisotropy.
         species : str
             Label used to generate axis titles.
@@ -54,12 +54,12 @@ class BetaRPlot(Hist2D):
             Additional options forwarded to
             :class:`~solarwindpy.plotting.hist2d.Hist2D`, e.g. ``nbins``,
             which may be a ``BinnedData`` holding columns named like ``beta``
-            and ``ani``, and ``mask``. ``logx`` and ``logy`` default to True,
+            and ``R``, and ``mask``. ``logx`` and ``logy`` default to True,
             or, with a ``BinnedData``, to its settings for those columns.
         """
 
         x = beta
-        y = ani
+        y = R
 
         # A shared BinnedData sets the log of its columns; see Hist2D.
         default = None if isinstance(kwargs.get("nbins"), BinnedData) else True
