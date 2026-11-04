@@ -12,7 +12,6 @@ lines and derives their intersection. No class keeps the older ``xh``,
 import inspect
 
 import numpy as np
-import pytest
 
 from solarwindpy.fitfunctions.hinge import (
     HingeAtPoint,
@@ -41,11 +40,6 @@ def _fit_function(cls):
     return cls(x, y)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="the hinge classes still name the hinge xh, xs and s; remove this "
-    "marker when every class names it h and yh",
-)
 def test_every_hinge_class_names_the_hinge_h_and_yh():
     r"""``h`` and ``yh`` name the hinge in all six hinge classes.
 

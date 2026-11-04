@@ -171,8 +171,8 @@ def __init__(
 
 ```python
 @property
-def xs(self) -> float:
-    """Saturation x-coordinate (derived from fitted params)."""
+def h(self) -> float:
+    """Hinge x-coordinate (derived from fitted params)."""
     return self.popt["x1"] + self.popt["yh"] / self.popt["m1"]
 ```
 

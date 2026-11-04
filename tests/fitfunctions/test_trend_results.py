@@ -22,15 +22,15 @@ from solarwindpy.fitfunctions.trend_fits import TrendFit
 from tests.tolerances import exact, noise_free
 
 
-# The author's reference hinge: (xh, yh) = (433, 4.12), rising with slope
+# The author's reference hinge: (h, yh) = (433, 4.12), rising with slope
 # yh / (433 - 250) and flattening to a tenth of that slope past the hinge.
-XH, YH = 433.0, 4.12
-M1 = YH / (XH - 250.0)
+H, YH = 433.0, 4.12
+M1 = YH / (H - 250.0)
 M2 = 0.1 * M1
 
 
 def _hinge_mu(v):
-    return np.minimum(YH + M1 * (v - XH), YH + M2 * (v - XH))
+    return np.minimum(YH + M1 * (v - H), YH + M2 * (v - H))
 
 
 def _hinge_agged():
@@ -104,7 +104,7 @@ def test_the_authors_example_recovers_the_reference_hinge():
         HingeAtPoint,
         y=("mu", "value"),
         yerr=("sigma", "value"),
-        trend_kwargs={"guess_xh": 433.0},
+        trend_kwargs={"guess_h": 433.0},
     )
     tf.make_fit()
 
@@ -114,7 +114,7 @@ def test_the_authors_example_recovers_the_reference_hinge():
         tf.trend.observations.raw.w, tf.bin_results.loc[:, ("sigma", "value")]
     )
     hinge = tf.trend.results.xs("value", level="K", axis=1).iloc[0]
-    assert [hinge["xh"], hinge["yh"]] == noise_free([XH, YH])  # the generating hinge
+    assert [hinge["h"], hinge["yh"]] == noise_free([H, YH])  # the generating hinge
     assert (tf.bin_results.loc[:, ("in_trend", "")]).all()
 
 

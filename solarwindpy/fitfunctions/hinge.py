@@ -64,9 +64,9 @@ def _median_slope(x, y, skip_nan=True):
     return np.median(slopes)
 
 
-def _y_near(x, y, xh):
-    r"""The ``y`` of the observation whose ``x`` is nearest ``xh``."""
-    return y[np.argmin(np.abs(x - xh))]
+def _y_near(x, y, h):
+    r"""The ``y`` of the observation whose ``x`` is nearest ``h``."""
+    return y[np.argmin(np.abs(x - h))]
 
 
 def _x_intercept(x, y, m):
@@ -95,11 +95,10 @@ class Hinge(FitFunction):
         Independent variable observations.
     yobs : array-like
         Dependent variable observations.
-    guess_xh : float, optional
-        The x of the hinge, where the estimate splits the data between the
-        two lines, whatever the class calls that parameter (``xh``, ``xs`` or
-        ``h``). None, the default, estimates it from the data as the median
-        used x. A full start goes to
+    guess_h : float, optional
+        The x of the hinge, ``h``, where the estimate splits the data between
+        the two lines. None, the default, estimates it from the data as the
+        median used x. A full start goes to
         :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit` as
         ``p0=``, as in every fit function.
     **kwargs
@@ -111,59 +110,59 @@ class Hinge(FitFunction):
     point of these models (the two lines' intercepts coincide), so ``p0``
     logs a warning and returns the package author's reference hinge instead,
     translated to the class's parameters: the hinge
-    :math:`(x_h, y_h) = (433, 4.12)`, the rising line's x-intercept
-    :math:`x_1 = 250`, its slope :math:`m_1 = y_h / (x_h - x_1) = 4.12 / 183`,
+    :math:`(h, y_h) = (433, 4.12)`, the rising line's x-intercept
+    :math:`x_1 = 250`, its slope :math:`m_1 = y_h / (h - x_1) = 4.12 / 183`,
     a small non-zero plateau slope :math:`m_2 = 0.01\,m_1`, and the plateau
-    line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that
+    line's x-intercept :math:`x_2 = h - y_h / m_2 = -17867`, which puts that
     line through the hinge.
 
     The same reference hinge is a useful explicit start for solar wind speed
-    trends: ``HingeAtPoint(v, y, guess_xh=433)`` splits at 433 km/s, and
+    trends: ``HingeAtPoint(v, y, guess_h=433)`` splits at 433 km/s, and
     ``make_fit(p0=...)`` starts from the full hinge when :math:`y_h = 4.12`
-    matters too. It is a usage note: it is not ``guess_xh``'s default.
+    matters too. It is a usage note: it is not ``guess_h``'s default.
 
     Examples
     --------
     Every hinge fit function shares ``p0``, shown here with :class:`TwoLine`,
     whose parameters are ``[x1, x2, m1, m2]``. Two lines meeting at (5, 10),
-    with data on both sides of ``guess_xh``, give the estimate:
+    with data on both sides of ``guess_h``, give the estimate:
 
     >>> import numpy as np
     >>> from solarwindpy.fitfunctions.hinge import TwoLine
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2 * x, -(x - 15))
-    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xh=5.0).p0]
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_h=5.0).p0]
     ['0', '15', '2', '-1']
 
-    With ``guess_xh`` past every point, the second line has no data and no
+    With ``guess_h`` past every point, the second line has no data and no
     estimate, so ``p0`` logs a warning and returns the reference hinge:
 
-    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xh=20.0).p0]
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_h=20.0).p0]
     ['250', '-1.787e+04', '0.02251', '0.0002251']
     """
 
     # The author's reference hinge, described in the class Notes.
-    _XH = 433.0
+    _H = 433.0
     _YH = 4.12
     _X1 = 250.0
-    _M1 = _YH / (_XH - _X1)
+    _M1 = _YH / (_H - _X1)
     _M2 = 0.01 * _M1
-    _X2 = _XH - _YH / _M2
+    _X2 = _H - _YH / _M2
 
-    def __init__(self, xobs, yobs, guess_xh=None, **kwargs):
+    def __init__(self, xobs, yobs, guess_h=None, **kwargs):
         # Documented in the class docstring (see FitFunctionMeta).
         super().__init__(xobs, yobs, **kwargs)
-        self._guess_xh = guess_xh
+        self._guess_h = guess_h
 
     @property
-    def guess_xh(self):
+    def guess_h(self):
         r"""The hinge x given at construction, or None to estimate it from the data."""
-        return self._guess_xh
+        return self._guess_h
 
     def _split_x(self):
-        r"""Where the estimate splits the data: :attr:`guess_xh`, or the median used x."""
-        if self.guess_xh is not None:
-            return self.guess_xh
+        r"""Where the estimate splits the data: :attr:`guess_h`, or the median used x."""
+        if self.guess_h is not None:
+            return self.guess_h
         return float(np.median(self.observations.used.x))
 
     @property
@@ -229,19 +228,19 @@ class Hinge(FitFunction):
 class HingeSaturation(Hinge):
     r"""Piecewise linear function with hinge point for saturation modeling.
 
-    The model consists of two linear segments joined at a hinge point (xh, yh):
+    The model consists of two linear segments joined at a hinge point (h, yh):
 
-    - Rising region (x < xh): :math:`f(x) = m_1 (x - x_1)`
-    - Plateau region (x >= xh): :math:`f(x) = m_2 (x - x_2)`
+    - Rising region (x < h): :math:`f(x) = m_1 (x - x_1)`
+    - Plateau region (x >= h): :math:`f(x) = m_2 (x - x_2)`
 
     where the slopes and intercepts are related by continuity at the hinge:
 
-    - :math:`m_1 = y_h / (x_h - x_1)`
-    - :math:`x_2 = x_h - y_h / m_2`
+    - :math:`m_1 = y_h / (h - x_1)`
+    - :math:`x_2 = h - y_h / m_2`
 
     Attributes
     ----------
-    xh : float
+    h : float
         Hinge x-coordinate (fitted parameter).
     yh : float
         Hinge y-coordinate (fitted parameter).
@@ -252,16 +251,16 @@ class HingeSaturation(Hinge):
 
     Notes
     -----
-    ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``xh`` is the split
-    (``guess_xh``, or the median used x) and ``yh`` the ``y`` of the
+    ``p0`` estimates ``[h, yh, x1, m2]`` from the data. ``h`` is the split
+    (``guess_h``, or the median used x) and ``yh`` the ``y`` of the
     observation nearest it; ``x1`` comes from a linear fit to the rising region
-    (x < xh), or is the data minimum when that region has fewer than two
+    (x < h), or is the data minimum when that region has fewer than two
     points or the fit is flat, and is undefined when the region's points
     share one ``x`` (no slope); ``m2`` is the median slope in the plateau
-    region (x >= xh), is 0 when that region has fewer than two points, and
+    region (x >= h), is 0 when that region has fewer than two points, and
     is undefined when it has repeated ``x``. When an estimate is undefined,
     ``p0`` returns the reference hinge of :class:`Hinge` as
-    ``[xh, yh, x1, m2]``. Unlike :class:`HingeMin` and :class:`HingeAtPoint`,
+    ``[h, yh, x1, m2]``. Unlike :class:`HingeMin` and :class:`HingeAtPoint`,
     a short region keeps its own fallback: ``m2 = 0`` is a flat plateau at
     ``yh``, which the model evaluates directly, so that start is not
     singular.
@@ -272,9 +271,9 @@ class HingeSaturation(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import HingeSaturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.where(x < 5, 2*x, 10)  # Saturation at y=10 for x>=5
-    >>> fit = HingeSaturation(x, y, guess_xh=5)
+    >>> fit = HingeSaturation(x, y, guess_h=5)
     >>> fit.make_fit()
-    >>> print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")
+    >>> print(f"Hinge at ({fit.popt['h']:.2f}, {fit.popt['yh']:.2f})")
     Hinge at (5.00, 10.00)
     """
 
@@ -285,17 +284,17 @@ class HingeSaturation(Hinge):
         Returns
         -------
         callable
-            Function with signature ``f(x, xh, yh, x1, m2)``.
+            Function with signature ``f(x, h, yh, x1, m2)``.
         """
 
-        def hinge_saturation(x, xh, yh, x1, m2):
+        def hinge_saturation(x, h, yh, x1, m2):
             r"""Evaluate hinge saturation model.
 
             Parameters
             ----------
             x : array-like
                 Independent variable values.
-            xh : float
+            h : float
                 Hinge x-coordinate.
             yh : float
                 Hinge y-coordinate.
@@ -309,8 +308,8 @@ class HingeSaturation(Hinge):
             numpy.ndarray
                 Model values at x.
             """
-            m1 = yh / (xh - x1)
-            x2 = xh - (yh / m2) if abs(m2) > 1e-15 else np.inf
+            m1 = yh / (h - x1)
+            x2 = h - (yh / m2) if abs(m2) > 1e-15 else np.inf
 
             y1 = m1 * (x - x1)
             y2 = m2 * (x - x2) if abs(m2) > 1e-15 else yh * np.ones_like(x)
@@ -323,12 +322,12 @@ class HingeSaturation(Hinge):
     def _estimate(self):
         x = self.observations.used.x
         y = self.observations.used.y
-        xh = self._split_x()
-        yh = _y_near(x, y, xh)
+        h = self._split_x()
+        yh = _y_near(x, y, h)
 
         # Estimate x1 from data in rising region
-        # m1 = yh / (xh - x1), so x1 = xh - yh/m1
-        rising_mask = x < xh
+        # m1 = yh / (h - x1), so x1 = h - yh/m1
+        rising_mask = x < h
         if rising_mask.sum() >= 2:
             x_rising = x[rising_mask]
             y_rising = y[rising_mask]
@@ -339,7 +338,7 @@ class HingeSaturation(Hinge):
                 # Simple linear regression to estimate slope m1
                 m1_est = np.polyfit(x_rising, y_rising, 1)[0]
                 if abs(m1_est) > 1e-10:
-                    x1 = xh - yh / m1_est
+                    x1 = h - yh / m1_est
                 else:
                     x1 = x.min()
         else:
@@ -347,16 +346,16 @@ class HingeSaturation(Hinge):
             x1 = x.min()
 
         # Estimate m2 from slope in plateau region
-        plateau_mask = x >= xh
+        plateau_mask = x >= h
         if plateau_mask.sum() >= 2:
             m2 = _median_slope(x[plateau_mask], y[plateau_mask], skip_nan=False)
         else:
             m2 = 0.0
 
-        return [xh, yh, x1, m2]
+        return [h, yh, x1, m2]
 
     def _reference_start(self):
-        return [self._XH, self._YH, self._X1, self._M2]
+        return [self._H, self._YH, self._X1, self._M2]
 
     @property
     def TeX_function(self) -> str:
@@ -371,8 +370,8 @@ class HingeSaturation(Hinge):
             [
                 r"f(x)=\min(y_1, \, y_2)",
                 r"y_i = m_i(x-x_i)",
-                r"m_1 = \frac{y_h}{x_h - x_1}",
-                r"x_2 = x_h - \frac{y_h}{m_2}",
+                r"m_1 = \frac{y_h}{h - x_1}",
+                r"x_2 = h - \frac{y_h}{m_2}",
             ]
         )
         return tex
@@ -392,10 +391,10 @@ class TwoLine(Hinge):
     - :math:`y_1 = m_1 (x - x_1)`
     - :math:`y_2 = m_2 (x - x_2)`
 
-    The lines intersect at the saturation point :math:`(x_s, s)` where:
+    The lines intersect at the saturation point :math:`(h, y_h)` where:
 
-    - :math:`x_s = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}`
-    - :math:`s = m_1 (x_s - x_1) = m_2 (x_s - x_2)`
+    - :math:`h = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}`
+    - :math:`y_h = m_1 (h - x_1) = m_2 (h - x_2)`
 
     Attributes
     ----------
@@ -407,9 +406,9 @@ class TwoLine(Hinge):
         Slope of first line (fitted parameter).
     m2 : float
         Slope of second line (fitted parameter).
-    xs : float
+    h : float
         x-coordinate of intersection point (derived property).
-    s : float
+    yh : float
         y-coordinate of intersection point (derived property).
     theta : float
         Angle between the two lines in radians (derived property).
@@ -417,7 +416,7 @@ class TwoLine(Hinge):
     Notes
     -----
     ``p0`` estimates ``[x1, x2, m1, m2]`` from the data on each side of the
-    split (``guess_xh``, or the median used x): at or below it and above it. A repeated
+    split (``guess_h``, or the median used x): at or below it and above it. A repeated
     point has no slope and is skipped. Each side needs at least two points
     with distinct ``x`` for a slope, and a nonzero slope for an x-intercept;
     otherwise an estimate is undefined, and ``p0`` returns the reference
@@ -429,9 +428,9 @@ class TwoLine(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import TwoLine
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))  # Two lines intersecting at (5, 10)
-    >>> fit = TwoLine(x, y, guess_xh=5.0)
+    >>> fit = TwoLine(x, y, guess_h=5.0)
     >>> fit.make_fit()
-    >>> print(f"Intersection at ({fit.xs:.2f}, {fit.s:.2f})")
+    >>> print(f"Intersection at ({fit.h:.2f}, {fit.yh:.2f})")
     Intersection at (5.00, 10.00)
     """
 
@@ -474,14 +473,14 @@ class TwoLine(Hinge):
         return twoline
 
     @property
-    def xs(self) -> float:
+    def h(self) -> float:
         r"""x-coordinate of the intersection (saturation) point.
 
         Calculated as:
 
         .. math::
 
-            x_s = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}
+            h = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}
         """
         popt = self.popt
         x1 = popt["x1"]
@@ -493,20 +492,20 @@ class TwoLine(Hinge):
         return n / d
 
     @property
-    def s(self) -> float:
+    def yh(self) -> float:
         r"""y-coordinate of the intersection (saturation) point.
 
         Calculated as:
 
         .. math::
 
-            s = m_1 (x_s - x_1)
+            y_h = m_1 (h - x_1)
         """
         popt = self.popt
         x1 = popt["x1"]
         m1 = popt["m1"]
-        xs = self.xs
-        return m1 * (xs - x1)
+        h = self.h
+        return m1 * (h - x1)
 
     @property
     def theta(self) -> float:
@@ -526,8 +525,8 @@ class TwoLine(Hinge):
         x = self.observations.used.x
         y = self.observations.used.y
 
-        xs = self._split_x()
-        tk = x <= xs
+        h = self._split_x()
+        tk = x <= h
 
         m1 = _median_slope(x[tk], y[tk])
         x1 = _x_intercept(x[tk], y[tk], m1)
@@ -568,25 +567,25 @@ class Saturation(Hinge):
 
         f(x) = \min(y_1, y_2)
 
-    Parameters are :math:`(x_1, x_s, s, \theta)` where:
+    Parameters are :math:`(x_1, h, y_h, \theta)` where:
 
     - :math:`x_1`: x-intercept of the rising line
-    - :math:`x_s`: x-coordinate of saturation point
-    - :math:`s`: y-coordinate of saturation point
+    - :math:`h`: x-coordinate of saturation point
+    - :math:`y_h`: y-coordinate of saturation point
     - :math:`\theta`: angle between the two lines (radians)
 
     The slopes are derived as:
 
-    - :math:`m_1 = s / (x_s - x_1)`
+    - :math:`m_1 = y_h / (h - x_1)`
     - :math:`m_2 = \tan(\arctan(m_1) - \theta)`
 
     Attributes
     ----------
     x1 : float
         x-intercept of rising line (fitted parameter).
-    xs : float
+    h : float
         x-coordinate of saturation point (fitted parameter).
-    s : float
+    yh : float
         y-coordinate of saturation point (fitted parameter).
     theta : float
         Angle between lines (fitted parameter, radians).
@@ -599,13 +598,13 @@ class Saturation(Hinge):
 
     Notes
     -----
-    ``p0`` estimates ``[x1, xs, s, theta]`` from the data on each side of
-    ``xs``, the split (``guess_xh``, or the median used x): at or below it
+    ``p0`` estimates ``[x1, h, yh, theta]`` from the data on each side of
+    ``h``, the split (``guess_h``, or the median used x): at or below it
     and above it. Each side
     needs at least two points with distinct ``x`` for a slope, and the
     rising side a nonzero slope for ``x1``; otherwise an estimate is
     undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as
-    ``[x1, xs, s, theta] = [x1, xh, yh, theta]``, where
+    ``[x1, h, yh, theta]``, where
     :math:`\theta = \arctan(m_1) - \arctan(m_2)` inverts the model's
     :math:`m_2 = \tan(\arctan(m_1) - \theta)`.
 
@@ -615,9 +614,9 @@ class Saturation(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import Saturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))
-    >>> fit = Saturation(x, y, guess_xh=5.0)
+    >>> fit = Saturation(x, y, guess_h=5.0)
     >>> fit.make_fit()
-    >>> print(f"Saturation at ({fit.popt['xs']:.2f}, {fit.popt['s']:.2f})")
+    >>> print(f"Saturation at ({fit.popt['h']:.2f}, {fit.popt['yh']:.2f})")
     Saturation at (5.00, 10.00)
     """
 
@@ -628,10 +627,10 @@ class Saturation(Hinge):
         Returns
         -------
         callable
-            Function with signature ``f(x, x1, xs, s, theta)``.
+            Function with signature ``f(x, x1, h, yh, theta)``.
         """
 
-        def saturation(x, x1, xs, s, theta):
+        def saturation(x, x1, h, yh, theta):
             r"""Evaluate saturation model.
 
             Parameters
@@ -640,9 +639,9 @@ class Saturation(Hinge):
                 Independent variable values.
             x1 : float
                 x-intercept of rising line.
-            xs : float
+            h : float
                 x-coordinate of saturation point.
-            s : float
+            yh : float
                 y-coordinate of saturation point.
             theta : float
                 Angle between lines in radians.
@@ -652,9 +651,9 @@ class Saturation(Hinge):
             numpy.ndarray
                 Model values at x.
             """
-            m1 = s / (xs - x1)
+            m1 = yh / (h - x1)
             m2 = np.tan(np.arctan(m1) - theta)
-            x2 = xs - (s / m2)
+            x2 = h - (yh / m2)
 
             l1 = m1 * (x - x1)
             l2 = m2 * (x - x2)
@@ -671,13 +670,13 @@ class Saturation(Hinge):
 
         .. math::
 
-            m_1 = \frac{s}{x_s - x_1}
+            m_1 = \frac{y_h}{h - x_1}
         """
         popt = self.popt
-        s = popt["s"]
-        xs = popt["xs"]
+        yh = popt["yh"]
+        h = popt["h"]
         x1 = popt["x1"]
-        return s / (xs - x1)
+        return yh / (h - x1)
 
     @property
     def m2(self) -> float:
@@ -702,32 +701,32 @@ class Saturation(Hinge):
 
         .. math::
 
-            x_2 = x_s - \frac{s}{m_2}
+            x_2 = h - \frac{y_h}{m_2}
         """
         popt = self.popt
-        s = popt["s"]
-        xs = popt["xs"]
+        yh = popt["yh"]
+        h = popt["h"]
         m2 = self.m2
-        return xs - (s / m2)
+        return h - (yh / m2)
 
     def _estimate(self):
         def estimate_line(x, y):
             m = _median_slope(x, y)
             x0 = _x_intercept(x, y, m)
             # A vertical line (infinite m) gives no saturation value.
-            s = m * (xs - x0) if np.isfinite(m) else np.nan
-            return x0, m, s
+            yh = m * (h - x0) if np.isfinite(m) else np.nan
+            return x0, m, yh
 
         x = self.observations.used.x
         y = self.observations.used.y
 
-        xs = self._split_x()
-        tk = x <= xs
+        h = self._split_x()
+        tk = x <= h
 
         x1, m1, s1 = estimate_line(x[tk], y[tk])
         x2, m2, s2 = estimate_line(x[~tk], y[~tk])
 
-        s = np.nan if np.isnan([s1, s2]).all() else np.nanmedian([s1, s2])
+        yh = np.nan if np.isnan([s1, s2]).all() else np.nanmedian([s1, s2])
         if not (np.isfinite(m1) and np.isfinite(m2)):
             theta = np.nan
         elif 1 + m1 * m2 == 0:
@@ -738,11 +737,11 @@ class Saturation(Hinge):
         else:
             theta = np.arctan((m1 - m2) / (1 + m1 * m2))
 
-        return [x1, xs, s, theta]
+        return [x1, h, yh, theta]
 
     def _reference_start(self):
         theta = np.arctan(self._M1) - np.arctan(self._M2)
-        return [self._X1, self._XH, self._YH, theta]
+        return [self._X1, self._H, self._YH, theta]
 
     @property
     def TeX_function(self) -> str:
@@ -755,10 +754,10 @@ class Saturation(Hinge):
         """
         tex = "\n".join(
             [
-                r"f \, \left(x, x_1, x_s, s, \theta\right)=\min\left(y_1, \, y_2\right)",
+                r"f \, \left(x, x_1, h, y_h, \theta\right)=\min\left(y_1, \, y_2\right)",
                 r"y_i = m_i(x - x_i)",
-                r"x_s = \frac{m_2 x_2 - m_1 x_1}{m_2 - m_1}",
-                r"s = m_i (x_s - x_i)",
+                r"h = \frac{m_2 x_2 - m_1 x_1}{m_2 - m_1}",
+                r"y_h = m_i (h - x_i)",
                 r"\theta = \arctan\left(\frac{m_1 - m_2}{1 + m_1 m_2}\right)",
             ]
         )
@@ -804,13 +803,13 @@ class HingeMin(Hinge):
     Notes
     -----
     ``p0`` estimates ``[m1, x1, x2, h]`` from the data on each side of
-    ``h``, the split (``guess_xh``, or the median used x): below it and at
+    ``h``, the split (``guess_h``, or the median used x): below it and at
     or above it. Each side needs at
     least two points for a slope, and a nonzero slope for an x-intercept;
     the lower side skips a repeated point, and on the upper side repeated
     ``x`` leave the slope undefined. Otherwise an estimate is undefined, and
     ``p0`` returns the reference hinge of :class:`Hinge` as
-    ``[m1, x1, x2, h]`` with ``h = xh``; the model's
+    ``[m1, x1, x2, h]``; the model's
     :math:`m_2 = m_1 (h - x_1) / (h - x_2)` then recovers the reference
     :math:`m_2`. When either side is short, the whole start is the reference
     hinge: the other side's estimate is not kept.
@@ -821,7 +820,7 @@ class HingeMin(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import HingeMin
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -2*(x-10))  # Two lines meeting at (5, 10)
-    >>> fit = HingeMin(x, y, guess_xh=5.0)
+    >>> fit = HingeMin(x, y, guess_h=5.0)
     >>> fit.make_fit()
     >>> print(f"Hinge at x={fit.popt['h']:.2f}")
     Hinge at x=5.00
@@ -926,7 +925,7 @@ class HingeMin(Hinge):
         return [m1, x1, x2, h]
 
     def _reference_start(self):
-        return [self._M1, self._X1, self._X2, self._XH]
+        return [self._M1, self._X1, self._X2, self._H]
 
     @property
     def TeX_function(self) -> str:
@@ -987,7 +986,7 @@ class HingeMax(HingeMin):
     >>> from solarwindpy.fitfunctions.hinge import HingeMax
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.maximum(-2*(x-0), 2*(x-10))  # V-shape with vertex at (5, -10)
-    >>> fit = HingeMax(x, y, guess_xh=5.0)
+    >>> fit = HingeMax(x, y, guess_h=5.0)
     >>> fit.make_fit()
     >>> print(f"Hinge at x={fit.popt['h']:.2f}")
     Hinge at x=5.00
@@ -1022,7 +1021,7 @@ class HingeAtPoint(Hinge):
     r"""Piecewise linear function passing through a specified hinge point.
 
     The model consists of two linear segments that both pass through the
-    hinge point :math:`(x_h, y_h)`:
+    hinge point :math:`(h, y_h)`:
 
     .. math::
 
@@ -1030,12 +1029,12 @@ class HingeAtPoint(Hinge):
 
     where:
 
-    - :math:`y_1 = m_1 (x - x_1)` with :math:`x_1 = x_h - y_h / m_1`
-    - :math:`y_2 = m_2 (x - x_2)` with :math:`x_2 = x_h - y_h / m_2`
+    - :math:`y_1 = m_1 (x - x_1)` with :math:`x_1 = h - y_h / m_1`
+    - :math:`y_2 = m_2 (x - x_2)` with :math:`x_2 = h - y_h / m_2`
 
     Attributes
     ----------
-    xh : float
+    h : float
         x-coordinate of hinge point (fitted parameter).
     yh : float
         y-coordinate of hinge point (fitted parameter).
@@ -1048,13 +1047,13 @@ class HingeAtPoint(Hinge):
 
     Notes
     -----
-    ``p0`` estimates ``[xh, yh, m1, m2]`` from the data on each side of
-    ``xh``, the split (``guess_xh``, or the median used x): ``yh`` is the ``y`` at the observation nearest
-    ``xh``, and the slopes come from each side of it: below it (x < xh) and
+    ``p0`` estimates ``[h, yh, m1, m2]`` from the data on each side of
+    ``h``, the split (``guess_h``, or the median used x): ``yh`` is the ``y`` at the observation nearest
+    ``h``, and the slopes come from each side of it: below it (x < h) and
     at or above it. Each side needs at least two points for a slope; the
     lower side skips a repeated point, and on the upper side repeated ``x``
     leave the slope undefined. Otherwise a slope is undefined, and ``p0``
-    returns the reference hinge of :class:`Hinge` as ``[xh, yh, m1, m2]``.
+    returns the reference hinge of :class:`Hinge` as ``[h, yh, m1, m2]``.
     When either side is short, the whole start is the reference hinge: the
     other side's estimate is not kept.
 
@@ -1064,9 +1063,9 @@ class HingeAtPoint(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import HingeAtPoint
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))  # Hinge at (5, 10)
-    >>> fit = HingeAtPoint(x, y, guess_xh=5.0)
+    >>> fit = HingeAtPoint(x, y, guess_h=5.0)
     >>> fit.make_fit()
-    >>> print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")
+    >>> print(f"Hinge at ({fit.popt['h']:.2f}, {fit.popt['yh']:.2f})")
     Hinge at (5.00, 10.00)
     """
 
@@ -1077,17 +1076,17 @@ class HingeAtPoint(Hinge):
         Returns
         -------
         callable
-            Function with signature ``f(x, xh, yh, m1, m2)``.
+            Function with signature ``f(x, h, yh, m1, m2)``.
         """
 
-        def hinge_at_point(x, xh, yh, m1, m2):
+        def hinge_at_point(x, h, yh, m1, m2):
             r"""Evaluate hinge-at-point model.
 
             Parameters
             ----------
             x : array-like
                 Independent variable values.
-            xh : float
+            h : float
                 x-coordinate of hinge point.
             yh : float
                 y-coordinate of hinge point.
@@ -1101,8 +1100,8 @@ class HingeAtPoint(Hinge):
             numpy.ndarray
                 Model values at x.
             """
-            x1 = xh - (yh / m1)
-            x2 = xh - (yh / m2)
+            x1 = h - (yh / m1)
+            x2 = h - (yh / m2)
 
             y1 = m1 * (x - x1)
             y2 = m2 * (x - x2)
@@ -1118,43 +1117,43 @@ class HingeAtPoint(Hinge):
 
         Returns a named tuple with:
 
-        - x1 = xh - yh / m1
-        - x2 = xh - yh / m2
+        - x1 = h - yh / m1
+        - x2 = h - yh / m2
         """
         popt = self.popt
-        xh = popt["xh"]
+        h = popt["h"]
         yh = popt["yh"]
         m1 = popt["m1"]
         m2 = popt["m2"]
-        x1 = xh - (yh / m1)
-        x2 = xh - (yh / m2)
+        x1 = h - (yh / m1)
+        x2 = h - (yh / m2)
         return _XIntercepts(x1, x2)
 
     def _estimate(self):
         x = self.observations.used.x
         y = self.observations.used.y
-        xh = self._split_x()
+        h = self._split_x()
 
         # Estimate yh from data near the hinge point
-        yh = _y_near(x, y, xh)
+        yh = _y_near(x, y, h)
 
         # A side with fewer than 2 points has no slope: its estimate is NaN.
         m1 = m2 = np.nan
 
         # Estimate m1 from region below hinge
-        tk_below = x < xh
+        tk_below = x < h
         if tk_below.sum() >= 2:
             m1 = _median_slope(x[tk_below], y[tk_below])
 
         # Estimate m2 from region above hinge
-        tk_above = x >= xh
+        tk_above = x >= h
         if tk_above.sum() >= 2:
             m2 = _median_slope(x[tk_above], y[tk_above], skip_nan=False)
 
-        return [xh, yh, m1, m2]
+        return [h, yh, m1, m2]
 
     def _reference_start(self):
-        return [self._XH, self._YH, self._M1, self._M2]
+        return [self._H, self._YH, self._M1, self._M2]
 
     @property
     def TeX_function(self) -> str:
@@ -1169,7 +1168,7 @@ class HingeAtPoint(Hinge):
             [
                 r"f(x)=\min(y_1, \, y_2)",
                 r"y_i = m_i(x-x_i)",
-                r"x_i = x_h - \frac{y_h}{m_i}",
+                r"x_i = h - \frac{y_h}{m_i}",
             ]
         )
         return tex

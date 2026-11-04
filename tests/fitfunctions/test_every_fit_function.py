@@ -150,7 +150,7 @@ def test_explicit_p0_none_does_not_read_the_class_guess():
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1, 2, 3, 4, 5])
-    fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_xh=2.5)
+    fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_h=2.5)
     with pytest.raises(NotImplementedError):
         fit.p0
     got = attempt_fit(fit, p0=None)
