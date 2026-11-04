@@ -12,6 +12,7 @@ from solarwindpy.fitfunctions.core import (
     FitFailedError,
     InvalidParameterError,
     InsufficientDataError,
+    NotFittedError,
 )
 from solarwindpy.fitfunctions.plots import FFPlot
 from solarwindpy.fitfunctions.tex_info import TeXinfo
@@ -291,26 +292,28 @@ def test_str_call_and_properties(fitted_linear):
 
 
 class TestChisqDofBeforeFit:
-    """Test chisq_dof property returns None before fit (lines 283-284)."""
+    """Test chisq_dof property raises before fit."""
 
-    def test_chisq_dof_returns_none_before_fit(self, simple_linear_data):
-        """Verify chisq_dof returns None when _chisq_dof attribute not set."""
+    def test_chisq_dof_raises_before_fit(self, simple_linear_data):
+        """Verify chisq_dof raises NotFittedError before make_fit."""
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
-        assert lf.chisq_dof is None
+        with pytest.raises(NotFittedError):
+            lf.chisq_dof
 
 
 class TestInitialGuessInfoBeforeFit:
-    """Test initial_guess_info property returns None before fit (lines 301-302)."""
+    """Test initial_guess_info property raises before fit."""
 
-    def test_initial_guess_info_returns_none_before_fit(self, simple_linear_data):
-        """``initial_guess_info`` is None on a fresh object that has not been fitted.
+    def test_initial_guess_info_raises_before_fit(self, simple_linear_data):
+        """``initial_guess_info`` raises on a fresh object that has not been fitted.
 
         ON FAILURE: the code is wrong -- an unfitted object reports a start.
         """
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
-        assert lf.initial_guess_info is None
+        with pytest.raises(NotFittedError):
+            lf.initial_guess_info
 
 
 class TestWeightShapeValidation:

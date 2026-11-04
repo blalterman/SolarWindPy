@@ -14,15 +14,8 @@ import pytest
 from solarwindpy.fitfunctions.core import InsufficientDataError, NotFittedError
 from solarwindpy.fitfunctions.lines import Line
 
-_STEP4 = pytest.mark.xfail(
-    strict=True,
-    reason="pcov, chisq_dof, initial_guess_info, fit_result, fit_bounds, plotter "
-    "and TeX_info do not yet raise NotFittedError before a fit; "
-    "remove this marker when consistent unfitted errors land",
-)
 
-# Each result, read from a fit; the ones that already raise NotFittedError
-# before a fit are the guards.
+# Each result, read from a fit.
 READS = {
     "results": lambda f: f.results,
     "popt": lambda f: f.popt,
@@ -39,7 +32,6 @@ READS = {
     "TeX_info": lambda f: f.TeX_info,
     "residuals": lambda f: f.residuals(),
 }
-ALREADY = {"results", "popt", "psigma", "rsq", "__call__", "x_intercept", "residuals"}
 # What only a successful fit produces.
 SUCCESS_ONLY = ["initial_guess_info", "fit_result", "fit_bounds", "plotter", "TeX_info"]
 
@@ -49,10 +41,7 @@ def _line():
     return Line(x, 2.0 * x + 1.0)
 
 
-@pytest.mark.parametrize(
-    "name",
-    [n if n in ALREADY else pytest.param(n, marks=_STEP4) for n in READS],
-)
+@pytest.mark.parametrize("name", list(READS))
 def test_every_result_raises_not_fitted_before_make_fit(name):
     """Before ``make_fit``, each result raises NotFittedError naming make_fit.
 
@@ -71,7 +60,6 @@ def test_not_fitted_is_an_attribute_error():
     assert not hasattr(_line(), "popt")
 
 
-@_STEP4
 @pytest.mark.parametrize("name", SUCCESS_ONLY)
 def test_after_a_failed_fit_success_only_results_raise_naming_the_failure(name):
     """A failed fit has no optimizer result: those reads name the failure.

@@ -407,10 +407,37 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         r"""The names of the actual function arguments pulled by getfullargspec."""
         return self._argnames
 
+    def _not_fitted(self):
+        r"""The :class:`NotFittedError` for a result read before a successful fit."""
+        name = type(self).__name__
+        if self._error is None:
+            return NotFittedError(f"{name} is not fitted: call make_fit first.")
+        return NotFittedError(
+            f"{name} has no successful fit: make_fit failed with "
+            f"{type(self._error).__name__}: {self._error}"
+        )
+
+    def _fitted(self, name):
+        r"""Stored result ``name``, or raise :class:`NotFittedError` when it is absent.
+
+        Every result read goes through here or :attr:`results`, so all of them
+        fail one way before a fit.
+        """
+        try:
+            return self.__dict__[name]
+        except KeyError:
+            raise self._not_fitted() from None
+
     @property
     def fit_bounds(self):
-        r"""Bounds used when running the fit."""
-        return dict(self._fit_bounds)
+        r"""Bounds used when running the last successful fit.
+
+        Raises
+        ------
+        NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return dict(self._fitted("_fit_bounds"))
 
     @property
     def chisq_dof(self):
@@ -419,12 +446,14 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Returns
         -------
         _ChisqPerDegreeOfFreedom
-            ``(linear, robust)``. NaN after a failed fit, and before a fit
-            returns None.
+            ``(linear, robust)``. NaN after a failed fit.
+
+        Raises
+        ------
+        NotFittedError
+            Before :meth:`make_fit`.
         """
-        if self._results is None:
-            return None
-        row = self._results.iloc[0]
+        row = self.results.iloc[0]
         return _ChisqPerDegreeOfFreedom(
             row[("chisq_dof", "linear")], row[("chisq_dof", "robust")]
         )
@@ -436,11 +465,18 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def fit_result(self):
-        return self._fit_result
+        r"""The :class:`scipy.optimize.OptimizeResult` of the last successful fit.
+
+        Raises
+        ------
+        NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_fit_result")
 
     @property
     def initial_guess_info(self):
-        r"""The start and bounds of the last successful fit, per parameter, or None.
+        r"""The start and bounds of the last successful fit, per parameter.
 
         The start is the one :func:`scipy.optimize.least_squares` began from:
         the caller's ``p0``, the class's :attr:`p0` as a subclass's
@@ -449,15 +485,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Returns
         -------
-        dict or None
-            ``{name: _InitialGuessInfo(p0, bounds)}``, or None before a fit
-            succeeds.
+        dict
+            ``{name: _InitialGuessInfo(p0, bounds)}``.
+
+        Raises
+        ------
+        NotFittedError
+            Before a successful :meth:`make_fit`.
         """
-        try:
-            p0 = self._fit_p0
-            bounds = self.fit_bounds
-        except AttributeError:
-            return None
+        p0 = self._fitted("_fit_p0")
+        bounds = self.fit_bounds
 
         names = self.argnames
         info = {
@@ -478,7 +515,14 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def plotter(self):
-        return self._plotter
+        r"""The :class:`~solarwindpy.fitfunctions.plots.FFPlot` of the last successful fit.
+
+        Raises
+        ------
+        NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_plotter")
 
     @property
     def results(self):
@@ -518,9 +562,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         'ok'
         """
         if self._results is None:
-            raise NotFittedError(
-                f"{type(self).__name__} has no results: call make_fit first."
-            )
+            raise self._not_fitted()
         return self._results.copy()
 
     @property
@@ -545,8 +587,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def pcov(self):
-        r"""Returns a copy so that the matrix isn't accidentally edited."""
-        return self._pcov.copy()
+        r"""The parameter covariance, in :attr:`argnames` order; NaN after a failed fit.
+
+        Returns a copy so that the matrix isn't accidentally edited.
+
+        Raises
+        ------
+        NotFittedError
+            Before :meth:`make_fit`.
+        """
+        return self._fitted("_pcov").copy()
 
     @property
     def rsq(self):
@@ -682,7 +732,14 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def TeX_info(self):
-        return self._TeX_info
+        r"""The :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo` of the last successful fit.
+
+        Raises
+        ------
+        NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_TeX_info")
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""Set the raw x- and y-values along with weights for the fit.
