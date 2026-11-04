@@ -108,7 +108,6 @@ def test_distance_reads_the_frame_radius_from_the_registry(monkeypatch, frame):
     pdt.assert_series_equal(sc.distance2sun, expected)
 
 
-@pytest.mark.xfail(strict=True, reason="o28: Spacecraft has no pos_units yet")
 @pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
 def test_position_units_are_the_frame_entry_units(frame):
     r"""``pos_units`` is the TeX unit of the spacecraft's frame entry.

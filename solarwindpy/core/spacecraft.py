@@ -111,6 +111,29 @@ class Spacecraft(base.Base):
         return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
+    def pos_units(self):
+        r"""TeX of the position unit, read from the registry entry of the frame.
+
+        The ``pos`` registry entry states no unit because the unit depends on
+        the frame: Earth radii in GSE, solar radii in HCI.
+
+        Returns
+        -------
+        str
+            ``QUANTITIES[frame.lower()].units``.
+
+        Examples
+        --------
+        >>> import solarwindpy as swp
+        >>> sc = swp.examples.load_plasma().sc
+        >>> sc.frame
+        'HCI'
+        >>> print(sc.pos_units)
+        \mathrm{R}_\odot
+        """
+        return quantities.QUANTITIES[self.frame.lower()].units
+
+    @property
     def v(self):
         """Velocity vector of the spacecraft.
 
