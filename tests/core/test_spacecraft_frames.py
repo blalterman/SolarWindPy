@@ -73,7 +73,6 @@ def test_a_refusal_names_the_supported_values(name, frame, supported):
         assert value in str(excinfo.value)
 
 
-@pytest.mark.xfail(strict=True, reason="o28: the frame entries carry no SI radius yet")
 @pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
 def test_every_supported_frame_has_a_registry_unit(frame):
     r"""Each supported frame has a registry entry with an SI factor and a TeX unit.
@@ -88,7 +87,6 @@ def test_every_supported_frame_has_a_registry_unit(frame):
     assert entry.units is not None
 
 
-@pytest.mark.xfail(strict=True, reason="o28: distance2sun reads Constants().misc")
 @pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
 def test_distance_reads_the_frame_radius_from_the_registry(monkeypatch, frame):
     r"""``distance2sun`` scales position by the registry's radius for its frame.

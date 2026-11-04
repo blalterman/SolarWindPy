@@ -16,11 +16,13 @@ import numpy as np
 # accidentally cause a problem.
 
 from . import base
+from . import quantities
 from . import vector
 
 # The spacecraft and frames SolarWindPy supports. Frame transformations are not
 # generalized, so a frame is listed only when `Spacecraft.distance2sun` converts
-# it, and `set_frame_name` refuses anything not listed here.
+# it and the quantity registry has its lower-cased entry, whose `si` is the
+# position unit in metres; `set_frame_name` refuses anything not listed here.
 _SUPPORTED = {
     "frame": ("GSE", "HCI"),
     "name": ("PSP", "WIND"),
@@ -145,7 +147,7 @@ class Spacecraft(base.Base):
         frame = self.frame
 
         if frame == "GSE":
-            re = self.constants.misc.loc["Re [m]"]
+            re = quantities.QUANTITIES[frame.lower()].si
             au = self.constants.misc.loc["1AU [m]"]
             sign_x = pd.Series(
                 [-1.0, 1.0, 1.0], index=pd.Index(("x", "y", "z"), name="C")
@@ -158,7 +160,7 @@ class Spacecraft(base.Base):
             )
 
         elif frame == "HCI":
-            rs = self.constants.misc.loc["Rs [m]"]
+            rs = quantities.QUANTITIES[frame.lower()].si
             pos_SI = pos.multiply(rs)
 
         else:

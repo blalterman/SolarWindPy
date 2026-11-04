@@ -70,6 +70,11 @@ UNIT_TEX = MappingProxyType(
     }
 )
 
+# IAU 2015 Resolution B3 nominal values, Prsa et al. (2016), AJ 152, 41,
+# doi:10.3847/0004-6256/152/2/41: the units of GSE and HCI position.
+_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
+_SOLAR_RADIUS = 695.7e6  # [m]
+
 _U = UNIT_TEX
 _KMS_SQ = r"(%s)^2" % _U["kms"]
 _FLUX_DENSITY = r"\mathrm{\mu W \, m^{-2}}"
@@ -78,8 +83,10 @@ _FLUX_DENSITY = r"\mathrm{\mu W \, m^{-2}}"
 QUANTITIES = MappingProxyType(
     {
         # Coordinates and angles.
-        "gse": Quantity(r"{$C}_{\mathrm{GSE}}", _U["Re"]),
-        "hci": Quantity(r"{$C}_{\mathrm{HCI}}", _U["Rs"]),
+        # A frame's position is in its body's radius; `Spacecraft.distance2sun`
+        # converts with it.
+        "gse": Quantity(r"{$C}_{\mathrm{GSE}}", _U["Re"], si=_EARTH_EQUATORIAL_RADIUS),
+        "hci": Quantity(r"{$C}_{\mathrm{HCI}}", _U["Rs"], si=_SOLAR_RADIUS),
         "colat": Quantity(r"\theta_{$C}", _U["deg"]),
         "lat": Quantity(r"{lat}_{{$C};{$S}}", _U["deg"]),
         "lon": Quantity(r"{lon}_{{$C};{$S}}", _U["deg"]),

@@ -404,7 +404,6 @@ IAU_2015_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
 IAU_2015_SOLAR_RADIUS = 695.7e6  # [m]
 
 
-@_xfail("o28: the frame entries carry no SI radius yet")
 @pytest.mark.parametrize(
     "frame, radius",
     [("gse", IAU_2015_EARTH_EQUATORIAL_RADIUS), ("hci", IAU_2015_SOLAR_RADIUS)],
@@ -419,7 +418,6 @@ def test_frame_unit_is_the_iau_2015_nominal_radius(frame, radius):
     assert _quantities().QUANTITIES[frame].si == exact(radius)
 
 
-@_xfail("o28: the radii still live in Constants().misc")
 @pytest.mark.parametrize("key", ["Re [m]", "Rs [m]"])
 def test_constants_hold_no_frame_radius(key):
     r"""The frame radii live only in the registry, not in ``Constants().misc``.

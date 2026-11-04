@@ -18,6 +18,7 @@ import pytest
 
 import solarwindpy as swp
 from solarwindpy.core import alfvenic_turbulence as turb
+from solarwindpy.core import quantities
 from solarwindpy.core.plasma import Plasma
 from solarwindpy.core.spacecraft import Spacecraft
 from tests.tolerances import exact
@@ -101,7 +102,8 @@ def test_distance_to_the_sun_is_the_position_magnitude():
     assert sc.frame == "HCI"
     mag = sc.pos.mag
     assert mag.isna().tolist() == [True, False, False]
-    expected = mag * sc.constants.misc.loc["Rs [m]"] / sc.units.distance2sun
+    rs = quantities.QUANTITIES["hci"].si
+    expected = mag * rs / sc.units.distance2sun
     pdt.assert_series_equal(sc.distance2sun, expected, check_names=False)
 
 

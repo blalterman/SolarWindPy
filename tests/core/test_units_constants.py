@@ -70,8 +70,6 @@ MISC_EXPECTED = {
     "c": SI_C,  # SI defining constant
     "hbar": SI_H / (2 * math.pi),  # SI defining constant h over 2 pi
     "1AU [m]": IAU_2012_AU,  # IAU 2012 Resolution B2
-    "Re [m]": IAU_2015_EARTH_EQUATORIAL_RADIUS,  # IAU 2015 Resolution B3
-    "Rs [m]": IAU_2015_SOLAR_RADIUS,  # IAU 2015 Resolution B3
     "gas constant": SI_NA * SI_K,  # R = N_A k, exact in the 2019 SI
 }
 
