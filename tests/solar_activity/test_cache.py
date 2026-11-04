@@ -15,7 +15,9 @@ entry is aged by moving its file's modification time back, the clock the
 cache reads.
 """
 
+import http.server
 import os
+import threading
 import time
 import warnings
 
@@ -274,3 +276,138 @@ def test_a_first_run_on_a_clean_home_creates_the_cache(tmp_path, monkeypatch):
     assert expected.is_dir()
     assert path.is_relative_to(expected)
     assert cache.cache_contents().index.tolist() == [url]
+
+
+@pytest.fixture
+def http_server():
+    """A loopback HTTP server: ``/<code>.csv`` answers ``<code>``, ``/ok.csv`` 200.
+
+    Returns the server's base URL. It stands in for a remote host so the
+    status astropy's real download raises can be read; it binds 127.0.0.1
+    only and never leaves the machine.
+    """
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            name = self.path.strip("/").split(".")[0]
+            code = 200 if name == "ok" else int(name)
+            self.send_response(code)
+            self.end_headers()
+            if code == 200:
+                self.wfile.write(b"served\n")
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield f"http://127.0.0.1:{server.server_address[1]}/"
+    server.shutdown()
+    server.server_close()
+
+
+_STATUS_XFAIL = pytest.mark.xfail(
+    strict=True,
+    reason="cache.DownloadError has no status and fetch has no fallback "
+    "switch; remove this marker when both land",
+)
+
+
+@_STATUS_XFAIL
+@pytest.mark.parametrize("code", [404, 500])
+def test_a_failed_http_download_reports_its_status(http_server, code):
+    """``DownloadError.status`` is the HTTP status the server answered.
+
+    Chosen input: a loopback server answering 404 and 500, through
+    astropy's real download.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    with pytest.raises(cache.DownloadError) as info:
+        cache.fetch(f"{http_server}{code}.csv", max_age=pd.Timedelta(days=1))
+
+    assert info.value.status == code
+
+
+@_STATUS_XFAIL
+def test_a_failure_without_an_http_answer_has_no_status(tmp_path):
+    """A download that never got an HTTP answer has ``status`` None.
+
+    Chosen input: a missing ``file://`` source, which fails the way an
+    unreachable host does, with no HTTP status.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    with pytest.raises(cache.DownloadError) as info:
+        cache.fetch((tmp_path / "gone.csv").as_uri(), max_age=pd.Timedelta(days=1))
+
+    assert info.value.status is None
+
+
+@_STATUS_XFAIL
+def test_without_fallback_a_failed_refresh_raises_despite_a_cached_copy(
+    http_server, seed_cache
+):
+    """``fallback=False`` raises with the status instead of using the cache.
+
+    Chosen input: a three-day-old cached copy of a URL that now answers 404.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    url = f"{http_server}404.csv"
+    seed_cache(url, "old\n", age_days=3)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with pytest.raises(cache.DownloadError) as info:
+            cache.fetch(url, max_age=pd.Timedelta(days=1), fallback=False)
+
+    assert info.value.status == 404
+
+
+@_STATUS_XFAIL
+def test_fall_back_returns_the_cached_copy_and_warns_its_age(seed_cache):
+    """``fall_back`` returns a cached copy with a warning naming its age.
+
+    Chosen input: a copy seeded three days old and a stand-in download
+    error, so the warning names "3.0 days".
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    url = "https://example.invalid/series.csv"
+    seed_cache(url, "old\n", age_days=3)
+
+    with pytest.warns(cache.StaleCacheWarning, match=r"3\.0 days old"):
+        path = cache.fall_back(url, OSError("unreachable"))
+
+    assert path.read_text() == "old\n"
+
+
+@_STATUS_XFAIL
+def test_fall_back_with_nothing_cached_raises_with_the_status(http_server):
+    """``fall_back`` raises ``DownloadError`` carrying the error's status.
+
+    Chosen input: the HTTPError a 404 download raised, and an empty cache.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    url = f"{http_server}404.csv"
+    with pytest.raises(cache.DownloadError) as raised:
+        cache.fetch(url, max_age=pd.Timedelta(days=1))
+    error = raised.value.__cause__
+
+    with pytest.raises(cache.DownloadError, match="no cached copy") as info:
+        cache.fall_back(url, error)
+
+    assert info.value.status == 404
