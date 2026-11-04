@@ -965,6 +965,59 @@ class TestPlotContours:
             )
 
 
+def _unsplit(rows):
+    """SpiralPlot2D on ``rows`` over x-bins [0,2), [2,4), [4,6); no cell splits."""
+    x, y, z = (pd.Series(c) for c in zip(*rows))
+    return SpiralPlot2D(
+        x,
+        y,
+        z,
+        initial_bins=(np.array([0.0, 2.0, 4.0, 6.0]), np.array(YEDGES)),
+        min_per_bin=len(rows),
+    )
+
+
+_DEGENERATE = pytest.mark.xfail(
+    strict=True, reason="matplotlib's Triangulation fails obscurely"
+)
+
+
+@_DEGENERATE
+@pytest.mark.parametrize(
+    "rows, match",
+    [
+        pytest.param(
+            [(1.0, 0.5, 1.0), (5.0, 1.5, 2.0)],
+            r"at least 3 occupied cells.*got 2",
+            id="two-cells",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (1.0, 1.5, 2.0), (1.0, 3.0, 3.0)],
+            r"occupied cells' centres all share one x",
+            id="one-x",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (5.0, 0.5, 3.0)],
+            r"occupied cells' centres all share one y",
+            id="one-y",
+        ),
+    ],
+)
+def test_contours_of_cells_that_cannot_be_triangulated_raise_clearly(rows, match):
+    """Too few occupied cells, or centres on one line of x or y, raise ValueError.
+
+    Chosen input: samples in two cells; three cells of the x-bin [0,2) whose
+    centres share x = 1; three cells of the y-bin [0,1), across x-bins
+    [0,2), [2,4) and [4,6), whose centres share y = 0.5. No triangle can be
+    drawn between them, and the message names why.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _unsplit(rows)
+    with pytest.raises(ValueError, match=match):
+        splot.plot_contours(levels=[1.5, 2.5], cbar=False)
+
+
 # ---------------------------------------------------------------------------
 # Samples outside the mesh, and integer initial edges.
 # ---------------------------------------------------------------------------
