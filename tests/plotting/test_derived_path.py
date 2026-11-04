@@ -166,3 +166,73 @@ def test_path_is_derived_not_stored(build):
     plot = build()
     assert "_path" not in vars(plot)
     assert not hasattr(plot, "set_path")
+
+
+@pytest.mark.parametrize("unset", [None, "None"], ids=["None", "string-None"])
+def test_scatter_path_has_a_z_part_only_while_labels_z_is_set(unset):
+    """``set_labels(z=...)`` adds the z part; z None (or ``"None"``) drops it.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = Scatter(X, Y)
+    plot.set_labels(z="w")
+    assert plot.path == Path("Scatter", "x", "y", "w", "linX-linY")
+    plot.set_labels(z=unset)
+    assert plot.path == Path("Scatter", "x", "y", "linX-linY")
+
+
+def test_hist1d_path_follows_set_labels():
+    """``set_labels`` on a Hist1D changes the x part; the count part stays.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = Hist1D(X)
+    plot.set_labels(x="bulk speed")
+    assert plot.path == Path("Hist1D", "bulk-speed", "count", "linX-linY")
+
+
+def test_hist2d_path_without_axnorm_ends_in_the_scale():
+    """An unnormalized count ends in ``count``, so the scale tag is the last part.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = Hist2D(X, Y, logx=True, logy=True)
+    assert plot.path == Path("Hist2D", "x", "y", "count", "logX-logY")
+
+
+def test_hist2d_path_keeps_its_built_scale_through_set_log():
+    """A Hist2D's x and y log are built in: the path keeps them through ``set_log``.
+
+    ``set_log`` passing the values the plot has is allowed and changes
+    nothing; changing one raises, and the path is still the built one.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = Hist2D(X, Y, logx=True)
+    built = Path("Hist2D", "x", "y", "count", "logX-linY")
+    plot.set_log(x=True, y=False)
+    assert plot.path == built
+    with pytest.raises(ValueError):
+        plot.set_log(y=True)
+    assert plot.path == built
+
+
+def test_hist2d_path_follows_set_labels_with_the_norm_last():
+    """``set_labels`` on a normalized Hist2D changes x and y; the norm stays last.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = Hist2D(X, Y, axnorm="c")
+    plot.set_labels(x="bulk speed", y="np")
+    assert plot.path == Path("Hist2D", "bulk-speed", "np", "count", "linX-linY-Cnorm")
+
+
+def test_spiral_path_carries_its_built_scale_and_follows_set_labels():
+    """A SpiralPlot2D path has its built log scale and follows ``set_labels``.
+
+    ON FAILURE: the code is wrong.
+    """
+    plot = SpiralPlot2D(X, Y, logx=True, min_per_bin=50)
+    assert plot.path == Path("SpiralPlot2D", "x", "y", "count", "logX-linY")
+    plot.set_labels(x="bulk speed", y="np")
+    assert plot.path == Path("SpiralPlot2D", "bulk-speed", "np", "count", "logX-linY")
