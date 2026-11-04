@@ -14,6 +14,13 @@ from typing import Dict
 
 import pytest
 
+if not (Path(__file__).resolve().parents[1] / ".claude" / "settings.json").is_file():
+    pytest.skip(
+        "developer tooling under .claude/ is absent (e.g. testing from the sdist)",
+        allow_module_level=True,
+    )
+
+
 CLAUDE_DIR = Path(__file__).resolve().parents[1] / ".claude"
 SETTINGS = CLAUDE_DIR / "settings.json"
 

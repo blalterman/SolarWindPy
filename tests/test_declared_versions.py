@@ -14,11 +14,19 @@ import re
 import tomllib
 from pathlib import Path
 
+import pytest
+
 import yaml
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+if not (REPO_ROOT / ".github" / "workflows").is_dir():
+    pytest.skip(
+        "CI workflows under .github/ are absent (e.g. testing from the sdist)",
+        allow_module_level=True,
+    )
 
 
 def _requires_python():
