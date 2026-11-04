@@ -58,18 +58,12 @@ def artifacts(tmp_path_factory):
     return wheel, sdist
 
 
-@pytest.mark.xfail(
-    strict=True, reason="P2: setup.cfg packages = find: discovers tests/ too"
-)
 def test_wheel_holds_only_the_package(artifacts):
     """The wheel's top level is ``solarwindpy/`` and its ``.dist-info``, nothing else."""
     wheel, _ = artifacts
     assert check.wheel_stray_entries(wheel) == []
 
 
-@pytest.mark.xfail(
-    strict=True, reason="P2: the stray tests package carries Spent-When headers"
-)
 def test_wheel_carries_no_spent_when(artifacts):
     """No file a user installs carries a purge-system header."""
     wheel, _ = artifacts
@@ -82,10 +76,6 @@ def test_sdist_keeps_tests_and_docs_source(artifacts):
     assert check.sdist_missing(check.sdist_members(sdist)) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="P2: the sdist ships every git-tracked file, MANIFEST.in prunes none",
-)
 def test_sdist_prunes_development_material(artifacts):
     """The sdist holds none of .claude/, .github/, docs/dispatches/, tmp/, spike/."""
     _, sdist = artifacts
