@@ -14,11 +14,6 @@ import pytest
 from solarwindpy.fitfunctions import hinge
 from tests.tolerances import noise_free
 
-_STEP3 = pytest.mark.xfail(
-    strict=True,
-    reason="the hinge classes still take guess_xs, guess_h and guess_yh with "
-    "defaults 326, 425 and 400; remove this marker when guess_xh=None lands",
-)
 
 HINGES = [
     hinge.HingeSaturation,
@@ -36,7 +31,6 @@ MIN_LINES = np.minimum(2.0 * X, -(X - 15.0))
 MAX_LINES = np.maximum(-2.0 * X, 2.0 * (X - 10.0))
 
 
-@_STEP3
 @pytest.mark.parametrize("cls", HINGES, ids=lambda c: c.__name__)
 def test_every_hinge_takes_guess_xh_and_defaults_it_to_none(cls):
     """``guess_xh`` is the one guess keyword; None is its default.
@@ -47,13 +41,7 @@ def test_every_hinge_takes_guess_xh_and_defaults_it_to_none(cls):
     assert cls(X, MIN_LINES, guess_xh=5.0).guess_xh == 5.0
 
 
-@pytest.mark.parametrize(
-    "cls",
-    # HingeAtPoint already took only guess_xh: it is the guard.
-    [pytest.param(c, marks=_STEP3) for c in HINGES if c is not hinge.HingeAtPoint]
-    + [hinge.HingeAtPoint],
-    ids=lambda c: c.__name__,
-)
+@pytest.mark.parametrize("cls", HINGES, ids=lambda c: c.__name__)
 def test_the_old_guess_keywords_are_refused(cls):
     """``guess_xs``, ``guess_h`` and ``guess_yh`` are gone: one name per concept.
 
@@ -67,7 +55,6 @@ def test_the_old_guess_keywords_are_refused(cls):
         assert gone not in dir(fit)
 
 
-@_STEP3
 @pytest.mark.parametrize("cls", HINGES, ids=lambda c: c.__name__)
 def test_no_guess_splits_the_data_at_its_median_x(cls):
     """With ``guess_xh=None`` the estimate splits at the median used x.
@@ -80,7 +67,6 @@ def test_no_guess_splits_the_data_at_its_median_x(cls):
     np.testing.assert_array_equal(estimated, explicit)
 
 
-@_STEP3
 @pytest.mark.parametrize(
     "cls, y, hinge_x",
     [
@@ -103,7 +89,6 @@ def test_a_hinge_with_no_guess_is_recovered(cls, y, hinge_x):
     assert hinge_x(fit) == noise_free(5.0)  # where the two lines meet
 
 
-@_STEP3
 def test_hinge_saturation_estimates_yh_at_the_split():
     """HingeSaturation's start takes ``yh`` from the observation nearest the split.
 

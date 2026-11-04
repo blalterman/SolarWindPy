@@ -64,6 +64,11 @@ def _median_slope(x, y, skip_nan=True):
     return np.median(slopes)
 
 
+def _y_near(x, y, xh):
+    r"""The ``y`` of the observation whose ``x`` is nearest ``xh``."""
+    return y[np.argmin(np.abs(x - xh))]
+
+
 def _x_intercept(x, y, m):
     r"""The median x-intercept of lines of slope ``m`` through each point.
 
@@ -84,6 +89,22 @@ class Hinge(FitFunction):
     ``p0`` is shared: it returns the estimate, or the reference start when the
     data give no estimate.
 
+    Parameters
+    ----------
+    xobs : array-like
+        Independent variable observations.
+    yobs : array-like
+        Dependent variable observations.
+    guess_xh : float, optional
+        The x of the hinge, where the estimate splits the data between the
+        two lines, whatever the class calls that parameter (``xh``, ``xs`` or
+        ``h``). None, the default, estimates it from the data as the median
+        used x. A full start goes to
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit` as
+        ``p0=``, as in every fit function.
+    **kwargs
+        Passed to :class:`~solarwindpy.fitfunctions.core.FitFunction`.
+
     Notes
     -----
     When the data give no estimate, the all-ones default start is a singular
@@ -96,23 +117,28 @@ class Hinge(FitFunction):
     line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that
     line through the hinge.
 
+    The same reference hinge is a useful explicit start for solar wind speed
+    trends: ``HingeAtPoint(v, y, guess_xh=433)`` splits at 433 km/s, and
+    ``make_fit(p0=...)`` starts from the full hinge when :math:`y_h = 4.12`
+    matters too. It is a usage note, not a default.
+
     Examples
     --------
     Every hinge fit function shares ``p0``, shown here with :class:`TwoLine`,
     whose parameters are ``[x1, x2, m1, m2]``. Two lines meeting at (5, 10),
-    with data on both sides of ``guess_xs``, give the estimate:
+    with data on both sides of ``guess_xh``, give the estimate:
 
     >>> import numpy as np
     >>> from solarwindpy.fitfunctions.hinge import TwoLine
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2 * x, -(x - 15))
-    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=5.0).p0]
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xh=5.0).p0]
     ['0', '15', '2', '-1']
 
-    With ``guess_xs`` past every point, the second line has no data and no
+    With ``guess_xh`` past every point, the second line has no data and no
     estimate, so ``p0`` logs a warning and returns the reference hinge:
 
-    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xs=20.0).p0]
+    >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xh=20.0).p0]
     ['250', '-1.787e+04', '0.02251', '0.0002251']
     """
 
@@ -123,6 +149,22 @@ class Hinge(FitFunction):
     _M1 = _YH / (_XH - _X1)
     _M2 = 0.01 * _M1
     _X2 = _XH - _YH / _M2
+
+    def __init__(self, xobs, yobs, guess_xh=None, **kwargs):
+        # Documented in the class docstring (see FitFunctionMeta).
+        super().__init__(xobs, yobs, **kwargs)
+        self._guess_xh = guess_xh
+
+    @property
+    def guess_xh(self):
+        r"""The hinge x given at construction, or None to estimate it from the data."""
+        return self._guess_xh
+
+    def _split_x(self):
+        r"""Where the estimate splits the data: :attr:`guess_xh`, or the median used x."""
+        if self.guess_xh is not None:
+            return self.guess_xh
+        return float(np.median(self.observations.used.x))
 
     @property
     def p0(self) -> list:
@@ -197,20 +239,6 @@ class HingeSaturation(Hinge):
     - :math:`m_1 = y_h / (x_h - x_1)`
     - :math:`x_2 = x_h - y_h / m_2`
 
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    guess_xh : float, optional
-        Initial guess for hinge x-coordinate. Default is 326.
-    guess_yh : float, optional
-        Initial guess for hinge y-coordinate. Default is 0.5.
-    **kwargs
-        Additional arguments passed to
-        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-
     Attributes
     ----------
     xh : float
@@ -224,8 +252,9 @@ class HingeSaturation(Hinge):
 
     Notes
     -----
-    ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``(xh, yh)`` is
-    ``saturation_guess``; ``x1`` comes from a linear fit to the rising region
+    ``p0`` estimates ``[xh, yh, x1, m2]`` from the data. ``xh`` is the split
+    (``guess_xh``, or the median used x) and ``yh`` the ``y`` of the
+    observation nearest it; ``x1`` comes from a linear fit to the rising region
     (x < xh), or is the data minimum when that region has fewer than two
     points or the fit is flat, and is undefined when the region's points
     share one ``x`` (no slope); ``m2`` is the median slope in the plateau
@@ -243,27 +272,11 @@ class HingeSaturation(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import HingeSaturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.where(x < 5, 2*x, 10)  # Saturation at y=10 for x>=5
-    >>> fit = HingeSaturation(x, y, guess_xh=5, guess_yh=10)
+    >>> fit = HingeSaturation(x, y, guess_xh=5)
     >>> fit.make_fit()
     >>> print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")
     Hinge at (5.00, 10.00)
     """
-
-    def __init__(
-        self,
-        xobs,
-        yobs,
-        guess_xh: float = 326,
-        guess_yh: float = 0.5,
-        **kwargs,
-    ):
-        super().__init__(xobs, yobs, **kwargs)
-        self._saturation_guess = (guess_xh, guess_yh)
-
-    @property
-    def saturation_guess(self) -> tuple[float, float]:
-        r"""Guess for saturation transition (xh, yh) used in p0 calculation."""
-        return self._saturation_guess
 
     @property
     def function(self):
@@ -308,10 +321,10 @@ class HingeSaturation(Hinge):
         return hinge_saturation
 
     def _estimate(self):
-        xh, yh = self.saturation_guess
-
         x = self.observations.used.x
         y = self.observations.used.y
+        xh = self._split_x()
+        yh = _y_near(x, y, xh)
 
         # Estimate x1 from data in rising region
         # m1 = yh / (xh - x1), so x1 = xh - yh/m1
@@ -384,18 +397,6 @@ class TwoLine(Hinge):
     - :math:`x_s = \frac{m_1 x_1 - m_2 x_2}{m_1 - m_2}`
     - :math:`s = m_1 (x_s - x_1) = m_2 (x_s - x_2)`
 
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    guess_xs : float, optional
-        Initial guess for saturation x-coordinate. Default is 425.0.
-    **kwargs
-        Additional arguments passed to
-        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-
     Attributes
     ----------
     x1 : float
@@ -415,13 +416,12 @@ class TwoLine(Hinge):
 
     Notes
     -----
-    ``p0`` estimates ``[x1, x2, m1, m2]`` from the data on each side of
-    ``guess_xs``: at or below it (x <= guess_xs) and above it. A repeated
+    ``p0`` estimates ``[x1, x2, m1, m2]`` from the data on each side of the
+    split (``guess_xh``, or the median used x): at or below it and above it. A repeated
     point has no slope and is skipped. Each side needs at least two points
     with distinct ``x`` for a slope, and a nonzero slope for an x-intercept;
     otherwise an estimate is undefined, and ``p0`` returns the reference
-    hinge of :class:`Hinge` as ``[x1, x2, m1, m2]``. The default
-    ``guess_xs=425`` is appropriate for solar wind speed analysis.
+    hinge of :class:`Hinge` as ``[x1, x2, m1, m2]``.
 
     Examples
     --------
@@ -429,26 +429,11 @@ class TwoLine(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import TwoLine
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))  # Two lines intersecting at (5, 10)
-    >>> fit = TwoLine(x, y, guess_xs=5.0)
+    >>> fit = TwoLine(x, y, guess_xh=5.0)
     >>> fit.make_fit()
     >>> print(f"Intersection at ({fit.xs:.2f}, {fit.s:.2f})")
     Intersection at (5.00, 10.00)
     """
-
-    def __init__(
-        self,
-        xobs,
-        yobs,
-        guess_xs: float = 425.0,
-        **kwargs,
-    ):
-        super().__init__(xobs, yobs, **kwargs)
-        self._guess_xs = guess_xs
-
-    @property
-    def guess_xs(self) -> float:
-        r"""Initial guess for saturation x-coordinate used in p0 calculation."""
-        return self._guess_xs
 
     @property
     def function(self):
@@ -541,8 +526,7 @@ class TwoLine(Hinge):
         x = self.observations.used.x
         y = self.observations.used.y
 
-        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
-        xs = self._guess_xs
+        xs = self._split_x()
         tk = x <= xs
 
         m1 = _median_slope(x[tk], y[tk])
@@ -596,18 +580,6 @@ class Saturation(Hinge):
     - :math:`m_1 = s / (x_s - x_1)`
     - :math:`m_2 = \tan(\arctan(m_1) - \theta)`
 
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    guess_xs : float, optional
-        Initial guess for saturation x-coordinate. Default is 425.0.
-    **kwargs
-        Additional arguments passed to
-        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-
     Attributes
     ----------
     x1 : float
@@ -628,14 +600,14 @@ class Saturation(Hinge):
     Notes
     -----
     ``p0`` estimates ``[x1, xs, s, theta]`` from the data on each side of
-    ``xs = guess_xs``: at or below it (x <= xs) and above it. Each side
+    ``xs``, the split (``guess_xh``, or the median used x): at or below it
+    and above it. Each side
     needs at least two points with distinct ``x`` for a slope, and the
     rising side a nonzero slope for ``x1``; otherwise an estimate is
     undefined, and ``p0`` returns the reference hinge of :class:`Hinge` as
     ``[x1, xs, s, theta] = [x1, xh, yh, theta]``, where
     :math:`\theta = \arctan(m_1) - \arctan(m_2)` inverts the model's
-    :math:`m_2 = \tan(\arctan(m_1) - \theta)`. The default ``guess_xs=425``
-    is appropriate for solar wind speed analysis.
+    :math:`m_2 = \tan(\arctan(m_1) - \theta)`.
 
     Examples
     --------
@@ -643,26 +615,11 @@ class Saturation(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import Saturation
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -1*(x-15))
-    >>> fit = Saturation(x, y, guess_xs=5.0)
+    >>> fit = Saturation(x, y, guess_xh=5.0)
     >>> fit.make_fit()
     >>> print(f"Saturation at ({fit.popt['xs']:.2f}, {fit.popt['s']:.2f})")
     Saturation at (5.00, 10.00)
     """
-
-    def __init__(
-        self,
-        xobs,
-        yobs,
-        guess_xs: float = 425.0,
-        **kwargs,
-    ):
-        super().__init__(xobs, yobs, **kwargs)
-        self._guess_xs = guess_xs
-
-    @property
-    def guess_xs(self) -> float:
-        r"""Initial guess for saturation x-coordinate used in p0 calculation."""
-        return self._guess_xs
 
     @property
     def function(self):
@@ -764,8 +721,7 @@ class Saturation(Hinge):
         x = self.observations.used.x
         y = self.observations.used.y
 
-        # TODO: Convert to data-driven p0 estimation (see GH issue #XX)
-        xs = self._guess_xs
+        xs = self._split_x()
         tk = x <= xs
 
         x1, m1, s1 = estimate_line(x[tk], y[tk])
@@ -830,18 +786,6 @@ class HingeMin(Hinge):
 
         m_2 = m_1 \frac{h - x_1}{h - x_2}
 
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    guess_h : float, optional
-        Initial guess for hinge x-coordinate. Default is 400.0.
-    **kwargs
-        Additional arguments passed to
-        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-
     Attributes
     ----------
     m1 : float
@@ -860,7 +804,8 @@ class HingeMin(Hinge):
     Notes
     -----
     ``p0`` estimates ``[m1, x1, x2, h]`` from the data on each side of
-    ``h = guess_h``: below it (x < h) and at or above it. Each side needs at
+    ``h``, the split (``guess_xh``, or the median used x): below it and at
+    or above it. Each side needs at
     least two points for a slope, and a nonzero slope for an x-intercept;
     the lower side skips a repeated point, and on the upper side repeated
     ``x`` leave the slope undefined. Otherwise an estimate is undefined, and
@@ -868,8 +813,7 @@ class HingeMin(Hinge):
     ``[m1, x1, x2, h]`` with ``h = xh``; the model's
     :math:`m_2 = m_1 (h - x_1) / (h - x_2)` then recovers the reference
     :math:`m_2`. When either side is short, the whole start is the reference
-    hinge: the other side's estimate is not kept. The default
-    ``guess_h=400`` is appropriate for solar wind speed analysis.
+    hinge: the other side's estimate is not kept.
 
     Examples
     --------
@@ -877,7 +821,7 @@ class HingeMin(Hinge):
     >>> from solarwindpy.fitfunctions.hinge import HingeMin
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.minimum(2*(x-0), -2*(x-10))  # Two lines meeting at (5, 10)
-    >>> fit = HingeMin(x, y, guess_h=5.0)
+    >>> fit = HingeMin(x, y, guess_xh=5.0)
     >>> fit.make_fit()
     >>> print(f"Hinge at x={fit.popt['h']:.2f}")
     Hinge at x=5.00
@@ -885,21 +829,6 @@ class HingeMin(Hinge):
 
     # The model combines the two lines with this; HingeMax uses np.maximum.
     _combine = staticmethod(np.minimum)
-
-    def __init__(
-        self,
-        xobs,
-        yobs,
-        guess_h: float = 400.0,
-        **kwargs,
-    ):
-        super().__init__(xobs, yobs, **kwargs)
-        self._guess_h = guess_h
-
-    @property
-    def guess_h(self) -> float:
-        r"""Initial guess for hinge x-coordinate used in p0 calculation."""
-        return self._guess_h
 
     @property
     def function(self):
@@ -977,7 +906,7 @@ class HingeMin(Hinge):
     def _estimate(self):
         x = self.observations.used.x
         y = self.observations.used.y
-        h = self._guess_h
+        h = self._split_x()
 
         # A side with fewer than 2 points has no slope: its estimates are NaN.
         m1 = x1 = x2 = np.nan
@@ -1058,7 +987,7 @@ class HingeMax(HingeMin):
     >>> from solarwindpy.fitfunctions.hinge import HingeMax
     >>> x = np.linspace(0, 15, 100)
     >>> y = np.maximum(-2*(x-0), 2*(x-10))  # V-shape with vertex at (5, -10)
-    >>> fit = HingeMax(x, y, guess_h=5.0)
+    >>> fit = HingeMax(x, y, guess_xh=5.0)
     >>> fit.make_fit()
     >>> print(f"Hinge at x={fit.popt['h']:.2f}")
     Hinge at x=5.00
@@ -1104,18 +1033,6 @@ class HingeAtPoint(Hinge):
     - :math:`y_1 = m_1 (x - x_1)` with :math:`x_1 = x_h - y_h / m_1`
     - :math:`y_2 = m_2 (x - x_2)` with :math:`x_2 = x_h - y_h / m_2`
 
-    Parameters
-    ----------
-    xobs : array-like
-        Independent variable observations.
-    yobs : array-like
-        Dependent variable observations.
-    guess_xh : float, optional
-        Initial guess for hinge x-coordinate. Default is 400.0.
-    **kwargs
-        Additional arguments passed to
-        :class:`~solarwindpy.fitfunctions.core.FitFunction`.
-
     Attributes
     ----------
     xh : float
@@ -1132,15 +1049,14 @@ class HingeAtPoint(Hinge):
     Notes
     -----
     ``p0`` estimates ``[xh, yh, m1, m2]`` from the data on each side of
-    ``xh = guess_xh``: ``yh`` is the ``y`` at the observation nearest
+    ``xh``, the split (``guess_xh``, or the median used x): ``yh`` is the ``y`` at the observation nearest
     ``xh``, and the slopes come from each side of it: below it (x < xh) and
     at or above it. Each side needs at least two points for a slope; the
     lower side skips a repeated point, and on the upper side repeated ``x``
     leave the slope undefined. Otherwise a slope is undefined, and ``p0``
     returns the reference hinge of :class:`Hinge` as ``[xh, yh, m1, m2]``.
     When either side is short, the whole start is the reference hinge: the
-    other side's estimate is not kept. The default ``guess_xh=400`` is
-    appropriate for solar wind speed analysis.
+    other side's estimate is not kept.
 
     Examples
     --------
@@ -1153,21 +1069,6 @@ class HingeAtPoint(Hinge):
     >>> print(f"Hinge at ({fit.popt['xh']:.2f}, {fit.popt['yh']:.2f})")
     Hinge at (5.00, 10.00)
     """
-
-    def __init__(
-        self,
-        xobs,
-        yobs,
-        guess_xh: float = 400.0,
-        **kwargs,
-    ):
-        super().__init__(xobs, yobs, **kwargs)
-        self._guess_xh = guess_xh
-
-    @property
-    def guess_xh(self) -> float:
-        r"""Initial guess for hinge x-coordinate used in p0 calculation."""
-        return self._guess_xh
 
     @property
     def function(self):
@@ -1230,13 +1131,12 @@ class HingeAtPoint(Hinge):
         return _XIntercepts(x1, x2)
 
     def _estimate(self):
-        xh = self._guess_xh
-
         x = self.observations.used.x
         y = self.observations.used.y
+        xh = self._split_x()
 
         # Estimate yh from data near the hinge point
-        yh = y[np.argmin(np.abs(x - xh))]
+        yh = _y_near(x, y, xh)
 
         # A side with fewer than 2 points has no slope: its estimate is NaN.
         m1 = m2 = np.nan

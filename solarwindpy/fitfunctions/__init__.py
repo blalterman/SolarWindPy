@@ -22,8 +22,8 @@ Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of
 :class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations
 enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,
 ``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few
-subclasses add their own, such as the ``guess_h`` initial hinge position of
-:class:`~solarwindpy.fitfunctions.hinge.HingeMin`.
+subclasses add their own, such as the ``guess_xh`` hinge position that every
+subclass of :class:`~solarwindpy.fitfunctions.hinge.Hinge` takes.
 
 How a fit runs
 --------------
