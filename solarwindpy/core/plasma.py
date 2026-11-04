@@ -1808,7 +1808,9 @@ species: {}
         Calculate the ratio of a bi-Maxwellian proton beam to a bi-Maxwellian
         proton core VDF at the peak beam velocity.
 
-        To avoid overflow erros, we return ln(ratio).
+        The name ``vdf_ratio`` is shorthand for
+        :math:`\ln(f_\mathrm{beam}/f_\mathrm{core})`: to avoid overflow
+        errors, this returns the natural logarithm of the ratio, not the ratio.
 
         The VDF for species :math:`i` at velocity :math:`v_j` is:
 

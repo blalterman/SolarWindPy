@@ -136,7 +136,7 @@ QUANTITIES = MappingProxyType(
         # Fits and distributions.
         "chisq": Quantity(r"\chi^2", _U["dimless"]),
         "chisqnu": Quantity(r"\chi^2_\nu", _U["dimless"]),
-        "VDFratio": Quantity(
+        "vdf_ratio": Quantity(
             r"\mathrm{ln}(\frac{f_i}{f_j} \left(v_i\right)_{$S})", _U["dimless"]
         ),
         "ab": Quantity(r"A_{$S}", r"\%"),

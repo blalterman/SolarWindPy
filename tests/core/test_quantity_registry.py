@@ -100,14 +100,7 @@ CASES = [
     (_P, "lnlambda", lambda p, t: p.lnlambda("p1", "a"), "M", False, None),
     (_P, "nuc", lambda p, t: p.nuc("p1", "a"), "M", False, None),
     (_P, "nc", lambda p, t: p.nc("p1", "a"), "M", False, None),
-    (
-        _P,
-        "vdf_ratio",
-        lambda p, t: p.vdf_ratio(),
-        "M",
-        False,
-        _author("`vdf_ratio` (method) and `VDFratio` (TeX key) differ"),
-    ),
+    (_P, "vdf_ratio", lambda p, t: p.vdf_ratio(), "M", False, None),
     (_P, "qpar", lambda p, t: p.qpar("p1+a"), "M", False, None),
     (_P, "Wk", lambda p, t: p.Wk("p1"), "M", False, None),
     # Ion: a Series result carries the label as its `.name`.
@@ -378,7 +371,6 @@ def test_heat_flux_is_qpar_at_every_layer():
     assert hasattr(units_constants.Units(), "qpar")
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_vdf_ratio_is_the_registry_key():
     """The beam-to-core VDF ratio is ``vdf_ratio`` in the registry, not ``VDFratio``.
 
