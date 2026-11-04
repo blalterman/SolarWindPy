@@ -990,9 +990,10 @@ class Plasma(base.Base):
         # copy the masked columns (copy-on-write) and leave the rest of
         # `data` pinned to its original, larger array.
         del moments
+        # Sorted, as `groupby(level="S")` orders the species.
         invalid = {
             s: isna.xs(s, axis=1, level="S").any(axis=1)
-            for s in isna.columns.unique(level="S")
+            for s in sorted(isna.columns.unique(level="S"))
         }
         del isna
         species = data.columns.get_level_values("S")
