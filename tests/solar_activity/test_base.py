@@ -2,18 +2,22 @@
 
 The classes under test are abstract, so each is exercised through the
 smallest concrete subclass that fills in its abstract hooks: those subclasses
-are real implementations, not stand-ins. The only external boundary is the
-cache directory a ``DataLoader`` reads and writes, which lives under
-``tmp_path``. Expected values are chosen inputs or hand-computed dates.
+are real implementations, not stand-ins. The external boundaries are the
+network, stood in for by a CSV under ``tmp_path`` served through a ``file://``
+URL, and the download cache, which the autouse ``isolated_cache`` fixture keeps
+under ``tmp_path``. Expected values are chosen inputs or hand-computed dates.
 """
 
 import logging
-import re
+import os
+import time
+import warnings
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from solarwindpy.solar_activity import cache
 from solarwindpy.solar_activity.base import (
     ID,
     ActivityIndicator,
@@ -35,11 +39,10 @@ class Catalog(ID):
 
 
 class CacheLoader(DataLoader):
-    """A loader whose cache is a chosen directory and whose download is local.
+    """A loader that reads the CSV its URL serves, fresh for one day.
 
-    ``download_data`` writes ``DOWNLOADED`` into the new slot and removes the
-    old one, which is what the package's real loaders do with the bytes they
-    fetch.
+    ``read_data`` parses the cached file, which is what the package's real
+    loaders do with the bytes they fetch.
     """
 
     DOWNLOADED = pd.DataFrame(
@@ -47,24 +50,18 @@ class CacheLoader(DataLoader):
         index=pd.DatetimeIndex(["2021-03-01", "2021-03-02", "2021-03-03"]),
     )
 
-    def __init__(self, key, url, root, allow_download=True):
-        self._root = root
-        self._allow_download = allow_download
-        super().__init__(key, url)
-
     @property
-    def data_path(self):
-        return self._root
+    def max_age(self):
+        return pd.Timedelta(days=1)
 
     @staticmethod
     def convert_nans(data):
         return data.replace(-1, np.nan)
 
-    def download_data(self, new_data_path, old_data_path):
-        if not self._allow_download:
-            raise AssertionError("download attempted although the cache is current")
-        self.DOWNLOADED.to_csv(new_data_path.with_suffix(".csv"))
-        old_data_path.with_suffix(".csv").unlink(missing_ok=True)
+    def read_data(self, path):
+        data = pd.read_csv(path, index_col=0, header=0)
+        data.index = pd.DatetimeIndex(data.index)
+        return data
 
     def load_data(self):
         super().load_data()
@@ -102,8 +99,6 @@ class Extrema(IndicatorExtrema):
 # Fixtures
 # ---------------------------------------------------------------------------
 
-TODAY_STR_FORMAT = "%Y%m%d"
-
 
 def today():
     """Today's date at midnight, as the package computes it."""
@@ -111,18 +106,22 @@ def today():
 
 
 @pytest.fixture
-def cache_root(tmp_path):
-    """An empty cache directory whose path holds no 8-digit run.
+def remote(tmp_path):
+    """Path of the "remote" CSV a ``CacheLoader`` downloads, under ``tmp_path``.
 
-    ``DataLoader.get_data_ctime`` reads the cache date from the first
-    8-digit run anywhere in each CSV's absolute path, so a ``tmp_path`` that
-    already contains one would be misread as a date.
+    Serve it at ``remote.as_uri()``; deleting it makes the next download fail
+    as an unreachable server does.
     """
-    if re.search(r"\d{8}", str(tmp_path)):
-        pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
-    root = tmp_path / "cache"
-    root.mkdir()
-    return root
+    directory = tmp_path / "remote"
+    directory.mkdir()
+    return directory / "daily.csv"
+
+
+def backdate(url, days):
+    """Move the cached copy of ``url`` ``days`` into the past."""
+    path = cache.cache_contents().loc[url, "path"]
+    then = time.time() - days * 86400.0
+    os.utime(path, (then, then))
 
 
 def extrema_table(max3="2015-01-01"):
@@ -227,78 +226,69 @@ def test_abstract_bases_cannot_be_instantiated_directly(cls):
 # ---------------------------------------------------------------------------
 
 
-def test_loader_keeps_key_and_url(cache_root):
+def test_loader_keeps_key_and_url():
     """The loader reports the key and URL it was built with.
 
     ON FAILURE: the code is wrong.
     """
-    loader = CacheLoader("daily", "https://example.org/daily.csv", cache_root)
+    loader = CacheLoader("daily", "https://example.org/daily.csv")
     assert loader.key == "daily"
     assert loader.url == "https://example.org/daily.csv"
 
 
-def test_ctime_is_the_date_in_the_cached_file_name(cache_root):
-    """The cache's creation time is the date written in its file name.
-
-    Chosen input: a file named ``20230315.csv`` means 2023-03-15.
-
-    ON FAILURE: the code is wrong.
-    """
-    (cache_root / "20230315.csv").write_text("t,value\n")
-    loader = CacheLoader("daily", "unused", cache_root)
-    assert loader.ctime == pd.Timestamp("2023-03-15")
-
-
-def test_ctime_of_an_empty_cache_is_the_unix_epoch(cache_root):
+def test_ctime_of_an_empty_cache_is_the_unix_epoch(remote):
     """With nothing cached, the creation time is 1970-01-01, i.e. stale.
 
     ON FAILURE: the code is wrong.
     """
-    loader = CacheLoader("daily", "unused", cache_root)
+    loader = CacheLoader("daily", remote.as_uri())
     assert loader.ctime == pd.Timestamp("1970-01-01")
 
 
-def test_age_is_the_time_since_the_cache_was_written(cache_root):
+def test_age_is_the_time_since_the_cache_was_written(remote):
     """``age`` = now - ctime, for a cache written five days ago.
 
-    Identity: ctime is midnight five days back, so the age is at least five
-    days and less than six.
+    Identity: the cached copy's file time is moved five days back, so the age
+    is at least five days and less than five days and a minute.
 
     ON FAILURE: the code is wrong.
     """
-    written = today() - pd.Timedelta(days=5)
-    (cache_root / f"{written.strftime(TODAY_STR_FORMAT)}.csv").write_text("t\n")
-    loader = CacheLoader("daily", "unused", cache_root)
-    assert pd.Timedelta(days=5) <= loader.age < pd.Timedelta(days=6)
+    CacheLoader.DOWNLOADED.to_csv(remote)
+    loader = CacheLoader("daily", remote.as_uri())
+    loader.load_data()
+    backdate(loader.url, 5)
+    assert pd.Timedelta(days=5) <= loader.age < pd.Timedelta(days=5, minutes=1)
 
 
-def test_load_data_downloads_into_todays_slot_when_the_cache_is_stale(cache_root):
-    """A stale cache is replaced by today's download, which is then read.
+def test_load_data_downloads_again_when_the_cache_is_stale(remote):
+    """A cached copy older than ``max_age`` is replaced by a new download.
 
-    Chosen input: an old cache file dated 2020-01-01. The loader must pass
-    ``download_data`` the old slot (so it is removed) and today's slot (so the
-    read finds the new file).
+    Chosen input: the first download holds one row from 2020; it is moved two
+    days back against a one-day window, and the source then serves
+    ``DOWNLOADED``, so only a new download returns ``DOWNLOADED``.
 
     ON FAILURE: the code is wrong.
     """
-    old = cache_root / "20200101.csv"
-    old.write_text("t,value\n2020-01-01,1.0\n")
-    loader = CacheLoader("daily", "unused", cache_root)
+    old = pd.DataFrame({"value": [1.0]}, index=pd.DatetimeIndex(["2020-01-01"]))
+    old.to_csv(remote)
+    first = CacheLoader("daily", remote.as_uri())
+    first.load_data()
+    backdate(first.url, 2)
+
+    CacheLoader.DOWNLOADED.to_csv(remote)
+    loader = CacheLoader("daily", remote.as_uri())
     loader.load_data()
 
-    new = cache_root / f"{today().strftime(TODAY_STR_FORMAT)}.csv"
-    assert new.exists()
-    assert not old.exists()
     pd.testing.assert_frame_equal(
         loader.data, CacheLoader.DOWNLOADED, check_freq=False, check_names=False
     )
 
 
-def test_load_data_reads_a_current_cache_without_downloading(cache_root):
-    """A cache written today is read as-is, with a datetime index.
+def test_load_data_reads_a_current_cache_without_downloading(remote):
+    """A cache younger than ``max_age`` is read as-is, with a datetime index.
 
-    Chosen input: two rows written to today's slot; ``download_data`` refuses
-    to run, so reaching it fails the test.
+    Chosen input: two rows are downloaded once, then the source is deleted,
+    so a second download would fail and warn; warnings are errors here.
 
     ON FAILURE: the code is wrong.
     """
@@ -306,13 +296,40 @@ def test_load_data_reads_a_current_cache_without_downloading(cache_root):
         {"value": [4.0, 5.0]},
         index=pd.DatetimeIndex(["2024-07-01", "2024-07-02"]),
     )
-    cached.to_csv(cache_root / f"{today().strftime(TODAY_STR_FORMAT)}.csv")
-    loader = CacheLoader("daily", "unused", cache_root, allow_download=False)
-    loader.load_data()
+    cached.to_csv(remote)
+    CacheLoader("daily", remote.as_uri()).load_data()
+    remote.unlink()
+
+    loader = CacheLoader("daily", remote.as_uri())
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        loader.load_data()
 
     assert isinstance(loader.data.index, pd.DatetimeIndex)
     pd.testing.assert_frame_equal(
         loader.data, cached, check_freq=False, check_names=False
+    )
+
+
+def test_load_data_falls_back_to_a_stale_cache_when_the_download_fails(remote):
+    """A stale cache whose refresh fails is loaded, with a warning of its age.
+
+    Chosen input: the cached copy is three days old and the source is gone.
+
+    ON FAILURE: the code is wrong.
+    """
+    CacheLoader.DOWNLOADED.to_csv(remote)
+    first = CacheLoader("daily", remote.as_uri())
+    first.load_data()
+    backdate(first.url, 3)
+    remote.unlink()
+
+    loader = CacheLoader("daily", remote.as_uri())
+    with pytest.warns(cache.StaleCacheWarning, match=r"3\.0 days old"):
+        loader.load_data()
+
+    pd.testing.assert_frame_equal(
+        loader.data, CacheLoader.DOWNLOADED, check_freq=False, check_names=False
     )
 
 
@@ -321,12 +338,13 @@ def test_load_data_reads_a_current_cache_without_downloading(cache_root):
 # ---------------------------------------------------------------------------
 
 
-def test_indicator_data_is_the_loaders_data(cache_root):
+def test_indicator_data_is_the_loaders_data(remote):
     """``ActivityIndicator.data`` is a shortcut to its loader's data.
 
     ON FAILURE: the code is wrong.
     """
-    loader = CacheLoader("daily", "unused", cache_root)
+    CacheLoader.DOWNLOADED.to_csv(remote)
+    loader = CacheLoader("daily", remote.as_uri())
     loader.load_data()
     assert Indicator(loader).data is loader.data
 
@@ -508,12 +526,12 @@ def test_loggers_sit_under_the_solarwindpy_logger():
     assert Extrema(extrema_table()).logger.name.startswith("solarwindpy.")
 
 
-def test_loader_logger_sits_under_the_solarwindpy_logger(cache_root):
+def test_loader_logger_sits_under_the_solarwindpy_logger():
     """A loader's logger is a child of ``solarwindpy``, named for its class.
 
     ON FAILURE: the code is wrong.
     """
-    loader = CacheLoader("daily", "unused", cache_root)
+    loader = CacheLoader("daily", "unused")
     assert loader.logger.name == "solarwindpy.solar_activity.base.CacheLoader"
 
 

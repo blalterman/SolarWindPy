@@ -8,7 +8,17 @@ exists, so pointing the variable at a directory under ``tmp_path`` keeps every
 test's cache private and leaves the user's ``~/.cache/solarwindpy`` untouched.
 """
 
+import itertools
+import os
+import time
+
+from pathlib import Path
+
 import pytest
+
+from astropy.utils.data import import_file_to_cache
+
+ONE_DAY = 86400.0
 
 
 @pytest.fixture(autouse=True)
@@ -23,3 +33,27 @@ def isolated_cache(tmp_path, monkeypatch):
     root.mkdir()
     monkeypatch.setenv("XDG_CACHE_HOME", str(root))
     return root
+
+
+@pytest.fixture
+def seed_cache(tmp_path, isolated_cache):
+    """Return ``seed(url, text, age_days=0)``: cache ``text`` as ``url``'s download.
+
+    The entry is registered with astropy's own ``import_file_to_cache``, so the
+    cache holds exactly what a download of ``url`` would have left, and its
+    file time is moved ``age_days`` into the past. Returns the cached path.
+    """
+    sources = tmp_path / "seeded"
+    sources.mkdir()
+    counter = itertools.count()
+
+    def _seed(url, text, age_days=0.0):
+        source = sources / f"{next(counter)}.txt"
+        source.write_text(text)
+        path = Path(import_file_to_cache(url, str(source), pkgname="solarwindpy"))
+        if age_days:
+            then = time.time() - age_days * ONE_DAY
+            os.utime(path, (then, then))
+        return path
+
+    return _seed

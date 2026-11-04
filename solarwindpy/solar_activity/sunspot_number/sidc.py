@@ -207,22 +207,29 @@ class SIDCLoader(DataLoader):
     r"""Download, cache, and load one SIDC sunspot-number series."""
 
     @property
-    def data_path(self):
-        r"""Cache directory for this series, ``<DataLoader.data_path>/sidc/<key>``."""
-        return super().data_path / "sidc" / self.key
+    def max_age(self):
+        r"""One day: SILSO updates its series daily."""
+        return pd.Timedelta(days=1)
 
     def convert_nans(self, data):
         r"""Replace SILSO's missing-value sentinel, -1, with NaN in place."""
         data.replace(-1, np.nan, inplace=True)
 
-    def download_data(self, new_data_path, old_data_path):
-        r"""Download and save the data to `new_data_path`.
+    def read_data(self, path):
+        r"""Parse a series downloaded from SILSO.
 
-        If `old_data_path` exists,
-        remove it.
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            File in SILSO's semicolon-separated, headerless layout.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The series indexed by time, with -1 replaced by NaN and a standard
+            error, std / sqrt(n), added for each standard deviation.
         """
-        url = self.url
-        self.logger.info("Downloading from SIDC sunspot number\nurl: %s", url)
+        self.logger.info("Reading SIDC sunspot number\npath: %s", path)
 
         key = self.key
         dtypes_columns = _Dtypes_Columns._asdict().get(key)
@@ -231,7 +238,7 @@ class SIDCLoader(DataLoader):
                 f"""You have not yet used the SSN specified by your key ({key}). Please verify the column labels before continuing."""
             )
 
-        csv = pd.read_csv(self.url, sep=";", header=None, dtype=dtypes_columns.dtypes)
+        csv = pd.read_csv(path, sep=";", header=None, dtype=dtypes_columns.dtypes)
         csv.columns = dtypes_columns.columns
 
         if key in ("m13", "m", "hm", "hm13"):
@@ -277,17 +284,10 @@ class SIDCLoader(DataLoader):
 
         csv.set_index(ts, inplace=True)
         self.convert_nans(csv)
-
-        new_data_path = new_data_path.with_suffix(".csv")
-        csv.to_csv(new_data_path, sep=",", na_rep="NaN")
-        old_data_path = old_data_path.with_suffix(".csv")
-        try:
-            old_data_path.unlink()
-        except FileNotFoundError:
-            pass
+        return csv
 
     def load_data(self):
-        r"""Load today's cached series and label each row with its cycle.
+        r"""Load the cached series and label each row with its cycle.
 
         Downloads the series first if the cache is stale. Adds a ``cycle``
         column holding the number of the solar cycle, from

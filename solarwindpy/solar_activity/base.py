@@ -9,20 +9,19 @@ __all__ = [
 ]
 
 import logging
-import re
 import urllib
 
 import numpy as np
 import pandas as pd
 
-from pathlib import Path
 from abc import ABC, abstractmethod, abstractproperty, abstractstaticmethod
 from collections import namedtuple
 
 from scipy.interpolate import InterpolatedUnivariateSpline
 
+from . import cache
+
 _Loader_Dtypes_Columns = namedtuple("LoaderNamedTuple", ["dtypes", "columns"])
-_data_date_pattern = re.compile(r"\d{4}\d{2}\d{2}")
 
 
 class Base(ABC):
@@ -106,8 +105,10 @@ class ID(Base):
 class DataLoader(Base):
     r"""Download, cache, and load a solar activity data set.
 
-    Data are cached under :attr:`data_path` in a file named for the date of
-    download, and downloaded again when that date is before today.
+    The downloaded file is kept in SolarWindPy's download cache,
+    :mod:`solarwindpy.solar_activity.cache`, and downloaded again once it is
+    older than :attr:`max_age`. If that download fails, the cached copy is
+    loaded with a :class:`~solarwindpy.solar_activity.cache.StaleCacheWarning`.
     """
 
     def __init__(self, key, url):
@@ -124,16 +125,15 @@ class DataLoader(Base):
         self._init_logger()
         self.set_key(key)
         self.set_url(url)
-        self.get_data_ctime()
-        self.get_data_age()
 
-    @abstractproperty
-    def data_path(self):
-        r"""Root of the local data cache, ``~/solarwindpy/data``.
+    @property
+    @abstractmethod
+    def max_age(self):
+        r"""Freshness window, :class:`pandas.Timedelta`.
 
-        Subclasses extend this path with their source and key.
+        A cached copy older than this is downloaded again.
         """
-        return Path.home() / "solarwindpy" / "data"
+        pass
 
     @abstractstaticmethod
     def convert_nans(data):
@@ -141,26 +141,26 @@ class DataLoader(Base):
         pass
 
     @abstractmethod
-    def download_data(self):
-        r"""Download the data and write them to the cache."""
+    def read_data(self, path):
+        r"""Parse the downloaded file at ``path``.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The data, indexed by time.
+        """
         pass
 
     @abstractmethod
     def load_data(self):
-        r"""Load today's cached data into :attr:`data`, downloading if stale.
+        r"""Load the data into :attr:`data`, downloading them if the cache is stale.
 
         Subclasses call this and may add to the loaded data.
         """
         self.logger.info(f"""Loading {self.key!s} data""")
 
-        self.maybe_update_stale_data()
-
-        today = pd.to_datetime("today").strftime("%Y%m%d")
-        fpath = (self.data_path / today).with_suffix(".csv")
-        data = pd.read_csv(fpath, index_col=0, header=0)
-
-        data.set_index(pd.DatetimeIndex(data.index), inplace=True)
-        self._data = data
+        path = cache.fetch(self.url, self.max_age)
+        self._data = self.read_data(path)
 
     @property
     def data(self):
@@ -179,13 +179,19 @@ class DataLoader(Base):
 
     @property
     def ctime(self):
-        r"""Date of the cached data, from its file name."""
-        return self._ctime
+        r"""Local time the cached data were downloaded.
+
+        ``1970-01-01`` if nothing is cached, so the data count as stale.
+        """
+        age = cache.cached_age(self.url)
+        if age is None:
+            return pd.to_datetime(0)
+        return pd.Timestamp.now() - age
 
     @property
     def age(self):
         r"""Time since :attr:`ctime`."""
-        return self._age
+        return pd.Timestamp.now() - self.ctime
 
     def set_key(self, key):
         r"""Set :attr:`key`."""
@@ -194,57 +200,6 @@ class DataLoader(Base):
     def set_url(self, new):
         r"""Set :attr:`url`."""
         self._url = new
-
-    def get_data_ctime(self):
-        r"""Determine when the current data set was created.
-
-        Returns
-        -------
-        pandas.Timestamp
-            Creation time inferred from the file name, or ``1970-01-01`` if no
-            prior data are found.
-        """
-        path = self.data_path
-        files = [str(x) for x in path.rglob("*.csv")]
-        dates = [re.findall(_data_date_pattern, f) for f in files]
-
-        if not len(dates):
-            # This will automatically return a date in 1970, so we
-            # will clear and download new data.
-            self._ctime = pd.to_datetime(0)
-            return
-
-        dates = np.concatenate(dates)
-        dates = [x.strip("/") for x in dates]
-        dates = np.unique(dates)
-
-        # BUG: This fails if there are more than two dated data directories.
-        assert dates.size == 1
-        ctime = pd.to_datetime(dates[0])
-
-        self.logger.info("Local data ctime %s", ctime)
-        self._ctime = ctime
-
-    def get_data_age(self):
-        r"""Compute the time elapsed since :attr:`ctime`."""
-        ctime = self.ctime
-        today = pd.to_datetime("today")
-        dt = today - ctime
-        self._age = dt
-
-    def maybe_update_stale_data(self):
-        r"""Download new data if the existing cache is stale."""
-        self.logger.info("Updating stale data")
-
-        old_ctime = self.ctime
-        new_ctime = pd.to_datetime("today")
-
-        if new_ctime.date() > old_ctime.date():
-            old_data_path = self.data_path / old_ctime.strftime("%Y%m%d")
-            new_data_path = self.data_path / new_ctime.strftime("%Y%m%d")
-            new_data_path.parent.mkdir(parents=True, exist_ok=True)
-
-            self.download_data(new_data_path, old_data_path)
 
 
 class ActivityIndicator(Base):

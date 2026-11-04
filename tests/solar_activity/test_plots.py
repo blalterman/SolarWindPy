@@ -2,12 +2,12 @@
 
 The indicator is a real ``SIDC`` monthly-smoothed sunspot series. Only the
 network is faked: SILSO's URL base is pointed at a local directory holding a
-file in SILSO's ``;``-separated format, and the cache home is moved under
-``tmp_path``. The series is chosen so each value is known by hand: the SSN
-of month ``i`` after January 2000 is ``50 + i``.
+file in SILSO's ``;``-separated format, and the download cache is kept under
+``tmp_path`` by the autouse ``isolated_cache`` fixture. The series is chosen
+so each value is known by hand: the SSN of month ``i`` after January 2000 is
+``50 + i``.
 """
 
-import re
 from pathlib import Path
 
 import matplotlib
@@ -47,21 +47,14 @@ def sidc(tmp_path, monkeypatch):
 def sidc_from_silso(tmp_path, monkeypatch, ssn):
     """A real ``SIDC("m13")`` downloaded from a local SILSO file of ``ssn``.
 
-    ``DataLoader`` reads the cache date from an 8-digit run anywhere in the
-    cache's absolute path, so a ``tmp_path`` that holds one would be misread.
-    Build one per test: a second ``SIDC("m13")`` under the same home reads
-    today's cache instead of the new file.
+    Build one per test: a second ``SIDC("m13")`` under the same cache reads
+    the fresh cached copy instead of the new file.
     """
-    if re.search(r"\d{8}", str(tmp_path)):
-        pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
-    home = tmp_path / "home"
-    home.mkdir()
     remote = tmp_path / "remote"
     remote.mkdir()
     (remote / "snmstotcsv.php").write_text(silso_m13(ssn))
 
     base = remote.as_uri() + "/"
-    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
     monkeypatch.setattr(SIDC_ID, "_url_base", property(lambda self: base))
     return SIDC("m13")
 

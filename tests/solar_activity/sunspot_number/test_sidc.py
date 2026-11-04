@@ -3,29 +3,28 @@
 
 ``SIDC.__init__`` runs an identifier, a loader, an extrema table, and two
 labelling passes. The only genuine external boundary in that chain is the SIDC
-download, and ``DataLoader`` only downloads when its on-disk cache is stale.
-So these tests redirect ``Path.home`` at a temporary directory, seed today's
-cache with a sunspot series of known shape, and then construct a real
-``SIDC``: a real ``SIDC_ID``, a real ``SIDCLoader``, a real ``SSNExtrema``
-reading the real shipped ``ssn_extrema.csv``, and the real labelling code.
+download, and ``DataLoader`` only downloads when its cached copy is stale.
+So these tests seed the download cache with a fresh sunspot series of known
+shape, in SILSO's layout, and then construct a real ``SIDC``: a real
+``SIDC_ID``, a real ``SIDCLoader``, a real ``SSNExtrema`` reading the real
+shipped ``ssn_extrema.csv``, and the real labelling code.
 
-Only boundaries are faked: ``Path.home`` (the ``fake_home`` fixture), the
-socket layer (the autouse ``no_network`` fixture, which makes
-``socket.getaddrinfo`` and ``socket.socket.connect`` raise ``NetworkRefused``),
-and, in one test, ``SIDC_ID.url``, the SILSO download URL, redirected to a
-local file in SILSO's layout (``silso_m13.csv``) so a stale cache downloads
-offline.
+Only boundaries are faked: the download cache (kept under ``tmp_path`` by the
+autouse ``isolated_cache`` fixture and seeded by ``seed_m13``), the socket
+layer (the autouse ``no_network`` fixture, which makes ``socket.getaddrinfo``
+and ``socket.socket.connect`` raise ``NetworkRefused``), and, in one test,
+``SIDC_ID.url``, the SILSO download URL, redirected to a local file in SILSO's
+layout (``silso_m13.csv``) so a stale cache downloads offline.
 Expectations are recomputed from the inputs -- the seeded series, the local SILSO
 file's text and the extrema table -- or are analytic identities of the normalization
 being applied.
 
 Whether the live endpoint still serves SILSO's layout is a drift question, not
-a unit-test question. ``test_sidc_loader.py`` covers ``download_data``'s
+a unit-test question. ``test_sidc_loader.py`` covers ``read_data``'s
 parsing of the other series keys.
 """
 
 import inspect
-import re
 import socket
 
 import matplotlib
@@ -54,24 +53,6 @@ SERIES_START = "1996-09-01"
 SERIES_END = "2019-11-01"
 
 
-@pytest.fixture
-def fake_home(tmp_path, monkeypatch):
-    """Redirect ``Path.home`` so the loader caches under ``tmp_path``.
-
-    ``DataLoader.get_data_ctime`` recovers the cache date by matching eight
-    consecutive digits anywhere in the absolute path and asserts it finds
-    exactly one, so a tmp_path with its own eight-digit run would break the
-    loader for reasons unrelated to the code under test.
-    """
-    if re.search(r"\d{8}", str(tmp_path)):
-        pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
-
-    home = tmp_path / "home"
-    home.mkdir()
-    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
-    return home
-
-
 class NetworkRefused(AssertionError):
     """Raised by ``no_network`` when a test in this module opens a socket."""
 
@@ -80,11 +61,9 @@ class NetworkRefused(AssertionError):
 def no_network(monkeypatch):
     """Refuse every socket, so no test in this module reaches SILSO.
 
-    Every test here seeds today's cache and expects the loader to read it.
-    ``maybe_update_stale_data`` recomputes "today" at load time, so a run that
-    straddles local midnight between seeding and loading would judge the cache
-    stale and run the real ``SIDCLoader.download_data``, whose
-    ``pd.read_csv(self.url)`` opens a connection to the live SILSO endpoint.
+    Every test here seeds a fresh cache and expects the loader to read it. A
+    cache judged stale would download from the live SILSO endpoint through
+    astropy's ``download_file``, which opens a connection.
     This guard sits on that network boundary rather than on any SolarWindPy
     name: ``socket.getaddrinfo`` (the DNS lookup) and ``socket.socket.connect``
     raise ``NetworkRefused``. It subclasses ``AssertionError``, not
@@ -103,19 +82,6 @@ def no_network(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect", refuse_connect)
 
 
-def seed_cache(home, key, frame, date=None):
-    """Write ``frame`` into the SIDC cache slot for ``key`` dated ``date``.
-
-    ``date`` defaults to today, the slot the loader reads without downloading.
-    """
-    cache = home / "solarwindpy" / "data" / "sidc" / key
-    cache.mkdir(parents=True, exist_ok=True)
-    if date is None:
-        date = pd.to_datetime("today")
-    frame.to_csv(cache / f"{date.strftime('%Y%m%d')}.csv")
-    return cache
-
-
 def sinusoidal_ssn(index):
     """A smooth sunspot-like series: strictly positive, one broad peak per cycle."""
     phase = 2.0 * np.pi * np.arange(len(index)) / 132.0
@@ -129,7 +95,7 @@ def seeded_index():
 
 
 @pytest.fixture
-def sidc(fake_home, seeded_index):
+def sidc(seed_m13, seeded_index):
     """A real ``SIDC`` built from a locally seeded cache."""
     frame = pd.DataFrame(
         {
@@ -139,7 +105,7 @@ def sidc(fake_home, seeded_index):
         },
         index=seeded_index,
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     return SIDC("m13")
 
 
@@ -152,15 +118,12 @@ def extrema():
 # ---------------------------------------------------------------------------
 # The network guard.
 # ---------------------------------------------------------------------------
-def test_no_network_refuses_the_download_a_stale_cache_triggers(
-    fake_home, seeded_index
-):
-    """A cache dated yesterday sends SIDC to the network, and the guard stops it.
+def test_no_network_refuses_the_download_a_stale_cache_triggers(seed_m13, seeded_index):
+    """A two-day-old cache sends SIDC to the network, and the guard stops it.
 
-    Seeding yesterday's slot instead of today's is the input chosen so the
-    answer is known: ``maybe_update_stale_data`` must call the real
-    ``download_data``, whose ``pd.read_csv`` on the SILSO URL is the only
-    network access in the chain. Seeing ``NetworkRefused`` proves the guard
+    Seeding a copy older than the one-day freshness window is the input chosen
+    so the answer is known: the cache must download from the SILSO URL, the
+    only network access in the chain. Seeing ``NetworkRefused`` proves the guard
     sits on that path, so every other test's offline claim rests on it.
 
     ON FAILURE: the no_network fixture no longer separates a cached load from
@@ -170,8 +133,7 @@ def test_no_network_refuses_the_download_a_stale_cache_triggers(
         {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    yesterday = pd.to_datetime("today") - pd.Timedelta("1D")
-    seed_cache(fake_home, "m13", frame, date=yesterday)
+    seed_m13(frame, age_days=2)
 
     with pytest.raises(NetworkRefused, match="tried to open a network connection"):
         SIDC("m13")
@@ -194,14 +156,14 @@ def silso_rows():
 
 
 def test_stale_cache_downloads_the_silso_series_and_loads_it(
-    fake_home, seeded_index, extrema, monkeypatch
+    seed_m13, seeded_index, extrema, monkeypatch
 ):
     """A stale cache downloads, parses, caches and labels the SILSO series.
 
-    Yesterday's cache holds the sinusoidal series, so ``SIDC("m13")`` must
-    download. The download URL is redirected to the local file, on the network
-    boundary; ``no_network`` stays active, and reading a local path opens no
-    socket. Every expectation comes from the file's text, split by hand: the
+    A two-day-old cache holds the sinusoidal series, so ``SIDC("m13")`` must
+    download. The download URL is redirected to the local file's ``file://``
+    URL, on the network boundary; ``no_network`` stays active, and reading a
+    local file opens no socket. Every expectation comes from the file's text, split by hand: the
     index is each row's month start, the columns carry SILSO's values with -1
     as NaN (the last row is a month with no smoothed sunspot number yet, -1 in
     ``ssn``, ``std`` and ``n_obs``), the standard error is std / sqrt(n_obs),
@@ -214,9 +176,8 @@ def test_stale_cache_downloads_the_silso_series_and_loads_it(
         {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    yesterday = pd.to_datetime("today") - pd.Timedelta("1D")
-    seed_cache(fake_home, "m13", stale, date=yesterday)
-    monkeypatch.setattr(SIDC_ID, "url", property(lambda self: str(SILSO_M13)))
+    monkeypatch.setattr(SIDC_ID, "url", property(lambda self: SILSO_M13.as_uri()))
+    seed_m13(stale, age_days=2)
 
     data = SIDC("m13").data
 
@@ -506,7 +467,7 @@ def test_normalization_by_feature_scale_maps_each_cycle_onto_the_unit_interval(s
 
 
 @pytest.mark.parametrize("factor", [2.0, 0.25, 1000.0])
-def test_normalization_by_max_is_scale_invariant(fake_home, seeded_index, factor):
+def test_normalization_by_max_is_scale_invariant(seed_m13, seeded_index, factor):
     """Rescaling the input sunspot number leaves the max normalization unchanged.
 
     Property over a region rather than a case: g / max(g) is invariant under
@@ -523,14 +484,14 @@ def test_normalization_by_max_is_scale_invariant(fake_home, seeded_index, factor
         frame = pd.DataFrame(
             {"ssn": scale * base, "std": 5.0, "n_obs": 25}, index=seeded_index
         )
-        seed_cache(fake_home, "m13", frame)
+        seed_m13(frame)
         indicator = SIDC("m13")
         results.append(indicator.run_normalization(norm_by="max"))
 
     np.testing.assert_allclose(results[0].values, results[1].values)
 
 
-def test_normalization_by_zscore_is_affine_invariant(fake_home, seeded_index):
+def test_normalization_by_zscore_is_affine_invariant(seed_m13, seeded_index):
     """Shifting and rescaling the input leaves the z-score unchanged.
 
     Property: (g - mean) / std is invariant under g -> a*g + b for a > 0.
@@ -546,7 +507,7 @@ def test_normalization_by_zscore_is_affine_invariant(fake_home, seeded_index):
             {"ssn": scale * base + offset, "std": 5.0, "n_obs": 25},
             index=seeded_index,
         )
-        seed_cache(fake_home, "m13", frame)
+        seed_m13(frame)
         indicator = SIDC("m13")
         results.append(indicator.run_normalization(norm_by="zscore"))
 
@@ -604,7 +565,7 @@ def test_norm_by_records_the_method_used(sidc):
 # ---------------------------------------------------------------------------
 # Interpolation.
 # ---------------------------------------------------------------------------
-def test_interpolate_data_recovers_a_linear_ramp(fake_home, seeded_index):
+def test_interpolate_data_recovers_a_linear_ramp(seed_m13, seeded_index):
     """Interpolating a straight line onto a finer grid returns that line.
 
     Parameter recovery: the source is exactly linear in elapsed time, so the
@@ -628,7 +589,7 @@ def test_interpolate_data_recovers_a_linear_ramp(fake_home, seeded_index):
         {"ssn": ramp(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     target = pd.date_range(seeded_index[10], seeded_index[-10], freq="10D")
@@ -637,7 +598,7 @@ def test_interpolate_data_recovers_a_linear_ramp(fake_home, seeded_index):
     assert interpolated.loc[:, "ssn"].to_numpy() == exact(ramp(target))
 
 
-def test_interpolate_data_does_not_extrapolate(fake_home, seeded_index):
+def test_interpolate_data_does_not_extrapolate(seed_m13, seeded_index):
     """Targets outside the measured span come back as NaN, not invented values.
 
     ON FAILURE: sunspot numbers would be fabricated for epochs the instrument
@@ -647,7 +608,7 @@ def test_interpolate_data_does_not_extrapolate(fake_home, seeded_index):
         {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     target = pd.date_range("1990-01-01", "2025-01-01", freq="MS")
@@ -670,7 +631,7 @@ def test_interpolate_data_does_not_extrapolate(fake_home, seeded_index):
 # Banding by sunspot number.
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("dssn", [2.0, 5.0, 10.0])
-def test_ssn_bands_contain_the_values_they_label(fake_home, seeded_index, dssn):
+def test_ssn_bands_contain_the_values_they_label(seed_m13, seeded_index, dssn):
     """Banding is a partition: a value is labelled exactly when it is in range.
 
     Two properties, together, over the whole series. Every labelled value
@@ -688,7 +649,7 @@ def test_ssn_bands_contain_the_values_they_label(fake_home, seeded_index, dssn):
         {"ssn": sinusoidal_ssn(seeded_index), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     target = pd.date_range(seeded_index[5], seeded_index[-5], freq="20D")
@@ -756,7 +717,7 @@ def ramp_index():
 
 
 @pytest.fixture
-def ramp_sidc(fake_home, ramp_index):
+def ramp_sidc(seed_m13, ramp_index):
     """A real ``SIDC`` whose cached series is the hand-built ramp.
 
     ``std`` is constant, so interpolating it gives a different answer than
@@ -765,7 +726,7 @@ def ramp_sidc(fake_home, ramp_index):
     frame = pd.DataFrame(
         {"ssn": ramp_ssn(ramp_index), "std": 5.0, "n_obs": 25}, index=ramp_index
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     return SIDC("m13")
 
 
@@ -806,7 +767,7 @@ def test_interpolate_data_defaults_to_the_ssn_column(ramp_sidc):
     assert ramp_sidc.interpolated is interpolated
 
 
-def test_interpolate_data_skips_a_missing_month(fake_home, ramp_index):
+def test_interpolate_data_skips_a_missing_month(seed_m13, ramp_index):
     """A NaN month is dropped before interpolating, not propagated.
 
     The remaining months still lie on the ramp, so the value at the missing
@@ -817,7 +778,7 @@ def test_interpolate_data_skips_a_missing_month(fake_home, ramp_index):
     ssn = ramp_ssn(ramp_index)
     ssn[10] = np.nan
     frame = pd.DataFrame({"ssn": ssn, "std": 5.0, "n_obs": 25}, index=ramp_index)
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     target = ramp_index[8:13]
@@ -947,13 +908,13 @@ def test_narrow_normalized_bands_touch_without_overlapping(ramp_sidc):
     assert all(band.left < v <= band.right for v, band in zip(values, cut))
 
 
-def test_ssn_bands_of_an_all_zero_series_are_empty(fake_home, ramp_index):
+def test_ssn_bands_of_an_all_zero_series_are_empty(seed_m13, ramp_index):
     """A series whose maximum is 0 has no band centres below it: every label is NaN.
 
     ON FAILURE: the code is wrong.
     """
     frame = pd.DataFrame({"ssn": 0.0, "std": 5.0, "n_obs": 25}, index=ramp_index)
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
     indicator.interpolate_data(at_days(50, 250))
 
@@ -1029,7 +990,7 @@ def _value_axis_labels(axes):
     return [label.get_text() for label in axes.xaxis.get_ticklabels()]
 
 
-def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index):
+def test_plot_on_colorbar_handles_a_low_activity_window(seed_m13, seeded_index):
     """A window that never exceeds SSN 50 plots finite coordinates on a 0-100 scale.
 
     A plotted coordinate has to be finite to render at all. The scale top is
@@ -1043,7 +1004,7 @@ def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index)
         {"ssn": np.full(len(seeded_index), 30.0), "std": 5.0, "n_obs": 25},
         index=seeded_index,
     )
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     figure, axes = plt.subplots()
@@ -1062,7 +1023,7 @@ def test_plot_on_colorbar_handles_a_low_activity_window(fake_home, seeded_index)
         plt.close(figure)
 
 
-def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(fake_home, seeded_index):
+def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(seed_m13, seeded_index):
     """A peak of 140 gets a scale top of 200, so the line stays inside the scale.
 
     Rounding to the nearest 100 would give 100 and draw the peak beyond the
@@ -1075,7 +1036,7 @@ def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(fake_home, seeded_index
     ssn = np.full(len(seeded_index), 20.0)
     ssn[len(ssn) // 2] = 140.0
     frame = pd.DataFrame({"ssn": ssn, "std": 5.0, "n_obs": 25}, index=seeded_index)
-    seed_cache(fake_home, "m13", frame)
+    seed_m13(frame)
     indicator = SIDC("m13")
 
     figure, axes = plt.subplots()
