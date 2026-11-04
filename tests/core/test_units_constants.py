@@ -87,7 +87,6 @@ DISPLAY_UNIT_IN_SI = {
     "dv": constants.kilo,  # km s^-1, differential flow
     "ca": constants.kilo,  # km s^-1, Alfven speed
     "cs": constants.kilo,  # km s^-1, sound speed
-    "cfms": constants.kilo,  # km s^-1, fast magnetosonic speed
     "pth": constants.pico,  # pPa
     "T": 1e5,  # 10^5 K
     "n": constants.centi**-3,  # cm^-3

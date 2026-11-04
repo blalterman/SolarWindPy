@@ -109,7 +109,6 @@ QUANTITIES = MappingProxyType(
         "dn": Quantity(r"\delta n_{{$S}}", _U["cm-3"]),
         "cs": Quantity(r"C_{s;$S}", _U["kms"], si=1e3),
         "ca": Quantity(r"C_{A;$S}", _U["kms"], si=1e3),
-        "cfms": Quantity(None, _U["kms"], si=1e3),
         "afsq": Quantity(r"\mathrm{Anisotropy \, Factor}^2_{$S}", _U["dimless"]),
         "caani": Quantity(r"C^{(\mathrm{Ani})}_{A;$S} \; ($C)", _U["kms"]),
         # Temperatures, pressures, anisotropies and fluxes.

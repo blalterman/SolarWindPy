@@ -275,12 +275,6 @@ def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
     assert sorted(public - known) == []
 
 
-#: Registry keys with an SI factor that no method returns, each with why.
-SI_KEYS_FOR_THE_AUTHOR = {
-    "cfms": "the fast magnetosonic speed has a display unit but no method or label",
-}
-
-
 def test_every_converted_quantity_is_returned_by_a_method():
     """Every registry key with an SI factor is the label of some core quantity.
 
@@ -290,7 +284,7 @@ def test_every_converted_quantity_is_returned_by_a_method():
     quantities = _quantities()
     returned = {c[1] for c in CASES if c[3] == "M"}
     converted = {k for k, q in quantities.QUANTITIES.items() if q.si is not None}
-    assert sorted(converted - returned - set(SI_KEYS_FOR_THE_AUTHOR)) == []
+    assert sorted(converted - returned) == []
 
 
 def test_every_registry_entry_is_used_by_a_method_or_a_label():
@@ -305,7 +299,7 @@ def test_every_registry_entry_is_used_by_a_method_or_a_label():
     unused = {
         k
         for k, q in quantities.QUANTITIES.items()
-        if q.tex is None and k not in returned and k not in SI_KEYS_FOR_THE_AUTHOR
+        if q.tex is None and k not in returned
     }
     assert sorted(unused) == []
 
@@ -381,7 +375,6 @@ def test_vdf_ratio_is_the_registry_key():
     assert "VDFratio" not in quantities.QUANTITIES
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_fast_magnetosonic_speed_is_not_in_the_registry():
     """No method computes ``cfms``, so neither the registry nor ``Units`` holds it.
 
