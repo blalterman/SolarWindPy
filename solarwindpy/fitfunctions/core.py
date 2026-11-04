@@ -540,7 +540,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         -------
         pandas.DataFrame
             One row. The columns are a MultiIndex with levels ``P`` (the
-            parameter or quality name) and ``K`` (the kind): ``(name,
+            parameter or quality name) and ``K`` (the kind), named in the
+            manner of the plasma data's ``M``, ``C``, ``S`` (measurement,
+            component, species) levels: ``(name,
             "value")`` and ``(name, "uncertainty")`` for each parameter in
             :attr:`argnames` order, then ``("chisq_dof", "linear")``,
             ``("chisq_dof", "robust")``, ``("rsq", "")``, ``("nobs", "")``,

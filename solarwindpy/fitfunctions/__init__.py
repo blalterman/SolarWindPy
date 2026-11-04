@@ -51,6 +51,10 @@ computes the optimized parameters, their covariance and
   ``status``. A failed fit raises, but first records a row of NaN values whose
   ``status`` names the exception, so a loop over many fits can catch the
   exception and keep going.
+  Its columns are a MultiIndex with levels ``P`` (parameter, or the quality
+  measure's name) and ``K`` (kind: ``"value"``, ``"uncertainty"``,
+  ``"linear"``, ``"robust"`` or empty), as the plasma data's columns have
+  levels ``M``, ``C`` and ``S`` (measurement, component, species).
 
 Failures are reported with
 :class:`~solarwindpy.fitfunctions.core.FitFunctionError` and its subclasses
