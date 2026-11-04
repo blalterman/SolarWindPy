@@ -21,6 +21,8 @@ import threading
 import time
 import warnings
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
@@ -114,6 +116,24 @@ def test_a_failed_refresh_returns_the_cached_copy_and_warns_its_age(tmp_path):
         path = cache.fetch(url, max_age=pd.Timedelta(days=1))
 
     assert path.read_text() == "first\n"
+
+
+def test_the_stale_cache_warning_from_fetch_points_at_its_caller(tmp_path):
+    """The StaleCacheWarning of a failed refresh is attributed to fetch's caller.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    source, url = serve(tmp_path, "first\n")
+    backdate(cache.fetch(url, max_age=pd.Timedelta(days=1)), 3)
+    source.unlink()
+
+    with pytest.warns(cache.StaleCacheWarning) as record:
+        cache.fetch(url, max_age=pd.Timedelta(days=1))
+
+    (stale,) = [w for w in record if w.category is cache.StaleCacheWarning]
+    assert Path(stale.filename).resolve() == Path(__file__).resolve()
 
 
 def test_a_failed_download_with_nothing_cached_raises(tmp_path):
