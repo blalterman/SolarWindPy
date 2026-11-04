@@ -145,7 +145,12 @@ class Core(ABC):
     def _level_labels(columns: pd.Index, level: str) -> pd.Index:
         r"""The labels ``columns`` holds on ``level``.
 
-        A flat Index is one level: its name, when set, must be ``level``.
+        A flat Index is one level. It is refused only when its name is
+        another level of the data model, such as ``"S"`` when ``level`` is
+        ``"C"``; an unnamed or otherwise named flat Index is taken as
+        ``level``, so that a frame whose level names are checked elsewhere
+        (as :meth:`~solarwindpy.core.plasma.Plasma.set_spacecraft` checks a
+        spacecraft's) is refused there, as before.
 
         Raises
         ------
@@ -153,7 +158,7 @@ class Core(ABC):
             If ``columns`` has no level ``level``.
         """
         if columns.nlevels == 1:
-            if columns.name not in (None, level):
+            if columns.name in _LEVEL_WORDS and columns.name != level:
                 raise ValueError(
                     f"Expected level {level!r}; these flat columns are level "
                     f"{columns.name!r}"

@@ -918,14 +918,14 @@ class Plasma(base.Base):
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
 
         w = (
-            data.loc[:, pd.IndexSlice["w", ["par", "per"]]]
+            self._select(data.xs("w", axis=1, level="M"), ["par", "per"], "C")
             .pow(2)
             .multiply(coeff, axis=1, level="C")
         )
 
-        # skipna=False: within a species, a time missing either part has no
-        # scalar thermal speed (docs page `missing_data`).
-        w = w.T.groupby("S").sum(skipna=False).T.pow(0.5)
+        # Within a species, a time missing either part has no scalar thermal
+        # speed (docs page `missing_data`).
+        w = self._component_reduce(w).pow(0.5)
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
@@ -952,7 +952,7 @@ class Plasma(base.Base):
             self.logger.info("no columns dropped from plasma")
 
         self._bfield = vector.BField(
-            data.b.xs("", axis=1, level="S"), _time_checked=data.index
+            self._select(data.b, "", "S"), _time_checked=data.index
         )
 
     def _mask_invalid_species(self, data):
@@ -982,7 +982,9 @@ class Plasma(base.Base):
         del moments
         # Sorted, as `groupby(level="S")` orders the species.
         invalid = {
-            s: isna.xs(s, axis=1, level="S").any(axis=1)
+            # Not a component reduction: any missing moment or component
+            # invalidates the species (docs page `missing_data`).
+            s: self._select(isna, s, "S").any(axis=1)
             for s in sorted(isna.columns.unique(level="S"))
         }
         del isna
@@ -1030,7 +1032,9 @@ class Plasma(base.Base):
         n = pd.concat(n, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a total with no species present is NaN, not 0.
+            # Not `_species_total`: `skipna=False` asks for a strict total
+            # (docs page `missing_data`). min_count=1: a total with no
+            # species present is NaN, not 0.
             n = n.sum(axis=1, skipna=skipna, min_count=1)
             n.name = species[0]
 
@@ -1058,8 +1062,7 @@ class Plasma(base.Base):
         rho = pd.concat(rho, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a total with no species present is NaN, not 0.
-            rho = rho.sum(axis=1, min_count=1)
+            rho = self._species_total(rho)
             rho.name = species[0]
         return rho
 
@@ -1088,8 +1091,7 @@ class Plasma(base.Base):
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            # min_count=1: a time where the species is missing stays NaN.
-            w = w.T.groupby(level="C").sum(min_count=1).T
+            w = self._species_total(w)
 
         return w
 
@@ -1125,7 +1127,7 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("C").sum(min_count=1).T
+            pth = self._species_total(pth)
         return pth
 
     def T(self, *species):
@@ -1156,7 +1158,7 @@ class Plasma(base.Base):
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            temp = temp.T.groupby("C").sum(min_count=1).T
+            temp = self._species_total(temp)
         return temp
 
     def beta(self, *species):
@@ -1228,7 +1230,7 @@ class Plasma(base.Base):
         ani : pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        pth = self.pth(*species).drop("scalar", axis=1)
+        pth = self._select(self.pth(*species), ["par", "per"], "C")
 
         include_dynamic = False
         if include_dynamic:
@@ -1238,15 +1240,8 @@ class Plasma(base.Base):
 
         exp = pd.Series({"par": -1, "per": 1})
 
-        if len(species) > 1:
-            ani = (
-                pth.pow(exp, axis=1, level="C")
-                .T.groupby(level="S")
-                .prod(skipna=False)
-                .T
-            )
-        else:
-            ani = pth.pow(exp, axis=1).product(axis=1, skipna=False)
+        ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
+        if len(species) == 1:
             ani.name = species[0]
 
         return ani
@@ -1343,11 +1338,11 @@ species: {}
         mean : pd.DataFrame
             One column per component.
         """
-        present = vectors.notna().T.groupby(level="S").all().T & weights.notna()
+        present = Plasma._component_reduce(vectors.notna(), "all") & weights.notna()
         weights = weights.where(present)
         weighted = vectors.multiply(weights, axis=1, level="S")
-        total = weighted.T.groupby(level="C").sum(min_count=1).T
-        return total.divide(weights.sum(axis=1, min_count=1), axis=0)
+        total = Plasma._species_total(weighted)
+        return total.divide(Plasma._species_total(weights), axis=0)
 
     def dv(self, s0, s1, project_m2q=False):
         r"""Calculate the differential flow between species `s0` and `s1`.
@@ -1429,19 +1424,18 @@ species: {}
             )
             # Within a species, a missing component makes dv^2 NaN; across
             # species, the sum keeps the species present (docs `missing_data`).
-            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum(skipna=False).T
+            dvsq_i = self._component_reduce(dv_i.pow(2.0))
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-            pdv = dvsq_rho_i.sum(axis=1, min_count=1)
+            pdv = self._species_total(dvsq_rho_i)
 
         elif len(stuple) == 2:
             # Can only have 2 species with `project_m2q`.
-            dvsq = (
-                self.dv(*stuple, project_m2q=project_m2q)
-                .cartesian.pow(2)
-                .sum(axis=1, skipna=False)
+            dvsq = self._component_reduce(
+                self.dv(*stuple, project_m2q=project_m2q).cartesian.pow(2)
             )
             rho_i = self.rho(*stuple)
-            # skipna=False: the reduced mass needs both species.
+            # Not `_species_total`: the reduced mass needs both species, so
+            # it is strict over species (docs page `missing_data`).
             mu = rho_i.product(axis=1, skipna=False).divide(
                 rho_i.sum(axis=1, skipna=False), axis=0
             )
@@ -1473,7 +1467,7 @@ species: {}
         rho = self.rho(*species) * self.units.rho
         pth = self.pth(*species) * self.units.pth
 
-        pth = pth.loc[:, "scalar"]
+        pth = self._select(pth, "scalar", "C")
 
         gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
         cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
@@ -1550,7 +1544,7 @@ species: {}
             )
 
         # A missing field component leaves B^2 unknown.
-        bsq = self.b.cartesian.pow(2.0).sum(axis=1, skipna=False)
+        bsq = self._component_reduce(self.b.cartesian.pow(2.0))
 
         # A species is masked as a whole where any moment is missing, so its
         # p_per and p_par are present together and the species sum of
@@ -1558,7 +1552,7 @@ species: {}
         # `missing_data`). Dynamic pressure, if ever included, would be
         # subtracted here with the species aligned.
         pth = self.pth(*species)
-        dp = pth.loc[:, "per"].subtract(pth.loc[:, "par"])
+        dp = self._select(pth, "per", "C").subtract(self._select(pth, "par", "C"))
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
@@ -1654,8 +1648,10 @@ species: {}
         n0 = self.ions.loc[s0].n * units.n
         n1 = self.ions.loc[s1].n * units.n
 
-        T0 = self.ions.loc[s0].T.scalar * units.T * constants.kb.eV
-        T1 = self.ions.loc[s1].T.scalar * units.T * constants.kb.eV
+        T0 = self._select(self.ions.loc[s0].T, "scalar", "C")
+        T1 = self._select(self.ions.loc[s1].T, "scalar", "C")
+        T0 = T0 * units.T * constants.kb.eV
+        T1 = T1 * units.T * constants.kb.eV
 
         r0 = n0.multiply(z0**2.0).divide(T0, axis=0)
         r1 = n1.multiply(z1**2.0).divide(T1, axis=0)
@@ -1728,9 +1724,10 @@ species: {}
         nb = self.ions.loc[sb].n * units.n
 
         w = pd.concat(
-            {s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True
+            {s: self.ions.loc[s].w("par") for s in [sa, sb]}, axis=1, sort=True
         )
-        # skipna=False: W_ab needs both species' thermal speeds.
+        # Not `_species_total`: W_ab needs both species' thermal speeds, so it
+        # is strict over species (docs page `missing_data`).
         wab = w.pow(2.0).sum(axis=1, skipna=False).pipe(np.sqrt) * units.w
 
         dv = self.dv(sa, sb).mag * units.dv
@@ -1749,7 +1746,8 @@ species: {}
         if both_species:
             exp = pd.Series({sa: 1.0, sb: -1.0})
             rho_ratio = pd.concat({s: self.rho(s) for s in [sa, sb]}, axis=1, sort=True)
-            # skipna=False: the ratio needs both species.
+            # Not a species total: the ratio needs both species (docs page
+            # `missing_data`).
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1, skipna=False)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
@@ -1872,19 +1870,21 @@ species: {}
         beam = beam[0]
         core = core[0]
 
-        n1 = self.data.xs(("n", "", core), axis=1)
-        n2 = self.data.xs(("n", "", beam), axis=1)
+        n1 = self.ions.loc[core].n
+        n2 = self.ions.loc[beam].n
 
-        w = self.w(beam, core).drop("scalar", axis=1, level="C")
-        w1_par = w.par.loc[:, core]
-        w1_per = w.per.loc[:, core]
-        w2_par = w.par.loc[:, beam]
-        w2_per = w.per.loc[:, beam]
+        w = self._select(self.w(beam, core), ["par", "per"], "C")
+        w1 = self._select(w, core, "S")
+        w2 = self._select(w, beam, "S")
+        w1_par = self._select(w1, "par", "C")
+        w1_per = self._select(w1, "per", "C")
+        w2_par = self._select(w2, "par", "C")
+        w2_per = self._select(w2, "per", "C")
 
         dv = self.dv(beam, core, project_m2q=True).project(self.b)
         # skipna=False: where b is missing the projection is NaN, and the
         # ratio must be NaN rather than the drift-free value ln(n2 w1^3 / n1 w2^3).
-        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1, skipna=False)
+        dvw = self._component_reduce(dv.divide(w1).pow(2))
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
@@ -1961,11 +1961,11 @@ species: {}
             niqi = ni.multiply(qi, axis=1, level="S")
             # Both sums run over the species present at each time; species
             # masking in `set_data` keeps a density from outliving its velocity.
-            ne = niqi.sum(axis=1, min_count=1)
+            ne = self._species_total(niqi)
             ve = self._species_weighted_mean(vi, niqi)
 
         # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
-        wp = self.w(tkw).loc[:, "scalar"]
+        wp = self._select(self.w(tkw), "scalar", "C")
         mpme = self.constants.m_in_mp["e"] ** -1
         we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
         # Isotropic electrons: the scalar thermal speed equals both components.
@@ -2046,15 +2046,14 @@ species: {}
         dv = {s: self.dv(s, scom).project(self.b).par for s in slist}
         dv = pd.concat(dv, axis=1, names=["S"], sort=True)
         dv.columns.name = "S"
-        w = self.data.w.par.loc[:, slist]
+        w = self._select(self._select(self.data.w, "par", "C"), list(slist), "S")
 
         qa = dv.pow(3)
         qb = dv.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
 
         qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
-            # min_count=1: a partial sum over the species present, NaN where none is.
-            qs = qs.sum(axis=1, min_count=1)
+            qs = self._species_total(qs)
             qs.name = "+".join(species)
 
         coeff = self.units.rho * (self.units.v**3.0) / self.units.q
@@ -2138,8 +2137,7 @@ species: {}
         w = pd.concat(w, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a partial sum over the species present, NaN where none is.
-            w = w.sum(axis=1, min_count=1)
+            w = self._species_total(w)
             w.name = species[0]
 
         return w

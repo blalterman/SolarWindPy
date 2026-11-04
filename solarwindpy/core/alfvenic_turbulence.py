@@ -177,19 +177,19 @@ class AlfvenicTurbulence(base.Core):
     @property
     def ep(self):
         r"""Energy contained in :math:`z^+`."""
-        ep = 0.5 * self.zp.pow(2).sum(axis=1, skipna=False)
+        ep = 0.5 * self._component_reduce(self.zp.pow(2))
         return ep
 
     @property
     def em(self):
         r"""Energy contained in :math:`z^-`."""
-        em = 0.5 * self.zm.pow(2).sum(axis=1, skipna=False)
+        em = 0.5 * self._component_reduce(self.zm.pow(2))
         return em
 
     @property
     def ev(self):
         r"""Energy contained in velocity fluctuations :math:`\frac{1}{2}v^2`."""
-        ev = 0.5 * self.v.pow(2).sum(axis=1, skipna=False)
+        ev = 0.5 * self._component_reduce(self.v.pow(2))
         return ev
 
     @property
@@ -197,7 +197,7 @@ class AlfvenicTurbulence(base.Core):
         r"""Energy contained in magnetic field fluctuations
 
         :math:`E_b = \frac{1}{2}b^2`."""
-        eb = 0.5 * self.b.pow(2).sum(axis=1, skipna=False)
+        eb = 0.5 * self._component_reduce(self.b.pow(2))
         return eb
 
     @property
@@ -220,7 +220,7 @@ class AlfvenicTurbulence(base.Core):
         r"""Cross helicity :math:`\frac{1}{2} \delta v \cdot \delta b`."""
         v = self.v
         b = self.b
-        c = 0.5 * v.multiply(b).sum(axis=1, skipna=False)
+        c = 0.5 * self._component_reduce(v.multiply(b))
         return c
 
     @property
@@ -311,15 +311,12 @@ unexpected.""")
             # Project along nominal Parker Spiral
             omega = 2.865e-6  # rad/s
             pos = sc_vector.data.xs("pos", axis=1, level="M")
-            r_rtn = (
-                pos.loc[:, ["x", "y", "z"]]
-                .pow(2)
-                .sum(axis=1, skipna=False)
-                .pipe(np.sqrt)
-            )
-            rho_rtn = (
-                pos.loc[:, ["x", "y"]].pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
-            )
+            r_rtn = self._component_reduce(
+                self._select(pos, ["x", "y", "z"], "C").pow(2)
+            ).pipe(np.sqrt)
+            rho_rtn = self._component_reduce(
+                self._select(pos, ["x", "y"], "C").pow(2)
+            ).pipe(np.sqrt)
             cos_colat = rho_rtn.divide(r_rtn)
 
             r = sc_vector.distance2sun * sc_vector.units.distance2sun * 1e-3  # [km]
@@ -330,12 +327,9 @@ unexpected.""")
             vt = data.loc[:, ("v", "y")].subtract(correction)
             data.loc[:, ("v", "y")] = vt
 
-            polarity = (
-                data.loc[:, "v"]
-                .multiply(data.loc[:, "b"], axis=1)
-                .drop("z", axis=1)
-                .sum(axis=1, skipna=False)
-                .pipe(np.sign)
+            vb = data.loc[:, "v"].multiply(data.loc[:, "b"], axis=1)
+            polarity = self._component_reduce(self._select(vb, ["x", "y"], "C")).pipe(
+                np.sign
             )
 
         window = kwargs.pop("window", "15min")

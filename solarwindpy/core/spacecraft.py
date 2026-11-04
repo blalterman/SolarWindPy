@@ -105,7 +105,7 @@ class Spacecraft(base.Base):
             Position vector with x, y, z components, built from the
             spacecraft's already-checked columns, so it skips the time checks.
         """
-        pos = self.data.xs("pos", axis=1, level="M").loc[:, ("x", "y", "z")]
+        pos = self._select(self.data.xs("pos", axis=1, level="M"), ["x", "y", "z"], "C")
         return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
@@ -124,7 +124,7 @@ class Spacecraft(base.Base):
             If spacecraft velocity data is not available.
         """
         try:
-            v = self.data.xs("v", axis=1, level="M").loc[:, ("x", "y", "z")]
+            v = self._select(self.data.xs("v", axis=1, level="M"), ["x", "y", "z"], "C")
             return vector.Vector(v, _time_checked=self.data.index)
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know it's velocity.")
@@ -133,7 +133,8 @@ class Spacecraft(base.Base):
     def carr(self):
         r"""Carrington latitude and longitude."""
         try:
-            return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
+            carr = self.data.xs("carr", axis=1, level="M")
+            return self._select(carr, ["lat", "lon"], "C")
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know its Carrington location.")
 
@@ -170,7 +171,7 @@ class Spacecraft(base.Base):
         # distance2sun units should be [m], so this shouldn't matter. However, just as
         # beta is treated in this way, we similarly treat distance2sun.
         d2s = (
-            pos_SI.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
+            self._component_reduce(pos_SI.pow(2)).pipe(np.sqrt)
             / self.units.distance2sun
         )
         d2s.name = "distance2sun"
@@ -241,7 +242,7 @@ class Spacecraft(base.Base):
 
         p = data.xs("pos", axis=1, level="M")
 
-        p = p.loc[:, ["x", "y", "z"]]
+        p = self._select(p, ["x", "y", "z"], "C")
         assert p.shape[1] == 3
 
         target = {"pos": p}
@@ -249,7 +250,7 @@ class Spacecraft(base.Base):
         try:
             v = data.xs("v", axis=1, level="M")
             assert isinstance(v, pd.DataFrame)
-            v = v.loc[:, ["x", "y", "z"]]
+            v = self._select(v, ["x", "y", "z"], "C")
             assert v.shape[1] == 3
             target["v"] = v
         except KeyError:
@@ -258,7 +259,7 @@ class Spacecraft(base.Base):
         try:
             c = data.xs("carr", axis=1, level="M")
             assert isinstance(c, pd.DataFrame)
-            c = c.loc[:, ["lat", "lon"]]
+            c = self._select(c, ["lat", "lon"], "C")
             assert c.shape[1] == 2
             target["carr"] = c
         except KeyError:
