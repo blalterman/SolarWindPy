@@ -523,6 +523,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   load_from_file passes on; Plasma.save(akey=) and Plasma.load_from_file(akey=) are auxkey=.
   The default file keys, and so saved files, are unchanged.
 
+- The additive constant of ExponentialPlusC and PowerLawPlusC is renamed from c to y0, in the
+  model signatures, p0, the TeX templates (+ y_0) and the popt and psigma keys.
+  ExponentialPlusC's rate was once named c, so code reading popt["c"] would silently have read
+  the constant; it now raises KeyError. Read popt["y0"] instead.
+
+- AlfvenicTurbulence and AlfvenicTurbulence.set_data take the Spacecraft for raffaella_version
+  as sc instead of sc_vector, as does Plasma.build_alfvenic_turbulence, which forwards it.
+  With raffaella_version=True, the only case that reads it, passing sc_vector= instead raises
+  the existing ValueError asking for the SC-Sun distance.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
