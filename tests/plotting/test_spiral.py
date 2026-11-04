@@ -977,12 +977,6 @@ def _unsplit(rows):
     )
 
 
-_DEGENERATE = pytest.mark.xfail(
-    strict=True, reason="matplotlib's Triangulation fails obscurely"
-)
-
-
-@_DEGENERATE
 @pytest.mark.parametrize(
     "rows, match",
     [
@@ -993,12 +987,12 @@ _DEGENERATE = pytest.mark.xfail(
         ),
         pytest.param(
             [(1.0, 0.5, 1.0), (1.0, 1.5, 2.0), (1.0, 3.0, 3.0)],
-            r"occupied cells' centres all share one x",
+            r"occupied cells' centers all share one x",
             id="one-x",
         ),
         pytest.param(
             [(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (5.0, 0.5, 3.0)],
-            r"occupied cells' centres all share one y",
+            r"occupied cells' centers all share one y",
             id="one-y",
         ),
     ],

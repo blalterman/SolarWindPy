@@ -1139,7 +1139,9 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         Raises
         ------
         ValueError
-            If ``cbar=True`` and the contour set has fewer than 2 levels.
+            If fewer than 3 cells hold finite values, or their centers all
+            share one x or one y, so no triangle can be drawn between them.
+            Or if ``cbar=True`` and the contour set has fewer than 2 levels.
 
         Examples
         --------
@@ -1157,11 +1159,6 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
-        if ax is None:
-            fig, ax = plt.subplots()
-
-        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
 
@@ -1170,6 +1167,24 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         x = self.mesh.mesh[tk_finite][:, [0, 1]].mean(axis=1)
         y = self.mesh.mesh[tk_finite][:, [2, 3]].mean(axis=1)
         C = C[tk_finite]
+
+        # Matplotlib's Triangulation fails here with a length or qhull error.
+        if C.size < 3:
+            raise ValueError(
+                f"Contours need at least 3 occupied cells to triangulate, got {C.size}."
+            )
+        for axis, centers in (("x", x), ("y", y)):
+            if np.ptp(centers) == 0:
+                raise ValueError(
+                    f"Contours cannot be triangulated: the occupied cells' "
+                    f"centers all share one {axis}, {centers[0]:g} in plot "
+                    f"coordinates."
+                )
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
         # Triangulate where the plot is drawn, each axis scaled to its span:
         # in data units one axis's range (hundreds of km/s against a decade
