@@ -825,6 +825,42 @@ def test_interpolate_data_skips_a_missing_month(fake_home, ramp_index):
     assert interpolated.loc[:, "ssn"].to_numpy() == exact(ramp_ssn(target))
 
 
+@pytest.mark.xfail(
+    strict=True, reason="B11: the abstract interpolate_data takes source_data"
+)
+def test_sidc_interpolate_data_extends_the_abstract_interface():
+    """The abstract ``interpolate_data`` declares the call SIDC answers.
+
+    Callers use ``indicator.interpolate_data(target_index, ...)``, so the
+    abstract method's parameters must be a leading prefix of SIDC's; SIDC may
+    add its own trailing options, such as ``key``.
+
+    ON FAILURE: the abstract interface and the SIDC override disagree on how
+    ``interpolate_data`` is called. The code is wrong.
+    """
+    abstract = list(inspect.signature(ActivityIndicator.interpolate_data).parameters)
+    concrete = list(inspect.signature(SIDC.interpolate_data).parameters)
+    assert abstract == ["self", "target_index"]
+    assert concrete[: len(abstract)] == abstract
+
+
+@pytest.mark.xfail(
+    strict=True, reason="B11: no shared engine ActivityIndicator._interpolate"
+)
+def test_sidc_interpolate_data_is_the_shared_engine_on_its_column(ramp_sidc):
+    """SIDC's ``interpolate_data`` is the base engine run on the column's non-NaN data.
+
+    ON FAILURE: SIDC no longer delegates to ``ActivityIndicator._interpolate``,
+    or no longer drops NaNs before it. The code is wrong.
+    """
+    target = at_days(50, 250, 450)
+    via_sidc = ramp_sidc.interpolate_data(target)
+    via_engine = ActivityIndicator._interpolate(
+        ramp_sidc, ramp_sidc.data.loc[:, "ssn"].dropna(), target
+    )
+    pd.testing.assert_frame_equal(via_sidc, via_engine)
+
+
 def test_run_normalization_also_normalizes_the_interpolated_series(ramp_sidc, extrema):
     """After ``interpolate_data``, ``run_normalization`` adds ``nssn`` to the interpolation.
 
