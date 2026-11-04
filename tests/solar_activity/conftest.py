@@ -27,10 +27,12 @@ def isolated_cache(tmp_path, monkeypatch):
 
     Returns the directory that plays the role of ``~/.cache``; SolarWindPy's
     cache is its ``solarwindpy`` subdirectory. astropy ignores an
-    ``XDG_CACHE_HOME`` that does not exist, so the directory is created.
+    ``XDG_CACHE_HOME`` that does not exist, so the directory is created, and
+    its ``solarwindpy`` subdirectory too, since astropy releases before 8 honour
+    the variable only when ``<XDG_CACHE_HOME>/<package>`` already exists.
     """
     root = tmp_path / "xdg-cache"
-    root.mkdir()
+    (root / "solarwindpy").mkdir(parents=True)
     monkeypatch.setenv("XDG_CACHE_HOME", str(root))
     return root
 
