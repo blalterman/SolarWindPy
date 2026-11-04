@@ -862,12 +862,11 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         z=None,
         logx=None,
         logy=None,
-        initial_bins=5,
-        clip=None,
-        mask=None,
-        *,
         axnorm=None,
+        clip=None,
+        initial_bins=5,
         min_per_bin=250,
+        mask=None,
     ):
         r"""Store the data and labels, then build the adaptive mesh.
 
@@ -880,8 +879,9 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         logx, logy : bool or None
             If True, use ``log10(abs())`` of that coordinate. None means
             False.
-        initial_bins : int or tuple
-            Initial bins per axis; see ``AdaptiveMesh.initial_edges``.
+        axnorm : {"t", "d", None}, optional
+            Normalization of the aggregated values: ``"t"`` divides by the
+            maximum, ``"d"`` gives a density over the cells' areas.
         clip : bool, str, Mapping or None
             If True, clip x and y to their 0.01st and 99.99th percentiles
             (``Base.clip_data``) when placing points in the mesh; the
@@ -890,14 +890,13 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             ``{"y": "u"}`` sets each axis on its own. Clipping limits x and
             y only; z is aggregated unclipped. None means False. Stored as
             ``clip``, a ``ClipAxes``.
+        initial_bins : int or tuple
+            Initial bins per axis; see ``AdaptiveMesh.initial_edges``.
+        min_per_bin : int
+            A mesh cell holding more points than this is split into four.
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y. A point
             is placed in the mesh where it is True and x, y and z are not NaN.
-        axnorm : {"t", "d", None}, optional
-            Normalization of the aggregated values: ``"t"`` divides by the
-            maximum, ``"d"`` gives a density over the cells' areas.
-        min_per_bin : int
-            A mesh cell holding more points than this is split into four.
 
         Raises
         ------

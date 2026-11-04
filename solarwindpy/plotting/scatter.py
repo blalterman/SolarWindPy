@@ -15,7 +15,7 @@ class Scatter(base.ColorPlot):
 
     _clipped_axes = ("x", "y", "z")
 
-    def __init__(self, x, y, z=None, clip=None, mask=None):
+    def __init__(self, x, y, z=None, logx=None, logy=None, clip=None, mask=None):
         r"""Initialize scatter plot data.
 
         Parameters
@@ -24,6 +24,10 @@ class Scatter(base.ColorPlot):
             Data defining (x, y) coordinates.
         z: pd.Series, optional
             If not None, used to specify the color for each point.
+        logx, logy: bool or None
+            If True, draw that axis on a log scale. The data stay linear:
+            ``clip`` and ``alim`` read the values as given. None means False;
+            ``set_log`` can change them later.
         clip: bool, str, Mapping or None
             If True, ``make_plot`` clips x, y and z to their 0.01st and 99.99th
             percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
@@ -38,7 +42,7 @@ class Scatter(base.ColorPlot):
         super(Scatter, self).__init__()
         self._set_data(x, y, z, clip, mask=mask)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
-        self._log = base.LogAxes(x=False, y=False)
+        self.set_log(x=bool(logx), y=bool(logy))
         self.set_path(None)
 
     def _format_axis(self, ax, collection, data):

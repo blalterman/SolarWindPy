@@ -58,12 +58,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     z : pd.Series, optional
         If not None, the value to aggregate in each bin. If None, each bin
         counts its points.
-    axnorm : str, optional
-        Normalization of the aggregated values; see ``set_axnorm`` for the keys.
     logx, logy : bool or None
         If True, bin ``log10(abs(x))`` or ``log10(abs(y))``. None means
         False, or, with a ``BinnedData`` as ``nbins``, its setting for that
         axis's column.
+    axnorm : str, optional
+        Normalization of the aggregated values; see ``FixedGrid.normalize``
+        for the keys.
     clip : bool, str, Mapping or None
         If True, clip x and y to their 0.01st and 99.99th percentiles
         (``Base.clip_data``) when assigning points to bins; the bin edges
@@ -111,9 +112,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         x,
         y,
         z=None,
-        axnorm=None,
         logx=None,
         logy=None,
+        axnorm=None,
         clip=None,
         nbins=101,
         bin_precision=None,

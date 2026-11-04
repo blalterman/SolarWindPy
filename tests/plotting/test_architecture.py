@@ -252,12 +252,6 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
 # Constructor order: variables, then log axes, then axnorm (F125)
 # ---------------------------------------------------------------------------
 
-_ORDER = pytest.mark.xfail(
-    strict=True,
-    reason="constructors do not yet share the order variables, log, axnorm; "
-    "remove this marker when refactor(plotting)! reorders them",
-)
-
 
 @pytest.mark.parametrize(
     "cls, expected",
@@ -280,7 +274,6 @@ _ORDER = pytest.mark.xfail(
                 "bin_precision",
                 "mask",
             ],
-            marks=_ORDER,
         ),
         pytest.param(
             SpiralPlot2D,
@@ -296,11 +289,8 @@ _ORDER = pytest.mark.xfail(
                 "min_per_bin",
                 "mask",
             ],
-            marks=_ORDER,
         ),
-        pytest.param(
-            Scatter, ["x", "y", "z", "logx", "logy", "clip", "mask"], marks=_ORDER
-        ),
+        pytest.param(Scatter, ["x", "y", "z", "logx", "logy", "clip", "mask"]),
     ],
     ids=lambda v: v.__name__ if isinstance(v, type) else "",
 )
@@ -317,7 +307,6 @@ def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
     assert params == expected
 
 
-@_ORDER
 def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():
     """``Scatter(logx=True, logy=True)`` draws on log axes; ``data`` stays linear.
 
