@@ -1081,146 +1081,28 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         return ax, collection, cbar
 
-    def _interpolate_to_grid(self, x, y, z, resolution=100, method="cubic"):
-        r"""Interpolate scattered data to a regular grid.
-
-        Parameters
-        ----------
-        x, y : np.ndarray
-            Coordinates of data points.
-        z : np.ndarray
-            Values at data points.
-        resolution : int
-            Number of grid points along each axis.
-        method : {"linear", "cubic", "nearest"}
-            Interpolation method passed to :func:`scipy.interpolate.griddata`.
-
-        Returns
-        -------
-        XX, YY : np.ndarray
-            2D meshgrid arrays.
-        ZZ : np.ndarray
-            Interpolated values on the grid.
-        """
-        from scipy.interpolate import griddata
-
-        xi = np.linspace(x.min(), x.max(), resolution)
-        yi = np.linspace(y.min(), y.max(), resolution)
-        XX, YY = np.meshgrid(xi, yi)
-        ZZ = griddata((x, y), z, (XX, YY), method=method)
-        return XX, YY, ZZ
-
-    def _interpolate_with_rbf(
-        self,
-        x,
-        y,
-        z,
-        resolution=100,
-        neighbors=50,
-        smoothing=1.0,
-        kernel="thin_plate_spline",
-    ):
-        r"""Interpolate scattered data using sparse RBF.
-
-        Uses :class:`scipy.interpolate.RBFInterpolator` with the ``neighbors``
-        parameter for efficient O(N·k) computation instead of O(N²).
-
-        Parameters
-        ----------
-        x, y : np.ndarray
-            Coordinates of data points.
-        z : np.ndarray
-            Values at data points.
-        resolution : int
-            Number of grid points along each axis.
-        neighbors : int
-            Number of nearest neighbors to use for each interpolation point.
-            Higher values produce smoother results but increase computation time.
-        smoothing : float
-            Smoothing parameter. Higher values produce smoother surfaces.
-        kernel : str
-            RBF kernel type. Options include "thin_plate_spline", "cubic",
-            "quintic", "multiquadric", "inverse_multiquadric", "gaussian".
-
-        Returns
-        -------
-        XX, YY : np.ndarray
-            2D meshgrid arrays.
-        ZZ : np.ndarray
-            Interpolated values on the grid.
-        """
-        from scipy.interpolate import RBFInterpolator
-
-        points = np.column_stack([x, y])
-        rbf = RBFInterpolator(
-            points, z, neighbors=neighbors, smoothing=smoothing, kernel=kernel
-        )
-
-        xi = np.linspace(x.min(), x.max(), resolution)
-        yi = np.linspace(y.min(), y.max(), resolution)
-        XX, YY = np.meshgrid(xi, yi)
-        grid_pts = np.column_stack([XX.ravel(), YY.ravel()])
-        ZZ = rbf(grid_pts).reshape(XX.shape)
-
-        return XX, YY, ZZ
-
     def plot_contours(
         self,
         ax=None,
-        method="rbf",
-        # RBF method params (default method)
-        rbf_neighbors=50,
-        rbf_smoothing=1.0,
-        rbf_kernel="thin_plate_spline",
-        # Grid method params
-        grid_resolution=100,
-        gaussian_filter_std=1.5,
-        interpolation="cubic",
-        nan_aware_filter=True,
-        # Common params
         cbar=True,
         cbar_kwargs=None,
         fcn=None,
         use_contourf=False,
+        levels=None,
         **kwargs,
     ):
-        r"""Make a contour plot from adaptive mesh data with optional smoothing.
+        r"""Contour the occupied cells' values, triangulated between their centers.
 
-        Supports three interpolation methods for generating contours from the
-        irregular adaptive mesh:
-
-        - ``"rbf"``: Sparse RBF interpolation (default, fastest with built-in smoothing)
-        - ``"grid"``: Grid interpolation + Gaussian smoothing (matches Hist2D API)
-        - ``"tricontour"``: Direct triangulated contours (no smoothing, for debugging)
+        The adaptive mesh is the smoothing: its cells are small where the
+        data are dense and large where they are sparse. So the contours are
+        drawn without further smoothing, by ``ax.tricontour`` (or
+        ``ax.tricontourf``) over a Delaunay triangulation of the occupied
+        cells' centers, interpolating linearly within each triangle.
 
         Parameters
         ----------
         ax : mpl.axes.Axes, None
             If None, create an Axes instance from ``plt.subplots``.
-        method : {"rbf", "grid", "tricontour"}
-            Interpolation method. Default is ``"rbf"`` (fastest with smoothing).
-        rbf_neighbors : int
-            ``"rbf"`` only. Number of nearest neighbors for sparse RBF.
-            Higher = smoother but slower. Default is 50.
-        rbf_smoothing : float
-            ``"rbf"`` only. RBF smoothing parameter. Higher values produce
-            smoother surfaces. Default is 1.0.
-        rbf_kernel : str
-            ``"rbf"`` only. RBF kernel type. Options: "thin_plate_spline"
-            (default), "cubic", "quintic", "multiquadric",
-            "inverse_multiquadric", "gaussian".
-        grid_resolution : int
-            ``"rbf"`` and ``"grid"``. Number of points along each axis of the
-            regular grid interpolated to. Default is 100.
-        gaussian_filter_std : float
-            ``"grid"`` only. Standard deviation for Gaussian smoothing.
-            Default is 1.5. Set to 0 to disable smoothing.
-        interpolation : {"linear", "cubic", "nearest"}
-            ``"grid"`` only. Interpolation method for griddata. Default is
-            "cubic".
-        nan_aware_filter : bool
-            ``"grid"`` only. If True, use NaN-aware Gaussian filtering.
-            Default is True.
         cbar : bool
             If True, create a colorbar. Default is True.
         cbar_kwargs : dict, None
@@ -1229,17 +1111,21 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         use_contourf : bool
             If True, use filled contours. Default is False.
+        levels : array-like, int, None
+            Contour levels. If None, matplotlib's choice.
         **kwargs
-            Additional arguments passed to the contour function.
-            Common options: ``levels``, ``cmap``, ``norm``, ``linestyles``.
-            ``norm`` defaults to the norm ``make_plot`` uses: a ``LogNorm``
-            for a density (``axnorm="d"``).
+            Passed to :meth:`matplotlib.axes.Axes.tricontour` or
+            :meth:`matplotlib.axes.Axes.tricontourf`. ``cmap``, ``norm`` and
+            ``linestyles`` are read here: ``norm`` defaults to the norm
+            ``make_plot`` uses, a ``LogNorm`` for a density
+            (``axnorm="d"``), and ``linestyles`` to the eight of
+            ``ColorPlot._contour_linestyles``.
 
         Returns
         -------
         ax : mpl.axes.Axes
             The axes containing the plot.
-        qset : QuadContourSet or TriContourSet
+        qset : TriContourSet
             The contour set object.
         cbar : Colorbar or None
             The colorbar if ``cbar=True``, else None.
@@ -1247,8 +1133,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         Raises
         ------
         ValueError
-            If ``method`` is not one of the three above, or if ``cbar=True``
-            and the contour set has fewer than 2 levels.
+            If ``cbar=True`` and the contour set has fewer than 2 levels.
 
         Examples
         --------
@@ -1260,31 +1145,8 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         >>> y = pd.Series(rng.uniform(1, 100, 500))
         >>> z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
         >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
-
-        >>> # Default: sparse RBF (fastest)
-        >>> ax, qset, cbar = splot.plot_contours()
-
-        >>> # Grid interpolation with Gaussian smoothing
-        >>> ax, qset, cbar = splot.plot_contours(
-        ...     method='grid',
-        ...     grid_resolution=100,
-        ...     gaussian_filter_std=2.0
-        ... )
-
-        >>> # Debug: see raw triangulation
-        >>> ax, qset, cbar = splot.plot_contours(method='tricontour')
+        >>> ax, qset, cbar = splot.plot_contours(levels=[-0.5, 0.0, 0.5])
         """
-        from .tools import nan_gaussian_filter
-
-        # Validate method
-        valid_methods = ("rbf", "grid", "tricontour")
-        if method not in valid_methods:
-            raise ValueError(
-                f"Invalid method '{method}'. Must be one of {valid_methods}."
-            )
-
-        # Pop contour-specific kwargs
-        levels = kwargs.pop("levels", None)
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
@@ -1311,61 +1173,12 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         y = y[tk_finite]
         C = C[tk_finite]
 
-        # Select contour function based on method
-        if method == "tricontour":
-            # Direct triangulated contour (no smoothing)
-            contour_fcn = ax.tricontourf if use_contourf else ax.tricontour
-            if levels is None:
-                args = [x, y, C]
-            else:
-                args = [x, y, C, levels]
-            qset = contour_fcn(
-                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
-            )
-
+        contour_fcn = ax.tricontourf if use_contourf else ax.tricontour
+        if levels is None:
+            args = [x, y, C]
         else:
-            # Interpolate to regular grid (rbf or grid method)
-            if method == "rbf":
-                XX, YY, ZZ = self._interpolate_with_rbf(
-                    x,
-                    y,
-                    C,
-                    resolution=grid_resolution,
-                    neighbors=rbf_neighbors,
-                    smoothing=rbf_smoothing,
-                    kernel=rbf_kernel,
-                )
-            else:  # method == "grid"
-                XX, YY, ZZ = self._interpolate_to_grid(
-                    x,
-                    y,
-                    C,
-                    resolution=grid_resolution,
-                    method=interpolation,
-                )
-                # Apply Gaussian smoothing if requested
-                if gaussian_filter_std > 0:
-                    if nan_aware_filter:
-                        ZZ = nan_gaussian_filter(ZZ, sigma=gaussian_filter_std)
-                    else:
-                        from scipy.ndimage import gaussian_filter
-
-                        ZZ = gaussian_filter(
-                            np.nan_to_num(ZZ, nan=0), sigma=gaussian_filter_std
-                        )
-
-            # Mask invalid values
-            ZZ = np.ma.masked_invalid(ZZ)
-
-            # Standard contour on regular grid
-            contour_fcn = ax.contourf if use_contourf else ax.contour
-            if levels is None:
-                args = [XX, YY, ZZ]
-            else:
-                args = [XX, YY, ZZ, levels]
-            qset = contour_fcn(
-                *args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs
-            )
+            args = [x, y, C, levels]
+        qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
 
         # Add colorbar
         if cbar:

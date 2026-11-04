@@ -28,8 +28,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
-from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
-from scipy.ndimage import gaussian_filter  # noqa: E402
 
 from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
@@ -201,13 +199,6 @@ def _occupied_centers(splot, fcn=np.mean, rows=ROWS):
         y = 10.0**y
     ok = np.isfinite(values)
     return x[ok], y[ok], values[ok]
-
-
-def _regular_grid(x, y, resolution):
-    return np.meshgrid(
-        np.linspace(x.min(), x.max(), resolution),
-        np.linspace(y.min(), y.max(), resolution),
-    )
 
 
 def _assert_same_segments(qset, ref):
@@ -836,18 +827,11 @@ class TestPlotContours:
     """``plot_contours`` contours the occupied cells' values at their centres."""
 
     LEVELS = [2.0, 4.0, 6.0]
-    RES = 20
 
     def _contour(self, splot, **kwargs):
         _, ax = plt.subplots()
         kwargs.setdefault("cbar", False)
-        kwargs.setdefault("grid_resolution", self.RES)
         return splot.plot_contours(ax=ax, levels=self.LEVELS, **kwargs)
-
-    def _reference(self, XX, YY, ZZ, filled=False):
-        _, ax = plt.subplots()
-        fcn = ax.contourf if filled else ax.contour
-        return fcn(XX, YY, np.ma.masked_invalid(ZZ), self.LEVELS)
 
     def test_centres_include_a_hand_worked_cell(self):
         """Cell [0,2)x[0,1) enters the contour input at (1, 0.5) with z = 1.
@@ -860,115 +844,18 @@ class TestPlotContours:
 
     @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
     def test_tricontour_triangulates_the_occupied_centres(self, log):
-        """``method="tricontour"`` contours exactly the occupied cells' centres.
+        """The contours triangulate exactly the occupied cells' centres.
 
         Empty cells are excluded; on log axes centres are 10**(mid-edge).
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1, log=log)
-        _, qset, _ = self._contour(splot, method="tricontour")
+        _, qset, _ = self._contour(splot)
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
         _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
         assert list(qset.levels) == self.LEVELS
-
-    def test_grid_without_smoothing_is_griddata_on_the_centres(self):
-        """``method="grid"`` with no smoothing contours ``griddata`` of the centres.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, qset, _ = self._contour(
-            splot, method="grid", interpolation="linear", gaussian_filter_std=0
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="linear")
-        _assert_same_segments(qset, self._reference(XX, YY, ZZ))
-
-    def test_grid_smoothing_without_nan_awareness_zero_fills(self):
-        """``nan_aware_filter=False`` smooths ``griddata`` with NaNs set to 0.
-
-        The reference with another sigma differs, so sigma is shown to reach
-        the filter.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, qset, _ = self._contour(
-            splot,
-            method="grid",
-            interpolation="linear",
-            gaussian_filter_std=1.5,
-            nan_aware_filter=False,
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = np.nan_to_num(griddata((x, y), z, (XX, YY), method="linear"), nan=0)
-        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
-        assert _segments_differ(qset, self._reference(XX, YY, gaussian_filter(ZZ, 3)))
-
-    def test_nan_aware_smoothing_of_a_complete_grid_is_a_gaussian_filter(self):
-        """With no NaNs, the NaN-aware filter is a plain Gaussian filter.
-
-        Nearest-neighbour interpolation leaves no NaN, so normalised
-        convolution reduces to ``scipy.ndimage.gaussian_filter``.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, qset, _ = self._contour(
-            splot,
-            method="grid",
-            interpolation="nearest",
-            gaussian_filter_std=1.5,
-            nan_aware_filter=True,
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="nearest")
-        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
-
-    def test_rbf_uses_the_given_interpolator_parameters(self):
-        """``method="rbf"`` contours an RBFInterpolator built with the caller's settings.
-
-        The reference with another smoothing differs, so the parameters are
-        shown to reach the interpolator.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        params = {"neighbors": 5, "smoothing": 0.5, "kernel": "cubic"}
-        _, qset, _ = self._contour(
-            splot,
-            method="rbf",
-            rbf_neighbors=params["neighbors"],
-            rbf_smoothing=params["smoothing"],
-            rbf_kernel=params["kernel"],
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        pts = np.column_stack([XX.ravel(), YY.ravel()])
-
-        def ref(**kw):
-            rbf = RBFInterpolator(np.column_stack([x, y]), z, **kw)
-            return self._reference(XX, YY, rbf(pts).reshape(XX.shape))
-
-        _assert_same_segments(qset, ref(**params))
-        assert _segments_differ(qset, ref(**{**params, "smoothing": 5.0}))
-
-    def test_default_method_is_rbf(self):
-        """With no ``method``, the contours are the default RBF interpolation.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, default, _ = self._contour(splot)
-        _, rbf, _ = self._contour(splot, method="rbf")
-        _, grid, _ = self._contour(splot, method="grid")
-        _assert_same_segments(default, rbf)
-        assert _segments_differ(default, grid)
 
     def test_use_contourf_fills_the_same_field(self):
         """``use_contourf=True`` draws filled contours of the same field.
@@ -976,18 +863,11 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, qset, _ = self._contour(
-            splot,
-            method="grid",
-            interpolation="linear",
-            gaussian_filter_std=0,
-            use_contourf=True,
-        )
+        _, qset, _ = self._contour(splot, use_contourf=True)
         assert qset.filled
         x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="linear")
-        _assert_same_segments(qset, self._reference(XX, YY, ZZ, filled=True))
+        _, ax = plt.subplots()
+        _assert_same_segments(qset, ax.tricontourf(x, y, z, self.LEVELS))
 
     def test_colorbar_and_contour_set_are_returned(self):
         """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` None.
@@ -1000,11 +880,10 @@ class TestPlotContours:
         _, qset, cbar = self._contour(splot, cbar=False)
         assert cbar is None
 
-    @pytest.mark.parametrize("method", ["tricontour", "grid"])
     @pytest.mark.parametrize(
         "keyword", ["label_levels", "clabel_kwargs", "skip_max_clbl"]
     )
-    def test_removed_labelling_keywords_are_rejected(self, method, keyword):
+    def test_removed_labelling_keywords_are_rejected(self, keyword):
         """A removed labelling keyword fails loudly instead of being ignored.
 
         Unknown keywords are forwarded to matplotlib's contour call, whose
@@ -1014,10 +893,9 @@ class TestPlotContours:
         keyword again, or swallows unknown keywords silently.
         """
         with pytest.raises(AttributeError, match=keyword):
-            self._contour(_plot(1), method=method, **{keyword: True})
+            self._contour(_plot(1), **{keyword: True})
 
-    @pytest.mark.parametrize("method", ["tricontour", "grid"])
-    def test_filled_contours_draw_no_labels_and_no_deprecation(self, method):
+    def test_filled_contours_draw_no_labels_and_no_deprecation(self):
         """Filled contours draw no text and emit no ``MatplotlibDeprecationWarning``.
 
         Matplotlib deprecated ``clabel`` on filled contours in 3.11; the old
@@ -1028,14 +906,10 @@ class TestPlotContours:
         """
         with warnings.catch_warnings():
             warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
-            ax, qset, _ = self._contour(_plot(1), method=method, use_contourf=True)
+            ax, qset, _ = self._contour(_plot(1), use_contourf=True)
         assert qset.filled
         assert len(ax.texts) == 0
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Ruling o25: Spiral contours have no rbf or grid smoothing",
-    )
     @pytest.mark.parametrize(
         "keyword, value",
         [
@@ -1065,14 +939,6 @@ class TestPlotContours:
             _plot(1).plot_contours(
                 ax=ax, levels=self.LEVELS, cbar=False, **{keyword: value}
             )
-
-    def test_unknown_method_is_rejected(self):
-        """A method other than rbf, grid or tricontour raises ValueError.
-
-        ON FAILURE: the code is wrong.
-        """
-        with pytest.raises(ValueError, match="Invalid method"):
-            self._contour(_plot(1), method="spline")
 
 
 # ---------------------------------------------------------------------------
@@ -1352,110 +1218,33 @@ def test_data_are_not_clipped_by_default():
 # ---------------------------------------------------------------------------
 
 
-def _nan_aware_gaussian(ZZ, sigma):
-    """Normalised convolution: smooth data and weights, keep NaN cells NaN."""
-    finite = np.isfinite(ZZ)
-    num = gaussian_filter(np.where(finite, ZZ, 0.0), sigma)
-    den = gaussian_filter(finite.astype(float), sigma)
-    with np.errstate(invalid="ignore"):  # 0 / 0 far from data; NaN either way
-        out = num / den
-    out[~finite] = np.nan
-    return out
-
-
-def _default_reference(method, x, y, z):
-    """Contours drawn with every default ``plot_contours`` documents.
-
-    rbf: 50 neighbours, smoothing 1.0, thin-plate spline, 100 x 100 grid.
-    grid: cubic ``griddata`` on a 100 x 100 grid, NaN-aware Gaussian sigma 1.5.
-    tricontour: the centres as given. Line contours, matplotlib's levels.
-    """
-    _, ax = plt.subplots()
-    if method == "tricontour":
-        return ax.tricontour(x, y, z)
-    XX, YY = _regular_grid(x, y, 100)
-    if method == "rbf":
-        rbf = RBFInterpolator(
-            np.column_stack([x, y]),
-            z,
-            neighbors=50,
-            smoothing=1.0,
-            kernel="thin_plate_spline",
-        )
-        ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
-    else:
-        ZZ = _nan_aware_gaussian(griddata((x, y), z, (XX, YY), method="cubic"), 1.5)
-    return ax.contour(XX, YY, np.ma.masked_invalid(ZZ))
-
-
 class TestPlotContoursCalls:
     """Calls with no arguments, with every option, and with one level."""
 
-    @pytest.mark.parametrize("method", [None, "rbf", "grid", "tricontour"])
-    def test_call_without_arguments_uses_the_documented_defaults(self, method):
+    def test_call_without_arguments_uses_the_documented_defaults(self):
         """With no arguments ``plot_contours`` draws its documented default.
 
-        It makes its own axes, draws line contours of the mean per cell with
-        a colorbar, and matches ``_default_reference``; ``None`` calls it
-        with no arguments at all (the default method, rbf).
+        It makes its own axes and draws line contours of the mean per cell,
+        triangulated between the occupied centres at matplotlib's levels,
+        with a colorbar.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        kwargs = {} if method is None else {"method": method}
-        ax, qset, cbar = splot.plot_contours(**kwargs)
+        ax, qset, cbar = splot.plot_contours()
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
-        _assert_same_segments(qset, _default_reference(method or "rbf", x, y, z))
+        _, ref_ax = plt.subplots()
+        _assert_same_segments(qset, ref_ax.tricontour(x, y, z))
 
-    def test_default_rbf_uses_fifty_neighbours(self):
-        """With more than 50 occupied cells, the default RBF uses 50 neighbours.
-
-        An 8 x 8 lattice of samples, one per leaf at min_per_bin=1, gives 64
-        occupied cells. The reference with 51 neighbours differs from the one
-        with 50, so this input separates the documented default from its
-        neighbours; with ROWS' 6 cells both would use all 6.
-
-        ON FAILURE: the code is wrong.
-        """
-        rows = [
-            (i + 0.3, j + 0.6, (i + 0.3 - 4.0) ** 2 + (j + 0.6))
-            for i in range(8)
-            for j in range(8)
-        ]
-        x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
-        edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
-        splot = SpiralPlot2D(x, y, z, initial_bins=edges, min_per_bin=1)
-        _, qset, _ = splot.plot_contours(cbar=False, grid_resolution=20)
-
-        cx, cy, cz = _occupied_centers(splot, rows=rows)
-        assert len(cz) == 64
-        XX, YY = _regular_grid(cx, cy, 20)
-        pts = np.column_stack([XX.ravel(), YY.ravel()])
-
-        def ref(neighbors):
-            rbf = RBFInterpolator(
-                np.column_stack([cx, cy]),
-                cz,
-                neighbors=neighbors,
-                smoothing=1.0,
-                kernel="thin_plate_spline",
-            )
-            _, ax = plt.subplots()
-            return ax.contour(XX, YY, rbf(pts).reshape(XX.shape))
-
-        _assert_same_segments(qset, ref(50))
-        assert _segments_differ(ref(50), ref(51))
-
-    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
-    def test_every_option_reaches_the_drawing(self, method):
+    def test_every_option_reaches_the_drawing(self):
         """Each option changes the drawing as documented.
 
         ``fcn="max"`` contours the maxima (5 where p2 and p3 share a cell at
-        min_per_bin=2); the method's own options shape the field; ``levels``,
-        ``cmap``, ``norm`` and ``linestyles`` reach the contour set; the
-        colorbar is drawn with ``cbar_kwargs`` on the given axes.
+        min_per_bin=2); ``levels``, ``cmap``, ``norm`` and ``linestyles``
+        reach the contour set; the colorbar is drawn with ``cbar_kwargs`` on
+        the given axes.
 
         ON FAILURE: the code is wrong.
         """
@@ -1463,27 +1252,15 @@ class TestPlotContoursCalls:
         levels = [2.0, 4.0, 6.0]
         norm = matplotlib.colors.Normalize(0.0, 10.0)
         linestyles = ["--", ":", "-."]
-        options = {
-            "rbf": {"rbf_neighbors": 4, "rbf_smoothing": 0.5, "rbf_kernel": "cubic"},
-            "grid": {
-                "interpolation": "linear",
-                "gaussian_filter_std": 0.5,  # between 0 and 1: still smooths
-                "nan_aware_filter": False,
-            },
-            "tricontour": {},
-        }[method]
         _, ax = plt.subplots()
         got_ax, qset, cbar = splot.plot_contours(
             ax=ax,
-            method=method,
-            grid_resolution=15,
             fcn="max",
             levels=levels,
             cmap="magma",
             norm=norm,
             linestyles=linestyles,
             cbar_kwargs={"label": "chosen"},
-            **options,
         )
         assert got_ax is ax and qset.axes is ax
         assert list(qset.levels) == levels
@@ -1494,27 +1271,9 @@ class TestPlotContoursCalls:
         x, y, z = _occupied_centers(splot, fcn=max)
         assert 5.0 in z.tolist()
         _, ref_ax = plt.subplots()
-        if method == "tricontour":
-            ref = ref_ax.tricontour(x, y, z, levels)
-        else:
-            XX, YY = _regular_grid(x, y, 15)
-            if method == "rbf":
-                rbf = RBFInterpolator(
-                    np.column_stack([x, y]),
-                    z,
-                    neighbors=4,
-                    smoothing=0.5,
-                    kernel="cubic",
-                )
-                ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
-            else:
-                ZZ = griddata((x, y), z, (XX, YY), method="linear")
-                ZZ = gaussian_filter(np.nan_to_num(ZZ, nan=0.0), 0.5)
-            ref = ref_ax.contour(XX, YY, np.ma.masked_invalid(ZZ), levels)
-        _assert_same_segments(qset, ref)
+        _assert_same_segments(qset, ref_ax.tricontour(x, y, z, levels))
 
-    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
-    def test_one_level_with_a_colorbar_is_a_clear_error(self, method):
+    def test_one_level_with_a_colorbar_is_a_clear_error(self):
         """A single contour level with ``cbar=True`` raises a ValueError saying why.
 
         Without the colorbar the single level is drawn.
@@ -1523,8 +1282,8 @@ class TestPlotContoursCalls:
         """
         splot = _plot(1)
         with pytest.raises(ValueError, match="at least 2 contour levels"):
-            splot.plot_contours(method=method, levels=[3.0])
-        _, qset, cbar = splot.plot_contours(method=method, levels=[3.0], cbar=False)
+            splot.plot_contours(levels=[3.0])
+        _, qset, cbar = splot.plot_contours(levels=[3.0], cbar=False)
         assert cbar is None and list(qset.levels) == [3.0]
 
 
