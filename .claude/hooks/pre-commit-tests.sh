@@ -45,16 +45,17 @@ echo ""
 echo "🎯 Testing modules related to staged changes..."
 for file in $staged_files; do
     # Convert file path to module path for testing
-    if [[ $file == solarwindpy/* ]]; then
-        module_path=${file%.py}
+    if [[ $file == src/solarwindpy/* ]]; then
+        module_path=${file#src/}
+        module_path=${module_path%.py}
         module_path=${module_path//\//.}
-        test_path="tests/${file#solarwindpy/}"
+        test_path="tests/${file#src/solarwindpy/}"
         test_path="tests/${test_path%.py}"
         
         # Check if corresponding test file exists
         if [[ -f "${test_path}.py" ]] || [[ -d "$(dirname ${test_path})" ]]; then
             echo "   Testing: $module_path"
-            if ! "$ENV" pytest "tests/${file#solarwindpy/}" -v --tb=short 2>/dev/null; then
+            if ! "$ENV" pytest "tests/${file#src/solarwindpy/}" -v --tb=short 2>/dev/null; then
                 echo "⚠️  Module-specific tests may need attention: $module_path"
             fi
         fi

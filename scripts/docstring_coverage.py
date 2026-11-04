@@ -312,8 +312,8 @@ def main():
     parser.add_argument(
         "--path",
         type=str,
-        default="solarwindpy",
-        help="Path to solarwindpy package (default: solarwindpy)",
+        default="src/solarwindpy",
+        help="Path to solarwindpy package (default: src/solarwindpy)",
     )
 
     args = parser.parse_args()

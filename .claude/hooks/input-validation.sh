@@ -29,7 +29,7 @@ validate_python_file() {
     fi
     
     # Check if file is in allowed directories
-    if [[ ! "$filepath" =~ ^(solarwindpy|tests|\.claude)/ ]]; then
+    if [[ ! "$filepath" =~ ^(src/solarwindpy|tests|\.claude)/ ]]; then
         echo "ERROR: File outside allowed directories: $filepath" >&2
         return 1
     fi

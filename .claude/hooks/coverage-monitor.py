@@ -73,21 +73,27 @@ def analyze_coverage_by_module():
 
     # Define module-specific requirements
     module_requirements = {
-        "solarwindpy/core": {
+        "src/solarwindpy/core": {
             "required": 95,
             "description": "Core physics calculations",
         },
-        "solarwindpy/instabilities": {
+        "src/solarwindpy/instabilities": {
             "required": 95,
             "description": "Instability calculations",
         },
-        "solarwindpy/fitfunctions": {
+        "src/solarwindpy/fitfunctions": {
             "required": 90,
             "description": "Curve fitting algorithms",
         },
-        "solarwindpy/plotting": {"required": 85, "description": "Visualization tools"},
-        "solarwindpy/tools": {"required": 90, "description": "Utility functions"},
-        "solarwindpy/solar_activity": {"required": 85, "description": "Solar indices"},
+        "src/solarwindpy/plotting": {
+            "required": 85,
+            "description": "Visualization tools",
+        },
+        "src/solarwindpy/tools": {"required": 90, "description": "Utility functions"},
+        "src/solarwindpy/solar_activity": {
+            "required": 85,
+            "description": "Solar indices",
+        },
     }
     files = coverage_data.get("files", {})
     for module_path, requirements in module_requirements.items():
@@ -176,7 +182,7 @@ def check_critical_coverage():
                     "--include=*.py",
                     "--max-count=100",
                     f"def.*{pattern}",
-                    "solarwindpy/",
+                    "src/solarwindpy/",
                 ],
                 capture_output=True,
                 text=True,
