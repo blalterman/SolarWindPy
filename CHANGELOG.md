@@ -384,6 +384,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   loading the Wind bimax file drops from 6.8 to 4.8 GB and the load from 2.43 to 2.03 s;
   loaded values are bitwise identical.
 
+- `Spacecraft` defines its supported names (PSP, WIND) and frames (GSE, HCI) in one table,
+  and an unsupported name or frame raises `NotImplementedError` naming the supported values.
+
 ### Added
 
 - `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
