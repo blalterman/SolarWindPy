@@ -279,9 +279,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ActivityIndicator` subclasses call `self._interpolate(source_data, target_index)`, the
   shared engine; the abstract `interpolate_data` takes `(target_index, ...)`, matching how
   `SIDC` is called.
-- Dependencies: `astropy>=7.2` (earlier versions fail to import with numpy 2.4 and later, which removed `numpy.in1d`) and PyTables (`tables`),
-  which `Plasma.save` and `Plasma.load_from_file` need, are required. `h5py` and `pyyaml`
-  are no longer runtime dependencies; `pyyaml` moves to the `test` and `dev` extras.
+- Dependencies: `astropy>=7.2` (earlier versions fail to import with numpy 2.4 and later,
+  which removed `numpy.in1d`) and PyTables (`tables`), which `Plasma.save` and
+  `Plasma.load_from_file` need, are required. `h5py` and `pyyaml` are no longer runtime
+  dependencies; `pyyaml` moves to the `test` and `dev` extras.
 
 - Quantity names converge on one canonical short name per quantity, the same at every
   layer (method, Series name, column label, registry key); aliases are removed with no
@@ -491,8 +492,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cached.
 
 - `solarwindpy.solar_activity.cache.cache_contents()`, a table of each cached URL with its
-  local path and age. Files live in astropy's download cache for package `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path); remove entries
-  with `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
+  local path and age. Files live in astropy's download cache for package `solarwindpy`
+  (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with astropy 7.2;
+  `cache_contents()` shows the path); remove entries with
+  `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
 
 ### Fixed
 
