@@ -595,6 +595,16 @@ These change computed values; rerun any analysis that used them.
   `pandas.DataFrame`.
 - Drop rows with missing timestamps (`NaT`) before building a `Plasma`, `Spacecraft`,
   `Ion`, `Vector`, `Tensor` or `BField`, e.g. `data = data.loc[data.index.notna()]`.
+- Plotting: rename `clip_data=` to `clip=`; pass `True`/`False` or one of "l", "lower",
+  "u", "upper", "both" (a prefix such as "lo" raises).
+- Plotting: edit the source data before building a plot, not `h.data`. `h.data` is
+  rebuilt on each access, so edits to it are silently lost.
+- Plotting: build a new plot instead of calling `set_data`, or `set_log` on a binned
+  axis. A `Base` subclass implements `_set_data`.
+- Plotting: replace subsets built with `x.loc[idx]` or `x.drop(idx)` with `mask=`, and
+  share bins across many histograms by passing one `BinnedData` as `nbins`.
+- Plotting: `Hist2D.agg()` returns every bin; call `.dropna()` for the occupied bins
+  only. Its index levels are `IntervalIndex`.
 
 ## [0.3.0] - 2025-12-24
 
