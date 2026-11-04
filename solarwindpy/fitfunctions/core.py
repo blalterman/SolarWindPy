@@ -672,6 +672,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             tex_info,
             fit_result,
             fitfunction_name=self.__class__.__name__,
+            residuals_func=self.residuals,
         )
         self._plotter = plotter
         return plotter

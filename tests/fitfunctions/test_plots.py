@@ -3,7 +3,10 @@
 The fixture is a ``Line`` fitted to ``y = 2x + 1`` at x = 0..5 with unit
 weights and ``1 <= x <= 3``, so the used observations are x = 1, 2, 3 and the
 raw ones extend past them on both sides. The plotter is given a hand-chosen
-model ``Y_FIT`` and residual vector ``FUN`` so every residual is known.
+model ``Y_FIT``, a stand-in for the fit function's ``residuals`` that returns
+the residuals of that model, and a residual vector ``FUN``, so every residual
+is known. The relation of the plotter's residuals to a real fit's is tested on
+``_noisy_fit``.
 """
 
 import io
@@ -25,12 +28,13 @@ from solarwindpy.fitfunctions.tex_info import TeXinfo
 from tests.tolerances import exact
 
 #: Model at raw x = 0..5. At the used x = 1, 2, 3 the observations are
-#: y = 3, 5, 7, so the simple residuals (model - observation) are 1, -1, 7
-#: and the percent residuals 100 * (1/4, -1/4, 7/14) = 25, -25, 50.
+#: y = 3, 5, 7, so the simple residuals (observation - model) are -1, 1, -7
+#: and the percent residuals 100 * (-1/4, 1/4, -7/14) = -25, 25, -50.
 Y_FIT = np.array([1.0, 4.0, 4.0, 14.0, 9.0, 11.0])
-SIMPLE = np.array([1.0, -1.0, 7.0])
-SIMPLE_PCT = np.array([25.0, -25.0, 50.0])
-#: Chosen robust residual vector, in units of the (unit) uncertainty.
+SIMPLE = np.array([-1.0, 1.0, -7.0])
+SIMPLE_PCT = np.array([-25.0, 25.0, -50.0])
+#: Chosen fit-result residual vector ``fun`` (model - observation), in units
+#: of the (unit) uncertainty. The robust residuals are its negation.
 FUN = np.array([0.25, -0.5, 1.0])
 
 #: The styles each plot draws by default (batch A: plot-styling defaults are
@@ -83,11 +87,36 @@ def make_texinfo(m=2.0):
     )
 
 
-def make_ffplot(y_fit=Y_FIT, fun=FUN, weights=True):
-    """FFPlot of the fixture fit with model ``y_fit`` and residuals ``fun``."""
+def residuals_returning(simple, pct):
+    """Stand-in for ``FitFunction.residuals`` returning ``simple`` or ``pct``."""
+
+    def residuals(pct=False, _simple=simple, _pct=pct):
+        return _pct if pct else _simple
+
+    return residuals
+
+
+def make_ffplot(
+    y_fit=Y_FIT,
+    fun=FUN,
+    weights=True,
+    residuals_func=residuals_returning(SIMPLE, SIMPLE_PCT),
+):
+    """FFPlot of the fixture fit with model ``y_fit`` and residuals ``fun``.
+
+    ``residuals_func`` stands in for the fit function's ``residuals``; by
+    default it returns the residuals of ``Y_FIT``.
+    """
     obs = _fit(weights=weights).observations
     tex = make_texinfo()
-    plot = FFPlot(obs, y_fit, tex, OptimizeResult(fun=fun), fitfunction_name="dummy")
+    plot = FFPlot(
+        obs,
+        y_fit,
+        tex,
+        OptimizeResult(fun=fun),
+        fitfunction_name="dummy",
+        residuals_func=residuals_func,
+    )
     return plot, tex, obs
 
 
@@ -95,7 +124,13 @@ def make_ffplot_of_size(n):
     """FFPlot of an exact line on x = 0..n-1 using its lower half."""
     fit = _fit(n=n, xmin=None, xmax=(n - 1) // 2)
     obs = fit.observations
-    return FFPlot(obs, obs.raw.y, make_texinfo(), OptimizeResult(fun=None))
+    return FFPlot(
+        obs,
+        obs.raw.y,
+        make_texinfo(),
+        OptimizeResult(fun=None),
+        residuals_func=fit.residuals,
+    )
 
 
 def annotations(ax, tex):
@@ -570,9 +605,6 @@ def _noisy_fit():
     return fit
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B2: FFPlot.residuals is model minus observation"
-)
 @pytest.mark.parametrize("pct", [False, True])
 def test_plotter_residuals_are_the_fit_functions_residuals(pct):
     """``plotter.residuals`` is ``FitFunction.residuals``: one home for residuals.
@@ -585,9 +617,6 @@ def test_plotter_residuals_are_the_fit_functions_residuals(pct):
     )
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B2: FFPlot.residuals is model minus observation"
-)
 def test_plotter_residuals_are_observed_minus_fitted():
     """Simple residuals are the used observations minus the model at them.
 
@@ -611,9 +640,6 @@ def test_percent_residuals_are_the_simple_ones_relative_to_the_model():
         assert residuals(pct=True) == exact(expected, scale=100.0)
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B2: robust residuals are fit_result.fun, model minus observed"
-)
 def test_robust_residuals_share_the_sign_of_the_simple_ones():
     """Robust residuals are ``-fit_result.fun``, observed minus fitted over sigma.
 
@@ -635,8 +661,8 @@ def test_robust_residuals_share_the_sign_of_the_simple_ones():
 
 
 @pytest.mark.parametrize("pct, expected", [(False, SIMPLE), (True, SIMPLE_PCT)])
-def test_simple_residuals_are_model_minus_observation(pct, expected):
-    """``residuals`` and ``plot_residuals`` give the hand-computed values.
+def test_simple_residuals_are_the_fit_functions(pct, expected):
+    """``residuals`` and ``plot_residuals`` give the fit function's residuals.
 
     ON FAILURE: the code is wrong.
     """
@@ -648,41 +674,49 @@ def test_simple_residuals_are_model_minus_observation(pct, expected):
     assert line.get_ydata() == exact(expected)
 
 
-def test_percent_residuals_are_nan_where_the_model_is_zero():
-    """Model 0, 4, 14 at y = 3, 5, 7 gives percent residuals NaN, -25, 50.
+def test_percent_residuals_keep_the_fit_functions_nan():
+    """A NaN percent residual (model zero) reaches the plot unchanged.
+
+    ``FitFunction.residuals`` makes it; ``test_core`` tests that.
 
     ON FAILURE: the code is wrong.
     """
-    plot, *_ = make_ffplot(y_fit=np.array([1.0, 0.0, 4.0, 14.0, 9.0, 11.0]))
-    assert plot.residuals(pct=True) == exact([np.nan, -25.0, 50.0], nan_ok=True)
+    pct = np.array([np.nan, 25.0, -50.0])
+    plot, *_ = make_ffplot(residuals_func=residuals_returning(SIMPLE, pct))
+    assert plot.residuals(pct=True) == exact(pct, nan_ok=True)
+    (line,) = plot.plot_residuals(pct=True).get_lines()
+    assert line.get_ydata() == exact(pct, nan_ok=True)
 
 
 @pytest.mark.parametrize("pct, robust", [(False, False), (True, False), (False, True)])
 def test_residuals_return_an_ndarray_on_every_path(pct, robust):
     """``residuals`` returns an ndarray on every path.
 
-    It does so even from a Series model and a list ``fun``, as its
+    It does so even from Series residuals and a list ``fun``, as its
     docstring promises.
 
     ON FAILURE: the code is wrong.
     """
-    plot, *_ = make_ffplot(y_fit=pd.Series(Y_FIT), fun=list(FUN))
+    plot, *_ = make_ffplot(
+        fun=list(FUN),
+        residuals_func=residuals_returning(pd.Series(SIMPLE), pd.Series(SIMPLE_PCT)),
+    )
     r = plot.residuals(pct=pct, robust=robust)
     assert type(r) is np.ndarray
-    expected = FUN if robust else (SIMPLE_PCT if pct else SIMPLE)
+    expected = -FUN if robust else (SIMPLE_PCT if pct else SIMPLE)
     assert r == exact(expected)
 
 
-def test_robust_residuals_are_the_fit_results_residual_vector():
-    """``robust=True`` gives ``fit_result.fun``, and ``kind="robust"`` draws it.
+def test_robust_residuals_are_the_negated_fit_result_residual_vector():
+    """``robust=True`` gives ``-fit_result.fun``, and ``kind="robust"`` draws it.
 
     ON FAILURE: the code is wrong.
     """
     plot, *_ = make_ffplot()
-    np.testing.assert_array_equal(plot.residuals(robust=True), FUN)
+    np.testing.assert_array_equal(plot.residuals(robust=True), -FUN)
     ax = plot.plot_residuals(kind="robust", pct=False)
     (line,) = ax.get_lines()
-    np.testing.assert_array_equal(line.get_ydata(), FUN)
+    np.testing.assert_array_equal(line.get_ydata(), -FUN)
 
 
 @pytest.mark.parametrize("kind", ["robust", "both", "ROBUST"])
@@ -723,7 +757,7 @@ def test_both_draws_simple_then_robust_residuals():
     ax = plot.plot_residuals(kind="both", pct=False)
     simple, robust = ax.get_lines()
     assert simple.get_ydata() == exact(SIMPLE)
-    np.testing.assert_array_equal(robust.get_ydata(), FUN)
+    np.testing.assert_array_equal(robust.get_ydata(), -FUN)
     assert simple.get_label() == r"$\mathrm{ \; Simple}$"
     assert robust.get_label() == r"$\mathrm{ \; Robust}$"
     assert robust.get_marker() == "X"
@@ -823,7 +857,7 @@ def test_residual_axes_carry_labels_scales_and_grid():
     assert tuple(rax.dataLim.intervalx) == (obs.raw.x[0], obs.raw.x[-1])
     assert rax.dataLim.intervaly[0] == SIMPLE.min()
 
-    plot.set_fit_result(OptimizeResult(fun=np.array([1.0, 2.0, 3.0])))
+    plot.set_fit_result(OptimizeResult(fun=np.array([-1.0, -2.0, -3.0])))
     rax = plot.plot_residuals(pct=False, kind="robust")
     assert rax.dataLim.intervaly[0] == 1.0  # the x-range extension adds no y = 0
 
