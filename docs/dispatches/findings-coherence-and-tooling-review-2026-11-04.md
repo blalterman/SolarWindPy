@@ -32,7 +32,7 @@ from the repository root; run Python tools inside the `solarwindpy` conda env
 - Pass 2's Predicted lines are kept as each reviewer wrote them, with that reviewer's own note on
   when they were written. The Experiment record reports the timing.
 - Where a finding overlaps a unit of the test-quality program, it cites the unit. The open-unit
-  list in `docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md` § Scope is stale;
+  list in `b01647bf:docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md` § Scope is stale;
   see the Experiment record.
 - The assembler reran the Repro of 34 findings drawn from all five reports; every one
   reproduced (Experiment record, "Repro spot-check").
@@ -853,7 +853,7 @@ are kept below, attributed to the slice.
 
 Baselines quoted by the slices: `conda run -n solarwindpy pytest tests/core tests/test_examples.py -q` gives 894 passed, 6 warnings, 18 subtests passed (run this session). All six warnings are the `mode.chained_assignment` Pandas4Warning of F172. Baseline: `conda run -n solarwindpy lint-imports` reports "Contracts: 2 kept, 0 broken."
 
-Test-quality overlap, as the core slice found it: Every unit of `docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md` § Scope that touches this scope shows a merged pull request (`git log --oneline --merges | command grep -E "tq-fix/(scalar-w-nan|p0-simplify|rm-core-solar|plasma-survivor-tests|plasma-io-electrons)"`). Still open, judged from that § Scope and the absence of a closing commit: step 1 (two questions to the author), step 4 (read the warnings), step 6 (`HingeMax` point, outside this scope), steps 7 and 8 (close the track). Two findings overlap: F172 is warnings that step 4 reads, and F59 is a gap in the missing-data rule of the merged `scalar-w-nan` unit (batch file § scalar-w-nan). No in-flight unit owns a file named below.
+Test-quality overlap, as the core slice found it: Every unit of `b01647bf:docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md` § Scope that touches this scope shows a merged pull request (`git log --oneline --merges | command grep -E "tq-fix/(scalar-w-nan|p0-simplify|rm-core-solar|plasma-survivor-tests|plasma-io-electrons)"`). Still open, judged from that § Scope and the absence of a closing commit: step 1 (two questions to the author), step 4 (read the warnings), step 6 (`HingeMax` point, outside this scope), steps 7 and 8 (close the track). Two findings overlap: F172 is warnings that step 4 reads, and F59 is a gap in the missing-data rule of the merged `scalar-w-nan` unit (batch file § scalar-w-nan). No in-flight unit owns a file named below.
 
 Author's untracked work, reported only: `solarwindpy/plans/` (three scripts: `check_sweep.sh`, `find_recent_automation_commits.zsh`, `make_branch_from_plan.py`) and `solarwindpy/tests/` (`test_base_master.py`, `test_base_old.py`; this directory is what `tests/test_import_aliases.py` flags in the suite baseline). `solarwindpy/fitfunctions/lines_BACKUP_41608.py`, listed as untracked in the dispatch Motivation, is no longer present (`git status --porcelain`). `solarwindpy/scripts/` holds only `logs/` and `__pycache__/` and is neither tracked nor listed by `git status`.
 

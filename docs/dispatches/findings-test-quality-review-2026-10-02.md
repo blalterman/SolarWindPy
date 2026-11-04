@@ -9,11 +9,11 @@ author_signoff: none
 
 owner: /Users/balterma/observatories/code/SolarWindPy
 
-Produced by `docs/dispatches/dispatch-test-quality-review-2026-10-02.md`. Every number below
+Produced by `b01647bf:docs/dispatches/dispatch-test-quality-review-2026-10-02.md`. Every number below
 names the command or artifact that reproduces it. Artifacts live under the git-ignored
 `tmp/test-quality-review/`; run commands from the repository root in the `solarwindpy` conda
 env (`conda run -n solarwindpy ...`). The fix program is
-`docs/dispatches/batch-test-quality-fixes-2026-10-02.md`.
+`b01647bf:docs/dispatches/batch-test-quality-fixes-2026-10-02.md`.
 
 ## Author decisions recorded
 
@@ -184,7 +184,7 @@ required.
 ## Re-measurement (2026-10-05)
 
 Run after the fix program's units merged, as the long-running units of
-`docs/dispatches/batch-test-quality-fixes-2026-10-02.md`.
+`b01647bf:docs/dispatches/batch-test-quality-fixes-2026-10-02.md`.
 
 ### Linkcheck
 

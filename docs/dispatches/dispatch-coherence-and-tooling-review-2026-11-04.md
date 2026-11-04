@@ -34,7 +34,7 @@ Existing capability and what each leaves open:
 - `/Users/blalterman/observatories/code/SolarWindPy/CLAUDE.md` § "Conventions" states "extract at
   the second copy" as a rule, with no detector.
 - The test-quality program (`docs/dispatches/findings-test-quality-review-2026-10-02.md`,
-  `docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`) measures tests against the
+  `b01647bf:docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`) measures tests against the
   contracts they owe. It does not measure coherence between code and tests or across modules.
 - Nothing evaluates `.claude/` against current Anthropic guidance or against Opus 5.5.
 
@@ -176,7 +176,7 @@ Layers: the package; each subpackage (`core`, `fitfunctions`, `instabilities`, `
 `solar_activity`, `tools`, `examples`); then modules, classes, and functions where the
 layer above flags a problem; and the test tree against the code tree. At each layer write
 `**Predicted:**` before reading below and `**Found:**` after. Apply P1 to P9. Take the
-test-quality program's open units (`docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`
+test-quality program's open units (`b01647bf:docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`
 § Scope) as given: cite them where they overlap a finding instead of re-reviewing them.
 
 ### Pass 3. Staged cleanup plan

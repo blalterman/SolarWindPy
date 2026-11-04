@@ -33,7 +33,7 @@ Rules every stage follows:
 - One logical change per commit, with a conventional subject.
 - Never touch `solarwindpy/plans/` or `solarwindpy/tests/`; they are the author's untracked work.
 
-Test-quality program: every unit of `docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`
+Test-quality program: every unit of `b01647bf:docs/dispatches/dispatch-continue-test-quality-fixes-2026-10-05.md`
 § Scope is merged (`gh pr list --state merged --limit 60`; `gh pr list --state open` is empty),
 with two exceptions. Step 6, the parked `hingemax-point` (`solarwindpy/fitfunctions/hinge.py:1070`
 still raises `NotImplementedError`), is open, and stage S29 depends on it. Step 4, "read the
