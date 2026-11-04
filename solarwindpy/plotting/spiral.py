@@ -19,6 +19,7 @@ from collections import namedtuple
 from numba import njit, prange
 
 from matplotlib import pyplot as plt
+from matplotlib.tri import Triangulation
 
 from . import base
 from . import labels
@@ -1099,6 +1100,11 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         ``ax.tricontourf``) over a Delaunay triangulation of the occupied
         cells' centers, interpolating linearly within each triangle.
 
+        The triangulation is built in plot coordinates (log10 on a log
+        axis, where the mesh is built) with each axis divided by its span,
+        so neither axis's units dominate the distances, and its triangles
+        are drawn at the centers in data units.
+
         Parameters
         ----------
         ax : mpl.axes.Axes, None
@@ -1159,25 +1165,28 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
 
-        x = self.mesh.mesh[:, [0, 1]].mean(axis=1)
-        y = self.mesh.mesh[:, [2, 3]].mean(axis=1)
+        # Cell centers in plot coordinates: log10 on a log axis, as the mesh.
+        tk_finite = np.isfinite(C)
+        x = self.mesh.mesh[tk_finite][:, [0, 1]].mean(axis=1)
+        y = self.mesh.mesh[tk_finite][:, [2, 3]].mean(axis=1)
+        C = C[tk_finite]
 
+        # Triangulate where the plot is drawn, each axis scaled to its span:
+        # in data units one axis's range (hundreds of km/s against a decade
+        # or two of n) dominates the Delaunay distances and the triangles
+        # are slivers. The same triangles are then drawn in data units.
+        triangles = Triangulation(x / np.ptp(x), y / np.ptp(y)).triangles
         if self.log.x:
             x = 10.0**x
         if self.log.y:
             y = 10.0**y
-
-        # Filter to finite values
-        tk_finite = np.isfinite(C)
-        x = x[tk_finite]
-        y = y[tk_finite]
-        C = C[tk_finite]
+        triangulation = Triangulation(x, y, triangles=triangles)
 
         contour_fcn = ax.tricontourf if use_contourf else ax.tricontour
         if levels is None:
-            args = [x, y, C]
+            args = [triangulation, C]
         else:
-            args = [x, y, C, levels]
+            args = [triangulation, C, levels]
         qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
 
         # Add colorbar
