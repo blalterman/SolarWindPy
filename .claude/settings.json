@@ -1,7 +1,7 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(grep:*)",
       "Bash(conda info:*)",
       "Bash(echo $CONDA_DEFAULT_ENV)",
       "Bash(doc8:*)",
@@ -21,18 +21,6 @@
       "Bash(python .claude/hooks/create-compaction.py)",
       "Bash(python .claude/scripts/generate-test.py)",
       "Bash(python .claude/scripts/generate-test.py *)",
-      "Bash(pytest --cov=solarwindpy)",
-      "Bash(pytest --cov=solarwindpy --cov-report=:*)",
-      "Bash(pytest --cov=solarwindpy --cov-report=html -q)",
-      "Bash(pytest --cov=solarwindpy --cov-report=term -q)",
-      "Bash(pytest --cov=solarwindpy --cov-report=xml -q)",
-      "Bash(pytest --cov=solarwindpy --cov-report=html -q --tb=short)",
-      "Bash(pytest --cov=solarwindpy --cov-report=term -q --tb=short)",
-      "Bash(pytest --cov=solarwindpy --cov-report=xml -q --tb=short)",
-      "Bash(pytest -q)",
-      "Bash(pytest -v)",
-      "Bash(pytest tests/*)",
-      "Bash(pytest solarwindpy/*)",
       "Bash(pytest:*)",
       "Bash(git add solarwindpy/**)",
       "Bash(git add tests/**)",
@@ -55,8 +43,6 @@
       "Bash(git log -n :*)",
       "Bash(git commit)",
       "Bash(git commit -m :*)",
-      "Bash(git push)",
-      "Bash(git push origin :*)",
       "Bash(git checkout :*)",
       "Bash(git branch)",
       "Bash(git branch -a)",
@@ -75,19 +61,18 @@
       "Bash(conda env create -f solarwindpy.yml)",
       "Bash(conda env create -f solarwindpy-dev.yml)",
       "Bash(conda activate :*)",
-      "Bash(pip install -e .)",
       "Bash(pre-commit:*)",
-      "Bash(tox:*)",
-      "Bash(mkdir -p .claude/logs)",
-      "Bash(mkdir -p .claude/backups)",
-      "Bash(touch .claude/logs/security-audit.log)"
+      "Bash(tox:*)"
+    ],
+    "ask": [
+      "Bash(git push *)"
     ],
     "deny": [
       "Read(./.env*)",
       "Read(./secrets/**)",
       "Read(./.token*)",
       "Read(~/.ssh/**)",
-      "Read(/etc/**)",
+      "Read(//etc/**)",
       "Edit(./.env*)",
       "Edit(./secrets/**)",
       "Edit(./.token*)",
@@ -99,7 +84,6 @@
       "Bash(wget :*)",
       "Bash(pip install :*)",
       "Bash(conda install :*)",
-      "WebFetch(domain:!docs.anthropic.com)",
       "Bash(eval :*)",
       "Bash(exec :*)",
       "Bash(source :*)",
@@ -108,81 +92,6 @@
       "Bash(git add /etc/**)",
       "Bash(git add secrets/**)",
       "Bash(git add .env:*)"
-    ]
-  },
-  "systemPrompt": "SolarWindPy solar wind physics package. CORE RULES: 1) Follow CLAUDE.md strictly for all operations. 2) Execute the .claude/scripts/ CLI scripts directly; never describe them instead of running them. 3) Reference .claude/docs/ for detailed procedures beyond CLAUDE.md.",
-  "tools": {
-    "enabled": [
-      "Bash",
-      "Edit",
-      "Read",
-      "Write",
-      "Glob",
-      "Grep",
-      "TodoWrite"
-    ],
-    "disabled": []
-  },
-  "ai": {
-    "preferredModel": "claude-sonnet-4-20250514"
-  },
-  "planningMode": true,
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/test-runner.sh --changed",
-            "timeout": 120
-          }
-        ]
-      },
-      {
-        "matcher": "MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/test-runner.sh --changed",
-            "timeout": 120
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash .claude/hooks/test-runner.sh --changed",
-            "timeout": 120
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .claude/hooks/create-compaction.py",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .claude/hooks/coverage-monitor.py",
-            "timeout": 60
-          }
-        ]
-      }
     ]
   }
 }

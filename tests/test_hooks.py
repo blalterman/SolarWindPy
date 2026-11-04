@@ -1,6 +1,6 @@
-# Spent-When: PERMANENT(the repository stops shipping Claude Code hooks)
+# Spent-When: PERMANENT(the repository stops shipping .claude/settings.json)
 # Supersedes: none
-"""Tests of the Claude Code hook scripts and their registration in settings.json.
+"""Tests of the Claude Code project settings in ``.claude/settings.json``.
 
 These test developer tooling under ``.claude/``, not the solarwindpy package.
 They live in ``tests/`` so the suite, the pre-commit hook and CI run them.
@@ -8,16 +8,13 @@ They live in ``tests/`` so the suite, the pre-commit hook and CI run them.
 
 import json
 import os
-import re
 import subprocess
-import sys
 from pathlib import Path
 from typing import Dict
 
 import pytest
 
 CLAUDE_DIR = Path(__file__).resolve().parents[1] / ".claude"
-HOOKS_DIR = CLAUDE_DIR / "hooks"
 SETTINGS = CLAUDE_DIR / "settings.json"
 
 
@@ -64,29 +61,6 @@ def mock_git_repo(tmp_path: Path) -> Path:
     return _make_mock_git_repo(tmp_path)
 
 
-def _hooks() -> dict:
-    """The ``hooks`` mapping of ``.claude/settings.json``."""
-    return json.loads(SETTINGS.read_text())["hooks"]
-
-
-_EXACT_MATCHER = re.compile(r"[A-Za-z0-9_\- ,|]*")
-
-
-def _matcher_matches(matcher, tool: str) -> bool:
-    """Whether a hook ``matcher`` selects ``tool``, by Claude Code's rules.
-
-    Per https://code.claude.com/docs/en/hooks: ``"*"``, ``""`` or an omitted
-    matcher matches every tool; a matcher of only letters, digits, ``_``,
-    ``-``, spaces, ``,`` and ``|`` is a list of exact names split on ``|`` or
-    ``,``; any other matcher is an unanchored regular expression.
-    """
-    if matcher in (None, "", "*"):
-        return True
-    if _EXACT_MATCHER.fullmatch(matcher):
-        return tool in {name.strip() for name in re.split(r"[|,]", matcher)}
-    return re.search(matcher, tool) is not None
-
-
 def test_mock_git_repo_leaves_the_callers_repository_untouched(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -119,74 +93,83 @@ def test_mock_git_repo_leaves_the_callers_repository_untouched(
     assert log == "Initial commit"
 
 
-def test_compaction_with_no_context_files_reports_zero_reduction(
-    mock_git_repo: Path,
-) -> None:
-    """A repository with none of the context files compacts with 0.0% reduction.
-
-    ``mock_git_repo`` holds only ``README.md``, which the token estimate does
-    not read, so the estimate is 0. The hook used to divide by it and exit with
-    ``ZeroDivisionError``; the expected report is no reduction (0 tokens to 0).
-
-    ON FAILURE: the code is wrong.
-    """
-    (mock_git_repo / ".claude").mkdir()
-    result = subprocess.run(
-        [sys.executable, str(HOOKS_DIR / "create-compaction.py")],
-        cwd=mock_git_repo,
-        env=_isolated_git_env(),
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stderr
-    state = (mock_git_repo / ".claude" / "compacted_state.md").read_text()
-    assert "**Context Reduction**: 0.0% (0 → 0 tokens)" in state
+def _settings() -> dict:
+    """The parsed contents of ``.claude/settings.json``."""
+    return json.loads(SETTINGS.read_text())
 
 
 def test_settings_file_exists() -> None:
-    """``.claude/settings.json`` exists, so Claude Code loads the hooks below.
+    """``.claude/settings.json`` exists, so Claude Code loads the project settings.
 
-    ON FAILURE: the hook registration file was removed or moved; restore it,
-    unless the author retired the hooks, in which case delete this file.
+    ON FAILURE: the shared project settings file was removed or moved; restore
+    it, unless the author retired it, in which case delete this file.
     """
     assert SETTINGS.is_file()
 
 
-def test_settings_has_hooks_section() -> None:
-    """``settings.json`` parses as JSON and has a ``hooks`` mapping.
+# Top-level keys this repository may set. Each is listed in the settings
+# index at https://code.claude.com/docs/en/settings-reference.md, except
+# ``$schema``, which https://code.claude.com/docs/en/settings.md documents for
+# editor validation. Extend the set from those pages when a new key is needed.
+_DOCUMENTED_KEYS = {
+    "$schema",
+    "permissions",
+    "hooks",
+    "model",
+    "env",
+    "enabledPlugins",
+}
 
-    ON FAILURE: settings.json is malformed or lost its hooks section; fix
-    settings.json, unless the author retired the hooks.
+
+def test_settings_uses_only_documented_keys() -> None:
+    """Every top-level key of ``settings.json`` is a documented settings key.
+
+    A key Claude Code does not define is ignored or reported as a settings
+    error, so it promises behaviour that nothing applies.
+
+    ON FAILURE: remove the undocumented key, or, if the settings reference now
+    documents it, add it to ``_DOCUMENTED_KEYS`` with its source.
     """
-    assert isinstance(json.loads(SETTINGS.read_text()).get("hooks"), dict)
+    assert set(_settings()) <= _DOCUMENTED_KEYS, sorted(
+        set(_settings()) - _DOCUMENTED_KEYS
+    )
 
 
-def test_post_tool_use_hook_configured() -> None:
-    """Every file-writing tool (Edit, MultiEdit, Write) runs the changed-file tests.
+def test_no_hooks_registered() -> None:
+    """``settings.json`` registers no Claude Code hooks.
 
-    ON FAILURE: an edit tool no longer triggers ``test-runner.sh --changed``;
-    fix the PostToolUse entries in settings.json, unless the author dropped
-    the per-edit test run.
+    The PostToolUse, PreCompact and Stop registrations were removed because
+    their scripts could not run tests or produce output Claude sees.
+
+    ON FAILURE: a hook was registered; replace this test with one that runs
+    the hook and checks the outcome Claude sees, not only its registration.
     """
-    entries = _hooks()["PostToolUse"]
-    for tool in ("Edit", "MultiEdit", "Write"):
-        commands = [
-            h["command"]
-            for entry in entries
-            if _matcher_matches(entry.get("matcher"), tool)
-            for h in entry["hooks"]
-        ]
-        assert any(
-            "test-runner.sh --changed" in c for c in commands
-        ), f"{tool} does not run test-runner.sh --changed"
+    assert "hooks" not in _settings()
 
 
-def test_pre_compact_hook_configured() -> None:
-    """PreCompact runs ``create-compaction.py``, a script that exists.
+def test_git_push_asks_and_is_not_allowed() -> None:
+    """Every ``git push`` prompts: an ``ask`` rule covers it and no ``allow`` rule does.
 
-    ON FAILURE: compaction no longer saves session state; fix the PreCompact
-    entry in settings.json, unless the author retired the compaction hook.
+    Rules are evaluated deny, then ask, then allow, and ``Bash(git push *)``
+    also matches a bare ``git push``
+    (https://code.claude.com/docs/en/permissions.md).
+
+    ON FAILURE: pushes run without a prompt; move the push rule back to ``ask``.
     """
-    commands = [h["command"] for e in _hooks()["PreCompact"] for h in e["hooks"]]
-    assert any("create-compaction.py" in c for c in commands), commands
-    assert (HOOKS_DIR / "create-compaction.py").is_file()
+    permissions = _settings()["permissions"]
+    assert "Bash(git push *)" in permissions.get("ask", [])
+    assert not [r for r in permissions["allow"] if r.startswith("Bash(git push")]
+
+
+def test_etc_deny_rule_is_absolute() -> None:
+    """The ``/etc`` read guard uses ``//``, the absolute-path form.
+
+    A rule that starts with a single ``/`` anchors at the project root, so
+    ``Read(/etc/**)`` guards ``<repo>/etc`` instead
+    (https://code.claude.com/docs/en/permissions.md).
+
+    ON FAILURE: restore ``Read(//etc/**)`` in the deny list.
+    """
+    deny = _settings()["permissions"]["deny"]
+    assert "Read(//etc/**)" in deny
+    assert "Read(/etc/**)" not in deny
