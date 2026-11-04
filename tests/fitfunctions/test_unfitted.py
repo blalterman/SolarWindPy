@@ -99,3 +99,44 @@ def test_after_a_failed_fit_the_values_are_nan():
     assert np.isnan(fit.pcov).all() and fit.pcov.shape == (2, 2)
     assert np.isnan(fit.chisq_dof).all()
     assert np.isnan(fit.rsq)
+
+
+def _refit_raising(exc):
+    """A Line fit once successfully, then refit with the optimizer raising ``exc``."""
+    fit = _line()
+    fit.make_fit()
+
+    def fail(**kwargs):
+        raise exc
+
+    fit._run_least_squares = fail
+    with pytest.raises(type(exc)):
+        fit.make_fit()
+    return fit
+
+
+_STALE = pytest.mark.xfail(
+    strict=True, reason="make_fit keeps the old outcome on TypeError"
+)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        name if name in SUCCESS_ONLY else pytest.param(name, marks=_STALE)
+        for name in [*READS, "error"]
+    ],
+)
+def test_an_unexpected_refit_error_leaves_no_result_from_the_earlier_fit(name):
+    """A refit raising outside the recorded failures leaves the fit unfitted.
+
+    Chosen input: a TypeError, which make_fit does not record as a failed
+    fit. The earlier success must not survive as status "ok" beside a missing
+    optimizer result.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _refit_raising(TypeError("bad keyword"))
+    reads = {**READS, "error": lambda f: f.error}
+    with pytest.raises(NotFittedError, match="call make_fit first"):
+        reads[name](fit)
