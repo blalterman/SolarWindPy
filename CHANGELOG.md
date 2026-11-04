@@ -313,18 +313,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     R), and StabilityCondition.anisotropy -> R; BetaRPlot(beta, ani, species) -> BetaRPlot(beta,
     R, species).
 
-- SIDC sunspot-number data are cached in SolarWindPy's download cache (the astropy download
-  cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with
-  astropy 7.2; `cache_contents()` shows the path)) instead of
-  `~/solarwindpy/data/sidc/<key>/YYYYMMDD.csv`, and downloaded again once the cached copy is
-  more than one day old. If that download fails, the cached series is loaded with a
-  `StaleCacheWarning` naming its age.
+- SIDC sunspot-number data are cached in SolarWindPy's download cache (`~/.cache/solarwindpy`
+  with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path)
+  instead of `~/solarwindpy/data/sidc/<key>/YYYYMMDD.csv`, and downloaded again once the
+  cached copy is more than one day old. If that download fails, the cached series is loaded
+  with a `StaleCacheWarning` naming its age.
 
-- `ICMECAT` always caches the catalog in SolarWindPy's download cache (the astropy download
-  cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with
-  astropy 7.2; `cache_contents()` shows the path), downloads it again once the cached copy is
-  more than 30 days old, and falls back to the cached copy with a `StaleCacheWarning` if that
-  download fails.
+- `ICMECAT` always caches the catalog in SolarWindPy's download cache (`~/.cache/solarwindpy`
+  with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path),
+  downloads it again once the cached copy is more than 30 days old, and falls back to the
+  cached copy with a `StaleCacheWarning` if that download fails.
 
 - `ICMECATDownloadError` subclasses `solarwindpy.solar_activity.cache.DownloadError` (still a
   `RuntimeError`).
@@ -493,9 +491,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cached.
 
 - `solarwindpy.solar_activity.cache.cache_contents()`, a table of each cached URL with its
-  local path and age. Files live in astropy's download cache for package `solarwindpy`, the
-  astropy download cache for `solarwindpy` (`~/.cache/solarwindpy` with astropy 8,
-  `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path); remove entries
+  local path and age. Files live in astropy's download cache for package `solarwindpy` (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path); remove entries
   with `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
 
 ### Fixed
