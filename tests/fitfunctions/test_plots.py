@@ -556,6 +556,84 @@ def test_plot_raw_used_fit_passes_each_keyword_set_to_its_plot():
 # ---------------------------------------------------------------------------
 
 
+def _noisy_fit():
+    """``Line`` fitted to ``2x + 1`` perturbed at the used points, unit weights.
+
+    The perturbations give residuals of order one, so a sign flip between
+    two residual definitions cannot hide inside a tolerance.
+    """
+    x = np.arange(10.0)
+    y = 2.0 * x + 1.0
+    y[2:8] += np.array([1.0, -2.0, 0.5, 1.5, -1.0, 2.0])
+    fit = Line(x, y, weights=np.ones_like(x), xmin=2, xmax=7)
+    fit.make_fit()
+    return fit
+
+
+@pytest.mark.xfail(
+    strict=True, reason="B2: FFPlot.residuals is model minus observation"
+)
+@pytest.mark.parametrize("pct", [False, True])
+def test_plotter_residuals_are_the_fit_functions_residuals(pct):
+    """``plotter.residuals`` is ``FitFunction.residuals``: one home for residuals.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _noisy_fit()
+    np.testing.assert_array_equal(
+        fit.plotter.residuals(pct=pct), fit.residuals(pct=pct)
+    )
+
+
+@pytest.mark.xfail(
+    strict=True, reason="B2: FFPlot.residuals is model minus observation"
+)
+def test_plotter_residuals_are_observed_minus_fitted():
+    """Simple residuals are the used observations minus the model at them.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _noisy_fit()
+    used = fit.observations.used
+    expected = used.y - fit(used.x)
+    assert fit.plotter.residuals() == exact(expected, scale=np.abs(used.y).max())
+
+
+def test_percent_residuals_are_the_simple_ones_relative_to_the_model():
+    """Percent residuals are 100 times the simple ones over the model, for both callers.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _noisy_fit()
+    model = fit(fit.observations.used.x)
+    for residuals in (fit.residuals, fit.plotter.residuals):
+        expected = 100.0 * residuals() / model
+        assert residuals(pct=True) == exact(expected, scale=100.0)
+
+
+@pytest.mark.xfail(
+    strict=True, reason="B2: robust residuals are fit_result.fun, model minus observed"
+)
+def test_robust_residuals_share_the_sign_of_the_simple_ones():
+    """Robust residuals are ``-fit_result.fun``, observed minus fitted over sigma.
+
+    With unit weights they equal the simple residuals, so ``kind="both"``
+    draws two lines of the same sign at every point.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _noisy_fit()
+    plot = fit.plotter
+    robust = plot.residuals(robust=True)
+    np.testing.assert_array_equal(robust, -np.asarray(fit.fit_result.fun))
+    simple = plot.residuals()
+    assert robust == exact(simple, scale=np.abs(simple).max())
+    drawn_simple, drawn_robust = plot.plot_residuals(kind="both", pct=False).get_lines()
+    assert np.all(
+        np.sign(drawn_simple.get_ydata()) == np.sign(drawn_robust.get_ydata())
+    )
+
+
 @pytest.mark.parametrize("pct, expected", [(False, SIMPLE), (True, SIMPLE_PCT)])
 def test_simple_residuals_are_model_minus_observation(pct, expected):
     """``residuals`` and ``plot_residuals`` give the hand-computed values.
