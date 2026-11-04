@@ -115,18 +115,7 @@ def _refit_raising(exc):
     return fit
 
 
-_STALE = pytest.mark.xfail(
-    strict=True, reason="make_fit keeps the old outcome on TypeError"
-)
-
-
-@pytest.mark.parametrize(
-    "name",
-    [
-        name if name in SUCCESS_ONLY else pytest.param(name, marks=_STALE)
-        for name in [*READS, "error"]
-    ],
-)
+@pytest.mark.parametrize("name", [*READS, "error"])
 def test_an_unexpected_refit_error_leaves_no_result_from_the_earlier_fit(name):
     """A refit raising outside the recorded failures leaves the fit unfitted.
 

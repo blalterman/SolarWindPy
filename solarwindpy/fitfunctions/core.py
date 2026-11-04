@@ -109,8 +109,9 @@ _QUALITY_COLUMNS = (
 _STATUS_OK = "ok"
 _KINDS = ("value", "uncertainty")
 
-# What a successful fit stores beyond its outcome; make_fit clears them
-# before each attempt, so a failed refit leaves none from an earlier success.
+# What a successful fit stores beyond its outcome; make_fit clears them, and
+# the outcome, before each attempt, so a failed refit leaves none from an
+# earlier success.
 _SUCCESS_ONLY = ("_fit_result", "_fit_p0", "_fit_bounds", "_TeX_info", "_plotter")
 
 
@@ -1252,26 +1253,34 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             status.
         NotImplementedError
             If ``absolute_sigma=True``; nothing is recorded.
+
+        Any other exception propagates unrecorded and leaves no outcome:
+        every result then raises
+        :class:`~solarwindpy.fitfunctions.core.NotFittedError`, as before a
+        first fit.
         """
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
 
-        for name in _SUCCESS_ONLY:
+        # Forget the previous fit, so an exception outside _FIT_FAILURES
+        # leaves the fit unfitted rather than reporting the old outcome.
+        for name in (*_SUCCESS_ONLY, "_outcome"):
             self.__dict__.pop(name, None)
+        self._results_table = None
+        self._error = None
 
         try:
             self._require_sufficient_data()
             kwargs = self._prepare_fit(kwargs)
             res, p0 = self._run_least_squares(**kwargs)
             popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+            rsq = self._calc_rsq(popt)
         except _FIT_FAILURES as e:
             self._record_failure(e)
             raise
 
-        self._record_outcome(
-            popt, psigma, pcov, all_chisq, self._calc_rsq(popt), error=None
-        )
+        self._record_outcome(popt, psigma, pcov, all_chisq, rsq, error=None)
         self._fit_result = res
         self._fit_p0 = tuple(p0)
 

@@ -209,7 +209,6 @@ def test_combined_popt_psigma_is_gone():
     assert "results" in dir(fit)
 
 
-@pytest.mark.xfail(strict=True, reason="_calc_rsq runs outside make_fit's try")
 def test_a_failure_computing_rsq_is_recorded_as_a_failed_fit():
     """R² is part of the fit: a failure computing it is recorded like the others.
 
