@@ -20,6 +20,7 @@ import pytest
 
 import solarwindpy as swp
 from solarwindpy.core import base, tensor, vector
+from tests.tolerances import exact
 
 
 @pytest.fixture(scope="module")
@@ -252,3 +253,27 @@ def test_one_species_on_a_species_level_is_accepted(cls):
     """
     frame = _two_species({"p1": [[4, 5, 6]]})
     pdt.assert_frame_equal(cls(frame).data, frame)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the named-level component reduction keeps the S level, so a "
+    "one-species (C, S) Vector's mag, rho and cos_theta are one-column "
+    "DataFrames; remove this marker when the reduction drops the lone species",
+)
+@pytest.mark.parametrize(
+    "cls", [vector.Vector, vector.BField], ids=["vector", "bfield"]
+)
+def test_one_species_on_a_species_level_reduces_to_one_series(cls):
+    r"""A one-species ``("C", "S")`` Vector's magnitudes and angle cosine are Series.
+
+    For the vector (4, 5, 6): ``mag`` is sqrt(77), ``rho`` is sqrt(41), and
+    its angle with itself has cosine 1.
+
+    ON FAILURE: the code is wrong.
+    """
+    v = cls(_two_species({"p1": [[4, 5, 6]]}))
+    for got, expected in ((v.mag, 77**0.5), (v.rho, 41**0.5), (v.cos_theta(v), 1.0)):
+        assert isinstance(got, pd.Series)
+        assert got.to_numpy() == exact(np.array([expected]))
