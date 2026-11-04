@@ -555,6 +555,10 @@ These change computed values; rerun any analysis that used them.
   `ion.w("par")`; they previously always raised `AttributeError`. An unknown component
   raises `KeyError` listing the available components.
 
+- `tools.swap_protons` now checks that the core (`p1`) density is at least the beam (`p2`)
+  density after the swap, and raises if not. The previous check compared `n_p2` with itself
+  and could never fail.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
