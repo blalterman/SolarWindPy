@@ -3,24 +3,24 @@ repos:
   rev: v4.4.0
   hooks:
   - id: trailing-whitespace
-    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
   - id: check-merge-conflict
-    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
   - id: check-added-large-files
     args: [--maxkb=5000]
-    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.17.3
   hooks:
   - id: ruff-check
-    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
   - id: ruff-format
-    files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/PyCQA/doc8
@@ -55,5 +55,5 @@ repos:
     entry: .claude/hooks/project-env.sh python -c
     args: ["import solarwindpy; print('✓ Import successful')"]
     language: system
-    files: ^solarwindpy/.*\.py$
+    files: ^src/solarwindpy/.*\.py$
     pass_filenames: false

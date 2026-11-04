@@ -19,9 +19,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # `l` as a short loop or unpacking target (a left bound, a label).
-"solarwindpy/plotting/hist1d.py" = ["E741"]
-"solarwindpy/plotting/hist2d.py" = ["E741"]
-"solarwindpy/plotting/tools.py" = ["E741"]
+"src/solarwindpy/plotting/hist1d.py" = ["E741"]
+"src/solarwindpy/plotting/hist2d.py" = ["E741"]
+"src/solarwindpy/plotting/tools.py" = ["E741"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 18
