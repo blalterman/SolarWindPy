@@ -533,6 +533,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   With raffaella_version=True, the only case that reads it, passing sc_vector= instead raises
   the existing ValueError asking for the SC-Sun distance.
 
+- The TeX fit report (TeX_popt, annotations) writes the offset parameters of ExponentialPlusC,
+  PowerLawPlusC, PowerLawOffCenter and LineXintercept as y_0 and x_0 instead of y0 and x0,
+  matching their model strings; popt keys stay x0 and y0.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
