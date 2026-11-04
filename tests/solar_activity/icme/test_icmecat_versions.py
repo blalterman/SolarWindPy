@@ -40,12 +40,6 @@ V23 = BASE.format(23)
 
 TIMEOUT = "timeout"
 
-PROBE_XFAIL = pytest.mark.xfail(
-    strict=True,
-    reason="ICMECAT has no version probe, version attribute or ICMECAT "
-    "warning classes; remove this marker when the probe lands",
-)
-
 
 def catalog_text(frame=CATALOG):
     """``frame`` as the CSV text the host serves."""
@@ -109,7 +103,6 @@ def all_404(*versions):
     return {BASE.format(v): 404 for v in versions}
 
 
-@PROBE_XFAIL
 def test_the_pinned_version_is_loaded_and_recorded(host):
     """With v23 hosted, it is loaded without probing and ``version`` is "v23".
 
@@ -124,7 +117,6 @@ def test_the_pinned_version_is_loaded_and_recorded(host):
     assert len(cat) == len(CATALOG)
 
 
-@PROBE_XFAIL
 def test_a_404_climbs_to_the_first_hosted_version_and_warns(host):
     """v23 404s, v24 404s, v25 is hosted: v25 is loaded, with a warning naming both.
 
@@ -142,7 +134,6 @@ def test_a_404_climbs_to_the_first_hosted_version_and_warns(host):
     assert fake.requested == [V23, BASE.format(24), BASE.format(25)]
 
 
-@PROBE_XFAIL
 def test_no_hosted_version_warns_and_raises_without_a_cache(host):
     """v23 through v28 all 404 and nothing is cached: warn, then raise.
 
@@ -160,7 +151,6 @@ def test_no_hosted_version_warns_and_raises_without_a_cache(host):
     assert fake.requested == [BASE.format(v) for v in range(23, 29)]
 
 
-@PROBE_XFAIL
 def test_no_hosted_version_falls_back_to_the_cached_pin(host, tmp_path):
     """v23 through v28 all 404 with v23 cached: warn twice and load the cache.
 
@@ -175,7 +165,6 @@ def test_no_hosted_version_falls_back_to_the_cached_pin(host, tmp_path):
     assert len(cat) == len(CATALOG)
 
 
-@PROBE_XFAIL
 @pytest.mark.parametrize("failure", [TIMEOUT, 500, 503], ids=str)
 def test_a_failure_that_is_not_a_404_never_climbs(host, tmp_path, failure):
     """A timeout or 5xx on v23 uses the cached v23 and probes nothing else.
@@ -201,7 +190,6 @@ def test_a_failure_that_is_not_a_404_raises_without_a_cache(host):
     assert fake.requested == [V23]
 
 
-@PROBE_XFAIL
 def test_a_failure_during_the_climb_stops_it(host, tmp_path):
     """v23 404s and v24 times out: the climb stops and the cached v23 is used.
 
@@ -217,7 +205,6 @@ def test_a_failure_during_the_climb_stops_it(host, tmp_path):
     assert cat.version == "v23"
 
 
-@PROBE_XFAIL
 def test_an_unknown_spacecraft_warns_instead_of_failing(host):
     """A catalog naming a spacecraft outside SPACECRAFT_NAMES loads, with a warning.
 
@@ -236,7 +223,6 @@ def test_an_unknown_spacecraft_warns_instead_of_failing(host):
     assert len(cat.filter("NewProbe")) == 1
 
 
-@PROBE_XFAIL
 def test_filter_keeps_the_loaded_version(host):
     """A filtered catalog reports the version its parent loaded.
 
