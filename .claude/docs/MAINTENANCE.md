@@ -123,14 +123,6 @@ python .claude/hooks/coverage-monitor.py
 ## Hook System Maintenance
 
 ```bash
-# Validate session state manually
-bash .claude/hooks/validate-session-state.sh
-
-# Run physics validation on specific files
-python .claude/hooks/physics-validation.py solarwindpy/core/plasma.py
-python .claude/hooks/physics-validation.py --strict
-python .claude/hooks/physics-validation.py --report
-
 # Create manual compaction for token management
 python .claude/hooks/create-compaction.py
 
