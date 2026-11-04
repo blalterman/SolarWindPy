@@ -359,6 +359,90 @@ def test_units_holds_exactly_the_registry_si_factors():
     assert got == expected
 
 
+# --- the author's rulings on names (o9) --------------------------------------
+
+_RULED = "the author ruled this name; the code follows in the next commit"
+
+
+@pytest.mark.parametrize(
+    "alias",
+    [
+        pytest.param("pdynamic", marks=_xfail(_RULED)),
+        pytest.param("heat_flux", marks=_xfail(_RULED)),
+    ],
+)
+def test_plasma_has_one_name_per_quantity(alias):
+    """``pdv`` and ``qpar`` are the canonical names; the long aliases are gone.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import plasma
+
+    assert not hasattr(plasma.Plasma, alias)
+
+
+@pytest.mark.xfail(strict=True, reason=_RULED)
+@pytest.mark.parametrize("method", ["afsq", "caani"])
+def test_dynamic_pressure_keyword_is_pdv(plasma, method):
+    """The keyword that would add dynamic pressure is ``pdv=``, the method's name.
+
+    Including it is not implemented, so passing it raises NotImplementedError.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(NotImplementedError):
+        getattr(plasma, method)("p1", pdv=True)
+
+
+@pytest.mark.xfail(strict=True, reason=_RULED)
+def test_heat_flux_is_qpar_at_every_layer():
+    """Heat flux is ``qpar``: the registry key and the ``Units`` field; ``q`` is free.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import units_constants
+
+    quantities = _quantities()
+    assert "qpar" in quantities.QUANTITIES
+    assert "q" not in quantities.QUANTITIES
+    assert hasattr(units_constants.Units(), "qpar")
+
+
+@pytest.mark.xfail(strict=True, reason=_RULED)
+def test_vdf_ratio_is_the_registry_key():
+    """The beam-to-core VDF ratio is ``vdf_ratio`` in the registry, not ``VDFratio``.
+
+    ON FAILURE: the code is wrong.
+    """
+    quantities = _quantities()
+    assert "vdf_ratio" in quantities.QUANTITIES
+    assert "VDFratio" not in quantities.QUANTITIES
+
+
+@pytest.mark.xfail(strict=True, reason=_RULED)
+def test_fast_magnetosonic_speed_is_not_in_the_registry():
+    """No method computes ``cfms``, so neither the registry nor ``Units`` holds it.
+
+    ON FAILURE: the code is wrong, unless a method computes the fast
+    magnetosonic speed again; then add its row to CASES.
+    """
+    from solarwindpy.core import units_constants
+
+    assert "cfms" not in _quantities().QUANTITIES
+    assert not hasattr(units_constants.Units(), "cfms")
+
+
+@pytest.mark.xfail(strict=True, reason=_RULED)
+def test_magnetic_pressure_is_capital_p_like_every_pressure():
+    """Magnetic pressure renders P_B, as thermal pressure renders P.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.plotting.labels.base import TeXlabel
+
+    assert TeXlabel(("pb", "", "")).tex == "P_B"
+
+
 # --- species (F128) ----------------------------------------------------------
 
 
