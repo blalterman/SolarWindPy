@@ -399,9 +399,6 @@ def test_download_data_yearly_round_trip(make_loader, tmp_path):
     np.testing.assert_allclose(written.loc[:, "std_error"].values, std / np.sqrt(n_obs))
 
 
-@pytest.mark.xfail(
-    strict=True, reason="B7: hemispheric columns are named '<h>std_error'"
-)
 def test_download_data_hemispheric_standard_errors(make_loader, tmp_path):
     """Each hemisphere's standard error is ``<h>_std_error``, its std over sqrt(count).
 

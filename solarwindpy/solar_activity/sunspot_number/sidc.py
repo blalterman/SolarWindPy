@@ -264,7 +264,7 @@ class SIDCLoader(DataLoader):
             cnt.columns = cnt.columns.to_series().str.split("_").apply(lambda x: x[1])
             std_error = std.divide(cnt.apply(np.sqrt), axis=1)
 
-            std_error.columns = (std_error.columns.to_series() + "std_error").values
+            std_error.columns = (std_error.columns.to_series() + "_std_error").values
 
             csv = pd.concat([csv, std_error], axis=1, sort=True)
 
