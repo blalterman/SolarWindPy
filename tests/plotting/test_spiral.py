@@ -168,9 +168,8 @@ def _plot(min_per_bin, z=Z, log=False, rows=None):
         logx=log,
         logy=log,
         initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+        min_per_bin=min_per_bin,
     )
-    splot.initialize_mesh(min_per_bin=min_per_bin)
-    splot.build_grouped()
     return splot
 
 
@@ -1220,21 +1219,16 @@ class TestProgressOutput:
         assert "Elapsed Time" in capsys.readouterr().err
         assert _own_or_warning_records(caplog) == []
 
-    @pytest.mark.parametrize("progress", [True, False])
-    def test_initialize_mesh_passes_progress_through(self, capsys, progress):
-        """``SpiralPlot2D.initialize_mesh(progress=...)`` controls the table.
-
-        The default is on.
+    def test_constructor_builds_the_mesh_without_the_progress_table(self, capsys):
+        """``SpiralPlot2D`` refines its mesh in the constructor, writing no table.
 
         ON FAILURE: the code is wrong.
         """
-        splot = SpiralPlot2D(X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
-        if progress:
-            splot.initialize_mesh(min_per_bin=1)
-        else:
-            splot.initialize_mesh(min_per_bin=1, progress=False)
+        splot = SpiralPlot2D(
+            X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)), min_per_bin=1
+        )
         err = capsys.readouterr().err
-        assert ("Elapsed Time" in err) is progress
+        assert "Elapsed Time" not in err
         assert set(_cells(splot.mesh.mesh)) == _refine(
             splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
         )
@@ -1303,9 +1297,9 @@ def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip)
-    splot.initialize_mesh(min_per_bin=101, progress=False)
-    splot.build_grouped()
+    splot = SpiralPlot2D(
+        CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip, min_per_bin=101
+    )
     assert splot.clip == ClipAxes(x=clip, y=clip, z=False)
     assert splot.agg().tolist() == exact(counts, nan_ok=True)
 
@@ -1315,9 +1309,7 @@ def test_data_are_not_clipped_by_default():
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES)
-    splot.initialize_mesh(min_per_bin=101, progress=False)
-    splot.build_grouped()
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, min_per_bin=101)
     assert splot.agg().tolist() == [1, 99, 1]
 
 
@@ -1400,9 +1392,7 @@ class TestPlotContoursCalls:
         ]
         x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
         edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
-        splot = SpiralPlot2D(x, y, z, initial_bins=edges)
-        splot.initialize_mesh(min_per_bin=1, progress=False)
-        splot.build_grouped()
+        splot = SpiralPlot2D(x, y, z, initial_bins=edges, min_per_bin=1)
         _, _, qset = splot.plot_contours(cbar=False, grid_resolution=20)
 
         cx, cy, cz = _occupied_centers(splot, rows=rows)
@@ -1852,8 +1842,9 @@ def test_spiral_plot_bin_ids_equal_brute_force_on_its_edges():
     ON FAILURE: the code is wrong.
     """
     x, y = _descent_points()
-    splot = SpiralPlot2D(x, y, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
-    splot.initialize_mesh(min_per_bin=3, progress=False)
+    splot = SpiralPlot2D(
+        x, y, initial_bins=(np.array(XEDGES), np.array(YEDGES)), min_per_bin=3
+    )
     xe, ye = splot.initial_bins["x"], splot.initial_bins["y"]
     pts = _points_of(splot.data.x, splot.data.y)
     leaves = _ordered_leaves(tuple(xe), tuple(ye), pts, 3)
@@ -1879,9 +1870,8 @@ def test_drawn_polygons_are_the_mesh_cells_corner_by_corner(log):
         logx=log,
         logy=log,
         initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+        min_per_bin=3,
     )
-    splot.initialize_mesh(min_per_bin=3, progress=False)
-    splot.build_grouped()
     _, coll = splot.make_plot(cbar=False)
     assert isinstance(coll, PolyCollection)
     m = 10.0**splot.mesh.mesh if log else splot.mesh.mesh

@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from . import base
 
 
-class Scatter(base.PlotWithZdata, base._CbarMaker):
+class Scatter(base.ColorPlot):
     r"""Scatter plot of y against x, optionally colored by z."""
 
     _clipped_axes = ("x", "y", "z")
@@ -45,17 +45,8 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
         super()._format_axis(ax)
 
         x = data.loc[:, "x"]
-        minx, maxx = x.min(), x.max()
-
         y = data.loc[:, "y"]
-        miny, maxy = y.min(), y.max()
-
-        # `pulled from the end of `ax.pcolormesh`.
-        collection.sticky_edges.x[:] = [minx, maxx]
-        collection.sticky_edges.y[:] = [miny, maxy]
-        corners = (minx, miny), (maxx, maxy)
-        ax.update_datalim(corners)
-        ax.autoscale_view()
+        self._fit_view(ax, collection, x.min(), x.max(), y.min(), y.max())
 
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""Make a scatter plot on `ax` using `ax.scatter`.

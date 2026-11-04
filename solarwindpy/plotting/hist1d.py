@@ -14,20 +14,13 @@ from matplotlib import pyplot as plt
 
 from . import base
 from . import labels
-from .agg_plot import AggPlot
-from .binned import BinnedData, _PlotSource
+from .binned import _PlotSource
 
 
-class Hist1D(AggPlot):
+class Hist1D(base._OnFixedGrid, base.BinnedPlot):
     r"""Create 1D plot of `x`, optionally aggregating `y` in bins of `x`.
 
-    Attributes
-    ----------
-    _gb_axes, path
-
-    Methods
-    -------
-    set_path, agg, _format_axis, make_plot
+    The bins are a 1-D :class:`~solarwindpy.plotting.binning.FixedGrid`.
     """
 
     def __init__(
@@ -91,29 +84,15 @@ class Hist1D(AggPlot):
             to bin.
         """
         super(Hist1D, self).__init__()
-        log, clip = self._inherit(
-            nbins,
-            {"x": getattr(x, "name", None)},
-            {"x": logx},
-            self._clip_by_axis(clip),
-            bin_precision,
+        self._set_grid_data(
+            {"x": x, "y": y}, nbins, {"x": logx}, clip, bin_precision, mask
         )
-        self.set_log(**log)
-        self.set_axnorm(axnorm)
-        within = nbins if isinstance(nbins, BinnedData) else None
-        self._set_data(x, y, clip, mask=mask, within=within)
-        self.set_labels(
-            x="x", y=labels.special.Count(norm=axnorm) if y is None else "y"
-        )
-        self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
-        self.make_cut()
         self.set_clim(None, None)
+        self.set_axnorm(axnorm)
+        self.set_labels(x="x", y=labels.special.Count() if y is None else "y")
 
     _clipped_axes = ("x",)
-
-    @property
-    def _gb_axes(self):
-        return ("x",)
+    _grid_axes = ("x",)
 
     def set_path(self, new, add_scale=True):
         path, x, y, z, scale_info = super(Hist1D, self).set_path(new, add_scale)
@@ -159,24 +138,6 @@ class Hist1D(AggPlot):
         self._store_clip(clip)
         self._bin_names = {"x": getattr(x, "name", None)}
         self._bin_index = getattr(x, "index", None)
-
-    def set_axnorm(self, new):
-        r"""The method by which the gridded data is normalized.
-
-        ===== =============================================================
-         key                           description
-        ===== =============================================================
-         d     Density normalize
-         t     Divide by the maximum (peak equals 1)
-        ===== ============================================================="""
-        new = self._validate_axnorm(new, ("d", "t"))
-
-        ylbl = self.labels.y
-        if isinstance(ylbl, labels.special.Count):
-            ylbl.set_axnorm(new)
-            ylbl.build_label()
-
-        self._axnorm = new
 
     def construct_cdf(self, only_plotted=True):
         r"""Build the empirical cumulative distribution of the observed x values.
@@ -224,27 +185,6 @@ class Hist1D(AggPlot):
 
         return cdf
 
-    def _axis_normalizer(self, agg):
-        r"""Takes care of row, column, total, and density normaliation.
-
-        Under ``logx`` the density is normalised over ``log10(x)``: the bins are
-        log-space intervals, so bar areas on the log axis sum to 1.
-        """
-
-        axnorm = self.axnorm
-        if axnorm is None:
-            pass
-        elif axnorm == "d":
-            n = agg.sum()
-            # Widths are in the binned variable, log10(x) under logx.
-            dx = self._bin_widths(agg.index)
-            agg = agg.divide(dx.multiply(n))
-
-        elif axnorm == "t":
-            agg = self._divide_by_max(agg)
-
-        return agg
-
     def agg(self, **kwargs):
         if self.axnorm == "d":
             fcn = kwargs.get("fcn", None)
@@ -254,15 +194,17 @@ class Hist1D(AggPlot):
         return super(Hist1D, self).agg(**kwargs)
 
     def set_labels(self, **kwargs):
+        r"""Set the x or y label; see ``BinnedPlot.set_labels``.
+
+        Raises
+        ------
+        ValueError
+            If a z label is passed: a ``Hist1D`` has none.
+        """
         if "z" in kwargs:
             raise ValueError(r"{} doesn't have a z-label".format(self))
 
-        y = kwargs.pop("y", self.labels.y)
-        if isinstance(y, labels.special.Count):
-            y.set_axnorm(self.axnorm)
-            y.build_label()
-
-        super(Hist1D, self).set_labels(y=y, **kwargs)
+        super(Hist1D, self).set_labels(**kwargs)
 
     def make_plot(
         self,

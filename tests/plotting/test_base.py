@@ -3,7 +3,7 @@
 
 ``Base`` and its mixins exist to be subclassed. The public state they manage
 (``data``, ``labels``, ``log``, ``path``, ``clip``) is tested on ``LinePlot``,
-a minimal ``PlotWithZdata`` subclass. Axis formatting and colorbars are tested
+a minimal ``ColorPlot`` subclass. Axis formatting and colorbars are tested
 through the package's own ``Hist1D`` and ``Scatter``, asserting on the real
 matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Expected values
 come from the hand-typed ``ROWS`` table or the ``_expected_path`` helper, which rebuilds the documented path
@@ -28,7 +28,7 @@ from solarwindpy.plotting.base import (  # noqa: E402
     Base,
     ClipAxes,
     LogAxes,
-    PlotWithZdata,
+    ColorPlot,
     RangeLimits,
 )
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
@@ -83,7 +83,7 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
     return Path(cls_name, x, y, z, _scale(logx, logy))
 
 
-class LinePlot(PlotWithZdata):
+class LinePlot(ColorPlot):
     """Minimal concrete plot: points coloured by z."""
 
     def __init__(self, x, y, z=None, clip=None):
@@ -132,7 +132,7 @@ def test_base_and_an_incomplete_subclass_cannot_be_instantiated():
     ON FAILURE: the code is wrong.
     """
 
-    class NoMakePlot(PlotWithZdata):
+    class NoMakePlot(ColorPlot):
         def __init__(self):
             super().__init__()
 
@@ -155,7 +155,7 @@ def test_str_and_logger_name_the_concrete_class():
 
 
 # ---------------------------------------------------------------------------
-# PlotWithZdata._set_data, through the constructor
+# ColorPlot._set_data, through the constructor
 # ---------------------------------------------------------------------------
 
 
@@ -337,7 +337,7 @@ def test_auto_path_is_class_then_labels_then_scale():
 
     Spaces become hyphens; a missing or ``"None"`` label falls back to the
     axis name. The literal path was written by hand from reading
-    ``Base.set_path`` and ``PlotWithZdata.set_path`` in ``base.py``: class
+    ``Base.set_path`` and ``ColorPlot.set_path`` in ``base.py``: class
     name ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
     ``"None"`` and ``None`` fall back to ``"y"`` and ``"z"``; ``add_scale``
     defaults to True, giving ``"logX"`` and ``"linY"`` joined by ``"-"`` and
@@ -560,9 +560,8 @@ def _spiral():
         GRID_Y,
         GRID_Z,
         initial_bins=(GRID_EDGES, GRID_EDGES),
+        min_per_bin=100,
     )
-    splot.initialize_mesh(min_per_bin=100)
-    splot.build_grouped()
     return splot
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Tests for ``solarwindpy.plotting.agg_plot.AggPlot``.
+"""Tests for ``solarwindpy.plotting.base.BinnedPlot`` on a ``FixedGrid``.
 
-``AggPlot`` is abstract; its behaviour is exercised through the real public
+``BinnedPlot`` is abstract; its behaviour is exercised through the real public
 subclasses ``Hist1D`` and ``Hist2D`` built from chosen inputs. Expected values
 come from numpy (``histogram_bin_edges``, ``histogram``, ``histogram2d``,
 ``digitize``, ``quantile``, ``clip``), ``scipy.stats.binned_statistic_2d``,
@@ -60,12 +60,12 @@ def _bin_index(values, edges):
 
 
 # ---------------------------------------------------------------------------
-# Bin edges: calc_bins_intervals, edges, intervals
+# Bin edges: the FixedGrid, edges, intervals
 # ---------------------------------------------------------------------------
 
 
 class TestBinEdges:
-    """``calc_bins_intervals`` turns ``nbins`` into edges and intervals per axis."""
+    """The ``FixedGrid`` turns ``nbins`` into edges and intervals per axis."""
 
     def test_integer_nbins_gives_equal_width_edges_over_the_data(self):
         """nbins=4 over x in [0, 8] and y in [-1, 3] gives steps of 2 and 1.
@@ -239,12 +239,12 @@ class TestBinEdges:
 
 
 # ---------------------------------------------------------------------------
-# make_cut and clipping
+# The cut and clipping
 # ---------------------------------------------------------------------------
 
 
 class TestCut:
-    """``make_cut`` assigns each observation to the interval that contains it."""
+    """The ``FixedGrid`` assigns each observation to the interval that contains it."""
 
     def test_each_observation_gets_the_interval_containing_it(self, xyz):
         """The cut interval of each point is the numpy.digitize bin of that point.
@@ -592,7 +592,7 @@ class TestSelection:
 
 
 class TestNbinsAndEdges:
-    """How ``calc_bins_intervals`` reads ``nbins`` and places the outer edges."""
+    """How the ``FixedGrid`` reads ``nbins`` and places the outer edges."""
 
     def test_numpy_integer_nbins_counts_bins_like_a_python_integer(self, xyz):
         """``np.int64(4)`` and ``np.int32(4)`` give the edges ``4`` gives.
@@ -664,7 +664,7 @@ class TestNbinsAndEdges:
         """numpy cannot allocate the "fd" edges of ``OUT_OF_MEMORY_X``.
 
         And one sample equals the fallback's lowest edge, the 0.05th
-        percentile rounded to 5 places (``calc_bins_intervals`` Notes).
+        percentile rounded to 5 places (``FixedGrid`` Notes).
         ON FAILURE: the fixture no longer separates the out-of-memory fallback
         from ordinary binning, or no sample sits on its lowest edge; fix the
         fixture.
@@ -750,7 +750,7 @@ class TestNbinsAndEdges:
         """The fallback's outer edges are the 0.05th and 99.95th percentiles.
 
         "fd" edges run from the clipped data's minimum to its maximum, which
-        are those percentiles (``calc_bins_intervals`` Notes), rounded to 5
+        are those percentiles (``FixedGrid`` Notes), rounded to 5
         places; the percentiles come from numpy.quantile.
         ON FAILURE: the code is wrong.
         """

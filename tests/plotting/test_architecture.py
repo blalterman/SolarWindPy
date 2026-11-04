@@ -30,12 +30,6 @@ from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
-pytestmark = pytest.mark.xfail(
-    strict=True,
-    reason="BinnedPlot/ColorPlot bases and Binning strategies are not built; "
-    "remove this marker when refactor(plotting)! lands them",
-)
-
 # 400 points of a correlated cloud: dense in the middle, sparse at the edges,
 # so the mesh splits some cells and not others.
 _RNG = np.random.default_rng(20261104)

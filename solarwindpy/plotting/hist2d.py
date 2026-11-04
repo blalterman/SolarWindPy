@@ -18,8 +18,6 @@ from . import base
 from . import labels
 from .tools import nan_gaussian_filter
 
-from .agg_plot import AggPlot
-from .binned import BinnedData
 from .hist1d import Hist1D
 
 
@@ -50,7 +48,7 @@ def _within(values, lower, upper, bins):
     return (lower < values) & (values <= upper)
 
 
-class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
+class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
     Parameters
@@ -75,7 +73,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         ``nbins``, its setting for that axis's column. Stored as ``clip``, a
         ``ClipAxes``.
     nbins : int or str or tuple or BinnedData
-        Bin specification passed to ``calc_bins_intervals``. A
+        Bin specification of the ``FixedGrid``; see its constructor. A
         ``BinnedData`` is shared: its bins and bin codes for the columns named
         ``x.name`` and ``y.name`` are used, ``logx``, ``logy`` and ``clip``
         default to its settings for those columns (an explicit, differing
@@ -103,9 +101,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
     Notes
     -----
-    ``calc_bins_intervals`` computes the bins, ``make_cut`` assigns each point
-    to a bin, ``agg`` aggregates and normalizes, and ``make_plot`` draws the
-    result with an optional colorbar.
+    The constructor bins the points on a 2-D
+    :class:`~solarwindpy.plotting.binning.FixedGrid`; ``agg`` aggregates and
+    normalizes, and ``make_plot`` draws the result with an optional colorbar.
     """
 
     def __init__(
@@ -123,31 +121,21 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     ):
         r"""Store the data, labels and normalization, then bin the data."""
         super().__init__()
-        log, clip = self._inherit(
+        self._set_grid_data(
+            {"x": x, "y": y, "z": z},
             nbins,
-            {"x": getattr(x, "name", None), "y": getattr(y, "name", None)},
             {"x": logx, "y": logy},
-            self._clip_by_axis(clip),
+            clip,
             bin_precision,
+            mask,
         )
-        self.set_log(**log)
-        within = nbins if isinstance(nbins, BinnedData) else None
-        self._set_data(x, y, z, clip, mask=mask, within=within)
-        self.set_labels(
-            x="x", y="y", z=labels.special.Count(norm=axnorm) if z is None else "z"
-        )
-
-        self.set_axnorm(axnorm)
-        self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
-        self.make_cut()
         self.set_clim(None, None)
+        self.set_axnorm(axnorm)
+        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
 
     # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
     _log_data = True
-
-    @property
-    def _gb_axes(self):
-        return ("x", "y")
+    _grid_axes = ("x", "y")
 
     def _maybe_convert_to_log_scale(self, x, y):
         if self.log.x:
@@ -157,118 +145,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return x, y
 
-    def set_labels(self, **kwargs):
-        r"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""
-        z = kwargs.pop("z", self.labels.z)
-        if isinstance(z, labels.special.Count):
-            try:
-                z.set_axnorm(self.axnorm)
-            except AttributeError:
-                pass
-
-            z.build_label()
-
-        super().set_labels(z=z, **kwargs)
-
-    def set_axnorm(self, new):
-        r"""The method by which the gridded data is normalized.
-
-        ===== =============================================================
-         key                           description
-        ===== =============================================================
-         c     Column normalize
-         d     Density normalize
-         r     Row normalize
-         t     Divide by the maximum (peak equals 1)
-         cd    PDFs in each column
-         rd    PDFs in each row
-        ===== ============================================================="""
-        new = self._validate_axnorm(new, ("c", "r", "t", "d", "cd", "rd"))
-
-        zlbl = self.labels.z
-        if isinstance(zlbl, labels.special.Count):
-            zlbl.set_axnorm(new)
-            zlbl.build_label()
-
-        self._axnorm = new
-
-    def _axis_normalizer(self, agg):
-        r"""Takes care of row, column, total, and density normaliation.
-
-        On a log axis the densities ("d", "cd", "rd") are normalised over
-        ``log10`` of that axis: the bins are log-space intervals, so cell areas
-        on the log axes sum to 1.
-        """
-
-        axnorm = self.axnorm
-        if axnorm is None:
-            pass
-        elif axnorm == "c":
-            agg = agg.divide(agg.groupby(level="x").max(), level="x")
-        elif axnorm == "r":
-            agg = agg.divide(agg.groupby(level="y").max(), level="y")
-        elif axnorm == "t":
-            agg = self._divide_by_max(agg)
-        elif axnorm == "d":
-            N = agg.sum().sum()
-            # Widths are in the binned variable, log10 on a log axis.
-            dx = self._bin_widths(self.intervals["x"])
-            dy = self._bin_widths(self.intervals["y"])
-            agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
-
-        elif axnorm == "cd":
-            N = agg.groupby(level="x").sum()
-            dy = self._bin_widths(self.intervals["y"])
-            # Divide by total in each column and each row's width
-            agg = agg.divide(N, level="x").divide(dy, level="y")
-
-        elif axnorm == "rd":
-            N = agg.groupby(level="y").sum()
-            dx = self._bin_widths(self.intervals["x"])
-            # Divide by total in each column and each row's width
-            agg = agg.divide(N, level="y").divide(dx, level="x")
-
-        return agg
-
-    def agg(self, **kwargs):
-        r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
-
-        Every (x, y) bin is present in the result, indexed by its x and y
-        intervals; a bin no row falls in, or outside ``alim``, is NaN.
-        ``kwargs`` are passed to ``AggPlot.agg``, which normalizes.
-        """
-        return self._apply_alim(super().agg(**kwargs))
-
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
         return super()._make_cbar(mappable, ticks=ticks, **kwargs)
-
-    @staticmethod
-    def _default_norm(axnorm):
-        r"""The colour normalisation a plot uses when the caller passes no ``norm``.
-
-        Parameters
-        ----------
-        axnorm : str or None
-            The histogram's ``axnorm``.
-
-        Returns
-        -------
-        matplotlib.colors.Normalize or None
-            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
-            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
-            ``"cd"``, ``"rd"``) span decades, so they get a clipped
-            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
-            choice to matplotlib.
-        """
-        if axnorm in ("c", "r"):
-            return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-        if axnorm in ("d", "cd", "rd"):
-            return mpl.colors.LogNorm(clip=True)
-        return None
 
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
@@ -898,12 +780,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         if only_plotted:
             keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
         if not project_counts and other != "z":
-            keep &= self._bin_codes()[other] >= 0
+            keep &= self.binning.axis_codes()[other] >= 0
 
         # The Hist1D finds the axis in the BinnedData by its name and reads
         # its codes; the measured values are sent on the source's own index,
         # with a mask, so no row is looked up by label.
-        column = self._bin_columns[axis]
+        column = self.binning.columns[axis]
         x = self._on_source_index(x).rename(column)
         y = None
         if not project_counts:
@@ -912,7 +794,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         h1 = Hist1D(
             x,
             y=y,
-            nbins=self._binned,
+            nbins=self.binning.binned,
             mask=self._on_source_index(pd.Series(keep)),
             **kwargs,
         )

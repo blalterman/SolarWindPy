@@ -51,7 +51,7 @@ def hist2d_instance():
 # input rather than a recorded output.
 #
 # Both edge arrays are exact at 5 decimal places, which is the precision at
-# which `calc_bins_intervals` stores interval endpoints; choosing them that way
+# which `FixedGrid` stores interval endpoints; choosing them that way
 # keeps rounding out of the comparisons.
 # ---------------------------------------------------------------------------
 
@@ -454,7 +454,7 @@ class TestPlotContours:
 
 
 class TestBinContract:
-    """What `calc_bins_intervals` promises about the bins it produces.
+    """What the `FixedGrid` promises about the bins it produces.
 
     The docstring names `np.histogram_bin_edges` as the source of the edges for
     an integer/str `nbins`, so numpy supplies the expectation directly.

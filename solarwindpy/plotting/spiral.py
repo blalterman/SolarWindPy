@@ -3,6 +3,7 @@ r"""Spiral mesh plots and associated binning utilities."""
 
 __all__ = [
     "SpiralMesh",
+    "AdaptiveMesh",
     "SpiralPlot2D",
 ]
 
@@ -14,7 +15,6 @@ import pandas as pd
 import matplotlib as mpl
 
 from datetime import datetime
-from numbers import Number
 from collections import namedtuple
 from numba import njit, prange
 
@@ -22,7 +22,8 @@ from matplotlib import pyplot as plt
 
 from . import base
 from . import labels
-from .binned import BinnedData
+from .binned import BinnedData, _clip_to_quantiles
+from .binning import Binning
 
 _FLOAT64 = np.finfo(np.float64)
 #: Most times refinement splits a cell before it raises ``ValueError``.
@@ -126,7 +127,7 @@ def _calculate_bin_number_with_numba(mesh, x, y):
         x0, x1, y0, y1 = mesh[i]
 
         # The largest x- and y-edges lie above the data (see
-        # `SpiralPlot2D.calc_initial_bins`), so a plain < needs no <= special case.
+        # `AdaptiveMesh.initial_edges`), so a plain < needs no <= special case.
         tk = (x >= x0) & (x < x1) & (y >= y0) & (y < y1)
 
         zbin[tk] = i
@@ -687,159 +688,58 @@ They will be replaced by NaNs and excluded from the aggregation.
         self._cat = cat
 
 
-class SpiralPlot2D(base.PlotWithZdata, base._CbarMaker):
-    r"""2D spiral plotting with adaptive mesh refinement.
+class AdaptiveMesh(Binning):
+    r"""Bins on a ``SpiralMesh``: cells split into quarters where data is dense.
 
-    Unlike ``Hist2D``, a ``SpiralPlot2D`` does not accept a shared
-    ``BinnedData``: its mesh adapts to its own data, so it always bins the
-    columns it is given. ``make_plot`` draws the cells as one
-    ``PolyCollection``.
-
-    Examples
-    --------
-    splot = SpiralPlot2D(...)
-    splot.initialize_mesh()
+    The mesh starts from a grid of initial edges and splits every cell
+    holding more than ``min_per_bin`` points into four, until none does, so
+    the resolution follows the density of the data. The cells are numbered
+    in the order of ``mesh.mesh``. They are not rows and columns, so only the
+    ``t`` and ``d`` normalizations apply; the cell measure is its area on the
+    binned scale. The mesh's ``cell_filter`` is applied as ``postfilter``.
     """
 
-    def __init__(
-        self,
-        x,
-        y,
-        z=None,
-        logx=None,
-        logy=None,
-        initial_bins=5,
-        clip=None,
-        mask=None,
-    ):
-        r"""Store the data and labels, then compute the initial bin edges.
+    def __init__(self, source, initial_bins, *, min_per_bin, clip):
+        r"""Compute the initial edges, build the mesh and place the rows in it.
 
         Parameters
         ----------
-        x, y : pd.Series
-            Point coordinates.
-        z : pd.Series, optional
-            Value to aggregate in each cell. If None, cells count points.
-        logx, logy : bool or None
-            If True, use ``log10(abs())`` of that coordinate. None means
-            False.
+        source : solarwindpy.plotting.binned._PlotSource
+            The plot's data: x and y, logged where the plot logs them.
         initial_bins : int or tuple
-            Initial bins per axis; see ``calc_initial_bins``.
-        clip : bool, str, Mapping or None
-            If True, clip x and y to their 0.01st and 99.99th percentiles
-            (``Base.clip_data``) when placing points in the mesh; the
-            initial bin edges are computed from the unclipped data. ``"l"`` or
-            ``"u"`` clips only the lower or upper tail; a mapping such as
-            ``{"y": "u"}`` sets each axis on its own. Clipping limits x and
-            y only; z is aggregated unclipped. None means False. Stored as
-            ``clip``, a ``ClipAxes``.
-        mask : pd.Series of bool, optional
-            Rows to keep, aligned by label to the index of x and y. A point
-            is placed in the mesh where it is True and x, y and z are not NaN.
-
-        Raises
-        ------
-        TypeError
-            If ``initial_bins`` is or holds a ``BinnedData``: the mesh adapts
-            to the data, so its cells cannot be shared bins.
+            Initial bins per axis; see ``initial_edges``.
+        min_per_bin : int
+            A cell holding more points than this is split.
+        clip : ClipAxes
+            Each of x and y whose field is set is clipped with
+            ``Base.clip_data`` before the points are placed; the initial
+            edges are computed from the unclipped data.
         """
-        if isinstance(initial_bins, BinnedData) or (
-            isinstance(initial_bins, (tuple, list))
-            and any(isinstance(b, BinnedData) for b in initial_bins)
-        ):
-            raise TypeError(
-                "SpiralPlot2D builds an adaptive mesh from its own data and "
-                "cannot use a shared BinnedData; pass x and y instead."
-            )
-        super().__init__()
-        self.set_log(x=bool(logx), y=bool(logy))
-        self._set_data(x, y, z, clip, mask=mask)
-        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
-        self.calc_initial_bins(initial_bins)
-        self.set_clim(None, None)
+        self._initial_bins = self.initial_edges(source, initial_bins)
+        # The coordinates only, as the plot's `data` holds them: no copy when
+        # every row is kept and the axis is linear.
+        x = source.logged("x")
+        y = source.logged("y")
+        if clip.x:
+            x = _clip_to_quantiles(x, clip.x)
+        if clip.y:
+            y = _clip_to_quantiles(y, clip.y)
 
-    # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
-    _log_data = True
+        edges = dict(self._initial_bins)
+        mesh = SpiralMesh(x, y, edges["x"], edges["y"], min_per_bin=min_per_bin)
+        # Attach the mesh before refining it, which makes debugging easier.
+        self._mesh = mesh
+        mesh.place_spectra_in_mesh(progress=False)
+        mesh.build_cat()
 
-    @property
-    def clim(self):
-        r"""``RangeLimits`` of the minimum and maximum counts per cell."""
-        return self._clim
-
-    @property
-    def initial_bins(self):
-        r"""Dict of the initial x and y bin edges."""
-        return dict(self._initial_bins)
-
-    @property
-    def grouped(self):
-        r"""z-values grouped by mesh cell, set by ``build_grouped``."""
-        return self._grouped
-
-    @property
-    def mesh(self):
-        r"""The ``SpiralMesh``, set by ``initialize_mesh``."""
-        return self._mesh
-
-    def agg(self, fcn=None):
-        r"""Aggregate the z-values into their cells.
-
-        ``clim``, the mesh's ``cell_filter`` and ``alim`` are applied in that
-        order; a cell removed by any of them is NaN.
-        """
-        self.logger.debug("aggregating z-data")
-
-        if fcn is None:
-            fcn = "count" if self._source.counts else "mean"
-
-        gb = self.grouped
-        agg = gb.agg(fcn)
-
-        c0, c1 = self.clim
-        if c0 is not None or c1 is not None:
-            cnt = gb.agg("count")
-            tk = pd.Series(True, index=agg.index)
-
-            if c0 is not None:
-                tk = tk & (cnt >= c0)
-            if c1 is not None:
-                tk = tk & (cnt <= c1)
-
-            agg = agg.where(tk)
-
-        # reindex to ensure we have a z-value for every bin.
-        reindex = pd.RangeIndex(start=0, stop=self.mesh.mesh.shape[0], step=1)
-        agg = agg.reindex(reindex)
-
-        agg = agg.where(self.mesh.cell_filter, axis=0)
-
-        return self._apply_alim(agg)
-
-    def build_grouped(self):
-        r"""Group the z-values by mesh cell and store the result in ``grouped``.
-
-        Raises
-        ------
-        ValueError
-            If the mesh categories and the data differ in length.
-        """
-        cat = self.mesh.cat
-        z = self._source.take("z")
-
-        if not (cat.size == z.size):
-            raise ValueError(f"""`cat` must have same size as data's first dimesion
-cat  : {cat.size}
-data : {z.size}
-""")
-
-        gb = z.groupby(cat)
-        self._grouped = gb
-
-    def calc_initial_bins(self, nbins):
+    @staticmethod
+    def initial_edges(source, nbins):
         r"""Compute the initial bin edges for x and y.
 
         Parameters
         ----------
+        source : solarwindpy.plotting.binned._PlotSource
+            The plot's data.
         nbins : int or tuple
             An int gives that many bins per axis at equally spaced quantiles of
             the finite data; a pair gives one int or edge array per axis. The
@@ -852,7 +752,6 @@ data : {z.size}
         tuple
             ``(("x", edges), ("y", edges))``.
         """
-        data = self.data
         keys = ("x", "y")
         bins = {}
 
@@ -871,7 +770,11 @@ data : {z.size}
         for k, b in nbins.items():
             # Numpy and Astropy don't like NaNs when calculating bins.
             # Infinities in bins (typically from log10(0)) also create problems.
-            d = data.loc[:, k].replace([-np.inf, np.inf], np.nan).dropna()
+            d = (
+                source.logged(k, labels=False)
+                .replace([-np.inf, np.inf], np.nan)
+                .dropna()
+            )
 
             if not isinstance(b, (int, np.ndarray)):
                 raise TypeError("Only want in integer or np.ndarrays for initial edges")
@@ -897,46 +800,149 @@ data : {z.size}
 
             bins[k] = b
 
-        bins = tuple(bins.items())
-        self._initial_bins = bins
-        return bins
+        return tuple(bins.items())
 
-    def initialize_mesh(self, *, progress=True, **kwargs):
-        r"""Build the ``SpiralMesh`` and assign every point to a cell.
+    @property
+    def initial_bins(self):
+        r"""Dict of the initial x and y bin edges."""
+        return dict(self._initial_bins)
 
-        ``progress`` is passed to ``SpiralMesh.generate_mesh``; ``kwargs`` are
-        passed to ``SpiralMesh``, e.g. ``min_per_bin``. Each of x and y whose
-        field of ``clip`` is set is clipped with ``Base.clip_data`` before
-        the points are placed in the mesh.
+    @property
+    def mesh(self):
+        r"""The ``SpiralMesh``."""
+        return self._mesh
+
+    @property
+    def allowed_axnorm(self):
+        r"""``d`` and ``t``: the mesh has no rows or columns to normalize."""
+        return ("d", "t")
+
+    @property
+    def cells(self):
+        r"""Every cell, a ``RangeIndex`` over the rows of ``mesh.mesh``."""
+        return pd.RangeIndex(self._mesh.mesh.shape[0])
+
+    def codes(self):
+        r"""Cell of each kept row, -1 for a row outside the mesh."""
+        bin_id = self._mesh.bin_id
+        ids = np.asarray(bin_id.id, dtype=np.intp)
+        return np.where(ids == bin_id.fill, -1, ids)
+
+    def cell_measure(self):
+        r"""Each cell's area, ``dx * dy`` on the binned scale."""
+        m = self._mesh.mesh
+        return (m[:, 1] - m[:, 0]) * (m[:, 3] - m[:, 2])
+
+    def postfilter(self, agg):
+        r"""Set to NaN the cells of ``agg`` that ``mesh.cell_filter`` drops."""
+        keep = self._mesh.cell_filter[agg.index.to_numpy()]
+        return agg.where(pd.Series(keep, index=agg.index), axis=0)
+
+
+class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
+    r"""2D spiral plotting with adaptive mesh refinement.
+
+    The constructor builds the adaptive mesh
+    (:class:`AdaptiveMesh`): it gives resolution where the data is dense,
+    to show structure and boundaries that a coarse average hides. Unlike
+    ``Hist2D``, a ``SpiralPlot2D`` does not accept a shared ``BinnedData``:
+    its mesh adapts to its own data, so it always bins the columns it is
+    given. ``make_plot`` draws the cells as one ``PolyCollection``.
+
+    Examples
+    --------
+    splot = SpiralPlot2D(x, y, z, min_per_bin=100)
+    ax, cbar = splot.make_plot()
+    """
+
+    def __init__(
+        self,
+        x,
+        y,
+        z=None,
+        logx=None,
+        logy=None,
+        initial_bins=5,
+        clip=None,
+        mask=None,
+        *,
+        axnorm=None,
+        min_per_bin=250,
+    ):
+        r"""Store the data and labels, then build the adaptive mesh.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        z : pd.Series, optional
+            Value to aggregate in each cell. If None, cells count points.
+        logx, logy : bool or None
+            If True, use ``log10(abs())`` of that coordinate. None means
+            False.
+        initial_bins : int or tuple
+            Initial bins per axis; see ``AdaptiveMesh.initial_edges``.
+        clip : bool, str, Mapping or None
+            If True, clip x and y to their 0.01st and 99.99th percentiles
+            (``Base.clip_data``) when placing points in the mesh; the
+            initial bin edges are computed from the unclipped data. ``"l"`` or
+            ``"u"`` clips only the lower or upper tail; a mapping such as
+            ``{"y": "u"}`` sets each axis on its own. Clipping limits x and
+            y only; z is aggregated unclipped. None means False. Stored as
+            ``clip``, a ``ClipAxes``.
+        mask : pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y. A point
+            is placed in the mesh where it is True and x, y and z are not NaN.
+        axnorm : {"t", "d", None}, optional
+            Normalization of the aggregated values: ``"t"`` divides by the
+            maximum, ``"d"`` gives a density over the cells' areas.
+        min_per_bin : int
+            A mesh cell holding more points than this is split into four.
+
+        Raises
+        ------
+        TypeError
+            If ``initial_bins`` is or holds a ``BinnedData``: the mesh adapts
+            to the data, so its cells cannot be shared bins.
+        ValueError
+            If more than ``min_per_bin`` points are identical in both x and
+            y, so no number of splits separates them.
         """
-        # The coordinates only, as `data` holds them: no copy when every row
-        # is kept and the axis is linear.
-        x = self._source.logged("x")
-        y = self._source.logged("y")
-        if self.clip.x:
-            x = self.clip_data(x, self.clip.x)
-        if self.clip.y:
-            y = self.clip_data(y, self.clip.y)
+        if isinstance(initial_bins, BinnedData) or (
+            isinstance(initial_bins, (tuple, list))
+            and any(isinstance(b, BinnedData) for b in initial_bins)
+        ):
+            raise TypeError(
+                "SpiralPlot2D builds an adaptive mesh from its own data and "
+                "cannot use a shared BinnedData; pass x and y instead."
+            )
+        super().__init__()
+        self.set_log(x=bool(logx), y=bool(logy))
+        self._set_data(x, y, z, clip, mask=mask)
+        self._binning = AdaptiveMesh(
+            self._source, initial_bins, min_per_bin=min_per_bin, clip=self.clip
+        )
+        self.set_clim(None, None)
+        self.set_axnorm(axnorm)
+        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
 
-        xbins = self.initial_bins["x"]
-        ybins = self.initial_bins["y"]
+    # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
+    _log_data = True
 
-        mesh = SpiralMesh(x, y, xbins, ybins, **kwargs)
-        # Attach mesh before anything else.
-        # Makes debugging easier.
-        self._mesh = mesh
+    @property
+    def initial_bins(self):
+        r"""Dict of the initial x and y bin edges."""
+        return self.binning.initial_bins
 
-        mesh.place_spectra_in_mesh(progress=progress)
-        mesh.build_cat()
+    @property
+    def mesh(self):
+        r"""The ``SpiralMesh`` the constructor built."""
+        return self.binning.mesh
 
-    def set_clim(self, lower=None, upper=None):
-        """Set the min (lower) and max (upper) counts per bin.
-
-        This limit is applied after the groupby aggregation in ``agg``.
-        """
-        assert isinstance(lower, Number) or lower is None
-        assert isinstance(upper, Number) or upper is None
-        self._clim = base.RangeLimits(lower, upper)
+    @property
+    def grouped(self):
+        r"""z-values grouped by mesh cell."""
+        return self._source.take("z").groupby(self.mesh.cat)
 
     def make_plot(
         self,
@@ -1024,7 +1030,7 @@ data : {z.size}
         collection.set_array(C)
 
         cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", None)
+        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
 
@@ -1035,15 +1041,14 @@ data : {z.size}
 
         ax.add_collection(collection, autolim=False)
 
-        minx = xmesh[:, 0].min()
-        miny = ymesh[:, 0].min()
-        maxx = xmesh[:, 1].max()
-        maxy = ymesh[:, 1].max()
-        collection.sticky_edges.x[:] = [minx, maxx]
-        collection.sticky_edges.y[:] = [miny, maxy]
-        corners = (minx, miny), (maxx, maxy)
-        ax.update_datalim(corners)
-        ax.autoscale_view()
+        self._fit_view(
+            ax,
+            collection,
+            xmesh[:, 0].min(),
+            xmesh[:, 1].max(),
+            ymesh[:, 0].min(),
+            ymesh[:, 1].max(),
+        )
 
         cbar_or_mappable = collection
         if cbar:
@@ -1251,9 +1256,7 @@ data : {z.size}
         >>> x = pd.Series(rng.uniform(1, 100, 500))
         >>> y = pd.Series(rng.uniform(1, 100, 500))
         >>> z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
-        >>> splot = SpiralPlot2D(x, y, z, initial_bins=5)
-        >>> splot.initialize_mesh(min_per_bin=10)
-        >>> splot.build_grouped()
+        >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
 
         >>> # Default: sparse RBF (fastest)
         >>> ax, cbar, qset = splot.plot_contours()

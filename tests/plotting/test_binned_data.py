@@ -737,9 +737,7 @@ class TestClipAxes:
         x = pd.Series([1.99] + [3.0] * 99 + [4.01])
         y = pd.Series([0.5] * 101)
         edges = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
-        splot = SpiralPlot2D(x, y, initial_bins=edges, clip=clip)
-        splot.initialize_mesh(min_per_bin=101, progress=False)
-        splot.build_grouped()
+        splot = SpiralPlot2D(x, y, initial_bins=edges, clip=clip, min_per_bin=101)
         assert splot.agg().tolist() == exact(counts, nan_ok=True)
 
     @pytest.mark.parametrize(

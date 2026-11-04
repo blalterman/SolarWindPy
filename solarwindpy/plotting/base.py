@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 r"""Base classes for plotting utilities.
 
-This module defines abstract helpers that manage axis labels, log scaling, and file
-system paths for saving figures.  Concrete plot classes derive from these mixins to
-implement specific visualizations.
+``Base`` manages the data, axis labels, log scaling, and the path for saving
+figures that every plot shares. ``ColorPlot`` adds a z value shown on a
+colorbar; ``BinnedPlot`` aggregates a value in the cells of a
+:class:`~solarwindpy.plotting.binning.Binning`. Concrete plots derive from
+them.
 """
 
 __all__ = [
@@ -12,12 +14,14 @@ __all__ = [
     "AxesLabels",
     "RangeLimits",
     "Base",
-    "PlotWithZdata",
+    "ColorPlot",
+    "BinnedPlot",
 ]
 
 import logging
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
 
 from numbers import Number
 from pathlib import Path
@@ -25,7 +29,9 @@ from collections import namedtuple
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
-from .binned import _PlotSource, _clip_kind, _clip_to_quantiles
+from . import labels
+from .binned import BinnedData, _PlotSource, _clip_kind, _clip_to_quantiles
+from .binning import FixedGrid
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 #: Clip setting per axis: False, True, or a clip string (see ``Base.clip_data``).
@@ -391,8 +397,231 @@ class Base(ABC):
         pass
 
 
-class _CbarMaker(ABC):
-    r"""Mixin that draws a colorbar labelled with ``labels.z``."""
+class ColorPlot(Base):
+    r"""Base for plots of x and y coloured by a z value, with a colorbar.
+
+    Holds the data intake of (x, y, z), the z label the colorbar shows, and
+    ``alim``, the limits on the coloured values.
+    """
+
+    _alim = RangeLimits(None, None)
+    _alim_kind = "value"
+    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    _log_data = False
+
+    @property
+    def alim(self):
+        r"""``RangeLimits`` on the aggregated value; see ``set_alim``."""
+        return self._alim
+
+    @property
+    def alim_kind(self):
+        r"""``"value"`` or ``"quantile"``: how ``alim`` is read; see ``set_alim``."""
+        return self._alim_kind
+
+    def set_alim(self, lower=None, upper=None, kind="value"):
+        r"""Set the minimum (lower) and maximum (upper) allowed aggregated value.
+
+        Unlike ``clim``, which limits the number of points in a bin, ``alim``
+        limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
+        any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
+        inclusive and None leaves that side open. A ``Scatter`` applies
+        ``alim`` to the z of each point and does not draw the points outside.
+
+        Parameters
+        ----------
+        lower, upper : float or None
+            The limits.
+        kind : {"value", "quantile"}
+            ``"value"``: the limits are aggregated values. ``"quantile"``: the
+            limits are quantiles in [0, 1] of the final aggregated values,
+            computed with :func:`numpy.nanquantile` over the finite values
+            (NaN and inf excluded) each time the plot aggregates. The
+            quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
+            or ``"r"`` they are taken over the whole grid, not per column or
+            row.
+
+        Raises
+        ------
+        ValueError
+            If ``kind`` is not ``"value"`` or ``"quantile"``, if ``lower`` is
+            not less than ``upper``, or, for ``"quantile"``, if a limit is
+            outside [0, 1].
+        """
+        if kind not in ("value", "quantile"):
+            raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
+        assert isinstance(lower, Number) or lower is None
+        assert isinstance(upper, Number) or upper is None
+        if kind == "quantile":
+            for name, q in (("lower", lower), ("upper", upper)):
+                if q is not None and not 0 <= q <= 1:
+                    raise ValueError(
+                        f"quantile alim {name}={q} must be between 0 and 1"
+                    )
+        if lower is not None and upper is not None and not lower < upper:
+            raise ValueError(
+                f"{kind} alim lower={lower} must be less than upper={upper}"
+            )
+        self._alim = RangeLimits(lower, upper)
+        self._alim_kind = kind
+
+    def _apply_alim(self, agg):
+        r"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            The final aggregated values, one per bin or cell, or for a
+            ``Scatter`` the z of each plotted point. With
+            ``alim_kind == "quantile"`` the thresholds are quantiles of all
+            of its finite entries.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` with every entry outside ``alim`` replaced by NaN.
+        """
+        lower, upper = self.alim
+        if lower is None and upper is None:
+            return agg
+
+        if self.alim_kind == "quantile":
+            values = agg.to_numpy(dtype=float)
+            values = values[np.isfinite(values)]
+            if values.size == 0:
+                return agg
+            if lower is not None:
+                lower = np.nanquantile(values, lower)
+            if upper is not None:
+                upper = np.nanquantile(values, upper)
+
+        keep = pd.Series(True, index=agg.index)
+        if lower is not None:
+            keep = keep & (agg >= lower)
+        if upper is not None:
+            keep = keep & (agg <= upper)
+
+        return agg.where(keep)
+
+    def _limit_values(self, agg):
+        r"""Apply ``alim`` to the aggregated values; see ``BinnedPlot.agg``."""
+        return self._apply_alim(agg)
+
+    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
+        r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
+
+        Called only by the constructor.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Coordinates of each point.
+        z : pd.Series, optional
+            Value at each point. If None, every point gets ``z = 1``.
+        clip : bool, str, Mapping or None, optional
+            Stored as ``self.clip``, a ``ClipAxes``, None as False. A scalar
+            applies to every axis in ``_clipped_axes``; a mapping such as
+            ``{"y": "u"}`` sets single axes. True clips both tails; ``"l"``
+            or ``"u"`` clips only the lower or upper tail (see
+            ``Base.clip_data``).
+        mask : pd.Series of bool, optional
+            Rows to keep, aligned by label to the index of x and y; a row is
+            kept where it is True and x, y and z are neither NaN nor +/-inf,
+            a logarithmic axis taken after ``log10(abs())``.
+        within : BinnedData, optional
+            The shared ``BinnedData`` passed as ``nbins``: rows its own mask
+            excludes are not kept either.
+
+        Raises
+        ------
+        TypeError
+            If ``mask`` is not a boolean ``pd.Series``.
+        KeyError
+            If ``clip`` names an axis the plot does not clip.
+        ValueError
+            If no row is left, or ``mask`` lacks a label or holds NaN; if
+            ``clip`` holds a string ``Base.clip_data`` does not accept; or if
+            the plot's data is already set.
+        """
+        self._claim_data()
+        log = self.log._asdict() if self._log_data else None
+        self._source = _PlotSource(
+            {"x": x, "y": y},
+            "z",
+            z,
+            log=log,
+            owner=self.__class__.__name__,
+            mask=mask,
+            within=within,
+        )
+        self._store_clip(clip)
+        self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
+        self._bin_index = getattr(x, "index", None)
+
+    def set_path(self, new, add_scale=True):
+        # Bug: path doesn't auto-set log information.
+        path, x, y, z, scale_info = super().set_path(new, add_scale)
+
+        if new == "auto":
+            path = path / x / y / z
+
+        else:
+            assert x is None
+            assert y is None
+            assert z is None
+
+        if add_scale:
+            assert scale_info is not None
+
+            scale_info = "-".join(scale_info)
+
+            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
+                # Insert <norm> at end of path so scale order is (x, y, z).
+                path = path.parts
+                path = path[:-1] + (scale_info + "-" + path[-1],)
+                path = Path(*path)
+            else:
+                path = path / scale_info
+
+        self._path = path
+
+    set_path.__doc__ = Base.set_path.__doc__
+
+    @staticmethod
+    def _default_norm(axnorm):
+        r"""The colour normalisation a plot uses when the caller passes no ``norm``.
+
+        Parameters
+        ----------
+        axnorm : str or None
+            The plot's ``axnorm``.
+
+        Returns
+        -------
+        matplotlib.colors.Normalize or None
+            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
+            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
+            ``"cd"``, ``"rd"``) span decades, so they get a clipped
+            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
+            choice to matplotlib.
+        """
+        if axnorm in ("c", "r"):
+            return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
+        if axnorm in ("d", "cd", "rd"):
+            return mpl.colors.LogNorm(clip=True)
+        return None
+
+    @staticmethod
+    def _fit_view(ax, artist, minx, maxx, miny, maxy):
+        r"""Fit ``ax``'s view to ``[minx, maxx] x [miny, maxy]``, the extent of ``artist``.
+
+        The sticky edges keep autoscaling from padding past the data, as
+        ``ax.pcolormesh`` does for its mesh.
+        """
+        artist.sticky_edges.x[:] = [minx, maxx]
+        artist.sticky_edges.y[:] = [miny, maxy]
+        ax.update_datalim(((minx, miny), (maxx, maxy)))
+        ax.autoscale_view()
 
     @staticmethod
     def _prepare_cbar_kwargs(cbar_kwargs, ax=None):
@@ -475,189 +704,338 @@ class _CbarMaker(ABC):
         return cbar
 
 
-class PlotWithZdata(Base):
-    r"""Base for plots of x, y data with an optional z value per point."""
+class BinnedPlot(Base):
+    r"""Base for plots that aggregate a value in the cells of a ``Binning``.
 
-    _alim = (None, None)
-    _alim_kind = "value"
-    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
-    _log_data = False
+    The plot's ``binning`` places each kept row in one cell. ``agg`` groups
+    the aggregated column by cell, applies ``clim`` to the count in each
+    cell, drops the cells the binning filters out, normalizes by ``axnorm``
+    with the cells' measure, and returns every cell. A ``ColorPlot`` then
+    applies ``alim``.
+    """
+
+    _axnorm = None
+    _clim = RangeLimits(None, None)
 
     @property
-    def alim(self):
-        r"""``(lower, upper)`` limits on the aggregated value; see ``set_alim``."""
-        return self._alim
+    def binning(self):
+        r"""The ``Binning`` that places each kept row in a cell."""
+        return self._binning
 
     @property
-    def alim_kind(self):
-        r"""``"value"`` or ``"quantile"``: how ``alim`` is read; see ``set_alim``."""
-        return self._alim_kind
+    def clim(self):
+        r"""``RangeLimits`` of the minimum and maximum counts per cell; see ``set_clim``."""
+        return self._clim
 
-    def set_alim(self, lower=None, upper=None, kind="value"):
-        r"""Set the minimum (lower) and maximum (upper) allowed aggregated value.
+    def set_clim(self, lower=None, upper=None):
+        r"""Set the minimum (lower) and maximum (upper) allowed counts per cell.
 
-        Unlike ``clim``, which limits the number of points in a bin, ``alim``
-        limits the value a bin aggregates to, after ``axnorm``, ``clim`` and
-        any cell filter. Bins outside ``[lower, upper]`` become NaN; bounds are
-        inclusive and None leaves that side open. A ``Scatter`` applies
-        ``alim`` to the z of each point and does not draw the points outside.
-
-        Parameters
-        ----------
-        lower, upper : float or None
-            The limits.
-        kind : {"value", "quantile"}
-            ``"value"``: the limits are aggregated values. ``"quantile"``: the
-            limits are quantiles in [0, 1] of the final aggregated values,
-            computed with :func:`numpy.nanquantile` over the finite values
-            (NaN and inf excluded) each time the plot aggregates. The
-            quantiles pool every bin of the plot: with ``axnorm`` of ``"c"``
-            or ``"r"`` they are taken over the whole grid, not per column or
-            row.
-
-        Raises
-        ------
-        ValueError
-            If ``kind`` is not ``"value"`` or ``"quantile"``, if ``lower`` is
-            not less than ``upper``, or, for ``"quantile"``, if a limit is
-            outside [0, 1].
+        A cell with fewer than ``lower`` or more than ``upper`` rows is NaN in
+        ``agg``. Bounds are inclusive; None leaves that side open.
         """
-        if kind not in ("value", "quantile"):
-            raise ValueError(f"alim kind must be 'value' or 'quantile', not {kind!r}")
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
-        if kind == "quantile":
-            for name, q in (("lower", lower), ("upper", upper)):
-                if q is not None and not 0 <= q <= 1:
-                    raise ValueError(
-                        f"quantile alim {name}={q} must be between 0 and 1"
-                    )
-        if lower is not None and upper is not None and not lower < upper:
-            raise ValueError(
-                f"{kind} alim lower={lower} must be less than upper={upper}"
-            )
-        self._alim = (lower, upper)
-        self._alim_kind = kind
+        self._clim = RangeLimits(lower, upper)
 
-    def _apply_alim(self, agg):
-        r"""Set to NaN the entries of ``agg`` outside ``alim``, bounds inclusive.
+    @property
+    def axnorm(self):
+        r"""Data normalization in plot.
 
-        Parameters
-        ----------
-        agg : pd.Series
-            The final aggregated values, one per bin or cell, or for a
-            ``Scatter`` the z of each plotted point. With
-            ``alim_kind == "quantile"`` the thresholds are quantiles of all
-            of its finite entries.
-
-        Returns
-        -------
-        pd.Series
-            ``agg`` with every entry outside ``alim`` replaced by NaN.
+        Not `mpl.colors.Normalize` instance. That is passed as a `kwarg` to
+        `make_plot`.
         """
-        lower, upper = self.alim
-        if lower is None and upper is None:
-            return agg
+        return self._axnorm
 
-        if self.alim_kind == "quantile":
-            values = agg.to_numpy(dtype=float)
-            values = values[np.isfinite(values)]
-            if values.size == 0:
-                return agg
-            if lower is not None:
-                lower = np.nanquantile(values, lower)
-            if upper is not None:
-                upper = np.nanquantile(values, upper)
+    def set_axnorm(self, new):
+        r"""Set how ``agg`` normalizes the aggregated values.
 
-        keep = pd.Series(True, index=agg.index)
-        if lower is not None:
-            keep = keep & (agg >= lower)
-        if upper is not None:
-            keep = keep & (agg <= upper)
-
-        return agg.where(keep)
-
-    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
-        r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
-
-        Called only by the constructor.
-
-        Parameters
-        ----------
-        x, y : pd.Series
-            Coordinates of each point.
-        z : pd.Series, optional
-            Value at each point. If None, every point gets ``z = 1``.
-        clip : bool, str, Mapping or None, optional
-            Stored as ``self.clip``, a ``ClipAxes``, None as False. A scalar
-            applies to every axis in ``_clipped_axes``; a mapping such as
-            ``{"y": "u"}`` sets single axes. True clips both tails; ``"l"``
-            or ``"u"`` clips only the lower or upper tail (see
-            ``Base.clip_data``).
-        mask : pd.Series of bool, optional
-            Rows to keep, aligned by label to the index of x and y; a row is
-            kept where it is True and x, y and z are neither NaN nor +/-inf,
-            a logarithmic axis taken after ``log10(abs())``.
-        within : BinnedData, optional
-            The shared ``BinnedData`` passed as ``nbins``: rows its own mask
-            excludes are not kept either.
+        The keys the plot's cells support are ``binning.allowed_axnorm``; see
+        ``binning.normalize``. A ``Count`` label on the aggregated axis is
+        rebuilt to name the normalization.
 
         Raises
         ------
         TypeError
-            If ``mask`` is not a boolean ``pd.Series``.
-        KeyError
-            If ``clip`` names an axis the plot does not clip.
+            If ``new`` is neither a string nor None.
         ValueError
-            If no row is left, or ``mask`` lacks a label or holds NaN; if
-            ``clip`` holds a string ``Base.clip_data`` does not accept; or if
-            the plot's data is already set.
+            If ``new`` is not a key the cells support.
         """
-        self._claim_data()
-        log = self.log._asdict() if self._log_data else None
-        self._source = _PlotSource(
-            {"x": x, "y": y},
-            "z",
-            z,
-            log=log,
-            owner=self.__class__.__name__,
-            mask=mask,
-            within=within,
-        )
-        self._store_clip(clip)
-        self._bin_names = {"x": getattr(x, "name", None), "y": getattr(y, "name", None)}
-        self._bin_index = getattr(x, "index", None)
+        self._axnorm = self._validate_axnorm(new, self.binning.allowed_axnorm)
+        self._count_with_axnorm(getattr(self.labels, self.agg_axes))
 
-    def set_path(self, new, add_scale=True):
-        # Bug: path doesn't auto-set log information.
-        path, x, y, z, scale_info = super().set_path(new, add_scale)
-
-        if new == "auto":
-            path = path / x / y / z
-
-        else:
-            assert x is None
-            assert y is None
-            assert z is None
-
-        if add_scale:
-            assert scale_info is not None
-
-            scale_info = "-".join(scale_info)
-
-            if bool(len(path.parts)) and path.parts[-1].endswith("norm"):
-                # Insert <norm> at end of path so scale order is (x, y, z).
-                path = path.parts
-                path = path[:-1] + (scale_info + "-" + path[-1],)
-                path = Path(*path)
-            else:
-                path = path / scale_info
-
-        self._path = path
-
-    set_path.__doc__ = Base.set_path.__doc__
+    def _count_with_axnorm(self, label):
+        r"""Rebuild ``label`` with ``axnorm`` if it is a ``Count``; return it."""
+        if isinstance(label, labels.special.Count):
+            label.set_axnorm(self.axnorm)
+            label.build_label()
+        return label
 
     def set_labels(self, **kwargs):
-        r"""Set or update the x, y, or z labels; see ``Base.set_labels``."""
-        z = kwargs.pop("z", self.labels.z)
-        super().set_labels(z=z, **kwargs)
+        r"""Set axis labels; a ``Count`` label of the aggregated axis follows ``axnorm``.
+
+        See ``Base.set_labels``.
+        """
+        axis = self.agg_axes
+        kwargs[axis] = self._count_with_axnorm(
+            kwargs.get(axis, getattr(self.labels, axis))
+        )
+        super().set_labels(**kwargs)
+
+    @staticmethod
+    def _validate_axnorm(new, allowed):
+        r"""Check an ``axnorm`` key and return it in its normalized form.
+
+        Parameters
+        ----------
+        new : str or None
+            The requested key. Matching is case-insensitive and exact.
+        allowed : tuple of str
+            The lowercase keys the plot's cells support.
+
+        Returns
+        -------
+        str or None
+            ``None`` unchanged, otherwise the lowercase key.
+
+        Raises
+        ------
+        TypeError
+            If `new` is neither a string nor None.
+        ValueError
+            If `new` is not one of `allowed`.
+        """
+        if new is None:
+            return None
+        if not isinstance(new, str):
+            raise TypeError(
+                f"axnorm must be a string or None; got {type(new).__name__}"
+            )
+        key = new.lower()
+        if key not in allowed:
+            raise ValueError(
+                f"Unrecognized axnorm '{new}'; expected one of: {', '.join(allowed)}"
+            )
+        return key
+
+    @property
+    def agg_axes(self):
+        r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
+        return self._source.columns[-1]
+
+    def _grouped_by_cell(self):
+        r"""The aggregated column on the rows in a cell, grouped by cell code."""
+        codes = self.binning.codes()
+        # By position: the groups are keyed by `codes`, never by row label.
+        target = self._source.take(self.agg_axes, labels=False)
+        inside = codes >= 0
+        if not inside.all():
+            target = pd.Series(target.array[inside], name=target.name, copy=False)
+            codes = codes[inside]
+        return target.groupby(codes)
+
+    def _limit_values(self, agg):
+        r"""Limits on the final aggregated values: none here; ``ColorPlot`` has ``alim``."""
+        return agg
+
+    def agg(self, fcn=None, **kwargs):
+        r"""Aggregate the values in each cell.
+
+        ``fcn`` allows you to specify a specific function for aggregation.
+        Otherwise, automatically choose "count" or "mean" based on the
+        uniqueness of the aggregated values. ``kwargs`` are passed to the
+        aggregation.
+
+        A cell whose count is outside ``clim`` is NaN, and so is a cell the
+        binning's ``postfilter`` drops. The occupied cells are then
+        normalized by ``axnorm`` (``binning.normalize``). Every cell is in
+        the result, indexed by ``binning.cells``; a cell no row falls in is
+        NaN. A ``ColorPlot`` then sets the cells outside ``alim`` to NaN.
+        """
+        tko = self.agg_axes
+
+        lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
+        self.logger.info(
+            f"Starting {self.__class__.__name__!s} aggregation of ({tko})\n%s",
+            "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
+        )
+
+        gb = self._grouped_by_cell()
+
+        if fcn is None:
+            fcn = "count" if self._source.counts else "mean"
+
+        agg = gb.agg(fcn, **kwargs)
+
+        c0, c1 = self.clim
+        if c0 is not None or c1 is not None:
+            cnt = gb.agg("count")
+            tk = pd.Series(True, index=agg.index)
+            if c0 is not None:
+                tk = tk & (cnt >= c0)
+            if c1 is not None:
+                tk = tk & (cnt <= c1)
+
+            agg = agg.where(tk)
+
+        binning = self.binning
+        agg = binning.postfilter(agg)
+
+        # Normalize the occupied cells only, so sums over cells never see the
+        # NaN of an empty one; then fill in every cell.
+        cells = binning.cells
+        positions = agg.index.to_numpy()
+        agg = agg.set_axis(cells[positions])
+        agg = binning.normalize(agg, self.axnorm, positions)
+        return self._limit_values(agg.reindex(cells))
+
+    def _kept_index(self):
+        r"""Labels of the rows the plot keeps, the index of ``data``."""
+        rows = self._source.rows
+        index = self._source.index
+        return index if rows is None else index[rows]
+
+    def _rows_in_cells(self, positions):
+        r"""Boolean ``pd.Series`` marking each kept row whose cell is in ``positions``.
+
+        Parameters
+        ----------
+        positions : np.ndarray of int
+            Cell codes, positions in ``binning.cells``.
+
+        Returns
+        -------
+        pd.Series
+            On the index of ``data``.
+        """
+        codes = self.binning.codes()
+        keep = np.isin(codes, positions) & (codes >= 0)
+        return pd.Series(keep, index=self._kept_index())
+
+    def get_plotted_data_boolean_series(self):
+        """Return a boolean ``pd.Series`` identifying each plotted measurement.
+
+        A measurement is plotted when its cell (e.g. its joint (x, y) bin in
+        2-D) survives aggregation. The series shares the same index as the
+        stored data. To align with a different index you may need to adjust
+        the returned series.
+        """
+        agg = self.agg()
+        tk = self._rows_in_cells(np.flatnonzero(agg.notna().to_numpy()))
+
+        self.logger.info(
+            f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
+        )
+
+        return tk
+
+    def get_subset_above_threshold(self, threshold, fcn="count"):
+        r"""Get the subset of data above a given threshold using `fcn` to.
+
+        aggregate. If `axnorm` set, this is used. A row is kept when its cell
+        (e.g. its joint (x, y) bin in 2-D) meets `threshold`.
+
+        Returns
+        -------
+        subset : pd.DataFrame
+            The kept rows, one column per column of ``data``, holding the
+            values the caller passed: never logged, sign included, whatever
+            ``log`` says.
+        tk : pd.Series of bool
+            True for each kept row, on the index of ``data``.
+        """
+        agg = self.agg(fcn=fcn)
+        tk = self._rows_in_cells(np.flatnonzero((agg >= threshold).to_numpy()))
+
+        # The source's values on the kept rows: no 10** round trip, so only
+        # what was stored logged differs from `data`, and it is not inverted.
+        source = self._source
+        subset = pd.DataFrame(
+            {k: source.take(k) for k in source.columns},
+            index=self._kept_index(),
+            copy=False,
+        )
+        subset = subset.loc[tk.to_numpy(dtype=bool)]
+
+        return subset, tk
+
+
+class _OnFixedGrid:
+    r"""The bins of a plot whose ``binning`` is a ``FixedGrid``, and its rows in them.
+
+    Mixed into ``Hist1D`` and ``Hist2D``; ``_grid_axes`` names the binned axes.
+    """
+
+    def _set_grid_data(self, inputs, nbins, log, clip, precision, mask):
+        r"""Store the data and bin it on a ``FixedGrid``.
+
+        Parameters
+        ----------
+        inputs : dict
+            The ``_set_data`` arguments in order, keyed by column.
+        nbins, precision
+            The grid's bins; see ``FixedGrid``.
+        log : dict
+            The caller's log setting per binned axis, None to inherit.
+        clip, mask
+            The caller's ``clip`` and ``mask``.
+        """
+        names = {k: getattr(inputs[k], "name", None) for k in self._grid_axes}
+        log, clip = FixedGrid.resolve(
+            nbins, names, log, self._clip_by_axis(clip), precision
+        )
+        self.set_log(**log)
+        within = nbins if isinstance(nbins, BinnedData) else None
+        self._set_data(*inputs.values(), clip, mask=mask, within=within)
+        self._binning = FixedGrid(
+            self._source,
+            nbins,
+            axes=self._grid_axes,
+            precision=precision,
+            names=self._bin_names,
+            index=self._bin_index,
+            log=self.log,
+            clip=self.clip,
+            logger=self.logger,
+        )
+
+    @property
+    def edges(self):
+        r"""Bin edges per axis, a float ``pd.Index`` each.
+
+        The edges the rows were binned by, as the plot's ``BinnedData`` stores
+        them.
+        """
+        return self.binning.edges
+
+    @property
+    def intervals(self):
+        r"""Bins per axis, a ``pd.IntervalIndex`` each."""
+        return self.binning.intervals
+
+    @property
+    def categoricals(self):
+        r"""Alias of ``intervals``: the bins per axis, a ``pd.IntervalIndex`` each."""
+        return self.intervals
+
+    @property
+    def cut(self):
+        r"""Bin of each row the plot keeps: a DataFrame of categoricals.
+
+        One column per binned axis, indexed by the kept rows' labels. Built on
+        each access from the bin codes.
+        """
+        return self.binning.cut()
+
+    @property
+    def joint(self):
+        r"""Combines the categorical and continuous data for `Groupby`."""
+        cut = self.cut
+        target = self._source.take(self.agg_axes)
+
+        mi = pd.MultiIndex.from_frame(cut)
+        return target.set_axis(mi)
+
+    @property
+    def grouped(self):
+        r"""`joint.groupby` with appropriate axes passes."""
+        return self.joint.groupby(list(self._grid_axes), observed=True)

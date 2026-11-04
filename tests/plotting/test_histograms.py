@@ -10,14 +10,14 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
+from solarwindpy.plotting.base import BinnedPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
 # Bins chosen by the test, so every count below is an input rather than a
 # recorded output. The edges are exact at the 5 decimal places at which
-# `calc_bins_intervals` stores interval endpoints.
+# `FixedGrid` stores interval endpoints.
 KNOWN_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 KNOWN_BIN_COUNTS = [3, 5, 2, 4, 6]
 
@@ -527,32 +527,32 @@ class TestHist2DAxisNormalization:
 class TestModuleIntegration:
     """Test integration between different histogram plotters."""
 
-    def test_hist1d_inherits_from_aggplot(self):
-        """Test that Hist1D properly inherits from AggPlot."""
-        assert issubclass(Hist1D, AggPlot)
+    def test_hist1d_inherits_from_binnedplot(self):
+        """Test that Hist1D properly inherits from BinnedPlot."""
+        assert issubclass(Hist1D, BinnedPlot)
 
-        # Create instance and verify it has AggPlot methods
+        # Create instance and verify it has BinnedPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
         hist = Hist1D(x_data)
 
-        # Should have AggPlot methods
+        # Should have BinnedPlot methods
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")
         assert hasattr(hist, "categoricals")
 
-    def test_hist2d_inherits_from_aggplot(self):
-        """Test that Hist2D properly inherits from AggPlot."""
-        assert issubclass(Hist2D, AggPlot)
+    def test_hist2d_inherits_from_binnedplot(self):
+        """Test that Hist2D properly inherits from BinnedPlot."""
+        assert issubclass(Hist2D, BinnedPlot)
 
-        # Create instance and verify it has AggPlot methods
+        # Create instance and verify it has BinnedPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
         y_data = pd.Series(np.random.normal(10, 3, 100))
         hist = Hist2D(x_data, y_data)
 
-        # Should have AggPlot methods
+        # Should have BinnedPlot methods
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")

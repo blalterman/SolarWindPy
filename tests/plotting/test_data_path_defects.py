@@ -289,9 +289,8 @@ def test_spiral_with_more_identical_points_than_min_per_bin_raises():
     ON FAILURE: the code is wrong.
     """
     x = pd.Series([0.0, 1.0, 2.0, 3.0, 0.5, 0.5, 0.5])
-    s = SpiralPlot2D(x, x.copy(), initial_bins=1)
     with pytest.raises(ValueError, match=r"3 points at \(0\.5, 0\.5\)"):
-        s.initialize_mesh(progress=False, min_per_bin=2)
+        SpiralPlot2D(x, x.copy(), initial_bins=1, min_per_bin=2)
 
 
 def test_spiral_mesh_with_identical_points_raises_when_refining_by_counting():
