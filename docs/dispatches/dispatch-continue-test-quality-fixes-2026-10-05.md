@@ -323,3 +323,73 @@ is DONE.
   committed findings in git history; it never restates them.
 - **Purge only when all children are DONE.** A parent purged while a child is still open
   would strand that child's context.
+
+---
+
+## Empirical Findings (2026-11-04 trial run)
+
+Written up after the fact, from git and GitHub state, in the cleanup worktree on branch
+`cleanup/dispatch-records` (contains master b58e27df). The AC commands ran from that worktree,
+not from the `/Users/balterma` checkout this dispatch names.
+
+### End-state metrics
+
+- Steps 1 to 8: 5 done (2, 3, 4, 5, and the worktree half of 7), 1 folded into other work (6),
+  1 partly answered (1), 1 superseded by an author decision (8).
+- `tq-fix/` pull requests merged from #494 on: 23, all with `mergedBy` = `blalterman`.
+- ACs: 6 PASS, 1 FAIL, 2 DEFERRED.
+
+### Governing Property
+
+served -- every `tq-fix/` pull request from #494 to #521 (23) was merged by the author's account
+(`gh pr list --state merged --search "head:tq-fix" --json mergedBy`), and the direct commits to
+master in the same window (for example 38ed10e9, 8f9b8d93, 4a592d3b, 82240ad3) are
+author-authored; each merged unit carried its own positive control, but the suite and docs build
+were not re-run for this write-up (AC3, AC4).
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| Three remaining units merged | PASS | jq count → 3 (#493 aa0d66f7, #494 fe945943, #496 9e11466a); control `tq-fix/no-such-unit` → 0 |
+| No `tq-fix/` PR open | PASS | open count → 0; control `--state all` → 42 |
+| Suite green | DEFERRED | not run for this write-up; the coherence cleanup reports the suite green on its branch |
+| Docs build green | DEFERRED | not run for this write-up |
+| `fallback_p0` private | PASS | `def fallback_p0` sum → 0; `def _fallback_p0` in core.py → 1; control: `def p0` sum over the same tree → 14 |
+| Stale CLAUDE.md pointer gone | PASS | `plasma.py:102` → 0; control: `plasma.py` in CLAUDE.md → 1 |
+| Mutation re-measurement recorded | PASS | 82240ad3 (2026-10-08). `^### Mutation` → 2, not 1: line 93 is the earlier `### Mutation sample`, line 208 is the re-measurement under `## Re-measurement (2026-10-05)`; control `^### Linkcheck` → 1 |
+| Agent worktrees removed | PASS | `.claude/worktrees/agent-` count → 0; control: `git worktree list` → 5 lines |
+| Revised adoption plan drafted | FAIL | `ls docs/dispatches/plan-spent-when-adoption-*.md` lists only the 2026-09-16 plan; control `Supersedes: none` → 1. See step 8 below |
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| Step 1a: does the `printed(actual/expected, decimals=...)` ratio form become a fifth tolerance kind | DEFERRED -- no recorded answer; `tests/tolerances.py` still defines `exact`, `printed`, `noise_free` and `assert_within_error_bars`, with no separate ratio kind |
+| Step 1b: do bare `pytest.approx(x)` calls join the enforcing test | RESOLVED -- yes, #495 (946d4929, "fail on approx calls that take pytest's default tolerance") |
+| Step 4: read the 20 warnings | RESOLVED -- #499 (f816447b, `warning-fixes`) took them from 33 to 4; the coherence plan's stage S3 covers the remaining `tests/core` warnings |
+| Step 6: `HingeMax` fallback start point | SUPERSEDED -- folded into the coherence cleanup's hinge work on branch `cleanup/coherence-2026-11` (plan stage S29), which renamed the hinge parameters in 428af551 (`test(fitfunctions): name the hinge h and yh in every hinge class`) and 85cdd302 (`refactor(fitfunctions)!: name the hinge x-location h in every hinge`); the x-location name is being settled as `xh` there. `HingeMax._reference_start` still raises `NotImplementedError` (hinge.py:998); the author's start point is owed to that work |
+| Step 7: close the track | RESOLVED in part -- agent worktrees 0, no `tq-fix/` PR open. The review dispatch was marked served (8e566726) and the batch written up and marked (09a10140) on 2026-11-04; reaping them with the findings file is left to the orchestrating session |
+| Step 8: revised Spent-When adoption plan | SUPERSEDED -- the author decided on 2026-11-04 to revise `plan-spent-when-adoption-2026-09-16.md` in place to the new scope rather than write a successor plan |
+
+### Deviations from plan
+
+- `mutation-recheck` and `linkcheck` results were committed directly to master (82240ad3,
+  59550929) rather than through a pull request, as the Seam allowed for orchestration records.
+- The program grew past this dispatch's three units: survivor units (#503 to #512), `polish`
+  (#514), `changelog-2` (#515), and six remaining-module units (#516 to #521), all specified in the
+  batch file and written up there.
+- The Status column of the work-plan doc was not checked for this write-up.
+
+### Commits
+
+- `aa0d66f7` #493 tolerance-helpers
+- `fe945943` #494 scalar-w-nan
+- `946d4929` #495 approx-default
+- `9e11466a` #496 p0-simplify
+- `f816447b` #499 warning-fixes
+- `82240ad3` docs(findings): record the final mutation re-measurement
+- `09a10140` docs(tdd): append empirical findings to batch-test-quality-fixes-2026-10-02 dispatch
+- `8e566726` docs(dispatch): mark the test-quality review dispatch served
+
+## Spent-Mark: executed; step 6 folded into coherence S29 hinge work; step 8 superseded by in-place revision of the adoption plan; ratio-form question open
