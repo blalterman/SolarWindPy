@@ -41,8 +41,8 @@ class SpacecraftTestBase(ABC):
     def test_position(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.r.data.columns)
-        self.assertIsInstance(ot.r, vector.Vector)
+        pdt.assert_index_equal(cols, ot.pos.data.columns)
+        self.assertIsInstance(ot.pos, vector.Vector)
         return ot
 
     def test_velocity(self):
@@ -120,7 +120,7 @@ class TestWind(SpacecraftTestBase, TestCase):
         super(TestWind, self).test_position()
         pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(pos, ot.r.data)
+        pdt.assert_frame_equal(pos, ot.pos.data)
 
     def test_velocity(self):
         with self.assertRaises(KeyError):
@@ -160,7 +160,7 @@ class TestPSP(SpacecraftTestBase, TestCase):
 
         pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(pos, ot.r.data)
+        pdt.assert_frame_equal(pos, ot.pos.data)
 
     def test_velocity(self):
         super(TestPSP, self).test_velocity()
@@ -203,11 +203,11 @@ def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
     caplog.clear()
     with caplog.at_level("WARNING", logger="solarwindpy"):
         for _ in range(2):
-            sc.r, sc.v, sc.distance2sun
+            sc.pos, sc.v, sc.distance2sun
     assert _warnings(caplog) == []
 
     assert sc.data.index.equals(ref.data.index)
-    assert sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert sc.pos.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
 
 
 @pytest.mark.parametrize(

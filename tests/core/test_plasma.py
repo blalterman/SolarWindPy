@@ -3256,7 +3256,7 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     assert p.data.index.equals(ref.epoch)
     assert p.sc.data.index.equals(ref.epoch)
     assert p.aux.index.equals(ref.epoch)
-    assert p.sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert p.sc.pos.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
     assert p.aux.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 
@@ -3533,7 +3533,7 @@ def test_plasma_spacecraft_and_auxiliary_data_stay_aligned(build):
     assert p.data.index.equals(ref.epoch)
     assert p.sc.data.index.equals(p.data.index)
     assert p.aux.index.equals(p.data.index)
-    assert p.sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert p.sc.pos.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
     assert p.aux.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 

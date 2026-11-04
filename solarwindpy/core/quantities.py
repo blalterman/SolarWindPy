@@ -84,6 +84,8 @@ QUANTITIES = MappingProxyType(
         "lat": Quantity(r"{lat}_{{$C};{$S}}", _U["deg"]),
         "lon": Quantity(r"{lon}_{{$C};{$S}}", _U["deg"]),
         "carr": Quantity(r"{$C}_\mathrm{Carrington}", _U["deg"]),
+        # The unit depends on the frame (gse, hci), so the entry states none.
+        "pos": Quantity(r"\mathbf{r}_{$C}", None),
         "distance2sun": Quantity(
             r"\mathrm{Distance \; to \; Sun}", r"\mathrm{m}", si=1.0
         ),

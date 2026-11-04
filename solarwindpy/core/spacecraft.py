@@ -75,7 +75,7 @@ class Spacecraft(base.Base):
         >>> spacecraft = Spacecraft(data, "psp", "HCI")
         >>> spacecraft.name, spacecraft.frame
         ('PSP', 'HCI')
-        >>> spacecraft.r.data.loc[:, "x"].tolist()
+        >>> spacecraft.pos.data.loc[:, "x"].tolist()
         [-42.0, -22.0, -34.0]
         >>> spacecraft.v.data.loc[:, "y"].tolist()
         [-80.0, -70.0, -90.0]
@@ -96,7 +96,7 @@ class Spacecraft(base.Base):
         return self._name
 
     @property
-    def r(self):
+    def pos(self):
         """Position vector of the spacecraft.
 
         Returns
@@ -141,7 +141,7 @@ class Spacecraft(base.Base):
     @property
     def distance2sun(self):
         r"""Radial distance to Sun in meters."""
-        pos = self.r.data
+        pos = self.pos.data
         frame = self.frame
 
         if frame == "GSE":

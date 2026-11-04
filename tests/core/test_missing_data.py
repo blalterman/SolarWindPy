@@ -99,7 +99,7 @@ def test_distance_to_the_sun_is_the_position_magnitude():
     """
     sc = _position_masked_plasma().sc
     assert sc.frame == "HCI"
-    mag = sc.r.mag
+    mag = sc.pos.mag
     assert mag.isna().tolist() == [True, False, False]
     expected = mag * sc.constants.misc.loc["Rs [m]"] / sc.units.distance2sun
     pdt.assert_series_equal(sc.distance2sun, expected, check_names=False)

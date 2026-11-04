@@ -641,7 +641,7 @@ class Plasma(base.Base):
         >>> plasma.set_spacecraft(psp)
         >>> plasma.sc.name
         'PSP'
-        >>> plasma.sc.r.data.loc[:, "x"].tolist()  # trajectory
+        >>> plasma.sc.pos.data.loc[:, "x"].tolist()  # trajectory
         [-42.0, -22.0, -34.0]
         """
         assert isinstance(new, spacecraft.Spacecraft) or new is None

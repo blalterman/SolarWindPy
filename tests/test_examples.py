@@ -97,7 +97,7 @@ def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
         ("v", "z"),
     ]
     assert sc.data.index.equals(plasma.epoch)
-    assert sc.r.data.loc[:, "x"].tolist() == [-42.0, -22.0, -34.0]
+    assert sc.pos.data.loc[:, "x"].tolist() == [-42.0, -22.0, -34.0]
     assert sc.v.data.loc[:, "y"].tolist() == [-80.0, -70.0, -90.0]
     assert sc.carr.loc[:, "lon"].tolist() == [-26.0, -36.0, -16.0]
     assert plasma.aux is None

@@ -72,7 +72,7 @@ def load_plasma():
     [1.0, 2.0, 3.0]
     >>> plasma.sc.name, plasma.sc.frame
     ('PSP', 'HCI')
-    >>> plasma.sc.r.data.loc[:, "x"].tolist()
+    >>> plasma.sc.pos.data.loc[:, "x"].tolist()
     [-42.0, -22.0, -34.0]
     """
     # Imported here so the package namespace binds only its own objects.
