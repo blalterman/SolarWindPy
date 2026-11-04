@@ -23,6 +23,7 @@ from pathlib import Path
 from string import Template
 from string import Formatter
 from abc import abstractmethod
+from ...core import quantities
 from . import base
 
 # TeX spacing commands: \, \: \; \! "\ " \quad \qquad
@@ -158,12 +159,8 @@ class ManualLabel(ArbitraryLabel):
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
-        result = (
-            r"$\mathrm{%s} \; [%s]$"
-            % (
-                self.tex.replace(" ", r" \; "),
-                self.units,
-            )
+        result = base.format_with_units(
+            r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units, sized=False
         ).replace(r" \; []", "")
         return self._format_with_description(result)
 
@@ -235,7 +232,7 @@ class CarringtonRotation(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = r"$%s \; [\#]$" % self.tex
+        result = base.format_with_units(self.tex, r"\#", sized=False)
         return self._format_with_description(result)
 
     @property
@@ -276,7 +273,7 @@ class Count(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = r"${} \; [{}]$".format(self.tex, self.units)
+        result = base.format_with_units(self.tex, self.units, sized=False)
         return self._format_with_description(result)
 
     @property
@@ -356,7 +353,7 @@ class Power(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = rf"${self.tex} \; [{self.units}]$"
+        result = base.format_with_units(self.tex, self.units, sized=False)
         return self._format_with_description(result)
 
     @property
@@ -387,7 +384,7 @@ class Probability(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = r"${} \; [{}]$".format(self.tex, self.units)
+        result = base.format_with_units(self.tex, self.units, sized=False)
         return self._format_with_description(result)
 
     @property
@@ -464,10 +461,8 @@ class CountOther(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = r"${tex} {sep} [{units}]$".format(
-            tex=self.tex,
-            sep="$\n$" if self.new_line_for_units else r"\;",
-            units=self.units,
+        result = base.format_with_units(
+            self.tex, self.units, sized=False, new_line=self.new_line_for_units
         )
         return self._format_with_description(result)
 
@@ -559,8 +554,9 @@ class MathFcn(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        sep = "$\n$" if self.new_line_for_units else r"\;"
-        result = rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        result = base.format_with_units(
+            self.tex, self.units, sized=True, new_line=self.new_line_for_units
+        )
         return self._format_with_description(result)
 
     @property
@@ -679,8 +675,9 @@ class AbsoluteValue(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        sep = "$\n$" if self.new_line_for_units else r"\;"
-        result = rf"""${self.tex} {sep} \left[{self.units}\right]$"""
+        result = base.format_with_units(
+            self.tex, self.units, sized=True, new_line=self.new_line_for_units
+        )
         return self._format_with_description(result)
 
     @property
@@ -747,7 +744,9 @@ class Distance2Sun(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = r"$%s \; [\mathrm{%s}]$" % (self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, r"\mathrm{%s}" % self.units, sized=False
+        )
         return self._format_with_description(result)
 
     @property
@@ -763,7 +762,7 @@ class Distance2Sun(ArbitraryLabel):
     @property
     def tex(self):
         r"""TeX of the label."""
-        return r"\mathrm{Distance \; to \; Sun}"
+        return quantities.QUANTITIES["distance2sun"].tex
 
     def set_units(self, units):
         r"""Set the distance units.
@@ -801,7 +800,7 @@ class SSN(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = r"$%s \; [\#]$" % self.tex
+        result = base.format_with_units(self.tex, r"\#", sized=False)
         return self._format_with_description(result)
 
     @property
@@ -867,7 +866,7 @@ class ComparisonLabel(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = r"${} \; [{}]$".format(self.tex, self.units)
+        result = base.format_with_units(self.tex, self.units, sized=False)
         return self._format_with_description(result)
 
     @property
@@ -1019,7 +1018,7 @@ class Xcorr(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = r"${} \; [{}]$".format(self.tex, self.units)
+        result = base.format_with_units(self.tex, self.units, sized=False)
         return self._format_with_description(result)
 
     @property

@@ -379,16 +379,8 @@ def test_registry_knows_every_species_core_knows():
     "species, tex",
     [
         # TeX from the author's ruling: the base symbol, then the fit model.
-        pytest.param(
-            "a_bimax",
-            r"n_{\alpha,\mathrm{bimax}}",
-            marks=_xfail(r"F128: a_bimax renders n_{\alpha_bim\alphax}"),
-        ),
-        pytest.param(
-            "p_bimax",
-            r"n_{p,\mathrm{bimax}}",
-            marks=_xfail("F128: p_bimax renders n_{p}, the plain proton"),
-        ),
+        ("a_bimax", r"n_{\alpha,\mathrm{bimax}}"),
+        ("p_bimax", r"n_{p,\mathrm{bimax}}"),
         # Guards: the species beside them keep their TeX.
         ("a", r"n_{\alpha}"),
         ("p1", r"n_{p_1}"),

@@ -15,17 +15,12 @@ import pytest
 
 import solarwindpy.plotting.labels as labels
 
-_NO_FORMATTER = (
-    "F130: labels/ writes the label-with-units form in 14 places; remove this "
-    "marker when they call one formatter"
-)
 
 #: The closing of a label-with-units literal: a bracket, then ``$``, then the
 #: end of the string.
 _CLOSING = re.compile(r"\]\$(?:\"|')")
 
 
-@pytest.mark.xfail(strict=True, reason=_NO_FORMATTER)
 def test_no_label_module_writes_the_closing_bracket_itself():
     """No module in ``plotting/labels`` spells out ``...]$`` in a string literal.
 
@@ -41,7 +36,6 @@ def test_no_label_module_writes_the_closing_bracket_itself():
     assert hits == []
 
 
-@pytest.mark.xfail(strict=True, raises=ImportError, reason=_NO_FORMATTER)
 @pytest.mark.parametrize(
     "kwargs, expected",
     [

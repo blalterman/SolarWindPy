@@ -4,6 +4,7 @@ r"""Tools for creating physical quantity plot labels."""
 __all__ = [
     "Base",
     "TeXlabel",
+    "format_with_units",
 ]
 
 import logging
@@ -13,39 +14,16 @@ from pathlib import Path
 from string import Template
 from collections import namedtuple
 
+from ...core import quantities
+
 _MCS = namedtuple("_MCS", "m,c,s")
 
 
-__isotope_species = r"^{%s}\mathrm{%s}"
-_trans_species = {
-    "e": r"e^-",
-    "a": r"\alpha",
-    "a1": r"\alpha_1",
-    "a2": r"\alpha_2",
-    "p": r"p",
-    "p_bimax": r"p",
-    "p1": r"p_1",
-    "p2": r"p_2",
-    "he": r"\mathrm{He}",
-    "dv": r"\Delta v",  # Because we want pdv in species
-}
-
-for s in ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S"):
-    _trans_species[s] = r"\mathrm{%s}" % s
-
-for i, s in (
-    (3, "He"),
-    (4, "He"),
-    (12, "C"),
-    (14, "N"),
-    (16, "O"),
-    (20, "Ne"),
-    (24, "Mg"),
-    (28, "Si"),
-    (32, "S"),
-    (40, "Ca"),
-):
-    _trans_species[f"{i}{s}"] = __isotope_species % (i, s)
+#: TeX of each species, component and display unit, read from the quantity
+#: registry (:mod:`solarwindpy.core.quantities`), their one home.
+_trans_species = quantities.SPECIES
+_trans_component = quantities.COMPONENTS
+_inU = quantities.UNIT_TEX
 
 _trans_axnorm = {
     None: "",
@@ -57,10 +35,11 @@ _trans_axnorm = {
     "cd": "1D Probability Density",
 }
 
-_all_species_re = sorted(_trans_species.keys())[
-    ::-1
-]  # Order so we check for p1 and p2 before p.
-_all_species_re = re.compile(r"({})".format("|".join(_all_species_re)))
+# Longest first, so a species is never matched by a code it starts with
+# (``a_bimax`` before ``a``, ``p1`` before ``p``).
+_all_species_re = re.compile(
+    "|".join(re.escape(s) for s in sorted(_trans_species, key=len, reverse=True))
+)
 _default_template_string = "{$M}_{{$C};{$S}}"
 
 
@@ -79,9 +58,8 @@ def _run_species_substitution(pattern):
 
     Notes
     -----
-    Only substitutions defined in ``_trans_species`` are performed. The
-    implementation relies on the simple mapping used in this module and may
-    need to be revisited for more complex patterns.
+    Only species in the registry's ``SPECIES`` are substituted. Codes are tried
+    longest first at each position.
     """
 
     def repl(x):
@@ -93,216 +71,52 @@ def _run_species_substitution(pattern):
     return substitution
 
 
-_trans_measurement = {
-    "pth": r"P",
-    "beta": r"\beta",
-    "dbeta": r"\Delta \beta",
-    "dv": r"\Delta v",
-    "qhat": r"\widehat{q}",
-    "Qhat": r"\widehat{q}",
-    "theta": r"\theta",
-}
+def _template_of(m):
+    """Return the TeX template of measurement ``m``.
 
-_inU = {
-    "b": r"\mathrm{nT}",
-    "Re": r"\mathrm{R}_\oplus",
-    "Rs": r"\mathrm{R}_\odot",
-    "kms": r"\mathrm{km \; s^{-1}}",
-    "pPa": r"\mathrm{pPa}",
-    "cm-3": r"\mathrm{cm}^{-3}",
-    "dimless": r"\mathrm{\#}",
-    "unknown": r"???",
-    "km": r"\mathrm{km}",
-    "deg": r"\mathrm{deg.}",
-    "Hz": r"\mathrm{Hz}",
-}
+    A registry quantity's own template, or the default
+    ``{$M}_{{$C};{$S}}`` with ``m`` as the symbol for a measurement the
+    registry does not know.
+    """
+    entry = quantities.QUANTITIES.get(m)
+    if entry is not None and entry.tex is not None:
+        return entry.tex
+    return _default_template_string
 
-_trans_units = {
-    # Vector components.
-    "gse": _inU["Re"],
-    "hci": _inU["Rs"],
-    "colat": _inU["deg"],
-    "lat": _inU["deg"],
-    "lon": _inU["deg"],
-    "carr": _inU["deg"],
-    # Trig things.
-    "theta": _inU["deg"],
-    "phi": _inU["deg"],
-    "deg": _inU["deg"],
-    "cos": _inU["dimless"],
-    "cos_theta": _inU["dimless"],
-    "cos_phi": _inU["dimless"],
-    "ratio": _inU["dimless"],
-    # Timestamps.
-    "year": r"\mathrm{Year}",
-    "fdoy": r"\mathrm{fdoy}",
-    # Plasma measurements.
-    "b": _inU["b"],
-    "n": _inU["cm-3"],
-    "rho": r"m_p \; " + _inU["cm-3"],
-    "v": _inU["kms"],
-    "w": _inU["kms"],
-    "dv": _inU["kms"],
-    "dn": _inU["cm-3"],
-    "cs": _inU["kms"],
-    "ca": _inU["kms"],
-    "afsq": _inU["dimless"],
-    "caani": _inU["kms"],
-    # Temperatures, pressures, and anisotropies.
-    "p": _inU["pPa"],
-    "pth": _inU["pPa"],
-    "T": r"10^5 \, \mathrm{K}",
-    "q": r"\mathrm{\mu W \, m^{-2}}",  # heat flux,
-    "qhat": _inU["dimless"],  # normalized heat flux
-    "Qhat": _inU["dimless"],  # normalized heat flux
-    "Wk": r"\mathrm{\mu W \, m^{-2}}",  # kinetic energy flux
-    "R": r"\perp/\parallel",
-    "beta": _inU["dimless"],
-    "dbeta": _inU["dimless"],
-    "pdv": _inU["pPa"],
-    "edv": _inU["dimless"],
-    # Flux
-    "flux": r"10^{-9} \, %s \, s^{-1}" % _inU["cm-3"].replace("-3", "-2"),
-    # Collisional things
-    "lnlambda": _inU["dimless"],
-    # TODO: verify that these units are Hertz.
-    "nuc": r"10^{-7} \mathrm{Hz}",
-    "nc": _inU["dimless"],
-    "chisq": _inU["dimless"],
-    "chisqnu": _inU["dimless"],
-    "VDFratio": _inU["dimless"],
-    "ab": r"\%",
-    "e": _inU["kms"],
-    # Alfvenic Turbulence
-    "zp": _inU["kms"],
-    "zm": _inU["kms"],
-    "ep": r"(%s)^2" % _inU["kms"],
-    "em": r"(%s)^2" % _inU["kms"],
-    "ev": r"(%s)^2" % _inU["kms"],
-    "etot": r"(%s)^2" % _inU["kms"],
-    "eres": r"(%s)^2" % _inU["kms"],
-    "xhel": r"(%s)^2" % _inU["kms"],
-    "sigma_m": _inU["dimless"],
-    "sigma_c": _inU["dimless"],
-    "sigma_r": _inU["dimless"],
-    "sigma_xy": _inU["dimless"],
-    "ra": _inU["dimless"],
-    "re": _inU["dimless"],
-    # Nyquist things
-    "Wn": _inU["dimless"],
-    "omegaR": _inU["Hz"],
-    "gamma": _inU["Hz"],
-    "gamma_max": _inU["Hz"],
-    "gyro_freq": _inU["Hz"],
-    "eth": r"\mathrm{eV}",
-    "kvec": _inU["dimless"],
-    "k": _inU["dimless"],
-    "insta_power": _inU["unknown"],
-    # MISC
-    # Spectral things
-    "spectral_exponent": _inU["dimless"],
-    "MeV/nuc": r"\mathrm{MeV/nuc}",
-    "SEP_differential_flux": r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
-    "SEP_intensity": r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
-    "SEP_energy": r"\mathrm{MeV/nuc}",
-    "SEP_spectrum_index": _inU["dimless"],
-}
 
-_trans_component = {
-    # Coordinates
-    "x": r"X",
-    "y": r"Y",
-    "z": r"Z",
-    "r": r"R",
-    "rho": r"\rho",
-    "colat": r"\theta",
-    "lat": r"\lambda",
-    "lon": r"\phi",
-    "R": r"\mathrm{R}",
-    "scalar": r"\mathrm{scalar}",
-    "theta": r"\theta",
-    "phi": r"\phi",
-    "per": r"\perp",
-    "par": r"\parallel",
-    "T": r"T",  # For use with temperature anisotropy.
-    "p": r"p",  # For use with pressure anisotropy.
-    "const": r"\mathrm{const}",  # constant for ("w", "const", "") label.
-    # These will be replaced by dot products and regex.
-    "bv": r"{\mathbf{B} \cdot \mathbf{v}}",
-    "dv": r"\Delta v",  # For "e" terms
-}
+def _units_of(key):
+    """Return the TeX of the display unit of ``key``, or ``???`` if it has none."""
+    entry = quantities.QUANTITIES.get(key)
+    if entry is None or entry.units is None:
+        return "???"
+    return entry.units
 
-_templates = {
-    # Timestamps
-    "year": r"\mathrm{Year}",
-    "fdoy": r"\mathrm{Fractional \; Day \; of \; Year}",
-    # Coordinates, e.g. for location plots.
-    "gse": r"{$C}_{\mathrm{GSE}}",
-    "hci": r"{$C}_{\mathrm{HCI}}",
-    "colat": r"\theta_{$C}",
-    "carr": r"{$C}_\mathrm{Carrington}",
-    "b": r"B_{$C}",
-    "n": r"n_{$S}",
-    "rho": r"\rho_{$S}",
-    "q": r"q_{{$C};{$S}}",  # heat flux
-    "Wk": r"W_{K;{$S}}",  # kinetic energy flux
-    "ratio": r"\mathrm{Ratio}",
-    "cos": r"\cos",
-    "cos_theta": r"\cos \theta_{{$C}_{$S}}",
-    "cos_phi": r"\cos \phi_{{$C}_{$S}}",
-    # Characteristic Velocities
-    "cs": r"C_{s;$S}",
-    "ca": r"C_{A;$S}",
-    "afsq": r"\mathrm{Anisotropy \, Factor}^2_{$S}",
-    "caani": r"C^{(\mathrm{Ani})}_{A;$S} \; ($C)",
-    # Collision things.
-    "lnlambda": r"\ln\Lambda_{$S}",
-    "nuc": r"\nu_{$C,$S}",
-    "nc": r"N_{C;$S}",
-    # Misc
-    "VDFratio": r"\mathrm{ln}(\frac{f_i}{f_j} \left(v_i\right)_{$S})",
-    "chisq": r"\chi^2",
-    "chisqnu": r"\chi^2_\nu",
-    "edv": r"P_{\Delta v}/P_\mathrm{th}|_{$S}",
-    "pdv": r"P_{\Delta v_{$S}}",
-    "ab": r"A_{$S}",
-    "e": r"e\left({$C}_{$S}\right)",
-    # Alfvenic Turbulence
-    "zp": r"Z^+_{{$S}}",
-    "zm": r"Z^-_{{$S}}",
-    "ep": r"e^+_{{$S}}",
-    "em": r"e^-_{{$S}}",
-    "ev": r"e^v_{{$S}}",
-    "etot": r"E_{{$S}}",
-    "eres": r"e^r_{{$S}}",
-    "xhel": r"e^c_{{$S}}",
-    "sigma_c": r"\sigma_{c;{$S}}",
-    "sigma_r": r"\sigma_{r;{$S}}",
-    "sigma_m": r"\sigma_{m}",
-    "sigma_xy": r"\sigma_{\parallel}",
-    "ra": r"r_{A;{$S}}",
-    "re": r"r_{E;{$S}}",
-    "dn": r"\delta n_{{$S}}",
-    # Instability things
-    "Wn": r"\mathrm{W_n}",
-    "gamma": r"\gamma",
-    "gamma_max": r"\gamma_\mathrm{max}",
-    "omegaR": r"\omega_R",
-    "gyro_freq": r"\Omega_{{$S}}",
-    "eth": r"\eth",  # "_{{$C;$S}}"
-    "kvec": r"\mathbf{k}_{$C}\rho_{$S}",
-    "k": r"k_{$C}\rho_{$S}",
-    "insta_power": r"\mathcal{P}_{{$S}}",
-    # Flux
-    "flux": r"\mathrm{Flux}_{$C}({$S})",
-    # Spectral Exponents
-    "spectral_exponent": r"\mathrm{Spectral \, Exponent}",
-    "MeV/nuc": r"\mathrm{Energy}",
-    "SEP_differential_flux": r"{{$S}} \: dJ/dE",
-    "SEP_intensity": r"{{$S}} \: \mathrm{Intensity}",
-    "SEP_energy": r"{{$S}} \: \mathrm{Energy}",
-    "SEP_spectrum_index": r"\gamma_{{$S}}",
-}
+
+def format_with_units(tex, units, *, sized, new_line=False):
+    r"""Return the label-with-units string ``$tex <sep> [units]$``.
+
+    The one home of this form: every label class builds its string here.
+
+    Parameters
+    ----------
+    tex : str
+        TeX of the quantity, without ``$``.
+    units : str
+        TeX of the units, without ``$``.
+    sized : bool
+        If True, bracket the units with ``\left[ \right]``, which grow with
+        their content; if False, with plain ``[ ]``.
+    new_line : bool, default False
+        If True, the units go on a new line; otherwise ``\;`` separates them.
+
+    Returns
+    -------
+    str
+        The label as a TeX math string.
+    """
+    sep = "$\n$" if new_line else r"\;"
+    left, right = (r"\left[", r"\right]") if sized else ("[", "]")
+    return f"${tex} {sep} {left}{units}{right}$"
 
 
 class Base(ABC):
@@ -379,7 +193,7 @@ class Base(ABC):
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
-        result = rf"${self.tex} \; \left[{self.units}\right]$"
+        result = format_with_units(self.tex, self.units, sized=True)
         return self._format_with_description(result)
 
     @property
@@ -551,12 +365,12 @@ class TeXlabel(Base):
             m = m.replace("_err", "")
             err = True
 
-        m1 = _trans_measurement.get(m, m)
+        m1 = m
         c1 = _trans_component.get(c, c)
         s1 = self.make_species(s)
         d = {"M": m1, "C": c1, "S": s1}
 
-        template_string = _templates.get(m, _default_template_string)
+        template_string = _template_of(m)
         template = Template(template_string)
 
         tex = template.safe_substitute(**d)
@@ -585,7 +399,7 @@ class TeXlabel(Base):
         if c in ("lat", "colat", "lon"):
             ukey = c
 
-        units = _trans_units.get(ukey, "???")
+        units = _units_of(ukey)
 
         self.logger.debug(
             r"""Built TeX label
@@ -621,10 +435,8 @@ template   : %s
             tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
             path = path / (axnorm.upper() + "norm")
 
-        with_units = r"${tex} {sep} \left[{units}\right]$".format(
-            tex=tex,
-            sep="$\n$" if self.new_line_for_units else r"\;",
-            units=units,
+        with_units = format_with_units(
+            tex, units, sized=True, new_line=self.new_line_for_units
         )
 
         # Apply description formatting
@@ -644,8 +456,8 @@ template   : %s
 
             m0, m1 = mcs0.m, mcs1.m
             u0, u1 = (
-                _trans_units.get(m0.replace("_err", ""), "???"),
-                _trans_units.get(m1.replace("_err", ""), "???"),
+                _units_of(m0.replace("_err", "")),
+                _units_of(m1.replace("_err", "")),
             )
             if u0 == u1:
                 units = r"\#"

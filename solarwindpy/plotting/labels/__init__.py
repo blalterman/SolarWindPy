@@ -14,6 +14,7 @@ __all__ = [
 from inspect import isclass
 import pandas as pd
 
+from ...core import quantities as _quantities
 from . import base
 from . import chemistry
 from . import composition
@@ -50,7 +51,7 @@ def _clean_str_list_for_printing(data):
 def available():
     """Print all available measurement, component and species labels."""
 
-    m = sorted(list(base._trans_measurement.keys()) + list(base._templates.keys()))
+    m = sorted(_quantities.QUANTITIES)
     c = sorted(base._trans_component.keys())
     s = sorted(base._trans_species.keys())
     a = []
