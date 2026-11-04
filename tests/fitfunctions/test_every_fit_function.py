@@ -45,16 +45,9 @@ CLASSES = _concrete_fit_functions()
 X = np.linspace(2.0, 10.0, 33)
 Y = 3.0 * np.exp(-0.5 * ((X - 5.0) / 1.5) ** 2) + 1.0
 
-# Constructor keywords a class requires, and set-up it needs before a fit.
-# No current class needs either.
-REQUIRED_KWARGS = {}
-SETUP = {}
-
 
 def _build(name, **kwargs):
-    fit = CLASSES[name](X, Y, **REQUIRED_KWARGS.get(name, {}), **kwargs)
-    SETUP.get(name, lambda fit: None)(fit)
-    return fit
+    return CLASSES[name](X, Y, **kwargs)
 
 
 def test_every_class_has_a_case():
@@ -66,8 +59,8 @@ def test_every_class_has_a_case():
     so every fit function the package lists is checked by these tests.
 
     ON FAILURE: the code is wrong if the two discoveries differ; otherwise a
-    fit function needs a constructor keyword or set-up that ``REQUIRED_KWARGS``
-    or ``SETUP`` does not give it; add it there.
+    fit function needs a constructor keyword or set-up before a fit; give
+    ``_build`` a case for it.
     """
     by_subclass_tree = {cls.__name__ for cls in ff._fit_function_classes()}
     assert CLASSES, "the module scan found no fit function"
