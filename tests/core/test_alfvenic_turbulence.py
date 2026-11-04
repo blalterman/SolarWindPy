@@ -654,7 +654,7 @@ def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
     kwargs = dict(window="10h", min_periods=1, center=True)
 
     ot = turb.AlfvenicTurbulence(
-        v, b, rho, "p1", raffaella_version=True, sc_vector=sc, **kwargs
+        v, b, rho, "p1", raffaella_version=True, sc=sc, **kwargs
     )
     plain = turb.AlfvenicTurbulence(v, b, rho, "p1", **kwargs)
 
@@ -677,11 +677,6 @@ def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
     pdt.assert_frame_equal(b, b_before)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="set_data(sc_vector=) is renamed sc=, the package's spacecraft name; "
-    "remove this marker when the rename lands",
-)
 def test_the_spacecraft_argument_is_named_sc():
     """The constructor and ``set_data`` take the Spacecraft as ``sc``.
 

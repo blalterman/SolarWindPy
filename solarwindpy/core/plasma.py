@@ -2075,7 +2075,7 @@ species: {}
         kwargs:
             Passed to
             :py:class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`:
-            ``raffaella_version`` and ``sc_vector`` select its GSE-to-RTN
+            ``raffaella_version`` and ``sc`` select its GSE-to-RTN
             verification aid, and the rest reach its ``rolling`` call, e.g.
             ``window`` and ``min_periods``.
         """

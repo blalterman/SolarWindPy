@@ -57,7 +57,7 @@ class AlfvenicTurbulence(base.Core):
     raffaella_version : bool, optional
         If True, ``velocity`` and ``bfield`` must be GSE vectors, which are
         converted to RTN and corrected for solar rotation; see Notes.
-    sc_vector : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+    sc : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
         Spacecraft in the GSE frame, at the times of ``velocity``. Required
         when ``raffaella_version`` is True.
     **kwargs
@@ -68,7 +68,7 @@ class AlfvenicTurbulence(base.Core):
     Raises
     ------
     ValueError
-        If ``raffaella_version`` is True and ``sc_vector`` is None.
+        If ``raffaella_version`` is True and ``sc`` is None.
 
     Notes
     -----
@@ -97,7 +97,7 @@ class AlfvenicTurbulence(base.Core):
         rho,
         species,
         raffaella_version=False,
-        sc_vector=None,
+        sc=None,
         **kwargs,
     ):
         r"""Initialize an :py:class:`AlfvenicTurbulence` object.
@@ -112,7 +112,7 @@ class AlfvenicTurbulence(base.Core):
             rho,
             species,
             raffaella_version=raffaella_version,
-            sc_vector=sc_vector,
+            sc=sc,
             **kwargs,
         )
 
@@ -266,7 +266,7 @@ class AlfvenicTurbulence(base.Core):
         rho,
         species,
         raffaella_version=False,
-        sc_vector=None,
+        sc=None,
         **kwargs,
     ):
         r"""Set data for the class, performing routine formatting checks.
@@ -314,7 +314,7 @@ unexpected.""")
         polarity = None
         if raffaella_version:
             self.logger.warning("Running Raffaella's version")
-            if sc_vector is None:
+            if sc is None:
                 raise ValueError(
                     "SC-Sun distance required to peform Raffaella's version."
                 )
@@ -326,7 +326,7 @@ unexpected.""")
 
             # Project along nominal Parker Spiral
             omega = 2.865e-6  # rad/s
-            pos = sc_vector.data.xs("pos", axis=1, level="M")
+            pos = sc.data.xs("pos", axis=1, level="M")
             r_rtn = self._component_reduce(
                 self._select(pos, ["x", "y", "z"], "C").pow(2)
             ).pipe(np.sqrt)
@@ -335,7 +335,7 @@ unexpected.""")
             ).pipe(np.sqrt)
             cos_colat = rho_rtn.divide(r_rtn)
 
-            r = sc_vector.distance2sun * sc_vector.units.distance2sun * 1e-3  # [km]
+            r = sc.distance2sun * sc.units.distance2sun * 1e-3  # [km]
 
             correction = r.multiply(cos_colat, axis=0).multiply(
                 omega

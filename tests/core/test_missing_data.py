@@ -212,7 +212,7 @@ def test_raffaella_polarity_and_field_are_nan_where_a_component_is_missing():
         rho,
         "p1",
         raffaella_version=True,
-        sc_vector=sc,
+        sc=sc,
         window="10h",
         min_periods=1,
         center=True,
