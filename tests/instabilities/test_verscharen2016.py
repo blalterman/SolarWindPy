@@ -618,3 +618,57 @@ def test_undefined_threshold_is_stable_while_others_hold(anisotropy, expected, l
     assert sc.instability_thresholds["FMW"].isna().all()
     assert sc.is_unstable.iloc[0].to_dict() == expected
     assert sc.stability_map[sc.stability_bin.iloc[0]] == label
+
+
+# ---------------------------------------------------------------------------
+# Docstring examples
+# ---------------------------------------------------------------------------
+
+
+def _beta_ani_inst_example_call():
+    """The ``(a, b, c)`` keywords of the beta_ani_inst call in its docstring."""
+    import re
+
+    match = re.search(
+        r">>> beta_ani_inst\(beta, a=(\S+), b=(\S+), c=([^)\s]+)\)",
+        v16.beta_ani_inst.__doc__,
+    )
+    assert match is not None, "beta_ani_inst's Examples no longer call it"
+    return tuple(float(x) for x in match.groups())
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="B3: the doctest passes FMW's a as AIC's b, a row of no table",
+)
+def test_beta_ani_inst_example_uses_one_published_row():
+    """The doctest's (a, b, c) is one row of Table 1, as insta_params holds it.
+
+    Verscharen et al. (2016), doi:10.3847/0004-637X/831/2/128, Table 1. The
+    coefficients of different rows (instabilities or growth rates) do not
+    combine into a published threshold.
+
+    ON FAILURE: the docstring is wrong.
+    """
+    call = _beta_ani_inst_example_call()
+    rows = {tuple(row) for row in v16.insta_params.loc[:, ["a", "b", "c"]].values}
+    assert call in rows
+
+
+def test_beta_ani_inst_example_output_is_its_call():
+    """The doctest's printed thresholds are what its call returns.
+
+    The doctest runs only in the CI doctest workflow, so the default suite runs
+    it here.
+
+    ON FAILURE: the docstring is wrong.
+    """
+    import doctest
+
+    finder = doctest.DocTestFinder()
+    (test,) = finder.find(v16.beta_ani_inst, "beta_ani_inst", globs=vars(v16))
+    runner = doctest.DocTestRunner(optionflags=doctest.ELLIPSIS)
+    with np.errstate(invalid="ignore"):
+        result = runner.run(test, out=lambda s: None)
+    assert result.attempted > 0
+    assert result.failed == 0
