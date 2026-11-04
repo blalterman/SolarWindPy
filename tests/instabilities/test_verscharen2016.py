@@ -668,3 +668,43 @@ def test_beta_ani_inst_example_output_is_its_call():
         result = runner.run(test, out=lambda s: None)
     assert result.attempted > 0
     assert result.failed == 0
+
+
+# ---------------------------------------------------------------------------
+# Stability-bin dtype and fill
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="B4: stability_bin is float64 because its fill placeholder is a float",
+)
+def test_stability_bin_is_an_integer_label():
+    """stability_bin has an integer dtype for stable, unstable and missing rows.
+
+    Rows from the hand-derived MM, Stable and OFI cases at 1e-3, plus a NaN row.
+
+    ON FAILURE: the code is wrong.
+    """
+    beta = pd.Series([1.0, 1.0, 10.0, np.nan])
+    anisotropy = pd.Series([3.0, 1.0, 0.5, np.nan])
+    sc = v16.StabilityCondition(-3, beta, anisotropy)
+    assert pd.api.types.is_integer_dtype(sc.stability_bin)
+    assert set(sc.stability_bin) <= set(sc.stability_map)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="B4: the fill placeholder is the float -9999.0, not an integer",
+)
+def test_fill_is_an_integer_outside_every_bin():
+    """The fill for a point outside every bin is the integer -9999 (Phase C, B4).
+
+    It is not a key of stability_map, so it never collides with a real bin.
+
+    ON FAILURE: the code is wrong, unless the author changes the fill value.
+    """
+    sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
+    assert isinstance(sc.fill, int)
+    assert sc.fill == -9999
+    assert sc.fill not in sc.stability_map
