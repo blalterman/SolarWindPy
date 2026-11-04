@@ -11,7 +11,20 @@ from . import base
 
 
 class Scatter(base.ColorPlot):
-    r"""Scatter plot of y against x, optionally colored by z."""
+    r"""Scatter plot of y against x, optionally colored by z.
+
+    Notes
+    -----
+    ``logx`` and ``logy`` set only the axis scale. ``Hist2D`` and
+    ``SpiralPlot2D`` also store ``log10(abs())`` of a flagged axis, because
+    they bin in log space; a ``Scatter`` keeps its data linear. Quantile
+    clipping gives nearly the same points either way, since a monotone log
+    preserves order. Negative values differ: the binned plots fold them
+    into the log axis with ``abs()``, while a ``Scatter`` leaves them for
+    matplotlib to drop from its log axis.
+
+    This difference is documented for now and needs to be revisited.
+    """
 
     _clipped_axes = ("x", "y", "z")
 
