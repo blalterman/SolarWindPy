@@ -567,6 +567,17 @@ These change computed values; rerun any analysis that used them.
   `gamma / Omega_p = 10^-4` (Verscharen et al. 2016, Table 1). It had passed the FM/W `a` as
   `b`, so it printed thresholds for no published instability.
 
+- Missing components now give NaN, following the rule in the missing-data docs: a quantity
+  built from a fixed set of inputs needs every input.
+  - `Plasma.anisotropy` is NaN for a species missing its parallel or perpendicular
+    component, and NaN where no species is present (it was 1.0). A species-partial total
+    such as `"a+p1"` stays partial over the species present.
+  - `Spacecraft.distance2sun` is NaN at a missing position component, as `Vector.mag`
+    is, so `Plasma.nc` is NaN there too.
+  - `AlfvenicTurbulence` energies and `cross_helicity` are NaN at a missing component.
+  - The Raffaella polarity, and the field built from it, are NaN at a missing `v_y` or
+    `b_y`.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
