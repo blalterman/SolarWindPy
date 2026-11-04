@@ -150,13 +150,13 @@ class PlasmaTestBase(ABC):
         )
         for s in slist:
             with self.assertRaisesRegex(ValueError, "Invalid species"):
-                self.object_testing.number_density(s)
+                self.object_testing.n(s)
 
             if "+" in s:
                 # A species list for which one species contains "+" is not
                 # uniformly parsable.
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    self.object_testing.number_density(*s.split(","))
+                    self.object_testing.n(*s.split(","))
 
     def test_held_species_are_accepted_in_any_order_and_sum(self):
         r"""Every held species, subset, and "+"-sum is accepted; sum order is irrelevant.
@@ -169,11 +169,11 @@ class PlasmaTestBase(ABC):
         """
         ot = self.object_testing
         for s in self.stuple:
-            self.assertEqual(ot.number_density(s).name, s)
+            self.assertEqual(ot.n(s).name, s)
         for combo in self.species_combinations:
-            ot.number_density(*combo)
-            forward = ot.number_density("+".join(combo))
-            backward = ot.number_density("+".join(reversed(combo)))
+            ot.n(*combo)
+            forward = ot.n("+".join(combo))
+            backward = ot.n("+".join(reversed(combo)))
             pdt.assert_series_equal(forward, backward, check_names=False)
 
     @abstractmethod
@@ -184,7 +184,7 @@ class PlasmaTestBase(ABC):
             for s in bad_species:
                 with self.assertRaisesRegex(ValueError,
                                             "Requested species unavailable."):
-                    self.object_testing.number_density(*s)
+                    self.object_testing.n(*s)
 
         ON FAILURE: the code is wrong.
         """
@@ -213,21 +213,21 @@ class PlasmaTestBase(ABC):
         ON FAILURE: the code is wrong.
         """
         b = self.data.b.xs("", axis=1, level="S").loc[:, ["x", "y", "z"]]
-        self.assertEqual(vector.BField(b), self.object_testing.bfield)
         self.assertEqual(vector.BField(b), self.object_testing.b)
-        self.assertEqual(self.object_testing.b, self.object_testing.bfield)
+        self.assertEqual(vector.BField(b), self.object_testing.b)
+        self.assertEqual(self.object_testing.b, self.object_testing.b)
 
     def test_number_density(self):
         r"""Plasma's number density per species, and summed over species, matches the ions.
 
         ON FAILURE: the code is wrong in `Plasma`'s species selection or in its sum
-        over species. The expectation comes from `Ion.number_density`, so a defect
+        over species. The expectation comes from `Ion.n`, so a defect
         common to both is not caught here; `tests/core/test_ions.py` covers that.
         """
         ot = self.object_testing
 
         ions_ = pd.concat(
-            {s: ot.ions[s].number_density for s in self.stuple},
+            {s: ot.ions[s].n for s in self.stuple},
             axis=1,
             names=["S"],
             sort=True,
@@ -236,9 +236,9 @@ class PlasmaTestBase(ABC):
         total_ions.name = "+".join(self.stuple)
         sum_species = self.species
 
-        pdt.assert_series_equal(total_ions, ot.number_density(sum_species))
         pdt.assert_series_equal(total_ions, ot.n(sum_species))
-        pdt.assert_series_equal(ot.n(sum_species), ot.number_density(sum_species))
+        pdt.assert_series_equal(total_ions, ot.n(sum_species))
+        pdt.assert_series_equal(ot.n(sum_species), ot.n(sum_species))
 
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
@@ -249,47 +249,43 @@ class PlasmaTestBase(ABC):
             else:
                 fcn = pdt.assert_frame_equal
 
-            fcn(this_ion, ot.number_density(*s))
             fcn(this_ion, ot.n(*s))
-            fcn(ot.n(*s), ot.number_density(*s))
+            fcn(this_ion, ot.n(*s))
+            fcn(ot.n(*s), ot.n(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1)
                 this_ion.name = "+".join(sorted(s))
-                pdt.assert_series_equal(this_ion, ot.number_density("+".join(s)))
                 pdt.assert_series_equal(this_ion, ot.n("+".join(s)))
-                pdt.assert_series_equal(
-                    ot.number_density("+".join(s)), ot.n("+".join(s))
-                )
+                pdt.assert_series_equal(this_ion, ot.n("+".join(s)))
+                pdt.assert_series_equal(ot.n("+".join(s)), ot.n("+".join(s)))
 
     def test_kinetic_energy_flux(self):
         """Plasma's kinetic energy flux is each ion's, and their sum for "a+b".
 
-        ON FAILURE: `Plasma.kinetic_energy_flux` does not reproduce or sum the
-        per-ion values; `Ion.kinetic_energy_flux` itself is tested in test_ions.
+        ON FAILURE: `Plasma.Wk` does not reproduce or sum the
+        per-ion values; `Ion.Wk` itself is tested in test_ions.
         """
         ot = self.object_testing
-        by_ion = {s: ot.ions.loc[s].kinetic_energy_flux for s in self.stuple}
+        by_ion = {s: ot.ions.loc[s].Wk for s in self.stuple}
         for s, wk in by_ion.items():
-            pdt.assert_series_equal(ot.kinetic_energy_flux(s), wk, check_names=False)
+            pdt.assert_series_equal(ot.Wk(s), wk, check_names=False)
         if len(self.stuple) > 1:
             total = sum(by_ion.values())
             scom = "+".join(self.stuple)
-            pdt.assert_series_equal(
-                ot.kinetic_energy_flux(scom), total, check_names=False
-            )
+            pdt.assert_series_equal(ot.Wk(scom), total, check_names=False)
 
     def test_mass_density(self):
         r"""Plasma's mass density per species, and summed over species, matches the ions.
 
         ON FAILURE: the code is wrong in `Plasma`'s species selection or in its sum
-        over species. The expectation comes from `Ion.mass_density`, so a defect
+        over species. The expectation comes from `Ion.rho`, so a defect
         common to both is not caught here; `tests/core/test_ions.py` covers that.
         """
         ot = self.object_testing
 
         ions_ = pd.concat(
-            {s: ot.ions[s].mass_density for s in self.stuple},
+            {s: ot.ions[s].rho for s in self.stuple},
             axis=1,
             names=["S"],
             sort=True,
@@ -298,9 +294,9 @@ class PlasmaTestBase(ABC):
         total_ions.name = "+".join(self.stuple)
         sum_species = self.species
 
-        pdt.assert_series_equal(total_ions, ot.mass_density(sum_species))
         pdt.assert_series_equal(total_ions, ot.rho(sum_species))
-        pdt.assert_series_equal(ot.rho(sum_species), ot.mass_density(sum_species))
+        pdt.assert_series_equal(total_ions, ot.rho(sum_species))
+        pdt.assert_series_equal(ot.rho(sum_species), ot.rho(sum_species))
 
         # Check that plasma returns each ion species independently.
         for s in self.species_combinations:
@@ -311,18 +307,16 @@ class PlasmaTestBase(ABC):
             else:
                 fcn = pdt.assert_frame_equal
 
-            fcn(this_ion, ot.mass_density(*s))
             fcn(this_ion, ot.rho(*s))
-            fcn(ot.rho(*s), ot.mass_density(*s))
+            fcn(this_ion, ot.rho(*s))
+            fcn(ot.rho(*s), ot.rho(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.sum(axis=1)
                 this_ion.name = "+".join(sorted(s))
-                pdt.assert_series_equal(this_ion, ot.mass_density("+".join(s)))
                 pdt.assert_series_equal(this_ion, ot.rho("+".join(s)))
-                pdt.assert_series_equal(
-                    ot.mass_density("+".join(s)), ot.rho("+".join(s))
-                )
+                pdt.assert_series_equal(this_ion, ot.rho("+".join(s)))
+                pdt.assert_series_equal(ot.rho("+".join(s)), ot.rho("+".join(s)))
 
     def test_thermal_speed(self):
         r"""Thermal speeds match the ions and satisfy the scalar-moment identity.
@@ -332,16 +326,16 @@ class PlasmaTestBase(ABC):
         parallel and perpendicular components.
         """
         ot = self.object_testing
-        ions_ = {s: ot.ions.loc[s].thermal_speed.data for s in self.stuple}
+        ions_ = {s: ot.ions.loc[s].w.data for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         for s in self.species_combinations:
             if len(s) == 1:
                 this_ion = ions_.xs(s[0], axis=1, level="S")
-                pdt.assert_frame_equal(this_ion, ot.thermal_speed(*s))
-                pdt.assert_frame_equal(ot.thermal_speed(*s), ot.w(*s))
-                pdt.assert_frame_equal(ot.thermal_speed(s[0]), ot.w(*s))
+                pdt.assert_frame_equal(this_ion, ot.w(*s))
+                pdt.assert_frame_equal(ot.w(*s), ot.w(*s))
+                pdt.assert_frame_equal(ot.w(s[0]), ot.w(*s))
 
                 # Test that the scalar thermal speed is as expected in plasma.
                 scalar = this_ion.loc[:, "scalar"].pow(2)
@@ -352,17 +346,17 @@ class PlasmaTestBase(ABC):
 
             else:
                 these_ions = ions_.loc[:, pd.IndexSlice[:, s]]
-                pdt.assert_frame_equal(these_ions, ot.thermal_speed(*s))
                 pdt.assert_frame_equal(these_ions, ot.w(*s))
-                pdt.assert_frame_equal(ot.thermal_speed(*s), ot.w(*s))
+                pdt.assert_frame_equal(these_ions, ot.w(*s))
+                pdt.assert_frame_equal(ot.w(*s), ot.w(*s))
 
                 msg = "The result of a total species thermal speed is physically ambiguous"
                 with self.assertRaisesRegex(NotImplementedError, msg):
-                    ot.thermal_speed("+".join(s))
+                    ot.w("+".join(s))
                 with self.assertRaisesRegex(NotImplementedError, msg):
                     ot.w("+".join(s))
                 with self.assertRaises(ValueError):
-                    ot.thermal_speed(",".join(s))
+                    ot.w(",".join(s))
 
     def test_pth(self):
         r"""Plasma's thermal pressure per species, and summed over species, matches the ions.
@@ -403,12 +397,12 @@ class PlasmaTestBase(ABC):
     def test_temperature(self):
         r"""Plasma's temperature per species, and summed over species, matches the ions.
 
-        ON FAILURE: `Plasma.temperature` and `Ion.temperature` disagree, or
+        ON FAILURE: `Plasma.T` and `Ion.T` disagree, or
         `Plasma`'s sum over species is wrong. This test cannot say which of the two
         is at fault, and a defect common to both passes it.
         """
         # Test that Plasma returns each Ion plasma independently.
-        ions_ = {s: self.object_testing.ions[s].temperature for s in self.stuple}
+        ions_ = {s: self.object_testing.ions[s].T for s in self.stuple}
         ions_ = pd.concat(ions_, axis=1, names=["S"], sort=True)
         ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
@@ -419,13 +413,11 @@ class PlasmaTestBase(ABC):
             if len(s) == 1:
                 this_ion = this_ion.xs(s[0], axis=1, level="S")
 
-            pdt.assert_frame_equal(this_ion, self.object_testing.temperature(*s))
+            pdt.assert_frame_equal(this_ion, self.object_testing.T(*s))
 
             if len(s) > 1:
                 this_ion = this_ion.T.groupby(level="C").sum().T
-                pdt.assert_frame_equal(
-                    this_ion, self.object_testing.temperature("+".join(s))
-                )
+                pdt.assert_frame_equal(this_ion, self.object_testing.T("+".join(s)))
 
     def test_beta(self):
         r"""Plasma beta equals 2 mu_0 p_th / B^2, with the unit conversion built here.
@@ -473,7 +465,7 @@ class PlasmaTestBase(ABC):
             w = self.data.w.xs(s, axis=1, level="S")
             ani = (w.per / w.par).pow(2)
             ani.name = s
-            right = ot.anisotropy(s)
+            right = ot.R(s)
             pdt.assert_series_equal(ani, right)
 
         # Test list of and sums of sums of species.
@@ -501,8 +493,8 @@ class PlasmaTestBase(ABC):
                 )
                 ani_sum.name = "+".join(sorted(s))
 
-                pdt.assert_frame_equal(ani_s, ot.anisotropy(*s))
-                pdt.assert_series_equal(ani_sum, ot.anisotropy("+".join(s)))
+                pdt.assert_frame_equal(ani_s, ot.R(*s))
+                pdt.assert_series_equal(ani_sum, ot.R("+".join(s)))
 
     def test_velocity(self):
         r"""Bulk velocity, its sqrt(m/q) projection, and the centre-of-mass velocity.
@@ -514,46 +506,44 @@ class PlasmaTestBase(ABC):
         for s in self.species_combinations:
             if len(s) == 1:
                 # Test the species
-                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.velocity(*s))
-                self.assertEqual(ot.ions.loc[s[0]].velocity, ot.v(*s))
-                self.assertEqual(ot.velocity(*s), ot.v(*s))
+                self.assertEqual(ot.ions.loc[s[0]].v, ot.v(*s))
+                self.assertEqual(ot.ions.loc[s[0]].v, ot.v(*s))
+                self.assertEqual(ot.v(*s), ot.v(*s))
 
                 # Test `project_m2q`.
-                v = ot.ions.loc[s[0]].velocity.data
+                v = ot.ions.loc[s[0]].v.data
                 m2q = np.sqrt(self.mass_in_mp[s[0]] / self.charge_states[s[0]])
                 v = v.multiply(m2q)
                 pdt.assert_frame_equal(v, ot.v(*s, project_m2q=True).data)
-                pdt.assert_frame_equal(v, ot.velocity(*s, project_m2q=True).data)
+                pdt.assert_frame_equal(v, ot.v(*s, project_m2q=True).data)
                 self.assertEqual(vector.Vector(v), ot.v(*s, project_m2q=True))
-                self.assertEqual(vector.Vector(v), ot.velocity(*s, project_m2q=True))
-                self.assertEqual(
-                    ot.v(*s, project_m2q=True), ot.velocity(*s, project_m2q=True)
-                )
+                self.assertEqual(vector.Vector(v), ot.v(*s, project_m2q=True))
+                self.assertEqual(ot.v(*s, project_m2q=True), ot.v(*s, project_m2q=True))
 
             else:
                 # Test species = (s0, s1, ..., sn)
                 ions_ = ot.ions.loc[list(s)].apply(lambda x: x.v)
 
-                pdt.assert_series_equal(ions_, ot.velocity(*s))
                 pdt.assert_series_equal(ions_, ot.v(*s))
-                pdt.assert_series_equal(ot.velocity(*s), ot.v(*s))
+                pdt.assert_series_equal(ions_, ot.v(*s))
+                pdt.assert_series_equal(ot.v(*s), ot.v(*s))
 
                 # comma-separated species list fails
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.velocity(",".join(s))
+                    ot.v(",".join(s))
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.v(",".join(s))
 
                 with self.assertRaisesRegex(
                     NotImplementedError, "A multi-species velocity is not valid"
                 ):
-                    ot.velocity(*s, project_m2q=True)
+                    ot.v(*s, project_m2q=True)
                 with self.assertRaisesRegex(
                     NotImplementedError, "A multi-species velocity is not valid"
                 ):
                     ot.v(*s, project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
-                    ot.velocity(",".join(s), project_m2q=True)
+                    ot.v(",".join(s), project_m2q=True)
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
                     ot.v(",".join(s), project_m2q=True)
 
@@ -572,12 +562,12 @@ class PlasmaTestBase(ABC):
                 ions_ = vector.Vector(ions_)
 
                 self.assertEqual(ions_, ot.v("+".join(s)))
-                self.assertEqual(ions_, ot.velocity("+".join(s)))
+                self.assertEqual(ions_, ot.v("+".join(s)))
 
                 with self.assertRaisesRegex(
                     NotImplementedError, "A multi-species velocity is not valid"
                 ):
-                    ot.velocity("+".join(s), project_m2q=True)
+                    ot.v("+".join(s), project_m2q=True)
                 with self.assertRaisesRegex(
                     NotImplementedError, "A multi-species velocity is not valid"
                 ):
@@ -1162,17 +1152,17 @@ class PlasmaTestBase(ABC):
 
         ot = self.object_testing
         ot.set_spacecraft(None)
-        self.assertIsNone(ot.spacecraft)
+        self.assertIsNone(ot.sc)
 
         ot.set_spacecraft(Wind)
-        self.assertEqual(ot.spacecraft, Wind)
-        self.assertEqual(ot.spacecraft, ot.sc)
+        self.assertEqual(ot.sc, Wind)
+        self.assertEqual(ot.sc, ot.sc)
 
         ot.set_spacecraft(PSP)
-        self.assertEqual(ot.spacecraft, PSP)
-        self.assertEqual(ot.spacecraft, ot.sc)
+        self.assertEqual(ot.sc, PSP)
+        self.assertEqual(ot.sc, ot.sc)
 
-        self.assertNotEqual(ot.spacecraft, Wind)
+        self.assertNotEqual(ot.sc, Wind)
         self.assertNotEqual(ot.sc, Wind)
 
         ot.set_spacecraft(None)
@@ -1678,11 +1668,11 @@ class PlasmaTestBase(ABC):
         drop = data.columns.isin(ot.data.columns)
         aux = data.loc[:, ~drop]
         ot.set_auxiliary_data(aux)
-        pdt.assert_frame_equal(aux, ot.auxiliary_data)
-        pdt.assert_frame_equal(ot.auxiliary_data, ot.aux)
+        pdt.assert_frame_equal(aux, ot.aux)
+        pdt.assert_frame_equal(ot.aux, ot.aux)
 
         ot.set_auxiliary_data(None)
-        self.assertIsNone(ot.auxiliary_data)
+        self.assertIsNone(ot.aux)
         self.assertIsNone(ot.aux)
 
         with self.assertRaises(ValueError):
@@ -2050,7 +2040,7 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
@@ -2074,7 +2064,7 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
@@ -2098,7 +2088,7 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
@@ -2123,7 +2113,7 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
@@ -2148,7 +2138,7 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
@@ -2172,7 +2162,7 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
@@ -2196,7 +2186,7 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
             with self.assertRaisesRegex(ValueError, "Requested species unavailable."):
                 if isinstance(s, str):
                     s = [s]
-                self.object_testing.number_density(*s)
+                self.object_testing.n(*s)
 
 
 # ---------------------------------------------------------------------------
@@ -2205,7 +2195,7 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
 # Each Plasma below is built from round-number inputs in the package's storage
 # units (`solarwindpy.core.units_constants.Units`): n [cm^-3], v and w [km/s],
 # b [nT]. Thermal speeds follow m w^2 = 2 k T (`Plasma.__init__` Notes;
-# `Ion.temperature` and `Ion.pth` = rho w^2 / 2 in solarwindpy/core/ions.py),
+# `Ion.T` and `Ion.pth` = rho w^2 / 2 in solarwindpy/core/ions.py),
 # the convention Hernandez & Marsch (1985) state after their Eq. 5. Outputs are
 # in `Units`: rho [m_p cm^-3], nuc [1e-7 Hz], qpar and Wk [uW m^-2], cs [km/s].
 # Expected values are computed here in SI from the named source and converted
@@ -2371,7 +2361,7 @@ def test_sound_speed_of_one_species_is_sqrt_gamma_p_over_rho():
     """
     p = _hand_plasma([{"p1": (5.0, (400.0, 0.0, 0.0), 30.0, 30.0)}], "p1")
     # 27.38612788 uses no physical constant (30 sqrt(5/6)); no CODATA dependence.
-    assert p.sound_speed("p1").iloc[0] == printed(27.38612788, decimals=8)
+    assert p.cs("p1").iloc[0] == printed(27.38612788, decimals=8)
     assert p.cs("p1").iloc[0] == printed(27.38612788, decimals=8)
 
 
@@ -2407,7 +2397,7 @@ def test_sound_speed_per_species_and_species_sum():
         )
 
     expected_sum = np.sqrt(GAMMA * sum(pth.values()) / sum(rho.values())) / KM
-    total = p.sound_speed("a+p1")
+    total = p.cs("a+p1")
     assert total.name == "a+p1"
     assert total.iloc[0] / expected_sum == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
@@ -2424,7 +2414,7 @@ def test_Wk_of_one_species_is_half_rho_v_cubed():
     """
     p = _hand_plasma([{"p1": (5.0, (240.0, 320.0, 0.0), 30.0, 30.0)}], "p1")
     expected = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
-    for wk in (p.Wk("p1"), p.kinetic_energy_flux("p1")):
+    for wk in (p.Wk("p1"), p.Wk("p1")):
         assert wk.iloc[0] == exact(expected)
         # 267.62 uses m_p from CODATA 2022 (scipy.constants, scipy 1.18.1).
         assert wk.iloc[0] == printed(267.62, decimals=2)
@@ -2485,7 +2475,7 @@ def test_Wk_species_sum_is_nan_where_no_species_is_present():
     )
     wk_p = 0.5 * 5.0 * PER_CC * M_P * (400.0 * KM) ** 3 / MICRO
 
-    for total in (p.Wk("a+p1"), p.kinetic_energy_flux("a+p1")):
+    for total in (p.Wk("a+p1"), p.Wk("a+p1")):
         assert total.iloc[0] == exact(wk_p)
         assert np.isnan(total.iloc[1])
 
@@ -2532,7 +2522,7 @@ def test_thermal_speed_of_one_species_stays_nan_where_it_is_missing():
         [{"p1": _PROTON_ROW}, {"p1": (5.0, (400.0, 0.0, 0.0), np.nan, np.nan)}],
         "p1",
     )
-    w = p.thermal_speed("p1")
+    w = p.w("p1")
 
     assert w.loc[:, ["par", "per", "scalar"]].iloc[0].to_numpy() == exact([30.0] * 3)
     assert w.loc[:, ["par", "per", "scalar"]].iloc[1].isna().all()
@@ -2603,8 +2593,8 @@ def test_temperature_follows_the_two_level_missing_data_rule():
         "a": M_ALPHA * (40.0 * KM) ** 2 / (2.0 * constants.k) / 1e5,
     }
 
-    _assert_two_level_scalar(p.temperature("a", "p1"), p.temperature("a+p1"), expected)
-    one = p.temperature("p1").loc[:, "scalar"]
+    _assert_two_level_scalar(p.T("a", "p1"), p.T("a+p1"), expected)
+    one = p.T("p1").loc[:, "scalar"]
     assert one.iloc[[1, 3]].isna().all()
 
 
@@ -2649,7 +2639,7 @@ def test_velocity_species_sum_weights_only_species_with_a_velocity():
         {"p1": p1, "p2": (1.0, nan3, 30.0, 30.0)},
         {"p1": (3.0, nan3, 30.0, 30.0), "p2": (1.0, nan3, 30.0, 30.0)},
     ]
-    v = _hand_plasma(rows, "p1", "p2").velocity("p1+p2").cartesian
+    v = _hand_plasma(rows, "p1", "p2").v("p1+p2").cartesian
 
     assert v.loc[:, "x"].iloc[:3].to_numpy() == exact([450.0, 400.0, 400.0])
     assert (v.loc[:, ["y", "z"]].iloc[:3].to_numpy() == 0.0).all()
@@ -2855,7 +2845,7 @@ def test_density_totals_are_nan_where_no_species_is_present():
         "a",
         "p1",
     )
-    for total in (p.number_density("a+p1"), p.mass_density("a+p1")):
+    for total in (p.n("a+p1"), p.rho("a+p1")):
         assert total.iloc[0] == exact(5.0)
         assert np.isnan(total.iloc[1])
 
@@ -3097,8 +3087,8 @@ def test_estimate_electrons_temperature_equals_proton_scalar_temperature():
         assert we == printed(1120.6821, decimals=4)
 
     # T_e uses CODATA m_e and T_p uses m_p: two CODATA routes to m_p / m_e.
-    t_e = e.temperature.loc[:, "scalar"].iloc[0]
-    t_p = p.ions.loc["p1"].temperature.loc[:, "scalar"].iloc[0]
+    t_e = e.T.loc[:, "scalar"].iloc[0]
+    t_p = p.ions.loc["p1"].T.loc[:, "scalar"].iloc[0]
     assert t_e / t_p == printed(1.0, decimals=CODATA_JOINT_DECIMALS)
 
 
@@ -3298,7 +3288,7 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     ref = swp.examples.load_plasma()
     perm = [2, 0, 1]
     data = ref.data.iloc[perm]
-    sc = spacecraft.Spacecraft(ref.spacecraft.data.iloc[perm], "PSP", "HCI")
+    sc = spacecraft.Spacecraft(ref.sc.data.iloc[perm], "PSP", "HCI")
     aux = pd.DataFrame(
         {("q", "", ""): [0.0, 1.0, 2.0]},
         index=ref.epoch,
@@ -3312,12 +3302,10 @@ def test_spacecraft_and_auxiliary_data_are_sorted_with_the_plasma(caplog):
     assert len(_warnings(caplog, "earlier than the row before")) == 1
     assert not _warnings(caplog, "in another order")
     assert p.data.index.equals(ref.epoch)
-    assert p.spacecraft.data.index.equals(ref.epoch)
-    assert p.auxiliary_data.index.equals(ref.epoch)
-    assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
-        [-42.0, -22.0, -34.0]
-    )
-    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+    assert p.sc.data.index.equals(ref.epoch)
+    assert p.aux.index.equals(ref.epoch)
+    assert p.sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert p.aux.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 
 def test_setters_refuse_a_mismatched_index_with_value_error():
@@ -3335,7 +3323,7 @@ def test_setters_refuse_a_mismatched_index_with_value_error():
     with pytest.raises(ValueError, match="index"):
         p.set_auxiliary_data(aux)
 
-    sc_data = p.spacecraft.data.set_axis(shifted, axis=0)
+    sc_data = p.sc.data.set_axis(shifted, axis=0)
     with pytest.raises(ValueError, match="index"):
         p.set_spacecraft(spacecraft.Spacecraft(sc_data, "PSP", "HCI"))
 
@@ -3492,8 +3480,8 @@ def test_set_auxiliary_data_reorders_the_plasma_times_given_in_another_order(cap
         p.set_auxiliary_data(aux.iloc[[2, 0, 1]])
 
     assert len(_warnings(caplog, "in another order")) == 1
-    assert p.auxiliary_data.index.equals(p.epoch)
-    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+    assert p.aux.index.equals(p.epoch)
+    assert p.aux.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 
 _PERM = [2, 0, 1]
@@ -3509,7 +3497,7 @@ def _example_aux(index):
 
 def _example_sc(rows):
     """The example spacecraft built from its rows in the order ``rows``."""
-    data = swp.examples.load_plasma().spacecraft.data.iloc[rows]
+    data = swp.examples.load_plasma().sc.data.iloc[rows]
     return spacecraft.Spacecraft(data, "PSP", "HCI")
 
 
@@ -3517,7 +3505,7 @@ def _built_out_of_order():
     """Plasma, spacecraft data and aux, all passed in order 2, 0, 1."""
     ref = swp.examples.load_plasma()
     data = ref.data.iloc[_PERM]
-    sc_data = ref.spacecraft.data.iloc[_PERM]
+    sc_data = ref.sc.data.iloc[_PERM]
     sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
     return plasma.Plasma(
         data, *ref.species, spacecraft=sc, auxiliary_data=_example_aux(data.index)
@@ -3591,12 +3579,10 @@ def test_plasma_spacecraft_and_auxiliary_data_stay_aligned(build):
     p = build()
     ref = swp.examples.load_plasma()
     assert p.data.index.equals(ref.epoch)
-    assert p.spacecraft.data.index.equals(p.data.index)
-    assert p.auxiliary_data.index.equals(p.data.index)
-    assert p.spacecraft.position.data.loc[:, "x"].to_numpy() == exact(
-        [-42.0, -22.0, -34.0]
-    )
-    assert p.auxiliary_data.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
+    assert p.sc.data.index.equals(p.data.index)
+    assert p.aux.index.equals(p.data.index)
+    assert p.sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert p.aux.loc[:, ("q", "", "")].to_numpy() == exact([0.0, 1.0, 2.0])
 
 
 def _minutes(n):
@@ -3642,7 +3628,7 @@ def test_one_repeated_time_in_ordered_data_logs_only_the_repeat_and_copies_nothi
 
     warned = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
     assert len(warned) == 1 and "repeat an earlier timestamp" in warned[0]
-    assert p.auxiliary_data is aux
+    assert p.aux is aux
 
 
 def test_two_swapped_rows_in_the_middle_are_one_out_of_order_row(caplog):
@@ -3757,7 +3743,7 @@ def test_auxiliary_data_levels_out_of_order_raise_value_error():
 
 def _one_row_spacecraft(p):
     """The example plasma's spacecraft cut to its first row."""
-    return spacecraft.Spacecraft(p.spacecraft.data.iloc[:1], "PSP", "HCI")
+    return spacecraft.Spacecraft(p.sc.data.iloc[:1], "PSP", "HCI")
 
 
 def _one_row_aux(p):
@@ -3854,7 +3840,7 @@ def test_number_density_total_skips_a_missing_species_unless_skipna_is_false():
         "p1",
         "p2",
     )
-    for method in (p.n, p.number_density):
+    for method in (p.n, p.n):
         assert method("p1+p2").to_numpy() == exact([5.5, 5.0])
         assert method("p1+p2", skipna=False).to_numpy() == exact(
             [5.5, np.nan], nan_ok=True
@@ -3868,7 +3854,7 @@ def test_kinetic_energy_flux_per_species_columns_are_named_S():
     """
     beam = (0.5, (450.0, 0.0, 0.0), 20.0, 20.0)
     p = _hand_plasma([{"p1": _PROTON_ROW, "p2": beam}], "p1", "p2")
-    wk = p.kinetic_energy_flux("p1", "p2")
+    wk = p.Wk("p1", "p2")
     assert list(wk.columns.names) == ["S"]
     assert list(wk.columns) == ["p1", "p2"]
 
@@ -3903,10 +3889,8 @@ def test_drop_species_keeps_shared_and_remaining_species_auxiliary_columns(
     p = _example_with_species_aux()
     result = p.drop_species(*dropped)
     expected_cols = [("q", "", "")] + [("q", "", s) for s in kept]
-    assert list(result.auxiliary_data.columns) == expected_cols
-    pdt.assert_frame_equal(
-        result.auxiliary_data, p.auxiliary_data.loc[:, expected_cols]
-    )
+    assert list(result.aux.columns) == expected_cols
+    pdt.assert_frame_equal(result.aux, p.aux.loc[:, expected_cols])
 
 
 def test_drop_species_keeps_the_spacecraft():
@@ -3916,8 +3900,8 @@ def test_drop_species_keeps_the_spacecraft():
     """
     p = swp.examples.load_plasma()
     result = p.drop_species("a")
-    assert result.spacecraft is not None
-    assert result.spacecraft == p.spacecraft
+    assert result.sc is not None
+    assert result.sc == p.sc
 
 
 def test_missing_attribute_raises_attribute_error_naming_it():
@@ -3947,7 +3931,7 @@ def test_species_string_with_whitespace_is_unavailable():
     """
     p = swp.examples.load_plasma()
     with pytest.raises(ValueError, match="unavailable"):
-        p.number_density("a e")
+        p.n("a e")
 
 
 def test_auxiliary_data_with_wrong_level_names_raises_value_error():
@@ -3968,7 +3952,7 @@ def test_spacecraft_with_wrong_level_names_raises_value_error():
     ON FAILURE: the code is wrong.
     """
     p = swp.examples.load_plasma()
-    sc_data = p.spacecraft.data.rename_axis(columns=["M", "X"])
+    sc_data = p.sc.data.rename_axis(columns=["M", "X"])
     sc = spacecraft.Spacecraft(sc_data, "PSP", "HCI")
     with pytest.raises(ValueError, match="levels named"):
         p.set_spacecraft(sc)

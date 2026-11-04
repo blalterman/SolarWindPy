@@ -41,18 +41,18 @@ class SpacecraftTestBase(ABC):
     def test_position(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.position.data.columns)
-        self.assertIsInstance(ot.position, vector.Vector)
-        self.assertEqual(ot.position, ot.r)
-        self.assertEqual(ot.position, ot.pos)
+        pdt.assert_index_equal(cols, ot.r.data.columns)
+        self.assertIsInstance(ot.r, vector.Vector)
+        self.assertEqual(ot.r, ot.r)
+        self.assertEqual(ot.r, ot.r)
         return ot
 
     def test_velocity(self):
         cols = pd.Index(("x", "y", "z"), name="C")
         ot = self.object_testing
-        pdt.assert_index_equal(cols, ot.velocity.data.columns)
-        self.assertIsInstance(ot.velocity, vector.Vector)
-        self.assertEqual(ot.velocity, ot.v)
+        pdt.assert_index_equal(cols, ot.v.data.columns)
+        self.assertIsInstance(ot.v, vector.Vector)
+        self.assertEqual(ot.v, ot.v)
         return ot
 
     def test_data(self):
@@ -123,17 +123,17 @@ class TestWind(SpacecraftTestBase, TestCase):
         super(TestWind, self).test_position()
         pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(pos, ot.position.data)
+        pdt.assert_frame_equal(pos, ot.r.data)
 
     def test_velocity(self):
         with self.assertRaises(KeyError):
-            self.object_testing.velocity
+            self.object_testing.v
         with self.assertRaises(KeyError):
             self.object_testing.v
 
     def test_carrington(self):
         with self.assertRaises(KeyError):
-            self.object_testing.carrington
+            self.object_testing.carr
 
 
 class TestPSP(SpacecraftTestBase, TestCase):
@@ -163,23 +163,23 @@ class TestPSP(SpacecraftTestBase, TestCase):
 
         pos = self.data.xs("pos", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(pos, ot.position.data)
+        pdt.assert_frame_equal(pos, ot.r.data)
 
     def test_velocity(self):
         super(TestPSP, self).test_velocity()
 
         v = self.data.xs("v", axis=1, level="M")
         ot = self.object_testing
-        pdt.assert_frame_equal(v, ot.velocity.data)
+        pdt.assert_frame_equal(v, ot.v.data)
 
     def test_carrington(self):
         cols = pd.Index(("lat", "lon"), name="C")
         carr = self.data.xs("carr", axis=1, level="M")
 
         ot = self.object_testing
-        self.assertIsInstance(ot.carrington, pd.DataFrame)
-        pdt.assert_index_equal(cols, ot.carrington.columns)
-        pdt.assert_frame_equal(carr, ot.carrington)
+        self.assertIsInstance(ot.carr, pd.DataFrame)
+        pdt.assert_index_equal(cols, ot.carr.columns)
+        pdt.assert_frame_equal(carr, ot.carr)
 
 
 def _warnings(caplog):
@@ -197,7 +197,7 @@ def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
 
     ON FAILURE: the code is wrong.
     """
-    ref = swp.examples.load_plasma().spacecraft
+    ref = swp.examples.load_plasma().sc
     with caplog.at_level("WARNING", logger="solarwindpy"):
         sc = spacecraft.Spacecraft(ref.data.iloc[[2, 0, 1]], "PSP", "HCI")
     (message,) = _warnings(caplog)
@@ -206,11 +206,11 @@ def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
     caplog.clear()
     with caplog.at_level("WARNING", logger="solarwindpy"):
         for _ in range(2):
-            sc.position, sc.pos, sc.r, sc.velocity, sc.v, sc.distance2sun
+            sc.r, sc.r, sc.r, sc.v, sc.v, sc.distance2sun
     assert _warnings(caplog) == []
 
     assert sc.data.index.equals(ref.data.index)
-    assert sc.position.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
+    assert sc.r.data.loc[:, "x"].to_numpy() == exact([-42.0, -22.0, -34.0])
 
 
 @pytest.mark.parametrize(
@@ -231,7 +231,7 @@ def test_data_that_is_not_a_dataframe_raise_type_error_naming_the_type(build):
 
     ON FAILURE: the code is wrong.
     """
-    sc = swp.examples.load_plasma().spacecraft
+    sc = swp.examples.load_plasma().sc
     with pytest.raises(
         TypeError, match=r"^Spacecraft data must be a pandas DataFrame, not ndarray$"
     ):
@@ -243,7 +243,7 @@ def test_spacecraft_refuses_missing_timestamps():
 
     ON FAILURE: the code is wrong.
     """
-    data = swp.examples.load_plasma().spacecraft.data
+    data = swp.examples.load_plasma().sc.data
     times = pd.DatetimeIndex([data.index[0], pd.NaT, data.index[2]])
     with pytest.raises(
         ValueError,
@@ -266,6 +266,6 @@ def test_an_unknown_frame_or_name_raises_naming_it(name, frame, message):
 
     ON FAILURE: the code is wrong.
     """
-    data = swp.examples.load_plasma().spacecraft.data
+    data = swp.examples.load_plasma().sc.data
     with pytest.raises(NotImplementedError, match=message):
         spacecraft.Spacecraft(data, name, frame)

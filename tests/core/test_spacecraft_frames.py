@@ -10,7 +10,7 @@ from solarwindpy.core import spacecraft
 
 
 def _position_data():
-    return swp.examples.load_plasma().spacecraft.data
+    return swp.examples.load_plasma().sc.data
 
 
 def test_every_supported_frame_is_accepted_and_gives_a_finite_distance():

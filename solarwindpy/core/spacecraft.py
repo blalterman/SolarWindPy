@@ -64,7 +64,7 @@ class Spacecraft(base.Base):
 
         >>> import solarwindpy as swp
         >>> from solarwindpy.core.spacecraft import Spacecraft
-        >>> data = swp.examples.load_plasma().spacecraft.data
+        >>> data = swp.examples.load_plasma().sc.data
         >>> data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE
         [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),
          ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]
@@ -75,9 +75,9 @@ class Spacecraft(base.Base):
         >>> spacecraft = Spacecraft(data, "psp", "HCI")
         >>> spacecraft.name, spacecraft.frame
         ('PSP', 'HCI')
-        >>> spacecraft.position.data.loc[:, "x"].tolist()
+        >>> spacecraft.r.data.loc[:, "x"].tolist()
         [-42.0, -22.0, -34.0]
-        >>> spacecraft.velocity.data.loc[:, "y"].tolist()
+        >>> spacecraft.v.data.loc[:, "y"].tolist()
         [-80.0, -70.0, -90.0]
         """
         # `Base.__init__` calls `set_data`, which needs neither frame nor name.
@@ -96,7 +96,7 @@ class Spacecraft(base.Base):
         return self._name
 
     @property
-    def position(self):
+    def r(self):
         """Position vector of the spacecraft.
 
         Returns
@@ -109,24 +109,7 @@ class Spacecraft(base.Base):
         return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
-    def pos(self):
-        """Shortcut to position property.
-
-        Returns
-        -------
-        vector.Vector
-            Position vector with x, y, z components.
-        """
-        # Ensures that `sc.pos` returns vector.
-        return self.position
-
-    @property
-    def r(self):
-        r"""Shortcut to :py:attr:`position`."""
-        return self.position
-
-    @property
-    def velocity(self):
+    def v(self):
         """Velocity vector of the spacecraft.
 
         Returns
@@ -147,12 +130,7 @@ class Spacecraft(base.Base):
             raise KeyError("Spacecraft doesn't know it's velocity.")
 
     @property
-    def v(self):
-        r"""Shortcut to :py:attr:`velocity`."""
-        return self.velocity
-
-    @property
-    def carrington(self):
+    def carr(self):
         r"""Carrington latitude and longitude."""
         try:
             return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
@@ -162,7 +140,7 @@ class Spacecraft(base.Base):
     @property
     def distance2sun(self):
         r"""Radial distance to Sun in meters."""
-        pos = self.position.data
+        pos = self.r.data
         frame = self.frame
 
         if frame == "GSE":

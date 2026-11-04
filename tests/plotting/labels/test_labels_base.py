@@ -468,7 +468,7 @@ def test_energy_flux_labels_match_author_declared_contract(labels_base, mcs, tex
     """Heat flux is labelled q and kinetic energy flux W_K, both in uW m^-2.
 
     The symbols are the author's declared contract; the unit matches what
-    Plasma.heat_flux and Plasma.kinetic_energy_flux report.
+    Plasma.heat_flux and Plasma.Wk report.
 
     ON FAILURE: the label changed; confirm with the author before updating.
     """
@@ -490,8 +490,8 @@ def test_energy_flux_labels_match_author_declared_contract(labels_base, mcs, tex
 def test_latitude_is_lambda_and_colatitude_is_theta(labels_base, mcs, tex):
     """A latitude component renders as lambda and a colatitude component as theta.
 
-    The symbols are the author's declared contract, matching Vector.latitude (angle
-    above the xy-plane) and Vector.colatitude (angle from +z); both are in degrees.
+    The symbols are the author's declared contract, matching Vector.lat (angle
+    above the xy-plane) and Vector.colat (angle from +z); both are in degrees.
 
     ON FAILURE: the label changed; confirm with the author before updating.
     """

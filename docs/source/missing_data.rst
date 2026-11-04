@@ -33,7 +33,7 @@ Across species
 A total over species, such as ``"a+p1"``, uses the species present at that time.
 It is NaN only when no species is present. Protons measured without alphas still
 give a total density, temperature and pressure. Weighted means, such as the
-center-of-mass velocity (:py:meth:`~solarwindpy.core.plasma.Plasma.velocity`)
+center-of-mass velocity (:py:meth:`~solarwindpy.core.plasma.Plasma.v`)
 and the electron velocity
 (:py:meth:`~solarwindpy.core.plasma.Plasma.estimate_electrons`), likewise
 average over the species present.
@@ -44,13 +44,13 @@ and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdynamic`, are
 NaN at a time when either species is missing.
 
 Thermal speeds do not add across species, so
-:py:meth:`~solarwindpy.core.plasma.Plasma.thermal_speed` raises for a total such
+:py:meth:`~solarwindpy.core.plasma.Plasma.w` raises for a total such
 as ``"a+p1"``. Only temperatures and pressures form totals.
 
 The two levels
 --------------
 
-For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.temperature`),
+For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.T`),
 ``ok`` marks a measured value present and ``NaN`` one missing. A species missing
 either component is masked as a whole at that time, so its result there is NaN:
 

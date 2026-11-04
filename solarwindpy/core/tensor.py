@@ -98,7 +98,7 @@ class Tensor(base.Base):
             raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     @property
-    def magnitude(self) -> pd.Series:
+    def mag(self) -> pd.Series:
         r"""Scalar magnitude of a thermal-speed tensor.
 
         Returns
@@ -119,4 +119,6 @@ class Tensor(base.Base):
         """
         par = self.data.loc[:, "par"]
         per = self.data.loc[:, "per"]
-        return par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+        mag = par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+        mag.name = "mag"
+        return mag

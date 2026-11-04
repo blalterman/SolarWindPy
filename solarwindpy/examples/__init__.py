@@ -70,9 +70,9 @@ def load_plasma():
      '2022-10-09 01:47:01.234560']
     >>> plasma.data.loc[:, ("n", "", "p1")].tolist()
     [1.0, 2.0, 3.0]
-    >>> plasma.spacecraft.name, plasma.spacecraft.frame
+    >>> plasma.sc.name, plasma.sc.frame
     ('PSP', 'HCI')
-    >>> plasma.spacecraft.position.data.loc[:, "x"].tolist()
+    >>> plasma.sc.r.data.loc[:, "x"].tolist()
     [-42.0, -22.0, -34.0]
     """
     # Imported here so the package namespace binds only its own objects.

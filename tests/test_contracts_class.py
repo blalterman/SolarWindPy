@@ -180,26 +180,23 @@ class TestIonClass:
         assert len(ion.data.columns) == 6  # n, v.x, v.y, v.z, w.par, w.per
 
     def test_ion_has_velocity_property(self, sample_ion_data: pd.DataFrame) -> None:
-        """Verify Ion has velocity property returning Vector."""
+        """Verify Ion has the velocity property v returning Vector."""
         ion = ions.Ion(sample_ion_data, "p1")
-        assert hasattr(ion, "velocity")
-        assert hasattr(ion, "v")  # Alias
+        assert hasattr(ion, "v")
 
     def test_ion_has_thermal_speed_property(
         self, sample_ion_data: pd.DataFrame
     ) -> None:
-        """Verify Ion has thermal_speed property returning Tensor."""
+        """Verify Ion has the thermal speed property w returning Tensor."""
         ion = ions.Ion(sample_ion_data, "p1")
-        assert hasattr(ion, "thermal_speed")
-        assert hasattr(ion, "w")  # Alias
+        assert hasattr(ion, "w")
 
     def test_ion_has_number_density_property(
         self, sample_ion_data: pd.DataFrame
     ) -> None:
-        """Verify Ion has number_density property returning Series."""
+        """Verify Ion has the number density property n returning Series."""
         ion = ions.Ion(sample_ion_data, "p1")
-        assert hasattr(ion, "number_density")
-        assert hasattr(ion, "n")  # Alias
+        assert hasattr(ion, "n")
         assert isinstance(ion.n, pd.Series)
 
 
@@ -233,9 +230,9 @@ class TestPlasmaClass:
         assert isinstance(p.ions.loc["p1"], ions.Ion)
 
     def test_plasma_has_bfield_property(self, sample_plasma_data: pd.DataFrame) -> None:
-        """Verify Plasma has bfield property."""
+        """Verify Plasma has the magnetic field property b."""
         p = plasma.Plasma(sample_plasma_data, "p1")
-        assert hasattr(p, "bfield")
+        assert hasattr(p, "b")
 
     def test_plasma_attribute_access_shortcut(
         self, sample_plasma_data: pd.DataFrame
@@ -316,9 +313,9 @@ class TestTensorClass:
         assert "scalar" in t.data.columns
 
     def test_tensor_has_magnitude_property(self) -> None:
-        """Verify Tensor class has magnitude property defined."""
+        """Verify Tensor class has the magnitude property mag defined."""
         # The magnitude property exists as a class attribute
-        assert hasattr(tensor.Tensor, "magnitude")
+        assert hasattr(tensor.Tensor, "mag")
         # Note: magnitude calculation requires MultiIndex columns with level "C"
         # so it can't be called with simple column names
 

@@ -80,8 +80,8 @@ class IonTestBase(ABC):
         n.name = "n"
         ot = self.object_testing
         pdt.assert_series_equal(n, ot.n)
-        pdt.assert_series_equal(n, ot.number_density)
-        pdt.assert_series_equal(ot.number_density, ot.n)
+        pdt.assert_series_equal(n, ot.n)
+        pdt.assert_series_equal(ot.n, ot.n)
 
     def test_mass_density(self):
         mmp = self.mass_in_mp
@@ -92,30 +92,30 @@ class IonTestBase(ABC):
             rho = rho.iloc[:, 0]
         rho.name = "rho"
         ot = self.object_testing
-        pdt.assert_series_equal(ot.rho, ot.mass_density)
+        pdt.assert_series_equal(ot.rho, ot.rho)
         pdt.assert_series_equal(rho, ot.rho)
-        pdt.assert_series_equal(rho, ot.mass_density)
+        pdt.assert_series_equal(rho, ot.rho)
 
     def test_v(self):
         v = vector.Vector(self.data.v)
         ot = self.object_testing
-        self.assertEqual(v, ot.velocity)
         self.assertEqual(v, ot.v)
-        self.assertEqual(ot.velocity, ot.v)
+        self.assertEqual(v, ot.v)
+        self.assertEqual(ot.v, ot.v)
 
     def test_w(self):
         w = tensor.Tensor(self.data.w)
         ot = self.object_testing
-        self.assertEqual(w, ot.thermal_speed)
         self.assertEqual(w, ot.w)
-        self.assertEqual(ot.w, ot.thermal_speed)
+        self.assertEqual(w, ot.w)
+        self.assertEqual(ot.w, ot.w)
 
     def test_anisotropy(self):
         w = self.data.w
         ani = (w.per / w.par).pow(2)
-        ani.name = "RT"
+        ani.name = "R"
         ot = self.object_testing
-        pdt.assert_series_equal(ani, ot.anisotropy)
+        pdt.assert_series_equal(ani, ot.R)
 
     def test_pth(self):
         # pth = nkT = 0.5 * n * m * w^2
@@ -132,7 +132,7 @@ class IonTestBase(ABC):
         w = self.data.w * 1e3
         kb = physical_constants["Boltzmann constant"][0]
         t = (0.5 * m / kb) * w.pow(2) / 1e5
-        pdt.assert_frame_equal(t, self.object_testing.temperature)
+        pdt.assert_frame_equal(t, self.object_testing.T)
 
     def test_cs(self):
         m = self.mass
@@ -154,7 +154,7 @@ class IonTestBase(ABC):
         v = self.data.v.loc[:, ["x", "y", "z"]].pow(2).sum(axis=1).pipe(np.sqrt) * 1e3
         wk = 0.5 * rho * v.pow(3) / 1e-6  # [uW m^-2]
         wk.name = "Wk"
-        pdt.assert_series_equal(wk, self.object_testing.kinetic_energy_flux)
+        pdt.assert_series_equal(wk, self.object_testing.Wk)
         pdt.assert_series_equal(wk, self.object_testing.Wk)
 
 
@@ -252,6 +252,6 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     )
     data = pd.DataFrame([[5.0, 400.0, 0.0, 0.0, 50.0, 50.0, 50.0]], columns=cols)
     expected = 0.5 * (5e6 * constants.m_p) * (400e3) ** 3 / 1e-6  # [uW m^-2]
-    assert ions.Ion(data, "p1").kinetic_energy_flux.iloc[0] == exact(expected)
+    assert ions.Ion(data, "p1").Wk.iloc[0] == exact(expected)
     # Guard the hand value in the docstring against the formula above.
     assert expected == printed(267.6, decimals=1)

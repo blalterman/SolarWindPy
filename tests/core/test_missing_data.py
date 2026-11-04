@@ -32,38 +32,38 @@ def _species_masked_plasma():
     data.loc[t[1], ("w", "per", "a")] = np.nan
     data.loc[t[2], ("w", "par", "p1")] = np.nan
     data.loc[t[2], ("w", "per", "a")] = np.nan
-    return Plasma(data, *base.species, spacecraft=base.spacecraft)
+    return Plasma(data, *base.species, spacecraft=base.sc)
 
 
 def _position_masked_plasma():
     r"""Example plasma whose spacecraft position x is missing at row 0."""
     base = swp.examples.load_plasma()
-    sc = base.spacecraft.data.copy()
+    sc = base.sc.data.copy()
     sc.loc[sc.index[0], ("pos", "x")] = np.nan
-    spacecraft = Spacecraft(sc, base.spacecraft.name, base.spacecraft.frame)
+    spacecraft = Spacecraft(sc, base.sc.name, base.sc.frame)
     return Plasma(base.data, *base.species, spacecraft=spacecraft)
 
 
 def test_one_species_anisotropy_matches_the_ion_and_is_nan_where_masked():
-    r"""``anisotropy("p1")`` equals ``p1.anisotropy``, NaN where p1 is masked.
+    r"""``anisotropy("p1")`` equals ``p1.R``, NaN where p1 is masked.
 
     ON FAILURE: the code is wrong.
     """
     plasma = _species_masked_plasma()
-    ani = plasma.anisotropy("p1")
+    ani = plasma.R("p1")
     assert np.isnan(ani.iloc[[0, 2]]).all()
-    pdt.assert_series_equal(ani, plasma.p1.anisotropy, check_names=False)
+    pdt.assert_series_equal(ani, plasma.p1.R, check_names=False)
 
 
 def test_several_species_anisotropy_matches_each_ion():
-    r"""Column s of ``anisotropy("a", "p1")`` equals ``plasma.s.anisotropy``.
+    r"""Column s of ``anisotropy("a", "p1")`` equals ``plasma.s.R``.
 
     ON FAILURE: the code is wrong.
     """
     plasma = _species_masked_plasma()
-    ani = plasma.anisotropy("a", "p1")
+    ani = plasma.R("a", "p1")
     for s in ("a", "p1"):
-        expected = plasma.ions.loc[s].anisotropy
+        expected = plasma.ions.loc[s].R
         pdt.assert_series_equal(ani.loc[:, s], expected, check_names=False)
 
 
@@ -72,7 +72,7 @@ def test_total_anisotropy_is_nan_where_no_species_is_present():
 
     ON FAILURE: the code is wrong.
     """
-    assert np.isnan(_species_masked_plasma().anisotropy("a+p1").iloc[2])
+    assert np.isnan(_species_masked_plasma().R("a+p1").iloc[2])
 
 
 def test_total_anisotropy_stays_partial_over_species():
@@ -84,9 +84,9 @@ def test_total_anisotropy_stays_partial_over_species():
     ON FAILURE: the code is wrong.
     """
     plasma = _species_masked_plasma()
-    ani = plasma.anisotropy("a+p1")
-    assert ani.iloc[0] == exact(plasma.a.anisotropy.iloc[0])
-    assert ani.iloc[1] == exact(plasma.p1.anisotropy.iloc[1])
+    ani = plasma.R("a+p1")
+    assert ani.iloc[0] == exact(plasma.a.R.iloc[0])
+    assert ani.iloc[1] == exact(plasma.p1.R.iloc[1])
 
 
 def test_distance_to_the_sun_is_the_position_magnitude():
@@ -97,9 +97,9 @@ def test_distance_to_the_sun_is_the_position_magnitude():
 
     ON FAILURE: the code is wrong.
     """
-    sc = _position_masked_plasma().spacecraft
+    sc = _position_masked_plasma().sc
     assert sc.frame == "HCI"
-    mag = sc.position.mag
+    mag = sc.r.mag
     assert mag.isna().tolist() == [True, False, False]
     expected = mag * sc.constants.misc.loc["Rs [m]"] / sc.units.distance2sun
     pdt.assert_series_equal(sc.distance2sun, expected, check_names=False)
@@ -141,10 +141,10 @@ def _turbulence():
 @pytest.mark.parametrize(
     "energy, vector, missing",
     [
-        ("e_plus", "zp", [1, 2]),
-        ("e_minus", "zm", [1, 2]),
-        ("kinetic_energy", "v", [1]),
-        ("magnetic_energy", "b", [2]),
+        ("ep", "zp", [1, 2]),
+        ("em", "zm", [1, 2]),
+        ("ev", "v", [1]),
+        ("eb", "b", [2]),
     ],
 )
 def test_each_energy_is_half_the_squared_magnitude_of_its_vector(
@@ -219,5 +219,5 @@ def test_raffaella_polarity_and_field_are_nan_where_a_component_is_missing():
     )
     assert ot.polarity.iloc[:4].tolist() == [1.0, -1.0, -1.0, 1.0]
     assert np.isnan(ot.polarity.iloc[4])
-    assert ot.bfield.iloc[4].isna().all()
-    assert ot.bfield.iloc[:4].notna().all().all()
+    assert ot.b.iloc[4].isna().all()
+    assert ot.b.iloc[:4].notna().all().all()

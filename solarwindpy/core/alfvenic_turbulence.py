@@ -86,7 +86,7 @@ class AlfvenicTurbulence(base.Core):
        spacecraft's distance to the Sun in km, and :math:`\cos\lambda` is
        :math:`\sqrt{x^2 + y^2} / \sqrt{x^2 + y^2 + z^2}` of its GSE position.
     3. The polarity of each measurement is the sign of
-       :math:`v_R b_R + v_T b_T`, and :attr:`bfield` returns the field
+       :math:`v_R b_R + v_T b_T`, and :attr:`b` returns the field
        fluctuations multiplied by it.
     """
 
@@ -135,17 +135,12 @@ class AlfvenicTurbulence(base.Core):
         return self._measurements
 
     @property
-    def velocity(self):
+    def v(self):
         r"""Velocity fluctuations (:math:`\delta v`) in Plasma's v-units."""
         return self.data.loc[:, "v"]
 
     @property
-    def v(self):
-        r"""Shortcut for :py:attr:`velocity`"""
-        return self.velocity
-
-    @property
-    def bfield(self):
+    def b(self):
         r"""B field fluctuations (:math:`\delta b`) in Alfven units."""
         b = self.data.loc[:, "b"]
         polarity = self.polarity
@@ -153,11 +148,6 @@ class AlfvenicTurbulence(base.Core):
             self.logger.warning("Rectifying B")
             b = b.multiply(polarity, axis=0)
         return b
-
-    @property
-    def b(self):
-        r"""Shortcut for :py:attr:`bfield`."""
-        return self.bfield
 
     @property
     def polarity(self):
@@ -173,62 +163,37 @@ class AlfvenicTurbulence(base.Core):
         return self._species
 
     @property
-    def z_plus(self):
+    def zp(self):
         r""":math:`z^+` Elsasser variable."""
         zp = self.v.add(self.b, axis=1)
         return zp
 
     @property
-    def zp(self):
-        r"""Shortcut for :py:attr:`z_plus`."""
-        return self.z_plus
-
-    @property
-    def z_minus(self):
+    def zm(self):
         r""":math:`z^-` Elsasser variable."""
         zm = self.v.subtract(self.b, axis=1)
         return zm
 
     @property
-    def zm(self):
-        r"""Shortcut for :py:attr:`z_minus`."""
-        return self.z_minus
-
-    @property
-    def e_plus(self):
+    def ep(self):
         r"""Energy contained in :math:`z^+`."""
         ep = 0.5 * self.zp.pow(2).sum(axis=1, skipna=False)
         return ep
 
     @property
-    def ep(self):
-        r"""Shortcut for :py:attr:`e_plus`."""
-        return self.e_plus
-
-    @property
-    def e_minus(self):
+    def em(self):
         r"""Energy contained in :math:`z^-`."""
         em = 0.5 * self.zm.pow(2).sum(axis=1, skipna=False)
         return em
 
     @property
-    def em(self):
-        r"""Shortcut for :py:attr:`e_minus`."""
-        return self.e_minus
-
-    @property
-    def kinetic_energy(self):
+    def ev(self):
         r"""Energy contained in velocity fluctuations :math:`\frac{1}{2}v^2`."""
         ev = 0.5 * self.v.pow(2).sum(axis=1, skipna=False)
         return ev
 
     @property
-    def ev(self):
-        r"""Shortcut for :py:attr:`kinetic_energy`, :math:`E_v`."""
-        return self.kinetic_energy
-
-    @property
-    def magnetic_energy(self):
+    def eb(self):
         r"""Energy contained in magnetic field fluctuations
 
         :math:`E_b = \frac{1}{2}b^2`."""
@@ -236,44 +201,19 @@ class AlfvenicTurbulence(base.Core):
         return eb
 
     @property
-    def eb(self):
-        r"""Shortcut for :py:attr:`magnetic_energy`."""
-        return self.magnetic_energy
-
-    @property
-    def total_energy(self):
+    def etot(self):
         r"""Total energy :math:`E_T = E_v + E_b`."""
         return self.ev.add(self.eb, axis=0)
 
     @property
-    def etot(self):
-        r"""Shortcut for :py:attr:`total_energy`."""
-        return self.total_energy
-
-    @property
-    def residual_energy(self):
+    def eres(self):
         r"""Residual energy :math:`E_R = E_v - E_b`."""
         return self.ev.subtract(self.eb, axis=0)
 
     @property
-    def eres(self):
-        r"""Shortcut for :py:attr:`residual_energy`."""
-        return self.residual_energy
-
-    @property
-    def normalized_residual_energy(self):
+    def sigma_r(self):
         r"""Normalized residual energy, :math:`E_R/E_T`."""
         return self.eres.divide(self.etot, axis=0)
-
-    @property
-    def eres_norm(self):
-        r"""Shortcut for :py:attr:`normalized_residual_energy`."""
-        return self.normalized_residual_energy
-
-    @property
-    def sigma_r(self):
-        r"""Shortcut for :py:attr:`normalized_residual_energy`."""
-        return self.normalized_residual_energy
 
     @property
     def cross_helicity(self):
@@ -284,7 +224,7 @@ class AlfvenicTurbulence(base.Core):
         return c
 
     @property
-    def normalized_cross_helicity(self):
+    def sigma_c(self):
         r"""Normalized cross helicity :math:`\frac{e^+ - e^-}{e^+ + e^-}`."""
         ep = self.ep
         em = self.em
@@ -294,29 +234,14 @@ class AlfvenicTurbulence(base.Core):
         return out
 
     @property
-    def sigma_c(self):
-        r"""Shortcut to :py:attr:`normalized_cross_helicity`."""
-        return self.normalized_cross_helicity
-
-    @property
-    def alfven_ratio(self):
+    def rA(self):
         r"""Alfv\'en ratio :math:`E_v/E_b`."""
         return self.ev.divide(self.eb, axis=0)
 
     @property
-    def rA(self):
-        r"""Shortcut to :py:attr:`alfven_ratio`."""
-        return self.alfven_ratio
-
-    @property
-    def elsasser_ratio(self):
+    def rE(self):
         r"""Elsasser ratio :math:`e^-/e^+`."""
         return self.em.divide(self.ep, axis=0)
-
-    @property
-    def rE(self):
-        r"""Shortcut to :py:attr:`elsasser_ratio`."""
-        return self.elsasser_ratio
 
     def set_data(
         self,

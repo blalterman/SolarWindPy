@@ -84,7 +84,7 @@ def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
     ]
     assert plasma.data.loc[:, ("n", "", "p1")].tolist() == [1.0, 2.0, 3.0]
 
-    sc = plasma.spacecraft
+    sc = plasma.sc
     assert (sc.name, sc.frame) == ("PSP", "HCI")
     assert sc.data.columns.tolist() == [
         ("carr", "lat"),
@@ -97,10 +97,10 @@ def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
         ("v", "z"),
     ]
     assert sc.data.index.equals(plasma.epoch)
-    assert sc.position.data.loc[:, "x"].tolist() == [-42.0, -22.0, -34.0]
-    assert sc.velocity.data.loc[:, "y"].tolist() == [-80.0, -70.0, -90.0]
-    assert sc.carrington.loc[:, "lon"].tolist() == [-26.0, -36.0, -16.0]
-    assert plasma.auxiliary_data is None
+    assert sc.r.data.loc[:, "x"].tolist() == [-42.0, -22.0, -34.0]
+    assert sc.v.data.loc[:, "y"].tolist() == [-80.0, -70.0, -90.0]
+    assert sc.carr.loc[:, "lon"].tolist() == [-26.0, -36.0, -16.0]
+    assert plasma.aux is None
 
 
 def test_plasma_no_longer_accepts_log_plasma_stats():
@@ -131,5 +131,5 @@ def test_plasma_logs_each_optional_input_not_passed(caplog):
 
     caplog.clear()
     with caplog.at_level(logging.INFO, logger="solarwindpy"):
-        Plasma(plasma.data, "p1", spacecraft=plasma.spacecraft, auxiliary_data=flags)
+        Plasma(plasma.data, "p1", spacecraft=plasma.sc, auxiliary_data=flags)
     assert not [m for m in caplog.messages if m.startswith("No ")]

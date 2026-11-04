@@ -29,18 +29,17 @@ import solarwindpy as swp
 
 # --- xfail reasons -----------------------------------------------------------
 
-_NO_REGISTRY = (
-    "solarwindpy.core.quantities does not exist yet; remove this marker when the "
-    "registry module lands"
-)
-_RENAME = (
-    "the canonical rename has not landed; remove this marker when the core renames land"
-)
-
 
 def _author(why):
     """Reason for a name the naming rule and the author's rulings leave open."""
     return f"for the author: {why}; remove this marker when the author decides"
+
+
+_UNNAMED = _author(
+    "the author's tests pin this Series unnamed "
+    "(tests/core/test_alfvenic_turbulence.py, tests/core/test_quantities.py "
+    "test_cos_theta), so setting its .name changes their assertions"
+)
 
 
 def _xfail(reason):
@@ -89,9 +88,9 @@ CASES = [
     (_P, "w", lambda p, t: p.w("p1"), "M", False, None),
     (_P, "b", lambda p, t: p.b, "M", False, None),
     (_P, "pth", lambda p, t: p.pth("p1"), "M", False, None),
-    (_P, "T", lambda p, t: p.T("p1"), "M", False, _RENAME),
+    (_P, "T", lambda p, t: p.T("p1"), "M", False, None),
     (_P, "beta", lambda p, t: p.beta("p1"), "M", False, None),
-    (_P, "R", lambda p, t: p.R("p1"), "M", False, _RENAME),
+    (_P, "R", lambda p, t: p.R("p1"), "M", False, None),
     (_P, "dv", lambda p, t: p.dv("p1", "a"), "M", False, None),
     (_P, "pdv", lambda p, t: p.pdv("p1", "a"), "M", False, None),
     (
@@ -144,8 +143,8 @@ CASES = [
     (_I, "v", lambda p, t: p.p1.v, "M", False, None),
     (_I, "w", lambda p, t: p.p1.w, "M", False, None),
     (_I, "pth", lambda p, t: p.p1.pth, "M", False, None),
-    (_I, "T", lambda p, t: p.p1.T, "M", False, _RENAME),
-    (_I, "R", lambda p, t: p.p1.R, "M", True, _RENAME),
+    (_I, "T", lambda p, t: p.p1.T, "M", False, None),
+    (_I, "R", lambda p, t: p.p1.R, "M", True, None),
     (_I, "cs", lambda p, t: p.p1.cs, "M", False, None),
     (_I, "Wk", lambda p, t: p.p1.Wk, "M", True, None),
     # Vector and BField.
@@ -153,13 +152,13 @@ CASES = [
     # The xy-plane magnitude shares the string `rho` with mass density (F74),
     # one level apart.
     (_V, "rho", lambda p, t: p.p1.v.rho, "C", True, None),
-    (_V, "colat", lambda p, t: p.p1.v.colat, "C", True, _RENAME),
-    (_V, "lat", lambda p, t: p.p1.v.lat, "C", True, _RENAME),
-    (_V, "lon", lambda p, t: p.p1.v.lon, "C", True, _RENAME),
-    (_V, "cos_theta", lambda p, t: p.p1.v.cos_theta(p.b), "M", True, _RENAME),
+    (_V, "colat", lambda p, t: p.p1.v.colat, "C", True, None),
+    (_V, "lat", lambda p, t: p.p1.v.lat, "C", True, None),
+    (_V, "lon", lambda p, t: p.p1.v.lon, "C", True, None),
+    (_V, "cos_theta", lambda p, t: p.p1.v.cos_theta(p.b), "M", True, _UNNAMED),
     (_B, "pb", lambda p, t: p.b.pb, "M", True, None),
     # Tensor.
-    (_T, "mag", lambda p, t: p.p1.w.mag, "C", True, _RENAME),
+    (_T, "mag", lambda p, t: p.p1.w.mag, "C", True, None),
     # Spacecraft.
     (
         _SC,
@@ -173,21 +172,21 @@ CASES = [
         ),
     ),
     (_SC, "v", lambda p, t: p.sc.v, "M", False, None),
-    (_SC, "carr", lambda p, t: p.sc.carr, "M", False, _RENAME),
+    (_SC, "carr", lambda p, t: p.sc.carr, "M", False, None),
     (_SC, "distance2sun", lambda p, t: p.sc.distance2sun, "M", True, None),
     # AlfvenicTurbulence.
     (_AT, "v", lambda p, t: t.v, "M", False, None),
     (_AT, "b", lambda p, t: t.b, "M", False, None),
     (_AT, "zp", lambda p, t: t.zp, "M", False, None),
     (_AT, "zm", lambda p, t: t.zm, "M", False, None),
-    (_AT, "ep", lambda p, t: t.ep, "M", True, _RENAME),
-    (_AT, "em", lambda p, t: t.em, "M", True, _RENAME),
-    (_AT, "ev", lambda p, t: t.ev, "M", True, _RENAME),
-    (_AT, "eb", lambda p, t: t.eb, "M", True, _RENAME),
-    (_AT, "etot", lambda p, t: t.etot, "M", True, _RENAME),
-    (_AT, "eres", lambda p, t: t.eres, "M", True, _RENAME),
-    (_AT, "sigma_r", lambda p, t: t.sigma_r, "M", True, _RENAME),
-    (_AT, "sigma_c", lambda p, t: t.sigma_c, "M", True, _RENAME),
+    (_AT, "ep", lambda p, t: t.ep, "M", True, _UNNAMED),
+    (_AT, "em", lambda p, t: t.em, "M", True, _UNNAMED),
+    (_AT, "ev", lambda p, t: t.ev, "M", True, _UNNAMED),
+    (_AT, "eb", lambda p, t: t.eb, "M", True, _UNNAMED),
+    (_AT, "etot", lambda p, t: t.etot, "M", True, _UNNAMED),
+    (_AT, "eres", lambda p, t: t.eres, "M", True, _UNNAMED),
+    (_AT, "sigma_r", lambda p, t: t.sigma_r, "M", True, _UNNAMED),
+    (_AT, "sigma_c", lambda p, t: t.sigma_c, "M", True, _UNNAMED),
     (
         _AT,
         "cross_helicity",
@@ -292,7 +291,7 @@ def _owner_classes():
 
 @pytest.mark.parametrize(
     "owner",
-    [pytest.param(o, marks=_xfail(_RENAME)) for o in (_P, _I, _V, _B, _T, _SC, _AT)],
+    [_P, _I, _V, _B, _T, _SC, _AT],
 )
 def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
     """Every public member is a quantity in CASES or listed in NOT_QUANTITIES.
