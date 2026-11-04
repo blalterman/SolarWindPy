@@ -328,6 +328,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ICMECATDownloadError` subclasses `solarwindpy.solar_activity.cache.DownloadError` (still a
   `RuntimeError`).
 
+- Solarwindpy.plotting.agg_plot.AggPlot -> solarwindpy.plotting.base.BinnedPlot, with its
+  binning in solarwindpy.plotting.binning.FixedGrid
+
+- Solarwindpy.plotting.base.PlotWithZdata -> solarwindpy.plotting.base.ColorPlot;
+  base._CbarMaker -> ColorPlot
+
+- Solarwindpy.plotting.__all__ lists binning instead of agg_plot
+
+- Hist1D/Hist2D calc_bins_intervals() and make_cut() -> removed; the constructor bins (see
+  plot.binning)
+
+- SpiralPlot2D(...).initialize_mesh(min_per_bin=n); build_grouped() -> SpiralPlot2D(...,
+  min_per_bin=n), meshed in the constructor
+
+- SpiralPlot2D.calc_initial_bins(nbins) -> AdaptiveMesh.initial_edges(source, nbins),
+  internal; initial_bins still reads the edges
+
+- SpiralPlot2D's mesh no longer writes its progress table to stderr
+  (SpiralMesh.generate_mesh(progress=True) still does)
+
+- Hist1D.clim, Hist2D.clim tuple -> RangeLimits (as SpiralPlot2D's already was)
+
+- Alim tuple -> RangeLimits on Hist2D, SpiralPlot2D and Scatter
+
+- SpiralPlot2D gains axnorm "t" and "d" (keyword axnorm=, set_axnorm), binning,
+  get_plotted_data_boolean_series and get_subset_above_threshold; agg accepts aggregation
+  kwargs
+
+- Hist1D, Hist2D and SpiralPlot2D gain a binning property
+
+- Hist2D(x, y, z, axnorm, logx, logy, ...) -> Hist2D(x, y, z, logx, logy, axnorm, clip, nbins,
+  bin_precision, mask)
+
+- SpiralPlot2D(x, y, z, logx, logy, initial_bins, clip, mask) -> SpiralPlot2D(x, y, z, logx,
+  logy, axnorm, clip, initial_bins, min_per_bin, mask)
+
+- Scatter(x, y, z, clip, mask) -> Scatter(x, y, z, logx, logy, clip, mask); logx and logy set
+  the axis scales only
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
