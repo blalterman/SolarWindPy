@@ -174,3 +174,103 @@ def test_a_local_path_is_read_in_place_and_not_cached(tmp_path):
 
     assert cache.fetch(str(local), max_age=pd.Timedelta(days=1)) == local
     assert cache.cache_contents().empty
+
+
+def test_a_refresh_leaves_exactly_one_entry_for_its_url(tmp_path, isolated_cache):
+    """A stale entry's refresh replaces it rather than adding a second copy.
+
+    Chosen input: the entry is refreshed twice, each time after being
+    backdated past its window, and the served text changes each time, so a
+    refresh that kept the old copy would leave two or three files on disk.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+
+    source, url = serve(tmp_path, "first\n")
+    path = cache.fetch(url, max_age=pd.Timedelta(days=1))
+    for text in ("second\n", "third\n"):
+        backdate(path, 2)
+        source.write_text(text)
+        path = cache.fetch(url, max_age=pd.Timedelta(days=1))
+
+    assert cache.cache_contents().index.tolist() == [url]
+    entries = list((isolated_cache / "solarwindpy").rglob("contents"))
+    assert entries == [path]
+    assert path.read_text() == "third\n"
+
+
+class DownloadAttempted(AssertionError):
+    """Raised when a test that must not download calls ``_download_file``."""
+
+
+@pytest.mark.parametrize("seeded", [False, True], ids=["empty", "seeded"])
+@pytest.mark.parametrize("accessor", ["age", "ctime"])
+def test_reading_a_loaders_age_writes_nothing(
+    accessor, seeded, isolated_cache, seed_cache, monkeypatch
+):
+    """Reading ``DataLoader.age`` or ``ctime`` neither downloads nor writes the cache.
+
+    ``ctime`` and ``age`` are the loaders' read-only accessors (``ICMECAT``
+    has none). Chosen input: an empty cache, and one holding the loader's
+    own URL; the cache tree is snapshotted, names and modification times,
+    before and after the read, and any download raises.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.solar_activity import cache
+    from solarwindpy.solar_activity.sunspot_number.sidc import SIDC_ID, SIDCLoader
+
+    sidc_id = SIDC_ID("m13")
+    if seeded:
+        seed_cache(sidc_id.url, "2020;01;2020.042;2.2;0.8;795;1\n", age_days=3)
+
+    def refuse(url, cache):
+        raise DownloadAttempted(f"reading {accessor} tried to download {url}")
+
+    monkeypatch.setattr(cache, "_download_file", refuse)
+
+    def snapshot():
+        return {
+            path.relative_to(isolated_cache): path.stat().st_mtime_ns
+            for path in isolated_cache.rglob("*")
+        }
+
+    before = snapshot()
+    getattr(SIDCLoader(sidc_id.key, sidc_id.url), accessor)
+    assert snapshot() == before
+
+
+def test_a_first_run_on_a_clean_home_creates_the_cache(tmp_path, monkeypatch):
+    """With no cache folder yet, the first fetch creates ``~/.cache/solarwindpy``.
+
+    Chosen input: HOME is an empty directory under ``tmp_path`` and
+    ``XDG_CACHE_HOME`` is unset, so astropy (8 or later) resolves the
+    default location and must create every level of it.
+
+    ON FAILURE: the code is wrong, unless astropy changed its default cache
+    location; then external fact drifted; update the cache module docstring.
+    """
+    import astropy
+
+    from packaging.version import Version
+
+    if Version(astropy.__version__) < Version("8"):
+        pytest.skip("astropy before 8 does not create ~/.cache/<package>")
+
+    from solarwindpy.solar_activity import cache
+
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    expected = home / ".cache" / "solarwindpy"
+    assert get_cache_dir_path("solarwindpy", ensure_exists=False) == expected
+    assert not expected.exists()
+
+    _, url = serve(tmp_path, "first\n")
+    path = cache.fetch(url, max_age=pd.Timedelta(days=1))
+
+    assert expected.is_dir()
+    assert path.is_relative_to(expected)
+    assert cache.cache_contents().index.tolist() == [url]
