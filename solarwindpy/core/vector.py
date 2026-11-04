@@ -48,9 +48,20 @@ class Vector(base.Base):
         Returns
         -------
         pd.Series
-            The requested component.
+            The requested component, which shares data with :attr:`data`.
+
+        Raises
+        ------
+        KeyError
+            If ``component`` is not a column of :attr:`data`; the message
+            names the available components.
         """
-        return self.__getattr__(component)
+        if component not in self.data.columns:
+            raise KeyError(
+                f"Unknown component {component!r}. "
+                f"Available: {self.data.columns.tolist()}"
+            )
+        return self.data.xs(component, axis=1)
 
     def set_data(self, new: pd.DataFrame):
         """Set new vector data.

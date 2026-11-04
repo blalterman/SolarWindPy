@@ -31,25 +31,31 @@ class Tensor(base.Base):
         """
         super().__init__(data, _time_checked=_time_checked)
 
-    def __call__(self, component: str) -> pd.Series | pd.DataFrame:
-        """Access a specific component of the tensor.
+    def __call__(self, component: str) -> pd.Series:
+        """Return a tensor component.
 
         Parameters
         ----------
         component : str
-            The name of the component to access.
+            Component to return (``'par'``, ``'per'`` or ``'scalar'``).
 
         Returns
         -------
-        pd.Series | pd.DataFrame
-            The requested component data.
+        pd.Series
+            The requested component, which shares data with :attr:`data`.
 
         Raises
         ------
-        AttributeError
-            If the component does not exist.
+        KeyError
+            If ``component`` is not a column of :attr:`data`; the message
+            names the available components.
         """
-        return self.__getattr__(component)
+        if component not in self.data.columns:
+            raise KeyError(
+                f"Unknown component {component!r}. "
+                f"Available: {self.data.columns.tolist()}"
+            )
+        return self.data.xs(component, axis=1)
 
     def set_data(self, new: pd.DataFrame):
         """Set new tensor data.
