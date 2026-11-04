@@ -22,7 +22,12 @@ E_INV = 0.36787944117144233  # e^-1
         # 2 e^-1
         (Exponential, ("x", "k", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
         # 2 e^-1 + 0.5
-        (ExponentialPlusC, ("x", "k", "A", "c"), (1.0, 1.0, 2.0, 0.5), 2 * E_INV + 0.5),
+        (
+            ExponentialPlusC,
+            ("x", "k", "A", "y0"),
+            (1.0, 1.0, 2.0, 0.5),
+            2 * E_INV + 0.5,
+        ),
     ],
 )
 def test_function_signature_and_output(
@@ -82,7 +87,7 @@ def test_exponential_p0_estimation():
 
 
 def test_exponential_plus_c_p0_estimation():
-    """From its default initial guess, ExponentialPlusC recovers k, A, c exactly.
+    """From its default initial guess, ExponentialPlusC recovers k, A, y0 exactly.
 
     ON FAILURE: the code is wrong.
     """
@@ -92,14 +97,9 @@ def test_exponential_plus_c_p0_estimation():
 
     assert obj.popt["k"] == noise_free(0.8)
     assert obj.popt["A"] == noise_free(3.0)
-    assert obj.popt["c"] == noise_free(0.5)
+    assert obj.popt["y0"] == noise_free(0.5)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="o27: the added constant is renamed c -> y0; "
-    "remove this marker when the rename lands",
-)
 def test_exponential_plus_c_names_its_constant_y0():
     """ExponentialPlusC calls its added constant ``y0``, and no parameter ``c``.
 
@@ -123,7 +123,7 @@ def test_exponential_plus_c_names_its_constant_y0():
     "cls, expected_tex",
     [
         (Exponential, r"f(x)=A \cdot e^{-kx}"),
-        (ExponentialPlusC, r"f(x)=A \cdot e^{-kx} + c"),
+        (ExponentialPlusC, r"f(x)=A \cdot e^{-kx} + y_0"),
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -146,7 +146,7 @@ def test_make_fit_success_regular(exponential_data):
 
     for cls, truth in [
         (Exponential, {"k": 0.8, "A": 3.0}),
-        (ExponentialPlusC, {"k": 0.8, "A": 3.0, "c": 0.0}),
+        (ExponentialPlusC, {"k": 0.8, "A": 3.0, "y0": 0.0}),
     ]:
         obj = cls(x, y)
         obj.make_fit()
@@ -189,16 +189,16 @@ def test_exponential_numerical_stability():
 
 
 def test_exponential_plus_c_constant_term():
-    """ExponentialPlusC is A at x = 0 plus c, and A/2 plus c one half-life later.
+    """ExponentialPlusC is A at x = 0 plus y0, and A/2 plus y0 one half-life later.
 
     ON FAILURE: the code is wrong.
     """
-    k, A, c = 1.0, 2.0, 0.5
+    k, A, y0 = 1.0, 2.0, 0.5
     x = np.array([0.0, np.log(2.0) / k])  # 0 and one half-life
     obj = ExponentialPlusC(x, np.ones_like(x))
 
     # 2 + 0.5 and 2/2 + 0.5
-    assert obj.function(x, k, A, c) == exact([2.5, 1.5])
+    assert obj.function(x, k, A, y0) == exact([2.5, 1.5])
 
 
 def test_str_and_call_methods_regular():
@@ -214,7 +214,7 @@ def test_str_and_call_methods_regular():
         obj.make_fit()
 
         assert cls.__name__ in str(obj)
-        # A + c at x = 0; A/2 + c at the half-life.
+        # A + y0 at x = 0; A/2 + y0 at the half-life.
         assert obj(x_test) == noise_free([3.0 + offset, 1.5 + offset]), cls
 
 
@@ -340,7 +340,7 @@ class TestExponentialPlusCPhase6:
         obj = ExponentialPlusC(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 3  # k, A, c
+        assert len(p0) == len(obj.argnames) == 3  # k, A, y0
         assert np.all(np.isfinite(p0))
 
 

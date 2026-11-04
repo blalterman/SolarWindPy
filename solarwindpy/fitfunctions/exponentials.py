@@ -53,37 +53,37 @@ class Exponential(FitFunction):
 
 
 class ExponentialPlusC(FitFunction):
-    r"""Exponential decay plus a constant, :math:`f(x) = A e^{-k x} + c`.
+    r"""Exponential decay plus a constant, :math:`f(x) = A e^{-k x} + y_0`.
 
-    Parameters are ``k`` (rate), ``A`` (amplitude) and ``c`` (offset).
+    Parameters are ``k`` (rate), ``A`` (amplitude) and ``y0`` (offset).
     """
 
     @property
     def function(self):
-        r"""The model :math:`A e^{-k x} + c` as ``f(x, k, A, c)``."""
+        r"""The model :math:`A e^{-k x} + y_0` as ``f(x, k, A, y0)``."""
 
-        def expc(x, k, A, c):
-            """Evaluate ``A * exp(-k * x) + c``."""
-            return (A * np.exp(-(k * x))) + c
+        def expc(x, k, A, y0):
+            """Evaluate ``A * exp(-k * x) + y0``."""
+            return (A * np.exp(-(k * x))) + y0
 
         return expc
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[k, A, c]`` for the fit."""
+        r"""Return initial guesses ``[k, A, y0]`` for the fit."""
         self._require_sufficient_data()
 
         y = self.observations.used.y
 
         k = 1.0
-        c = 0.0
+        y0 = 0.0
         A = y.max()
 
-        p0 = [k, A, c]
+        p0 = [k, A, y0]
         return p0
 
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A \cdot e^{-kx} + c"
+        TeX = r"f(x)=A \cdot e^{-kx} + y_0"
         return TeX

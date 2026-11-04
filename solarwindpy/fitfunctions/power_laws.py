@@ -57,26 +57,26 @@ class PowerLaw(FitFunction):
 
 
 class PowerLawPlusC(FitFunction):
-    r"""Power law with an additive constant, :math:`f(x) = A x^{\alpha} + c`.
+    r"""Power law with an additive constant, :math:`f(x) = A x^{\alpha} + y_0`.
 
-    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``c`` (offset).
+    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``y0`` (offset).
     """
 
     _TeX_argnames = _ALPHA_TEX
 
     @property
     def function(self):
-        r"""The model :math:`A x^{\alpha} + c` as ``f(x, A, alpha, c)``."""
+        r"""The model :math:`A x^{\alpha} + y_0` as ``f(x, A, alpha, y0)``."""
 
-        def power_law(x, A, alpha, c):
-            """Evaluate ``A * x**alpha + c``."""
-            return (A * (x**alpha)) + c
+        def power_law(x, A, alpha, y0):
+            """Evaluate ``A * x**alpha + y0``."""
+            return (A * (x**alpha)) + y0
 
         return power_law
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, alpha, c]`` for the fit."""
+        r"""Return initial guesses ``[A, alpha, y0]`` for the fit."""
         self._require_sufficient_data()
 
         p0 = [1, 1, 0]
@@ -85,7 +85,7 @@ class PowerLawPlusC(FitFunction):
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A x^{\alpha} + c"
+        TeX = r"f(x)=A x^{\alpha} + y_0"
         return TeX
 
 

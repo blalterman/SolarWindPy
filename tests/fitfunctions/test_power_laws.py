@@ -26,7 +26,7 @@ from tests.fitfunctions._attempt import attempt_fit
         # 6 sqrt(2) + 1
         (
             PowerLawPlusC,
-            ("x", "A", "alpha", "c"),
+            ("x", "A", "alpha", "y0"),
             (2.0, 3.0, 1.5, 1.0),
             6 * np.sqrt(2.0) + 1,
         ),
@@ -108,7 +108,7 @@ def test_power_law_p0_is_fixed(cls, power_law_data):
     "cls, expected_tex",
     [
         (PowerLaw, r"f(x)=A x^{\alpha}"),
-        (PowerLawPlusC, r"f(x)=A x^{\alpha} + c"),
+        (PowerLawPlusC, r"f(x)=A x^{\alpha} + y_0"),
         (PowerLawOffCenter, r"f(x)=A (x-x_0)^{\alpha}"),
     ],
 )
@@ -127,7 +127,7 @@ def test_TeX_function_strings(cls, expected_tex):
     "cls, truth",
     [
         (PowerLaw, {"A": 2.0, "alpha": -1.5}),
-        (PowerLawPlusC, {"A": 2.0, "alpha": -1.5, "c": 0.0}),
+        (PowerLawPlusC, {"A": 2.0, "alpha": -1.5, "y0": 0.0}),
         (PowerLawOffCenter, {"A": 2.0, "alpha": -1.5, "x0": 0.0}),
     ],
 )
@@ -182,12 +182,12 @@ def test_power_law_perfect_fit():
 
 
 def test_power_law_plus_c_perfect_fit():
-    """PowerLawPlusC recovers A = 16, alpha = -2, c = 2 from 18, 6, 3, 2.25.
+    """PowerLawPlusC recovers A = 16, alpha = -2, y0 = 2 from 18, 6, 3, 2.25.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    A, alpha, c = 16.0, -2.0, 2.0
+    A, alpha, y0 = 16.0, -2.0, 2.0
     y = np.array([18.0, 6.0, 3.0, 2.25])
 
     obj = PowerLawPlusC(x, y)
@@ -195,15 +195,10 @@ def test_power_law_plus_c_perfect_fit():
 
     assert obj.popt["A"] == noise_free(A)
     assert obj.popt["alpha"] == noise_free(alpha)
-    assert obj.popt["c"] == noise_free(c)
+    assert obj.popt["y0"] == noise_free(y0)
     assert obj(x) == noise_free(y)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="o27: the added constant is renamed c -> y0; "
-    "remove this marker when the rename lands",
-)
 def test_power_law_plus_c_names_its_constant_y0():
     """PowerLawPlusC calls its added constant ``y0``, and no parameter ``c``.
 
