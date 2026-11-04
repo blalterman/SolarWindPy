@@ -43,8 +43,6 @@ class SpacecraftTestBase(ABC):
         ot = self.object_testing
         pdt.assert_index_equal(cols, ot.r.data.columns)
         self.assertIsInstance(ot.r, vector.Vector)
-        self.assertEqual(ot.r, ot.r)
-        self.assertEqual(ot.r, ot.r)
         return ot
 
     def test_velocity(self):
@@ -52,7 +50,6 @@ class SpacecraftTestBase(ABC):
         ot = self.object_testing
         pdt.assert_index_equal(cols, ot.v.data.columns)
         self.assertIsInstance(ot.v, vector.Vector)
-        self.assertEqual(ot.v, ot.v)
         return ot
 
     def test_data(self):
@@ -206,7 +203,7 @@ def test_out_of_order_spacecraft_data_warn_once_then_sort(caplog):
     caplog.clear()
     with caplog.at_level("WARNING", logger="solarwindpy"):
         for _ in range(2):
-            sc.r, sc.r, sc.r, sc.v, sc.v, sc.distance2sun
+            sc.r, sc.v, sc.distance2sun
     assert _warnings(caplog) == []
 
     assert sc.data.index.equals(ref.data.index)

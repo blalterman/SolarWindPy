@@ -80,8 +80,6 @@ class IonTestBase(ABC):
         n.name = "n"
         ot = self.object_testing
         pdt.assert_series_equal(n, ot.n)
-        pdt.assert_series_equal(n, ot.n)
-        pdt.assert_series_equal(ot.n, ot.n)
 
     def test_mass_density(self):
         mmp = self.mass_in_mp
@@ -92,23 +90,17 @@ class IonTestBase(ABC):
             rho = rho.iloc[:, 0]
         rho.name = "rho"
         ot = self.object_testing
-        pdt.assert_series_equal(ot.rho, ot.rho)
-        pdt.assert_series_equal(rho, ot.rho)
         pdt.assert_series_equal(rho, ot.rho)
 
     def test_v(self):
         v = vector.Vector(self.data.v)
         ot = self.object_testing
         self.assertEqual(v, ot.v)
-        self.assertEqual(v, ot.v)
-        self.assertEqual(ot.v, ot.v)
 
     def test_w(self):
         w = tensor.Tensor(self.data.w)
         ot = self.object_testing
         self.assertEqual(w, ot.w)
-        self.assertEqual(w, ot.w)
-        self.assertEqual(ot.w, ot.w)
 
     def test_anisotropy(self):
         w = self.data.w
@@ -154,7 +146,6 @@ class IonTestBase(ABC):
         v = self.data.v.loc[:, ["x", "y", "z"]].pow(2).sum(axis=1).pipe(np.sqrt) * 1e3
         wk = 0.5 * rho * v.pow(3) / 1e-6  # [uW m^-2]
         wk.name = "Wk"
-        pdt.assert_series_equal(wk, self.object_testing.Wk)
         pdt.assert_series_equal(wk, self.object_testing.Wk)
 
 

@@ -107,7 +107,6 @@ class VectorTestBase(QuantityTestBase):
         mag = np.sqrt(x.pow(2) + y.pow(2) + z.pow(2))
         mag.name = "mag"
         pdt.assert_series_equal(mag, self.object_testing.mag)
-        pdt.assert_series_equal(mag, self.object_testing.mag)
 
     def test_rho(self):
         """rho is the xy-plane magnitude sqrt(x^2 + y^2).
@@ -138,8 +137,6 @@ class VectorTestBase(QuantityTestBase):
         colat = np.rad2deg(np.arctan2(rho, z))
         colat.name = "colat"
         pdt.assert_series_equal(lat, self.object_testing.lat)
-        pdt.assert_series_equal(lat, self.object_testing.lat)
-        pdt.assert_series_equal(colat, self.object_testing.colat)
         pdt.assert_series_equal(colat, self.object_testing.colat)
         assert (
             self.object_testing.lat + self.object_testing.colat
@@ -155,7 +152,6 @@ class VectorTestBase(QuantityTestBase):
         lon = np.arctan2(y, x)
         lon = np.rad2deg(lon)
         lon.name = "lon"
-        pdt.assert_series_equal(lon, self.object_testing.lon)
         pdt.assert_series_equal(lon, self.object_testing.lon)
 
     def test_r(self):
@@ -188,8 +184,6 @@ class VectorTestBase(QuantityTestBase):
         mag = v.pow(2).sum(axis=1).pipe(np.sqrt)
         uv = vector.Vector(v.divide(mag, axis=0))
         pdt.assert_frame_equal(uv.data, self.object_testing.uv.data)
-        pdt.assert_frame_equal(uv.data, self.object_testing.uv.data)
-        self.assertEqual(uv, self.object_testing.uv)
         self.assertEqual(uv, self.object_testing.uv)
 
     def test_project(self):
@@ -288,7 +282,6 @@ class TestBField(VectorTestBase, base.SWEData):
         pb = bsq * const
         pb.name = "pb"
         pdt.assert_series_equal(pb, self.object_testing.pb)
-        pdt.assert_series_equal(pb, self.object_testing.pb)
 
 
 class VelocityTestBase(VectorTestBase):
@@ -343,7 +336,6 @@ class TestVectorAngleHandCases:
         """
         expected = [c[1] for c in self.CASES]
         assert np.asarray(v.lat) == exact(expected, scale=UNIT_SCALE)
-        assert np.asarray(v.lat) == exact(expected, scale=UNIT_SCALE)
 
     def test_colatitude_of_hand_directions(self, v):
         """colatitude and colat are 0 on +z, 90 on +x, 180 on -z, 45 and 120 off-axis.
@@ -351,7 +343,6 @@ class TestVectorAngleHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [c[2] for c in self.CASES]
-        assert np.asarray(v.colat) == exact(expected, scale=UNIT_SCALE)
         assert np.asarray(v.colat) == exact(expected, scale=UNIT_SCALE)
 
 
