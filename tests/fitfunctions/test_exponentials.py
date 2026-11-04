@@ -20,9 +20,9 @@ E_INV = 0.36787944117144233  # e^-1
     "cls, expected_params, sample_args, expected_value",
     [
         # 2 e^-1
-        (Exponential, ("x", "c", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
+        (Exponential, ("x", "k", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
         # 2 e^-1 + 0.5
-        (ExponentialPlusC, ("x", "c", "A", "d"), (1.0, 1.0, 2.0, 0.5), 2 * E_INV + 0.5),
+        (ExponentialPlusC, ("x", "k", "A", "c"), (1.0, 1.0, 2.0, 0.5), 2 * E_INV + 0.5),
     ],
 )
 def test_function_signature_and_output(
@@ -47,9 +47,9 @@ def exponential_data():
     """Noisy y = 3 exp(-0.8 x), x in [0, 3], noise sigma 0.05, unit weights."""
     rng = np.random.default_rng(42)
     x = np.linspace(0, 3, 30)
-    c, A = 0.8, 3.0
+    k, A = 0.8, 3.0
     noise = rng.normal(0, 0.05, size=x.shape)
-    y = A * np.exp(-c * x) + noise
+    y = A * np.exp(-k * x) + noise
     w = np.ones_like(x)
     return x, y, w
 
@@ -69,7 +69,7 @@ def test_p0_zero_size_input(cls):
 
 
 def test_exponential_p0_estimation():
-    """From its default initial guess, Exponential recovers c = 0.8, A = 3 exactly.
+    """From its default initial guess, Exponential recovers k = 0.8, A = 3 exactly.
 
     ON FAILURE: the code is wrong.
     """
@@ -77,12 +77,12 @@ def test_exponential_p0_estimation():
     obj = Exponential(x, 3.0 * np.exp(-0.8 * x))
     obj.make_fit()
 
-    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["k"] == noise_free(0.8)
     assert obj.popt["A"] == noise_free(3.0)
 
 
 def test_exponential_plus_c_p0_estimation():
-    """From its default initial guess, ExponentialPlusC recovers c, A, d exactly.
+    """From its default initial guess, ExponentialPlusC recovers k, A, c exactly.
 
     ON FAILURE: the code is wrong.
     """
@@ -90,16 +90,16 @@ def test_exponential_plus_c_p0_estimation():
     obj = ExponentialPlusC(x, 3.0 * np.exp(-0.8 * x) + 0.5)
     obj.make_fit()
 
-    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["k"] == noise_free(0.8)
     assert obj.popt["A"] == noise_free(3.0)
-    assert obj.popt["d"] == noise_free(0.5)
+    assert obj.popt["c"] == noise_free(0.5)
 
 
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (Exponential, r"f(x)=A \cdot e^{-cx}"),
-        (ExponentialPlusC, r"f(x)=A \cdot e^{-cx} + d"),
+        (Exponential, r"f(x)=A \cdot e^{-kx}"),
+        (ExponentialPlusC, r"f(x)=A \cdot e^{-kx} + c"),
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -121,8 +121,8 @@ def test_make_fit_success_regular(exponential_data):
     x, y, w = exponential_data
 
     for cls, truth in [
-        (Exponential, {"c": 0.8, "A": 3.0}),
-        (ExponentialPlusC, {"c": 0.8, "A": 3.0, "d": 0.0}),
+        (Exponential, {"k": 0.8, "A": 3.0}),
+        (ExponentialPlusC, {"k": 0.8, "A": 3.0, "c": 0.0}),
     ]:
         obj = cls(x, y)
         obj.make_fit()
@@ -165,16 +165,16 @@ def test_exponential_numerical_stability():
 
 
 def test_exponential_plus_c_constant_term():
-    """ExponentialPlusC is A at x = 0 plus d, and A/2 plus d one half-life later.
+    """ExponentialPlusC is A at x = 0 plus c, and A/2 plus c one half-life later.
 
     ON FAILURE: the code is wrong.
     """
-    c, A, d = 1.0, 2.0, 0.5
-    x = np.array([0.0, np.log(2.0) / c])  # 0 and one half-life
+    k, A, c = 1.0, 2.0, 0.5
+    x = np.array([0.0, np.log(2.0) / k])  # 0 and one half-life
     obj = ExponentialPlusC(x, np.ones_like(x))
 
     # 2 + 0.5 and 2/2 + 0.5
-    assert obj.function(x, c, A, d) == exact([2.5, 1.5])
+    assert obj.function(x, k, A, c) == exact([2.5, 1.5])
 
 
 def test_str_and_call_methods_regular():
@@ -190,7 +190,7 @@ def test_str_and_call_methods_regular():
         obj.make_fit()
 
         assert cls.__name__ in str(obj)
-        # A + d at x = 0; A/2 + d at the half-life.
+        # A + c at x = 0; A/2 + c at the half-life.
         assert obj(x_test) == noise_free([3.0 + offset, 1.5 + offset]), cls
 
 
@@ -243,12 +243,12 @@ def test_exponential_with_weights():
     obj = Exponential(x, y, weights=sigma)
     obj.make_fit()
 
-    def model(x, c, A):
-        return A * np.exp(-c * x)
+    def model(x, k, A):
+        return A * np.exp(-k * x)
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0])
-    assert [obj.popt["c"], obj.popt["A"]] == noise_free(weighted)
+    assert [obj.popt["k"], obj.popt["A"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
@@ -258,23 +258,23 @@ def test_exponential_with_weights():
 @pytest.mark.parametrize(
     "cls, params, expected",
     [
-        # Slow decay, c = 1e-6: e^{-cx} = 1 - cx to 2e-12.
+        # Slow decay, k = 1e-6: e^{-kx} = 1 - kx to 2e-12.
         (Exponential, (1e-6, 1.0), [1.0, 1 - 1e-6, 1 - 2e-6]),
         (ExponentialPlusC, (1e-6, 1.0, 0.5), [1.5, 1.5 - 1e-6, 1.5 - 2e-6]),
-        # Fast decay, c = 100: e^-100 ~ 4e-44 vanishes beside O(1) terms.
+        # Fast decay, k = 100: e^-100 ~ 4e-44 vanishes beside O(1) terms.
         (Exponential, (100.0, 1.0), [1.0, 0.0, 0.0]),
         (ExponentialPlusC, (100.0, 1.0, 0.5), [1.5, 0.5, 0.5]),
     ],
 )
 def test_extreme_decay_rates_reach_their_limits(cls, params, expected):
-    """At c -> 0 each model is linear in x; at large c it jumps to its x -> inf limit.
+    """At k -> 0 each model is linear in x; at large k it jumps to its x -> inf limit.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1.0, 2.0])
     obj = cls(x, np.array([1.0, 0.5, 0.25]))
 
-    # The limit forms drop (c x)^2 / 2 <= 2e-12 or e^-100 ~ 4e-44, so they hold
+    # The limit forms drop (k x)^2 / 2 <= 2e-12 or e^-100 ~ 4e-44, so they hold
     # to 11 decimal places.
     assert obj.function(x, *params) == printed(expected, decimals=11)
 
@@ -298,7 +298,7 @@ class TestExponentialP0Phase6:
         obj = Exponential(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 2  # c, A
+        assert len(p0) == len(obj.argnames) == 2  # k, A
         assert np.all(np.isfinite(p0))
 
 
@@ -316,7 +316,7 @@ class TestExponentialPlusCPhase6:
         obj = ExponentialPlusC(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 3  # c, A, d
+        assert len(p0) == len(obj.argnames) == 3  # k, A, c
         assert np.all(np.isfinite(p0))
 
 
