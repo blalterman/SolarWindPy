@@ -19,14 +19,6 @@ from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 from tests.fitfunctions._attempt import attempt_fit
 
 
-_EXPONENT_FIRST = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="power laws take (A, alpha); remove this marker when they take "
-    "the exponent first, (alpha, A)",
-)
-
-
 @pytest.mark.parametrize(
     "cls, expected_params, sample_args, expected_value",
     [
@@ -36,7 +28,6 @@ _EXPONENT_FIRST = pytest.mark.xfail(
             ("x", "alpha", "A"),
             (2.0, 1.5, 3.0),
             6 * np.sqrt(2.0),
-            marks=_EXPONENT_FIRST,
         ),
         # 6 sqrt(2) + 1
         pytest.param(
@@ -44,7 +35,6 @@ _EXPONENT_FIRST = pytest.mark.xfail(
             ("x", "alpha", "A", "y0"),
             (2.0, 1.5, 3.0, 1.0),
             6 * np.sqrt(2.0) + 1,
-            marks=_EXPONENT_FIRST,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
         pytest.param(
@@ -52,7 +42,6 @@ _EXPONENT_FIRST = pytest.mark.xfail(
             ("x", "alpha", "A", "x0"),
             (2.0, 1.5, 3.0, 0.5),
             4.5 * np.sqrt(1.5),
-            marks=_EXPONENT_FIRST,
         ),
     ],
 )
@@ -78,9 +67,9 @@ def test_function_signature_and_output(
     [
         Exponential,
         ExponentialPlusC,
-        pytest.param(PowerLaw, marks=_EXPONENT_FIRST),
-        pytest.param(PowerLawPlusC, marks=_EXPONENT_FIRST),
-        pytest.param(PowerLawOffCenter, marks=_EXPONENT_FIRST),
+        PowerLaw,
+        PowerLawPlusC,
+        PowerLawOffCenter,
     ],
 )
 def test_exponent_then_amplitude_across_exponential_and_power_law_siblings(cls):
@@ -288,9 +277,9 @@ def test_power_law_numerical_stability():
 
     obj = PowerLaw(x, y)
 
-    assert obj.function(0.1, 1.0, -10.0) == exact(1e10)
+    assert obj.function(0.1, -10.0, 1.0) == exact(1e10)
     # 10^0.1 = 1.2589254117941673 (tenth root of 10).
-    assert obj.function(10.0, 1.0, 0.1) == exact(1.2589254117941673)
+    assert obj.function(10.0, 0.1, 1.0) == exact(1.2589254117941673)
 
 
 def test_power_law_zero_handling():
@@ -304,7 +293,7 @@ def test_power_law_zero_handling():
     obj = PowerLaw(x, y)
 
     assert obj.function(0.01, 1.0, 1.0) == exact(0.01)
-    assert obj.function(2.0, 5.0, 0.0) == exact(5.0)
+    assert obj.function(2.0, 0.0, 5.0) == exact(5.0)
 
 
 def test_power_law_off_center_centering():
@@ -317,7 +306,7 @@ def test_power_law_off_center_centering():
 
     obj = PowerLawOffCenter(x, np.ones_like(x))
 
-    result = obj.function(x, 2.0, 1.0, x0)
+    result = obj.function(x, 1.0, 2.0, x0)
     assert result == exact([1.0, 3.0, 5.0, 7.0])
 
 
@@ -382,7 +371,7 @@ def test_power_law_off_center_bound_respects_the_caller(x0_upper, expected):
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    obj.make_fit(bounds=([0.0, -5.0, -3.0], [100.0, 5.0, x0_upper]))
+    obj.make_fit(bounds=([-5.0, 0.0, -3.0], [5.0, 100.0, x0_upper]))
 
     assert obj.fit_bounds["A"] == (0.0, 100.0)
     assert obj.fit_bounds["alpha"] == (-5.0, 5.0)
@@ -431,7 +420,7 @@ def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_low
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([0.0, -5.0, x0_lower], [100.0, 5.0, 10.0])
+    bounds = ([-5.0, 0.0, x0_lower], [5.0, 100.0, 10.0])
     match = r"needs x0 below the smallest used x \(1\.0\)"
 
     with pytest.raises(ValueError, match=match):
@@ -485,7 +474,7 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])
+    bounds = ([-5.0, 0.0, -3.0], [5.0, 100.0, 10.0])
     p0 = [1.0, 1.0, -5.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at -5\.0, "
@@ -560,7 +549,7 @@ def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0, 
     obj = PowerLawOffCenter(x, y)
     assert obj.p0[2] == exact(0.0)
 
-    obj.make_fit(bounds=([0.0, -5.0, x0_bounds[0]], [100.0, 5.0, x0_bounds[1]]))
+    obj.make_fit(bounds=([-5.0, 0.0, x0_bounds[0]], [5.0, 100.0, x0_bounds[1]]))
     assert obj.popt["A"] == noise_free(4.0)
     assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
@@ -635,7 +624,7 @@ def test_power_law_negative_x_handling():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 1.0, 2.0) == exact([4.0, 1.0, 1.0, 4.0])
+    assert obj.function(x, 2.0, 1.0) == exact([4.0, 1.0, 1.0, 4.0])
 
 
 def test_power_law_integer_vs_float_exponents():
@@ -648,8 +637,8 @@ def test_power_law_integer_vs_float_exponents():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, A, 2) == exact([2.0, 8.0, 18.0])
-    assert obj.function(x, A, 2.0) == exact([2.0, 8.0, 18.0])
+    assert obj.function(x, 2, A) == exact([2.0, 8.0, 18.0])
+    assert obj.function(x, 2.0, A) == exact([2.0, 8.0, 18.0])
 
 
 def test_power_law_edge_case_exponents():
@@ -660,9 +649,9 @@ def test_power_law_edge_case_exponents():
     x = np.array([1.0, 2.0, 4.0])
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 3.0, 1.0) == exact([3.0, 6.0, 12.0])
-    assert obj.function(x, 5.0, 0.0) == exact([5.0, 5.0, 5.0])
-    assert obj.function(x, 2.0, -1.0) == exact([2.0, 1.0, 0.5])
+    assert obj.function(x, 1.0, 3.0) == exact([3.0, 6.0, 12.0])
+    assert obj.function(x, 0.0, 5.0) == exact([5.0, 5.0, 5.0])
+    assert obj.function(x, -1.0, 2.0) == exact([2.0, 1.0, 0.5])
 
 
 # Off-center data: 16 / x^2 on x = [1, 2, 4, 8]; x0's upper bound is the
@@ -681,7 +670,7 @@ def test_power_law_off_center_refusal_names_the_class():
     ON FAILURE: the code is wrong.
     """
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
-    bounds = ([0.0, -5.0, BELOW_ONE], [100.0, 5.0, 10.0])
+    bounds = ([-5.0, 0.0, BELOW_ONE], [5.0, 100.0, 10.0])
     with pytest.raises(ValueError, match=r"^PowerLawOffCenter needs x0 below"):
         obj.make_fit(bounds=bounds)
 
@@ -690,7 +679,7 @@ def test_power_law_off_center_refusal_names_the_class():
     "p0, bounds",
     [
         ([1.0, 1.0, BELOW_ONE], (-np.inf, np.inf)),
-        ([1.0, 1.0, -3.0], ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])),
+        ([1.0, 1.0, -3.0], ([-5.0, 0.0, -3.0], [5.0, 100.0, 10.0])),
     ],
     ids=["at-upper-bound", "at-lower-bound"],
 )
