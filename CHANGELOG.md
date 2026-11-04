@@ -279,7 +279,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ActivityIndicator` subclasses call `self._interpolate(source_data, target_index)`, the
   shared engine; the abstract `interpolate_data` takes `(target_index, ...)`, matching how
   `SIDC` is called.
-- Dependencies: `astropy>=7` (6.x fails to import with numpy 2.5) and PyTables (`tables`),
+- Dependencies: `astropy>=7.2` (earlier versions fail to import with numpy 2.4 and later, which removed `numpy.in1d`) and PyTables (`tables`),
   which `Plasma.save` and `Plasma.load_from_file` need, are required. `h5py` and `pyyaml`
   are no longer runtime dependencies; `pyyaml` moves to the `test` and `dev` extras.
 
