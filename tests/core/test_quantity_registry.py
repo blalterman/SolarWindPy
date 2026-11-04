@@ -35,6 +35,13 @@ def _author(why):
     return f"for the author: {why}; remove this marker when the author decides"
 
 
+_O9A = (
+    "author's ruling o9a: position is `pos` at every layer, so Spacecraft.r "
+    "becomes Spacecraft.pos and the registry gains `pos`; remove this marker "
+    "when it lands"
+)
+
+
 def _xfail(reason):
     return pytest.mark.xfail(strict=True, reason=reason)
 
@@ -119,17 +126,7 @@ CASES = [
     # Tensor.
     (_T, "mag", lambda p, t: p.p1.w.mag, "C", True, None),
     # Spacecraft.
-    (
-        _SC,
-        "r",
-        lambda p, t: p.sc.r,
-        "M",
-        False,
-        _author(
-            "the position vector is `r` (ruled), but its stored M label is `pos`; "
-            "renaming the stored label changes saved files"
-        ),
-    ),
+    (_SC, "pos", lambda p, t: p.sc.pos, "M", False, _O9A),
     (_SC, "v", lambda p, t: p.sc.v, "M", False, None),
     (_SC, "carr", lambda p, t: p.sc.carr, "M", False, None),
     (_SC, "distance2sun", lambda p, t: p.sc.distance2sun, "M", True, None),
@@ -248,7 +245,7 @@ def _owner_classes():
 
 @pytest.mark.parametrize(
     "owner",
-    [_P, _I, _V, _B, _T, _SC, _AT],
+    [_P, _I, _V, _B, _T, pytest.param(_SC, marks=_xfail(_O9A)), _AT],
 )
 def test_every_public_member_is_a_quantity_or_named_as_not_one(owner):
     """Every public member is a quantity in CASES or listed in NOT_QUANTITIES.
@@ -384,6 +381,24 @@ def test_magnetic_pressure_is_capital_p_like_every_pressure():
     from solarwindpy.plotting.labels.base import TeXlabel
 
     assert TeXlabel(("pb", "", "")).tex == "P_B"
+
+
+@_xfail(_O9A)
+def test_position_is_pos_with_the_symbol_r(plasma):
+    r"""Position is ``pos``: the stored M label, the accessor and the registry key.
+
+    Its TeX symbol is the position vector, ``\mathbf{r}``. The radial
+    component ``r`` at the C level is a different quantity and keeps its name.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import spacecraft
+
+    quantities = _quantities()
+    assert not hasattr(spacecraft.Spacecraft, "r")
+    assert plasma.sc.pos.data.equals(plasma.sc.data.xs("pos", axis=1, level="M"))
+    assert quantities.QUANTITIES["pos"].tex.startswith(r"\mathbf{r}")
+    assert "r" in quantities.COMPONENTS
 
 
 # --- species (F128) ----------------------------------------------------------
