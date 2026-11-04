@@ -120,7 +120,7 @@ class Hinge(FitFunction):
     The same reference hinge is a useful explicit start for solar wind speed
     trends: ``HingeAtPoint(v, y, guess_xh=433)`` splits at 433 km/s, and
     ``make_fit(p0=...)`` starts from the full hinge when :math:`y_h = 4.12`
-    matters too. It is a usage note, not a default.
+    matters too. It is a usage note: it is not ``guess_xh``'s default.
 
     Examples
     --------

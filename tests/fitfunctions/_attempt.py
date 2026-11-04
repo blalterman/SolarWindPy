@@ -13,6 +13,7 @@ def attempt_fit(fit, **kwargs):
     try:
         fit.make_fit(**kwargs)
     except Exception as e:
-        if fit.error is not e:
+        # A usage error on a fresh fit leaves error unreadable: re-raise it.
+        if getattr(fit, "error", None) is not e:
             raise
     return fit.error

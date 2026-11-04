@@ -567,7 +567,15 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def error(self):
-        r"""The exception that made the last :meth:`make_fit` fail, or None."""
+        r"""The exception that made the last :meth:`make_fit` fail, or None after a success.
+
+        Raises
+        ------
+        NotFittedError
+            Before :meth:`make_fit`.
+        """
+        if self._results is None:
+            raise self._not_fitted()
         return self._error
 
     def _results_kind(self, kind):
