@@ -137,9 +137,13 @@ def beta_ani_inst(beta, a=None, b=None, c=None):
 
     Examples
     --------
+    The A/IC threshold at gamma / Omega_p = 10^-4, Table 1 of
+    :cite:`Verscharen2016a` (``insta_params`` row ``("AIC", -4)``). Beta
+    below ``c`` has no threshold:
+
     >>> beta = np.logspace(-2, 2, 5)
-    >>> beta_ani_inst(beta, a=0.367, b=-0.408, c=0.011)  # doctest: +ELLIPSIS
-    array([       nan, 1.1367783..., 1.36534751..., 1.93857946..., 3.40240693...])
+    >>> beta_ani_inst(beta, a=0.367, b=0.364, c=0.011)
+    array([       nan, 1.88529518, 1.36848059, 1.15879618, 1.06865678])
     """
     # Effectively, type checking.
     a = float(a)

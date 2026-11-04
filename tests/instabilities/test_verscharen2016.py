@@ -637,10 +637,6 @@ def _beta_ani_inst_example_call():
     return tuple(float(x) for x in match.groups())
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="B3: the doctest passes FMW's a as AIC's b, a row of no table",
-)
 def test_beta_ani_inst_example_uses_one_published_row():
     """The doctest's (a, b, c) is one row of Table 1, as insta_params holds it.
 
