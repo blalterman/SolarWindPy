@@ -1593,6 +1593,11 @@ output discarded.
 The main thread's brief to Pass 1 said 24 `.claude` files. There are 25, and Pass 1 counted them
 itself.
 
+The main thread also told the author that 208 commits touching `solarwindpy/` followed the alias
+cleanup with no disallowed alias added. The assembler's check found 208 is the count since the
+date, which includes same-day commits that predate 1244828c; strictly after it the count is 157.
+The conclusion held, and the plan's author section states both figures.
+
 ### Correct content that was not its to decide
 
 The clearest instance is in the control arm. Its plan schedules caller-visible changes as
