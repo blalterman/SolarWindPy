@@ -31,7 +31,7 @@ jobs:
     # pytest's doctest collection imports each module as part of the package,
     # so a module that fails to import is a failure rather than a silent skip.
     - name: Run docstring examples
-      run: pytest --doctest-modules solarwindpy -q
+      run: pytest --doctest-modules src/solarwindpy -q
 
     - name: Run documentation examples
       run: pytest --doctest-glob='*.rst' docs/source -q

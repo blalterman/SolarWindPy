@@ -26,9 +26,9 @@ jobs:
       - name: Run Bandit security scan
         run: |
           mkdir -p security-results
-          bandit -r solarwindpy -ll -f json -o security-results/bandit-report.json
-          bandit -r solarwindpy -ll -f txt -o security-results/bandit-report.txt
-          bandit -r solarwindpy -ll  # Display to console
+          bandit -r src/solarwindpy -ll -f json -o security-results/bandit-report.json
+          bandit -r src/solarwindpy -ll -f txt -o security-results/bandit-report.txt
+          bandit -r src/solarwindpy -ll  # Display to console
         continue-on-error: true
       
       - name: Run Safety check
