@@ -622,3 +622,4 @@ Conda: solarwindpy.yml already has pytables and pyyaml. Only h5py leaves. astrop
 | 7 | B8 then M1 | `solarwindpy/core/spacecraft.py`, `tests/core/test_spacecraft.py` |
 | 8 | B5 | none |
 | 9 | P1 | `pyproject.toml`, `solarwindpy.yml` |
+## Spent-Mark: Wave 2 and P1 landed (2f670c58, 6c05ae18)

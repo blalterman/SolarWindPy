@@ -290,3 +290,4 @@ the rule extends to container accessors at all.
 
 `survives` in `phaseA-naming.cards.json`: for a card about an earlier author note, whether
 that note survives the rule unchanged; for a new card, whether the finding stands.
+## Spent-Mark: registry and renames landed (bfa33560); parked names are on the tracker
