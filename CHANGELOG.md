@@ -279,9 +279,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ActivityIndicator` subclasses call `self._interpolate(source_data, target_index)`, the
   shared engine; the abstract `interpolate_data` takes `(target_index, ...)`, matching how
   `SIDC` is called.
-- Dependencies: `astropy>=7.2` (earlier versions fail to import with numpy 2.4 and later,
-  which removed `numpy.in1d`) and PyTables (`tables`), which `Plasma.save` and
-  `Plasma.load_from_file` need, are required. `h5py` and `pyyaml` are no longer runtime
+- Dependencies: `astropy>=8`, so the download cache has one location
+  (`~/.cache/solarwindpy`; astropy 7 used `~/.solarwindpy/cache`), and PyTables
+  (`tables`), which `Plasma.save` and `Plasma.load_from_file` need, are required. `h5py` and `pyyaml` are no longer runtime
   dependencies; `pyyaml` moves to the `test` and `dev` extras.
 
 - Quantity names converge on one canonical short name per quantity, the same at every
@@ -314,14 +314,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     R), and StabilityCondition.anisotropy -> R; BetaRPlot(beta, ani, species) -> BetaRPlot(beta,
     R, species).
 
-- SIDC sunspot-number data are cached in SolarWindPy's download cache (`~/.cache/solarwindpy`
-  with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path)
+- SIDC sunspot-number data are cached in SolarWindPy's download cache (`~/.cache/solarwindpy`)
   instead of `~/solarwindpy/data/sidc/<key>/YYYYMMDD.csv`, and downloaded again once the
   cached copy is more than one day old. If that download fails, the cached series is loaded
   with a `StaleCacheWarning` naming its age.
 
-- `ICMECAT` always caches the catalog in SolarWindPy's download cache (`~/.cache/solarwindpy`
-  with astropy 8, `~/.solarwindpy/cache` with astropy 7.2; `cache_contents()` shows the path),
+- `ICMECAT` always caches the catalog in SolarWindPy's download cache (`~/.cache/solarwindpy`),
   downloads it again once the cached copy is more than 30 days old, and falls back to the
   cached copy with a `StaleCacheWarning` if that download fails.
 
@@ -622,8 +620,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `solarwindpy.solar_activity.cache.cache_contents()`, a table of each cached URL with its
   local path and age. Files live in astropy's download cache for package `solarwindpy`
-  (`~/.cache/solarwindpy` with astropy 8, `~/.solarwindpy/cache` with astropy 7.2;
-  `cache_contents()` shows the path); remove entries with
+  (`~/.cache/solarwindpy`); remove entries with
   `astropy.utils.data.clear_download_cache(url, pkgname="solarwindpy")`.
 
 ### Fixed
