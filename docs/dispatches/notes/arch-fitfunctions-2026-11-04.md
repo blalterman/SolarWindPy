@@ -309,3 +309,4 @@ The `popt` 92 mostly survives under the proposal, because `popt["name"]` works o
 2. **Six hinge classes.** `TwoLine`, `Saturation`, `HingeMin` and `HingeAtPoint` parameterize overlapping two-line geometry. Is each parameterization in use for its own fitted quantities, or is a subset enough?
 3. **Derived quantities.** Should `x_intercept`, `xs`, `theta` and `normal_parameters` appear as table columns (value only, or with propagated uncertainty), or stay as separate properties?
 4. **The table's level and kind names.** Do `P` and `K`, with `value` and `uncertainty`, read right to you, or do you want `popt` and `psigma` kept as the `K` labels?
+## Spent-Mark: fitfunctions refactor landed (results table, TrendFit, hinge guess, NotFittedError)

@@ -372,6 +372,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.mag`, `.rho`, `project` and `cos_theta` across every species. Select one species first,
   e.g. `data.xs("p1", axis=1, level="S")`.
 
+- FitFunction.combined_popt_psigma -> FitFunction.results (one-row (P, K) table with quality
+  and status columns)
+
+- FitFunction.make_fit(return_exception=True) -> make_fit() raises after recording; read
+  FitFunction.error and results[("status", "")]
+
+- A failed fit left no record -> results holds NaN values and status = the exception class
+  name; calling the fit returns NaN
+
+- New FitFunction.results, FitFunction.error, core.NotFittedError
+
+- TrendFit(agged, trendfunc, ffunc1d=None, ykey1d="mu", wkey1d="sigma", trend_logx=False) ->
+  TrendFit(agged, bin_function, trend_function, *, y, yerr, logx=False, bin_kwargs=None,
+  trend_kwargs=None)
+
+- Make_ffunc1ds(), make_1dfits(), make_trend_func(), trend_func.make_fit() ->
+  make_fit(bin_fit_kwargs=None, trend_fit_kwargs=None)
+
+- Popt_1d, psigma_1d, bad_fits -> bin_results (failed bins are NaN rows with a status)
+
+- Ffuncs -> bin_fits; trend_func -> trend; ffunc1d_class -> bin_function; trendfunc_class ->
+  trend_function; trend_logx -> logx; popt1d_keys and Popt1DKeys -> y and yerr
+
+- Plot_all_ffuncs -> plot_bin_fits; plot_all_popt_1d -> plot_bin_results
+  (only_plot_data_in_trend_fit -> only_in_trend; the wkey keyword goes);
+  plot_trend_and_resid_on_ffuncs(trend_kwargs, fit1d_kwargs) ->
+  plot_trend_and_resid_on_bins(trend_plot_kwargs, bin_plot_kwargs);
+  plot_1d_popt_and_trend(kwargs_popt_1d=) -> plot_bin_results_and_trend(bin_plot_kwargs=)
+
+- Set_agged and set_fitfunctions removed; build a new TrendFit instead
+
+- New FitFunction.results_columns
+
+- TwoLine(guess_xs=425.0), Saturation(guess_xs=425.0) -> guess_xh=None
+
+- HingeMin(guess_h=400.0), HingeMax(guess_h=400.0) -> guess_xh=None
+
+- HingeSaturation(guess_xh=326, guess_yh=0.5) -> guess_xh=None (yh is estimated at the split)
+
+- HingeAtPoint(guess_xh=400.0) -> guess_xh=None
+
+- HingeSaturation.saturation_guess, TwoLine.guess_xs, Saturation.guess_xs, HingeMin.guess_h ->
+  Hinge.guess_xh
+
+- FitFunction.chisq_dof before a fit: None -> raises NotFittedError
+
+- FitFunction.initial_guess_info before a fit: None -> raises NotFittedError
+
+- Every other fit result before a fit: bare AttributeError -> NotFittedError (an
+  AttributeError subclass) naming make_fit
+
+- FitFunction.error before a fit: None -> raises NotFittedError
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
