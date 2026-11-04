@@ -51,18 +51,18 @@ class TestHist2DPandasCompatibility:
         for col in agg_unstacked.columns:
             col_max = agg_unstacked[col].max()
             if not pd.isna(col_max):
-                assert col_max == exact(
-                    1.0
-                ), f"Column {col} max is {col_max}, expected 1.0"
+                assert col_max == exact(1.0), (
+                    f"Column {col} max is {col_max}, expected 1.0"
+                )
 
         # Check that all non-NaN values are between 0 and 1
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after column normalization"
-        assert (
-            non_nan_values <= 1.0001
-        ).all(), "Found values > 1 after column normalization"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after column normalization"
+        )
+        assert (non_nan_values <= 1.0001).all(), (
+            "Found values > 1 after column normalization"
+        )
 
     def test_row_normalize(self):
         """Test row normalize (axnorm='r').
@@ -80,18 +80,18 @@ class TestHist2DPandasCompatibility:
         for row_idx in agg_unstacked.index:
             row_max = agg_unstacked.loc[row_idx].max()
             if not pd.isna(row_max):
-                assert row_max == exact(
-                    1.0
-                ), f"Row {row_idx} max is {row_max}, expected 1.0"
+                assert row_max == exact(1.0), (
+                    f"Row {row_idx} max is {row_max}, expected 1.0"
+                )
 
         # Check that all non-NaN values are between 0 and 1
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after row normalization"
-        assert (
-            non_nan_values <= 1.0001
-        ).all(), "Found values > 1 after row normalization"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after row normalization"
+        )
+        assert (non_nan_values <= 1.0001).all(), (
+            "Found values > 1 after row normalization"
+        )
 
     def test_total_normalize(self):
         """Test total normalize (axnorm='t').
@@ -110,12 +110,12 @@ class TestHist2DPandasCompatibility:
 
         # Check that all non-NaN values are between 0 and 1
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after total normalization"
-        assert (
-            non_nan_values <= 1.0001
-        ).all(), "Found values > 1 after total normalization"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after total normalization"
+        )
+        assert (non_nan_values <= 1.0001).all(), (
+            "Found values > 1 after total normalization"
+        )
 
     def test_density_normalize(self):
         """Test density normalize (axnorm='d').
@@ -155,15 +155,15 @@ class TestHist2DPandasCompatibility:
                     total_integral += value * dx * dy
 
         # A density integrates to 1 over the cell areas.
-        assert total_integral == exact(
-            1.0
-        ), f"Density integral is {total_integral}, expected 1.0"
+        assert total_integral == exact(1.0), (
+            f"Density integral is {total_integral}, expected 1.0"
+        )
 
         # Values should be non-negative
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after density normalization"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after density normalization"
+        )
 
     def test_pdfs_in_each_column(self):
         """Test PDFs in each column (axnorm='cd').
@@ -197,15 +197,15 @@ class TestHist2DPandasCompatibility:
 
             # Each column should integrate to 1 (if it has data)
             if integral > 0:  # Only check columns with data
-                assert integral == exact(
-                    1.0
-                ), f"Column {col} PDF integral is {integral}, expected 1.0"
+                assert integral == exact(1.0), (
+                    f"Column {col} PDF integral is {integral}, expected 1.0"
+                )
 
         # Values should be non-negative
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after PDFs in each column"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after PDFs in each column"
+        )
 
     def test_pdfs_in_each_row(self):
         """Test PDFs in each row (axnorm='rd').
@@ -239,15 +239,15 @@ class TestHist2DPandasCompatibility:
 
             # Each row should integrate to 1 (if it has data)
             if integral > 0:  # Only check rows with data
-                assert integral == exact(
-                    1.0
-                ), f"Row {row} PDF integral is {integral}, expected 1.0"
+                assert integral == exact(1.0), (
+                    f"Row {row} PDF integral is {integral}, expected 1.0"
+                )
 
         # Values should be non-negative
         non_nan_values = agg.dropna()
-        assert (
-            non_nan_values >= 0
-        ).all(), "Found negative values after PDFs in each row"
+        assert (non_nan_values >= 0).all(), (
+            "Found negative values after PDFs in each row"
+        )
 
     def test_no_normalization(self):
         """Test that no normalization (axnorm=None) works correctly."""
@@ -264,9 +264,9 @@ class TestHist2DPandasCompatibility:
         # Check that values are in reasonable range for raw z data (0-10)
         non_nan_values = agg.dropna()
         assert non_nan_values.min() >= 0, "Found negative values in raw aggregation"
-        assert (
-            non_nan_values.max() <= 10.1
-        ), "Found unexpectedly large values in raw aggregation"
+        assert non_nan_values.max() <= 10.1, (
+            "Found unexpectedly large values in raw aggregation"
+        )
 
     def test_edge_case_single_bin(self):
         """Test normalization with data that falls into a single bin.
@@ -290,9 +290,9 @@ class TestHist2DPandasCompatibility:
 
         # The single value should be 1.0 after normalization
         non_nan_value = agg.dropna().iloc[0]
-        assert non_nan_value == exact(
-            1.0
-        ), f"Single bin value is {non_nan_value}, expected 1.0"
+        assert non_nan_value == exact(1.0), (
+            f"Single bin value is {non_nan_value}, expected 1.0"
+        )
 
     def test_edge_case_with_nans(self):
         """Test normalization with NaN values in input data."""
@@ -390,16 +390,16 @@ class TestHist2DPandasCompatibility:
 
             # Should be able to get aggregation without error
             agg = hist.agg()
-            assert (
-                agg is not None
-            ), f"Failed to get aggregation with axnorm={option} ({description})"
+            assert agg is not None, (
+                f"Failed to get aggregation with axnorm={option} ({description})"
+            )
 
             # Should have at least some non-NaN values
             if option is not None:  # None means no normalization
                 non_nan_count = agg.notna().sum()
-                assert (
-                    non_nan_count > 0
-                ), f"No non-NaN values with axnorm={option} ({description})"
+                assert non_nan_count > 0, (
+                    f"No non-NaN values with axnorm={option} ({description})"
+                )
 
     def test_density_normalize_with_counts(self):
         """Test density normalize with count data (no z values).
@@ -438,9 +438,9 @@ class TestHist2DPandasCompatibility:
                     total_integral += value * dx * dy
 
         # A density integrates to 1 over the cell areas.
-        assert total_integral == exact(
-            1.0
-        ), f"Count density integral is {total_integral}, expected 1.0"
+        assert total_integral == exact(1.0), (
+            f"Count density integral is {total_integral}, expected 1.0"
+        )
 
 
 class TestNormalizationBounds:

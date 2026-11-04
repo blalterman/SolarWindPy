@@ -935,9 +935,7 @@ class PlasmaTestBase(ABC):
         alone is for the author to adjudicate.
         """
         ot = self.object_testing
-        regex_msg = (
-            "`lnlambda` can only calculate with individual s0 " "and s1 species."
-        )
+        regex_msg = "`lnlambda` can only calculate with individual s0 and s1 species."
         invalid = "Invalid species"
 
         kb_J = constants.physical_constants["Boltzmann constant"]
@@ -1257,7 +1255,7 @@ class PlasmaTestBase(ABC):
         tau_exp_PSP = PSP.distance2sun.multiply(vsw.pow(-1.0), axis=0)
 
         individual_msg = (
-            "`nc` can only calculate with individual" " `sa` and `sb` species."
+            "`nc` can only calculate with individual `sa` and `sb` species."
         )
         invalid_msg = "Invalid species"
 

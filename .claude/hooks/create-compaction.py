@@ -445,30 +445,30 @@ def create_compaction():
 ## Compaction Metadata
 - **Timestamp**: {timestamp}
 - **Branch**: {branch}
-- **Plan**: {plan_name or 'No active plan'}
+- **Plan**: {plan_name or "No active plan"}
 - **Pre-Compaction Context**: ~{tokens:,} tokens ({lines:,} lines)
 - **Target Compression**: {target_description}
 - **Target Tokens**: ~{target_tokens:,} tokens
-- **Strategy**: {compression_strategy['level']} compression with {'code' if compression_strategy['preserve_code'] else 'prose'} focus
+- **Strategy**: {compression_strategy["level"]} compression with {"code" if compression_strategy["preserve_code"] else "prose"} focus
 
 ## Content Analysis
-- **Files Analyzed**: {estimation_metadata['total_files']}
+- **Files Analyzed**: {estimation_metadata["total_files"]}
 - **Content Breakdown**:
-  - Code: {content_breakdown.get('code', 0)} lines
-  - Prose: {content_breakdown.get('prose', 0)} lines
-  - Tables: {content_breakdown.get('tables', 0)} lines
-  - Lists: {content_breakdown.get('lists', 0)} lines
-  - Headers: {content_breakdown.get('headers', 0)} lines
+  - Code: {content_breakdown.get("code", 0)} lines
+  - Prose: {content_breakdown.get("prose", 0)} lines
+  - Tables: {content_breakdown.get("tables", 0)} lines
+  - Lists: {content_breakdown.get("lists", 0)} lines
+  - Headers: {content_breakdown.get("headers", 0)} lines
 - **Token Estimates**:
-  - Line-based: {estimation_metadata['estimates']['line_based']:,}
-  - Character-based: {estimation_metadata['estimates']['char_based']:,}
-  - Word-based: {estimation_metadata['estimates']['word_based']:,}
-  - Content-weighted: {estimation_metadata['estimates']['content_weighted']:,}
+  - Line-based: {estimation_metadata["estimates"]["line_based"]:,}
+  - Character-based: {estimation_metadata["estimates"]["char_based"]:,}
+  - Word-based: {estimation_metadata["estimates"]["word_based"]:,}
+  - Content-weighted: {estimation_metadata["estimates"]["content_weighted"]:,}
   - **Final estimate**: {tokens:,} tokens
 
 ## Git State
 ### Current Branch: {branch}
-### Last Commit: {git_info['last_commit'] if git_info['last_commit'] else 'No commit info available'}
+### Last Commit: {git_info["last_commit"] if git_info["last_commit"] else "No commit info available"}
 
 ### Recent Commits:
 ```
@@ -477,27 +477,27 @@ def create_compaction():
 
 ### Working Directory Status:
 ```
-{status if status else 'Clean working directory'}
+{status if status else "Clean working directory"}
 ```
 
 ### Uncommitted Changes Summary:
 ```
-{git_info['diff_stats'] if git_info['diff_stats'] else 'No uncommitted changes'}
+{git_info["diff_stats"] if git_info["diff_stats"] else "No uncommitted changes"}
 ```
 
 ## Critical Context Summary
 
 ### Active Tasks (Priority Focus)
-{chr(10).join(f"- {task}" for task in critical_context['active_tasks'][:5]) if critical_context['active_tasks'] else "- No active tasks identified"}
+{chr(10).join(f"- {task}" for task in critical_context["active_tasks"][:5]) if critical_context["active_tasks"] else "- No active tasks identified"}
 
 ### Recent Key Decisions
-{chr(10).join(f"- {decision}" for decision in critical_context['recent_decisions'][:3]) if critical_context['recent_decisions'] else "- No recent decisions captured"}
+{chr(10).join(f"- {decision}" for decision in critical_context["recent_decisions"][:3]) if critical_context["recent_decisions"] else "- No recent decisions captured"}
 
 ### Blockers & Issues
-{chr(10).join(f"⚠️ {blocker}" for blocker in critical_context['blockers'][:3]) if critical_context['blockers'] else "✅ No blockers identified"}
+{chr(10).join(f"⚠️ {blocker}" for blocker in critical_context["blockers"][:3]) if critical_context["blockers"] else "✅ No blockers identified"}
 
 ### Immediate Next Steps
-{chr(10).join(f"➡️ {step}" for step in critical_context['next_steps'][:3]) if critical_context['next_steps'] else "- Next steps to be determined"}
+{chr(10).join(f"➡️ {step}" for step in critical_context["next_steps"][:3]) if critical_context["next_steps"] else "- Next steps to be determined"}
 
 ## Session Context Summary
 """
@@ -524,7 +524,7 @@ def create_compaction():
 
 ### Plan Progress Summary
 - Plan directory: {plan_dir}
-- Last modified: {datetime.fromtimestamp(overview_file.stat().st_mtime).strftime('%Y-%m-%d %H:%M')}
+- Last modified: {datetime.fromtimestamp(overview_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M")}
 """
             except Exception as e:
                 compaction_content += (
@@ -593,7 +593,7 @@ def create_compaction():
 ### 📊 Efficiency Metrics
 - **Context Reduction**: {reduction * 100:.1f}% ({tokens:,} → {target_tokens:,} tokens)
 - **Estimated Session Extension**: {int(reduction * 60)} additional minutes of productive work
-- **Compaction Strategy**: {compression_strategy['level']} compression focused on {'code' if compression_strategy['preserve_code'] else 'prose'} optimization
+- **Compaction Strategy**: {compression_strategy["level"]} compression focused on {"code" if compression_strategy["preserve_code"] else "prose"} optimization
 
 ---
 *Automated intelligent compaction - {timestamp}*

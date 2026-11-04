@@ -129,9 +129,9 @@ class TestICMECATDataProperty:
         serve_catalog()
         cat = ICMECAT()
         for col in ["icme_start_time", "mo_start_time", "mo_end_time"]:
-            assert pd.api.types.is_datetime64_any_dtype(
-                cat.data[col]
-            ), f"{col} should be datetime64, got {cat.data[col].dtype}"
+            assert pd.api.types.is_datetime64_any_dtype(cat.data[col]), (
+                f"{col} should be datetime64, got {cat.data[col].dtype}"
+            )
 
 
 class TestICMECATIntervalsProperty:
@@ -276,9 +276,9 @@ class TestICMECATFilter:
         """
         marker = "matched case-insensitively:"
         doc = " ".join(ICMECAT.__doc__.split())
-        assert (
-            marker in doc
-        ), f"ICMECAT docstring no longer contains {marker!r}; update this test's marker"
+        assert marker in doc, (
+            f"ICMECAT docstring no longer contains {marker!r}; update this test's marker"
+        )
         listed = doc.split(marker, 1)[1].split(".", 1)[0]
         names = {name.strip() for name in listed.split(",")}
         assert names == set(icmecat.SPACECRAFT_NAMES)

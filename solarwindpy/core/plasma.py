@@ -351,7 +351,7 @@ class Plasma(base.Base):
         if data_modifier_fcn is not None:
             if not isinstance(data_modifier_fcn, FunctionType):
                 msg = (
-                    "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+                    "`modifier_fcn` must be a FunctionType. You passes '%s`."
                 ) % type(data_modifier_fcn)
                 raise TypeError(msg)
             data = data_modifier_fcn(data)
@@ -367,7 +367,7 @@ class Plasma(base.Base):
             data.shape,
         )
 
-        msg = "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+        msg = "`modifier_fcn` must be a FunctionType. You passes '%s`."
         if sc is not None:
             sc = sc.data
             if sc_modifier_fcn is not None:
@@ -558,9 +558,9 @@ class Plasma(base.Base):
         (see :class:`~solarwindpy.core.base.Base`).
         """
         species = self.species
-        assert np.all(
-            ["+" not in s for s in species]
-        ), "Plasma.species can't contain '+'."
+        assert np.all(["+" not in s for s in species]), (
+            "Plasma.species can't contain '+'."
+        )
         species = tuple(species)
 
         ions_ = pd.Series(

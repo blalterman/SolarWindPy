@@ -23,9 +23,9 @@ def _example_plasma():
     # What the tests below assume of the example data.
     assert p.species == ("a", "e", "p1", "p2"), "example plasma species changed"
     # test_save_applies_each_modifier_function_before_writing drops "carr".
-    assert "carr" in p.spacecraft.data.columns.get_level_values(
-        "M"
-    ), "example spacecraft no longer has Carrington coordinates"
+    assert "carr" in p.spacecraft.data.columns.get_level_values("M"), (
+        "example spacecraft no longer has Carrington coordinates"
+    )
     aux = pd.DataFrame(
         {("quality", "", ""): [0, 1, 0], ("chisq", "", "p1"): [1.5, 2.5, 3.5]},
         index=p.epoch,

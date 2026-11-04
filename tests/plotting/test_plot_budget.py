@@ -295,6 +295,6 @@ class TestBuildTime:
         # Linear = SCALE (4x); cells x points = SCALE**2 (16x). Bound 6x,
         # 1.5 x linear (measured 3.86-4.34 at 500k -> 2M; 0.14 s -> 0.74 s at
         # 1M -> 4.6M in step 9a is 5.3x for 4.6x rows).
-        assert (
-            ratio <= 1.5 * SCALE
-        ), f"{t_small:.3f} s -> {t_large:.3f} s = {ratio:.2f}x"
+        assert ratio <= 1.5 * SCALE, (
+            f"{t_small:.3f} s -> {t_large:.3f} s = {ratio:.2f}x"
+        )

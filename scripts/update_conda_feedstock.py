@@ -644,7 +644,8 @@ This update was prepared using automated tooling from the SolarWindPy repository
         # Step 1.5: Verify git tag provenance (optional, non-blocking)
         print("\n🔍 Verifying source provenance...")
         git_verified, commit_sha = self.verify_git_tag_provenance(
-            version_str, require_master=False  # Don't enforce, just report
+            version_str,
+            require_master=False,  # Don't enforce, just report
         )
 
         if git_verified and commit_sha:

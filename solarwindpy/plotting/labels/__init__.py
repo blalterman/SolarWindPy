@@ -71,7 +71,8 @@ def available():
     a = sorted(a)
     a = ", ".join(a)
 
-    print(r"""TeXlabel knows
+    print(
+        r"""TeXlabel knows
 
 Measurements
 ------------
@@ -88,4 +89,5 @@ Species
 Special
 -------
 {a}
-""".format(m=m, c=c, s=s, a=a))
+""".format(m=m, c=c, s=s, a=a)
+    )

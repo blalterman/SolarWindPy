@@ -1314,8 +1314,10 @@ class TestPlotConstructionCodesEqualPandasCut:
         kept = np.isfinite(x)
         assert h.cut.index.equals(x.index[kept])  # the plot keeps finite rows
         np.testing.assert_array_equal(
-            h.cut["x"].cat.codes, _pandas_codes(x[kept], UNEVEN, closed)  # pandas.cut
+            h.cut["x"].cat.codes,
+            _pandas_codes(x[kept], UNEVEN, closed),  # pandas.cut
         )
         np.testing.assert_array_equal(
-            h.cut["y"].cat.codes, _pandas_codes(y[kept], EDGES, closed)  # pandas.cut
+            h.cut["y"].cat.codes,
+            _pandas_codes(y[kept], EDGES, closed),  # pandas.cut
         )

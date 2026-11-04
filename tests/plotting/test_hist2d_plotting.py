@@ -295,9 +295,9 @@ class TestPlotHistWithContours:
             if len(unfiltered_data[level_idx]) != len(filtered_data[level_idx]):
                 differs = True
                 break
-        assert differs or len(unfiltered_data) != len(
-            filtered_data
-        ), "Filtered contours should differ from unfiltered"
+        assert differs or len(unfiltered_data) != len(filtered_data), (
+            "Filtered contours should differ from unfiltered"
+        )
         plt.close("all")
 
     def test_pcolormesh_data_matches_prep_agg(self, known_hist, known_counts):
@@ -933,9 +933,9 @@ class TestMakePlot:
         alpha = _quadmesh(ax).get_facecolors()[:, 3]
 
         assert alpha.min() >= 0.0 and alpha.max() <= 1.0
-        assert np.all(
-            np.diff(alpha) < 0
-        ), f"opacity not decreasing with spread: {alpha}"
+        assert np.all(np.diff(alpha) < 0), (
+            f"opacity not decreasing with spread: {alpha}"
+        )
         plt.close("all")
 
 

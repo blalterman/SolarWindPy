@@ -40,9 +40,9 @@ class TestResidualsEnhancement:
 
         # Should have different lengths
         assert len(r_fitted) < len(r_all), "use_all=True should return more residuals"
-        assert len(r_all) == len(
-            self.x
-        ), "use_all=True should return residuals for all data"
+        assert len(r_all) == len(self.x), (
+            "use_all=True should return residuals for all data"
+        )
 
         # Fitted region residuals should be subset of all residuals
         # (Though not necessarily at the same indices due to masking)
@@ -156,9 +156,9 @@ class TestInPlaceOperations:
         # Mask should select appropriate subset
         used_x = ff.observations.used.x
         assert len(used_x) > 0, "Should have some used observations"
-        assert len(used_x) < len(
-            x
-        ), "Should exclude some observations due to constraints"
+        assert len(used_x) < len(x), (
+            "Should exclude some observations due to constraints"
+        )
 
         # All used x values should satisfy constraints
         assert np.all(used_x >= -1), "All used x should be >= xmin"
@@ -177,9 +177,9 @@ class TestInPlaceOperations:
         used_x = ff.observations.used.x
 
         # Should only use values outside the (-1, 1) range
-        assert np.all(
-            (used_x <= -1) | (used_x >= 1)
-        ), "Should only use values outside central region"
+        assert np.all((used_x <= -1) | (used_x >= 1)), (
+            "Should only use values outside central region"
+        )
         assert len(used_x) < len(x), "Should exclude central region"
 
 
@@ -229,12 +229,12 @@ class TestPhase4Integration:
         r_all = first_fit.residuals(use_all=True)
         r_pct = first_fit.residuals(pct=True)
 
-        assert len(r_all) >= len(
-            r_fitted
-        ), "use_all should give at least as many residuals"
-        assert len(r_pct) == len(
-            r_fitted
-        ), "Percentage residuals should match fitted residuals"
+        assert len(r_all) >= len(r_fitted), (
+            "use_all should give at least as many residuals"
+        )
+        assert len(r_pct) == len(r_fitted), (
+            "Percentage residuals should match fitted residuals"
+        )
 
         print("✓ All Phase 4 features working correctly")
 
