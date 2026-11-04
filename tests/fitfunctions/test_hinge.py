@@ -2461,12 +2461,6 @@ def test_hinge_saturation_rising_region_without_a_slope_gives_reference_start(
     assert p0 == noise_free(expected)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="hinge fits set no TeX_argnames, so TeX_popt shows xh, yh, x1, ...; "
-    "remove this marker when each parameter renders as its model string writes it",
-)
 @pytest.mark.parametrize(
     "cls, fixture, expected",
     [
