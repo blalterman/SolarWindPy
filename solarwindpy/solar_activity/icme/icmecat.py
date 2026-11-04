@@ -8,12 +8,11 @@ __all__ = [
 ]
 
 import logging
-import time
-import warnings
 import pandas as pd
 import numpy as np
-from pathlib import Path
 from typing import Optional
+
+from .. import cache
 
 #: Download URL of the pinned HELIO4CAST ICMECAT release, v23.
 ICMECAT_URL = (
@@ -21,10 +20,9 @@ ICMECAT_URL = (
 )
 
 _PINNED_VERSION = "v23"
-_CACHE_MAX_AGE_DAYS = 30
-# The cache is CSV, the format the catalog downloads in, so caching needs no
-# dependency beyond pandas (parquet would need an undeclared engine).
-_CACHE_FILENAME = "icmecat.csv"
+# Freshness window: a cached catalog younger than this is used without
+# downloading (see solarwindpy.solar_activity.cache).
+_MAX_AGE = pd.Timedelta(days=30)
 
 # The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
 # ACE and Cassini were previously (and wrongly) included: both have zero
@@ -64,8 +62,8 @@ the road. As of January 2026, they are:
 """
 
 
-class ICMECATDownloadError(RuntimeError):
-    """Raised when the ICMECAT catalog cannot be downloaded from HELIO4CAST."""
+class ICMECATDownloadError(cache.DownloadError):
+    """Raised when the ICMECAT catalog cannot be downloaded and none is cached."""
 
 
 class ICMECAT:
@@ -74,6 +72,12 @@ class ICMECAT:
     See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog's
     citation and co-authorship terms.
 
+    The downloaded catalog is kept in SolarWindPy's download cache
+    (:mod:`solarwindpy.solar_activity.cache`, by default
+    ``~/.cache/solarwindpy``) and downloaded again once it is more than 30
+    days old. If that download fails, the cached catalog is used with a
+    :class:`~solarwindpy.solar_activity.cache.StaleCacheWarning`.
+
     Parameters
     ----------
     spacecraft : str, optional
@@ -81,9 +85,6 @@ class ICMECAT:
         Valid names are the ``SPACECRAFT_NAMES`` values, matched
         case-insensitively: BepiColombo, Juno, MAVEN, MESSENGER, PSP,
         SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.
-    cache_dir : Path, optional
-        Directory for caching downloaded data, saved as ``icmecat.csv``
-        (the format the catalog downloads in). If None, no caching.
 
     Attributes
     ----------
@@ -143,14 +144,9 @@ class ICMECAT:
     [True, False]
     """
 
-    def __init__(
-        self,
-        spacecraft: Optional[str] = None,
-        cache_dir: Optional[Path] = None,
-    ):
+    def __init__(self, spacecraft: Optional[str] = None):
         self._init_logger()
         self._spacecraft = spacecraft
-        self._cache_dir = Path(cache_dir) if cache_dir else None
         self._data: Optional[pd.DataFrame] = None
         self._intervals: Optional[pd.DataFrame] = None
 
@@ -218,65 +214,17 @@ class ICMECAT:
     # -------------------------------------------------------------------------
 
     def _load_data(self) -> None:
-        """Load ICMECAT data, applying the cache freshness policy.
+        """Load ICMECAT through the download cache.
 
-        Freshness policy: a cache younger than ``_CACHE_MAX_AGE_DAYS`` is
-        used directly. Otherwise (or with no cache at all) a download is
-        attempted. If the download fails and a cache exists -- even a stale
-        one -- the stale cache is served rather than losing data the user
-        already has on disk, with a warning naming its age. If no cache
-        exists, the download error propagates.
+        A cached catalog younger than ``_MAX_AGE`` is used directly;
+        otherwise it is downloaded again, and if that fails the cached copy
+        is used with a warning naming its age (see
+        :func:`solarwindpy.solar_activity.cache.fetch`). With nothing cached,
+        a failed download raises :class:`ICMECATDownloadError`.
         """
-        cached, age_days = self._read_cache()
-
-        if (
-            cached is not None
-            and age_days is not None
-            and age_days <= _CACHE_MAX_AGE_DAYS
-        ):
-            self._data = cached
-            self.logger.info("Loaded from cache: %d events", len(self._data))
-            return
-
         try:
-            self._download()
-        except ICMECATDownloadError:
-            if cached is None:
-                raise
-            message = (
-                f"ICMECAT download failed, serving cached data that is "
-                f"{age_days:.0f} days old."
-            )
-            warnings.warn(message)
-            self.logger.warning(message)
-            self._data = cached
-
-    def _read_cache(self) -> "tuple[Optional[pd.DataFrame], Optional[float]]":
-        """Read the on-disk cache with no freshness policy applied.
-
-        Returns
-        -------
-        tuple
-            ``(df, age_days)``, both ``None`` if there is no cache directory
-            configured or no cache file present.
-        """
-        if self._cache_dir is None:
-            return None, None
-
-        cache_path = self._cache_dir / _CACHE_FILENAME
-        if not cache_path.exists():
-            return None, None
-
-        age_days = (time.time() - cache_path.stat().st_mtime) / 86400
-        return pd.read_csv(cache_path, parse_dates=_DATETIME_COLUMNS), age_days
-
-    def _download(self) -> None:
-        """Download ICMECAT from helioforecast.space."""
-        self.logger.info("Downloading ICMECAT from %s", ICMECAT_URL)
-
-        try:
-            self._data = pd.read_csv(ICMECAT_URL, parse_dates=_DATETIME_COLUMNS)
-        except Exception as exc:
+            path = cache.fetch(ICMECAT_URL, _MAX_AGE)
+        except cache.DownloadError as exc:
             raise ICMECATDownloadError(
                 f"Failed to download ICMECAT {_PINNED_VERSION} from {ICMECAT_URL}. "
                 f"Edit solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL) "
@@ -285,14 +233,8 @@ class ICMECAT:
                 f"Underlying error: {exc!r}"
             ) from exc
 
-        self.logger.info("Downloaded %d ICME events", len(self._data))
-
-        # Save to cache if configured
-        if self._cache_dir is not None:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            cache_path = self._cache_dir / _CACHE_FILENAME
-            self._data.to_csv(cache_path, index=False)
-            self.logger.info("Cached to %s", cache_path)
+        self._data = pd.read_csv(path, parse_dates=_DATETIME_COLUMNS)
+        self.logger.info("Loaded %d ICME events from %s", len(self._data), path)
 
     # -------------------------------------------------------------------------
     # Filtering
@@ -345,7 +287,6 @@ class ICMECAT:
         new = object.__new__(ICMECAT)
         new._init_logger()
         new._spacecraft = spacecraft  # Keep user's original spelling for display
-        new._cache_dir = self._cache_dir
         new._data = self._data[self._data["sc_insitu"] == actual_name].copy()
         new._intervals = None
         new._prepare_intervals()
