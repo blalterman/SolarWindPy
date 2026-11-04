@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops shipping example data)
-# Supersedes: none
 r"""Example data shipped with SolarWindPy.
 
 The example is three rows of synthetic solar wind measurements: magnetic
