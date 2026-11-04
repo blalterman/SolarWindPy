@@ -26,8 +26,9 @@ Confidence: moderate. The deciding evidence:
   The seams already deliver the author's principle (every operation names its dimension) to
   every caller [inferred from the call-site counts below: every core reduction goes through them].
 - The costs are structural: two component dimensions, list selections that copy, an inner
-  default join, a new IO dependency, and about 350 lines of core and core-test code touching
-  MultiIndex structure directly [measured counts; the effort they imply is inferred].
+  default join, and a new IO dependency. About 83 to 98 lines in core outside `base.py`, and
+  380 to 410 lines in `tests/core`, touch MultiIndex structure directly [measured line counts;
+  the effort they imply is inferred].
 
 What would change the answer: wanting units carried through `core` (the one qualitative gain,
 section 5), or wanting netCDF as the on-disk format. If either becomes a goal, the seams make
@@ -98,7 +99,14 @@ copies a multi-block frame):
 
 ## 4. Blast radius [measured line counts; migration effort inferred]
 
-Seam call sites in `solarwindpy/core` outside `base.py` (`git grep -F -c '<name>(' -- solarwindpy/core`):
+All counts are matching *lines* from `git grep -c` (or `| wc -l`), so they include docstrings
+and comments. They are an upper bound on code sites.
+
+Seam lines in `solarwindpy/core` outside `base.py`:
+
+```bash
+git grep -F -c '_select(' -- solarwindpy/core            # likewise _component_reduce(, _species_total(
+```
 
 | seam | lines | where |
 |---|---|---|
@@ -106,49 +114,51 @@ Seam call sites in `solarwindpy/core` outside `base.py` (`git grep -F -c '<name>
 | `_component_reduce(` | 22 | alfvenic_turbulence 8, plasma 7, vector 5, ions 1, spacecraft 1 |
 | `_species_total(` | 10 | plasma 10 |
 
-The 62 call sites keep their shape under xarray: only the seam bodies change [inferred].
+The 62 seam lines need little change *if* the xarray `select` maps the level word `"C"` to
+whichever component dimension the variable carries, as `component_reduce` already does via
+`component_dim`. The prototype's `select` takes the dimension name instead. So, as built,
+each `_select(..., "C")` call would also change its argument to `"component"` or
+`"tcomponent"` [inferred].
 
-Structural MultiIndex access left in `core`, which would be rewritten (the union of
-`MultiIndex|from_tuples|from_product|.xs(|level="[MCS]"|names=["M"|.loc[:, (|columns.names|columns.levels|get_level_values|IndexSlice|reorder_levels|.loc[:, "`
-in `git grep -e`): **94 lines**. By pattern:
+Structural MultiIndex access in the rest of the code, which a migration rewrites. There are
+two patterns. Narrow covers the structure only. Broad adds `pd.concat` and
+`sort_index(axis=1)`, which in core mostly build or order (C, S) frames, but not all of them do.
 
-- `pd.concat`: 19, 16 of them in plasma, which builds (C, S) frames per species;
-- `MultiIndex`: 22;
-- `level="C"/"S"`: 16;
-- `.xs(`: 14;
-- `.loc[:, "v"]`-style positional M access: 11 (ions 3, plasma 3, alfvenic_turbulence 3,
-  spacecraft 2);
-- `sort_index(axis=1)`: 10;
-- `level="M"`: 8;
-- `get_level_values`: 6;
-- `reorder_levels`: 4;
-- `IndexSlice`: 2.
+```bash
+N='MultiIndex\|from_tuples\|from_product\|\.xs(\|level=.[MCS].\|names=\[.[MCS].\|\.loc\[:, *(\|\.loc\[:, *"\|columns\.names\|columns\.levels\|get_level_values\|IndexSlice\|reorder_levels'
+B="$N"'\|pd\.concat\|sort_index(axis=1)'
+git grep -e "$N" -- solarwindpy/core | wc -l                                    # narrow
+git grep -e "$B" -- solarwindpy/core ':!solarwindpy/core/base.py' | wc -l      # broad, outside base.py
+git grep -c -e "$B" -- tests/core                                               # per test file
+```
 
-These lines overlap. The concentration is `plasma.py`: the per-species `pd.concat(...,
-names=["S"])` then `reorder_levels(["C","S"])` pattern in `w`, `pth`, `T` and the rest,
-which a Dataset replaces with one `.sel(species=...)`.
+| scope | narrow | broad |
+|---|---|---|
+| `solarwindpy/core` (all) | 102 | 117 |
+| `solarwindpy/core` outside `base.py` | 83 | 98 |
+| `tests/core` (14 files of 18; 8749 lines, 338 tests) | 379 | 412 |
+| `solarwindpy/` outside core (12 files: plotting and the other pandas consumers) | | 82 |
+| `tests/` outside core (17 files) | | 115 |
 
-Tests in `tests/core` that construct or inspect MultiIndex frames, with the same pattern
-(the one above, without `IndexSlice`, `reorder_levels` and the M-string `.loc`):
+- Broad, per core file: plasma 60, base 19, spacecraft 11, alfvenic_turbulence 10, ions 10,
+  abundances 5, vector 2.
+- Broad, per test file: test_plasma 241, test_alfvenic_turbulence 52, test_quantities 32,
+  test_base 16, test_abundances 15, test_spacecraft 14, test_plasma_io 11, test_ions 11.
 
-- **255 lines in 14 files** out of 8749 lines and 338 test functions.
-- By file: test_plasma 148, test_quantities 27, test_abundances 14, test_plasma_io 11,
-  test_base 11, test_alfvenic_turbulence 11, test_spacecraft 10, test_ions 9.
-
-Outside `core`, the same pattern hits 34 lines in 9 `solarwindpy/` files (plotting and the
-other pandas consumers, which stay on pandas through `.to_dataframe()`) and 32 lines in 10
-test files.
+The concentration is `plasma.py`. Its per-species `pd.concat(..., names=["S"])` followed by
+`reorder_levels(["C","S"])`, in `w`, `pth`, `T` and the rest, is what a Dataset replaces with
+one `.sel(species=...)`.
 
 Migration estimate [inferred from the counts above]:
 
-- Rewrite the `base.py` seam block.
-- Rewrite about 94 structural lines in core, mostly in plasma.
-- Rewrite the IO path.
-- Change about 255 test lines, most of them in test_plasma.
-- The 62 seam call sites need little change.
-- About 66 consumer lines stay pandas only if `Plasma.data` keeps returning an (M, C, S)
-  frame, which means a `to_dataframe` shim that rebuilds the MultiIndex and copies on every
-  access.
+- Rewrite the `base.py` seam block and the IO path.
+- Rewrite about 83 to 98 structural lines in core outside `base.py`, about 60 of them in
+  plasma.
+- Change about 380 to 410 test lines in `tests/core`, about 60% of them in test_plasma.
+- Touch the 62 seam lines only for the component-dimension argument, as above.
+- The 82 consumer lines and 115 test lines outside core stay as they are only if `Plasma.data`
+  keeps returning an (M, C, S) frame. That needs a shim that rebuilds the MultiIndex and
+  copies on every access (section 3: `to_dataset` is a full copy; the reverse is too).
 
 ## 5. pint-xarray units [measured, `units_pint.py`]
 
