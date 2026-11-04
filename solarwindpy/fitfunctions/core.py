@@ -434,7 +434,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before a successful :meth:`make_fit`.
         """
         return dict(self._fitted("_fit_bounds"))
@@ -445,12 +445,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Returns
         -------
-        _ChisqPerDegreeOfFreedom
+        solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom
             ``(linear, robust)``. NaN after a failed fit.
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
         row = self.results.iloc[0]
@@ -469,7 +469,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before a successful :meth:`make_fit`.
         """
         return self._fitted("_fit_result")
@@ -490,7 +490,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before a successful :meth:`make_fit`.
         """
         p0 = self._fitted("_fit_p0")
@@ -519,7 +519,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before a successful :meth:`make_fit`.
         """
         return self._fitted("_plotter")
@@ -546,7 +546,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit` has run.
 
         Examples
@@ -571,7 +571,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
         if self._results is None:
@@ -601,7 +601,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before :meth:`make_fit`.
         """
         return self._fitted("_pcov").copy()
@@ -744,7 +744,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Raises
         ------
-        NotFittedError
+        ~solarwindpy.fitfunctions.core.NotFittedError
             Before a successful :meth:`make_fit`.
         """
         return self._fitted("_TeX_info")
@@ -1142,7 +1142,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         popt, psigma : array-like
             One value and one uncertainty per parameter, in :attr:`argnames`
             order.
-        chisq : _ChisqPerDegreeOfFreedom
+        chisq : solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom
         rsq : float
         status : str
         """
@@ -1212,7 +1212,10 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         Raises
         ------
-        InsufficientDataError, FitFailedError, ValueError, RuntimeError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
+        ~solarwindpy.fitfunctions.core.FitFailedError
+        ValueError
+        RuntimeError
             When the fit fails. Before raising, :attr:`results` records the
             failure: NaN values and the exception's class name as ``status``.
             The exception is also kept as :attr:`error`. To fit many data sets

@@ -659,7 +659,7 @@ class FFPlot(object):
         self._labels = AxesLabels(x, y, z)
 
     def set_log(self, **kwargs):
-        r"""Set :py:class:`LogAxes`.
+        r"""Set :py:class:`~solarwindpy.plotting.base.LogAxes`.
 
         Only used for determining if weights should be :math:`w/(y \ln(10))`.
         """

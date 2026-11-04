@@ -238,7 +238,10 @@ class TrendFit(object):
 
         Raises
         ------
-        InsufficientDataError, FitFailedError, ValueError, RuntimeError
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
+        ~solarwindpy.fitfunctions.core.FitFailedError
+        ValueError
+        RuntimeError
             If the trend fit fails. :attr:`bin_results` and :attr:`trend` are
             set first, and the trend's results record the failure.
         """
