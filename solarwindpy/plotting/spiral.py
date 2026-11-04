@@ -710,7 +710,7 @@ class AdaptiveMesh(Binning):
             Initial bins per axis; see ``initial_edges``.
         min_per_bin : int
             A cell holding more points than this is split.
-        clip : ClipAxes
+        clip : ~solarwindpy.plotting.base.ClipAxes
             Each of x and y whose field is set is clipped with
             ``Base.clip_data`` before the points are placed; the initial
             edges are computed from the unclipped data.

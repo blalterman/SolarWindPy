@@ -141,9 +141,9 @@ class FixedGrid(Binning):
             ``BinnedData``.
         index : pd.Index or None
             The index of the plot's x input, matched to a ``BinnedData``'s.
-        log : LogAxes
+        log : ~solarwindpy.plotting.base.LogAxes
             The plot's log settings.
-        clip : ClipAxes
+        clip : ~solarwindpy.plotting.base.ClipAxes
             The plot's clip settings.
         logger : logging.Logger
             Receives the warning of values outside memory-clipped bins.

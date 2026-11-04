@@ -255,7 +255,7 @@ class ActivityIndicator(Base):
 
         Subclasses choose which of their data to interpolate, may add
         trailing options for that choice (e.g. a column key), and delegate
-        the interpolation itself to :meth:`_interpolate`, which also sets
+        the interpolation itself to ``_interpolate``, which also sets
         :attr:`interpolated`.
 
         Parameters
