@@ -659,6 +659,20 @@ class _ComponentFrame(Base):
                 )
         super().set_data(new)
 
+    @classmethod
+    def _component_reduce(cls, frame: pd.DataFrame, how: str = "sum"):
+        r"""Reduce over components, one value per time for the one species held.
+
+        As :meth:`Core._component_reduce`; when ``frame`` also has a species
+        level, which holds at most one species here (see :meth:`set_data`),
+        the lone species column is returned as an unnamed Series, as a sum
+        over every column would return it.
+        """
+        out = super()._component_reduce(frame, how)
+        if isinstance(out, pd.DataFrame) and out.shape[1] == 1:
+            out = out.iloc[:, 0].rename(None)
+        return out
+
     def __call__(self, component: str) -> pd.Series:
         r"""Return one component.
 

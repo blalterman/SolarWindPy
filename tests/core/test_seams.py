@@ -255,13 +255,6 @@ def test_one_species_on_a_species_level_is_accepted(cls):
     pdt.assert_frame_equal(cls(frame).data, frame)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the named-level component reduction keeps the S level, so a "
-    "one-species (C, S) Vector's mag, rho and cos_theta are one-column "
-    "DataFrames; remove this marker when the reduction drops the lone species",
-)
 @pytest.mark.parametrize(
     "cls", [vector.Vector, vector.BField], ids=["vector", "bfield"]
 )
