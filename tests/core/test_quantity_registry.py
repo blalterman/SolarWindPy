@@ -179,7 +179,7 @@ NOT_QUANTITIES = {
     _I: {"species"},
     _V: {"cartesian", "project", "uv"},
     _T: set(),
-    _SC: {"frame", "name", "set_frame_name"},
+    _SC: {"frame", "name", "pos_units", "set_frame_name"},
     _AT: {"averaging_info", "measurements", "polarity", "species"},
 }
 NOT_QUANTITIES[_B] = NOT_QUANTITIES[_V]

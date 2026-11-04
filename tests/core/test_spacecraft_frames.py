@@ -106,3 +106,17 @@ def test_distance_reads_the_frame_radius_from_the_registry(monkeypatch, frame):
         pos = pos.assign(x=constants.au - pos.loc[:, "x"])
     expected = np.sqrt(pos.pow(2).sum(axis=1)).rename("distance2sun")
     pdt.assert_series_equal(sc.distance2sun, expected)
+
+
+@pytest.mark.xfail(strict=True, reason="o28: Spacecraft has no pos_units yet")
+@pytest.mark.parametrize("frame", spacecraft._SUPPORTED["frame"])
+def test_position_units_are_the_frame_entry_units(frame):
+    r"""``pos_units`` is the TeX unit of the spacecraft's frame entry.
+
+    The ``pos`` entry states no unit, because the unit depends on the frame.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = spacecraft.Spacecraft(_position_data(), "PSP", frame)
+    assert sc.pos_units == quantities.QUANTITIES[frame.lower()].units
+    assert quantities.QUANTITIES["pos"].units is None
