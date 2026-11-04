@@ -337,3 +337,55 @@ If the dispatch was abandoned without execution: skip steps 1, 1a and 2, and opt
 `## Abandoned (YYYY-MM-DD)` with a one-line reason. An abandoned unit's plan keeps its
 `NOT-YET`, which is the correct reading — the work stopped rather than finished, and no marker
 claims otherwise.
+
+---
+
+## Empirical Findings (2026-11-04 trial run)
+
+### End-state metrics
+
+- Findings: 206 (214 across five review slices before merging duplicates), 51 marked for author decision.
+- Plan: 40 stages, each with Done when, Guarding tests, and Density; 51 items under Changes for author confirmation.
+- Repro spot-check by the assembler: 34 of 34 reproduced. Main thread reproduced F78 (`plasma.b("x")` raises AttributeError) and F128 (`TeXlabel` renders `a_bimax` as `n_{\alpha_bim\alphax}`).
+- Tooling verdicts over 25 tracked `.claude` files (the dispatch implied 24 in the main thread's brief): keep 3, rebuild 6, retire 16. Proposed CLAUDE.md: 64 lines.
+- Suite: before env rebuild 155 failed and 245 errors (four modules excluded); after rebuild 1 failed, 6254 passed; at close 6255 passed, 0 failed.
+
+### Governing Property
+
+not served: the property is an end state of the package ("reads as one design"), and this dispatch by design changed no package, test, or tooling file; the findings file records 206 open coherence findings that the 40-stage plan carries.
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| No package, test, or tooling file changed | PASS | `git diff --stat $START..HEAD -- solarwindpy tests .claude CLAUDE.md pyproject.toml .pre-commit-config.yaml` printed nothing; positive control: the same range over `docs/dispatches` lists the two outputs. The add in a7506826 and removal in d22ac858 net to no tree change. |
+| Findings file has every section | PASS | grep count printed `5` |
+| Every tooling file has a verdict | PASS | loop over `git ls-files .claude` (25 paths) printed no "no verdict" line |
+| Every finding located and reproducible | PASS | printed `206 206`; duplicate F ids: 0 |
+| Every subpackage layer carries a prediction | PASS | printed `28` (need 9 or more) |
+| Control arm ran first and is saved | PASS | `tmp/coherence-review/control-solar_activity.md` non-empty; launched before any principled brief |
+| Plan stages complete | PASS | awk printed `ok 40` |
+| API and result changes listed | PASS | grep count printed `1` |
+| Both outputs lint clean | PASS | lint-ai-clean printed `All files clean.` |
+| Suite unchanged and green | PASS | `6255 passed, 12 skipped, 290 warnings, 18 subtests passed` |
+
+### Deviations from plan
+
+- Observe First found the `solarwindpy` conda env stale (pandas 2.3.3 against `pandas>=3,<4`, no import-linter, editable install pointing at the removed `/Users/blalterman/code/SolarWindPy`). With author approval it was removed and rebuilt from `solarwindpy.yml` plus `python=3.12` and `pandas>=3`, then `pip install -e ".[dev]"`. The unpinned solve paired astropy 6.1.7 with numpy 2.5.4 and failed to import (`np.in1d`); `conda install "astropy>=7"` gave astropy 8.0.2 from `pkgs/main`, a channel mix.
+- With author approval, overriding the anti-pattern for that file, the untracked conflict-marker file `solarwindpy/fitfunctions/lines_BACKUP_41608.py` was deleted; it caused four collection errors.
+- At the author's instruction, the never-tracked July 2025 copies in `solarwindpy/tests/` were committed (a7506826) and then removed (d22ac858); they were the only cause of the last failing test.
+- The author asked mid-run for execution through subagents: Pass 1, four Pass 2 slices, and an assembler wrote scratch files under `tmp/coherence-review/` and the two outputs.
+- The control report returned to the main thread on arrival, so "unread" held only for the Pass 2 solar_activity reviewer.
+- The author supplied revised ISE principles mid-run, then clarified that they flex with the task; both were applied at assembly, and the plan now recommends deleting `tests/test_import_aliases.py`.
+- Not marked spent: the Governing Property is not served by a review-only dispatch, and the marker accepts only served or declined.
+
+### Commits
+
+- `7b6d99fe` docs(dispatch): record the coherence and tooling review and plan its cleanup
+- `cb514314` docs(dispatch): record the corrected post-cleanup commit count in the experiment record
+- `a7506826` chore: preserve the author's untracked July 2025 test copies
+- `d22ac858` chore: remove the July 2025 test copies from solarwindpy/tests/
+
+### Backup location
+
+`tmp/coherence-review/env-before/` (conda explicit list and pip freeze of the pre-rebuild env; a record, not a restorable clone).
