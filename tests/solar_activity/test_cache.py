@@ -26,14 +26,6 @@ from astropy.config.paths import get_cache_dir_path
 
 ONE_DAY = 86400.0
 
-needs_cache = pytest.mark.xfail(
-    strict=True,
-    raises=ImportError,
-    reason="solarwindpy.solar_activity.cache does not exist yet (F140: two "
-    "cache policies in one subpackage); expected ImportError on import; "
-    "remove this marker when the shared cache helper lands",
-)
-
 
 def serve(tmp_path, text):
     """Write ``text`` as a "remote" file; return its path and ``file://`` URL."""
@@ -60,7 +52,6 @@ def test_the_isolated_cache_lies_under_tmp_path(isolated_cache):
     assert resolved == isolated_cache / "solarwindpy"
 
 
-@needs_cache
 def test_a_fresh_entry_is_returned_without_downloading(tmp_path):
     """Within its freshness window the cached copy is returned as is.
 
@@ -83,7 +74,6 @@ def test_a_fresh_entry_is_returned_without_downloading(tmp_path):
     assert path.read_text() == "first\n"
 
 
-@needs_cache
 def test_a_stale_entry_is_downloaded_again(tmp_path):
     """Past its freshness window the entry is replaced by a new download.
 
@@ -104,7 +94,6 @@ def test_a_stale_entry_is_downloaded_again(tmp_path):
     assert path.read_text() == "second\n"
 
 
-@needs_cache
 def test_a_failed_refresh_returns_the_cached_copy_and_warns_its_age(tmp_path):
     """A stale entry whose download fails is returned, with a warning of its age.
 
@@ -125,7 +114,6 @@ def test_a_failed_refresh_returns_the_cached_copy_and_warns_its_age(tmp_path):
     assert path.read_text() == "first\n"
 
 
-@needs_cache
 def test_a_failed_download_with_nothing_cached_raises(tmp_path):
     """With no cached copy to fall back on, a failed download raises.
 
@@ -139,7 +127,6 @@ def test_a_failed_download_with_nothing_cached_raises(tmp_path):
         cache.fetch(url, max_age=pd.Timedelta(days=1))
 
 
-@needs_cache
 def test_cache_contents_lists_each_url_with_its_path_and_age(tmp_path):
     """The listing maps each cached URL to its local file and that file's age.
 
@@ -148,13 +135,13 @@ def test_cache_contents_lists_each_url_with_its_path_and_age(tmp_path):
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.solar_activity import cache, cache_contents
+    from solarwindpy.solar_activity import cache
 
     _, url = serve(tmp_path, "first\n")
     path = cache.fetch(url, max_age=pd.Timedelta(days=1))
     backdate(path, 5)
 
-    listing = cache_contents()
+    listing = cache.cache_contents()
 
     assert listing.index.tolist() == [url]
     assert listing.loc[url, "path"] == path
@@ -162,30 +149,28 @@ def test_cache_contents_lists_each_url_with_its_path_and_age(tmp_path):
     assert pd.Timedelta(days=5) <= age < pd.Timedelta(days=5, minutes=1)
 
 
-@needs_cache
 def test_cache_contents_of_an_empty_cache_is_an_empty_listing():
     """Before anything is downloaded the listing is empty but keeps its columns.
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.solar_activity import cache_contents
+    from solarwindpy.solar_activity import cache
 
-    listing = cache_contents()
+    listing = cache.cache_contents()
 
     assert listing.empty
     assert listing.columns.tolist() == ["path", "age"]
 
 
-@needs_cache
 def test_a_local_path_is_read_in_place_and_not_cached(tmp_path):
     """A plain file path is returned as is, and nothing enters the cache.
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.solar_activity import cache, cache_contents
+    from solarwindpy.solar_activity import cache
 
     local = tmp_path / "local.csv"
     local.write_text("first\n")
 
     assert cache.fetch(str(local), max_age=pd.Timedelta(days=1)) == local
-    assert cache_contents().empty
+    assert cache.cache_contents().empty
