@@ -675,10 +675,6 @@ def test_beta_ani_inst_example_output_is_its_call():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="B4: stability_bin is float64 because its fill placeholder is a float",
-)
 def test_stability_bin_is_an_integer_label():
     """stability_bin has an integer dtype for stable, unstable and missing rows.
 
@@ -693,10 +689,6 @@ def test_stability_bin_is_an_integer_label():
     assert set(sc.stability_bin) <= set(sc.stability_map)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="B4: the fill placeholder is the float -9999.0, not an integer",
-)
 def test_fill_is_an_integer_outside_every_bin():
     """The fill for a point outside every bin is the integer -9999 (Phase C, B4).
 

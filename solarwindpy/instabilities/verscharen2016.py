@@ -172,7 +172,8 @@ class StabilityCondition(object):
         Boolean mask indicating unstable modes.
     stability_bin : pandas.Series
         Integer label describing the dominant instability, named
-        ``"Stability"``.
+        ``"Stability"``; the keys of ``stability_map``. A point outside
+        every bin carries ``fill`` (-9999).
 
     Notes
     -----
@@ -210,8 +211,12 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Placeholder ``stability_bin`` starts from before each bin is assigned."""
-        return -9999.0
+        r"""Integer ``stability_bin`` label of a point outside every bin.
+
+        ``stability_bin`` starts from it before each bin is assigned. It is
+        not a key of ``stability_map``.
+        """
+        return -9999
 
     @property
     def instability_parameters(self):
@@ -280,7 +285,10 @@ class StabilityCondition(object):
 
     @property
     def stability_bin(self):
-        """The integer corresponding to the (in)stability condition."""
+        """The integer corresponding to the (in)stability condition.
+
+        A point outside every bin carries ``fill`` (-9999).
+        """
 
         return self._stability_bin
 
