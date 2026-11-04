@@ -785,6 +785,8 @@ These change computed values; rerun any analysis that used them.
 - An `IndicatorPlot` subclass that never calls `set_labels` raising `AttributeError` on
   `path`.
 
+- The wheel no longer installs a stray top-level `tests` package beside solarwindpy.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
