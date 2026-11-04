@@ -246,3 +246,90 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
     assert plotted.index.equals(d.index)
     assert plotted.to_numpy().tolist() == expected.tolist()
     assert 0 < expected.sum() < len(d)  # the fixture keeps some rows, not all
+
+
+# ---------------------------------------------------------------------------
+# Constructor order: variables, then log axes, then axnorm (F125)
+# ---------------------------------------------------------------------------
+
+_ORDER = pytest.mark.xfail(
+    strict=True,
+    reason="constructors do not yet share the order variables, log, axnorm; "
+    "remove this marker when refactor(plotting)! reorders them",
+)
+
+
+@pytest.mark.parametrize(
+    "cls, expected",
+    [
+        (
+            Hist1D,
+            ["x", "y", "logx", "axnorm", "clip", "nbins", "bin_precision", "mask"],
+        ),
+        pytest.param(
+            Hist2D,
+            [
+                "x",
+                "y",
+                "z",
+                "logx",
+                "logy",
+                "axnorm",
+                "clip",
+                "nbins",
+                "bin_precision",
+                "mask",
+            ],
+            marks=_ORDER,
+        ),
+        pytest.param(
+            SpiralPlot2D,
+            [
+                "x",
+                "y",
+                "z",
+                "logx",
+                "logy",
+                "axnorm",
+                "clip",
+                "initial_bins",
+                "min_per_bin",
+                "mask",
+            ],
+            marks=_ORDER,
+        ),
+        pytest.param(
+            Scatter, ["x", "y", "z", "logx", "logy", "clip", "mask"], marks=_ORDER
+        ),
+    ],
+    ids=lambda v: v.__name__ if isinstance(v, type) else "",
+)
+def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
+    """Every plot constructor orders its parameters variables, log, axnorm, the rest.
+
+    The rest share one order: clip, the bins, mask.
+
+    ON FAILURE: the code is wrong.
+    """
+    import inspect
+
+    params = list(inspect.signature(cls.__init__).parameters)[1:]
+    assert params == expected
+
+
+@_ORDER
+def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():
+    """``Scatter(logx=True, logy=True)`` draws on log axes; ``data`` stays linear.
+
+    ON FAILURE: the code is wrong.
+    """
+    import matplotlib.pyplot as plt
+
+    x = pd.Series([1.0, 10.0, 100.0])
+    y = pd.Series([2.0, 20.0, 200.0])
+    plot = Scatter(x, y, logx=True, logy=True)
+    assert plot.log == base.LogAxes(True, True)
+    assert plot.data.x.to_numpy() == exact(x.to_numpy())  # the chosen input
+    ax, _ = plot.make_plot()
+    assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
+    plt.close("all")
