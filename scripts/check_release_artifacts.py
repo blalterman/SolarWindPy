@@ -66,6 +66,24 @@ def sdist_pruned_present(members):
     return [d for d in SDIST_PRUNED if any(m.startswith(d) for m in members)]
 
 
+def wheel_missing_package_files(wheel, members):
+    """Return the sdist's ``solarwindpy/`` files that the wheel does not install.
+
+    Every package file the sdist carries, data files such as
+    ``ssn_extrema.csv`` included, must reach the wheel; a data file that
+    reaches only the sdist fails at import time for anyone who installs.
+    """
+    with zipfile.ZipFile(wheel) as zf:
+        installed = set(zf.namelist())
+    # sdist member lists name directories too, without a trailing slash.
+    dirs = {m.rsplit("/", 1)[0] for m in members if "/" in m}
+    return sorted(
+        m
+        for m in members
+        if m.startswith(f"{PACKAGE}/") and m not in dirs and m not in installed
+    )
+
+
 def problems(dist_dir):
     """Return every problem found in ``dist_dir``'s single wheel and sdist."""
     dist_dir = Path(dist_dir)
@@ -83,6 +101,10 @@ def problems(dist_dir):
     ]
     found += [f"{wheel.name}: Spent-When in {f}" for f in wheel_spent_when_files(wheel)]
     members = sdist_members(sdist)
+    found += [
+        f"{wheel.name}: does not install {m}"
+        for m in wheel_missing_package_files(wheel, members)
+    ]
     found += [f"{sdist.name}: missing {d}" for d in sdist_missing(members)]
     found += [f"{sdist.name}: holds {d}" for d in sdist_pruned_present(members)]
     return found
