@@ -347,6 +347,60 @@ def test_plot_contours_draws_every_published_threshold_on_log_axes():
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
 
 
+@pytest.mark.xfail(
+    strict=True, reason="A3: StabilityContours.plot_contours returns nothing"
+)
+def test_plot_contours_returns_ax_lines_and_no_colorbar():
+    """``plot_contours`` returns ``(ax, lines, None)``, the shared plot order.
+
+    ``lines`` maps each drawn ``(growth_rate, instability)`` to its Line2D,
+    every one of which is on the axes. The colorbar slot is None because
+    the contours are lines, not a mappable.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    try:
+        ret = sc.plot_contours(ax)
+        assert isinstance(ret, tuple) and len(ret) == 3
+        out_ax, lines, cbar = ret
+        assert out_ax is ax
+        assert cbar is None
+        assert isinstance(lines, dict)
+        assert sorted(lines) == sorted((g, k) for g, k in ROWS)
+        for line in lines.values():
+            assert isinstance(line, Line2D)
+            assert any(line is drawn for drawn in ax.lines)
+        assert len(lines) == len(ax.lines)
+    finally:
+        plt.close(fig)
+
+
+@pytest.mark.xfail(
+    strict=True, reason="A3: StabilityContours.plot_contours returns nothing"
+)
+def test_plot_contours_returns_only_the_curves_it_draws():
+    """Filtering by growth rate and instability returns only the drawn curves.
+
+    The table-legend placeholders for skipped curves are not returned.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    try:
+        out_ax, lines, cbar = sc.plot_contours(
+            ax, growth_rate=-3, tk_kind=["MM", "AIC"]
+        )
+        assert out_ax is ax
+        assert cbar is None
+        assert sorted(lines) == [(-3, "AIC"), (-3, "MM")]
+        assert [line for line in ax.lines] == list(lines.values())
+    finally:
+        plt.close(fig)
+
+
 def test_plot_contours_fix_scale_false_keeps_caller_scales():
     """fix_scale=False leaves the axes scales as the caller had them.
 

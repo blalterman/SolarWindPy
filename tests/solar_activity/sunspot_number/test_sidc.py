@@ -985,6 +985,39 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
         plt.close(figure)
 
 
+@pytest.mark.xfail(strict=True, reason="A3: SIDC.plot_on_colorbar returns nothing")
+@pytest.mark.parametrize("vertical", [True, False])
+def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
+    """``plot_on_colorbar`` returns ``(cax, underlay, overlay, None)``.
+
+    The underlay is the solid white line and the overlay the dashed black
+    line drawn over it, both on ``cax``. The colorbar slot is None because
+    the method receives only the colour bar's axes.
+
+    ON FAILURE: the code is wrong.
+    """
+    figure, axes = plt.subplots()
+    try:
+        ret = sidc.plot_on_colorbar(
+            axes,
+            pd.Timestamp("2000-01-01"),
+            pd.Timestamp("2010-01-01"),
+            vertical_cbar=vertical,
+        )
+        assert isinstance(ret, tuple) and len(ret) == 4
+        cax, underlay, overlay, cbar = ret
+        assert cax is axes
+        assert cbar is None
+        assert isinstance(underlay, matplotlib.lines.Line2D)
+        assert isinstance(overlay, matplotlib.lines.Line2D)
+        assert list(axes.lines) == [underlay, overlay]
+        assert underlay.get_linestyle() == "-"
+        assert matplotlib.colors.to_hex(underlay.get_color()) == "#ffffff"
+        assert matplotlib.colors.to_hex(overlay.get_color()) == "#000000"
+    finally:
+        plt.close(figure)
+
+
 def _value_axis_labels(axes):
     """Return the colour bar's major tick labels on the SSN (x) axis."""
     return [label.get_text() for label in axes.xaxis.get_ticklabels()]
