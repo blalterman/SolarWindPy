@@ -159,7 +159,6 @@ def test_alpha_fcn_is_ignored_with_a_warning_on_a_count_plot(make, caplog):
 # --- the categoricals alias --------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, reason=_RULED)
 def test_bins_are_named_intervals_only():
     """The bins per axis are ``intervals``; the ``categoricals`` alias is gone.
 

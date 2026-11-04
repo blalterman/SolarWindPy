@@ -1013,11 +1013,6 @@ class _OnFixedGrid:
         return self.binning.intervals
 
     @property
-    def categoricals(self):
-        r"""Alias of ``intervals``: the bins per axis, a ``pd.IntervalIndex`` each."""
-        return self.intervals
-
-    @property
     def cut(self):
         r"""Bin of each row the plot keeps: a DataFrame of categoricals.
 

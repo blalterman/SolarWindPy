@@ -378,7 +378,6 @@ EXEMPT = {
     "alim_kind": "kind of the aggregate limits, a setting",
     "axnorm": "normalization key, a setting",
     "binning": "the cells rows are placed in, not rows",
-    "categoricals": "the bins per axis, not rows",
     "clim": "count limits, a setting",
     "clip": "clip settings per axis",
     "clip_data": "static helper inherited from Base that clips the values it is "

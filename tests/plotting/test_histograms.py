@@ -528,7 +528,6 @@ class TestModuleIntegration:
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")
-        assert hasattr(hist, "categoricals")
 
     def test_hist2d_inherits_from_binnedplot(self):
         """Test that Hist2D properly inherits from BinnedPlot."""
@@ -544,7 +543,6 @@ class TestModuleIntegration:
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")
-        assert hasattr(hist, "categoricals")
 
 
 if __name__ == "__main__":

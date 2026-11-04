@@ -235,7 +235,6 @@ class TestBinEdges:
             iv = h.intervals[name]
             np.testing.assert_array_equal(iv.left, edges[:-1])
             np.testing.assert_array_equal(iv.right, edges[1:])
-            assert list(h.categoricals[name]) == list(iv)
 
 
 # ---------------------------------------------------------------------------

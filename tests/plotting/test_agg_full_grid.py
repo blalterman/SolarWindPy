@@ -133,7 +133,7 @@ def _intervals(breaks, closed):
 
 
 def test_the_bins_are_the_hand_derived_intervals(spec):
-    """``intervals`` and ``categoricals`` are the same IntervalIndex, as derived by hand.
+    """``intervals`` are the IntervalIndex derived by hand.
 
     Guards the fixture: every expected grid below rests on these bins.
 
@@ -144,9 +144,7 @@ def test_the_bins_are_the_hand_derived_intervals(spec):
     for axis, breaks in (("x", spec["x_breaks"]), ("y", spec["y_breaks"])):
         expected = _intervals(breaks, spec["closed"])
         assert isinstance(h.intervals[axis], pd.IntervalIndex)
-        assert isinstance(h.categoricals[axis], pd.IntervalIndex)
         assert h.intervals[axis].equals(expected)
-        assert h.categoricals[axis].equals(expected)
         assert h.edges[axis].to_numpy() == exact(breaks)
 
 
