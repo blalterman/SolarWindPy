@@ -367,6 +367,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scatter(x, y, z, clip, mask) -> Scatter(x, y, z, logx, logy, clip, mask); logx and logy set
   the axis scales only
 
+- A `Vector`, `BField` or `Tensor` built from columns whose species level `S` holds more than
+  one species now raises `ValueError` naming them; previously a `Vector` silently computed
+  `.mag`, `.rho`, `project` and `cos_theta` across every species. Select one species first,
+  e.g. `data.xs("p1", axis=1, level="S")`.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
