@@ -304,7 +304,6 @@ class TestGaussianLn:
         obj.make_fit()
         assert self._reported(str(obj.TeX_info), MEAN) is not None
 
-    @pytest.mark.xfail(strict=True, reason="except AttributeError swallows it")
     def test_a_bug_reading_TeX_info_is_not_taken_for_not_fitted(self, lognormal_data):
         """An AttributeError inside ``TeX_info`` propagates from the flag setter.
 
@@ -323,7 +322,6 @@ class TestGaussianLn:
         with pytest.raises(AttributeError, match="boom"):
             Broken(x, y).set_TeX_report_normal_parameters(True)
 
-    @pytest.mark.xfail(strict=True, reason="except AttributeError swallows it")
     def test_a_bug_computing_normal_parameters_is_not_taken_for_not_fitted(
         self, lognormal_data
     ):
