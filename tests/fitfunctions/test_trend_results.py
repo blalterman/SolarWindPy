@@ -21,11 +21,6 @@ from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.trend_fits import TrendFit
 from tests.tolerances import exact, noise_free
 
-_STEP2 = pytest.mark.xfail(
-    strict=True,
-    reason="TrendFit has no bin_results table or explicit y and yerr yet; "
-    "remove this marker when the two-level TrendFit lands",
-)
 
 # The author's reference hinge: (xh, yh) = (433, 4.12), rising with slope
 # yh / (433 - 250) and flattening to a tenth of that slope past the hinge.
@@ -78,6 +73,13 @@ def _agged5():
     )
 
 
+def _noisy_agged5():
+    """``_agged5`` plus seeded noise, so each ``mu`` has a nonzero uncertainty."""
+    agged = _agged5()
+    rng = np.random.default_rng(5)
+    return agged + rng.normal(0, 0.1, agged.shape)
+
+
 def _trend5(**kwargs):
     kwargs.setdefault("y", ("mu", "value"))
     kwargs.setdefault("yerr", ("sigma", "value"))
@@ -87,7 +89,6 @@ def _trend5(**kwargs):
     return tf
 
 
-@_STEP2
 def test_the_authors_example_recovers_the_reference_hinge():
     """A Gaussian per column, then a hinge on mu with yerr = sigma, finds (433, 4.12).
 
@@ -117,7 +118,6 @@ def test_the_authors_example_recovers_the_reference_hinge():
     assert (tf.bin_results.loc[:, ("in_trend", "")]).all()
 
 
-@_STEP2
 def test_bin_results_is_the_concatenation_of_each_bin_fits_results():
     """Row k of ``bin_results`` is bin k's ``results``, indexed by the columns.
 
@@ -138,7 +138,6 @@ def test_bin_results_is_the_concatenation_of_each_bin_fits_results():
     assert res.loc[:, ("sigma", "value")].to_numpy() == noise_free(SIGMAS)
 
 
-@_STEP2
 def test_in_trend_marks_the_bins_the_trend_fit_used():
     """``in_trend`` is the trend fit's own selection of bins.
 
@@ -150,7 +149,6 @@ def test_in_trend_marks_the_bins_the_trend_fit_used():
     np.testing.assert_array_equal(in_trend, tf.trend.observations.tk_observed)
 
 
-@_STEP2
 def test_a_failed_bin_keeps_a_nan_row_and_stays_out_of_the_trend():
     """A column too sparse to fit keeps its row, NaN with its status, and is not in the trend.
 
@@ -172,7 +170,6 @@ def test_a_failed_bin_keeps_a_nan_row_and_stays_out_of_the_trend():
     assert list(tf.bin_fits.index) == list(agged.columns)
 
 
-@_STEP2
 def test_y_and_yerr_have_no_default():
     """The trend's y and yerr are the scientist's choice: both must be named.
 
@@ -184,26 +181,24 @@ def test_y_and_yerr_have_no_default():
         TrendFit(_agged5(), Gaussian, Line, yerr=("sigma", "value"))
 
 
-@_STEP2
 def test_yerr_can_be_the_uncertainty_of_mu_or_none():
     """``yerr=("mu", "uncertainty")`` weights by psigma of mu; None leaves the trend unweighted.
 
     ON FAILURE: the code is wrong.
     """
     tf = TrendFit(
-        _agged5(), Gaussian, Line, y=("mu", "value"), yerr=("mu", "uncertainty")
+        _noisy_agged5(), Gaussian, Line, y=("mu", "value"), yerr=("mu", "uncertainty")
     )
     tf.make_fit()
-    np.testing.assert_array_equal(
-        tf.trend.observations.raw.w, tf.bin_results.loc[:, ("mu", "uncertainty")]
-    )
+    psigma = tf.bin_results.loc[:, ("mu", "uncertainty")]
+    assert (psigma > 0).all()  # the noise exists to make these nonzero
+    np.testing.assert_array_equal(tf.trend.observations.raw.w, psigma)
 
     unweighted = TrendFit(_agged5(), Gaussian, Line, y=("mu", "value"), yerr=None)
     unweighted.make_fit()
     assert unweighted.trend.observations.raw.w is None
 
 
-@_STEP2
 def test_an_unknown_key_raises_naming_the_available_ones():
     """A y or yerr that is not a results column raises KeyError listing the choices.
 
@@ -215,14 +210,18 @@ def test_an_unknown_key_raises_naming_the_available_ones():
         TrendFit(_agged5(), Gaussian, Line, y=("mu", "value"), yerr=("mu", "psigma"))
 
 
-@_STEP2
 def test_two_setups_compare_by_concatenating_their_trend_results():
     """yerr = sigma and yerr = psigma of mu give two trend rows in one frame.
 
     ON FAILURE: the code is wrong.
     """
-    width = _trend5()
-    psigma = _trend5(yerr=("mu", "uncertainty"))
+    setup = dict(y=("mu", "value"), trend_kwargs={})
+    width = TrendFit(_noisy_agged5(), Gaussian, Line, yerr=("sigma", "value"), **setup)
+    width.make_fit()
+    psigma = TrendFit(
+        _noisy_agged5(), Gaussian, Line, yerr=("mu", "uncertainty"), **setup
+    )
+    psigma.make_fit()
     cmp = pd.concat(
         {"width": width.trend.results, "psigma": psigma.trend.results},
         names=["setup"],
@@ -236,7 +235,6 @@ def test_two_setups_compare_by_concatenating_their_trend_results():
     assert per_bin.index.equals(width.agged.columns)
 
 
-@_STEP2
 def test_results_before_make_fit_raise_not_fitted():
     """``bin_results`` and ``trend`` do not exist before ``make_fit``.
 
@@ -249,7 +247,6 @@ def test_results_before_make_fit_raise_not_fitted():
         tf.trend
 
 
-@_STEP2
 def test_keywords_reach_each_level():
     """Construction keywords reach each level's fit function; fit keywords each fit.
 
@@ -282,7 +279,6 @@ def test_keywords_reach_each_level():
     )
 
 
-@_STEP2
 def test_logx_fits_the_trend_against_ten_to_the_center():
     """Under ``logx`` the trend's x is 10**center.
 
@@ -293,7 +289,6 @@ def test_logx_fits_the_trend_against_ten_to_the_center():
     np.testing.assert_array_equal(tf.trend.observations.raw.x, 10.0**centers)
 
 
-@_STEP2
 def test_the_per_bin_spellings_are_gone():
     """One per-bin table replaces popt_1d, psigma_1d, popt1d_keys and the rest.
 

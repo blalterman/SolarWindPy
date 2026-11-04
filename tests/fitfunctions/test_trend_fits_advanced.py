@@ -15,6 +15,10 @@ from solarwindpy.fitfunctions.power_laws import PowerLaw
 from solarwindpy.fitfunctions.trend_fits import TrendFit
 from tests.tolerances import exact
 
+# The trend's y and yerr: each column's Gaussian centroid and width.
+MU = ("mu", "value")
+SIGMA = ("sigma", "value")
+
 matplotlib.use("Agg")  # Non-interactive backend for testing
 
 
@@ -196,7 +200,7 @@ class TestPhase4Integration:
         # Simulate multiple measurement columns with different Gaussian profiles
         data = pd.DataFrame(
             {
-                f"measurement_{i}": (
+                i: (
                     (3 + i * 0.5)
                     * np.exp(-((x - (10 + i * 0.2)) ** 2) / (2 * (2 + i * 0.1) ** 2))
                     + np.random.normal(0, 0.05, 200)
@@ -207,22 +211,22 @@ class TestPhase4Integration:
         )
 
         # Test complete workflow
-        tf = TrendFit(data, Gaussian, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
+        tf = TrendFit(data, Gaussian, Line, y=MU, yerr=SIGMA)
 
         start_time = time.perf_counter()
-        tf.make_1dfits()
+        tf.make_fit()
         execution_time = time.perf_counter() - start_time
 
         # Verify results
-        assert len(tf.ffuncs) > 20, "Most fits should succeed"
+        ok = tf.bin_results.loc[:, ("status", "")] == "ok"
+        assert ok.sum() > 20, "Most fits should succeed"
         print(
-            f"Successfully fitted {len(tf.ffuncs)}/25 measurements in {execution_time:.2f}s"  # noqa: E231
+            f"Successfully fitted {ok.sum()}/25 measurements in {execution_time:.2f}s"  # noqa: E231
         )
 
         # Test residuals on first successful fit
-        first_fit_key = tf.ffuncs.index[0]
-        first_fit = tf.ffuncs[first_fit_key]
+        first_fit_key = ok.index[ok][0]
+        first_fit = tf.bin_fits[first_fit_key]
 
         # Test new residuals functionality
         r_fitted = first_fit.residuals(use_all=False)
@@ -245,7 +249,7 @@ class TestPhase4Integration:
 
 
 class TestMakeTrendFuncEdgeCases:
-    """Test make_trend_func edge cases (lines 378-379, 385)."""
+    """Test trend construction edge cases."""
 
     def setup_method(self):
         """Create test data with standard numeric index (not IntervalIndex)."""
@@ -271,32 +275,32 @@ class TestMakeTrendFuncEdgeCases:
             index=x,
         )
 
-    def test_make_trend_func_with_non_interval_index(self):
-        """Test make_trend_func handles non-IntervalIndex popt (lines 378-379)."""
-        tf = TrendFit(self.data_numeric, Line, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
+    def test_make_fit_with_non_interval_index(self):
+        """Test the trend handles non-IntervalIndex columns."""
+        tf = TrendFit(self.data_numeric, Gaussian, Line, y=MU, yerr=SIGMA)
 
-        # popt_1d should have numeric index, not IntervalIndex
-        # This triggers the TypeError branch at lines 378-379
-        tf.make_trend_func()
+        # bin_results has a numeric index, not IntervalIndex
+        tf.make_fit()
 
-        # Verify trend_func was created successfully
-        assert isinstance(tf.trend_func, Line)
+        # Verify the trend was created successfully
+        assert isinstance(tf.trend, Line)
 
-    def test_make_trend_func_weights_error(self):
-        """Test make_trend_func raises ValueError when weights passed (line 385)."""
-        tf = TrendFit(self.data_interval, Line, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
-
-        # Passing weights should raise ValueError
-        with pytest.raises(ValueError, match="Weights are handled by `wkey1d`"):
-            tf.make_trend_func(weights=np.ones(len(tf.popt_1d)))
+    def test_trend_weights_error(self):
+        """Test TrendFit raises ValueError when trend weights are passed."""
+        # Passing weights should raise ValueError: yerr selects them
+        with pytest.raises(ValueError, match="yerr selects the trend's weights"):
+            TrendFit(
+                self.data_interval,
+                Gaussian,
+                Line,
+                y=MU,
+                yerr=SIGMA,
+                trend_kwargs=dict(weights=np.ones(5)),
+            )
 
 
 class TestPlotAllPopt1DEdgeCases:
-    """Test plot_all_popt_1d edge cases (lines 411, 419-425, 428, 439-466)."""
+    """Test plot_bin_results edge cases (lines 411, 419-425, 428, 439-466)."""
 
     def setup_method(self):
         """Create test data with IntervalIndex columns for proper trend fit."""
@@ -314,55 +318,53 @@ class TestPlotAllPopt1DEdgeCases:
             index=x,
         )
 
-        # Set up complete TrendFit with trend_func
-        self.tf = TrendFit(self.data, Line, ffunc1d=Gaussian)
-        self.tf.make_ffunc1ds()
-        self.tf.make_1dfits()
-        self.tf.make_trend_func()
-        self.tf.trend_func.make_fit()
+        # Set up complete TrendFit with its trend
+        self.tf = TrendFit(self.data, Gaussian, Line, y=MU, yerr=SIGMA)
+        self.tf.make_fit()
 
-    def test_plot_all_popt_1d_ax_none(self):
-        """Test plot_all_popt_1d creates axes when ax is None (line 411)."""
+    def test_plot_bin_results_ax_none(self):
+        """Test plot_bin_results creates axes when ax is None (line 411)."""
         # When ax is None, should call subplots() to create figure and axes
-        plotted = self.tf.plot_all_popt_1d(ax=None, plot_window=False)
+        plotted = self.tf.plot_bin_results(ax=None, plot_window=False)
 
         # Should return valid plotted objects (line or tuple)
         assert isinstance(plotted, (tuple, object))
         plt.close("all")
 
-    def test_plot_all_popt_1d_only_in_trend_fit(self):
-        """Test only_plot_data_in_trend_fit=True path (lines 419-425)."""
-        plotted = self.tf.plot_all_popt_1d(
-            ax=None, only_plot_data_in_trend_fit=True, plot_window=False
+    def test_plot_bin_results_only_in_trend_fit(self):
+        """Test only_in_trend=True path (lines 419-425)."""
+        plotted = self.tf.plot_bin_results(
+            ax=None, only_in_trend=True, plot_window=False
         )
 
         # Should complete without error (returns line or tuple)
         assert isinstance(plotted, (tuple, object))
         plt.close("all")
 
-    def test_plot_all_popt_1d_with_plot_window(self):
+    def test_plot_bin_results_with_plot_window(self):
         """Test plot_window=True path (lines 439-466)."""
         # Default is plot_window=True
-        plotted = self.tf.plot_all_popt_1d(ax=None, plot_window=True)
+        plotted = self.tf.plot_bin_results(ax=None, plot_window=True)
 
         # Should return tuple (line, window)
         assert isinstance(plotted, tuple)
         assert len(plotted) == 2
         plt.close("all")
 
-    def test_plot_all_popt_1d_plot_window_wkey_none_error(self):
-        """Test plot_window=True raises error when wkey is None (lines 439-442)."""
-        # Pass wkey=None to trigger the NotImplementedError
-        with pytest.raises(NotImplementedError, match="`wkey` must be able to index"):
-            self.tf.plot_all_popt_1d(ax=None, plot_window=True, wkey=None)
+    def test_plot_bin_results_plot_window_yerr_none_error(self):
+        """Test plot_window=True raises error when yerr is None."""
+        tf = TrendFit(self.data, Gaussian, Line, y=MU, yerr=None)
+        tf.make_fit()
+        with pytest.raises(ValueError, match="plot_window needs yerr"):
+            tf.plot_bin_results(ax=None, plot_window=True)
         plt.close("all")
 
 
 class TestTrendLogxPaths:
-    """Test trend_logx=True paths (lines 428, 503, 520)."""
+    """Test logx=True paths (lines 428, 503, 520)."""
 
     def setup_method(self):
-        """Create test data for trend_logx testing."""
+        """Create test data for logx testing."""
         np.random.seed(42)
         x = np.linspace(0, 10, 50)
 
@@ -377,30 +379,24 @@ class TestTrendLogxPaths:
             index=x,
         )
 
-    def test_plot_all_popt_1d_trend_logx(self):
-        """Test plot_all_popt_1d with trend_logx=True (line 428)."""
-        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
-        tf.make_trend_func()
-        tf.trend_func.make_fit()
+    def test_plot_bin_results_logx(self):
+        """Test plot_bin_results with logx=True (line 428)."""
+        tf = TrendFit(self.data, Gaussian, Line, y=MU, yerr=SIGMA, logx=True)
+        tf.make_fit()
 
-        # Verify trend_logx is True
-        assert tf.trend_logx is True
+        # Verify logx is True
+        assert tf.logx is True
 
-        # Plot with trend_logx=True should apply 10**x transformation
-        plotted = tf.plot_all_popt_1d(ax=None, plot_window=False)
+        # Plot with logx=True should apply 10**x transformation
+        plotted = tf.plot_bin_results(ax=None, plot_window=False)
 
         assert isinstance(plotted, (tuple, object))
         plt.close("all")
 
-    def test_plot_trend_fit_resid_trend_logx(self):
-        """Test plot_trend_fit_resid with trend_logx=True (line 503)."""
-        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
-        tf.make_trend_func()
-        tf.trend_func.make_fit()
+    def test_plot_trend_fit_resid_logx(self):
+        """Test plot_trend_fit_resid with logx=True (line 503)."""
+        tf = TrendFit(self.data, Gaussian, Line, y=MU, yerr=SIGMA, logx=True)
+        tf.make_fit()
 
         # This should trigger line 503: rax.set_xscale("log")
         hax, rax = tf.plot_trend_fit_resid()
@@ -411,16 +407,13 @@ class TestTrendLogxPaths:
         assert rax.get_xscale() == "log"
         plt.close("all")
 
-    def test_plot_trend_and_resid_on_ffuncs_trend_logx(self):
-        """Test plot_trend_and_resid_on_ffuncs with trend_logx=True (line 520)."""
-        tf = TrendFit(self.data, Line, trend_logx=True, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
-        tf.make_trend_func()
-        tf.trend_func.make_fit()
+    def test_plot_trend_and_resid_on_bins_logx(self):
+        """Test plot_trend_and_resid_on_bins with logx=True (line 520)."""
+        tf = TrendFit(self.data, Gaussian, Line, y=MU, yerr=SIGMA, logx=True)
+        tf.make_fit()
 
         # This should trigger line 520: rax.set_xscale("log")
-        hax, rax = tf.plot_trend_and_resid_on_ffuncs()
+        hax, rax = tf.plot_trend_and_resid_on_bins()
 
         assert isinstance(hax, plt.Axes)
         assert isinstance(rax, plt.Axes)
@@ -446,15 +439,10 @@ class TestNumericIndexWorkflow:
             index=x,
         )
 
-        tf = TrendFit(data, Line, ffunc1d=Gaussian)
-        tf.make_ffunc1ds()
-        tf.make_1dfits()
+        tf = TrendFit(data, Gaussian, Line, y=MU, yerr=SIGMA)
+        tf.make_fit()
 
-        # This triggers the TypeError handling at lines 378-379
-        tf.make_trend_func()
-
-        assert isinstance(tf.trend_func, Line)
-        tf.trend_func.make_fit()
+        assert isinstance(tf.trend, Line)
 
         # Verify fit completed
-        assert hasattr(tf.trend_func, "popt")
+        assert hasattr(tf.trend, "popt")

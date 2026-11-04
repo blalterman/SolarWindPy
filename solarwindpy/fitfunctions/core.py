@@ -1081,12 +1081,22 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         rsq : float
         status : str
         """
-        columns = [(name, kind) for name in self.argnames for kind in _KINDS]
-        columns += list(_QUALITY_COLUMNS)
         values = [v for pair in zip(popt, psigma) for v in pair]
         values += [chisq.linear, chisq.robust, rsq, self.nobs, self.dof, status]
-        columns = pd.MultiIndex.from_tuples(columns, names=["P", "K"])
-        return pd.DataFrame([values], columns=columns)
+        return pd.DataFrame([values], columns=self.results_columns)
+
+    @property
+    def results_columns(self):
+        r"""The columns of :attr:`results`, available before a fit.
+
+        Returns
+        -------
+        pandas.MultiIndex
+            Levels ``P`` and ``K``, as :attr:`results` describes.
+        """
+        columns = [(name, kind) for name in self.argnames for kind in _KINDS]
+        columns += list(_QUALITY_COLUMNS)
+        return pd.MultiIndex.from_tuples(columns, names=["P", "K"])
 
     def _record_failure(self, error):
         r"""Store a NaN :attr:`results` row whose status names ``error``."""
