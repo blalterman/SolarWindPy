@@ -197,7 +197,7 @@ class AlfvenicTurbulence(base.Core):
     @property
     def e_plus(self):
         r"""Energy contained in :math:`z^+`."""
-        ep = 0.5 * self.zp.pow(2).sum(axis=1)
+        ep = 0.5 * self.zp.pow(2).sum(axis=1, skipna=False)
         return ep
 
     @property
@@ -208,7 +208,7 @@ class AlfvenicTurbulence(base.Core):
     @property
     def e_minus(self):
         r"""Energy contained in :math:`z^-`."""
-        em = 0.5 * self.zm.pow(2).sum(axis=1)
+        em = 0.5 * self.zm.pow(2).sum(axis=1, skipna=False)
         return em
 
     @property
@@ -219,7 +219,7 @@ class AlfvenicTurbulence(base.Core):
     @property
     def kinetic_energy(self):
         r"""Energy contained in velocity fluctuations :math:`\frac{1}{2}v^2`."""
-        ev = 0.5 * self.v.pow(2).sum(axis=1)
+        ev = 0.5 * self.v.pow(2).sum(axis=1, skipna=False)
         return ev
 
     @property
@@ -232,7 +232,7 @@ class AlfvenicTurbulence(base.Core):
         r"""Energy contained in magnetic field fluctuations
 
         :math:`E_b = \frac{1}{2}b^2`."""
-        eb = 0.5 * self.b.pow(2).sum(axis=1)
+        eb = 0.5 * self.b.pow(2).sum(axis=1, skipna=False)
         return eb
 
     @property
@@ -280,7 +280,7 @@ class AlfvenicTurbulence(base.Core):
         r"""Cross helicity :math:`\frac{1}{2} \delta v \cdot \delta b`."""
         v = self.v
         b = self.b
-        c = 0.5 * v.multiply(b).sum(axis=1)
+        c = 0.5 * v.multiply(b).sum(axis=1, skipna=False)
         return c
 
     @property
@@ -409,7 +409,7 @@ unexpected.""")
                 data.loc[:, "v"]
                 .multiply(data.loc[:, "b"], axis=1)
                 .drop("z", axis=1)
-                .sum(axis=1)
+                .sum(axis=1, skipna=False)
                 .pipe(np.sign)
             )
 

@@ -22,6 +22,10 @@ perpendicular component, because one component alone does not describe the
 distribution. The field strength in
 :py:meth:`~solarwindpy.core.plasma.Plasma.afsq` needs all three field
 components.
+The rule covers every vector and tensor in ``solarwindpy.core``,
+:py:class:`~solarwindpy.core.spacecraft.Spacecraft` included, so a magnitude,
+a component sum or a dot product is NaN wherever one of its components is
+missing.
 
 Across species
 --------------

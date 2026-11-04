@@ -22,16 +22,6 @@ from solarwindpy.core.plasma import Plasma
 from solarwindpy.core.spacecraft import Spacecraft
 from tests.tolerances import exact
 
-XFAIL_ANISOTROPY = pytest.mark.xfail(
-    strict=True, reason="M1: Plasma.anisotropy skips missing par or per"
-)
-XFAIL_DISTANCE = pytest.mark.xfail(
-    strict=True, reason="M1: Spacecraft.distance2sun skips missing components"
-)
-XFAIL_TURBULENCE = pytest.mark.xfail(
-    strict=True, reason="M1: AlfvenicTurbulence sums skip missing components"
-)
-
 
 def _species_masked_plasma():
     r"""Example plasma with p1 missing at row 0, a at row 1, and both at row 2."""
@@ -54,7 +44,6 @@ def _position_masked_plasma():
     return Plasma(base.data, *base.species, spacecraft=spacecraft)
 
 
-@XFAIL_ANISOTROPY
 def test_one_species_anisotropy_matches_the_ion_and_is_nan_where_masked():
     r"""``anisotropy("p1")`` equals ``p1.anisotropy``, NaN where p1 is masked.
 
@@ -66,7 +55,6 @@ def test_one_species_anisotropy_matches_the_ion_and_is_nan_where_masked():
     pdt.assert_series_equal(ani, plasma.p1.anisotropy, check_names=False)
 
 
-@XFAIL_ANISOTROPY
 def test_several_species_anisotropy_matches_each_ion():
     r"""Column s of ``anisotropy("a", "p1")`` equals ``plasma.s.anisotropy``.
 
@@ -79,7 +67,6 @@ def test_several_species_anisotropy_matches_each_ion():
         pdt.assert_series_equal(ani.loc[:, s], expected, check_names=False)
 
 
-@XFAIL_ANISOTROPY
 def test_total_anisotropy_is_nan_where_no_species_is_present():
     r"""``anisotropy("a+p1")`` is NaN, not the empty product 1, with no species.
 
@@ -102,7 +89,6 @@ def test_total_anisotropy_stays_partial_over_species():
     assert ani.iloc[1] == exact(plasma.p1.anisotropy.iloc[1])
 
 
-@XFAIL_DISTANCE
 def test_distance_to_the_sun_is_the_position_magnitude():
     r"""``distance2sun`` is NaN exactly where ``position.mag`` is.
 
@@ -119,7 +105,6 @@ def test_distance_to_the_sun_is_the_position_magnitude():
     pdt.assert_series_equal(sc.distance2sun, expected, check_names=False)
 
 
-@XFAIL_DISTANCE
 def test_coulomb_number_is_nan_where_the_position_is_missing():
     r"""``Plasma.nc`` is NaN where a position component is missing.
 
@@ -153,7 +138,6 @@ def _turbulence():
     )
 
 
-@XFAIL_TURBULENCE
 @pytest.mark.parametrize(
     "energy, vector, missing",
     [
@@ -179,7 +163,6 @@ def test_each_energy_is_half_the_squared_magnitude_of_its_vector(
     pdt.assert_series_equal(e, expected, check_names=False)
 
 
-@XFAIL_TURBULENCE
 def test_cross_helicity_is_nan_where_a_component_is_missing():
     r"""``cross_helicity`` is NaN where a component of v or b is missing.
 
@@ -192,7 +175,6 @@ def test_cross_helicity_is_nan_where_a_component_is_missing():
     pdt.assert_series_equal(c, expected, check_names=False)
 
 
-@XFAIL_TURBULENCE
 def test_raffaella_polarity_and_field_are_nan_where_a_component_is_missing():
     r"""The polarity and ``bfield`` are NaN where v_T is missing.
 

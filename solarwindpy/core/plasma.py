@@ -1266,9 +1266,14 @@ class Plasma(base.Base):
         exp = pd.Series({"par": -1, "per": 1})
 
         if len(species) > 1:
-            ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
+            ani = (
+                pth.pow(exp, axis=1, level="C")
+                .T.groupby(level="S")
+                .prod(skipna=False)
+                .T
+            )
         else:
-            ani = pth.pow(exp, axis=1).product(axis=1)
+            ani = pth.pow(exp, axis=1).product(axis=1, skipna=False)
             ani.name = species[0]
 
         return ani

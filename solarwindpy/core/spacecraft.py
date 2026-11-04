@@ -191,7 +191,10 @@ class Spacecraft(base.Base):
 
         # distance2sun units should be [m], so this shouldn't matter. However, just as
         # beta is treated in this way, we similarly treat distance2sun.
-        d2s = pos_SI.pow(2).sum(axis=1).pipe(np.sqrt) / self.units.distance2sun
+        d2s = (
+            pos_SI.pow(2).sum(axis=1, skipna=False).pipe(np.sqrt)
+            / self.units.distance2sun
+        )
         d2s.name = "distance2sun"
         return d2s
 
