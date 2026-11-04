@@ -283,6 +283,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which `Plasma.save` and `Plasma.load_from_file` need, are required. `h5py` and `pyyaml`
   are no longer runtime dependencies; `pyyaml` moves to the `test` and `dev` extras.
 
+- Quantity names converge on one canonical short name per quantity, the same at every
+  layer (method, Series name, column label, registry key); aliases are removed with no
+  deprecation shim:
+  - Units.temperature -> Units.T, Units.qpar -> Units.q, Units.kinetic_energy_flux -> Units.Wk.
+  - Units.bfield is removed; Units.b is the magnetic-field factor, and every Units field now
+    reads its default from solarwindpy.core.quantities.QUANTITIES.
+  - plotting.labels.base._trans_measurement, _templates and _trans_units are removed; the TeX
+    and units of each quantity live in solarwindpy.core.quantities.QUANTITIES.
+  - TeXlabel renders the species a_bimax as \alpha,\mathrm{bimax}, p_bimax as p,\mathrm{bimax}
+    (was p) and pm as p,\mathrm{moment}.
+  - Plasma: number_density -> n, mass_density -> rho, velocity -> v, thermal_speed -> w, bfield
+    -> b, sound_speed -> cs, kinetic_energy_flux -> Wk, temperature -> T, anisotropy -> R,
+    spacecraft -> sc, auxiliary_data -> aux.
+  - Ion: number_density -> n, mass_density -> rho, velocity -> v, thermal_speed -> w,
+    kinetic_energy_flux -> Wk, temperature -> T, anisotropy -> R (Series name "RT" -> "R");
+    Ion.set_species -> Ion._set_species (private).
+  - Vector: magnitude and r -> mag, colatitude -> colat, latitude -> lat, longitude -> lon
+    (Series names follow), unit_vector -> uv; BField.pressure -> pb; Tensor.magnitude -> mag.
+  - Spacecraft: position, pos -> r (r is the position Vector; distance is r.mag), velocity -> v,
+    carrington -> carr.
+  - AlfvenicTurbulence: velocity -> v, bfield -> b, z_plus -> zp, z_minus -> zm, e_plus -> ep,
+    e_minus -> em, kinetic_energy -> ev, magnetic_energy -> eb, total_energy -> etot,
+    residual_energy -> eres, normalized_residual_energy and eres_norm -> sigma_r,
+    normalized_cross_helicity -> sigma_c, alfven_ratio -> rA, elsasser_ratio -> rE.
+  - StabilityContours.plot_contours(plot_gamma=) -> plot_contours(growth_rate=); the
+    insta_params index level "Growth Rate" -> "growth_rate".
+  - StabilityCondition(growth_rate, beta, anisotropy) -> StabilityCondition(growth_rate, beta,
+    R), and StabilityCondition.anisotropy -> R; BetaRPlot(beta, ani, species) -> BetaRPlot(beta,
+    R, species).
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
