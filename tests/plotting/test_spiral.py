@@ -1032,6 +1032,40 @@ class TestPlotContours:
         assert qset.filled
         assert len(ax.texts) == 0
 
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Ruling o25: Spiral contours have no rbf or grid smoothing",
+    )
+    @pytest.mark.parametrize(
+        "keyword, value",
+        [
+            ("method", "rbf"),
+            ("rbf_neighbors", 50),
+            ("rbf_smoothing", 1.0),
+            ("rbf_kernel", "cubic"),
+            ("grid_resolution", 100),
+            ("gaussian_filter_std", 1.5),
+            ("interpolation", "cubic"),
+            ("nan_aware_filter", True),
+        ],
+    )
+    def test_removed_smoothing_keywords_are_rejected(self, keyword, value):
+        """A removed smoothing keyword fails loudly instead of being ignored.
+
+        The adaptive mesh is the smoothing, so the rbf and grid methods and
+        their parameters are gone. Unknown keywords are forwarded to
+        matplotlib's contour call, whose ``Artist.set`` raises
+        ``AttributeError`` naming the keyword.
+
+        ON FAILURE: the code is wrong -- ``plot_contours`` accepts a removed
+        smoothing keyword again, or swallows unknown keywords silently.
+        """
+        _, ax = plt.subplots()
+        with pytest.raises(AttributeError, match=keyword):
+            _plot(1).plot_contours(
+                ax=ax, levels=self.LEVELS, cbar=False, **{keyword: value}
+            )
+
     def test_unknown_method_is_rejected(self):
         """A method other than rbf, grid or tricontour raises ValueError.
 
