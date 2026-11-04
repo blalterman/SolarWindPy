@@ -35,13 +35,6 @@ def _author(why):
     return f"for the author: {why}; remove this marker when the author decides"
 
 
-_UNNAMED = _author(
-    "the author's tests pin this Series unnamed "
-    "(tests/core/test_alfvenic_turbulence.py, tests/core/test_quantities.py "
-    "test_cos_theta), so setting its .name changes their assertions"
-)
-
-
 def _xfail(reason):
     return pytest.mark.xfail(strict=True, reason=reason)
 
@@ -121,7 +114,7 @@ CASES = [
     (_V, "colat", lambda p, t: p.p1.v.colat, "C", True, None),
     (_V, "lat", lambda p, t: p.p1.v.lat, "C", True, None),
     (_V, "lon", lambda p, t: p.p1.v.lon, "C", True, None),
-    (_V, "cos_theta", lambda p, t: p.p1.v.cos_theta(p.b), "M", True, _UNNAMED),
+    (_V, "cos_theta", lambda p, t: p.p1.v.cos_theta(p.b), "M", True, None),
     (_B, "pb", lambda p, t: p.b.pb, "M", True, None),
     # Tensor.
     (_T, "mag", lambda p, t: p.p1.w.mag, "C", True, None),
@@ -145,21 +138,21 @@ CASES = [
     (_AT, "b", lambda p, t: t.b, "M", False, None),
     (_AT, "zp", lambda p, t: t.zp, "M", False, None),
     (_AT, "zm", lambda p, t: t.zm, "M", False, None),
-    (_AT, "ep", lambda p, t: t.ep, "M", True, _UNNAMED),
-    (_AT, "em", lambda p, t: t.em, "M", True, _UNNAMED),
-    (_AT, "ev", lambda p, t: t.ev, "M", True, _UNNAMED),
-    (_AT, "eb", lambda p, t: t.eb, "M", True, _UNNAMED),
-    (_AT, "etot", lambda p, t: t.etot, "M", True, _UNNAMED),
-    (_AT, "eres", lambda p, t: t.eres, "M", True, _UNNAMED),
-    (_AT, "sigma_r", lambda p, t: t.sigma_r, "M", True, _UNNAMED),
-    (_AT, "sigma_c", lambda p, t: t.sigma_c, "M", True, _UNNAMED),
+    (_AT, "ep", lambda p, t: t.ep, "M", True, None),
+    (_AT, "em", lambda p, t: t.em, "M", True, None),
+    (_AT, "ev", lambda p, t: t.ev, "M", True, None),
+    (_AT, "eb", lambda p, t: t.eb, "M", True, None),
+    (_AT, "etot", lambda p, t: t.etot, "M", True, None),
+    (_AT, "eres", lambda p, t: t.eres, "M", True, None),
+    (_AT, "sigma_r", lambda p, t: t.sigma_r, "M", True, None),
+    (_AT, "sigma_c", lambda p, t: t.sigma_c, "M", True, None),
     (
         _AT,
         "cross_helicity",
         lambda p, t: t.cross_helicity,
         "M",
         True,
-        _UNNAMED,
+        None,
     ),
     (
         _AT,
@@ -167,7 +160,7 @@ CASES = [
         lambda p, t: t.rA,
         "M",
         True,
-        _UNNAMED,
+        None,
     ),
     (
         _AT,
@@ -175,7 +168,7 @@ CASES = [
         lambda p, t: t.rE,
         "M",
         True,
-        _UNNAMED,
+        None,
     ),
 ]
 

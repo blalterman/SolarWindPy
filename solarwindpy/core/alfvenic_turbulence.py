@@ -178,18 +178,21 @@ class AlfvenicTurbulence(base.Core):
     def ep(self):
         r"""Energy contained in :math:`z^+`."""
         ep = 0.5 * self._component_reduce(self.zp.pow(2))
+        ep.name = "ep"
         return ep
 
     @property
     def em(self):
         r"""Energy contained in :math:`z^-`."""
         em = 0.5 * self._component_reduce(self.zm.pow(2))
+        em.name = "em"
         return em
 
     @property
     def ev(self):
         r"""Energy contained in velocity fluctuations :math:`\frac{1}{2}v^2`."""
         ev = 0.5 * self._component_reduce(self.v.pow(2))
+        ev.name = "ev"
         return ev
 
     @property
@@ -198,22 +201,29 @@ class AlfvenicTurbulence(base.Core):
 
         :math:`E_b = \frac{1}{2}b^2`."""
         eb = 0.5 * self._component_reduce(self.b.pow(2))
+        eb.name = "eb"
         return eb
 
     @property
     def etot(self):
         r"""Total energy :math:`E_T = E_v + E_b`."""
-        return self.ev.add(self.eb, axis=0)
+        etot = self.ev.add(self.eb, axis=0)
+        etot.name = "etot"
+        return etot
 
     @property
     def eres(self):
         r"""Residual energy :math:`E_R = E_v - E_b`."""
-        return self.ev.subtract(self.eb, axis=0)
+        eres = self.ev.subtract(self.eb, axis=0)
+        eres.name = "eres"
+        return eres
 
     @property
     def sigma_r(self):
         r"""Normalized residual energy, :math:`E_R/E_T`."""
-        return self.eres.divide(self.etot, axis=0)
+        sigma_r = self.eres.divide(self.etot, axis=0)
+        sigma_r.name = "sigma_r"
+        return sigma_r
 
     @property
     def cross_helicity(self):
@@ -221,6 +231,7 @@ class AlfvenicTurbulence(base.Core):
         v = self.v
         b = self.b
         c = 0.5 * self._component_reduce(v.multiply(b))
+        c.name = "cross_helicity"
         return c
 
     @property
@@ -231,17 +242,22 @@ class AlfvenicTurbulence(base.Core):
         num = ep.subtract(em)
         den = ep.add(em)
         out = num.divide(den)
+        out.name = "sigma_c"
         return out
 
     @property
     def rA(self):
         r"""Alfv\'en ratio :math:`E_v/E_b`."""
-        return self.ev.divide(self.eb, axis=0)
+        rA = self.ev.divide(self.eb, axis=0)
+        rA.name = "rA"
+        return rA
 
     @property
     def rE(self):
         r"""Elsasser ratio :math:`e^-/e^+`."""
-        return self.em.divide(self.ep, axis=0)
+        rE = self.em.divide(self.ep, axis=0)
+        rE.name = "rE"
+        return rE
 
     def set_data(
         self,

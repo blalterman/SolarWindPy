@@ -252,11 +252,13 @@ class VectorTestBase(QuantityTestBase):
         cos_theta = vuv.multiply(buv, axis=1).sum(axis=1)
 
         b = vector.BField(b)
-        pdt.assert_series_equal(cos_theta, self.object_testing.cos_theta(b))
+        pdt.assert_series_equal(
+            cos_theta.rename("cos_theta"), self.object_testing.cos_theta(b)
+        )
 
         v = vector.Vector(v)
         vuv = vector.Vector(vuv)
-        par = pd.Series(1.0, index=vmag.index)
+        par = pd.Series(1.0, index=vmag.index, name="cos_theta")
         pdt.assert_series_equal(par, self.object_testing.cos_theta(v))
         pdt.assert_series_equal(par, self.object_testing.cos_theta(vuv))
 

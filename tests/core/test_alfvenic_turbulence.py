@@ -181,7 +181,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         ep = 0.5 * zp.pow(2).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(ep, ot.ep)
+        pdt.assert_series_equal(ep.rename("ep"), ot.ep)
 
     def test_e_minus(self):
         v = self.data.loc[:, "v"]
@@ -190,28 +190,28 @@ class AlfvenicTrubulenceTestBase(ABC):
         em = 0.5 * zm.pow(2).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(em, ot.em)
+        pdt.assert_series_equal(em.rename("em"), ot.em)
 
     def test_kinetic_energy(self):
         v = self.data.loc[:, "v"]
         ev = 0.5 * v.pow(2).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(ev, ot.ev)
+        pdt.assert_series_equal(ev.rename("ev"), ot.ev)
 
     def test_magnetic_energy(self):
         b = self.data.loc[:, "b"]
         eb = 0.5 * b.pow(2).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(eb, ot.eb)
+        pdt.assert_series_equal(eb.rename("eb"), ot.eb)
 
     def test_total_energy(self):
         tk = ["v", "b"]
         etot = 0.5 * self.data.loc[:, tk].pow(2).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(etot, ot.etot)
+        pdt.assert_series_equal(etot.rename("etot"), ot.etot)
 
     def test_residual_energy(self):
         v = self.data.loc[:, "v"]
@@ -221,7 +221,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         eres = ev.subtract(eb, axis=0)
 
         ot = self.object_testing
-        pdt.assert_series_equal(eres, ot.eres)
+        pdt.assert_series_equal(eres.rename("eres"), ot.eres)
 
     def test_normalized_residual_energy(self):
         v = self.data.loc[:, "v"]
@@ -233,7 +233,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         eres_norm = eres.divide(etot, axis=0)
 
         ot = self.object_testing
-        pdt.assert_series_equal(eres_norm, ot.sigma_r)
+        pdt.assert_series_equal(eres_norm.rename("sigma_r"), ot.sigma_r)
 
     def test_cross_helicity(self):
         v = self.data.loc[:, "v"]
@@ -241,7 +241,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         ch = 0.5 * v.multiply(b, axis=1).sum(axis=1)
 
         ot = self.object_testing
-        pdt.assert_series_equal(ch, ot.cross_helicity)
+        pdt.assert_series_equal(ch.rename("cross_helicity"), ot.cross_helicity)
 
     def test_normalized_cross_helicity(self):
         v = self.data.loc[:, "v"]
@@ -253,7 +253,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         normalized_cross_helicity = 2.0 * ch.divide(etot, axis=0)
 
         ot = self.object_testing
-        pdt.assert_series_equal(normalized_cross_helicity, ot.sigma_c)
+        pdt.assert_series_equal(normalized_cross_helicity.rename("sigma_c"), ot.sigma_c)
 
     def test_alfven_ratio(self):
         v = self.data.loc[:, "v"]
@@ -263,7 +263,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         rA = ev.divide(eb, axis=0)
 
         ot = self.object_testing
-        pdt.assert_series_equal(rA, ot.rA)
+        pdt.assert_series_equal(rA.rename("rA"), ot.rA)
 
     def test_elsasser_ratio(self):
         v = self.data.loc[:, "v"]
@@ -275,7 +275,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         rE = em.divide(ep, axis=0)
 
         ot = self.object_testing
-        pdt.assert_series_equal(rE, ot.rE)
+        pdt.assert_series_equal(rE.rename("rE"), ot.rE)
 
     def test_eq(self):
         ot = self.object_testing

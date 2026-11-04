@@ -223,7 +223,9 @@ class Vector(base._ComponentFrame):
                 f"cos_theta method not implemented for {type(other)}"
             )
 
-        return self._component_reduce(self.uv.data.multiply(other, axis=1))
+        cos_theta = self._component_reduce(self.uv.data.multiply(other, axis=1))
+        cos_theta.name = "cos_theta"
+        return cos_theta
 
 
 class BField(Vector):
