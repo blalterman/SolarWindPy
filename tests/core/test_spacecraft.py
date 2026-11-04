@@ -256,8 +256,8 @@ def test_spacecraft_refuses_missing_timestamps():
 @pytest.mark.parametrize(
     "name, frame, message",
     [
-        ("PSP", "rtn", r"^Unrecognized frame: RTN$"),
-        ("ace", "GSE", r"^Unrecognized name: ACE$"),
+        ("PSP", "rtn", r"^Unrecognized frame: RTN;"),
+        ("ace", "GSE", r"^Unrecognized name: ACE;"),
     ],
     ids=["frame", "name"],
 )

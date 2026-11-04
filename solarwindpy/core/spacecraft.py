@@ -222,9 +222,17 @@ class Spacecraft(base.Base):
         name = name.upper()
 
         if frame not in _SUPPORTED["frame"]:
-            raise NotImplementedError("Unrecognized frame: {}".format(frame))
+            raise NotImplementedError(
+                "Unrecognized frame: {}; supported: {}".format(
+                    frame, ", ".join(_SUPPORTED["frame"])
+                )
+            )
         if name not in _SUPPORTED["name"]:
-            raise NotImplementedError("Unrecognized name: {}".format(name))
+            raise NotImplementedError(
+                "Unrecognized name: {}; supported: {}".format(
+                    name, ", ".join(_SUPPORTED["name"])
+                )
+            )
 
         self._frame = frame
         self._name = name

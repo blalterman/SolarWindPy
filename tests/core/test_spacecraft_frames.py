@@ -53,14 +53,6 @@ def test_the_name_check_reads_the_table(monkeypatch):
     assert spacecraft.Spacecraft(_position_data(), "ace", "GSE").name == "ACE"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "B8: the refusal does not name the supported values; changing it "
-        "breaks the author's exact-message pins in tests/core/test_spacecraft.py"
-        "::test_an_unknown_frame_or_name_raises_naming_it"
-    ),
-)
 @pytest.mark.parametrize(
     "name, frame, supported",
     [("PSP", "rtn", ("GSE", "HCI")), ("ace", "GSE", ("PSP", "WIND"))],
