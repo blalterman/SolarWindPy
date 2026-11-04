@@ -338,7 +338,7 @@ class TestMakePlot:
         """
         x, _ = xy
 
-        ax, _ = Hist1D(x, nbins=EDGES).make_plot()
+        ax, _, _, _ = Hist1D(x, nbins=EDGES).make_plot()
 
         line_x, line_y = _line_xy(ax.lines[0])
         assert np.asarray(line_x) == exact(_centers())
@@ -368,7 +368,7 @@ class TestMakePlot:
         expected_dy = _per_bin(x, y, spread)
 
         _, ax = plt.subplots()
-        _, container = Hist1D(x, y, nbins=EDGES).make_plot(ax, fcn=fcn)
+        _, container, _, _ = Hist1D(x, y, nbins=EDGES).make_plot(ax, fcn=fcn)
 
         line_x, line_y = _line_xy(container.lines[0])
         assert np.asarray(line_x) == exact(_centers())
@@ -438,11 +438,11 @@ class TestMakePlot:
         std = _per_bin(x, y, lambda s: np.std(s, ddof=1))
 
         _, ax = plt.subplots()
-        _, (line, band) = Hist1D(x, y, nbins=EDGES).make_plot(
+        _, line, band, _ = Hist1D(x, y, nbins=EDGES).make_plot(
             ax, fcn=("mean", "std"), plot_window=True
         )
 
-        assert np.asarray(_line_xy(line[0])[1]) == exact(mean)
+        assert np.asarray(_line_xy(line)[1]) == exact(mean)
         vertices = np.unique(band.get_paths()[0].vertices.round(9), axis=0)
         expected = np.unique(
             np.vstack(
@@ -484,7 +484,7 @@ class TestMakePlot:
         std = _per_bin(x, y, lambda s: np.std(s, ddof=1))
 
         _, ax = plt.subplots()
-        _, (_, band) = Hist1D(x, y, nbins=EDGES).make_plot(
+        _, _, band, _ = Hist1D(x, y, nbins=EDGES).make_plot(
             ax, fcn=("mean", "std"), plot_window=True, transpose_axes=True
         )
 
@@ -933,7 +933,7 @@ def test_keywords_and_their_aliases_reach_the_line(xy):
     """
     x, y = xy
     _, ax = plt.subplots()
-    _, container = Hist1D(x, y, nbins=EDGES).make_plot(
+    _, container, _, _ = Hist1D(x, y, nbins=EDGES).make_plot(
         ax, c="r", ls="--", label="errorbar"
     )
     Hist1D(x, y, nbins=EDGES).make_plot(
@@ -1057,7 +1057,7 @@ def test_transposed_errorbars_are_horizontal(xy):
     std = _per_bin(x, y, lambda s: np.std(s, ddof=1))
 
     _, ax = plt.subplots()
-    _, container = Hist1D(x, y, nbins=EDGES).make_plot(
+    _, container, _, _ = Hist1D(x, y, nbins=EDGES).make_plot(
         ax, fcn=("mean", "std"), transpose_axes=True
     )
 

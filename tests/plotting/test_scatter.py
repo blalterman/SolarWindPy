@@ -88,7 +88,7 @@ def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
     """
     sc = Scatter(X, Y, Z)
     sc.set_labels(x="Vx", y="Np", z="T")
-    ret_ax, cbar = sc.make_plot(ax=ax)
+    ret_ax, _, cbar = sc.make_plot(ax=ax)
     coll = ax.collections[0]
     np.testing.assert_array_equal(coll.get_array(), _col(KEPT, 3))
     assert ret_ax is ax
@@ -106,7 +106,7 @@ def test_two_valued_z_is_colour_mapped_with_a_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     z = pd.Series([0.5, 0.5, 0.9, 0.9, 0.5, 0.9])
-    _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     kept_z = z.drop(1).to_numpy()  # row 1 has NaN y (ROWS)
     np.testing.assert_array_equal(ax.collections[0].get_array(), kept_z)
     assert isinstance(cbar, Colorbar)
@@ -118,7 +118,7 @@ def test_absent_or_constant_z_gives_uncoloured_points_and_no_colorbar(ax, z):
 
     ON FAILURE: the code is wrong.
     """
-    _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     assert ax.collections[0].get_array() is None
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -129,7 +129,7 @@ def test_cbar_false_colours_points_but_draws_no_colorbar(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
+    _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
     np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -142,7 +142,7 @@ def test_without_ax_a_new_figure_is_made():
     """
     existing, _ = plt.subplots()
     try:
-        new_ax, _ = Scatter(X, Y).make_plot()
+        new_ax, _, _ = Scatter(X, Y).make_plot()
         assert isinstance(new_ax, Axes)
         assert new_ax.figure is not existing
         assert len(new_ax.collections) == 1
@@ -168,7 +168,7 @@ def test_cbar_kwargs_reach_the_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
-    _, cbar = Scatter(X, Y, Z).make_plot(
+    _, _, cbar = Scatter(X, Y, Z).make_plot(
         ax=ax, cbar_kwargs={"cax": cax, "label": "custom"}
     )
     assert cbar.ax is cax
@@ -244,7 +244,7 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
         # that warning from pre-empting the assertion under ``-W error``.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
+            _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
         if cbar2.ax.figure is not ax2.figure:
             raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
     finally:
@@ -289,7 +289,7 @@ def test_value_alim_draws_only_points_with_z_inside_the_limits(ax, lower, upper)
     z = ALIM_Z[:-1]
     sc = Scatter(ALIM_X[:-1], ALIM_Y[:-1], z)
     sc.set_alim(lower, upper)
-    _, cbar = sc.make_plot(ax=ax)
+    _, _, cbar = sc.make_plot(ax=ax)
     keep = np.ones(z.size, dtype=bool)
     if lower is not None:
         keep &= z >= lower
@@ -307,7 +307,7 @@ def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.2, 0.8, kind="quantile")
-    _, cbar = sc.make_plot(ax=ax)
+    _, _, cbar = sc.make_plot(ax=ax)
     lo, hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], [0.2, 0.8])
     keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
     assert 2 < keep.sum() < ALIM_Z.size - 2
@@ -323,7 +323,7 @@ def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.0, 0.5, kind="quantile")
-    _, cbar = sc.make_plot(ax=ax)
+    _, _, cbar = sc.make_plot(ax=ax)
     hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], 0.5)
     _assert_drawn(ax, cbar, ALIM_Z <= hi)
 

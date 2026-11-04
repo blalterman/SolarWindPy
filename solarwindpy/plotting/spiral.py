@@ -852,7 +852,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
     Examples
     --------
     splot = SpiralPlot2D(x, y, z, min_per_bin=100)
-    ax, cbar = splot.make_plot()
+    ax, collection, cbar = splot.make_plot()
     """
 
     def __init__(
@@ -976,8 +976,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         Returns
         -------
         ax : Axes
-        cbar_or_mappable : Colorbar or matplotlib.collections.PolyCollection
-            The colorbar if ``cbar``, otherwise the cells' collection.
+        collection : matplotlib.collections.PolyCollection
+            The mesh cells.
+        cbar : Colorbar or None
+            The colorbar if ``cbar``, otherwise None.
 
         Raises
         ------
@@ -1049,12 +1051,12 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             ymesh[:, 1].max(),
         )
 
-        cbar_or_mappable = collection
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             cbar = self._make_cbar(collection, norm=norm, **cbar_kwargs)
-            cbar_or_mappable = cbar
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
@@ -1077,7 +1079,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             colors[:, 3] = alpha
             collection.set_facecolor(colors)
 
-        return ax, cbar_or_mappable
+        return ax, collection, cbar
 
     def _interpolate_to_grid(self, x, y, z, resolution=100, method="cubic"):
         r"""Interpolate scattered data to a regular grid.
@@ -1235,10 +1237,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         -------
         ax : mpl.axes.Axes
             The axes containing the plot.
-        cbar_or_mappable : Colorbar or QuadContourSet
-            The colorbar if ``cbar=True``, else the contour set.
-        qset : QuadContourSet
+        qset : QuadContourSet or TriContourSet
             The contour set object.
+        cbar : Colorbar or None
+            The colorbar if ``cbar=True``, else None.
 
         Raises
         ------
@@ -1258,17 +1260,17 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
 
         >>> # Default: sparse RBF (fastest)
-        >>> ax, cbar, qset = splot.plot_contours()
+        >>> ax, qset, cbar = splot.plot_contours()
 
         >>> # Grid interpolation with Gaussian smoothing
-        >>> ax, cbar, qset = splot.plot_contours(
+        >>> ax, qset, cbar = splot.plot_contours(
         ...     method='grid',
         ...     grid_resolution=100,
         ...     gaussian_filter_std=2.0
         ... )
 
         >>> # Debug: see raw triangulation
-        >>> ax, cbar, qset = splot.plot_contours(method='tricontour')
+        >>> ax, qset, cbar = splot.plot_contours(method='tricontour')
         """
         from .tools import nan_gaussian_filter
 
@@ -1376,7 +1378,6 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             )
 
         # Add colorbar
-        cbar_or_mappable = qset
         if cbar:
             if len(qset.levels) < 2:
                 # Matplotlib's colorbar fails with a bare IndexError here.
@@ -1384,9 +1385,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
                     f"A colorbar needs at least 2 contour levels, got "
                     f"{list(qset.levels)}. Pass more levels or cbar=False."
                 )
-            cbar_obj = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-            cbar_or_mappable = cbar_obj
+            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset
+        return ax, qset, cbar

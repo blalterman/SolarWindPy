@@ -177,7 +177,7 @@ def test_the_mesh_handed_to_matplotlib_is_the_grid_with_empty_bins_masked(spec):
     ON FAILURE: the code is wrong.
     """
     h = _hist(spec)
-    _, mesh = h.make_plot(cbar=False)
+    _, mesh, _ = h.make_plot(cbar=False)
     C = mesh.get_array()
     expected = np.array(spec["grid"], dtype=float).T  # rows are y bins
     assert C.shape == expected.shape

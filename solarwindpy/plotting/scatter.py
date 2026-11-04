@@ -65,6 +65,14 @@ class Scatter(base.ColorPlot):
         kwargs:
             Passed to `ax.scatter`.
 
+        Returns
+        -------
+        ax: mpl.axes.Axes
+        collection: mpl.collections.PathCollection
+            The points.
+        cbar: mpl.colorbar.Colorbar or None
+            The colorbar if `cbar` is True and z varies, else None.
+
         Notes
         -----
         Points whose z is outside ``alim`` (see ``set_alim``) are not drawn,
@@ -96,4 +104,4 @@ class Scatter(base.ColorPlot):
 
         self._format_axis(ax, collection, data)
 
-        return ax, cbar
+        return ax, collection, cbar

@@ -745,7 +745,7 @@ class TestMakePlot:
         """
         splot = _plot(2, log=log)
         _, ax = plt.subplots()
-        ax, coll = splot.make_plot(ax=ax, cbar=False)
+        ax, coll, _ = splot.make_plot(ax=ax, cbar=False)
         assert isinstance(coll, PolyCollection)
         expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
         assert np.asarray(_rectangles(coll)) == exact(expected)
@@ -760,7 +760,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2, log=True)
-        _, coll = splot.make_plot(cbar=False)
+        _, coll, _ = splot.make_plot(cbar=False)
         rects = _rectangles(coll).tolist()
         assert any(r == exact([1.0, 100.0, 1.0, 10.0]) for r in rects)
 
@@ -771,7 +771,7 @@ class TestMakePlot:
         """
         splot = _plot(2)
         _, ax = plt.subplots()
-        _, cbar = splot.make_plot(ax=ax)
+        _, _, cbar = splot.make_plot(ax=ax)
         assert isinstance(cbar, Colorbar)
         assert isinstance(cbar.mappable, PolyCollection)
         assert cbar.mappable in ax.collections
@@ -802,7 +802,7 @@ class TestMakePlot:
         assert (lo, hi) == exact((1.08, 8.8))  # hand-computed
 
         splot.set_alim(0.01, 0.99, kind="quantile")
-        _, coll = splot.make_plot(cbar=False)
+        _, coll, _ = splot.make_plot(cbar=False)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
         expected = np.where((means >= lo) & (means <= hi), means, np.nan)
         assert np.asarray(values) == exact(expected, nan_ok=True)
@@ -820,7 +820,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, alpha_fcn="max")
+        _, coll, _ = splot.make_plot(cbar=False, alpha_fcn="max")
         vmax = _expected_agg(splot, max)
         scaled = (vmax - np.nanmin(vmax)) / (np.nanmax(vmax) - np.nanmin(vmax))
         expected = np.nan_to_num((1 - scaled) ** 0.25, nan=0.0)
@@ -867,7 +867,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1, log=log)
-        _, _, qset = self._contour(splot, method="tricontour")
+        _, qset, _ = self._contour(splot, method="tricontour")
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
         _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
@@ -879,7 +879,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, qset = self._contour(
+        _, qset, _ = self._contour(
             splot, method="grid", interpolation="linear", gaussian_filter_std=0
         )
         x, y, z = _occupied_centers(splot)
@@ -896,7 +896,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, qset = self._contour(
+        _, qset, _ = self._contour(
             splot,
             method="grid",
             interpolation="linear",
@@ -918,7 +918,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, qset = self._contour(
+        _, qset, _ = self._contour(
             splot,
             method="grid",
             interpolation="nearest",
@@ -940,7 +940,7 @@ class TestPlotContours:
         """
         splot = _plot(1)
         params = {"neighbors": 5, "smoothing": 0.5, "kernel": "cubic"}
-        _, _, qset = self._contour(
+        _, qset, _ = self._contour(
             splot,
             method="rbf",
             rbf_neighbors=params["neighbors"],
@@ -964,9 +964,9 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, default = self._contour(splot)
-        _, _, rbf = self._contour(splot, method="rbf")
-        _, _, grid = self._contour(splot, method="grid")
+        _, default, _ = self._contour(splot)
+        _, rbf, _ = self._contour(splot, method="rbf")
+        _, grid, _ = self._contour(splot, method="grid")
         _assert_same_segments(default, rbf)
         assert _segments_differ(default, grid)
 
@@ -976,7 +976,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, qset = self._contour(
+        _, qset, _ = self._contour(
             splot,
             method="grid",
             interpolation="linear",
@@ -990,15 +990,15 @@ class TestPlotContours:
         _assert_same_segments(qset, self._reference(XX, YY, ZZ, filled=True))
 
     def test_colorbar_and_contour_set_are_returned(self):
-        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` the set.
+        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` None.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        ax, cbar, qset = self._contour(splot, cbar=True)
+        ax, qset, cbar = self._contour(splot, cbar=True)
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
-        _, mappable, qset = self._contour(splot, cbar=False)
-        assert mappable is qset
+        _, qset, cbar = self._contour(splot, cbar=False)
+        assert cbar is None
 
     @pytest.mark.parametrize("method", ["tricontour", "grid"])
     @pytest.mark.parametrize(
@@ -1028,7 +1028,7 @@ class TestPlotContours:
         """
         with warnings.catch_warnings():
             warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
-            ax, _, qset = self._contour(_plot(1), method=method, use_contourf=True)
+            ax, qset, _ = self._contour(_plot(1), method=method, use_contourf=True)
         assert qset.filled
         assert len(ax.texts) == 0
 
@@ -1369,7 +1369,7 @@ class TestPlotContoursCalls:
         """
         splot = _plot(1)
         kwargs = {} if method is None else {"method": method}
-        ax, cbar, qset = splot.plot_contours(**kwargs)
+        ax, qset, cbar = splot.plot_contours(**kwargs)
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
@@ -1393,7 +1393,7 @@ class TestPlotContoursCalls:
         x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
         edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
         splot = SpiralPlot2D(x, y, z, initial_bins=edges, min_per_bin=1)
-        _, _, qset = splot.plot_contours(cbar=False, grid_resolution=20)
+        _, qset, _ = splot.plot_contours(cbar=False, grid_resolution=20)
 
         cx, cy, cz = _occupied_centers(splot, rows=rows)
         assert len(cz) == 64
@@ -1439,7 +1439,7 @@ class TestPlotContoursCalls:
             "tricontour": {},
         }[method]
         _, ax = plt.subplots()
-        got_ax, cbar, qset = splot.plot_contours(
+        got_ax, qset, cbar = splot.plot_contours(
             ax=ax,
             method=method,
             grid_resolution=15,
@@ -1490,8 +1490,8 @@ class TestPlotContoursCalls:
         splot = _plot(1)
         with pytest.raises(ValueError, match="at least 2 contour levels"):
             splot.plot_contours(method=method, levels=[3.0])
-        _, mappable, qset = splot.plot_contours(method=method, levels=[3.0], cbar=False)
-        assert mappable is qset and list(qset.levels) == [3.0]
+        _, qset, cbar = splot.plot_contours(method=method, levels=[3.0], cbar=False)
+        assert cbar is None and list(qset.levels) == [3.0]
 
 
 # ---------------------------------------------------------------------------
@@ -1570,7 +1570,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, fcn="max")
+        _, coll, _ = splot.make_plot(cbar=False, fcn="max")
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
         assert np.asarray(values) == exact(_expected_agg(splot, max), nan_ok=True)
         assert 5.0 in values.tolist() and 3.5 not in values.tolist()
@@ -1581,7 +1581,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         norm = matplotlib.colors.Normalize(0.0, 20.0)
-        _, coll = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
+        _, coll, _ = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
         assert coll.get_cmap().name == "magma"
         assert coll.norm is norm
 
@@ -1594,7 +1594,7 @@ class TestMakePlotOptions:
 
         ON FAILURE: the code is wrong.
         """
-        ax, _ = _plot(2, log=log).make_plot(cbar=False)
+        ax, _, _ = _plot(2, log=log).make_plot(cbar=False)
         expected = np.array([[0.0, 6.06], [0.0, 4.04]])
         if log:
             expected = 10.0**expected
@@ -1611,7 +1611,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         fig, ax = plt.subplots()
-        _, cbar = _plot(2).make_plot(ax=ax)
+        _, _, cbar = _plot(2).make_plot(ax=ax)
         fig.canvas.draw()
         rgba = np.asarray(fig.canvas.buffer_rgba())
         coll = cbar.mappable
@@ -1872,7 +1872,7 @@ def test_drawn_polygons_are_the_mesh_cells_corner_by_corner(log):
         initial_bins=(np.array(XEDGES), np.array(YEDGES)),
         min_per_bin=3,
     )
-    _, coll = splot.make_plot(cbar=False)
+    _, coll, _ = splot.make_plot(cbar=False)
     assert isinstance(coll, PolyCollection)
     m = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
     paths = coll.get_paths()

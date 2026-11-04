@@ -89,15 +89,26 @@ class IndicatorPlot(base.Base):
         ----------
         ax : matplotlib.axes.Axes, optional
             Axes to draw on. A new figure is created if None.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        line : matplotlib.lines.Line2D
+            The indicator's line.
+        cbar : None
+            An indicator plot draws no colorbar; the slot keeps the return
+            order ``(ax, artists..., cbar)`` shared by every plot.
         """
         if ax is None:
             fig, ax = subplots()
 
         data = self.plot_data
         x = mdates.date2num(data.index)
-        ax.plot(x, data, color="k", ls="--", marker=None)
+        (line,) = ax.plot(x, data, color="k", ls="--", marker=None)
 
         self._format_axis(ax)
+
+        return ax, line, None
 
 
 class SSNPlot(IndicatorPlot):

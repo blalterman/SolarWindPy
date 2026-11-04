@@ -194,7 +194,7 @@ class TestContourGrid:
         x_mid = 0.5 * (XEDGES[1:] + XEDGES[:-1])
         y_mid = 0.5 * (YEDGES[1:] + YEDGES[:-1])
         fig, ax = plt.subplots()
-        *_, qset = known_hist.plot_contours(ax=ax, cbar=False, levels=[0.5, 1.5, 2.5])
+        _, qset, _ = known_hist.plot_contours(ax=ax, cbar=False, levels=[0.5, 1.5, 2.5])
         vertices = np.concatenate([seg for segs in qset.allsegs for seg in segs])
         plt.close(fig)
         assert vertices.size  # the fixture: the chosen levels draw contours
@@ -222,7 +222,7 @@ class TestPlotHistWithContours:
         """
         known_hist.set_axnorm("t")
         _, supplied = plt.subplots()
-        ax, cbar, qset = known_hist.plot_hist_with_contours(
+        ax, _, qset, cbar = known_hist.plot_hist_with_contours(
             ax=supplied, levels=[0.3, 0.6]
         )
         assert ax is supplied
@@ -240,8 +240,8 @@ class TestPlotHistWithContours:
 
         ON FAILURE: the code is wrong.
         """
-        _, _, filled = hist2d_instance.plot_hist_with_contours(use_contourf=True)
-        _, _, lines = hist2d_instance.plot_hist_with_contours(use_contourf=False)
+        _, _, filled, _ = hist2d_instance.plot_hist_with_contours(use_contourf=True)
+        _, _, lines, _ = hist2d_instance.plot_hist_with_contours(use_contourf=False)
         assert filled.filled is True
         assert lines.filled is False
         plt.close("all")
@@ -254,7 +254,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong, or the author changed the "t" defaults
         in `_get_contour_levels`.
         """
-        ax, cbar, qset = hist2d_instance.plot_hist_with_contours()
+        ax, _, qset, cbar = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t", default levels are [0.01, 0.1, 0.3, 0.7, 0.99]
         expected_levels = [0.01, 0.1, 0.3, 0.7, 0.99]
         np.testing.assert_allclose(
@@ -269,7 +269,7 @@ class TestPlotHistWithContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, cbar, qset = hist2d_instance.plot_hist_with_contours()
+        ax, _, qset, cbar = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t" (total normalized), values should be in [0, 1]
         assert cbar.vmin >= 0, "Colorbar vmin should be >= 0"
         assert cbar.vmax <= 1, "Colorbar vmax should be <= 1"
@@ -281,11 +281,15 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong.
         """
         # Get unfiltered contours
-        ax1, _, qset1 = hist2d_instance.plot_hist_with_contours(gaussian_filter_std=0)
+        ax1, _, qset1, _ = hist2d_instance.plot_hist_with_contours(
+            gaussian_filter_std=0
+        )
         unfiltered_data = qset1.allsegs
 
         # Get filtered contours
-        ax2, _, qset2 = hist2d_instance.plot_hist_with_contours(gaussian_filter_std=2)
+        ax2, _, qset2, _ = hist2d_instance.plot_hist_with_contours(
+            gaussian_filter_std=2
+        )
         filtered_data = qset2.allsegs
 
         # The contour paths should differ (filtering smooths the data)
@@ -309,7 +313,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm("t")
-        ax, cbar, qset = known_hist.plot_hist_with_contours()
+        ax, _, qset, cbar = known_hist.plot_hist_with_contours()
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         expected = _expected_grid(known_counts) / known_counts.max()
         assert np.asarray(values.reshape(expected.shape)) == exact(
@@ -326,7 +330,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong.
         """
         hist, counts, _ = z_valued_hist
-        ax, _, _ = hist.plot_hist_with_contours(fcn="count", cbar=False)
+        ax, _, _, _ = hist.plot_hist_with_contours(fcn="count", cbar=False)
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         expected = _expected_grid(counts)  # empty bins are blank
         assert np.asarray(values.reshape(expected.shape)) == exact(
@@ -351,7 +355,7 @@ class TestPlotHistWithContours:
         levels = [0.2, 0.4, 0.6]
         sigma = 1.0
         known_hist.set_axnorm("t")
-        _, _, qset = known_hist.plot_hist_with_contours(
+        _, _, qset, _ = known_hist.plot_hist_with_contours(
             cbar=False,
             levels=levels,
             use_contourf=True,
@@ -393,7 +397,7 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, mappable, qset = hist2d_instance.plot_contours(levels=[0.5], cbar=False)
+        ax, qset, _ = hist2d_instance.plot_contours(levels=[0.5], cbar=False)
         assert len(qset.levels) == 1
         assert qset.levels[0] == 0.5
         plt.close("all")
@@ -404,7 +408,7 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         levels = [0.3, 0.5, 0.7]
-        ax, mappable, qset = hist2d_instance.plot_contours(levels=levels)
+        ax, qset, mappable = hist2d_instance.plot_contours(levels=levels)
         assert len(qset.levels) == 3
         np.testing.assert_allclose(qset.levels, levels)
         plt.close("all")
@@ -414,7 +418,7 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, _, qset = hist2d_instance.plot_contours(use_contourf=True)
+        ax, qset, _ = hist2d_instance.plot_contours(use_contourf=True)
         assert qset.filled is True
         plt.close("all")
 
@@ -423,7 +427,7 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, _, qset = hist2d_instance.plot_contours(use_contourf=False)
+        ax, qset, _ = hist2d_instance.plot_contours(use_contourf=False)
         assert qset.filled is False
         plt.close("all")
 
@@ -435,7 +439,7 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, mappable, qset = hist2d_instance.plot_contours(cbar=True)
+        ax, qset, mappable = hist2d_instance.plot_contours(cbar=True)
         assert isinstance(mappable, matplotlib.colorbar.Colorbar)
         assert mappable.mappable is qset
         assert qset in ax.collections
@@ -447,8 +451,8 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, mappable, qset = hist2d_instance.plot_contours(cbar=False)
-        assert mappable is qset
+        ax, qset, cbar = hist2d_instance.plot_contours(cbar=False)
+        assert cbar is None
         assert qset in ax.collections
         plt.close("all")
 
@@ -811,7 +815,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong -- the figure would show numbers that are
         not the data.
         """
-        ax, _ = known_hist.make_plot()
+        ax, _, _ = known_hist.make_plot()
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         np.testing.assert_allclose(
             values.reshape(len(YEDGES) - 1, len(XEDGES) - 1),
@@ -825,7 +829,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong -- the grid would be drawn at the wrong
         coordinates.
         """
-        ax, _ = known_hist.make_plot()
+        ax, _, _ = known_hist.make_plot()
         coords = _quadmesh(ax).get_coordinates()
         np.testing.assert_allclose(coords[0, :, 0], XEDGES)
         np.testing.assert_allclose(coords[:, 0, 1], YEDGES)
@@ -852,7 +856,7 @@ class TestMakePlot:
             logy=True,
             nbins=[np.log10(xedges), np.log10(yedges)],
         )
-        ax, _ = h.make_plot()
+        ax, _, _ = h.make_plot()
         coords = _quadmesh(ax).get_coordinates()
 
         np.testing.assert_allclose(coords[0, :, 0], xedges)
@@ -868,7 +872,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
-        ax, returned = known_hist.make_plot(cbar=True)
+        ax, _, returned = known_hist.make_plot(cbar=True)
         assert isinstance(returned, matplotlib.colorbar.Colorbar)
         assert returned.mappable is _quadmesh(ax)
         assert returned.ax.get_ylabel() == str(known_hist.labels.z)
@@ -880,7 +884,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
-        ax, returned = known_hist.make_plot(cbar=False)
+        ax, returned, _ = known_hist.make_plot(cbar=False)
         assert returned is _quadmesh(ax)
         plt.close("all")
 
@@ -891,7 +895,7 @@ class TestMakePlot:
         panels.
         """
         fig, ax = plt.subplots()
-        returned, _ = known_hist.make_plot(ax=ax, cbar=False)
+        returned, _, _ = known_hist.make_plot(ax=ax, cbar=False)
         assert returned is ax
         assert len(ax.collections) == 1
         plt.close("all")
@@ -929,7 +933,7 @@ class TestMakePlot:
         assert np.all(np.diff(expected_std) > 0), "fixture premise: std increases"
 
         h = Hist2D(pd.Series(xs), pd.Series(ys), pd.Series(zs), nbins=[xedges, yedges])
-        ax, _ = h.make_plot(alpha_fcn="std", cbar=False)
+        ax, _, _ = h.make_plot(alpha_fcn="std", cbar=False)
         alpha = _quadmesh(ax).get_facecolors()[:, 3]
 
         assert alpha.min() >= 0.0 and alpha.max() <= 1.0
@@ -960,7 +964,7 @@ class TestQuantileAlimInPlots:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_alim(0.01, 0.99, kind="quantile")
-        ax, _ = known_hist.make_plot(cbar=False)
+        ax, _, _ = known_hist.make_plot(cbar=False)
         values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
         np.testing.assert_array_equal(
             values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
@@ -973,7 +977,7 @@ class TestQuantileAlimInPlots:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_alim(0.01, 0.99, kind="quantile")
-        ax, _, _ = known_hist.plot_hist_with_contours(cbar=False)
+        ax, _, _, _ = known_hist.plot_hist_with_contours(cbar=False)
         values = np.ma.filled(np.ma.asarray(_quadmesh(ax).get_array(), float), np.nan)
         np.testing.assert_array_equal(
             values.reshape(KNOWN_COUNTS.shape), self._expected_grid()
@@ -986,13 +990,13 @@ def _norm_of(method, axnorm):
     x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
     h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm=axnorm)
     if method == "make_plot":
-        ax, _ = h.make_plot(cbar=False)
+        ax, _, _ = h.make_plot(cbar=False)
         return _quadmesh(ax).norm
     if method == "plot_hist_with_contours":
-        ax, _, qset = h.plot_hist_with_contours(cbar=False)
+        ax, _, qset, _ = h.plot_hist_with_contours(cbar=False)
         assert qset.norm is _quadmesh(ax).norm
         return qset.norm
-    _, _, qset = h.plot_contours(cbar=False)
+    _, qset, _ = h.plot_contours(cbar=False)
     return qset.norm
 
 
@@ -1039,7 +1043,7 @@ class TestDefaultNorm:
         """
         x, y = _points_from_counts(KNOWN_COUNTS, XEDGES, YEDGES)
         h = Hist2D(x, y, nbins=[XEDGES, YEDGES], axnorm="d")
-        _, _, qset = h.plot_contours(cbar=False)
+        _, qset, _ = h.plot_contours(cbar=False)
         # The defaults written in `_get_contour_levels` for axnorm "d".
         expected = [3e-5, 1e-4, 3e-4, 1e-3, 1.7e-3, 2.3e-3]
         np.testing.assert_array_equal(qset.levels, expected)
@@ -1086,7 +1090,7 @@ class TestPlotSignatures:
         assert names[-1] == "levels"
         assert params["levels"].default is None
         levels = [1.5, 2.5, 4.5]  # chosen inside the 1..6 counts of KNOWN_COUNTS
-        _, _, qset = known_hist.plot_contours(levels=levels, cbar=False)
+        _, qset, _ = known_hist.plot_contours(levels=levels, cbar=False)
         np.testing.assert_array_equal(qset.levels, levels)
         plt.close("all")
 
@@ -2063,7 +2067,7 @@ def _contour_levels(hist, levels=None):
     """Levels of the contour set ``plot_contours`` draws for ``hist``."""
     fig, ax = plt.subplots()
     try:
-        *_, qset = hist.plot_contours(ax=ax, cbar=False, levels=levels)
+        _, qset, _ = hist.plot_contours(ax=ax, cbar=False, levels=levels)
         return np.asarray(qset.levels, dtype=float)
     finally:
         plt.close(fig)
@@ -2137,7 +2141,7 @@ class TestColorScale:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm(axnorm)
-        ax, mappable = known_hist.make_plot(cbar=False)
+        ax, mappable, _ = known_hist.make_plot(cbar=False)
 
         assert mappable.norm.vmin == 0.0
         assert mappable.norm.vmax == 1.0
@@ -2151,7 +2155,7 @@ class TestColorScale:
         """
         known_hist.set_axnorm("c")
         requested = matplotlib.colors.Normalize(vmin=0.2, vmax=0.4)
-        ax, mappable = known_hist.make_plot(cbar=False, norm=requested)
+        ax, mappable, _ = known_hist.make_plot(cbar=False, norm=requested)
 
         assert mappable.norm is requested
         plt.close("all")
@@ -2166,7 +2170,7 @@ class TestColorScale:
         """
         known_hist.set_axnorm("t")
         requested = matplotlib.colors.Normalize(vmin=0.0, vmax=1.0)
-        ax, cbar, qset = known_hist.plot_hist_with_contours(cbar=False, norm=requested)
+        ax, _, qset, _ = known_hist.plot_hist_with_contours(cbar=False, norm=requested)
 
         assert _quadmesh(ax).norm is requested
         assert qset.norm is requested
@@ -2205,12 +2209,12 @@ class TestContourFiltering:
             gaussian_filter_std=1.5,
             nan_aware_filter=False,
             cbar=False,
-        )[2]
+        )[1]
         nan_aware = complete_hist.plot_contours(
             gaussian_filter_std=1.5,
             nan_aware_filter=True,
             cbar=False,
-        )[2]
+        )[1]
 
         assert len(plain.allsegs) == len(nan_aware.allsegs)
         for at_plain, at_nan_aware in zip(plain.allsegs, nan_aware.allsegs):
@@ -2254,7 +2258,7 @@ class TestNoContourLabels:
         known_hist.set_axnorm("t")
         with warnings.catch_warnings():
             warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
-            ax, _, qset = known_hist.plot_contours(
+            ax, qset, _ = known_hist.plot_contours(
                 use_contourf=True, cbar=False, levels=[0.1, 0.3, 0.5, 0.7]
             )
         assert qset.filled is True

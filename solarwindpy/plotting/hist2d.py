@@ -230,9 +230,10 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         -------
         ax: mpl.axes.Axes
             Axes upon which plot was made.
-        cbar_or_mappable: colorbar.Colorbar, mpl.collections.QuadMesh
-            If `cbar` is True, return the colorbar. Otherwise, return the `Quadmesh` used
-            to create the colorbar.
+        mesh: mpl.collections.QuadMesh
+            The histogram's cells.
+        cbar: colorbar.Colorbar or None
+            The colorbar if `cbar` is True, else None.
         """
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
@@ -249,13 +250,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         XX, YY = np.meshgrid(x, y)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
-        cbar_or_mappable = pc
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, **cbar_kwargs)
-            cbar_or_mappable = cbar
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
@@ -285,7 +286,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         elif alpha_fcn is not None:
             self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
 
-        return ax, cbar_or_mappable
+        return ax, pc, cbar
 
     def plot_hist_with_contours(
         self,
@@ -337,9 +338,12 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         Returns
         -------
         ax : mpl.axes.Axes
-        cbar_or_mappable : colorbar.Colorbar or QuadMesh
+        mesh : QuadMesh
+            The pcolormesh background.
         qset : QuadContourSet
             The contour set from the overlay.
+        cbar : colorbar.Colorbar or None
+            The colorbar of the mesh if `cbar` is True, else None.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -416,15 +420,16 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         )
 
         # --- 3. Colorbar ---
-        cbar_or_mappable = pc
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-            cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
+        else:
+            cbar = None
 
         # --- 4. Format axis ---
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset
+        return ax, pc, qset, cbar
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -628,9 +633,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         Returns
         -------
         ax : mpl.axes.Axes
-        cbar_or_mappable : colorbar.Colorbar or QuadContourSet
-            The colorbar if `cbar` is True, else the contour set.
         qset : QuadContourSet
+        cbar : colorbar.Colorbar or None
+            The colorbar if `cbar` is True, else None.
         """
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
@@ -701,15 +706,15 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         if plot_edges:
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
-        cbar_or_mappable = qset
         if cbar:
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-            cbar_or_mappable = cbar
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset
+        return ax, qset, cbar
 
     def _on_source_index(self, values):
         r"""``values``, given on the kept rows, on every row of the source.
@@ -857,7 +862,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         cbar_kwargs = self._prepare_cbar_kwargs(kwargs.pop("cbar_kwargs", None))
         cax = cbar_kwargs.pop("cax", cax)
         orientation = cbar_kwargs.pop("orientation", "horizontal")
-        _, cbar = self.make_plot(
+        _, _, cbar = self.make_plot(
             ax=hax,
             cbar_kwargs=dict(cax=cax, orientation=orientation, **cbar_kwargs),
             **kwargs,

@@ -38,7 +38,6 @@ from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from solarwindpy.solar_activity.plots import IndicatorPlot  # noqa: E402
 
-ORDER = "draw methods return (ax, cbar_or_mappable[, qset]) or no artist"
 
 RNG = np.random.default_rng(11)
 N = 2000
@@ -116,7 +115,6 @@ COLOR_CASES = [
 ]
 
 
-@pytest.mark.xfail(strict=True, reason=ORDER)
 @pytest.mark.parametrize("cbar", [True, False], ids=["cbar", "no-cbar"])
 @pytest.mark.parametrize(
     "build, method, kwargs, artists",
@@ -138,7 +136,6 @@ def test_color_plot_returns_ax_then_artists_then_cbar_or_none(
     assert isinstance(out[-1], Colorbar if cbar else NONE)
 
 
-@pytest.mark.xfail(strict=True, reason=ORDER)
 def test_scatter_without_z_returns_its_collection_and_no_colorbar():
     """A Scatter without z keeps the same shape: its collection, then None.
 
@@ -151,7 +148,6 @@ def test_scatter_without_z_returns_its_collection_and_no_colorbar():
     assert out[2] is None
 
 
-@pytest.mark.xfail(strict=True, reason=ORDER)
 @pytest.mark.parametrize(
     "kwargs, line, band",
     [
@@ -177,7 +173,6 @@ def test_hist1d_returns_ax_line_band_then_none(kwargs, line, band):
     assert out[3] is None
 
 
-@pytest.mark.xfail(strict=True, reason=ORDER)
 def test_indicator_plot_returns_ax_line_then_none():
     """``(ax, line, None)``: an indicator plot draws no colorbar.
 

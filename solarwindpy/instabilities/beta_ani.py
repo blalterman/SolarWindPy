@@ -33,7 +33,7 @@ class BetaRPlot(Hist2D):
     >>> beta = pd.Series(10.0 ** rng.uniform(-1, 1, 500), name="beta")
     >>> R = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="R")
     >>> br = BetaRPlot(beta, R, "p")
-    >>> ax, cbar = br.make_plot()
+    >>> ax, mesh, cbar = br.make_plot()
     >>> ax.get_xscale(), ax.get_yscale()
     ('log', 'log')
     >>> plt.close("all")
@@ -87,10 +87,10 @@ class BetaRPlot(Hist2D):
         -------
         matplotlib.axes.Axes
             Axis containing the plot.
-        matplotlib.colorbar.Colorbar
-            Colorbar associated with the plot.
+        matplotlib.collections.QuadMesh
+            The histogram's cells.
+        matplotlib.colorbar.Colorbar or None
+            Colorbar associated with the plot, or None with ``cbar=False``.
         """
         cmap = kwargs.pop("cmap", "Greens_r")
-        ax, cbar = super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)
-
-        return ax, cbar
+        return super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)

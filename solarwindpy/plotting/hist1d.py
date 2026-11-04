@@ -232,6 +232,17 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             key ``window_kwargs`` holds a dict of options for the band and its
             edge lines: ``alpha`` (band only) defaults to 0.15, and ``color``
             and ``linestyle`` default to the central line's.
+
+        Returns
+        -------
+        ax: mpl.axes.Axes
+        line: mpl.container.ErrorbarContainer or mpl.lines.Line2D
+            The error bars, or with ``plot_window`` the central line.
+        band: mpl.collections.PolyCollection or None
+            The uncertainty window with ``plot_window``, else None.
+        cbar: None
+            A Hist1D draws no colorbar; the slot keeps the return order
+            ``(ax, artists..., cbar)`` shared by every plot.
         """
         agg = self.agg(fcn=fcn)
         x = agg.index.mid
@@ -300,7 +311,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             window_color = window_kwargs.pop("color", color)
             window_linestyle = window_kwargs.pop("linestyle", ls)
 
-            line = ax.plot(x, y, color=color, linestyle=ls, label=label, **kwargs)
+            (line,) = ax.plot(x, y, color=color, linestyle=ls, label=label, **kwargs)
             if plot_window_edges:
                 ax.plot(
                     *upper,
@@ -315,7 +326,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
                     **window_kwargs,
                 )
 
-            polycol = window_plotter(
+            band = window_plotter(
                 *band,
                 color=window_color,
                 linestyle=window_linestyle,
@@ -323,14 +334,13 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
                 **window_kwargs,
             )
 
-            out = (line, polycol)
-
         else:
-            out = ax.errorbar(x, y, xerr=dx, yerr=dy, drawstyle=drawstyle, **kwargs)
+            line = ax.errorbar(x, y, xerr=dx, yerr=dy, drawstyle=drawstyle, **kwargs)
+            band = None
 
         self._format_axis(ax, transpose_axes=transpose_axes)
 
-        return ax, out
+        return ax, line, band, None
 
     def take_data_in_yrange_across_x(
         self,

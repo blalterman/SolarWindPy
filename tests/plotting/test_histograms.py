@@ -289,7 +289,7 @@ class TestHist1DPlotting:
         hist = Hist1D(x, nbins=KNOWN_EDGES)
         fig, ax = plt.subplots()
 
-        returned_ax, _ = hist.make_plot(ax)
+        returned_ax, _, _, _ = hist.make_plot(ax)
 
         assert returned_ax is ax
         (line,) = ax.lines
