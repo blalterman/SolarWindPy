@@ -34,6 +34,9 @@ convention = "numpy"
 quote-style = "double"
 
 [tool.pytest.ini_options]
+# Import this checkout's package, not whichever checkout the editable install
+# points at, so every worktree's suite and commit hook test their own src/.
+pythonpath = ["src"]
 testpaths = ["tests"]
 strict_markers = true
 markers = [

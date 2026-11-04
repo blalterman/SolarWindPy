@@ -10,9 +10,9 @@ In-situ solar wind plasma analysis. The author owns the physics and the public A
 - A stale env produces failures that look like code bugs. Before debugging a surprising failure,
   check that the env imports this checkout and a pandas inside the `pyproject.toml` range:
   `conda run -n solarwindpy python -c "import solarwindpy, pandas; print(solarwindpy.__file__, pandas.__version__)"`
-- The editable install maps `solarwindpy` to one checkout's `src/`. In any other worktree,
-  prefix commands with `PYTHONPATH=$PWD/src`, `git commit` included because its hook runs the
-  suite; without it they test the other checkout.
+- The editable install maps `solarwindpy` to one checkout's `src/`. `pytest` (and so the commit
+  hook) puts this checkout's `src/` first through `pythonpath` in `pyproject.toml`, but `python -c`
+  and `lint-imports` do not: in another worktree, prefix those with `PYTHONPATH=$PWD/src`.
 - Rebuild the env: `solarwindpy.yml` leaves the Python version to CI, so pin it in a copy
   (`python=3.12`) and run `conda env create -f <copy>`, then
   `conda run -n solarwindpy pip install -e ".[dev]"`. Plain `pip install -e .` leaves out
