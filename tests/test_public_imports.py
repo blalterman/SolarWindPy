@@ -230,7 +230,7 @@ def test_no_package_binds_a_solarwindpy_object_it_does_not_define(package):
 def test_top_level_exposes_only_subpackages_and_the_pp_nickname():
     """``solarwindpy`` exposes its subpackages, ``pp``, and dunder metadata.
 
-    ON FAILURE: the code is wrong; solarwindpy/__init__.py exposes another
+    ON FAILURE: the code is wrong; src/solarwindpy/__init__.py exposes another
     public name. Give helper imports a leading underscore and import objects
     from their defining modules.
     """

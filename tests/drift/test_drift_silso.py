@@ -67,7 +67,7 @@ def test_silso_extrema_are_in_ssn_extrema_csv():
     """Every extremum SILSO lists is in ssn_extrema.csv with the same year-month.
 
     ON FAILURE: external fact drifted; update
-    solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv.
+    src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv.
     """
     with urllib.request.urlopen(TABLE_URL, timeout=30) as response:
         observed = parse_cycle_table(response.read().decode())
@@ -82,6 +82,6 @@ def test_silso_extrema_are_in_ssn_extrema_csv():
         pinned,
         observed,
         fact="SILSO lists an extremum that ssn_extrema.csv lacks or differs on",
-        location="solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv",
+        location="src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv",
         remedy=f"copy the new or changed extrema from {TABLE_URL}",
     )

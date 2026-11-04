@@ -3,9 +3,9 @@
 """Integration contract between solarwindpy labels and matplotlib.
 
 Every plot class hands its label objects to ``Axes.set_xlabel`` and
-``Axes.set_ylabel`` (``_add_axis_labels`` in ``solarwindpy/plotting/base.py``),
+``Axes.set_ylabel`` (``_add_axis_labels`` in ``src/solarwindpy/plotting/base.py``),
 and matplotlib typesets ``str(label)`` with its mathtext engine: the package
-style, ``solarwindpy/plotting/solarwindpy.mplstyle``, leaves ``text.usetex``
+style, ``src/solarwindpy/plotting/solarwindpy.mplstyle``, leaves ``text.usetex``
 off. A label mathtext cannot parse raises at draw time, inside the user's
 ``savefig``; a label with unbalanced dollar signs is drawn as literal TeX
 source instead of math.

@@ -3,7 +3,7 @@
 """The example ``Plasma`` that docstring examples load, and Plasma's input logging.
 
 Expected values are the example CSVs' own bytes (the chosen input):
-``solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
+``src/solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
 """
 
 import logging

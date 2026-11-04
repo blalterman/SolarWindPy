@@ -2150,7 +2150,7 @@ class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
 # Each Plasma below is built from round-number inputs in the package's storage
 # units (`solarwindpy.core.units_constants.Units`): n [cm^-3], v and w [km/s],
 # b [nT]. Thermal speeds follow m w^2 = 2 k T (`Plasma.__init__` Notes;
-# `Ion.T` and `Ion.pth` = rho w^2 / 2 in solarwindpy/core/ions.py),
+# `Ion.T` and `Ion.pth` = rho w^2 / 2 in src/solarwindpy/core/ions.py),
 # the convention Hernandez & Marsch (1985) state after their Eq. 5. Outputs are
 # in `Units`: rho [m_p cm^-3], nuc [1e-7 Hz], qpar and Wk [uW m^-2], cs [km/s].
 # Expected values are computed here in SI from the named source and converted
