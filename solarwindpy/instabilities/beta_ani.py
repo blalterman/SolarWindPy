@@ -49,7 +49,8 @@ class BetaRPlot(Hist2D):
         R : pandas.Series
             Temperature anisotropy.
         species : str
-            Label used to generate axis titles.
+            Species of the axis labels, as given: a fit species such as
+            ``"p_bimax"`` names its fit model.
         **kwargs
             Additional options forwarded to
             :class:`~solarwindpy.plotting.hist2d.Hist2D`, e.g. ``nbins``,
@@ -68,10 +69,8 @@ class BetaRPlot(Hist2D):
 
         super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, **kwargs)
         self.set_labels(
-            x=TeXlabel(("beta", "par", species.replace("_bimax", ""))),
-            y=TeXlabel(
-                ("R", "P" if "+" in species else "T", species.replace("_bimax", ""))
-            ),
+            x=TeXlabel(("beta", "par", species)),
+            y=TeXlabel(("R", "P" if "+" in species else "T", species)),
         )
         self.set_clim(5, None)
 
