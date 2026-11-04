@@ -107,8 +107,14 @@ numpydoc_xref_aliases = {
     "Axes": "matplotlib.axes.Axes",
     "mpl.axis.Axis": "matplotlib.axis.Axis",
     "mpl.collections.QuadMesh": "matplotlib.collections.QuadMesh",
+    "mpl.collections.PathCollection": "matplotlib.collections.PathCollection",
+    "mpl.collections.PolyCollection": "matplotlib.collections.PolyCollection",
+    "mpl.container.ErrorbarContainer": "matplotlib.container.ErrorbarContainer",
+    "mpl.lines.Line2D": "matplotlib.lines.Line2D",
+    "mpl.colorbar.Colorbar": "matplotlib.colorbar.Colorbar",
     "QuadMesh": "matplotlib.collections.QuadMesh",
     "QuadContourSet": "matplotlib.contour.QuadContourSet",
+    "TriContourSet": "matplotlib.tri.TriContourSet",
     "colorbar.Colorbar": "matplotlib.colorbar.Colorbar",
     "Colorbar": "matplotlib.colorbar.Colorbar",
     "FunctionType": "types.FunctionType",
@@ -173,6 +179,14 @@ nitpick_ignore = [
     # Private names are not documented, so the show-inheritance line cannot
     # link it.
     ("py:class", "solarwindpy.plotting.base._OnFixedGrid"),
+    # Private base of core.vector.Vector and core.tensor.Tensor, named on
+    # their show-inheritance line for the same reason.
+    ("py:class", "solarwindpy.core.base._ComponentFrame"),
+    # Private types that public signatures take or return. Their docstrings
+    # name the real type; private names are not documented, so the name
+    # cannot link.
+    ("py:obj", "solarwindpy.plotting.binned._PlotSource"),
+    ("py:obj", "solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom"),
 ]
 
 # -- HTML output configuration -----------------------------------------------
