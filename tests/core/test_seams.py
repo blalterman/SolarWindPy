@@ -21,11 +21,6 @@ import pytest
 import solarwindpy as swp
 from solarwindpy.core import base, tensor, vector
 
-_NO_ACCESSOR = (
-    "the named-level accessor and reduction helpers do not exist yet; "
-    "remove this marker when refactor(core) adds them to base.Core"
-)
-
 
 @pytest.fixture(scope="module")
 def plasma_data():
@@ -52,7 +47,6 @@ def _two_species(rows_by_species, labels=("x", "y", "z")):
 # --- The accessor -----------------------------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_species_selection_names_the_level_not_its_position(plasma_data):
     r"""Selecting species p1 by level name ignores where the ``S`` level sits.
 
@@ -68,7 +62,6 @@ def test_species_selection_names_the_level_not_its_position(plasma_data):
     pdt.assert_frame_equal(got, expected.sort_index(axis=1))
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_component_selection_shares_the_parent_data():
     r"""A component selected from a flat frame shares the frame's memory.
 
@@ -83,7 +76,6 @@ def test_component_selection_shares_the_parent_data():
     assert np.shares_memory(got.to_numpy(), frame["y"].to_numpy())
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_list_of_components_keeps_the_order_asked_for():
     r"""Selecting ``["z", "x"]`` returns exactly those columns in that order.
 
@@ -95,7 +87,6 @@ def test_a_list_of_components_keeps_the_order_asked_for():
     pdt.assert_frame_equal(got, frame.loc[:, ["z", "x"]])
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_list_of_components_on_two_levels_keeps_every_species():
     r"""Selecting ``["y", "x"]`` on ``("C", "S")`` columns keeps both species.
 
@@ -108,7 +99,6 @@ def test_a_list_of_components_on_two_levels_keeps_every_species():
     assert got.loc[:, ("x", "p1")].tolist() == [4.0]
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_an_unknown_label_raises_naming_the_level_and_its_labels():
     r"""Selecting a component that is absent raises KeyError listing x, y and z.
 
@@ -119,7 +109,6 @@ def test_an_unknown_label_raises_naming_the_level_and_its_labels():
         base.Core._select(frame, "par", "C")
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_flat_index_named_for_another_level_is_refused():
     r"""Selecting a component from flat columns named ``S`` raises ValueError.
 
@@ -132,12 +121,6 @@ def test_a_flat_index_named_for_another_level_is_refused():
         base.Core._select(frame, "a", "C")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Vector.__call__ and Tensor.__call__ are separate copies of one body; "
-    "remove this marker when refactor(core) gives them one shared implementation",
-)
 def test_vector_and_tensor_share_one_component_call():
     r"""Vector and Tensor resolve ``__call__`` to the same function.
 
@@ -151,7 +134,6 @@ def test_vector_and_tensor_share_one_component_call():
 # --- Reductions name their level -----------------------------------------
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_component_sum_is_nan_where_any_component_is_missing():
     r"""Summing over ``C`` is strict: one missing component makes the row NaN.
 
@@ -166,7 +148,6 @@ def test_a_component_sum_is_nan_where_any_component_is_missing():
     assert np.isnan(got.iloc[1])
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_component_product_is_nan_where_any_component_is_missing():
     r"""A product over ``C`` is strict: (2, 3) gives 6, (2, NaN) gives NaN.
 
@@ -178,7 +159,6 @@ def test_a_component_product_is_nan_where_any_component_is_missing():
     assert np.isnan(got.iloc[1])
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_component_sum_keeps_each_species_whatever_the_level_order():
     r"""Summing over ``C`` keeps one column per species, for either level order.
 
@@ -199,7 +179,6 @@ def test_a_component_sum_keeps_each_species_whatever_the_level_order():
         pdt.assert_frame_equal(base.Core._component_reduce(moved), expected)
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_species_total_uses_the_species_present():
     r"""Summing over ``S`` is partial: NaN only where no species is present.
 
@@ -214,7 +193,6 @@ def test_a_species_total_uses_the_species_present():
     assert np.isnan(got.iloc[2])
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_species_total_keeps_each_component():
     r"""Summing over ``S`` on ``("C", "S")`` columns keeps one column per component.
 
@@ -230,7 +208,6 @@ def test_a_species_total_keeps_each_component():
     pdt.assert_frame_equal(base.Core._species_total(frame), expected)
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_ACCESSOR)
 def test_a_reduction_refuses_columns_without_its_level():
     r"""A component sum of flat columns named ``S`` raises ValueError.
 

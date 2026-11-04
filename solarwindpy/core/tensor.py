@@ -10,7 +10,7 @@ import pandas as pd
 from . import base
 
 
-class Tensor(base.Base):
+class Tensor(base._ComponentFrame):
     """Container for tensor-valued quantities.
 
     Parameters
@@ -30,32 +30,6 @@ class Tensor(base.Base):
             Private; see :class:`~solarwindpy.core.base.Base`.
         """
         super().__init__(data, _time_checked=_time_checked)
-
-    def __call__(self, component: str) -> pd.Series:
-        """Return a tensor component.
-
-        Parameters
-        ----------
-        component : str
-            Component to return (``'par'``, ``'per'`` or ``'scalar'``).
-
-        Returns
-        -------
-        pd.Series
-            The requested component, which shares data with :attr:`data`.
-
-        Raises
-        ------
-        KeyError
-            If ``component`` is not a column of :attr:`data`; the message
-            names the available components.
-        """
-        if component not in self.data.columns:
-            raise KeyError(
-                f"Unknown component {component!r}. "
-                f"Available: {self.data.columns.tolist()}"
-            )
-        return self.data.xs(component, axis=1)
 
     def set_data(self, new: pd.DataFrame):
         """Set new tensor data.
@@ -117,8 +91,8 @@ class Tensor(base.Base):
         This is the combination ``Plasma`` uses for the stored ``scalar`` thermal
         speed; the ``scalar`` column itself is not read.
         """
-        par = self.data.loc[:, "par"]
-        per = self.data.loc[:, "per"]
+        par = self("par")
+        per = self("per")
         mag = par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
         mag.name = "mag"
         return mag

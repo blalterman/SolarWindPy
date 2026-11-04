@@ -16,7 +16,7 @@ import pandas as pd
 from . import base
 
 
-class Vector(base.Base):
+class Vector(base._ComponentFrame):
     """Three-dimensional vector container.
 
     Parameters
@@ -36,32 +36,6 @@ class Vector(base.Base):
             Private; see :class:`~solarwindpy.core.base.Base`.
         """
         super().__init__(data, _time_checked=_time_checked)
-
-    def __call__(self, component: str) -> pd.Series:
-        """Return a vector component.
-
-        Parameters
-        ----------
-        component : str
-            Component to return (``'x'``, ``'y'`` or ``'z'``).
-
-        Returns
-        -------
-        pd.Series
-            The requested component, which shares data with :attr:`data`.
-
-        Raises
-        ------
-        KeyError
-            If ``component`` is not a column of :attr:`data`; the message
-            names the available components.
-        """
-        if component not in self.data.columns:
-            raise KeyError(
-                f"Unknown component {component!r}. "
-                f"Available: {self.data.columns.tolist()}"
-            )
-        return self.data.xs(component, axis=1)
 
     def set_data(self, new: pd.DataFrame):
         """Set new vector data.
@@ -100,8 +74,7 @@ class Vector(base.Base):
         pd.Series
             Vector magnitude.
         """
-        mag = self.data.loc[:, ["x", "y", "z"]]
-        mag = mag.pow(2).sum(axis=1, skipna=False).pow(0.5)
+        mag = self._component_reduce(self.cartesian.pow(2)).pow(0.5)
         mag.name = "mag"
         return mag
 
@@ -114,8 +87,8 @@ class Vector(base.Base):
         pd.Series
             XY-plane magnitude.
         """
-        rho = self.data.loc[:, ["x", "y"]]
-        rho = rho.pow(2).sum(axis=1, skipna=False).pow(0.5)
+        rho = self._select(self.data, ["x", "y"], "C")
+        rho = self._component_reduce(rho.pow(2)).pow(0.5)
         rho.name = "rho"
         return rho
 
@@ -132,7 +105,7 @@ class Vector(base.Base):
         -----
         ``colat = arctan2(rho, z) = 90 - lat``.
         """
-        colat = np.rad2deg(np.arctan2(self.rho, self.data.z))
+        colat = np.rad2deg(np.arctan2(self.rho, self("z")))
         colat.name = "colat"
         return colat
 
@@ -149,7 +122,7 @@ class Vector(base.Base):
         -----
         ``lat = arctan2(z, rho) = 90 - colat``.
         """
-        lat = np.rad2deg(np.arctan2(self.data.z, self.rho))
+        lat = np.rad2deg(np.arctan2(self("z"), self.rho))
         lat.name = "lat"
         return lat
 
@@ -162,7 +135,7 @@ class Vector(base.Base):
         pd.Series
             Longitude in degrees.
         """
-        lon = np.rad2deg(np.arctan2(self.data.y, self.data.x))
+        lon = np.rad2deg(np.arctan2(self("y"), self("x")))
         lon.name = "lon"
         return lon
 
@@ -175,7 +148,7 @@ class Vector(base.Base):
         pd.DataFrame
             Columns ``x``, ``y`` and ``z``.
         """
-        return self.data.loc[:, ["x", "y", "z"]]
+        return self._select(self.data, ["x", "y", "z"], "C")
 
     @property
     def uv(self) -> "Vector":
@@ -218,13 +191,10 @@ class Vector(base.Base):
             )
 
         cart = self.cartesian
-        par = cart.multiply(other, axis=1).sum(axis=1, skipna=False)
-        per = (
-            cart.subtract(other.multiply(par, axis=0), axis=1)
-            .pow(2)
-            .sum(axis=1, skipna=False)
-            .pipe(np.sqrt)
-        )
+        par = self._component_reduce(cart.multiply(other, axis=1))
+        per = self._component_reduce(
+            cart.subtract(other.multiply(par, axis=0), axis=1).pow(2)
+        ).pipe(np.sqrt)
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
     def cos_theta(self, other: "Vector") -> pd.Series:
@@ -253,7 +223,7 @@ class Vector(base.Base):
                 f"cos_theta method not implemented for {type(other)}"
             )
 
-        return self.uv.data.multiply(other, axis=1).sum(axis=1, skipna=False)
+        return self._component_reduce(self.uv.data.multiply(other, axis=1))
 
 
 class BField(Vector):
