@@ -5,9 +5,11 @@
 The order is the axis first, then the primary artists, then the colorbar,
 which is None when there is none: ``(ax, artists..., cbar_or_None)``. A
 contour method returns its contour set as the last artist, just before the
-colorbar. A method's tuple has the same length and the same type in each
-position whether or not a colorbar is drawn, whether a Scatter has z, and
-whether a Hist1D draws its uncertainty window.
+colorbar. A method's tuple has the same length whether or not a colorbar
+is drawn, whether a Scatter has z, and whether a Hist1D draws its
+uncertainty window. Each position keeps its type too, with one exception:
+Hist1D's line slot holds the ``ErrorbarContainer`` without the window and
+the central ``Line2D`` with it, so the error-bar handles stay reachable.
 """
 
 from types import SimpleNamespace
