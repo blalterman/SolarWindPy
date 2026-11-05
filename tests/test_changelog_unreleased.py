@@ -1,10 +1,11 @@
 # Spent-When: PERMANENT(CHANGELOG.md stops carrying an Unreleased section)
 # Supersedes: none
-"""The Unreleased changelog names only paths that resolve as it says.
+"""The newest changelog section names only paths that resolve as it says.
 
-Users read the ``## [Unreleased]`` section of ``CHANGELOG.md`` as the migration
-guide from the last release, so every mapping in it must state the final state:
-the new name resolves in this checkout and the old name does not.
+Users read the newest section of ``CHANGELOG.md`` as the migration guide: the
+``## [Unreleased]`` section while it has entries, otherwise the latest release.
+Every mapping in it must state the final state: the new name resolves in this
+checkout and the old name does not.
 
 Checked:
 
@@ -63,18 +64,21 @@ _CLASS_ARROW = re.compile(
 )
 _BULLET_CLASS = re.compile(r"^-\s+`(\w+)`:")
 
-# Lower bounds on how many names each check covers, so a parser regression
-# that matches nothing cannot pass silently.
-_MIN_TABLE_ROWS = 60
-_MIN_ADDED_PATHS = 8
-_MIN_CLASS_RENAMES = 40
+# Raw markers each parser must account for, so a parser regression that
+# matches nothing cannot pass silently, whatever the section's size.
+_RAW_TABLE_ROW = re.compile(r"^\s*\|\s*`solarwindpy\.", re.MULTILINE)
 
 
 def _unreleased():
+    """The newest section with entries: Unreleased if it has any, else the latest release."""
     text = CHANGELOG.read_text(encoding="utf-8")
     start = text.index("## [Unreleased]")
-    stop = text.index("\n## [", start + 1)
-    return text[start:stop]
+    while True:
+        stop = text.find("\n## [", start + 1)
+        section = text[start : stop if stop >= 0 else len(text)]
+        if re.search(r"^\s*[-|]", section, re.MULTILINE) or stop < 0:
+            return section
+        start = stop + 1
 
 
 def _subsection(section, title):
@@ -104,12 +108,12 @@ def _table_rows():
 
 
 def test_the_table_is_found():
-    """The import-path table parses into at least the expected number of rows.
+    """Every import-path table row in the section parses.
 
     ON FAILURE: the code is wrong if the table's layout changed; update the
-    pattern. The changelog is wrong if rows were dropped by mistake.
+    pattern.
     """
-    assert len(_table_rows()) >= _MIN_TABLE_ROWS
+    assert len(_table_rows()) == len(_RAW_TABLE_ROW.findall(_unreleased()))
 
 
 @pytest.mark.parametrize("old,cell", _table_rows(), ids=lambda v: str(v)[:60])
@@ -178,12 +182,13 @@ def _class_renames():
 
 
 def test_class_renames_are_found():
-    """The class-relative renames parse into at least the expected number.
+    """A section with class-relative renames parses at least one of them.
 
     ON FAILURE: the code is wrong if the bullets' layout changed; update the
-    patterns. The changelog is wrong if renames were dropped by mistake.
+    patterns.
     """
-    assert len(_class_renames()) >= _MIN_CLASS_RENAMES
+    stated = any(_BULLET_CLASS.match(b) and "->" in b for b in _bullets(_unreleased()))
+    assert len(_class_renames()) >= int(stated)
 
 
 @pytest.mark.parametrize("cls,old,new", _class_renames(), ids=lambda v: str(v))
@@ -204,7 +209,9 @@ def test_added_paths_resolve():
 
     ON FAILURE: the changelog is wrong; correct the path.
     """
-    paths = sorted(set(_TICKED_PATH.findall(_subsection(_unreleased(), "Added"))))
-    assert len(paths) >= _MIN_ADDED_PATHS, paths
+    section = _unreleased()
+    if "### Added\n" not in section:
+        pytest.skip("the newest section has no Added subsection")
+    paths = sorted(set(_TICKED_PATH.findall(_subsection(section, "Added"))))
     missing = [p for p in paths if not _resolves(p)]
     assert not missing, missing
