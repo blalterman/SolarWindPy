@@ -115,7 +115,11 @@ epoch
 2022-10-09 01:47:01.234560    49800.0
 Name: scalar, dtype: float64
 
-The plasma beta and the anisotropy ``R`` are dimensionless. ``R`` is the
+The plasma beta and the anisotropy ``R`` are dimensionless. Each column of
+``beta`` is the thermal pressure of that component over the magnetic pressure,
+:math:`\beta = n k_B T / (B^2 / 2 \mu_0) = 2 \mu_0 p_{th} / B^2`, where
+:math:`p_{th} = \rho w^2 / 2 = n k_B T` uses the parallel, perpendicular or
+scalar thermal speed and :math:`B` is the field magnitude. ``R`` is the
 perpendicular over the parallel pressure; for one species it is
 :math:`(w_\perp / w_\parallel)^2`, so :math:`7^2 / 10^2 = 0.49` at the first
 time:
