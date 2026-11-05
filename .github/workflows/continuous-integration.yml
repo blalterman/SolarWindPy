@@ -70,9 +70,39 @@ jobs:
           python -m build --outdir dist
           python scripts/check_release_artifacts.py dist
 
+  # Test suite on Windows (PyHC standard #4: support all major operating systems).
+  # Lint, import layering, and the release build stay on the Linux validate job.
+  test-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          # tests/test_release_artifacts.py builds with --no-isolation and needs these
+          python -m pip install build setuptools_scm wheel
+
+      - name: Run core tests
+        run: |
+          pytest --tb=short --disable-warnings tests/
+
   # Summary job
   ci-summary:
-    needs: [validate]
+    needs: [validate, test-windows]
     runs-on: ubuntu-latest
     if: always()
     
@@ -85,8 +115,9 @@ jobs:
           echo ""
           echo "Job Results:"
           echo "- Quick Validation: ${{ needs.validate.result }}"
+          echo "- Windows Tests: ${{ needs.test-windows.result }}"
           echo ""
-          if [[ "${{ needs.validate.result }}" == "success" ]]; then
+          if [[ "${{ needs.validate.result }}" == "success" && "${{ needs.test-windows.result }}" == "success" ]]; then
             echo "✅ PR validation passed - ready for review"
           else
             echo "❌ PR validation failed - requires fixes"
