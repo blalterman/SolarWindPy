@@ -772,3 +772,13 @@ def test_every_dimensionless_label_shares_one_unit_form(labels_base):
     assert TeXlabel(("n", "", "p1"), axnorm="t").units == dimless
     assert Count().units == dimless
     assert str(CarringtonRotation()).endswith(r"\left[%s\right]$" % dimless)
+
+
+def test_normalized_ratio_is_parenthesized(labels_base):
+    """A normalized ratio groups the ratio: (n_a/n_p) / Max, not n_a/n_p / Max.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "a"), ("n", "", "p1"), axnorm="t")
+    assert label.tex == r"(n_{\alpha}/n_{p_1}) / \mathrm{Max}"
+    assert "validate_axnorm" in labels_base.__all__

@@ -62,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   units are 1 / (bin width or area in the axes' units), which a label does not know, so it
   states none. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
   Density" (both were "1D Probability Density"), and `TeXlabel(..., axnorm="d")` reads
-  "Density of n_p" (was "Density Norm n_p [#]").
+  "Density of n_p" (was "Density Norm n_p [#]"). A normalized ratio groups the ratio:
+  `(n_a/n_p) / \mathrm{Max}`.
 - `TeXlabel` accepts the `"cd"` and `"rd"` normalizations that `Count` accepts. Both read
   the keys from one table, `solarwindpy.plotting.labels.base.AXNORM`, and raise `ValueError`
   (was `AssertionError`) for any other key.

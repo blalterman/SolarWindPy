@@ -6,6 +6,7 @@ __all__ = [
     "Base",
     "TeXlabel",
     "format_with_units",
+    "validate_axnorm",
 ]
 
 import logging
@@ -472,6 +473,8 @@ template   : %s
         if axnorm is not None:
             norm = AXNORM[axnorm]
             units = "" if norm.density else _inU["dimless"]
+            if self.mcs1 is not None:
+                tex = f"({tex})"
             tex = norm.quantity % tex
             path = path / (axnorm.upper() + "norm")
 
