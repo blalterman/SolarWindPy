@@ -11,6 +11,7 @@ is known. The relation of the plotter's residuals to a real fit's is tested on
 
 import io
 import logging
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -962,3 +963,24 @@ def test_an_ffplot_figure_renders_to_png():
     assert buf.getvalue().startswith(b"\x89PNG\r\n\x1a\n")
     pixels = render(hax.figure)
     assert len(np.unique(pixels.reshape(-1, 4), axis=0)) > 2
+
+
+@pytest.mark.xfail(strict=True, reason="FFPlot warns on every fit without yerr today")
+def test_a_fit_plot_without_yerr_is_silent(capsys, caplog):
+    """Plotting a fit without yerr writes nothing and warns of nothing.
+
+    A fit without uncertainties is ordinary, so its plot logs at most at
+    DEBUG: no record at INFO or above, nothing on stdout or stderr, and no
+    Python warning.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(10.0)
+    fit = Line(x, 2.0 * x + 1.0)
+    fit.make_fit()
+    with caplog.at_level(logging.DEBUG), warnings.catch_warnings():
+        warnings.simplefilter("error")
+        fit.plotter.plot_raw_used_fit_resid()
+    assert [r for r in caplog.records if r.levelno >= logging.INFO] == []
+    out, err = capsys.readouterr()
+    assert out == "" and err == ""
