@@ -3,7 +3,7 @@
 Thank you for considering contributing to SolarWindPy.
 
 Everyone who takes part in SolarWindPy is expected to follow the
-[Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1). Report
+[Code of Conduct](https://github.com/blalterman/SolarWindPy/blob/master/CODE_OF_CONDUCT.md) (Contributor Covenant 2.1). Report
 concerns to [blaltermanphd@gmail.com](mailto:blaltermanphd@gmail.com).
 
 ## When a contribution is not accepted
@@ -125,14 +125,20 @@ SolarWindPy uses `pyproject.toml` as the single source of truth for dependencies
 
 **Runtime dependencies** (required by users):
 ```toml
-# Edit pyproject.toml [project.dependencies]
-"somepackage>=X.Y",
+# pyproject.toml
+[project]
+dependencies = [
+  "somepackage>=X.Y",
+]
 ```
 
 **Development tools**:
 ```toml
-# Edit pyproject.toml [project.optional-dependencies.dev]
-"sometool>=X.Y",
+# pyproject.toml
+[project.optional-dependencies]
+dev = [
+  "sometool>=X.Y",
+]
 ```
 
 Set a floor to the oldest version the test suite actually runs on.

@@ -51,6 +51,13 @@ quantities, and visualizing results with scientific accuracy.
    citing
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Development
+
+   contributing
+   code_of_conduct
+
+.. toctree::
    :maxdepth: 4
    :caption: API Reference
 

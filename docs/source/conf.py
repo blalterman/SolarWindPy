@@ -58,6 +58,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "matplotlib.sphinxext.plot_directive",
     "sphinx_copybutton",
+    "myst_parser",  # renders CONTRIBUTING.md and CODE_OF_CONDUCT.md
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
