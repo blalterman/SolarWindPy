@@ -27,8 +27,8 @@ the module that defines it, and is documented at that path.
    ~solarwindpy.plotting.hist2d.Hist2D
    ~solarwindpy.plotting.labels.base.TeXlabel
 
-Core Module
------------
+Core
+----
 
 .. autosummary::
    :toctree: _autosummary
@@ -36,8 +36,8 @@ Core Module
 
    solarwindpy.core
 
-Plotting Module
----------------
+Plotting
+--------
 
 .. autosummary::
    :toctree: _autosummary
@@ -45,8 +45,8 @@ Plotting Module
 
    solarwindpy.plotting
 
-Fit Functions Module
---------------------
+Fit Functions
+-------------
 
 .. autosummary::
    :toctree: _autosummary
@@ -54,8 +54,8 @@ Fit Functions Module
 
    solarwindpy.fitfunctions
 
-Solar Activity Module
----------------------
+Solar Activity
+--------------
 
 .. autosummary::
    :toctree: _autosummary
@@ -63,8 +63,8 @@ Solar Activity Module
 
    solarwindpy.solar_activity
 
-Instabilities Module
---------------------
+Instabilities
+-------------
 
 .. autosummary::
    :toctree: _autosummary
@@ -72,8 +72,8 @@ Instabilities Module
 
    solarwindpy.instabilities
 
-Tools Module
-------------
+Tools
+-----
 
 .. autosummary::
    :toctree: _autosummary
@@ -81,8 +81,8 @@ Tools Module
 
    solarwindpy.tools
 
-Examples Module
----------------
+Examples
+--------
 
 .. autosummary::
    :toctree: _autosummary

@@ -1,4 +1,6 @@
-{{ fullname | escape | underline}}
+{{ name | escape | underline}}
+
+``import {{ fullname }}``
 
 .. automodule:: {{ fullname }}
    :no-members:
@@ -65,7 +67,7 @@
    :recursive:
 
 {% for item in modules %}
-   {{ item }}
+   ~{{ item }}
    {%- endfor %}
 
 {% endif %}
