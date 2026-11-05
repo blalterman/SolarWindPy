@@ -81,6 +81,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Plotting a fit without `yerr` no longer logs "No weights. Need weights to plot a window..."
+  as a warning on every plot; the zero-width window is noted at DEBUG on the
+  `solarwindpy.fitfunctions.plots` logger.
 - The API page of `Plasma.lnlambda` showed a MathJax error ("Double subscripts") in place of
   its equation, and documented a `species` parameter it does not take; it documents `s0, s1`.
   A test now rejects double subscripts, double superscripts and unbalanced braces in docstring

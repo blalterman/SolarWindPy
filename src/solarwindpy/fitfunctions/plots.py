@@ -9,7 +9,7 @@ __all__ = [
     "FFPlot",
 ]
 
-import logging  # noqa: F401
+import logging
 
 import numpy as np
 import matplotlib as mpl
@@ -296,8 +296,9 @@ class FFPlot(object):
             return ax, plotted
 
         if yerr is None:
-            logging.getLogger().warning(
-                "No yerr. Need yerr to plot a window for FitFunction. Setting yerr to 0."
+            # A fit without uncertainties is ordinary: draw a zero-width window.
+            logging.getLogger(__name__).debug(
+                "No yerr: the %s window has zero width.", kind
             )
             yerr = 0
 

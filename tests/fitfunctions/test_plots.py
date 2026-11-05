@@ -444,15 +444,16 @@ def test_window_and_edge_keywords_take_effect(kind):
 
 @pytest.mark.parametrize("kind", ["raw", "used"])
 def test_without_yerr_the_window_collapses_onto_the_line(kind, caplog):
-    """No yerr logs a warning and draws a zero-width window.
+    """No yerr draws a zero-width window and says so only at DEBUG.
 
     ON FAILURE: the code is wrong.
     """
     plot, *_ = make_ffplot(yerr=False)
     o = getattr(plot.observations, kind)
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.DEBUG):
         _, (_, window, _) = getattr(plot, f"plot_{kind}")()
-    assert "No yerr" in caplog.text
+    records = [r for r in caplog.records if "No yerr" in r.getMessage()]
+    assert [r.levelno for r in records] == [logging.DEBUG]
     vy = window.get_paths()[0].vertices[:, 1]
     assert vy.min() == o.y.min()
     assert vy.max() == o.y.max()
@@ -965,7 +966,6 @@ def test_an_ffplot_figure_renders_to_png():
     assert len(np.unique(pixels.reshape(-1, 4), axis=0)) > 2
 
 
-@pytest.mark.xfail(strict=True, reason="FFPlot warns on every fit without yerr today")
 def test_a_fit_plot_without_yerr_is_silent(capsys, caplog):
     """Plotting a fit without yerr writes nothing and warns of nothing.
 
