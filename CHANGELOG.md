@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the suite: `numpy>=2.0` (was `>=1.26`; astropy 8 requires it), `numba>=0.60` (was `>=0.59`),
   `numexpr>=2.10` (was `>=2.8`), `bottleneck>=1.4` (was `>=1.3`), `tables>=3.10.1` (was `>=3.9`),
   `matplotlib>=3.11` (was `>=3.10`); in the test extra, `pyyaml>=6.0.1` and `packaging>=25.0`.
+- `FitFunction.make_fit` now uses only public SciPy APIs; fit results are unchanged. It no
+  longer imports private helpers from `scipy.optimize._minpack_py`, and the obsolete fallback to
+  `scipy.optimize.minpack`, which no supported SciPy provides, is removed.
+- The `StabilityContours.plot_contours` table legend is reimplemented; its output is identical.
+
+### Removed
+
+- `scripts/conda_config.py`, which nothing used.
 
 ### Fixed
 
