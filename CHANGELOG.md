@@ -930,6 +930,25 @@ These change computed values; rerun any analysis that used them.
   `icmecat.py`. `cache.fall_back` takes a keyword `stacklevel`, defaulting to the depth that
   attributes the warning to the caller of `cache.fetch`.
 
+- Every warning SolarWindPy issues now names the line of the caller's own code that triggered
+  it, at any call depth. The StaleCacheWarning from the solar-activity loaders previously
+  named solarwindpy/solar_activity/base.py, the OptimizeWarning from make_fit named
+  solarwindpy/fitfunctions/core.py, and the docstring-inheritance warning named
+  solarwindpy/__init__.py instead of the import. The stacklevel keyword of
+  solarwindpy.solar_activity.cache.fall_back is removed.
+
+- A fit function's make_fit no longer leaves a half-updated fit when a step after the
+  optimizer raises. An error while building TeX_info or the plotter used to leave status "ok"
+  with those results missing; a recorded failure there (ValueError, RuntimeError, or a
+  FitFunctionError) is now recorded as a failed fit, and any other exception leaves the fit
+  unfitted. fit_bounds no longer answers after a fit that failed after the optimizer ran.
+  TrendFit.make_fit interrupted by an unexpected exception no longer keeps the previous
+  bin_results and trend; the TrendFit and its bin fits are left unfitted.
+
+- SpiralPlot2D.plot_contours raises a ValueError saying the occupied cells' centers all lie on
+  one line when they do along any direction; centers on a diagonal previously reached a qhull
+  RuntimeError. The message for centers sharing one x or one y changes to the same wording.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
