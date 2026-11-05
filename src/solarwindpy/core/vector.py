@@ -23,6 +23,31 @@ class Vector(base._ComponentFrame):
     ----------
     data : :class:`pandas.DataFrame`
         Data with ``x``, ``y`` and ``z`` components.
+
+    Examples
+    --------
+    A (3, 4, 0) vector has magnitude 5 and lies in the xy-plane, 90 degrees
+    from +z; a (0, 0, 2) vector points along +z:
+
+    >>> import pandas as pd
+    >>> from solarwindpy.core.vector import Vector
+    >>> t = pd.date_range("2020-01-01", periods=2, freq="min")
+    >>> v = Vector(pd.DataFrame({"x": [3.0, 0.0], "y": [4.0, 0.0],
+    ...                          "z": [0.0, 2.0]}, index=t))
+    >>> v.mag.tolist()
+    [5.0, 2.0]
+    >>> v.colat.tolist()
+    [90.0, 0.0]
+    >>> v.uv.cartesian.loc[:, ["x", "y"]].iloc[0].tolist()
+    [0.6, 0.8]
+
+    A :class:`~solarwindpy.core.plasma.Plasma` holds each species' velocity
+    as a vector:
+
+    >>> import solarwindpy as swp
+    >>> plasma = swp.examples.load_plasma()
+    >>> plasma.p1.v.mag.round(2).tolist()
+    [458.26, 700.0, 1044.03]
     """
 
     def __init__(self, data: pd.DataFrame, *, _time_checked: pd.Index | None = None):

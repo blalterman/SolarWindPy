@@ -1013,22 +1013,86 @@ class BinnedData:
         return self._frame.index
 
     def log_of(self, col):
-        r"""True if ``col`` is binned as ``log10(abs())``."""
+        r"""True if ``col`` is binned as ``log10(abs())``.
+
+        Parameters
+        ----------
+        col : str
+            A binned column.
+
+        Returns
+        -------
+        bool
+            Whether ``col`` is binned on its ``log10(abs())`` scale.
+
+        Raises
+        ------
+        KeyError
+            If ``col`` is not binned.
+        """
         self._check(col)
         return self._log[col]
 
     def clip_of(self, col):
-        r"""The clip setting of ``col``: False, True, or a tail string."""
+        r"""The clip setting of ``col``: False, True, or a tail string.
+
+        Parameters
+        ----------
+        col : str
+            A binned column.
+
+        Returns
+        -------
+        bool or str
+            The clip setting ``col`` was binned with.
+
+        Raises
+        ------
+        KeyError
+            If ``col`` is not binned.
+        """
         self._check(col)
         return self._clip[col]
 
     def edges(self, col):
-        r"""Bin edges of ``col``, a read-only ndarray."""
+        r"""Bin edges of ``col``, a read-only ndarray.
+
+        Parameters
+        ----------
+        col : str
+            A binned column.
+
+        Returns
+        -------
+        np.ndarray
+            Read-only edges of the bins of ``col``, on its binned scale.
+
+        Raises
+        ------
+        KeyError
+            If ``col`` is not binned.
+        """
         self._check(col)
         return self._edges[col]
 
     def intervals(self, col):
-        r"""Bins of ``col``, a ``pd.IntervalIndex``."""
+        r"""Bins of ``col``, a ``pd.IntervalIndex``.
+
+        Parameters
+        ----------
+        col : str
+            A binned column.
+
+        Returns
+        -------
+        pd.IntervalIndex
+            The bins of ``col``, on its binned scale.
+
+        Raises
+        ------
+        KeyError
+            If ``col`` is not binned.
+        """
         self._check(col)
         return self._intervals[col]
 

@@ -246,14 +246,18 @@ class SpiralMesh(object):
 
         Parameters
         ----------
-        density: scalar
-            The density quantile above which we want to select bins, e.g.
-            above the 0.01 quantile. This ensures that each bin meets some
-            sufficient fill factor.
-        size: scalar
-            The size quantile below which we want to select bins, e.g.
-            below the 0.99 quantile. This ensures that the bin isn't so large
-            that it will appear as an outlier.
+        **kwargs : float or bool
+            ``density``: the density quantile above which we want to select
+            bins, e.g. above the 0.01 quantile. This ensures that each bin
+            meets some sufficient fill factor. ``size``: the size quantile
+            below which we want to select bins, e.g. below the 0.99 quantile.
+            This ensures that the bin isn't so large that it will appear as
+            an outlier. Each defaults to False, which applies no filter.
+
+        Raises
+        ------
+        KeyError
+            If any other keyword is passed.
         """
         density = kwargs.pop("density", False)
         size = kwargs.pop("size", False)
@@ -266,18 +270,36 @@ class SpiralMesh(object):
         )
 
     def set_initial_edges(self, xedges, yedges):
-        r"""Store the initial x and y edges."""
+        r"""Store the initial x and y edges.
+
+        Parameters
+        ----------
+        xedges, yedges : np.ndarray
+            Edges of the initial grid on each axis.
+        """
         self._initial_edges = _InitialSpiralEdges(xedges, yedges)
 
     def set_data(self, x, y):
-        r"""Store ``x`` and ``y`` as the columns of one DataFrame."""
+        r"""Store ``x`` and ``y`` as the columns of one DataFrame.
+
+        Parameters
+        ----------
+        x, y : pd.Series
+            Point coordinates.
+        """
         data = pd.concat({"x": x, "y": y}, axis=1)
         self._data = data  # SpiralMeshData(x, y)
         # The leaf of each point found by `generate_mesh`, for these data.
         self._placed = None
 
     def set_min_per_bin(self, new):
-        r"""Store the split threshold as an int."""
+        r"""Store the split threshold as an int.
+
+        Parameters
+        ----------
+        new : int
+            A cell holding more points than this is split.
+        """
         self._min_per_bin = int(new)
 
     def initialize_bins(self):
@@ -319,6 +341,15 @@ class SpiralMesh(object):
         r"""Split every cell holding more than ``min_per_bin`` points into quarters.
 
         The rows of ``bins`` that were split are set to NaN in place.
+
+        Parameters
+        ----------
+        bins : np.ndarray
+            Shape (N, 4) array of ``[x0, x1, y0, y1]`` cell edges.
+        x, y : np.ndarray
+            Point coordinates.
+        min_per_bin : int
+            A cell holding more points than this is split.
 
         Returns
         -------
@@ -669,7 +700,15 @@ They will be replaced by NaNs and excluded from the aggregation.
     def place_spectra_in_mesh(self, progress=True):
         r"""Generate the mesh, then assign each point to a cell; return ``bin_id``.
 
-        ``progress`` is passed to ``generate_mesh``.
+        Parameters
+        ----------
+        progress : bool, optional
+            Passed to ``generate_mesh``.
+
+        Returns
+        -------
+        tuple
+            ``bin_id``, from ``calculate_bin_number``.
         """
         self.generate_mesh(progress=progress)
         bin_id = self.calculate_bin_number()
@@ -827,18 +866,42 @@ class AdaptiveMesh(Binning):
         return pd.RangeIndex(self._mesh.mesh.shape[0])
 
     def codes(self):
-        r"""Cell of each kept row, -1 for a row outside the mesh."""
+        r"""Cell of each kept row, -1 for a row outside the mesh.
+
+        Returns
+        -------
+        np.ndarray
+            Integer row of ``mesh.mesh`` holding each kept row; -1 outside
+            the mesh.
+        """
         bin_id = self._mesh.bin_id
         ids = np.asarray(bin_id.id, dtype=np.intp)
         return np.where(ids == bin_id.fill, -1, ids)
 
     def cell_measure(self):
-        r"""Each cell's area, ``dx * dy`` on the binned scale."""
+        r"""Each cell's area, ``dx * dy`` on the binned scale.
+
+        Returns
+        -------
+        np.ndarray
+            Area of each cell, in the order of ``mesh.mesh``.
+        """
         m = self._mesh.mesh
         return (m[:, 1] - m[:, 0]) * (m[:, 3] - m[:, 2])
 
     def postfilter(self, agg):
-        r"""Set to NaN the cells of ``agg`` that ``mesh.cell_filter`` drops."""
+        r"""Set to NaN the cells of ``agg`` that ``mesh.cell_filter`` drops.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            Aggregated values, indexed by cell code.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` with the dropped cells NaN.
+        """
         keep = self._mesh.cell_filter[agg.index.to_numpy()]
         return agg.where(pd.Series(keep, index=agg.index), axis=0)
 
@@ -855,8 +918,22 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
     Examples
     --------
-    splot = SpiralPlot2D(x, y, z, min_per_bin=100)
-    ax, collection, cbar = splot.make_plot()
+    An 8 x 8 grid of points starts in 2 x 2 cells of 16 points each. With
+    ``min_per_bin=8`` each cell is split once, into quarters of 4 points:
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> import matplotlib.pyplot as plt
+    >>> from solarwindpy.plotting.spiral import SpiralPlot2D
+    >>> grid = np.arange(8.0)
+    >>> x = pd.Series(np.repeat(grid, 8))
+    >>> y = pd.Series(np.tile(grid, 8))
+    >>> splot = SpiralPlot2D(x, y, initial_bins=2, min_per_bin=8)
+    >>> counts = splot.agg()
+    >>> counts.size, int(counts.min()), int(counts.max()), int(counts.sum())
+    (16, 4, 4, 64)
+    >>> ax, collection, cbar = splot.make_plot()
+    >>> plt.close("all")
     """
 
     def __init__(

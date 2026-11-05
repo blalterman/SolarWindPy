@@ -33,6 +33,27 @@ class Ion(base.Base):
     ----------
     species : str
         The ion's species name.
+
+    Examples
+    --------
+    Create a proton ion from the example plasma's measurement data:
+
+    >>> import solarwindpy as swp
+    >>> from solarwindpy.core.ions import Ion
+    >>> plasma = swp.examples.load_plasma()
+    >>> proton_data = plasma.data.xs('p1', level='S', axis=1)
+    >>> proton = Ion(proton_data, 'p1')
+    >>> proton.species
+    'p1'
+    >>> proton.n.tolist()
+    [1.0, 2.0, 3.0]
+    >>> proton.v.mag.round(2).tolist()
+    [458.26, 700.0, 1044.03]
+
+    It matches the proton ion the plasma builds itself:
+
+    >>> proton == plasma.p1
+    True
     """
 
     def __init__(
@@ -66,27 +87,6 @@ class Ion(base.Base):
 
         Physical constants and mass values are automatically assigned
         based on the species identifier using standard atomic masses.
-
-        Examples
-        --------
-        Create a proton ion from the example plasma's measurement data:
-
-        >>> import solarwindpy as swp
-        >>> from solarwindpy.core.ions import Ion
-        >>> plasma = swp.examples.load_plasma()
-        >>> proton_data = plasma.data.xs('p1', level='S', axis=1)
-        >>> proton = Ion(proton_data, 'p1')
-        >>> proton.species
-        'p1'
-        >>> proton.n.tolist()
-        [1.0, 2.0, 3.0]
-        >>> proton.v.mag.round(2).tolist()
-        [458.26, 700.0, 1044.03]
-
-        It matches the proton ion the plasma builds itself:
-
-        >>> proton == plasma.p1
-        True
         """
         self._set_species(species)
         super().__init__(data, _time_checked=_time_checked)

@@ -59,6 +59,14 @@ class Ion(base.Base):
 
         An unrecognized species logs a warning.
 
+        Parameters
+        ----------
+        species : str
+            Element symbol, e.g. ``"He"``; stored title-cased.
+        charge : int or str
+            Charge state: an integer, a string that converts to one, or
+            ``"i"`` or ``"j"``.
+
         Raises
         ------
         ValueError
@@ -133,7 +141,15 @@ class ChargeStateRatio(base.Base):
         return units
 
     def set_ions(self, ionA, ionB):
-        r"""Store both ions, building an ``Ion`` from each tuple."""
+        r"""Store both ions, building an ``Ion`` from each tuple.
+
+        Parameters
+        ----------
+        ionA : solarwindpy.plotting.labels.composition.Ion or tuple
+            Numerator ion, or the ``(species, charge)`` arguments of one.
+        ionB : solarwindpy.plotting.labels.composition.Ion or tuple
+            Denominator ion, or the ``(species, charge)`` arguments of one.
+        """
         if not isinstance(ionA, Ion):
             ionA = Ion(*ionA)
         if not isinstance(ionB, Ion):

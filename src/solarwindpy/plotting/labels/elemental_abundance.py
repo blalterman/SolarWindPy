@@ -97,7 +97,15 @@ class ElementalAbundance(base.Base):
         return self._pct_unit
 
     def set_species(self, species, reference_species):
-        r"""Store both element symbols, title-cased; an unrecognized one logs a warning."""
+        r"""Store both element symbols, title-cased; an unrecognized one logs a warning.
+
+        Parameters
+        ----------
+        species : str
+            Element symbol of the numerator.
+        reference_species : str
+            Element symbol of the denominator (reference).
+        """
         species = species.title()
         reference_species = reference_species.title()
 

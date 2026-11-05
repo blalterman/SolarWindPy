@@ -387,6 +387,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def logger(self):
+        r"""The :class:`logging.Logger` named after this module and class."""
         return self._logger
 
     def _init_logger(self):
@@ -552,6 +553,13 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def observations(self):
+        r"""The observations set by :meth:`set_fit_obs`.
+
+        A named tuple ``(used, raw, tk_observed)``: ``used`` and ``raw`` are
+        each ``(x, y, w)`` named tuples of the observations kept for the fit
+        and of all observations passed in, and ``tk_observed`` is the boolean
+        mask over ``raw`` that selects ``used``.
+        """
         return self._observations
 
     @property
@@ -912,6 +920,18 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self._argnames = args
 
     def build_plotter(self):
+        r"""Build and store the :class:`~solarwindpy.fitfunctions.plots.FFPlot` of this fit.
+
+        The plot holds :attr:`observations`, the model evaluated at every raw
+        ``x`` (NaN where the model cannot be evaluated), :attr:`TeX_info`,
+        :attr:`fit_result` and :meth:`residuals`. :meth:`make_fit` calls this
+        after :meth:`build_TeX_info`; the result is :attr:`plotter`.
+
+        Returns
+        -------
+        ~solarwindpy.fitfunctions.plots.FFPlot
+            The plot object, also stored as :attr:`plotter`.
+        """
         obs = self.observations
         try:
             yfit = self(self.observations.raw.x)
@@ -932,6 +952,18 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         return plotter
 
     def build_TeX_info(self):
+        r"""Build and store the :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo` of this fit.
+
+        The info holds the fitted parameters and their uncertainties (NaN for
+        each parameter when they are not available), :attr:`TeX_function`,
+        :attr:`chisq_dof`, :attr:`rsq` and :attr:`initial_guess_info`.
+        :meth:`make_fit` calls this; the result is :attr:`TeX_info`.
+
+        Returns
+        -------
+        ~solarwindpy.fitfunctions.tex_info.TeXinfo
+            The info object, also stored as :attr:`TeX_info`.
+        """
         # Allows annotating of TeX_info when fit fails in a manner
         # that is easily identifiable.
         try:

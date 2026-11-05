@@ -46,7 +46,14 @@ class Binning(ABC):
 
     @abstractmethod
     def codes(self):
-        r"""Cell code of each kept row, by position: an int array, -1 in no cell."""
+        r"""Cell code of each kept row, by position: an int array, -1 in no cell.
+
+        Returns
+        -------
+        np.ndarray
+            Integer position in ``cells`` of each kept row's cell; -1 for a
+            row in no cell.
+        """
 
     @abstractmethod
     def cell_measure(self):
@@ -54,6 +61,11 @@ class Binning(ABC):
 
         A width in 1-D, an area in 2-D. On a log axis the binned variable is
         ``log10`` of the data, so the size is measured in ``log10``.
+
+        Returns
+        -------
+        np.ndarray
+            Size of each cell, in code order.
         """
 
     def postfilter(self, agg):
@@ -61,6 +73,16 @@ class Binning(ABC):
 
         Identity here; a strategy with a cell filter sets the cells it drops
         to NaN.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            Aggregated values, indexed by cell code.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` with the dropped cells NaN; ``agg`` itself here.
         """
         return agg
 
@@ -559,7 +581,14 @@ class FixedGrid(Binning):
         return pd.MultiIndex.from_product(intervals, names=list(self._axes))
 
     def cell_measure(self):
-        r"""Each bin's width in 1-D, its area in 2-D, on the binned scale."""
+        r"""Each bin's width in 1-D, its area in 2-D, on the binned scale.
+
+        Returns
+        -------
+        np.ndarray
+            Size of each cell, in code order; in 2-D the first axis varies
+            slowest.
+        """
         widths = [np.asarray(self.intervals[k].length) for k in self._axes]
         if len(widths) == 1:
             return widths[0]
@@ -576,7 +605,14 @@ class FixedGrid(Binning):
         return index if rows is None else index[rows]
 
     def axis_codes(self):
-        r"""Bin code of each kept row on each axis, -1 off the bins."""
+        r"""Bin code of each kept row on each axis, -1 off the bins.
+
+        Returns
+        -------
+        dict
+            Maps each axis in ``axes`` to an integer array of the kept rows'
+            positions in that axis's ``intervals``; -1 off the bins.
+        """
         on = self._cut_on()
         columns = self._columns
         return {k: self._binned.codes(columns[k], on=on) for k in self._axes}
@@ -585,6 +621,12 @@ class FixedGrid(Binning):
         r"""Position of each kept row's joint bin in ``cells``, -1 in none.
 
         The first axis varies slowest.
+
+        Returns
+        -------
+        np.ndarray
+            Integer position in ``cells`` of each kept row's joint bin; -1
+            for a row off the bins on any axis.
         """
         intervals = self.intervals
         flat = None
@@ -601,7 +643,14 @@ class FixedGrid(Binning):
         return flat
 
     def cut(self):
-        r"""Bin of each kept row: a DataFrame of categoricals, one column per axis."""
+        r"""Bin of each kept row: a DataFrame of categoricals, one column per axis.
+
+        Returns
+        -------
+        pd.DataFrame
+            One categorical column per axis in ``axes``, holding each kept
+            row's bin interval.
+        """
         on = self._cut_on()
         columns = self._columns
         return pd.DataFrame(
@@ -626,6 +675,25 @@ class FixedGrid(Binning):
         On a log axis the densities ("d", "cd", "rd") are normalized over
         ``log10`` of that axis: the bins are log-space intervals, so cell
         areas on the log axes sum to 1.
+
+        Parameters
+        ----------
+        agg : pd.Series
+            Aggregated values of the occupied cells, indexed by their cells.
+        axnorm : str or None
+            A key of ``allowed_axnorm``, or None.
+        positions : np.ndarray
+            Cell code of each entry of ``agg``.
+
+        Returns
+        -------
+        pd.Series
+            ``agg`` normalized; unchanged when ``axnorm`` is None.
+
+        Raises
+        ------
+        ValueError
+            For a key the base :meth:`Binning.normalize` does not handle.
         """
         if axnorm == "c":
             return agg.divide(agg.groupby(level="x").max(), level="x")

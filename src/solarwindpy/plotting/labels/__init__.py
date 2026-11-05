@@ -49,7 +49,32 @@ def _clean_str_list_for_printing(data):
 
 
 def available():
-    """Print all available measurement, component and species labels."""
+    """Print all available measurement, component and species labels.
+
+    The listing has four parts: the measurements and components
+    :class:`~solarwindpy.plotting.labels.base.TeXlabel` translates, grouped
+    by first letter; the species it translates; and the special label
+    classes, the subclasses of
+    :class:`~solarwindpy.plotting.labels.special.ArbitraryLabel` in this
+    package. It is printed, not returned.
+
+    Examples
+    --------
+    >>> import contextlib
+    >>> import io
+    >>> from solarwindpy.plotting import labels
+    >>> printed = io.StringIO()
+    >>> with contextlib.redirect_stdout(printed):
+    ...     labels.available()
+    >>> lines = printed.getvalue().splitlines()
+    >>> lines[0]
+    'TeXlabel knows'
+    >>> [lines[i] for i in range(len(lines) - 1) if set(lines[i + 1]) == {"-"}]
+    ['Measurements', 'Components', 'Species', 'Special']
+    >>> special = lines[lines.index("Special") + 2].split(", ")
+    >>> "ManualLabel" in special and "Epoch" in special
+    True
+    """
 
     m = sorted(_quantities.QUANTITIES)
     c = sorted(base._trans_component.keys())

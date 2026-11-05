@@ -11,12 +11,36 @@ from . import base
 
 
 class Tensor(base._ComponentFrame):
-    """Container for tensor-valued quantities.
+    r"""Container for tensor-valued quantities.
 
     Parameters
     ----------
     data : :class:`pandas.DataFrame`
         Tensor data with components ``par``, ``per`` and ``scalar``.
+
+    Examples
+    --------
+    A thermal-speed tensor's :attr:`mag` combines the components as
+    :math:`\sqrt{(w_\parallel^2 + 2 w_\perp^2) / 3}`, so
+    :math:`w_\parallel = 5, w_\perp = 1` gives :math:`\sqrt{27/3} = 3`:
+
+    >>> import pandas as pd
+    >>> from solarwindpy.core.tensor import Tensor
+    >>> t = pd.date_range("2020-01-01", periods=2, freq="min")
+    >>> w = Tensor(pd.DataFrame({"par": [1.0, 5.0], "per": [1.0, 1.0],
+    ...                          "scalar": [1.0, 3.0]}, index=t))
+    >>> w.mag.tolist()
+    [1.0, 3.0]
+    >>> w("par").tolist()
+    [1.0, 5.0]
+
+    A :class:`~solarwindpy.core.plasma.Plasma` holds each species' thermal
+    speeds as a tensor:
+
+    >>> import solarwindpy as swp
+    >>> plasma = swp.examples.load_plasma()
+    >>> plasma.p1.w.data.loc[:, "par"].tolist()
+    [10.0, 20.0, 30.0]
     """
 
     def __init__(self, data: pd.DataFrame, *, _time_checked: pd.Index | None = None):

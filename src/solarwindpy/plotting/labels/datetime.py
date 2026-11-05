@@ -71,7 +71,13 @@ class Timedelta(special.ArbitraryLabel):
             return base._inU["unknown"]
 
     def set_offset(self, new):
-        r"""Store ``new`` converted with ``to_offset``, or unchanged if that fails."""
+        r"""Store ``new`` converted with ``to_offset``, or unchanged if that fails.
+
+        Parameters
+        ----------
+        new : str or pandas offset
+            Value passed to :func:`pandas.tseries.frequencies.to_offset`.
+        """
         try:
             new = to_offset(new)
         except ValueError:
@@ -122,7 +128,13 @@ class DateTime(special.ArbitraryLabel):
         return Path(self.kind.lower().replace(" ", "-"))
 
     def set_kind(self, new):
-        r"""Store the text of the label."""
+        r"""Store the text of the label.
+
+        Parameters
+        ----------
+        new : str
+            Text of the label, e.g. ``"Year"``.
+        """
         self._kind = new
 
 
@@ -189,15 +201,32 @@ class Epoch(special.ArbitraryLabel):
         return self._format_with_description(result)
 
     def set_larger(self, new):
-        r"""Store the larger time unit, title-cased."""
+        r"""Store the larger time unit, title-cased.
+
+        Parameters
+        ----------
+        new : str
+            The larger time unit, e.g. ``"Day"``.
+        """
         self._larger = new.title()
 
     def set_smaller(self, new):
-        r"""Store the smaller time unit, title-cased."""
+        r"""Store the smaller time unit, title-cased.
+
+        Parameters
+        ----------
+        new : str
+            The smaller time unit, e.g. ``"Hour"``.
+        """
         self._smaller = new.title()
 
     def set_space(self, new):
         r"""Set the spacing between words.
+
+        Parameters
+        ----------
+        new : str
+            A space, ``" "``, or one of the TeX spaces ``\,``, ``\;``, ``\:``.
 
         Raises
         ------
@@ -252,7 +281,13 @@ class Frequency(special.ArbitraryLabel):
         return self._path
 
     def set_other(self, other):
-        r"""Store ``other``, wrapping it in a ``Timedelta`` if it is not one."""
+        r"""Store ``other``, wrapping it in a ``Timedelta`` if it is not one.
+
+        Parameters
+        ----------
+        other : Timedelta or str
+            Time interval label, or the offset to build one from.
+        """
         if not isinstance(other, Timedelta):
             other = Timedelta(other)
 

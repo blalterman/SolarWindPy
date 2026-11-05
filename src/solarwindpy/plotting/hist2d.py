@@ -105,6 +105,25 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     The constructor bins the points on a 2-D
     :class:`~solarwindpy.plotting.binning.FixedGrid`; ``agg`` aggregates and
     normalizes, and ``make_plot`` draws the result with an optional colorbar.
+
+    Examples
+    --------
+    Count six points in a 3 x 2 grid given by its edges. Every bin is in the
+    result, indexed by its (x, y) intervals; an empty bin is NaN.
+
+    >>> import pandas as pd
+    >>> import matplotlib.pyplot as plt
+    >>> from solarwindpy.plotting.hist2d import Hist2D
+    >>> x = pd.Series([1.0, 1.0, 2.0, 2.0, 2.0, 3.0], name="x")
+    >>> y = pd.Series([1.0, 2.0, 1.0, 1.0, 2.0, 2.0], name="y")
+    >>> h = Hist2D(x, y, nbins=([0.5, 1.5, 2.5, 3.5], [0.5, 1.5, 2.5]))
+    >>> counts = h.agg()
+    >>> counts.tolist()
+    [1.0, 1.0, 2.0, 1.0, nan, 1.0]
+    >>> int(counts.sum())
+    6
+    >>> ax, mesh, cbar = h.make_plot()
+    >>> plt.close("all")
     """
 
     def __init__(
@@ -484,7 +503,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         Parameters
         ----------
-        ax:
+        ax : mpl.axes.Axes
             Axis on which to plot.
         smooth: bool
             If True, apply a Savitzky-Golay filter (:py:func:`scipy.signal.savgol_filter`)
@@ -495,13 +514,19 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             10% of the number of observations (`window_length`) and 3 (`polyorder`).
             Note that because `window_length` must be odd, if the 10% value is even, we
             take 1-window_length.
-        xlim, ylim: tuple of (float or None, float or None), optional
-            Inclusive ``(lower, upper)`` limits, in data coordinates, on the edge
-            vertices drawn. A vertex outside a limit is dropped; a vertex exactly
-            on a limit is kept. ``None`` leaves that side unbounded. Default
-            ``(None, None)``.
-        kwargs:
-            Passed to `ax.plot`
+        **kwargs
+            ``xlim`` and ``ylim``, each a tuple ``(lower, upper)`` of float
+            or None: inclusive limits, in data coordinates, on the edge
+            vertices drawn. A vertex outside a limit is dropped; a vertex
+            exactly on a limit is kept. ``None`` leaves that side unbounded.
+            Default ``(None, None)``. ``color`` defaults to ``"cyan"`` and
+            ``label`` labels the top edge only. The rest are passed to
+            `ax.plot`.
+
+        Returns
+        -------
+        etop, ebottom : list of mpl.lines.Line2D
+            The lines ``ax.plot`` draws for the top and the bottom edge.
         """
 
         top, bottom = self.get_border()

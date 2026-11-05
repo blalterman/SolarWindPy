@@ -41,6 +41,28 @@ class Spacecraft(base.Base):
         Identifier of the spacecraft.
     frame : str
         Reference frame of the vectors, e.g. ``"HCI"`` or ``"GSE"``.
+
+    Examples
+    --------
+    Build a spacecraft from the example Parker Solar Probe trajectory:
+
+    >>> import solarwindpy as swp
+    >>> from solarwindpy.core.spacecraft import Spacecraft
+    >>> data = swp.examples.load_plasma().sc.data
+    >>> data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE
+    [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),
+     ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]
+    >>> times = data.index.strftime("%Y-%m-%d %H:%M:%S.%f")
+    >>> times.tolist()  # doctest: +NORMALIZE_WHITESPACE
+    ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',
+     '2022-10-09 01:47:01.234560']
+    >>> spacecraft = Spacecraft(data, "psp", "HCI")
+    >>> spacecraft.name, spacecraft.frame
+    ('PSP', 'HCI')
+    >>> spacecraft.pos.data.loc[:, "x"].tolist()
+    [-42.0, -22.0, -34.0]
+    >>> spacecraft.v.data.loc[:, "y"].tolist()
+    [-80.0, -70.0, -90.0]
     """
 
     def __init__(self, data, name, frame):
@@ -59,28 +81,6 @@ class Spacecraft(base.Base):
         frame: str
             The frame of reference for the spacecraft position and velocity, e.g.
             Geocentric Solar Ecliptic (GSE) or Heliocentric Internal (HCI).
-
-        Examples
-        --------
-        Build a spacecraft from the example Parker Solar Probe trajectory:
-
-        >>> import solarwindpy as swp
-        >>> from solarwindpy.core.spacecraft import Spacecraft
-        >>> data = swp.examples.load_plasma().sc.data
-        >>> data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE
-        [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),
-         ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]
-        >>> times = data.index.strftime("%Y-%m-%d %H:%M:%S.%f")
-        >>> times.tolist()  # doctest: +NORMALIZE_WHITESPACE
-        ['1995-01-01 12:35:00.000000', '2022-03-23 19:29:09.000000',
-         '2022-10-09 01:47:01.234560']
-        >>> spacecraft = Spacecraft(data, "psp", "HCI")
-        >>> spacecraft.name, spacecraft.frame
-        ('PSP', 'HCI')
-        >>> spacecraft.pos.data.loc[:, "x"].tolist()
-        [-42.0, -22.0, -34.0]
-        >>> spacecraft.v.data.loc[:, "y"].tolist()
-        [-80.0, -70.0, -90.0]
         """
         # `Base.__init__` calls `set_data`, which needs neither frame nor name.
         super(Spacecraft, self).__init__(data)

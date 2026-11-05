@@ -149,10 +149,22 @@ def _class_formula(cls):
 
 
 def available():
-    """Print every available fit function, its module and its LaTeX formula.
+    r"""Print every available fit function, its module and its LaTeX formula.
 
     The formula is read from each class's ``TeX_function`` without fitting any
-    data. Formulas that span several lines are joined with ``"; "``.
+    data. Formulas that span several lines are joined with ``"; "``. The
+    table is printed; nothing is returned.
+
+    Examples
+    --------
+    >>> from solarwindpy.fitfunctions import available
+    >>> available()  # doctest: +ELLIPSIS
+    Fit function        Module        LaTeX
+    ------------------  ------------  -----
+    Exponential         exponentials  f(x)=A \cdot e^{-kx}
+    ...
+    Line                lines         f(x)=m \cdot x + b
+    ...
     """
     rows = [
         (cls.__name__, cls.__module__.rsplit(".", 1)[-1], _class_formula(cls))

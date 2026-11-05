@@ -424,10 +424,31 @@ class Plasma(base.Base):
             The key for getting spacecraft data from the HDF5 file.
         auxkey: str, "FC_AUX"
             key for getting auxiliary data from HDF5 file.
+        sc_frame : str, optional
+            Coordinate frame of the spacecraft data, passed to
+            :class:`~solarwindpy.core.spacecraft.Spacecraft`. Required when
+            ``sckey`` is set.
+        sc_name : str, optional
+            Name of the spacecraft, passed to
+            :class:`~solarwindpy.core.spacecraft.Spacecraft`. Required when
+            ``sckey`` is set.
         start, stop: None, parsable by `pd.to_datetime`
             If not None, time to start/stop for loading data.
         kwargs:
             Passed to `Plasma.__init__`.
+
+        Returns
+        -------
+        Plasma
+            The plasma built from the file's ``dkey`` table, with spacecraft
+            data from ``sckey`` and auxiliary data from ``auxkey`` attached
+            when those keys are set.
+
+        Raises
+        ------
+        ValueError
+            If a species is not a string, or if ``sckey`` is set and
+            ``sc_name`` or ``sc_frame`` is None.
         """
 
         data = pd.read_hdf(fname, key=dkey)
@@ -879,6 +900,14 @@ class Plasma(base.Base):
         Rows out of time order are sorted with a warning, as at construction
         (see :class:`Plasma`). The magnetic field is rebuilt from columns of
         the data just checked, so its time checks are skipped.
+
+        Parameters
+        ----------
+        new : pd.DataFrame
+            Plasma data with column levels named ``"M"``, ``"C"`` and
+            ``"S"``, indexed by time. Only the ``b``, ``n``, ``v`` and ``w``
+            measurements of the plasma's species (and of no species) are
+            kept; other columns are dropped with a log message.
 
         Raises
         ------
@@ -1606,9 +1635,9 @@ species: {}
 
         Parameters
         ----------
-        species: str
-            Each species is a string. It cannot be a sum of species,
-            nor can it be an iterable of species.
+        s0, s1 : str
+            The two species. Each must name a single species: it cannot be
+            a sum of species, nor an iterable of species.
 
         Returns
         -------
@@ -1911,6 +1940,27 @@ species: {}
         otherwise from the core protons ``p1``; the beam ``p2`` is never used.
         The electron :class:`~solarwindpy.core.ions.Ion` is derived row by row
         from the plasma's already-checked data, so it skips the time checks.
+
+        Parameters
+        ----------
+        inplace : bool, optional
+            If True, also add the estimated electrons to this plasma's data
+            as species ``e`` (updating them if their columns already exist).
+            Default False.
+
+        Returns
+        -------
+        Ion
+            The estimated electrons, species ``e``, with density ``n``,
+            velocity ``v`` and thermal speeds ``w`` (``par``, ``per`` and
+            ``scalar`` all equal). Rows with zero estimated density are NaN.
+
+        Raises
+        ------
+        NotImplementedError
+            If the plasma already holds species ``e``.
+        ValueError
+            If the plasma holds neither ``p`` nor ``p1``, or holds both.
         """
 
         species = self.species
@@ -2078,6 +2128,19 @@ species: {}
             ``raffaella_version`` and ``sc`` select its GSE-to-RTN
             verification aid, and the rest reach its ``rolling`` call, e.g.
             ``window`` and ``min_periods``.
+
+        Returns
+        -------
+        :class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`
+            Built from the Cartesian magnetic field, the velocity (the
+            species' velocity, or the differential velocity ``s0`` relative
+            to ``s1`` when ``species`` is ``"s0,s1"``) and the mass density
+            of the species (of ``s1`` in the two-species form).
+
+        Raises
+        ------
+        ValueError
+            If ``species`` contains more than one comma.
         """
         species_ = species.split(",")
 

@@ -221,6 +221,31 @@ class TeXlabel(Base):
     -----
     Comparison operators and hashing use :class:`str` of the object so two
     labels representing the same quantity compare equal.
+
+    Examples
+    --------
+    A label for the x component of the proton velocity:
+
+    >>> from solarwindpy.plotting.labels.base import TeXlabel
+    >>> label = TeXlabel(("v", "x", "p"))
+    >>> print(label.tex)
+    {v}_{{X};{p}}
+    >>> print(label.units)
+    \mathrm{km \; s^{-1}}
+    >>> print(label)
+    ${v}_{{X};{p}} \; \left[\mathrm{km \; s^{-1}}\right]$
+    >>> label.path.as_posix()
+    'v_x_p'
+
+    A ratio of two quantities with the same units is dimensionless:
+
+    >>> ratio = TeXlabel(("n", "", "a"), ("n", "", "p"))
+    >>> print(ratio.tex)
+    n_{\alpha}/n_{p}
+    >>> print(ratio.units)
+    \#
+    >>> ratio.path.as_posix()
+    'n_a-OV-n_p'
     """
 
     def __init__(
@@ -292,7 +317,16 @@ class TeXlabel(Base):
         return self._axnorm
 
     def set_mcs(self, mcs0, mcs1):
-        r"""Store the numerator and optional denominator as ``_MCS`` namedtuples."""
+        r"""Store the numerator and optional denominator as ``_MCS`` namedtuples.
+
+        Parameters
+        ----------
+        mcs0 : tuple of str
+            ``(measurement, component, species)`` of the numerator.
+        mcs1 : tuple of str or None
+            ``(measurement, component, species)`` of the denominator, or None
+            for a label that is not a ratio.
+        """
         mcs0_ = _MCS(*mcs0)
 
         mcs1_ = None
@@ -303,7 +337,13 @@ class TeXlabel(Base):
         self._mcs1 = mcs1_
 
     def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line."""
+        r"""Set whether units are placed on a new line.
+
+        Parameters
+        ----------
+        new : bool
+            If True, units go on a new line; stored as :class:`bool`.
+        """
         self._new_line_for_units = bool(new)
 
     def set_axnorm(self, new):
@@ -322,6 +362,16 @@ class TeXlabel(Base):
 
     def make_species(self, pattern):
         r"""Replace each species code in ``pattern`` that has a TeX translation.
+
+        Parameters
+        ----------
+        pattern : str
+            Text holding species codes, e.g. ``"a+p1"``.
+
+        Returns
+        -------
+        str
+            ``pattern`` with each species code replaced by its TeX.
 
         Notes
         -----

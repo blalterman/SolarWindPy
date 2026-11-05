@@ -288,8 +288,8 @@ class Base(ABC):
 
         Parameters
         ----------
-        x, y, z : str or solarwindpy.plotting.labels.base.TeXlabel, optional
-            New axis labels.
+        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
+            New axis labels under the keywords ``x``, ``y`` and ``z``.
 
         Raises
         ------
@@ -732,6 +732,13 @@ class BinnedPlot(Base):
 
         A cell with fewer than ``lower`` or more than ``upper`` rows is NaN in
         ``agg``. Bounds are inclusive; None leaves that side open.
+
+        Parameters
+        ----------
+        lower : int or float or None, optional
+            Minimum count per cell.
+        upper : int or float or None, optional
+            Maximum count per cell.
         """
         assert isinstance(lower, Number) or lower is None
         assert isinstance(upper, Number) or upper is None
@@ -752,6 +759,12 @@ class BinnedPlot(Base):
         The keys the plot's cells support are ``binning.allowed_axnorm``; see
         ``binning.normalize``. A ``Count`` label on the aggregated axis is
         rebuilt to name the normalization.
+
+        Parameters
+        ----------
+        new : str or None
+            Normalization key, matched case-insensitively; None for no
+            normalization.
 
         Raises
         ------
@@ -774,6 +787,11 @@ class BinnedPlot(Base):
         r"""Set axis labels; a ``Count`` label of the aggregated axis follows ``axnorm``.
 
         See ``Base.set_labels``.
+
+        Parameters
+        ----------
+        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
+            New axis labels under the keywords ``x``, ``y`` and ``z``.
         """
         axis = self.agg_axes
         kwargs[axis] = self._count_with_axnorm(
@@ -850,6 +868,19 @@ class BinnedPlot(Base):
         normalized by ``axnorm`` (``binning.normalize``). Every cell is in
         the result, indexed by ``binning.cells``; a cell no row falls in is
         NaN. A ``ColorPlot`` then sets the cells outside ``alim`` to NaN.
+
+        Parameters
+        ----------
+        fcn : str or callable, optional
+            Aggregation passed to the cells' ``SeriesGroupBy.agg``.
+            If None, ``"count"`` when the plot counts rows, else ``"mean"``.
+        **kwargs
+            Passed to the aggregation.
+
+        Returns
+        -------
+        pd.Series
+            The aggregated value of every cell, indexed by ``binning.cells``.
         """
         tko = self.agg_axes
 
@@ -918,6 +949,11 @@ class BinnedPlot(Base):
         2-D) survives aggregation. The series shares the same index as the
         stored data. To align with a different index you may need to adjust
         the returned series.
+
+        Returns
+        -------
+        pd.Series
+            True for each plotted row, on the index of ``data``.
         """
         agg = self.agg()
         tk = self._rows_in_cells(np.flatnonzero(agg.notna().to_numpy()))
@@ -929,10 +965,18 @@ class BinnedPlot(Base):
         return tk
 
     def get_subset_above_threshold(self, threshold, fcn="count"):
-        r"""Get the subset of data above a given threshold using `fcn` to.
+        r"""Get the subset of data in cells whose aggregate meets a threshold.
 
-        aggregate. If `axnorm` set, this is used. A row is kept when its cell
-        (e.g. its joint (x, y) bin in 2-D) meets `threshold`.
+        The cells are aggregated with ``fcn`` through :meth:`agg`, so
+        ``axnorm`` and ``clim`` apply. A row is kept when its cell (e.g. its
+        joint (x, y) bin in 2-D) aggregates to at least ``threshold``.
+
+        Parameters
+        ----------
+        threshold : int or float
+            Minimum aggregated value of a kept cell, inclusive.
+        fcn : str or callable, optional
+            Aggregation passed to :meth:`agg`.
 
         Returns
         -------

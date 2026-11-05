@@ -204,7 +204,47 @@ class SIDC_ID(ID):
 
 
 class SIDCLoader(DataLoader):
-    r"""Download, cache, and load one SIDC sunspot-number series."""
+    r"""Download, cache, and load one SIDC sunspot-number series.
+
+    Parameters
+    ----------
+    key : str
+        Series key, as in :class:`SIDC_ID` (e.g. ``"m"`` for the monthly
+        total).
+    url : str
+        Download URL of the series, or a local path to a file in SILSO's
+        layout, which is read as is and never cached.
+
+    Examples
+    --------
+    In normal use the URL comes from :class:`SIDC_ID`. This example stays
+    offline by reading a small local file in SILSO's monthly layout
+    (year; month; year fraction; SSN; standard deviation; number of
+    observations; definitive flag), where ``-1`` marks a missing value:
+
+    >>> import tempfile
+    >>> from pathlib import Path
+    >>> rows = (
+    ...     "2019;12;2019.958;1.5;0.4;500;1\n"
+    ...     "2020;01;2020.042;6.2;1.1;400;1\n"
+    ...     "2020;02;2020.124;-1;-1;0;0\n"
+    ... )
+    >>> with tempfile.TemporaryDirectory() as d:
+    ...     path = Path(d) / "monthly.csv"
+    ...     _ = path.write_text(rows)
+    ...     loader = SIDCLoader("m", str(path))
+    ...     loader.load_data()
+    >>> loader.data.index.strftime("%Y-%m").tolist()
+    ['2019-12', '2020-01', '2020-02']
+    >>> loader.data["ssn"].tolist()
+    [1.5, 6.2, nan]
+
+    Each month is labelled with the solar cycle, from :class:`SSNExtrema`,
+    that contains it:
+
+    >>> loader.data["cycle"].tolist()
+    [24, 25, 25]
+    """
 
     @property
     def max_age(self):
@@ -212,7 +252,13 @@ class SIDCLoader(DataLoader):
         return pd.Timedelta(days=1)
 
     def convert_nans(self, data):
-        r"""Replace SILSO's missing-value sentinel, -1, with NaN in place."""
+        r"""Replace SILSO's missing-value sentinel, -1, with NaN in place.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            Series read from SILSO; modified in place.
+        """
         data.replace(-1, np.nan, inplace=True)
 
     def read_data(self, path):
@@ -466,8 +512,29 @@ class SIDC(ActivityIndicator):
     def cut_spec_by_ssn_band(self, key="ssn", dssn=2.0):
         r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn.
 
+        The bands are centred on ``0, 2 dssn, 4 dssn, ...`` below the maximum
+        of ``key`` in :attr:`data`, each spanning centre +/- ``dssn``. The
+        values cut are those of :attr:`interpolated`, i.e. the times of the
+        last :meth:`interpolate_data` call. The result is also stored as
+        :attr:`spec_by_ssn_band`, and the bands as :attr:`ssn_band_intervals`.
+
+        Parameters
+        ----------
+        key : str, optional
+            Column to cut, ``"ssn"`` (default) or the normalized ``"nssn"``.
+        dssn : float, optional
+            Half-width of each band, in the units of ``key``. Defaults to 2.
+
+        Returns
+        -------
+        pandas.Series
+            Band (a :class:`pandas.Interval`) holding each interpolated
+            value, named ``"<key>_band"``; NaN where no band holds it.
+
         Raises
         ------
+        ValueError
+            If ``key`` is ``"nssn"`` and ``dssn`` is not below 1.
         KeyError
             If :attr:`interpolated` has no ``key`` column, naming it.
         """
@@ -614,10 +681,32 @@ class SIDC(ActivityIndicator):
 
 
 class SSNExtrema(IndicatorExtrema):
-    r"""Solar-cycle sunspot-number extrema tabulated in ``ssn_extrema.csv``."""
+    r"""Solar-cycle sunspot-number extrema tabulated in ``ssn_extrema.csv``.
+
+    The table ships with the package, so no download is needed. It takes
+    no arguments.
+
+    Examples
+    --------
+    >>> extrema = SSNExtrema()
+    >>> extrema.data.loc[24].dt.strftime("%Y-%m-%d").to_dict()
+    {'Min': '2008-12-01', 'Max': '2014-04-01'}
+
+    Cycle 24 rises from its minimum to its maximum and falls until the
+    minimum of cycle 25:
+
+    >>> extrema.cycle_intervals.loc[24, "Fall"]
+    Interval(2014-04-01 00:00:00, 2019-12-01 00:00:00, closed='right')
+    """
 
     def load_or_set_data(self, *args, **kwargs):
         r"""Read the ``Min`` and ``Max`` dates of each cycle from ``ssn_extrema.csv``.
+
+        Parameters
+        ----------
+        *args, **kwargs
+            Must be empty; accepted for the signature of
+            :meth:`~solarwindpy.solar_activity.base.IndicatorExtrema.load_or_set_data`.
 
         Raises
         ------

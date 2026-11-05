@@ -153,7 +153,7 @@ def beta_ani_inst(beta, a=None, b=None, c=None):
 
 
 class StabilityCondition(object):
-    """Evaluate plasma stability using the Verscharen et al. fits.
+    r"""Evaluate plasma stability using the Verscharen et al. fits.
 
     Parameters
     ----------
@@ -181,6 +181,22 @@ class StabilityCondition(object):
     (beta at or below the fit offset ``c`` of Eq. (5), or beta missing) or
     the anisotropy is missing, the measurement is not unstable to that
     instability.
+
+    Examples
+    --------
+    Four measurements at the same beta and increasing anisotropy, tested
+    against the thresholds for gamma / Omega_p = 10^-3:
+
+    >>> import pandas as pd
+    >>> beta = pd.Series([1.0, 1.0, 1.0, 1.0])
+    >>> R = pd.Series([0.2, 1.0, 1.5, 3.0])
+    >>> sc = StabilityCondition(-3, beta, R)
+    >>> sc.instability_thresholds.loc[0].round(3).to_dict()
+    {'AIC': 1.436, 'FMW': 0.226, 'MM': 1.765, 'OFI': -0.25}
+    >>> sc.stability_bin.tolist()
+    [1, 2, 3, 4]
+    >>> [sc.stability_map[k].replace("\n", " ") for k in sc.stability_bin]
+    ['Between FMW & OFI', 'Stable', 'Between AIC & MM', 'MM']
     """
 
     def __init__(self, growth_rate, beta, R):
@@ -338,7 +354,20 @@ class StabilityCondition(object):
         self._instability_parameters = temp
 
     def set_beta_ani(self, beta, R):
-        """Set the beta and anisotropy values."""
+        """Set the beta and anisotropy values.
+
+        Parameters
+        ----------
+        beta : pandas.Series
+            Parallel proton beta.
+        R : pandas.Series
+            Temperature anisotropy, with the same shape as ``beta``.
+
+        Raises
+        ------
+        AssertionError
+            If ``beta`` and ``R`` differ in shape.
+        """
 
         assert beta.shape == R.shape
         data = pd.concat({"beta": beta, "R": R}, axis=1)
@@ -422,6 +451,21 @@ class StabilityContours(object):
     ----------
     beta : numpy.ndarray
         Parallel proton beta values used for the contours.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> contours = StabilityContours(np.logspace(0, 1, 3))
+    >>> contours.contours.shape
+    (3, 4)
+    >>> contours.contours.loc[-3, "AIC"].round(3)
+    array([1.436, 1.267, 1.163])
+    >>> fig, ax = plt.subplots()
+    >>> ax, lines, cbar = contours.plot_contours(ax, growth_rate=-3)
+    >>> sorted(lines)
+    [(-3, 'AIC'), (-3, 'FMW'), (-3, 'MM'), (-3, 'OFI')]
+    >>> plt.close("all")
     """
 
     def __init__(self, beta):
@@ -434,6 +478,18 @@ class StabilityContours(object):
         return self._beta
 
     def set_beta(self, new):
+        r"""Set :attr:`beta`.
+
+        Parameters
+        ----------
+        new : numpy.ndarray
+            Parallel proton beta values at which to evaluate the contours.
+
+        Raises
+        ------
+        AssertionError
+            If ``new`` is not a :class:`numpy.ndarray`.
+        """
         assert isinstance(new, np.ndarray)
         self._beta = new
 
@@ -453,6 +509,13 @@ class StabilityContours(object):
 
     @property
     def contours(self):
+        r"""Threshold anisotropy of each instability at every :attr:`beta`.
+
+        A :class:`pandas.DataFrame` indexed by growth rate (``-4``, ``-3``,
+        ``-2``) with one column per instability (``AIC``, ``FMW``, ``MM``,
+        ``OFI``); each cell is the :func:`beta_ani_inst` array evaluated at
+        :attr:`beta` with that row's ``insta_params``.
+        """
         return self._contours
 
     def plot_contours(

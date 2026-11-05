@@ -490,6 +490,8 @@ class TrendFit(object):
 
         Parameters
         ----------
+        **kwargs
+            The keyword options listed below; any other raises TypeError.
         annotate_kwargs : dict, optional
             Passed to the fit annotation. Default
             ``dict(xloc=0.5, yloc=0.1, va="bottom")``.
@@ -532,8 +534,19 @@ class TrendFit(object):
     ):
         r"""Plot the trend fit over the bin results, with the trend's residuals.
 
-        ``trend_plot_kwargs`` go to :meth:`plot_trend_fit_resid` and
-        ``bin_plot_kwargs`` to :meth:`plot_bin_results`.
+        Parameters
+        ----------
+        trend_plot_kwargs : dict, optional
+            Keywords passed to :meth:`plot_trend_fit_resid`.
+        bin_plot_kwargs : dict, optional
+            Keywords passed to :meth:`plot_bin_results`, which draws on the
+            trend fit's axes.
+
+        Returns
+        -------
+        hax, rax : matplotlib.axes.Axes
+            The axes of the trend fit and bin results, which carry a legend,
+            and the axes of the trend's residuals.
         """
         if trend_plot_kwargs is None:
             trend_plot_kwargs = {}
@@ -553,6 +566,22 @@ class TrendFit(object):
         ``bin_plot_kwargs`` go to :meth:`plot_bin_results`; ``annotate_kwargs``,
         ``fit_kwargs`` and the rest to the trend plotter's
         :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit`.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on. If None, a new figure and axes are created.
+        **kwargs
+            ``bin_plot_kwargs`` (dict, default empty) is passed to
+            :meth:`plot_bin_results`. ``annotate_kwargs`` (dict, default
+            empty), ``fit_kwargs`` (dict, default
+            ``dict(color="limegreen")``) and any other keyword are passed to
+            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.plot_raw_used_fit`.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+            The axes drawn on.
         """
         if ax is None:
             fig, ax = subplots()
@@ -580,6 +609,9 @@ class TrendFit(object):
 
         Parameters
         ----------
+        **kwargs
+            Any of ``x``, ``y`` and ``z``, passed to the trend plotter's
+            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.set_labels`.
         x:
             The trend's x-label: the bin fits' legend label.
         y:

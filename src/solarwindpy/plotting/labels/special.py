@@ -189,11 +189,24 @@ class ManualLabel(ArbitraryLabel):
         return path
 
     def set_tex(self, tex):
-        r"""Store ``tex`` with surrounding ``$`` stripped."""
+        r"""Store ``tex`` with surrounding ``$`` stripped.
+
+        Parameters
+        ----------
+        tex : str
+            TeX of the quantity.
+        """
         self._tex = tex.strip("$")
 
     def set_unit(self, unit):
-        r"""Store ``unit``, translating a known units key to TeX."""
+        r"""Store ``unit``, translating a known units key to TeX.
+
+        Parameters
+        ----------
+        unit : str
+            A key of the units table in :mod:`solarwindpy.core.quantities`, or
+            raw TeX; surrounding ``$`` are stripped.
+        """
         unit = base._inU.get(unit, unit)
         self._unit = unit.strip("$")
 
@@ -226,7 +239,15 @@ class CarringtonRotation(ArbitraryLabel):
     """Carrington rotation count."""
 
     def __init__(self, short_label=True, description=None):
-        """Instantiate the label."""
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        short_label : bool, default True
+            If True, ``tex`` is the abbreviation CR; otherwise it is spelled out.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self._short_label = bool(short_label)
         self.set_description(description)
@@ -376,7 +397,17 @@ class Probability(ArbitraryLabel):
     """Probability that a quantity meets a comparison criterion."""
 
     def __init__(self, other_label, comparison=None, description=None):
-        """Instantiate the label."""
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        other_label : solarwindpy.plotting.labels.base.Base
+            Label of the quantity being compared.
+        comparison : str, optional
+            Comparison criterion, e.g. ``"> 5"``. None means no comparison.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
@@ -413,11 +444,28 @@ class Probability(ArbitraryLabel):
         return self._comparison
 
     def set_other_label(self, other):
-        r"""Store the label of the quantity being compared."""
+        r"""Store the label of the quantity being compared.
+
+        Parameters
+        ----------
+        other : solarwindpy.plotting.labels.base.Base
+            Label of the quantity being compared.
+
+        Raises
+        ------
+        TypeError
+            If ``other`` is not a label object.
+        """
         self._other_label = _check_label(other, "other_label")
 
     def set_comparison(self, new):
-        r"""Store the comparison as a string; None becomes ``""``."""
+        r"""Store the comparison as a string; None becomes ``""``.
+
+        Parameters
+        ----------
+        new : str or None
+            Comparison criterion, e.g. ``"> 5"``.
+        """
         if new is None:
             new = ""
         self._comparison = str(new)
@@ -451,7 +499,19 @@ class CountOther(ArbitraryLabel):
     def __init__(
         self, other_label, comparison=None, new_line_for_units=False, description=None
     ):
-        """Instantiate the label."""
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        other_label : solarwindpy.plotting.labels.base.Base
+            Label of the quantity being compared.
+        comparison : str, optional
+            Comparison criterion, e.g. ``"> 5"``. None means no comparison.
+        new_line_for_units : bool, default False
+            If True, a newline separates label and units.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
@@ -497,15 +557,38 @@ class CountOther(ArbitraryLabel):
         return self._new_line_for_units
 
     def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line."""
+        r"""Set whether units are placed on a new line.
+
+        Parameters
+        ----------
+        new : bool
+            If True, units go on a new line; stored as :class:`bool`.
+        """
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        r"""Store the label of the quantity being compared."""
+        r"""Store the label of the quantity being compared.
+
+        Parameters
+        ----------
+        other : solarwindpy.plotting.labels.base.Base
+            Label of the quantity being compared.
+
+        Raises
+        ------
+        TypeError
+            If ``other`` is not a label object.
+        """
         self._other_label = _check_label(other, "other_label")
 
     def set_comparison(self, new):
-        r"""Store the comparison as a string; None becomes ``""``."""
+        r"""Store the comparison as a string; None becomes ``""``.
+
+        Parameters
+        ----------
+        new : str or None
+            Comparison criterion, e.g. ``"> 5"``.
+        """
         if new is None:
             new = ""
         self._comparison = str(new)
@@ -544,7 +627,22 @@ class MathFcn(ArbitraryLabel):
         new_line_for_units=False,
         description=None,
     ):
-        """Instantiate the label."""
+        r"""Instantiate the label.
+
+        Parameters
+        ----------
+        fcn : str
+            TeX name of the function, e.g. ``"log_{10}"``, set in ``\mathrm``.
+        other_label : solarwindpy.plotting.labels.base.Base
+            Label the function is applied to.
+        dimensionless : bool, default True
+            If True, the units are dimensionless; otherwise they are the
+            function applied to the other label's units.
+        new_line_for_units : bool, default False
+            If True, a newline separates label and units.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_other_label(other_label)
         self.set_function(fcn)
@@ -598,21 +696,50 @@ class MathFcn(ArbitraryLabel):
         return self._new_line_for_units
 
     def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line."""
+        r"""Set whether units are placed on a new line.
+
+        Parameters
+        ----------
+        new : bool
+            If True, units go on a new line; stored as :class:`bool`.
+        """
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        r"""Store the label the function is applied to."""
+        r"""Store the label the function is applied to.
+
+        Parameters
+        ----------
+        other : solarwindpy.plotting.labels.base.Base
+            Label the function is applied to.
+
+        Raises
+        ------
+        TypeError
+            If ``other`` is not a label object.
+        """
         self._other_label = _check_label(other, "other_label")
 
     def set_function(self, new):
-        r"""Store the function name as a string; None becomes ``""``."""
+        r"""Store the function name as a string; None becomes ``""``.
+
+        Parameters
+        ----------
+        new : str or None
+            TeX name of the function, e.g. ``"log_{10}"``.
+        """
         if new is None:
             new = ""
         self._function = str(new)
 
     def set_dimensionless(self, new):
-        r"""Set whether the result is labelled dimensionless."""
+        r"""Set whether the result is labelled dimensionless.
+
+        Parameters
+        ----------
+        new : bool
+            If True, the units are dimensionless; stored as :class:`bool`.
+        """
         self._dimensionless = bool(new)
 
     def _build_tex(self):
@@ -706,11 +833,28 @@ class AbsoluteValue(ArbitraryLabel):
         return self._new_line_for_units
 
     def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line."""
+        r"""Set whether units are placed on a new line.
+
+        Parameters
+        ----------
+        new : bool
+            If True, units go on a new line; stored as :class:`bool`.
+        """
         self._new_line_for_units = bool(new)
 
     def set_other_label(self, other):
-        r"""Store the label the function is applied to."""
+        r"""Store the label the function is applied to.
+
+        Parameters
+        ----------
+        other : solarwindpy.plotting.labels.base.Base
+            Label the function is applied to.
+
+        Raises
+        ------
+        TypeError
+            If ``other`` is not a label object.
+        """
         self._other_label = _check_label(other, "other_label")
 
     def _build_tex(self):
@@ -764,6 +908,12 @@ class Distance2Sun(ArbitraryLabel):
 
     def set_units(self, units):
         r"""Set the distance units.
+
+        Parameters
+        ----------
+        units : str
+            ``"rs"``, ``"re"`` or ``"au"`` (case-insensitive), translated to
+            TeX, or ``"m"`` or ``"km"``.
 
         Raises
         ------
@@ -856,7 +1006,20 @@ class ComparisonLabel(ArbitraryLabel):
     """Label comparing two other labels via a function."""
 
     def __init__(self, labelA, labelB, fcn_name, fcn=None, description=None):
-        """Instantiate the label."""
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        labelA, labelB : solarwindpy.plotting.labels.base.Base
+            The two labels compared; if both have units, they must match.
+        fcn_name : str
+            Name of the function; see ``set_function``.
+        fcn : str, optional
+            Template containing the keys ``$labelA`` and ``$labelB``; see
+            ``set_function``.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
@@ -904,6 +1067,11 @@ class ComparisonLabel(ArbitraryLabel):
 
     def set_constituents(self, labelA, labelB):
         r"""Store the two labels and their shared units.
+
+        Parameters
+        ----------
+        labelA, labelB : solarwindpy.plotting.labels.base.Base
+            The two labels compared.
 
         Raises
         ------
@@ -1007,7 +1175,19 @@ class Xcorr(ArbitraryLabel):
     """Cross-correlation coefficient between two labels."""
 
     def __init__(self, labelA, labelB, method, short_tex=False, description=None):
-        """Instantiate the label."""
+        r"""Instantiate the label.
+
+        Parameters
+        ----------
+        labelA, labelB : str or solarwindpy.plotting.labels.base.Base
+            The two correlated quantities: label objects, or raw TeX strings.
+        method : str
+            Name of the correlation method; see ``set_method``.
+        short_tex : bool, default False
+            If True, ``tex`` uses the short form :math:`\rho`.
+        description : str or None, optional
+            Human-readable description displayed above the mathematical label.
+        """
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)
@@ -1057,6 +1237,12 @@ class Xcorr(ArbitraryLabel):
     def set_constituents(self, labelA, labelB):
         r"""Store the two labels.
 
+        Parameters
+        ----------
+        labelA, labelB : str or solarwindpy.plotting.labels.base.Base
+            The two correlated quantities: label objects, or raw TeX strings
+            used as both TeX and save path.
+
         Raises
         ------
         TypeError
@@ -1071,11 +1257,24 @@ class Xcorr(ArbitraryLabel):
         self._labelB = labelB
 
     def set_method(self, new):
-        r"""Store the correlation method name, title-cased."""
+        r"""Store the correlation method name, title-cased.
+
+        Parameters
+        ----------
+        new : str
+            Name of the correlation method. The long form of ``tex`` shows
+            it; the short form subscripts :math:`\rho` with its first letter.
+        """
         self._method = str(new).title()
 
     def set_short_tex(self, new):
-        r"""Set whether ``tex`` uses the short form."""
+        r"""Set whether ``tex`` uses the short form.
+
+        Parameters
+        ----------
+        new : bool
+            If True, ``tex`` uses the short form; stored as :class:`bool`.
+        """
         self._short_tex = bool(new)
 
     def _build_tex(self):

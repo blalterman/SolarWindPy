@@ -20,8 +20,6 @@ import inspect
 import pkgutil
 import re
 
-import pytest
-
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -201,11 +199,6 @@ def test_public_objects_are_found():
     assert "solarwindpy.examples.load_plasma" in names
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="14 public methods and properties have no docstring; remove this marker when the docstring work lands",
-)
 def test_every_public_object_has_a_docstring():
     """Every public class, method, property and function has a docstring.
 
@@ -215,11 +208,6 @@ def test_every_public_object_has_a_docstring():
     assert not missing, missing
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="about 100 public methods do not name every argument under Parameters; remove this marker when the docstring work lands",
-)
 def test_every_public_argument_is_in_a_parameters_section():
     """Every argument of a public method or function is named under Parameters.
 
@@ -243,11 +231,6 @@ def test_every_public_argument_is_in_a_parameters_section():
     assert not missing, missing
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="31 public methods return a value without a Returns section; remove this marker when the docstring work lands",
-)
 def test_every_public_function_returning_a_value_has_a_returns_section():
     """A public method or function whose body returns a value has Returns.
 
@@ -266,11 +249,6 @@ def test_every_public_function_returning_a_value_has_a_returns_section():
     assert not missing, missing
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="entry points in ENTRY_POINTS lack an Examples section; remove this marker when the docstring work lands",
-)
 def test_every_entry_point_has_an_examples_section():
     """Every class and function in ENTRY_POINTS has an Examples section.
 

@@ -81,6 +81,15 @@ class ID(Base):
     def set_key(self, key):
         """Set the identifier key and construct the download URL.
 
+        Sets :attr:`key` and :attr:`url`, the subclass's base URL joined to
+        the fragment ``key`` maps to.
+
+        Parameters
+        ----------
+        key : str
+            Key of the data product, one of the keys of the subclass's URL
+            map.
+
         Raises
         ------
         NotImplementedError
@@ -137,12 +146,24 @@ class DataLoader(Base):
 
     @abstractstaticmethod
     def convert_nans(data):
-        r"""Replace the source's missing-value sentinel with NaN."""
+        r"""Replace the source's missing-value sentinel with NaN.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            Data read from the source.
+        """
         pass
 
     @abstractmethod
     def read_data(self, path):
         r"""Parse the downloaded file at ``path``.
+
+        Parameters
+        ----------
+        path : pathlib.Path
+            Local copy of the data, as :func:`~solarwindpy.solar_activity.cache.fetch`
+            returns it.
 
         Returns
         -------
@@ -194,11 +215,24 @@ class DataLoader(Base):
         return pd.Timestamp.now() - self.ctime
 
     def set_key(self, key):
-        r"""Set :attr:`key`."""
+        r"""Set :attr:`key`.
+
+        Parameters
+        ----------
+        key : str
+            Data identifier.
+        """
         self._key = key
 
     def set_url(self, new):
-        r"""Set :attr:`url`."""
+        r"""Set :attr:`url`.
+
+        Parameters
+        ----------
+        new : str
+            Download URL, or a local path, which
+            :func:`~solarwindpy.solar_activity.cache.fetch` reads as is.
+        """
         self._url = new
 
 
@@ -245,7 +279,18 @@ class ActivityIndicator(Base):
         return self._interpolated
 
     def set_id(self, new):
-        r"""Set :attr:`id`, which must be an :class:`~solarwindpy.solar_activity.base.ID`."""
+        r"""Set :attr:`id`.
+
+        Parameters
+        ----------
+        new : solarwindpy.solar_activity.base.ID
+            Identifier of the data product.
+
+        Raises
+        ------
+        AssertionError
+            If ``new`` is not an :class:`~solarwindpy.solar_activity.base.ID`.
+        """
         assert isinstance(new, ID)
         self._id = new
 
@@ -423,6 +468,15 @@ class IndicatorExtrema(Base):
     #######################################################################
     def calculate_intervals(self):
         r"""Compute rising, falling, and full-cycle time intervals.
+
+        Also stores the result as :attr:`cycle_intervals`.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Indexed like :attr:`data` (one row per cycle), with columns
+            ``Cycle``, ``Fall`` and ``Rise`` holding :class:`pandas.Interval`
+            objects; ``Fall`` is ``NaT`` for a cycle with no falling edge yet.
 
         Notes
         -----

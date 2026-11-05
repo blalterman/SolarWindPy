@@ -24,6 +24,24 @@ class Scatter(base.ColorPlot):
     matplotlib to drop from its log axis.
 
     This difference is documented for now and needs to be revisited.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import matplotlib.pyplot as plt
+    >>> from solarwindpy.plotting.scatter import Scatter
+    >>> x = pd.Series([1.0, 2.0, 3.0])
+    >>> y = pd.Series([4.0, 5.0, 6.0])
+    >>> z = pd.Series([7.0, 8.0, 9.0])
+    >>> s = Scatter(x, y, z)
+    >>> ax, collection, cbar = s.make_plot()
+    >>> collection.get_offsets().tolist()
+    [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
+    >>> collection.get_array().tolist()
+    [7.0, 8.0, 9.0]
+    >>> cbar is None
+    False
+    >>> plt.close("all")
     """
 
     _clipped_axes = ("x", "y", "z")

@@ -21,6 +21,34 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
     r"""Create 1D plot of `x`, optionally aggregating `y` in bins of `x`.
 
     The bins are a 1-D :class:`~solarwindpy.plotting.binning.FixedGrid`.
+
+    Examples
+    --------
+    Count six values in three bins given by their edges:
+
+    >>> import pandas as pd
+    >>> import matplotlib.pyplot as plt
+    >>> from solarwindpy.plotting.hist1d import Hist1D
+    >>> x = pd.Series([1.0, 2.0, 2.0, 3.0, 3.0, 3.0], name="x")
+    >>> h = Hist1D(x, nbins=[0.5, 1.5, 2.5, 3.5])
+    >>> h.agg().tolist()
+    [1, 2, 3]
+
+    With ``axnorm="t"`` the peak bin is 1:
+
+    >>> Hist1D(x, axnorm="t", nbins=[0.5, 1.5, 2.5, 3.5]).agg().tolist()
+    [0.3333333333333333, 0.6666666666666666, 1.0]
+
+    Given ``y``, each bin holds the mean of the ``y`` values in it:
+
+    >>> y = pd.Series([10.0, 20.0, 40.0, 30.0, 30.0, 60.0], name="y")
+    >>> means = Hist1D(x, y, nbins=[0.5, 1.5, 2.5, 3.5])
+    >>> means.agg().tolist()
+    [10.0, 30.0, 40.0]
+    >>> ax, line, band, cbar = means.make_plot()
+    >>> band is None, cbar is None
+    (True, True)
+    >>> plt.close("all")
     """
 
     def __init__(
@@ -167,6 +195,24 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         return cdf
 
     def agg(self, **kwargs):
+        r"""Aggregate the values in each bin; see ``BinnedPlot.agg``.
+
+        Parameters
+        ----------
+        **kwargs
+            Passed to ``BinnedPlot.agg``, including its ``fcn``.
+
+        Returns
+        -------
+        pd.Series
+            The aggregated value of every bin, indexed by its interval.
+
+        Raises
+        ------
+        ValueError
+            If ``axnorm`` is ``"d"`` and ``fcn`` is neither None nor
+            ``"count"``: a density needs counts.
+        """
         if self.axnorm == "d":
             fcn = kwargs.get("fcn", None)
             if (fcn != "count") & (fcn is not None):
@@ -176,6 +222,11 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
 
     def set_labels(self, **kwargs):
         r"""Set the x or y label; see ``BinnedPlot.set_labels``.
+
+        Parameters
+        ----------
+        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
+            New axis labels under the keywords ``x`` and ``y``.
 
         Raises
         ------

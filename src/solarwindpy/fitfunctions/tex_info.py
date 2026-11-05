@@ -43,8 +43,11 @@ class TeXinfo(object):
             Optimized fit parameters and their uncertainties.
         TeX_function: str
             TeX-formatted function for printing
-        chisq_dof: scalar, None
-            If not None, chisq per degree of freedom for the fit.
+        chisq_dof: namedtuple, None
+            If not None, chisq per degree of freedom for the fit, with
+            ``linear`` and ``robust`` fields as
+            :attr:`~solarwindpy.fitfunctions.core.FitFunction.chisq_dof`
+            gives it.
         rsq: scalar, None
             If not None, :math:`R^2` coefficient of determination for the fit.
         initial_guess_info: dict, None
@@ -385,19 +388,24 @@ class TeXinfo(object):
 
         Parameters
         ----------
+        **kwargs
+            The keyword options listed below. Any other keyword raises
+            ValueError.
         chisq_dof: bool
-            If True, include chisq/dof in the info. It is printed to 2 decimal
-            places.
+            If True (default), include chisq/dof in the info. It is printed
+            to 2 decimal places.
         relative_error: bool
             If True, print out relative error as :math:`\Delta(x)/x` for all
-            fit parameters x.
+            fit parameters x. Default False.
         rsq: bool
             If True, include :math:`R^2` coefficient of determination.
+            Default False.
         convert_pow_10: bool
-            If True, use 10^{X} format. Otherwise, use eX format.
+            If True (default), use 10^{X} format. Otherwise, use eX format.
             Note that `simplify_info_for_paper` must be disabled.
         strip_uncertainties: bool
             If True, strip fit uncertainties from reported parameters.
+            Default False.
         simplify_info_for_paper: bool
             If True, simplify the printout to only print the quantities
             to their uncertainty in standard decimal (not expoential)
@@ -410,6 +418,18 @@ class TeXinfo(object):
             Additional info added to the fit info annotation box.
         annotate_fcn: FunctionType
            Function that manipulates the final TeX_info str before returning.
+
+        Returns
+        -------
+        str
+            The annotation text, also stored as :attr:`info`. If every
+            fitted parameter is NaN, the parameters are replaced by
+            ``Fit Failed``.
+
+        Raises
+        ------
+        ValueError
+            If an unknown keyword is passed.
         """
 
         chisq_dof = kwargs.pop("chisq_dof", True)
@@ -457,7 +477,19 @@ class TeXinfo(object):
         return info
 
     def set_initial_guess_info(self, new):
-        r"""Store per-parameter ``(p0, bounds)`` info; ``new`` is a dict or None."""
+        r"""Store per-parameter ``(p0, bounds)`` info.
+
+        Parameters
+        ----------
+        new : dict or None
+            Keys are the function's argument names and values are
+            ``(p0, fit_bounds)`` for that parameter, or None for no info.
+
+        Raises
+        ------
+        TypeError
+            If ``new`` is neither a dict nor None.
+        """
         if not (isinstance(new, dict) or new is None):
             raise TypeError(
                 f"Unsure how to parse `initial_guess_info` of type {type(new)}"
@@ -475,6 +507,12 @@ class TeXinfo(object):
 
         The annotation is rebuilt with defaults the next time :attr:`info`
         is read.
+
+        Parameters
+        ----------
+        new : dict or None
+            Values reported as ``name = value``, keyed by LaTeX name. None
+            stores no values.
 
         Raises
         ------
@@ -495,7 +533,20 @@ class TeXinfo(object):
         self.__dict__.pop("_info", None)
 
     def set_popt_psigma(self, popt, psigma):
-        r"""Store parameters and uncertainties; every ``popt`` key must be in ``psigma``."""
+        r"""Store parameters and uncertainties; every ``popt`` key must be in ``psigma``.
+
+        Parameters
+        ----------
+        popt : dict
+            Optimized fit parameters, keyed by argument name.
+        psigma : dict
+            Uncertainties of the fit parameters, keyed by argument name.
+
+        Raises
+        ------
+        ValueError
+            If a key of ``popt`` is not in ``psigma``.
+        """
         for k in popt:
             if k not in psigma:
                 raise ValueError(f"key ({k}) must be in both 'popt' and 'psigma' ")
@@ -504,6 +555,13 @@ class TeXinfo(object):
 
     def set_TeX_argnames(self, **kwargs):
         r"""Define the mapping to format LaTeX function argnames.
+
+        Parameters
+        ----------
+        **kwargs
+            Each keyword is a fitted parameter's name and its value is the
+            LaTeX string that replaces the name in the annotation, e.g.
+            ``mu=r"\mu"``.
 
         Raises
         ------
@@ -532,15 +590,36 @@ class TeXinfo(object):
         self._TeX_argnames = kwargs.items()
 
     def set_TeX_function(self, TeX_function):
-        r"""Store the LaTeX form of the fitted function."""
+        r"""Store the LaTeX form of the fitted function.
+
+        Parameters
+        ----------
+        TeX_function : str
+            TeX-formatted function for printing.
+        """
         self._TeX_function = TeX_function
 
     def set_chisq_dof(self, new):
-        r"""Store the chi-squared per degree of freedom."""
+        r"""Store the chi-squared per degree of freedom.
+
+        Parameters
+        ----------
+        new : namedtuple or None
+            Chi-squared per degree of freedom with ``linear`` and ``robust``
+            fields, as
+            :attr:`~solarwindpy.fitfunctions.core.FitFunction.chisq_dof`
+            gives it, or None.
+        """
         self._chisq_dof = new
 
     def set_rsq(self, new):
-        r"""Store the :math:`R^2` coefficient of determination."""
+        r"""Store the :math:`R^2` coefficient of determination.
+
+        Parameters
+        ----------
+        new : float or None
+            :math:`R^2` of the fit, or None.
+        """
         self._rsq = new
 
     def val_uncert_2_string(self, value, uncertainty):
@@ -549,6 +628,20 @@ class TeXinfo(object):
         Where the value is reported to the first non-zero digit of the uncertainty.
 
         Require that ``value > uncertainty``.
+
+        Parameters
+        ----------
+        value : float
+            The value to report.
+        uncertainty : float
+            Its uncertainty. If not finite, the value is reported to 3
+            decimal places.
+
+        Returns
+        -------
+        str
+            ``value`` and ``uncertainty`` in exponential notation, joined by
+            ``\pm``, the uncertainty to one significant figure.
 
         Examples
         --------

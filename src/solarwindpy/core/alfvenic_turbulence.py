@@ -88,6 +88,32 @@ class AlfvenicTurbulence(base.Core):
     3. The polarity of each measurement is the sign of
        :math:`v_R b_R + v_T b_T`, and :attr:`b` returns the field
        fluctuations multiplied by it.
+
+    Examples
+    --------
+    Usually built with
+    :meth:`~solarwindpy.core.plasma.Plasma.build_alfvenic_turbulence`. Here
+    four minutes of synthetic data have a constant field and a velocity
+    alternating between 400 and 410. With a two-point rolling mean, the
+    fluctuations about it are 0, +5, -5 and +5:
+
+    >>> import pandas as pd
+    >>> from solarwindpy.core.alfvenic_turbulence import AlfvenicTurbulence
+    >>> t = pd.date_range("2020-01-01", periods=4, freq="min")
+    >>> v = pd.DataFrame({"x": [400.0, 410.0, 400.0, 410.0], "y": 0.0, "z": 0.0},
+    ...                  index=t)
+    >>> b = pd.DataFrame({"x": 5.0, "y": 0.0, "z": 0.0}, index=t)
+    >>> rho = pd.Series(5.0, index=t)
+    >>> turb = AlfvenicTurbulence(v, b, rho, "p1", window=2, min_periods=1)
+    >>> turb.v.loc[:, "x"].tolist()
+    [0.0, 5.0, -5.0, 5.0]
+
+    The kinetic energy in the fluctuations is :math:`\frac{1}{2}\delta v^2`:
+
+    >>> turb.ev.tolist()
+    [0.0, 12.5, 12.5, 12.5]
+    >>> turb.averaging_info
+    AlfvenicTurbAveraging(window=2, min_periods=1)
     """
 
     def __init__(
@@ -269,14 +295,42 @@ class AlfvenicTurbulence(base.Core):
         sc=None,
         **kwargs,
     ):
-        r"""Set data for the class, performing routine formatting checks.
+        r"""Set the measurements and their fluctuations about a rolling mean.
 
-        The `auto_reindex` kwarg can be set to False for batch analysis. So
-        that, if running a large batch of analysis on the same data, one can
-        reindex once outside of this class and avoid many unnecessary reindexing
-        cases within it. Be sure to carefully check your reindexing so as to not
-        introduce lots of NaNs. I ran into that bug when first writing this
-        class.
+        ``b_in`` is converted to Alfv\'en units with ``rho`` before
+        averaging. The measurements are stored in :attr:`measurements`; the
+        fluctuations, measurements minus their rolling mean, in :attr:`data`.
+        A warning is logged when ``v_in``, ``b_in`` and ``rho`` do not share
+        one index.
+
+        Parameters
+        ----------
+        v_in : pd.DataFrame
+            Velocity, one column per component, indexed by time.
+        b_in : pd.DataFrame
+            Magnetic field in the same basis as ``v_in``, indexed by time.
+        rho : pd.Series
+            Mass density used to convert ``b_in`` to Alfv\'en units.
+        species : str
+            Species string, stored as :attr:`species`. At most one ``,``.
+        raffaella_version : bool, optional
+            If True, convert GSE input to RTN and correct for solar rotation;
+            see the class Notes. Default False.
+        sc : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+            Spacecraft in the GSE frame. Required when ``raffaella_version``
+            is True.
+        **kwargs
+            Passed to :meth:`pandas.DataFrame.rolling`. ``window`` defaults
+            to ``"15min"`` and ``min_periods`` to 5.
+
+        Raises
+        ------
+        TypeError
+            If ``species`` is not a string, or ``v_in``, ``b_in`` or ``rho``
+            is not indexed by a :class:`pandas.DatetimeIndex`.
+        ValueError
+            If ``species`` holds more than one ``,``, or
+            ``raffaella_version`` is True and ``sc`` is None.
         """
 
         species = self._clean_species_for_setting(species)

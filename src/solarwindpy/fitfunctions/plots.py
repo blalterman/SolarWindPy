@@ -117,26 +117,52 @@ class FFPlot(object):
 
     @property
     def labels(self):
+        r"""The ``(x, y, z)`` axis labels, a :class:`~solarwindpy.plotting.base.AxesLabels`.
+
+        Set with :meth:`set_labels`. ``x`` and ``y`` label the axes and, with
+        ``z`` when it is not None, name the directories of :attr:`path`.
+        """
         return self._labels
 
     @property
     def log(self):
+        r"""Whether each axis is log scaled, a :class:`~solarwindpy.plotting.base.LogAxes`.
+
+        Set with :meth:`set_log`. Both are False by default.
+        """
         return self._log
 
     @property
     def observations(self):
+        r"""The fit's ``(used, raw, tk_observed)`` observations.
+
+        As :attr:`solarwindpy.fitfunctions.core.FitFunction.observations`;
+        set with :meth:`set_observations`.
+        """
         return self._observations
 
     @property
     def fitfunction_name(self):
+        r"""Name of the originating fit function, the first directory of :attr:`path`."""
         return self._fitfunction_name
 
     @property
     def fit_result(self):
+        r"""The fit's :class:`scipy.optimize.OptimizeResult`.
+
+        Its ``fun`` gives the robust residuals of :meth:`residuals`.
+        """
         return self._fit_result
 
     @property
     def path(self):
+        r"""Relative :class:`pathlib.Path` naming this plot, e.g. for saving it.
+
+        ``FFPlot/<fitfunction_name>/<x>/<y>[/<z>]/<scales>``, where each
+        label contributes its own ``path`` if it has one and its string
+        otherwise, and ``<scales>`` is ``logX`` or ``linX`` joined by ``_``
+        to ``logY`` or ``linY`` according to :attr:`log`.
+        """
         base = Path(self.__class__.__name__) / self.fitfunction_name
 
         try:
@@ -164,24 +190,55 @@ class FFPlot(object):
 
     @property
     def TeX_info(self):
+        r"""The :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo` that annotates the fit."""
         return self._TeX_info
 
     @property
     def y_fit(self):
+        r"""The model evaluated at each raw observation's ``x``, :class:`numpy.ndarray`."""
         return self._y_fit
 
     def set_fitfunction_name(self, new):
-        """Set the descriptive name for saved plots."""
+        """Set :attr:`fitfunction_name`, the descriptive name for saved plots.
+
+        Parameters
+        ----------
+        new : str
+            Name of the originating fit function; converted with ``str``.
+        """
 
         self._fitfunction_name = str(new)
 
     def set_fit_result(self, new):
-        """Store the optimization result object."""
+        """Set :attr:`fit_result`, the optimization result object.
+
+        Parameters
+        ----------
+        new : scipy.optimize.OptimizeResult
+            Result object returned from the fitting routine.
+        """
 
         self._fit_result = new
 
     def set_observations(self, observations, y_fit):
-        """Set raw and fitted values used for plotting."""
+        """Set :attr:`observations` and :attr:`y_fit`, the values plotted.
+
+        Parameters
+        ----------
+        observations : namedtuple
+            The ``(used, raw, tk_observed)`` observations of the fit, as
+            returned by ``FitFunction.observations``.
+        y_fit : np.ndarray
+            Model evaluated at ``observations.raw.x``; it must have the
+            same shape.
+
+        Raises
+        ------
+        AssertionError
+            If ``y_fit`` and ``observations.raw.x`` differ in shape, or
+            ``y_fit`` masked by ``observations.tk_observed`` and
+            ``observations.used.x`` differ in shape.
+        """
 
         assert y_fit.shape == observations.raw.x.shape
         assert y_fit[observations.tk_observed].shape == observations.used.x.shape
@@ -362,10 +419,30 @@ class FFPlot(object):
         r"""Plot the observations used in the fit.
 
         Plot from ``observations.used.x``, ``observations.used.y``, and
-        ``observations.used.w``. Parameters and returns are those of
-        :py:meth:`plot_raw`; unless ``markevery`` is given, a marker is
+        ``observations.used.w``. Unless ``markevery`` is given, a marker is
         drawn on every :math:`10^{\lfloor \log_{10} N \rfloor - 1}`-th of
         the :math:`N` used points.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes, optional
+            Axes to draw on. If None, a new figure and axes are created.
+        plot_window : bool, default True
+            If True, draw a line with a ``y +- w`` window. Otherwise draw
+            error bars.
+        edge_kwargs : dict, optional
+            If not None, draw the window's edges as lines with these
+            keywords, as in :py:meth:`plot_raw`.
+        **kwargs
+            Line2D keywords merged over the default used style. The
+            ``window_kwargs`` keyword is passed to
+            :meth:`matplotlib.axes.Axes.fill_between` for the window.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        plotted : tuple or matplotlib.container.ErrorbarContainer
+            ``(line, window, edges)`` with a window, else the error bars.
         """
         if kwargs.get("markevery") is None:
             kwargs["markevery"] = self._estimate_markevery()
@@ -646,6 +723,18 @@ class FFPlot(object):
         r"""Set or update x, y, or z labels.
 
         Any label not specified in kwargs is propagated from `self.labels.<x, y, or z>`.
+
+        Parameters
+        ----------
+        **kwargs
+            Any of ``x``, ``y`` and ``z``: the new label for that axis, a
+            str or a label object such as
+            :class:`~solarwindpy.plotting.labels.base.TeXlabel`.
+
+        Raises
+        ------
+        KeyError
+            If any other keyword is passed.
         """
 
         x = kwargs.pop("x", self.labels.x)
@@ -659,9 +748,16 @@ class FFPlot(object):
         self._labels = AxesLabels(x, y, z)
 
     def set_log(self, **kwargs):
-        r"""Set :py:class:`~solarwindpy.plotting.base.LogAxes`.
+        r"""Set :attr:`log`, a :py:class:`~solarwindpy.plotting.base.LogAxes`.
 
-        Only used for determining if weights should be :math:`w/(y \ln(10))`.
+        :attr:`log` sets the scale of the x and y axes the
+        plots are drawn on and the ``<scales>`` part of :attr:`path`.
+
+        Parameters
+        ----------
+        **kwargs
+            ``x`` and/or ``y``, each a bool: True for a log-scaled axis.
+            Axes not passed keep their current setting.
         """
         log = self._log._asdict()
         for k, v in kwargs.items():
