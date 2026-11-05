@@ -103,6 +103,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   time colorbar with `SIDC("m13").plot_on_colorbar`. The docs build and the plot-block test
   read the series from a snapshot in `docs/source/_data` through a private download cache, so
   neither needs the network.
+- The Usage guide documents what each `axnorm` computes for a count, a sum and any other
+  aggregation, with a figure of the weight of a signed mean on the centred colour scale;
+  selecting cells with `clim` and `alim` and their rows with `get_plotted_data`; and the
+  publication format. The quickstart shows `Plasma.info`, a plot's printed summary and a fit
+  with `yerr`. `scripts/benchmark_binned_data.py` measures the time and memory a shared
+  `BinnedData` saves, the numbers the Usage guide quotes.
 
 ### Changed
 
@@ -114,6 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A count in `agg` (`fcn="count"`, or the default on a plot without z) counts each cell's rows
   with `numpy.bincount` of the rows' cell codes instead of a pandas groupby: same result, about
   twice as fast at 1e6 rows.
+- `solarwindpy.plotting.labels.base.validate_axnorm` takes the accepted keys, `allowed`
+  (default every key of `AXNORM`), and is the one check of an `axnorm` key: the plots call it
+  with their binning's `allowed_axnorm`, with the same messages as before.
 
 ### Fixed
 
@@ -163,6 +172,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TeXlabel` accepts the `"cd"` and `"rd"` normalizations that `Count` accepts. Both read
   the keys from one table, `solarwindpy.plotting.labels.base.AXNORM`, and raise `ValueError`
   (was `AssertionError`) for any other key.
+- `SIDC` no longer warns that pandas deprecates `inplace=True` each time it loads or
+  normalizes the sunspot number.
 
 ## [0.4.1] - 2026-11-05
 
