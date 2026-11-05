@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
+  `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
+  and a `Line` fit's `results`. It replaces the tutorial stub.
+
 ### Changed
 
 - `pre-commit install` now installs the commit-message hook as well as the pre-commit hook

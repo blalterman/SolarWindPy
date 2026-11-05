@@ -129,5 +129,5 @@ component, and species that the plot labels know.
 Next Steps
 ----------
 
-- The :doc:`tutorial` covers more of the library.
+- :doc:`missing_data` explains how missing measurements propagate.
 - The :doc:`api_reference` documents every public class and function.

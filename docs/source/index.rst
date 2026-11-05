@@ -23,8 +23,8 @@ scientific accuracy.
    :caption: User Guide
 
    installation
+   tutorial/quickstart
    usage
-   tutorial
    missing_data
 
 .. toctree::

@@ -48,7 +48,8 @@ After installation, import the package and create a plasma object with sample da
 >>> print(f"Proton density: {plasma.p1.n.mean():.1f} cm⁻³")
 Proton density: 6.7 cm⁻³
 
-See the documentation for detailed usage examples and API reference.
+See the `documentation <https://solarwindpy.readthedocs.io>`_ for the
+quickstart, usage examples and the API reference.
 
 Installation
 ============
