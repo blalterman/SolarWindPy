@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SpiralPlot2D` no longer logs warnings on every construction and draw. Its timing and
   bin-population messages report normal operation and are now DEBUG records; the message
   that points outside the mesh are dropped stays a warning.
+- The fit annotation (`TeXinfo.build_info` with `convert_pow_10`) prints a value or uncertainty
+  whose exponent is 0 without an exponent: `2.5 \pm 1 \times 10^{-1}`, not
+  `2.5 \times 10^{+0} \pm 1 \times 10^{-1}`.
 
 ## [0.4.0] - 2026-11-05
 
