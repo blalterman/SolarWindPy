@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Hist2D.plot_edges` no longer raises below 50 x-bins. The default Savitzky-Golay window,
   10% of the edge's points, is raised to the smallest odd length above `polyorder`, and an
   edge too short for any such window is drawn unsmoothed.
+- `Hist2D.plot_contours` and `Hist2D.plot_hist_with_contours` with `gaussian_filter_std`
+  no longer erase the contours around empty bins. A grid with empty (NaN) bins is smoothed by
+  `solarwindpy.plotting.tools.nan_gaussian_filter`, which averages only the occupied bins; a
+  grid without them is filtered by `scipy.ndimage.gaussian_filter` as before, with unchanged
+  results. The `nan_aware_filter` keyword is removed: passing it raises an error from
+  matplotlib.
 
 ## [0.4.0] - 2026-11-05
 

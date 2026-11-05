@@ -197,15 +197,16 @@ draws a log axis. ``make_plot`` colors each cell by its count:
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_contours` draws the same
 histogram as contours. ``gaussian_filter_std`` smooths the values with a
 Gaussian whose standard deviation is in bins before the contours are drawn.
-Set ``nan_aware_filter=True`` with it whenever the histogram has empty cells:
-an empty cell is NaN, and the plain filter spreads each NaN over its
-neighbours until no contour is left to draw. ``plot_edges=True`` also draws the
+An empty cell is NaN; when there are any, the filter averages only the
+occupied cells and leaves the empty ones empty, rather than spreading each NaN
+over its neighbours. ``plot_edges=True`` also draws the
 edges of the occupied distribution
 (:py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_edges`): in each column of
 ``x`` bins, the highest and the lowest occupied ``y`` bin, smoothed by a
 Savitzky-Golay filter unless ``edges_kwargs=dict(smooth=False)``. The
-filter's default window is a tenth of the number of ``x`` bins, so with fewer
-than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
+filter's default window is a tenth of the number of ``x`` bins, widened to fit
+its cubic polynomial when there are few bins; set ``window_length`` in
+``edges_kwargs=dict(sg_kwargs=...)`` to choose another. Here
 ``axnorm="t"``, explained in `Normalizations`_, scales the peak to 1:
 
 .. plot::
@@ -223,7 +224,7 @@ than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
 
    h2 = Hist2D(v, n, logy=True, nbins=50, axnorm="t")
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
-   h2.plot_contours(gaussian_filter_std=2, nan_aware_filter=True, plot_edges=True)
+   h2.plot_contours(gaussian_filter_std=2, plot_edges=True)
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot` draws the
 histogram with its projections on the top and right margins. Each margin is a
