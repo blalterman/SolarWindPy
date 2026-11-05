@@ -1,7 +1,3 @@
-<!--
-Spent-When: PERMANENT(SolarWindPy stops adopting a code of conduct)
-Supersedes: none
--->
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge
