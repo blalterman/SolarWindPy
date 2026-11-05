@@ -18,7 +18,8 @@ three-level MultiIndex named ``M``, ``C``, ``S``:
 - ``M``, the measurement: ``n`` (number density, cm\ :sup:`-3`), ``v``
   (velocity, km/s), ``w`` (thermal speed, km/s), ``b`` (magnetic field, nT).
 - ``C``, the component: ``x``, ``y``, ``z`` for vectors, ``par`` and ``per``
-  for thermal speeds, empty for scalars.
+  for thermal speeds, empty for scalars. The plasma computes a ``scalar``
+  thermal speed from ``par`` and ``per``; it is not an input.
 - ``S``, the species: ``p1`` (protons), ``a`` (alphas), empty for the
   magnetic field.
 
