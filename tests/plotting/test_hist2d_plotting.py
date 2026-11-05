@@ -134,23 +134,17 @@ def z_valued_hist():
     return hist, counts, z_means
 
 
-@pytest.fixture
-def smoothable_hist():
-    """A Hist2D wide enough in x that a savgol window of 5 is meaningful.
+def _moving_band_hist(nx):
+    """A Hist2D with ``nx`` x-bins whose occupied y-band moves with x.
 
-    61 x-bins is not arbitrary: `_plot_one_edge` defaults `window_length` to
-    floor(n / 10), decremented to the next odd number, and defaults
-    `polyorder` to 3. Fewer columns make the default window too narrow for that
-    polynomial order and scipy refuses outright, which would mask the parameter
-    mix-up this fixture exists to expose.
+    The occupied band moves up and down with x, so neither border is flat.
+    A flat border is invariant under savgol at any polynomial order, which
+    would make the smoothing comparisons vacuous.
     """
-    xedges = np.round(np.linspace(0.0, 1.0, 62), 5)
+    xedges = np.round(np.linspace(0.0, 1.0, nx + 1), 5)
     yedges = np.round(np.linspace(0.0, 1.0, 9), 5)
-    ny, nx = len(yedges) - 1, len(xedges) - 1
+    ny = len(yedges) - 1
 
-    # The occupied band moves up and down with x, so neither border is flat.
-    # A flat border is invariant under savgol at any polynomial order, which
-    # would make the smoothing comparisons vacuous.
     counts = np.zeros((ny, nx), dtype=int)
     for j in range(nx):
         lo = j % 3
@@ -160,6 +154,16 @@ def smoothable_hist():
 
     x, y = _points_from_counts(counts, xedges, yedges)
     return Hist2D(x, y, nbins=[xedges, yedges])
+
+
+@pytest.fixture
+def smoothable_hist():
+    """A Hist2D wide enough in x that a savgol window of 5 is meaningful.
+
+    61 x-bins puts the default `window_length`, floor(n / 10) made odd, at 5:
+    above the default `polyorder` of 3 without raising it to the minimum.
+    """
+    return _moving_band_hist(61)
 
 
 def _expected_grid(counts):
@@ -1469,6 +1473,42 @@ class TestPlotEdges:
         expected = savgol_filter(np.asarray(raw_bottom.get_ydata(), float), 21, 1)
         assert np.asarray(np.asarray(smoothed_bottom.get_ydata(), float)) == exact(
             expected
+        )
+        plt.close("all")
+
+    def test_default_smoothing_widens_the_window_for_few_bins(self):
+        """Below 50 x-bins the default window is the smallest that fits polyorder 3.
+
+        floor(n / 10) is at most 3 there, which savgol rejects for polyorder 3;
+        the default window must be the smallest odd length above the
+        polynomial order, 5, so the edge is smoothed rather than refused.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = _moving_band_hist(20)
+        fig, ax = plt.subplots()
+        (raw,), _ = hist.plot_edges(ax, smooth=False)
+        (smoothed,), _ = hist.plot_edges(ax, smooth=True)
+
+        expected = savgol_filter(np.asarray(raw.get_ydata(), float), 5, 3)
+        assert np.asarray(np.asarray(smoothed.get_ydata(), float)) == exact(expected)
+        plt.close("all")
+
+    def test_default_smoothing_is_skipped_when_no_window_fits(self):
+        """With too few x-bins for any odd window above polyorder, draw the raw edge.
+
+        Four x-bins admit odd windows of 1 and 3, neither above polyorder 3, so
+        the default smoothing has nothing to fit and leaves the edge as is.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = _moving_band_hist(4)
+        fig, ax = plt.subplots()
+        (raw,), _ = hist.plot_edges(ax, smooth=False)
+        (smoothed,), _ = hist.plot_edges(ax, smooth=True)
+
+        assert np.asarray(np.asarray(smoothed.get_ydata(), float)) == exact(
+            np.asarray(raw.get_ydata(), float)
         )
         plt.close("all")
 

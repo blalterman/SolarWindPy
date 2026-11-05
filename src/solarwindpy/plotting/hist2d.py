@@ -430,6 +430,26 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         border = Border(top, bottom)
         return border
 
+    @staticmethod
+    def _default_savgol_window(n, polyorder):
+        r"""Default Savitzky-Golay window for an edge of ``n`` points, or None.
+
+        10% of ``n``, made odd by subtracting 1 when even; raised to the
+        smallest odd length above ``polyorder`` when it is not above it; capped
+        at the largest odd length within ``n``. None when no odd length within
+        ``n`` exceeds ``polyorder``: the edge is too short to smooth.
+        """
+        wlength = int(np.floor(n / 10))
+        if not wlength % 2:
+            wlength -= 1
+        if wlength <= polyorder:
+            wlength = polyorder + 1 + polyorder % 2
+        if wlength > n:
+            wlength = n if n % 2 else n - 1
+        if wlength <= polyorder:
+            return None
+        return wlength
+
     def _plot_one_edge(
         self,
         ax,
@@ -448,13 +468,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         sg_kwargs = dict() if sg_kwargs is None else dict(sg_kwargs)
 
         if smooth:
-            wlength = sg_kwargs.pop("window_length", int(np.floor(y.shape[0] / 10)))
             polyorder = sg_kwargs.pop("polyorder", 3)
+            wlength = sg_kwargs.pop("window_length", None)
+            if wlength is None:
+                wlength = self._default_savgol_window(y.shape[0], polyorder)
 
-            if not wlength % 2:
-                wlength -= 1
-
-            y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
+            if wlength is not None:
+                y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
         if self.log.x:
             x = 10.0**x
@@ -491,10 +511,14 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             to the y-values before plotting to smooth the curve.
         sg_kwargs: dict, None
             If not None, dict of kwargs passed to Savitzky-Golay filter. Also allows
-            for setting of `window_length` and `polyorder` as kwargs. They default to
-            10% of the number of observations (`window_length`) and 3 (`polyorder`).
-            Note that because `window_length` must be odd, if the 10% value is even, we
-            take 1-window_length.
+            for setting of `window_length` and `polyorder` as kwargs. `polyorder`
+            defaults to 3. `window_length` defaults to 10% of the number of points
+            on the edge, less 1 when even, as the filter needs an odd window. A
+            default window that is not above `polyorder`, as below 50 points
+            for `polyorder` 3, is raised to the smallest odd length above it, and
+            a window longer than the edge to the longest odd length within it.
+            When no odd length within the edge exceeds `polyorder` the edge is
+            drawn unsmoothed. A `window_length` the caller passes is used as given.
         xlim, ylim: tuple of (float or None, float or None), optional
             Inclusive ``(lower, upper)`` limits, in data coordinates, on the edge
             vertices drawn. A vertex outside a limit is dropped; a vertex exactly

@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.github/workflows/docs.yml`). The workflow still builds the docs with warnings as errors on
   every push and pull request.
 
+### Fixed
+
+- `Hist2D.plot_edges` no longer raises below 50 x-bins. The default Savitzky-Golay window,
+  10% of the edge's points, is raised to the smallest odd length above `polyorder`, and an
+  edge too short for any such window is drawn unsmoothed.
+
 ## [0.4.0] - 2026-11-05
 
 ### Changed - BREAKING CHANGES
