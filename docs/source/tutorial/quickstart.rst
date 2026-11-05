@@ -181,8 +181,18 @@ random number generator:
 
 ``popt`` holds the fitted parameters and ``psigma`` their uncertainties. Each
 uncertainty is the square root of a diagonal element of the parameter
-covariance ``pcov``, which is scaled by the fit's reduced chi-squared, as
-:py:func:`scipy.optimize.curve_fit` does by default.
+covariance ``pcov``, and ``pcov`` is always rescaled by the fit's robust reduced
+chi-squared; ``make_fit(absolute_sigma=True)`` raises ``NotImplementedError``.
+Measurement uncertainties enter through the ``weights`` argument, the 1-sigma
+uncertainties of ``y``, one per observation.
+
+``chisq_dof`` has two kinds. ``linear`` is the sum of squared residuals,
+divided by ``weights`` when given, per degree of freedom. ``robust`` is the
+same sum after the fit's loss function (``make_fit`` uses a Huber loss by
+default), and it is the one that rescales ``pcov``:
+
+>>> [round(float(value), 3) for value in fit.chisq_dof]
+[0.197, 0.064]
 
 :py:attr:`~solarwindpy.fitfunctions.core.FitFunction.results` is the same
 outcome as a one-row table. Its columns are a MultiIndex of the parameter or
@@ -201,7 +211,9 @@ of freedom and the status:
 Next Steps
 ----------
 
-- :doc:`/usage` builds a plasma from your own DataFrame and saves a fit's plot.
+- :doc:`/usage` shows the input DataFrame layout for bringing your own data:
+  the ``M``, ``C``, ``S`` columns a plasma needs. It builds a plasma from that
+  DataFrame and saves a fit's plot.
 - :doc:`/missing_data` explains how missing measurements propagate.
 - :py:class:`~solarwindpy.core.plasma.Plasma` documents every derived quantity.
   Methods worth knowing next: :py:meth:`~solarwindpy.core.plasma.Plasma.pth`

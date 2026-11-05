@@ -8,6 +8,8 @@ Installation
 Requirements
 ------------
 
+SolarWindPy supports Python 3.12 and newer (``requires-python = ">=3.12,<4"``).
+
 ``pyproject.toml`` is the single declaration of what SolarWindPy needs:
 ``requires-python`` gives the supported Python versions and ``dependencies``
 gives the supported range of each required package. The
