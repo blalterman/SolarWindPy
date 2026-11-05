@@ -30,7 +30,9 @@ if not (REPO_ROOT / ".github" / "workflows").is_dir():
 
 
 def _requires_python():
-    pyproject = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())
+    pyproject = tomllib.loads(
+        (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    )
     return pyproject["project"]["requires-python"]
 
 
@@ -62,25 +64,29 @@ def declared_python_versions():
     """Return ``(site, version)`` for every Python version the repo declares."""
     found = []
 
-    pyproject = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())
+    pyproject = tomllib.loads(
+        (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    )
     for c in pyproject["project"]["classifiers"]:
         m = re.fullmatch(r"Programming Language :: Python :: (3\.\d+)", c)
         if m:
             found.append(("pyproject.toml: classifiers", m.group(1)))
 
-    tox = (REPO_ROOT / "tox.ini").read_text()
+    tox = (REPO_ROOT / "tox.ini").read_text(encoding="utf-8")
     envlist = re.search(r"^envlist\s*=\s*(.+)$", tox, re.MULTILINE).group(1)
     for major, minor in re.findall(r"py(\d)(\d+)", envlist):
         found.append(("tox.ini: envlist", f"{major}.{minor}"))
 
-    rtd = yaml.safe_load((REPO_ROOT / ".readthedocs.yaml").read_text())
+    rtd = yaml.safe_load((REPO_ROOT / ".readthedocs.yaml").read_text(encoding="utf-8"))
     found.append(
         (".readthedocs.yaml: build.tools.python", str(rtd["build"]["tools"]["python"]))
     )
 
     for wf in sorted((REPO_ROOT / ".github" / "workflows").glob("*.yml")):
         _workflow_versions(
-            yaml.safe_load(wf.read_text()), f".github/workflows/{wf.name}", found
+            yaml.safe_load(wf.read_text(encoding="utf-8")),
+            f".github/workflows/{wf.name}",
+            found,
         )
 
     return found
