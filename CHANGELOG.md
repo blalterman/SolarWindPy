@@ -543,7 +543,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   same values.
 
 - PowerLaw, PowerLawPlusC and PowerLawOffCenter take the exponent before the amplitude, as
-  Exponential and ExponentialPlusC already
+  Exponential and ExponentialPlusC already do: their functions are f(x, alpha, A), f(x, alpha,
+  A, y0) and f(x, alpha, A, x0), so a positional p0 or bounds, and positional arguments to
+  function, now give alpha first, and popt, psigma and the results columns list alpha before A.
+  Code that passes these by name is unaffected.
 
 - The TeX report of HingeSaturation, TwoLine, Saturation, HingeMin, HingeMax and HingeAtPoint
   (TeX_info, whose TeX_popt labels the fitted values) writes xh, yh, x1, x2, m1 and m2 as x_h,
