@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
   `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
   runs each of those code blocks on its own.
+- The Usage guide shows how to share one `BinnedData` across several plots, with a
+  measurement of the time and memory it saves.
 
 ### Changed
 
