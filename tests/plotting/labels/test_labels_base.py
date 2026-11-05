@@ -58,23 +58,23 @@ def test_run_species_substitution(texlabel_basic):
 
 def test_texlabel_attributes(texlabel_basic):
     """Check attributes of a typical :class:`TeXlabel`."""
-    assert texlabel_basic.tex == "{v}_{{X};{p}}"
+    assert texlabel_basic.tex == "{v}_{{x};{p}}"
     assert texlabel_basic.units == "\\mathrm{km \\; s^{-1}}"
     assert texlabel_basic.path == Path("v_x_p")
     assert (
         texlabel_basic.with_units
-        == "${v}_{{X};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
+        == "${v}_{{x};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
     )
 
 
 def test_texlabel_ratio_attributes(texlabel_ratio):
     """Check attributes of a ratio :class:`TeXlabel`."""
-    assert texlabel_ratio.tex == "{v}_{{X};{p}}/n_{p}"
+    assert texlabel_ratio.tex == "{v}_{{x};{p}}/n_{p}"
     assert texlabel_ratio.units == "\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}"
     assert texlabel_ratio.path == Path("v_x_p-OV-n_p")
     assert (
         texlabel_ratio.with_units
-        == "${v}_{{X};{p}}/n_{p} \\; \\left[\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}\\right]$"
+        == "${v}_{{x};{p}}/n_{p} \\; \\left[\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}\\right]$"
     )
 
 
@@ -105,10 +105,9 @@ def test_texlabel_comparison_operators(texlabel_basic, labels_base):
 def test_texlabel_axnorm_types(labels_base):
     """Test different axis normalization types."""
     test_cases = [
-        ("c", "Col."),
+        ("c", "Column"),
         ("r", "Row"),
-        ("t", "Total"),
-        ("d", "Density"),
+        ("t", "Max"),
         (None, ""),
     ]
 
@@ -124,7 +123,7 @@ def test_texlabel_axnorm_types(labels_base):
 def test_texlabel_error_measurement(texlabel_with_error):
     """Test error measurement handling."""
     assert "\\sigma" in texlabel_with_error.tex
-    assert "{v}_{{X};{p}}" in texlabel_with_error.tex
+    assert "{v}_{{x};{p}}" in texlabel_with_error.tex
 
 
 def test_texlabel_newline_units(texlabel_newline_units):
@@ -177,9 +176,9 @@ def test_measurement_translation(labels_base):
 def test_component_translation(labels_base):
     """Test component translation."""
     test_cases = {
-        ("v", "x", "p"): "X",
-        ("v", "y", "p"): "Y",
-        ("v", "z", "p"): "Z",
+        ("v", "x", "p"): "x",
+        ("v", "y", "p"): "y",
+        ("v", "z", "p"): "z",
         ("v", "r", "p"): "R",
         ("v", "per", "p"): "\\perp",
         ("v", "par", "p"): "\\parallel",
@@ -197,7 +196,7 @@ def test_units_translation(labels_base):
         ("n", "", "p"): "\\mathrm{cm}^{-3}",
         ("b", "x", ""): "\\mathrm{nT}",
         ("T", "", "p"): "10^5 \\, \\mathrm{K}",
-        ("beta", "", "p"): "\\mathrm{\\#}",
+        ("beta", "", "p"): "\\#",
     }
 
     for mcs, expected_units in test_cases.items():
@@ -242,7 +241,7 @@ def test_template_substitution(labels_base):
 
     # Test default template
     label = labels_base.TeXlabel(("unknown_measurement", "x", "p"))
-    assert "{unknown_measurement}_{{X};{p}}" in label.tex
+    assert "{unknown_measurement}_{{x};{p}}" in label.tex
 
 
 def test_tex_cleanup(labels_base):
@@ -307,14 +306,14 @@ def test_texlabel_set_methods(labels_base):
 
 def test_axnorm_validation(labels_base):
     """Test axis normalization validation."""
-    valid_values = [None, "c", "r", "t", "d"]
+    valid_values = [None, "c", "r", "t", "d", "cd", "rd"]
 
     for val in valid_values:
         label = labels_base.TeXlabel(("v", "x", "p"), axnorm=val)
         assert label.axnorm == val
 
     # Test invalid axnorm
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         labels_base.TeXlabel(("v", "x", "p"), axnorm="invalid")
 
 
@@ -348,111 +347,57 @@ def test_empty_string_handling(labels_base):
         assert hasattr(label, "path")
 
 
-class TestDescriptionFeature:
-    """Tests for the description property on Base/TeXlabel classes.
+class TestNameFeature:
+    """``name``: the first line of a label in publication format.
 
-    The description feature allows human-readable text to be prepended
-    above the mathematical LaTeX label for axis/colorbar labels.
+    ON FAILURE: the code is wrong.
     """
 
-    def test_description_default_none(self, labels_base):
-        """Default description is None when not specified."""
+    def test_default_name_is_the_registry_name(self, labels_base):
+        assert labels_base.TeXlabel(("v", "x", "p")).name == "Velocity"
+
+    def test_set_name_stores_a_string(self, labels_base):
         label = labels_base.TeXlabel(("v", "x", "p"))
-        assert label.description is None
+        label.set_name(42)
+        assert label.name == "42"
 
-    def test_set_description_stores_value(self, labels_base):
-        """set_description() stores the given string."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description("Test description")
-        assert label.description == "Test description"
+    def test_set_name_none_restores_the_default(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="Speed")
+        assert label.name == "Speed"
+        label.set_name(None)
+        assert label.name == "Velocity"
 
-    def test_set_description_converts_to_string(self, labels_base):
-        """set_description() converts non-string values to string."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description(42)
-        assert label.description == "42"
-        assert isinstance(label.description, str)
-
-    def test_set_description_none_clears(self, labels_base):
-        """set_description(None) clears the description."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description("Some text")
-        assert label.description == "Some text"
-        label.set_description(None)
-        assert label.description is None
-
-    def test_description_init_parameter(self, labels_base):
-        """TeXlabel accepts description in __init__."""
-        label = labels_base.TeXlabel(("n", "", "p"), description="density")
-        assert label.description == "density"
-
-    def test_description_appears_in_with_units(self, labels_base):
-        """Description is prepended to with_units output."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="velocity")
-        result = label.with_units
-        assert result.startswith("velocity\n")
-        assert "$" in result  # Still contains the TeX label
-
-    def test_description_with_newline_separator(self, labels_base):
-        """Description uses newline to separate from label."""
-        label = labels_base.TeXlabel(("T", "", "p"), description="temperature")
-        result = label.with_units
-        lines = result.split("\n")
-        assert len(lines) >= 2
-        assert lines[0] == "temperature"
-
-    def test_format_with_description_none_unchanged(self, labels_base):
-        """Without a description, ``with_units`` is the bare TeX label.
-
-        ON FAILURE: the code is wrong.
-        """
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        assert label.description is None
+    def test_name_is_not_shown_in_the_default_format(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="Speed")
         assert label.with_units == (
-            "${v}_{{X};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
+            "${v}_{{x};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
         )
 
-    def test_format_with_description_adds_prefix(self, labels_base):
-        """A description set and built prepends itself and a newline to ``with_units``.
-
-        ``with_units`` is documented as set by ``build_label``, so the label is
-        rebuilt after ``set_description``.
-
-        ON FAILURE: the code is wrong.
-        """
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        bare = label.with_units
-        label.set_description("info")
-        label.build_label()
-        assert label.with_units == "info\n" + bare
-
-    def test_description_with_axnorm(self, labels_base):
-        """Description works correctly with axis normalization."""
-        label = labels_base.TeXlabel(("n", "", "p"), axnorm="t", description="count")
-        result = label.with_units
-        assert result.startswith("count\n")
-        assert "Total" in result or "Norm" in result
-
-    def test_description_with_ratio_label(self, labels_base):
-        """Description works with ratio-style labels."""
+    def test_name_heads_the_label_in_publication_format(self, labels_base):
         label = labels_base.TeXlabel(
-            ("v", "x", "p"), ("n", "", "p"), description="v/n ratio"
+            ("v", "x", "p"), name="Speed", publication_format=True
         )
-        result = label.with_units
-        assert result.startswith("v/n ratio\n")
-        assert "/" in result  # Contains ratio
+        assert str(label) == "Speed\n" + str(labels_base.TeXlabel(("v", "x", "p")))
 
-    def test_description_empty_string_treated_as_falsy(self, labels_base):
-        """Empty string description is treated as no description."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="")
-        result = label.with_units
-        # Empty string is falsy, so _format_with_description returns unchanged
-        assert not result.startswith("\n")
+    def test_name_with_axnorm_and_ratio(self, labels_base):
+        norm = labels_base.TeXlabel(
+            ("n", "", "p"), axnorm="t", name="count", publication_format=True
+        )
+        assert norm.with_units.startswith("count\n")
+        assert "Max" in norm.with_units
+        ratio = labels_base.TeXlabel(
+            ("v", "x", "p"), ("n", "", "p"), name="v/n", publication_format=True
+        )
+        assert ratio.with_units.startswith("v/n\n")
 
-    def test_str_includes_description(self, labels_base):
-        """__str__ returns with_units which includes description."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="speed")
-        assert str(label).startswith("speed\n")
+    def test_empty_name_adds_no_line(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="", publication_format=True)
+        assert "\n" not in label.with_units
+
+    def test_description_is_gone(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"))
+        assert not hasattr(label, "description")
+        assert not hasattr(label, "set_description")
 
 
 @pytest.mark.parametrize(
@@ -503,10 +448,10 @@ def test_latitude_is_lambda_and_colatitude_is_theta(labels_base, mcs, tex):
 @pytest.mark.parametrize(
     "mcs, units",
     [
-        (("cos_phi", "", "p1"), "\\mathrm{\\#}"),
-        (("ratio", "", ""), "\\mathrm{\\#}"),
-        (("Qhat", "", "p1"), "\\mathrm{\\#}"),
-        (("dbeta", "", "p1"), "\\mathrm{\\#}"),
+        (("cos_phi", "", "p1"), "\\#"),
+        (("ratio", "", ""), "\\#"),
+        (("Qhat", "", "p1"), "\\#"),
+        (("dbeta", "", "p1"), "\\#"),
         (("eth", "", "p1"), "\\mathrm{eV}"),
     ],
     ids=["cos_phi", "ratio", "Qhat", "dbeta", "eth"],
@@ -534,11 +479,11 @@ def test_measurement_units_follow_author_decision(labels_base, mcs, units):
         # A component with no TeX translation is used as written.
         (("v", "w", "p"), "{v}_{{w};{p}}"),
         # "_err" wraps the label in sigma().
-        (("v_err", "x", "p"), "\\sigma({v}_{{X};{p}})"),
+        (("v_err", "x", "p"), "\\sigma({v}_{{x};{p}})"),
         # "caani" template "... \; ($C)" with C empty drops "\; ()".
         (("caani", "", ""), "C^{(\\mathrm{Ani})}_{A}"),
         # "nuc" template "\nu_{$C,$S}": an empty side drops its comma.
-        (("nuc", "x", ""), "\\nu_{X}"),
+        (("nuc", "x", ""), "\\nu_{x}"),
         (("nuc", "", "p1"), "\\nu_{p_1}"),
         # "SEP_differential_flux" template "{{$S}} \: dJ/dE" with S empty
         # drops "{{}}" and the leading space.
@@ -631,15 +576,68 @@ def test_ratio_units_look_up_each_measurement_without_err(
 
 
 def test_axnorm_label_names_the_normalization_in_tex_path_and_units(labels_base):
-    r"""A column-normalized label reads "Col. Norm", saves under ``Cnorm`` and counts ``\#``.
+    r"""A column-normalized label reads "/ Column Max", saves under ``Cnorm``, states ``\#``.
 
     ON FAILURE: the code is wrong.
     """
     label = labels_base.TeXlabel(("n", "", "p"), axnorm="c")
-    assert label.tex == r"\mathrm{Col. \; Norm} \; n_{p}"
+    assert label.tex == r"n_{p} / \mathrm{Column \; Max}"
     assert label.path == Path("n_p/Cnorm")
     assert label.units == "\\#"
-    assert label.with_units == r"$\mathrm{Col. \; Norm} \; n_{p} \; \left[\#\right]$"
+    assert label.with_units == r"$n_{p} / \mathrm{Column \; Max} \; \left[\#\right]$"
+
+
+@pytest.mark.parametrize(
+    "axnorm, tex",
+    [
+        ("d", r"\mathrm{Density \; of} \; n_{p}"),
+        ("cd", r"\mathrm{Column \; Density \; of} \; n_{p}"),
+        ("rd", r"\mathrm{Row \; Density \; of} \; n_{p}"),
+    ],
+)
+def test_density_axnorm_label_states_no_units(labels_base, axnorm, tex):
+    """A density of a quantity is per unit of the binned axes: no units are stated.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "p"), axnorm=axnorm)
+    assert label.tex == tex
+    assert label.units == ""
+    assert label.with_units == f"${tex}$"
+
+
+def test_every_axnorm_a_plot_accepts_has_a_label(labels_base):
+    """Each binning's ``allowed_axnorm`` keys are keys of the one label table.
+
+    ``Count`` and ``TeXlabel`` both accept exactly the table's keys, so a key
+    a binning adds needs one entry there, and this test names it.
+
+    ON FAILURE: the code is wrong -- a binning accepts an ``axnorm`` no label
+    can name; add it to ``labels.base.AXNORM``.
+    """
+    import numpy as np
+    import pandas as pd
+    from solarwindpy.plotting.hist1d import Hist1D
+    from solarwindpy.plotting.hist2d import Hist2D
+    from solarwindpy.plotting.labels.special import Count
+    from solarwindpy.plotting.spiral import SpiralPlot2D
+
+    rng = np.random.default_rng(0)
+    x = pd.Series(rng.random(200), name="x")
+    y = pd.Series(rng.random(200), name="y")
+    plots = [
+        Hist1D(x, nbins=5),
+        Hist2D(x, y, nbins=5),
+        SpiralPlot2D(x, y, x.rename("z"), min_per_bin=20),
+    ]
+    table = set(labels_base.AXNORM)
+    for plot in plots:
+        assert set(plot.binning.allowed_axnorm) <= table, type(plot).__name__
+    for key in table:
+        assert Count(key).axnorm == key
+        assert labels_base.TeXlabel(("n", "", "p"), axnorm=key).axnorm == key
+    with pytest.raises(ValueError):
+        Count("nope")
 
 
 def test_new_line_for_units_splits_label_and_units_into_two_math_lines(labels_base):
@@ -658,3 +656,75 @@ def test_logger_is_named_for_module_and_class(labels_base):
     """
     label = labels_base.TeXlabel(("n", "", "p"))
     assert label.logger.name == "solarwindpy.plotting.labels.base.TeXlabel"
+
+
+@pytest.mark.parametrize("c", ["x", "y", "z"])
+def test_cartesian_component_is_a_lowercase_subscript(labels_base, c):
+    """A vector's x, y and z components subscript as written: v_x, B_z.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(("v", c, "p1")).tex == "{v}_{{%s};{p_1}}" % c
+    assert labels_base.TeXlabel(("b", c, "")).tex == "B_{%s}" % c
+
+
+@pytest.mark.parametrize(
+    "mcs, tex",
+    [
+        (("gse", "x", ""), r"{X}_{\mathrm{GSE}}"),
+        (("gse", "z", ""), r"{Z}_{\mathrm{GSE}}"),
+        (("hci", "y", ""), r"{Y}_{\mathrm{HCI}}"),
+    ],
+)
+def test_frame_position_axes_stay_upper_case(labels_base, mcs, tex):
+    """A frame's coordinate axes are upper case by convention: X_GSE, not x_GSE.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(mcs).tex == tex
+
+
+@pytest.mark.parametrize("m", ["T", "w", "beta", "p"])
+def test_scalar_component_renders_as_no_component(labels_base, m):
+    """The scalar column of a tensor quantity is the bare scalar: T_{p_1}.
+
+    A scalar has no component, as the ``mag`` of a vector is its bare symbol.
+
+    ON FAILURE: the code is wrong.
+    """
+    scalar = labels_base.TeXlabel((m, "scalar", "p1"))
+    assert scalar.tex == labels_base.TeXlabel((m, "", "p1")).tex
+    assert "scalar" not in scalar.tex
+
+
+def test_every_dimensionless_label_shares_one_unit_form(labels_base):
+    r"""Dimensionless quantities, ratios and counts all state the registry's one form.
+
+    beta and the temperature anisotropy R are ratios of like quantities, as
+    a ratio label is; a count is a pure number. Each states
+    ``UNIT_TEX["dimless"]``, ``\#``.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import quantities
+    from solarwindpy.plotting.labels.special import CarringtonRotation, Count
+
+    dimless = quantities.UNIT_TEX["dimless"]
+    assert dimless == r"\#"
+    TeXlabel = labels_base.TeXlabel
+    assert TeXlabel(("beta", "", "p1")).units == dimless
+    assert TeXlabel(("R", "", "p1")).units == dimless
+    assert TeXlabel(("n", "", "a"), ("n", "", "p1")).units == dimless
+    assert TeXlabel(("n", "", "p1"), axnorm="t").units == dimless
+    assert Count().units == dimless
+    assert str(CarringtonRotation()).endswith(r"\left[%s\right]$" % dimless)
+
+
+def test_normalized_ratio_is_parenthesized(labels_base):
+    """A normalized ratio groups the ratio: (n_a/n_p) / Max, not n_a/n_p / Max.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "a"), ("n", "", "p1"), axnorm="t")
+    assert label.tex == r"(n_{\alpha}/n_{p_1}) / \mathrm{Max}"
+    assert "validate_axnorm" in labels_base.__all__

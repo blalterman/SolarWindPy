@@ -49,6 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `allowed_axnorm` adds `w` (1-D and `SpiralPlot2D`) and `w`, `wc`, `wr` (2-D); `Count` and
   `TeXlabel` accept them. Count plots and `t`/`c`/`r` of non-negative values are unchanged.
 
+- The `description=` keyword, `description` property and `set_description` of every
+  plot label class is removed. A label's one optional first line is now its `name`, which the
+  publication format prints above the symbol line; every label class takes `name=` and
+  `publication_format=`. Migrate `description="text"` to `name="text",
+  publication_format=True` (or `set_publication_format(True)` for every label). Unlike a
+  description, the name is not printed in the default one-line format.
+
 ### Added
 
 - A summary `repr` for every plot (`Hist1D`, `Hist2D`, `SpiralPlot2D`, `Scatter`), shown by
@@ -68,6 +75,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
   honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
   the z of each point.
+- Every quantity in the registry has a display name: `solarwindpy.core.quantities.Quantity`
+  takes a required keyword `name`, a few words in title case such as "Number Density" or
+  "Temperature". It names the quantity only, without species or component.
+- Publication-format labels: a label is its name in words over its usual TeX symbol and
+  units, e.g. "Number Density" over `n_{p_1} [cm^-3]`. Turn it on for every label with
+  `solarwindpy.plotting.labels.base.set_publication_format` (read the default with
+  `solarwindpy.plotting.labels.base.publication_format`), or per label with
+  `TeXlabel(..., publication_format=True)`, which overrides the default. The name is the
+  registry's; `TeXlabel(..., name="Solar Wind Speed")` replaces it. A ratio reads
+  "<Name> Ratio" or "<Name0> / <Name1>". A `Count` is its normalization's name over a symbol:
+  "Count" over `N [#]`, "Normalized Count" over `N / N_max [#]`, "Probability Density" over
+  `p`. Labels read the default when they render, so it also applies to plots already built.
 
 ### Changed
 
@@ -89,6 +108,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its equation, and documented a `species` parameter it does not take; it documents `s0, s1`.
   A test now rejects double subscripts, double superscripts and unbalanced braces in docstring
   math.
+- `Hist2D.plot_edges` no longer raises below 50 x-bins. The default Savitzky-Golay window,
+  10% of the edge's points, is raised to the smallest odd length above `polyorder`, and an
+  edge too short for any such window is drawn unsmoothed.
+- `Hist2D.plot_contours` and `Hist2D.plot_hist_with_contours` with `gaussian_filter_std`
+  no longer erase the contours around empty bins. A grid with empty (NaN) bins is smoothed by
+  `solarwindpy.plotting.tools.nan_gaussian_filter`, which averages only the occupied bins; a
+  grid without them is filtered by `scipy.ndimage.gaussian_filter` as before, with unchanged
+  results. The `nan_aware_filter` keyword is removed: passing it raises an error from
+  matplotlib.
+- `SpiralPlot2D` no longer logs warnings on every construction and draw. Its timing and
+  bin-population messages report normal operation and are now DEBUG records; the message
+  that points outside the mesh are dropped stays a warning.
+- The fit annotation (`TeXinfo.build_info` with `convert_pow_10`) prints a value or uncertainty
+  whose exponent is 0 without an exponent: `2.5 \pm 1 \times 10^{-1}`, not
+  `2.5 \times 10^{+0} \pm 1 \times 10^{-1}`.
+- `TeXlabel` subscripts a vector's `x`, `y` and `z` components lower case, `v_x` rather than
+  `v_X`. A frame's position axes stay upper case, `X_\mathrm{GSE}`: a registry template
+  writes them with the new `$A` placeholder, the component's code in upper case.
+- `TeXlabel` renders the `scalar` component as no component, like `mag`: `("T", "scalar", "p1")`
+  reads `T_{p_1}`, not `T_{\mathrm{scalar};p_1}`.
+- Labels state one dimensionless unit, `\#`, the registry's `UNIT_TEX["dimless"]`: beta and
+  the other dimensionless quantities wrote `\mathrm{\#}` while ratios and counts wrote `\#`.
+  The temperature anisotropy `R` states it too, in place of `\perp/\parallel`.
+- Normalized labels say what the normalization is. `axnorm="t"` reads "Count / Max" (was
+  "Total Norm Count"), `"c"` and `"r"` "Count / Column Max" and "Count / Row Max"; a
+  normalized quantity reads `n_p / \mathrm{Max}`. A density's `Count` label no longer claims
+  `\#` units: it states the inverse of the bins it is per, from the plot's axis labels, e.g.
+  `(km s^-1)^-1 (cm^-3)^-1` for `"d"` on a 2-D plot, `dex^-1` for a log axis; an axis whose
+  label states no units contributes nothing. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
+  Density" (both were "1D Probability Density"), and `TeXlabel(..., axnorm="d")` reads
+  "Density of n_p" (was "Density Norm n_p [#]"). A normalized ratio groups the ratio:
+  `(n_a/n_p) / \mathrm{Max}`. The weights read "Count Fraction" (`w`), "Column Count Fraction"
+  (`wc`) and "Row Count Fraction" (`wr`) on a `Count`, and "Weight of n_p" on a `TeXlabel`,
+  whose value is the weight of another aggregation. A `TeXlabel` normalized by a maximum states
+  `\#`; a density or weight of a quantity states no units, since they depend on the
+  aggregation.
+- `TeXlabel` accepts the `"cd"` and `"rd"` normalizations that `Count` accepts. Both read
+  the keys from one table, `solarwindpy.plotting.labels.base.AXNORM`, and raise `ValueError`
+  (was `AssertionError`) for any other key.
 
 ## [0.4.1] - 2026-11-05
 

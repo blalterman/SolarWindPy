@@ -964,22 +964,31 @@ class BinnedPlot(_AggregateLimits):
         self._count_with_axnorm(getattr(self.labels, self.agg_axes))
 
     def _count_with_axnorm(self, label):
-        r"""Rebuild ``label`` with ``axnorm`` if it is a ``Count``; return it."""
+        r"""Rebuild ``label`` with ``axnorm`` and the binned axes if it is a ``Count``.
+
+        The binned axes' labels and log scales give a density its units; see
+        ``labels.base.density_units``. Returns ``label``.
+        """
         if isinstance(label, labels.special.Count):
             label.set_axnorm(self.axnorm)
+            label.set_binned_axes(
+                {
+                    axis: (getattr(self.labels, axis), getattr(self.log, axis))
+                    for axis in self._source.columns
+                    if axis != self.agg_axes
+                }
+            )
             label.build_label()
         return label
 
     def set_labels(self, **kwargs):
         r"""Set axis labels; a ``Count`` label of the aggregated axis follows ``axnorm``.
 
-        See ``Base.set_labels``.
+        The ``Count`` is updated after the labels are set, so a density's
+        units follow new labels of the binned axes. See ``Base.set_labels``.
         """
-        axis = self.agg_axes
-        kwargs[axis] = self._count_with_axnorm(
-            kwargs.get(axis, getattr(self.labels, axis))
-        )
         super().set_labels(**kwargs)
+        self._count_with_axnorm(getattr(self.labels, self.agg_axes))
 
     @staticmethod
     def _validate_axnorm(new, allowed):

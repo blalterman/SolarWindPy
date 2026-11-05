@@ -11,6 +11,7 @@ import matplotlib as mpl
 
 from matplotlib import pyplot as plt
 from collections import namedtuple
+from scipy.ndimage import gaussian_filter
 from scipy.signal import savgol_filter
 
 
@@ -166,9 +167,23 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         return C, x, y
 
-    def _nan_gaussian_filter(self, array, sigma, **kwargs):
-        """Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""
-        return nan_gaussian_filter(array, sigma, **kwargs)
+    @staticmethod
+    def _gaussian_filter(array, sigma, kwargs):
+        r"""Smooth the grid ``array`` with a Gaussian of ``sigma`` bins.
+
+        A grid without empty (NaN) bins is filtered by
+        :func:`scipy.ndimage.gaussian_filter`. A grid with empty bins is
+        filtered by :func:`~solarwindpy.plotting.tools.nan_gaussian_filter`,
+        which averages only the occupied neighbours and keeps the empty bins
+        empty: the plain filter spreads each NaN over the kernel, blanking the
+        bins around every gap. ``kwargs``, a dict or None, is passed to the
+        filter.
+        """
+        kwargs = {} if kwargs is None else kwargs
+        array = np.asarray(array, dtype=float)
+        if np.isnan(array).any():
+            return nan_gaussian_filter(array, sigma, **kwargs)
+        return gaussian_filter(array, sigma, **kwargs)
 
     def make_plot(
         self,
@@ -254,7 +269,6 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_kwargs=None,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
-        nan_aware_filter=False,
         **kwargs,
     ):
         """Make a 2D pcolormesh plot with contour overlay.
@@ -279,12 +293,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_kwargs : dict, None
             Additional kwargs passed to contour/contourf (e.g., linestyles, colors).
         gaussian_filter_std : int
-            If > 0, apply Gaussian filter to contour data.
+            If > 0, smooth the contour data with a Gaussian of this standard
+            deviation, in bins, as :py:meth:`plot_contours` does: the filter
+            skips empty bins.
         gaussian_filter_kwargs : dict, None
-            Kwargs passed to `scipy.ndimage.gaussian_filter`.
-        nan_aware_filter : bool
-            If True and gaussian_filter_std > 0, use NaN-aware filtering via
-            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+            Kwargs passed to the Gaussian filter.
         kwargs :
             Passed to `ax.pcolormesh`. `norm` defaults as in `make_plot` and
             is shared by the mesh and the contours.
@@ -323,19 +336,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         # Apply Gaussian filter if requested
         if needs_filter:
-            if gaussian_filter_kwargs is None:
-                gaussian_filter_kwargs = {}
-
-            if nan_aware_filter:
-                C_centers = self._nan_gaussian_filter(
-                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
-                )
-            else:
-                from scipy.ndimage import gaussian_filter
-
-                C_centers = gaussian_filter(
-                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
-                )
+            C_centers = self._gaussian_filter(
+                C_centers, gaussian_filter_std, gaussian_filter_kwargs
+            )
 
             C_centers = np.ma.masked_invalid(C_centers)
 
@@ -402,6 +405,26 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         border = Border(top, bottom)
         return border
 
+    @staticmethod
+    def _default_savgol_window(n, polyorder):
+        r"""Default Savitzky-Golay window for an edge of ``n`` points, or None.
+
+        10% of ``n``, made odd by subtracting 1 when even; raised to the
+        smallest odd length above ``polyorder`` when it is not above it; capped
+        at the largest odd length within ``n``. None when no odd length within
+        ``n`` exceeds ``polyorder``: the edge is too short to smooth.
+        """
+        wlength = int(np.floor(n / 10))
+        if not wlength % 2:
+            wlength -= 1
+        if wlength <= polyorder:
+            wlength = polyorder + 1 + polyorder % 2
+        if wlength > n:
+            wlength = n if n % 2 else n - 1
+        if wlength <= polyorder:
+            return None
+        return wlength
+
     def _plot_one_edge(
         self,
         ax,
@@ -420,13 +443,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         sg_kwargs = dict() if sg_kwargs is None else dict(sg_kwargs)
 
         if smooth:
-            wlength = sg_kwargs.pop("window_length", int(np.floor(y.shape[0] / 10)))
             polyorder = sg_kwargs.pop("polyorder", 3)
+            wlength = sg_kwargs.pop("window_length", None)
+            if wlength is None:
+                wlength = self._default_savgol_window(y.shape[0], polyorder)
 
-            if not wlength % 2:
-                wlength -= 1
-
-            y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
+            if wlength is not None:
+                y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
         if self.log.x:
             x = 10.0**x
@@ -463,10 +486,14 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             to the y-values before plotting to smooth the curve.
         sg_kwargs: dict, None
             If not None, dict of kwargs passed to Savitzky-Golay filter. Also allows
-            for setting of `window_length` and `polyorder` as kwargs. They default to
-            10% of the number of observations (`window_length`) and 3 (`polyorder`).
-            Note that because `window_length` must be odd, if the 10% value is even, we
-            take 1-window_length.
+            for setting of `window_length` and `polyorder` as kwargs. `polyorder`
+            defaults to 3. `window_length` defaults to 10% of the number of points
+            on the edge, less 1 when even, as the filter needs an odd window. A
+            default window that is not above `polyorder`, as below 50 points
+            for `polyorder` 3, is raised to the smallest odd length above it, and
+            a window longer than the edge to the longest odd length within it.
+            When no odd length within the edge exceeds `polyorder` the edge is
+            drawn unsmoothed. A `window_length` the caller passes is used as given.
         xlim, ylim: tuple of (float or None, float or None), optional
             Inclusive ``(lower, upper)`` limits, in data coordinates, on the edge
             vertices drawn. A vertex outside a limit is dropped; a vertex exactly
@@ -530,7 +557,6 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         use_contourf=False,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
-        nan_aware_filter=False,
         levels=None,
         **kwargs,
     ):
@@ -553,13 +579,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         use_contourf: bool
             If True, use `ax.contourf`. Else use `ax.contour`.
         gaussian_filter_std: int
-            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
-            standard deviation specified by `gaussian_filter_std`.
+            If > 0, smooth the z-values with a Gaussian of this standard
+            deviation, in bins. A grid without empty bins is filtered by
+            :func:`scipy.ndimage.gaussian_filter`; a grid with empty bins by
+            :func:`~solarwindpy.plotting.tools.nan_gaussian_filter`, which
+            averages only the occupied bins and leaves the empty ones empty.
         gaussian_filter_kwargs: None, dict
-            If not None and gaussian_filter_std > 0, passed to :func:`scipy.ndimage.gaussian_filter`
-        nan_aware_filter: bool
-            If True and gaussian_filter_std > 0, use NaN-aware filtering via
-            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+            If not None and gaussian_filter_std > 0, passed to the filter.
         levels: array-like, int, None
             Contour levels. If None, the default for the ``axnorm``, or
             matplotlib's choice when there is none.
@@ -598,17 +624,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         C = agg.values
         if gaussian_filter_std:
-            if gaussian_filter_kwargs is None:
-                gaussian_filter_kwargs = dict()
-
-            if nan_aware_filter:
-                C = self._nan_gaussian_filter(
-                    C, gaussian_filter_std, **gaussian_filter_kwargs
-                )
-            else:
-                from scipy.ndimage import gaussian_filter
-
-                C = gaussian_filter(C, gaussian_filter_std, **gaussian_filter_kwargs)
+            C = self._gaussian_filter(C, gaussian_filter_std, gaussian_filter_kwargs)
 
         C = np.ma.masked_invalid(C)
         norm, cmap = self._color_scale(kwargs, C)

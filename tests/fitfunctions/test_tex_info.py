@@ -538,3 +538,23 @@ def test_offset_parameters_render_with_tex_subscripts(cls, x, y, expected):
     obj.make_fit()
     assert obj.TeX_info.TeX_argnames == expected
     assert set(expected.values()) <= set(obj.TeX_info.TeX_popt)
+
+
+def test_a_zero_exponent_is_not_printed():
+    r"""A value or uncertainty with exponent 0 prints without ``\times 10^{+0}``.
+
+    2.5 and 2.0 have exponent 0; 0.1 and 456 have exponents -1 and 2, which
+    still print. Each value reads back as the value given.
+
+    ON FAILURE: the code is wrong.
+    """
+    tex = TeXinfo(
+        {"a": 2.5, "b": 456.0}, {"a": 0.1, "b": 2.0}, "f(x)", CHISQ, RSQ, None
+    )
+    info = tex.build_info()
+    assert "10^{+0" not in info and "10^{-0" not in info
+    a_line = _param_line(info, "a")
+    b_line = _param_line(info, "b")
+    assert r"10^{-1" in a_line and r"10^{+2" in b_line
+    assert _read_back(a_line) == (2.5, 0.1)
+    assert _read_back(b_line) == (456.0, 2.0)

@@ -209,15 +209,16 @@ draws a log axis. ``make_plot`` colors each cell by its count:
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_contours` draws the same
 histogram as contours. ``gaussian_filter_std`` smooths the values with a
 Gaussian whose standard deviation is in bins before the contours are drawn.
-Set ``nan_aware_filter=True`` with it whenever the histogram has empty cells:
-an empty cell is NaN, and the plain filter spreads each NaN over its
-neighbours until no contour is left to draw. ``plot_edges=True`` also draws the
+An empty cell is NaN; when there are any, the filter averages only the
+occupied cells and leaves the empty ones empty, rather than spreading each NaN
+over its neighbours. ``plot_edges=True`` also draws the
 edges of the occupied distribution
 (:py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_edges`): in each column of
 ``x`` bins, the highest and the lowest occupied ``y`` bin, smoothed by a
 Savitzky-Golay filter unless ``edges_kwargs=dict(smooth=False)``. The
-filter's default window is a tenth of the number of ``x`` bins, so with fewer
-than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
+filter's default window is a tenth of the number of ``x`` bins, widened to fit
+its cubic polynomial when there are few bins; set ``window_length`` in
+``edges_kwargs=dict(sg_kwargs=...)`` to choose another. Here
 ``axnorm="t"``, explained in `Normalizations`_, scales the peak to 1, and
 ``use_contourf=True`` fills the contours:
 
@@ -236,9 +237,7 @@ than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
 
    h2 = Hist2D(v, n, logy=True, nbins=50, axnorm="t")
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
-   h2.plot_contours(
-       use_contourf=True, gaussian_filter_std=2, nan_aware_filter=True, plot_edges=True
-   )
+   h2.plot_contours(use_contourf=True, gaussian_filter_std=2, plot_edges=True)
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_hist_with_contours` draws
 the histogram and its smoothed contours on the same axes, with one colorbar,
@@ -264,7 +263,6 @@ stand out over the colored cells; the line style changes with the level:
        use_contourf=False,
        contour_kwargs=dict(colors="k"),
        gaussian_filter_std=2,
-       nan_aware_filter=True,
    )
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot` draws the
@@ -490,11 +488,11 @@ The binning decides which keys a plot accepts.
 ``axnorm``. Any other key raises:
 
 >>> Hist1D(v).binning.allowed_axnorm
-('d', 't')
+('d', 't', 'w')
 >>> Hist1D(v, axnorm="c")
 Traceback (most recent call last):
 ...
-ValueError: Unrecognized axnorm 'c'; expected one of: d, t
+ValueError: Unrecognized axnorm 'c'; expected one of: d, t, w
 
 With ``"c"`` or ``"r"`` the colorbar defaults to ten bands on [0, 1]; with the
 densities it is logarithmic. Four normalizations of the same data:
@@ -538,23 +536,20 @@ $n_{p_1} \; \left[\mathrm{cm}^{-3}\right]$
 >>> print(TeXlabel(("b", "", "")))
 $B \; \left[\mathrm{nT}\right]$
 >>> print(TeXlabel(("v", "x", "a")))
-${v}_{{X};{\alpha}} \; \left[\mathrm{km \; s^{-1}}\right]$
+${v}_{{x};{\alpha}} \; \left[\mathrm{km \; s^{-1}}\right]$
 
 A derived quantity uses its plasma method's name as ``M``. Methods such as
 :py:meth:`~solarwindpy.core.plasma.Plasma.T` and
 :py:meth:`~solarwindpy.core.plasma.Plasma.beta` return columns ``par``,
-``per`` and ``scalar``, and the label prints the component as given, so the
-scalar column's key gives a literal "scalar" subscript. For the scalar, leave
-the component empty:
+``per`` and ``scalar``. The scalar column's label is the bare symbol, the same
+as with the component left empty:
 
 >>> print(TeXlabel(("T", "par", "p1")))
 ${T}_{{\parallel};{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("T", "scalar", "p1")))
-${T}_{{\mathrm{scalar}};{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
->>> print(TeXlabel(("T", "", "p1")))
 ${T}_{{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("beta", "", "p1")))
-${\beta}_{{p_1}} \; \left[\mathrm{\#}\right]$
+${\beta}_{{p_1}} \; \left[\#\right]$
 
 A dimensionless quantity, such as :math:`\beta`, has the units
 :math:`[\#]`. A second key makes a ratio:
@@ -565,12 +560,18 @@ $n_{\alpha}/n_{p_1} \; \left[\#\right]$
 A plot labels its axes ``x``, ``y`` and ``z`` until ``set_labels`` sets them.
 A histogram's counts carry the special label
 :py:class:`~solarwindpy.plotting.labels.special.Count`, which follows the
-plot's ``axnorm``:
+plot's ``axnorm``. A count divided by a maximum is a pure number, :math:`[\#]`;
+a density is per unit width or area of the bins, so its label states the
+inverse of the binned axes' units, :math:`\mathrm{dex}^{-1}` for a log axis. Here
+the axes are labelled by plain strings, which state no units:
 
 >>> from solarwindpy.plotting.hist2d import Hist2D
+>>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="t")
+>>> print(h2.labels.z)
+$\mathrm{Count \, / \, Max} \; \left[\#\right]$
 >>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="cd")
 >>> print(h2.labels.z)
-$\mathrm{1D \, Probability \, Density} \; \left[\#\right]$
+$\mathrm{Column \, Probability \, Density}$
 
 ``solarwindpy.plotting.labels.available()`` prints every measurement,
 component and species ``TeXlabel`` knows, and the special labels.
