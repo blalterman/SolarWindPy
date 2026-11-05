@@ -1643,13 +1643,13 @@ species: {}
     def lnlambda(self, s0, s1):
         r"""Calculate the Coulomb logarithm between species s0 and s1.
 
-            :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
+            :math:`\ln \lambda_{0,1} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
 
         Parameters
         ----------
-        species: str
-            Each species is a string. It cannot be a sum of species,
-            nor can it be an iterable of species.
+        s0, s1 : str
+            The two species, one each. Neither can be a sum of species
+            nor an iterable of species.
 
         Returns
         -------

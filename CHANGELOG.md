@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Read the Docs (https://solarwindpy.readthedocs.io) is the only documentation host. The
   package metadata lists it as the `Documentation` URL.
 
+### Fixed
+
+- The API page of `Plasma.lnlambda` showed a MathJax error ("Double subscripts") in place of
+  its equation, and documented a `species` parameter it does not take; it documents `s0, s1`.
+  A test now rejects double subscripts, double superscripts and unbalanced braces in docstring
+  math.
+
 ### Removed
 
 - The GitHub Pages deployment of the documentation (the `deploy` job in
