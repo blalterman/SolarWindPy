@@ -127,12 +127,15 @@ def check_tests() -> Tuple[bool, str]:
 
 
 def check_linting() -> Tuple[bool, str]:
-    """Check if code passes linting."""
-    code, stdout, stderr = run_command(["ruff", "check"])
+    """Check the package passes linting, over the files CI lints."""
+    # CI (continuous-integration.yml, ci-master.yml) runs ruff on the package
+    # only; the same scope here keeps one definition of "lint clean".
+    code, stdout, stderr = run_command(["ruff", "check", "src/solarwindpy"])
     if code != 0:
         return (
             False,
-            f"Linting errors found. Fix with 'ruff format .' and address ruff check issues:\n{stdout}",
+            "Linting errors found. Fix with 'ruff format src/solarwindpy' and "
+            f"address ruff check issues:\n{stdout}",
         )
 
     return True, "Code passes linting"
