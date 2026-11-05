@@ -25,7 +25,7 @@ release = version
 
 # -- General configuration ---------------------------------------------------
 
-needs_sphinx = "1.8"
+needs_sphinx = "7.0"  # the docs extra's floor, sphinx>=7.0 in pyproject.toml
 
 # numpydoc is the only docstring processor. Running napoleon beside it made
 # both rewrite every docstring; napoleon's ``Attributes`` sections then emitted
@@ -232,7 +232,7 @@ html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------
 
-# PDF output configuration (enabled for RTD)
+# PDF output configuration
 latex_engine = 'pdflatex'
 latex_elements = {
     'papersize': 'letterpaper',
@@ -245,7 +245,7 @@ latex_elements = {
     ''',
 }
 
-# EPUB output configuration (enabled for RTD)
+# EPUB output configuration
 epub_show_urls = 'footnote'
 epub_use_index = True
 
