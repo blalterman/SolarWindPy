@@ -23,11 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   index, as the subset did; for a boolean mask on a unique index use
   `data.index.isin(plot.get_plotted_data().index)`.
   `get_subset_above_threshold(t)` compared each cell's aggregate after `axnorm`: with no
-  `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; on a
-  `Hist2D` or `SpiralPlot2D` with an `axnorm` or another `fcn`, use `plot.set_alim(t, None)`
-  then `plot.get_plotted_data(fcn)`. A `Hist1D` has no `alim`, so a threshold on a normalized or
-  non-count `Hist1D` has no direct replacement: filter `plot.agg(fcn)` and select the rows of
-  the kept bins through `plot.cut`.
+  `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; with an
+  `axnorm` or another `fcn`, use `plot.set_alim(t, None)` then `plot.get_plotted_data(fcn)` on
+  any binned plot, `Hist1D` included.
 - `Hist1D.take_data_in_yrange_across_x` calls `get_y_bounds(row, expected_logy=False)`, as
   `Hist2D`'s calls it with its log flag; a callback written as `lambda row: ...` raises
   `TypeError`. Accept the keyword, e.g. `lambda row, expected_logy=False: ...`. `Hist1D` and
@@ -69,6 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cells the figure shows (cells whose `agg(fcn)` is not NaN after `clim`, `axnorm`, any cell
   filter and `alim`), with the caller's x, y and z values on the caller's index. Pass the `fcn`
   given to `make_plot`. Each plot computes its rows' cell codes once and reuses them in `agg`.
+- `Hist1D.set_alim` (with `alim` and `alim_kind`): the limits on the aggregated value of a bin,
+  after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
+  honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
+  the z of each point.
 
 ### Changed
 

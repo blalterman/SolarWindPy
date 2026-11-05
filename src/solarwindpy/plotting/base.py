@@ -488,28 +488,16 @@ class Base(ABC):
         pass
 
 
-class ColorPlot(Base):
-    r"""Base for plots of x and y coloured by a z value, with a colorbar.
+class _AggregateLimits(Base):
+    r"""``alim``: limits on a plot's aggregated or coloured values.
 
-    Holds the data intake of (x, y, z), the z label the colorbar shows, and
-    ``alim``, the limits on the coloured values.
+    The one home of ``alim`` for every plot that has it. A ``BinnedPlot``
+    applies it to each cell's aggregated value (``_limit_values``); a
+    ``Scatter`` to the z of each point.
     """
 
     _alim = RangeLimits(None, None)
     _alim_kind = "value"
-    #: Default linestyles of the contour levels, cycled when there are more.
-    _contour_linestyles = (
-        "-",
-        ":",
-        "--",
-        (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-        "--",
-        ":",
-        "-",
-        (0, (7, 3, 1, 3, 1, 3)),
-    )
-    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
-    _log_data = False
 
     @property
     def alim(self):
@@ -613,9 +601,28 @@ class ColorPlot(Base):
 
         return agg.where(keep)
 
-    def _limit_values(self, agg):
-        r"""Apply ``alim`` to the aggregated values; see ``BinnedPlot.agg``."""
-        return self._apply_alim(agg)
+
+class ColorPlot(_AggregateLimits):
+    r"""Base for plots of x and y coloured by a z value, with a colorbar.
+
+    Holds the data intake of (x, y, z) and the z label the colorbar shows;
+    ``alim``, the limits on the coloured values, comes from
+    ``_AggregateLimits``.
+    """
+
+    #: Default linestyles of the contour levels, cycled when there are more.
+    _contour_linestyles = (
+        "-",
+        ":",
+        "--",
+        (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+        "--",
+        ":",
+        "-",
+        (0, (7, 3, 1, 3, 1, 3)),
+    )
+    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    _log_data = False
 
     def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
         r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
@@ -877,14 +884,14 @@ class ColorPlot(Base):
         return cbar
 
 
-class BinnedPlot(Base):
+class BinnedPlot(_AggregateLimits):
     r"""Base for plots that aggregate a value in the cells of a ``Binning``.
 
     The plot's ``binning`` places each kept row in one cell. ``agg`` groups
     the aggregated column by cell, applies ``clim`` to the count in each
     cell, drops the cells the binning filters out, normalizes by ``axnorm``
-    with the cells' measure, and returns every cell. A ``ColorPlot`` then
-    applies ``alim``.
+    with the cells' measure, applies ``alim`` to the result, and returns
+    every cell.
     """
 
     _axnorm = None
@@ -910,6 +917,9 @@ class BinnedPlot(Base):
         clim = self._format_limits(self.clim)
         if clim is not None:
             fields["clim"] = clim
+        if "alim" in fields:
+            # Show alim after clim, the order they apply in.
+            fields["alim"] = fields.pop("alim")
         return fields
 
     @property
@@ -1040,8 +1050,8 @@ class BinnedPlot(Base):
         return target.groupby(codes)
 
     def _limit_values(self, agg):
-        r"""Limits on the final aggregated values: none here; ``ColorPlot`` has ``alim``."""
-        return agg
+        r"""Apply ``alim`` to the final aggregated values; see ``agg``."""
+        return self._apply_alim(agg)
 
     def agg(self, fcn=None, **kwargs):
         r"""Aggregate the values in each cell.
@@ -1055,7 +1065,7 @@ class BinnedPlot(Base):
         binning's ``postfilter`` drops. The occupied cells are then
         normalized by ``axnorm`` (``binning.normalize``). Every cell is in
         the result, indexed by ``binning.cells``; a cell no row falls in is
-        NaN. A ``ColorPlot`` then sets the cells outside ``alim`` to NaN.
+        NaN. The cells outside ``alim`` are then set to NaN.
 
         How ``axnorm`` treats the result depends on the aggregation, which
         is classified as a count (``"count"``), a sum (``"sum"`` or
@@ -1165,8 +1175,8 @@ class BinnedPlot(Base):
         r"""The rows in the cells the figure shows.
 
         A cell is shown when ``agg(fcn)`` is not NaN there: after ``clim``,
-        ``axnorm``, any cell filter (a spiral mesh's ``cell_filter``) and, on
-        a ``ColorPlot``, ``alim``. ``alim`` acts on the aggregated value, so
+        ``axnorm``, any cell filter (a spiral mesh's ``cell_filter``) and
+        ``alim``. ``alim`` acts on the aggregated value, so
         pass the ``fcn`` you gave ``make_plot``; the default is the same as
         ``make_plot``'s.
 
