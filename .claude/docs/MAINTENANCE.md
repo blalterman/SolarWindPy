@@ -104,7 +104,7 @@ Monitor conda-forge bot PR creation and CI status during releases:
 ```bash
 # Generate test scaffolding for new modules
 python .claude/scripts/generate-test.py
-python .claude/scripts/generate-test.py src/solarwindpy/new_module.py
+python .claude/scripts/generate-test.py solarwindpy/new_module.py
 
 # Run comprehensive test suite with coverage
 pytest --cov=solarwindpy --cov-report=html -q
@@ -123,14 +123,6 @@ python .claude/hooks/coverage-monitor.py
 ## Hook System Maintenance
 
 ```bash
-# Validate session state manually
-bash .claude/hooks/validate-session-state.sh
-
-# Run physics validation on specific files
-python .claude/hooks/physics-validation.py src/solarwindpy/core/plasma.py
-python .claude/hooks/physics-validation.py --strict
-python .claude/hooks/physics-validation.py --report
-
 # Create manual compaction for token management
 python .claude/hooks/create-compaction.py
 

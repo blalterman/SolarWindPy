@@ -38,19 +38,19 @@ def _check_docstring_inheritance() -> None:
     imported it with the switch off before importing solarwindpy keeps it off.
     """
     import os
-    import warnings
 
     import docstring_inheritance
 
+    from .tools import _warn
+
     requested = bool(os.environ.get("DOCSTRING_INHERITANCE_ENABLE"))
     if requested and docstring_inheritance.NumpyDocstringInheritanceMeta is type:
-        warnings.warn(
+        _warn(
             "docstring inheritance is off: docstring_inheritance was imported "
             "before solarwindpy with DOCSTRING_INHERITANCE_ENABLE unset, so "
             "fit-function methods show no inherited help text. Import "
             "solarwindpy first, or set DOCSTRING_INHERITANCE_ENABLE=1 before "
-            "starting Python.",
-            stacklevel=2,
+            "starting Python."
         )
 
 

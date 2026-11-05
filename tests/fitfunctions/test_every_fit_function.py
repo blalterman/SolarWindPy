@@ -12,12 +12,13 @@ import importlib
 import importlib.util
 import inspect
 import pkgutil
+import warnings
 
 import numpy as np
 import pytest
 
 import solarwindpy.fitfunctions as ff
-from solarwindpy.fitfunctions.core import FitFunction
+from solarwindpy.fitfunctions.core import FitDegeneracyWarning, FitFunction
 from solarwindpy.fitfunctions.hinge import HingeMax
 from tests.fitfunctions._attempt import attempt_fit
 
@@ -45,16 +46,9 @@ CLASSES = _concrete_fit_functions()
 X = np.linspace(2.0, 10.0, 33)
 Y = 3.0 * np.exp(-0.5 * ((X - 5.0) / 1.5) ** 2) + 1.0
 
-# Constructor keywords a class requires, and set-up it needs before a fit.
-# No current class needs either.
-REQUIRED_KWARGS = {}
-SETUP = {}
-
 
 def _build(name, **kwargs):
-    fit = CLASSES[name](X, Y, **REQUIRED_KWARGS.get(name, {}), **kwargs)
-    SETUP.get(name, lambda fit: None)(fit)
-    return fit
+    return CLASSES[name](X, Y, **kwargs)
 
 
 def test_every_class_has_a_case():
@@ -66,8 +60,8 @@ def test_every_class_has_a_case():
     so every fit function the package lists is checked by these tests.
 
     ON FAILURE: the code is wrong if the two discoveries differ; otherwise a
-    fit function needs a constructor keyword or set-up that ``REQUIRED_KWARGS``
-    or ``SETUP`` does not give it; add it there.
+    fit function needs a constructor keyword or set-up before a fit; give
+    ``_build`` a case for it.
     """
     by_subclass_tree = {cls.__name__ for cls in ff._fit_function_classes()}
     assert CLASSES, "the module scan found no fit function"
@@ -133,12 +127,18 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
     generic = _build(name)
     n = len(generic.argnames)
 
-    got = attempt_fit(explicit_none, p0=None)
-    expected = attempt_fit(generic, p0=_generic_start(name, n))
+    # Fits from the generic start are often degenerate, and which pairs are
+    # depends on the platform's SciPy and BLAS, so the warning is neither
+    # expected nor forbidden here; both routes must report the same pairs.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FitDegeneracyWarning)
+        got = attempt_fit(explicit_none, p0=None)
+        expected = attempt_fit(generic, p0=_generic_start(name, n))
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
     if got is None:
         assert explicit_none.popt == generic.popt
+        assert explicit_none.degenerate == generic.degenerate
 
 
 def test_explicit_p0_none_does_not_read_the_class_guess():

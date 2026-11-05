@@ -15,7 +15,7 @@ __all__ = [
 
 import numpy as np
 
-from .core import FitFunction
+from .core import FitFunction, NotFittedError
 
 
 def _weighted_moments(fitfunction, x, y):
@@ -335,7 +335,7 @@ class GaussianLn(FitFunction):
         self._use_normal_parameters = new
         try:
             tex_info = self.TeX_info
-        except AttributeError:  # Not fitted yet.
+        except NotFittedError:
             return
         tex_info.set_extra_params(self._TeX_extra_params())
 
@@ -349,7 +349,7 @@ class GaussianLn(FitFunction):
             return None
         try:
             normal = self.normal_parameters
-        except AttributeError:  # Not fitted.
+        except NotFittedError:
             return None
         return {
             r"\mathrm{mean}(x)": normal["mean"],

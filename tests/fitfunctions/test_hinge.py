@@ -2459,3 +2459,58 @@ def test_hinge_saturation_rising_region_without_a_slope_gives_reference_start(
         warnings.simplefilter("error")
         p0 = obj.p0
     assert p0 == noise_free(expected)
+
+
+@pytest.mark.parametrize(
+    "cls, fixture, expected",
+    [
+        (
+            HingeSaturation,
+            "clean_saturation_data",
+            {"xh": "x_h", "yh": "y_h", "x1": "x_1", "m2": "m_2"},
+        ),
+        (
+            TwoLine,
+            "clean_twoline_data",
+            {"x1": "x_1", "x2": "x_2", "m1": "m_1", "m2": "m_2"},
+        ),
+        (
+            Saturation,
+            "clean_saturation_twoline_data",
+            {"x1": "x_1", "xh": "x_h", "yh": "y_h", "theta": r"\theta"},
+        ),
+        (
+            HingeMin,
+            "clean_hingemin_data",
+            {"m1": "m_1", "x1": "x_1", "x2": "x_2", "xh": "x_h"},
+        ),
+        (
+            HingeMax,
+            "clean_hingemax_data",
+            {"m1": "m_1", "x1": "x_1", "x2": "x_2", "xh": "x_h"},
+        ),
+        (
+            HingeAtPoint,
+            "clean_hingeatpoint_data",
+            {"xh": "x_h", "yh": "y_h", "m1": "m_1", "m2": "m_2"},
+        ),
+    ],
+    ids=lambda v: v.__name__ if isinstance(v, type) else None,
+)
+def test_hinge_parameters_render_as_their_model_string_writes_them(
+    cls, fixture, expected, request
+):
+    r"""Each hinge parameter's TeX name is how ``TeX_function`` writes it.
+
+    The model strings write ``x_h``, ``y_h``, ``x_1``, ``m_2`` (or ``x_i``,
+    ``m_i``) and ``\theta``; ``TeX_popt`` labels the fitted values the same
+    way, as for ``x_0``, ``y_0`` and ``\alpha`` elsewhere. Every fixture
+    hinges at x = 5.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = request.getfixturevalue(fixture)[:2]
+    obj = cls(x, y, guess_xh=5.0)
+    obj.make_fit()
+    assert obj.TeX_info.TeX_argnames == expected
+    assert set(expected.values()) <= set(obj.TeX_info.TeX_popt)

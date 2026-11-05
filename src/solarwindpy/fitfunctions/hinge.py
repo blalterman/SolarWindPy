@@ -149,10 +149,26 @@ class Hinge(FitFunction):
     _M2 = 0.01 * _M1
     _X2 = _XH - _YH / _M2
 
+    #: TeX of every hinge parameter, as the model strings write it.
+    _HINGE_TEX = {
+        "xh": "x_h",
+        "yh": "y_h",
+        "x1": "x_1",
+        "x2": "x_2",
+        "m1": "m_1",
+        "m2": "m_2",
+        "theta": r"\theta",
+    }
+
     def __init__(self, xobs, yobs, guess_xh=None, **kwargs):
         # Documented in the class docstring (see FitFunctionMeta).
         super().__init__(xobs, yobs, **kwargs)
         self._guess_xh = guess_xh
+
+    @property
+    def _TeX_argnames(self):
+        r"""The TeX of this class's parameters, e.g. ``xh`` as ``x_h``."""
+        return {name: self._HINGE_TEX[name] for name in self.argnames}
 
     @property
     def guess_xh(self):

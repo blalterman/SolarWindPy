@@ -26,16 +26,16 @@ _ALPHA_TEX = {"alpha": r"\alpha"}
 class PowerLaw(FitFunction):
     r"""Power law :math:`f(x) = A x^{\alpha}`.
 
-    Parameters are ``A`` (amplitude) and ``alpha`` (exponent).
+    Parameters are ``alpha`` (exponent) and ``A`` (amplitude).
     """
 
     _TeX_argnames = _ALPHA_TEX
 
     @property
     def function(self):
-        r"""The model :math:`A x^{\alpha}` as ``f(x, A, alpha)``."""
+        r"""The model :math:`A x^{\alpha}` as ``f(x, alpha, A)``."""
 
-        def power_law(x, A, alpha):
+        def power_law(x, alpha, A):
             """Evaluate ``A * x**alpha``."""
             return A * (x**alpha)
 
@@ -43,7 +43,7 @@ class PowerLaw(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, alpha]`` for the fit."""
+        r"""Return initial guesses ``[alpha, A]`` for the fit."""
         self._require_sufficient_data()
 
         p0 = [1, 1]
@@ -59,16 +59,16 @@ class PowerLaw(FitFunction):
 class PowerLawPlusC(FitFunction):
     r"""Power law with an additive constant, :math:`f(x) = A x^{\alpha} + y_0`.
 
-    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``y0`` (offset).
+    Parameters are ``alpha`` (exponent), ``y0`` (offset) and ``A`` (amplitude).
     """
 
     _TeX_argnames = {**_ALPHA_TEX, "y0": "y_0"}
 
     @property
     def function(self):
-        r"""The model :math:`A x^{\alpha} + y_0` as ``f(x, A, alpha, y0)``."""
+        r"""The model :math:`A x^{\alpha} + y_0` as ``f(x, alpha, y0, A)``."""
 
-        def power_law(x, A, alpha, y0):
+        def power_law(x, alpha, y0, A):
             """Evaluate ``A * x**alpha + y0``."""
             return (A * (x**alpha)) + y0
 
@@ -76,10 +76,10 @@ class PowerLawPlusC(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, alpha, y0]`` for the fit."""
+        r"""Return initial guesses ``[alpha, y0, A]`` for the fit."""
         self._require_sufficient_data()
 
-        p0 = [1, 1, 0]
+        p0 = [1, 0, 1]
         return p0
 
     @property
@@ -92,7 +92,7 @@ class PowerLawPlusC(FitFunction):
 class PowerLawOffCenter(FitFunction):
     r"""Power law about a shifted origin, :math:`f(x) = A (x - x_0)^{\alpha}`.
 
-    Parameters are ``A`` (amplitude), ``alpha`` (exponent) and ``x0`` (origin).
+    Parameters are ``alpha`` (exponent), ``x0`` (origin) and ``A`` (amplitude).
 
     Notes
     -----
@@ -166,9 +166,9 @@ class PowerLawOffCenter(FitFunction):
 
     @property
     def function(self):
-        r"""The model :math:`A (x - x_0)^{\alpha}` as ``f(x, A, alpha, x0)``."""
+        r"""The model :math:`A (x - x_0)^{\alpha}` as ``f(x, alpha, x0, A)``."""
 
-        def power_law(x, A, alpha, x0):
+        def power_law(x, alpha, x0, A):
             """Evaluate ``A * (x - x0)**alpha``."""
             return A * ((x - x0) ** alpha)
 
@@ -176,9 +176,9 @@ class PowerLawOffCenter(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[A, alpha, x0]`` for the fit.
+        r"""Return initial guesses ``[alpha, x0, A]`` for the fit.
 
-        ``A`` and ``alpha`` start at 1. ``x0`` starts at 0 when every used ``x``
+        ``alpha`` and ``A`` start at 1. ``x0`` starts at 0 when every used ``x``
         is positive; otherwise it starts below the smallest used ``x`` by the
         range of the used ``x`` (by 1 when they are all equal), inside the
         bound :meth:`make_fit` places on ``x0``.
@@ -192,7 +192,7 @@ class PowerLawOffCenter(FitFunction):
         else:
             span = x.max() - xmin
             x0 = xmin - (span if span > 0 else 1.0)
-        p0 = [1, 1, x0]
+        p0 = [1, x0, 1]
         return p0
 
     @property

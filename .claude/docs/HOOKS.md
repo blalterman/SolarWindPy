@@ -1,79 +1,30 @@
-# Hook System Reference
+# Hook Scripts
 
-Comprehensive automation system for SolarWindPy development workflow.
+`.claude/settings.json` registers no Claude Code hooks. The scripts in
+`.claude/hooks/` run in two ways: the git pre-commit hooks in
+`.pre-commit-config.yaml` call some of them, and the rest run by hand.
 
-## Hook Types and Triggers
+## Run by the git pre-commit hooks
 
-### SessionStart Hooks
-- **Trigger**: Every Claude Code session startup
-- **Script**: `.claude/hooks/validate-session-state.sh`
-- **Purpose**: Branch validation, context loading, plan status
-- **Timeout**: 30 seconds
+- `pre-commit-tests.sh`: the `solarwindpy-physics` hook. On any commit that
+  touches a `.py` file it runs the full suite with the coverage floor set by its
+  `--cov-fail-under` argument. The floor is a regression ratchet below measured
+  coverage; raise it as coverage rises.
+- `project-env.sh`: runs a command inside the `solarwindpy` conda env. The
+  pre-commit hooks that run Python go through it.
 
-### PostToolUse Hooks
-- **Trigger**: After Edit/MultiEdit/Write operations
-- **Script**: `.claude/hooks/test-runner.sh --changed`
-- **Purpose**: Smart test execution for modified files
-- **Timeout**: 120 seconds
-
-### PreCompact Hooks
-- **Trigger**: Token boundary approaching
-- **Script**: `.claude/hooks/create-compaction.py` 
-- **Purpose**: Session state preservation
-- **Timeout**: 30 seconds
-
-### Stop Hooks
-- **Trigger**: Session end
-- **Script**: `.claude/hooks/coverage-monitor.py`
-- **Purpose**: Final coverage analysis and reporting
-- **Timeout**: 60 seconds
-
-## Key Hook Scripts
-
-### Session Management
-- `validate-session-state.sh` - Branch validation and context loading
-- `create-compaction.py` - Token limit management with state preservation
-
-### Quality Assurance  
-- `test-runner.sh` - Smart test execution with multiple modes
-- `coverage-monitor.py` - Detailed coverage analysis and reporting
-- `pre-commit-tests.sh` - Automated testing before commits
-
-## Test Runner Modes
+## Run by hand
 
 ```bash
-.claude/hooks/test-runner.sh --changed     # Test only changed files
-.claude/hooks/test-runner.sh --physics     # Physics validation tests  
-.claude/hooks/test-runner.sh --coverage    # Full coverage report
-.claude/hooks/test-runner.sh --fast        # Quick test run
-.claude/hooks/test-runner.sh --all         # Complete test suite
+.claude/hooks/test-runner.sh --changed     # tests for changed files
+.claude/hooks/test-runner.sh --physics     # physics validation subset
+.claude/hooks/test-runner.sh --coverage    # full coverage report
+.claude/hooks/test-runner.sh --fast        # quick run
+.claude/hooks/test-runner.sh --all         # complete suite
+python .claude/hooks/coverage-monitor.py   # per-module coverage report (advisory)
+python .claude/hooks/create-compaction.py  # write a session-state compaction file
+.claude/hooks/validate-tags.sh             # check git tags follow the release conventions
 ```
 
-## Session State Management
-
-### Compaction Pattern
-- **Location**: `.claude/compacted_state.md` and timestamped backups
-- **Format**: `compaction-{date}-{time}-{compression}pct.md`
-- **Purpose**: File-based session state preservation at token boundaries
-- **Benefits**: 60-80% token savings through automated compression
-
-### Coverage Monitoring
-- **Requirement**: ≥95% coverage enforced
-- **Integration**: Pre-commit hook validation
-- **Reporting**: Detailed analysis via coverage-monitor.py
-- **Templates**: Smart test generation via generate-test.py
-
-## Hook Configuration
-
-All hooks are configured in `.claude/settings.json` with:
-- **Matchers**: Pattern-based trigger conditions
-- **Timeouts**: Maximum execution time limits
-- **Blocking**: Whether execution blocks tool use
-- **Arguments**: Dynamic parameter passing
-
-## Automation Benefits
-- **Token Optimization**: 60-80% reduction in planning overhead
-- **Quality Assurance**: Automatic validation prevents broken code
-- **Workflow Enforcement**: Branch protection and test requirements
-- **Scientific Rigor**: Physics constraint validation
-- **Multi-computer Sync**: Instant plan access across machines
+`input-validation.sh` defines argument-sanitizing helpers, but no script sources
+it.

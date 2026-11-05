@@ -32,8 +32,38 @@ __all__ = [
 ]
 
 import logging
+import os
+import warnings
+
 import numpy as np
 import pandas as pd
+
+# Every frame whose file lies under the package directory is skipped by _warn.
+# Not resolved: a frame's filename keeps the path the package was imported by.
+_PACKAGE_PREFIX = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + os.sep
+
+
+def _warn(message, category=UserWarning):
+    """Issue ``message`` as ``category``, attributed to the caller outside the package.
+
+    A warning names the file and line that triggered it, and a ``-W`` filter
+    matches on that module. Every warning SolarWindPy issues goes through
+    here, which names the first frame outside the package directory, so the
+    user sees their own line however deeply the package nested the call; a
+    hand-counted ``stacklevel`` breaks whenever the call depth changes.
+
+    It lives in this bottom-layer module so the layers in ``pyproject.toml``
+    let every subpackage but :mod:`solarwindpy.core`, this module's
+    independent sibling, import it.
+
+    Parameters
+    ----------
+    message : str
+        The warning text.
+    category : type of Warning, optional
+        The warning class. Default :class:`UserWarning`.
+    """
+    warnings.warn(message, category, skip_file_prefixes=(_PACKAGE_PREFIX,))
 
 
 def _check_core_dominates(data):

@@ -246,3 +246,27 @@ def test_a_missing_local_catalog_still_raises_without_probing(tmp_path, monkeypa
         with pytest.raises(ICMECATDownloadError):
             ICMECAT()
     assert fake.requested == []
+
+
+@pytest.mark.parametrize(
+    "served",
+    [
+        pytest.param({V23: TIMEOUT}, id="not-a-404"),
+        pytest.param({V23: 404, BASE.format(24): TIMEOUT}, id="failure-mid-climb"),
+        pytest.param(all_404(23, 24, 25, 26, 27, 28), id="nothing-hosted"),
+    ],
+)
+def test_the_stale_cache_warning_points_at_the_icmecat_call(host, tmp_path, served):
+    """Each path to the cached v23 attributes its StaleCacheWarning to ``ICMECAT()``.
+
+    Chosen input: one scenario per call of ``cache.fall_back`` in ICMECAT.
+
+    ON FAILURE: the code is wrong.
+    """
+    seed_v23(tmp_path)
+    host(served)
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        ICMECAT()
+    (stale,) = [w for w in record if w.category is cache.StaleCacheWarning]
+    assert Path(stale.filename).resolve() == Path(__file__).resolve()

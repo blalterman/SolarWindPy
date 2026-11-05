@@ -38,6 +38,8 @@ import pandas as pd
 
 from astropy.utils import data as _astropy_data
 
+from ..tools import _warn
+
 #: Package name under which astropy keeps SolarWindPy's downloads.
 PKGNAME = "solarwindpy"
 
@@ -233,7 +235,7 @@ def fall_back(url, error):
         f"Could not download {url} ({error!r}); using the cached copy that "
         f"is {days:.1f} days old: {cached}"
     )
-    warnings.warn(message, StaleCacheWarning, stacklevel=3)
+    _warn(message, StaleCacheWarning)
     _logger.warning(message)
     return cached
 

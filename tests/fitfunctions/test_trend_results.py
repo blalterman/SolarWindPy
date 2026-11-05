@@ -14,7 +14,11 @@ import pandas as pd
 import pytest
 
 from solarwindpy.fitfunctions import trend_fits
-from solarwindpy.fitfunctions.core import InsufficientDataError, NotFittedError
+from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
+    InsufficientDataError,
+    NotFittedError,
+)
 from solarwindpy.fitfunctions.gaussians import Gaussian
 from solarwindpy.fitfunctions.hinge import HingeAtPoint
 from solarwindpy.fitfunctions.lines import Line
@@ -265,7 +269,9 @@ def test_keywords_reach_each_level():
         bin_kwargs={"xmax": 7.0},
         trend_kwargs={"xmax": 2.0},
     )
-    tf.make_fit()
+    # The trend's two used bins leave its covariance not finite.
+    with pytest.warns(FitDegeneracyWarning, match="m and b have a non-finite"):
+        tf.make_fit()
     for fit in tf.bin_fits:
         assert fit.observations.used.x.max() == 6.5  # the last center <= 7
     assert tf.trend.observations.used.x.max() == 1.5  # the last center <= 2

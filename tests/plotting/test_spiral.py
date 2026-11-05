@@ -965,6 +965,83 @@ class TestPlotContours:
             )
 
 
+def _unsplit(rows, yedges=YEDGES):
+    """SpiralPlot2D on ``rows`` over x-bins [0,2), [2,4), [4,6); no cell splits."""
+    x, y, z = (pd.Series(c) for c in zip(*rows))
+    return SpiralPlot2D(
+        x,
+        y,
+        z,
+        initial_bins=(np.array([0.0, 2.0, 4.0, 6.0]), np.array(yedges)),
+        min_per_bin=len(rows),
+    )
+
+
+@pytest.mark.parametrize(
+    "rows, yedges, match",
+    [
+        pytest.param(
+            [(1.0, 0.5, 1.0), (5.0, 1.5, 2.0)],
+            YEDGES,
+            r"at least 3 occupied cells.*got 2",
+            id="two-cells",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (1.0, 1.5, 2.0), (1.0, 3.0, 3.0)],
+            YEDGES,
+            r"occupied cells' centers all lie on one line",
+            id="vertical-line",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (5.0, 0.5, 3.0)],
+            YEDGES,
+            r"occupied cells' centers all lie on one line",
+            id="horizontal-line",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (3.0, 1.5, 2.0), (5.0, 2.5, 3.0)],
+            (0.0, 1.0, 2.0, 3.0),
+            r"occupied cells' centers all lie on one line",
+            id="diagonal-line",
+        ),
+    ],
+)
+def test_contours_of_cells_that_cannot_be_triangulated_raise_clearly(
+    rows, yedges, match
+):
+    """Too few occupied cells, or centres all on one line, raise ValueError.
+
+    Chosen input: samples in two cells; three cells of the x-bin [0,2) whose
+    centres share x = 1; three cells of the y-bin [0,1), across x-bins
+    [0,2), [2,4) and [4,6), whose centres share y = 0.5; and three cells on
+    the diagonal of unit y-bins, centres (1, 0.5), (3, 1.5), (5, 2.5). No
+    triangle can be drawn between them, and the message names why.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _unsplit(rows, yedges)
+    with pytest.raises(ValueError, match=match):
+        splot.plot_contours(levels=[1.5, 2.5], cbar=False)
+
+
+def test_contours_of_three_cells_off_one_line_draw_their_triangle():
+    """Three occupied cells whose centres are not on one line are contoured.
+
+    Chosen input: cells centred at (1, 0.5), (3, 0.5) and (1, 1.5) holding
+    1, 2 and 3. Their one triangle interpolates linearly, so the level 1.5
+    crosses the edge from 1 to 2 halfway, at (2, 0.5), and the edge from 1
+    to 3 a quarter of the way, at (1, 0.75).
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _unsplit([(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (1.0, 1.5, 3.0)])
+    _, qset, _ = splot.plot_contours(levels=[1.5], cbar=False)
+    (segments,) = qset.allsegs
+    (segment,) = segments
+    ends = np.asarray(sorted(map(tuple, segment)))
+    assert ends == exact(np.array([[1.0, 0.75], [2.0, 0.5]]))
+
+
 # ---------------------------------------------------------------------------
 # Samples outside the mesh, and integer initial edges.
 # ---------------------------------------------------------------------------

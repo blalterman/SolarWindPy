@@ -143,7 +143,7 @@ def test_a_subclass_precheck_failure_is_recorded_too():
     x = np.linspace(1.0, 5.0, 20)
     fit = PowerLawOffCenter(x, 2.0 * x**1.5)
     with pytest.raises(ValueError, match="needs x0 below"):
-        fit.make_fit(bounds=([-np.inf, -np.inf, 2.0], [np.inf, np.inf, np.inf]))
+        fit.make_fit(bounds=([-np.inf, 2.0, -np.inf], [np.inf, np.inf, np.inf]))
     assert fit.results.loc[:, ("status", "")].item() == "ValueError"
 
 
@@ -207,3 +207,24 @@ def test_combined_popt_psigma_is_gone():
     fit.make_fit()
     assert "combined_popt_psigma" not in dir(fit)
     assert "results" in dir(fit)
+
+
+def test_a_failure_computing_rsq_is_recorded_as_a_failed_fit():
+    """R² is part of the fit: a failure computing it is recorded like the others.
+
+    Chosen input: ``_calc_rsq`` replaced by one raising RuntimeError, one of
+    the failures make_fit records.
+
+    ON FAILURE: the code is wrong.
+    """
+    x, y = _gaussian()
+    fit = Gaussian(x, y)
+
+    def fail(popt):
+        raise RuntimeError("rsq")
+
+    fit._calc_rsq = fail
+    with pytest.raises(RuntimeError, match="rsq"):
+        fit.make_fit()
+    assert fit.results.loc[:, ("status", "")].item() == "RuntimeError"
+    assert isinstance(fit.error, RuntimeError)
