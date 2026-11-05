@@ -607,7 +607,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         'ok'
         """
         if self._results_table is None:
-            self._results_table = self._results_row(self._fitted("_outcome"))
+            self._results_table = pd.DataFrame(
+                [self._results_values()], columns=self.results_columns
+            )
         return self._results_table.copy()
 
     @property
@@ -1275,13 +1277,20 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
                 )
         return f"{self.__class__.__name__}: " + " ".join(parts)
 
-    def _results_row(self, outcome):
-        r"""Build the one-row :attr:`results` table of ``outcome``; every row is built here.
+    def _results_values(self):
+        r"""The stored outcome's :attr:`results` row, in :attr:`results_columns` order.
 
-        Parameters
-        ----------
-        outcome : solarwindpy.fitfunctions.core._FitOutcome
+        Every results row is built from this list: :attr:`results` as one
+        row, and
+        :attr:`~solarwindpy.fitfunctions.trend_fits.TrendFit.bin_results` as
+        one row per bin fit, in a single table.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before :meth:`make_fit` has run.
         """
+        outcome = self._fitted("_outcome")
         values = [v for pair in zip(outcome.popt, outcome.psigma) for v in pair]
         values += [
             outcome.chisq.linear,
@@ -1291,7 +1300,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             outcome.dof,
             outcome.status,
         ]
-        return pd.DataFrame([values], columns=self.results_columns)
+        return values
 
     @property
     def results_columns(self):

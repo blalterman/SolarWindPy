@@ -300,7 +300,11 @@ class TrendFit(object):
                     fit._record_failure(exc)
 
             if len(self.bin_fits):
-                results = pd.concat([fit.results for fit in self.bin_fits])
+                # One table from every bin fit's results row, built at once.
+                results = pd.DataFrame(
+                    [fit._results_values() for fit in self.bin_fits],
+                    columns=self.bin_fits.iloc[0].results_columns,
+                )
             else:
                 results = pd.DataFrame(
                     columns=pd.MultiIndex.from_tuples([], names=["P", "K"])
