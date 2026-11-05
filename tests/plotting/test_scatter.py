@@ -581,3 +581,72 @@ def test_segments_do_not_change_the_axis_limits(ax):
     Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
     assert ax.get_xlim() == (EX.min(), EX.max())
     assert ax.get_ylim() == (EY.min(), EY.max())
+
+
+# ---------------------------------------------------------------------------
+# A colour in connect_kwargs: with a varying z the segments are colour-mapped,
+# so the colour is dropped with a warning naming the key the caller typed;
+# otherwise it is the segments' one colour, under any of its spellings.
+# ---------------------------------------------------------------------------
+
+COLOR_KEYS = ["color", "c", "colors", "edgecolor", "edgecolors", "ec"]
+
+
+@pytest.mark.parametrize("key", COLOR_KEYS)
+def test_connect_colour_with_varying_z_warns_and_is_ignored(ax, key):
+    """With a varying z the segments keep the colormap; the colour key is named.
+
+    ON FAILURE: the code is wrong.
+    """
+    kwargs = {key: "red"}
+    with pytest.warns(UserWarning, match=rf"connect_kwargs\['{key}'\]") as record:
+        _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(
+            ax=ax, connect=True, connect_kwargs=kwargs
+        )
+    assert kwargs == {key: "red"}
+    assert len(record) == 1
+    assert record[0].filename == __file__
+    assert "colormap" in str(record[0].message)
+    ax.figure.canvas.draw()
+    expected = points.get_cmap()(points.norm(_mean_z(EZ, Z_ORDER)))
+    np.testing.assert_allclose(lc.get_edgecolor(), expected)
+
+
+@pytest.mark.parametrize("key", COLOR_KEYS)
+@pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
+def test_connect_colour_without_varying_z_is_honoured(ax, key, z):
+    """With no z, or a constant one, every spelling of the colour sets the segments'.
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        _, _, lc, _ = Scatter(EX, EY, z).make_plot(
+            ax=ax, connect=True, connect_kwargs={key: "red"}
+        )
+    ax.figure.canvas.draw()
+    np.testing.assert_array_equal(lc.get_edgecolor(), [[1.0, 0.0, 0.0, 1.0]])
+
+
+@pytest.mark.parametrize("z", [None, EZ])
+def test_connect_without_a_colour_key_does_not_warn(ax, z):
+    """Styling the segments without a colour issues no warning.
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        Scatter(EX, EY, z).make_plot(
+            ax=ax, connect=True, connect_kwargs={"linewidth": 2.0}
+        )
+
+
+def test_connect_refuses_two_colour_keys(ax):
+    """Two spellings of the colour are ambiguous, as matplotlib's aliases are.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match="'color'.*'ec'"):
+        Scatter(EX, EY).make_plot(
+            ax=ax, connect=True, connect_kwargs={"color": "red", "ec": "blue"}
+        )

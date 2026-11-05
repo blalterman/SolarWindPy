@@ -126,6 +126,7 @@ test = [
     "pytest-cov>=6.0",
     "packaging>=23.0",
     "pyyaml>=6.0",  # tests/test_declared_versions.py reads YAML
+    "requests>=2.31",  # tests/test_update_conda_feedstock.py stubs requests.get
 ]
 docs = [
     "sphinx>=7.0",
@@ -142,6 +143,7 @@ dev = [
     "pytest>=9.0",
     "pytest-cov>=6.0",
     "pyyaml>=6.0",  # tests/test_declared_versions.py reads YAML
+    "requests>=2.31",  # tests/test_update_conda_feedstock.py stubs requests.get
     # Documentation tools
     "sphinx>=7.0",
     "sphinx_rtd_theme>=2.0",
