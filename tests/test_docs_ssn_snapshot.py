@@ -30,10 +30,6 @@ pytestmark = pytest.mark.filterwarnings(
     "error::solarwindpy.solar_activity.cache.StaleCacheWarning"
 )
 
-_PENDING = pytest.mark.xfail(
-    strict=True, reason="the docs have no sunspot-number snapshot yet"
-)
-
 
 def _helper():
     spec = importlib.util.spec_from_file_location(
@@ -57,7 +53,6 @@ def seeded(tmp_path, monkeypatch):
     return helper, path
 
 
-@_PENDING
 def test_snapshot_is_cached_fresh_under_the_m13_url(seeded):
     """The seed is the loader's URL, younger than its freshness window.
 
@@ -71,7 +66,6 @@ def test_snapshot_is_cached_fresh_under_the_m13_url(seeded):
     assert cache.fetch(url, SIDCLoader("m13", url).max_age) == path
 
 
-@_PENDING
 def test_snapshot_names_its_source_and_caches_only_the_data(seeded):
     """The committed file's header names the URL; the cached copy has no header.
 
@@ -85,7 +79,6 @@ def test_snapshot_names_its_source_and_caches_only_the_data(seeded):
     assert not [line for line in path.read_text().splitlines() if line[:1] == "#"]
 
 
-@_PENDING
 def test_snapshot_parses_through_sidc_and_covers_1994_to_2026(seeded):
     """``SIDC("m13")`` loads the seeded snapshot: months 1994-01 through 2026.
 

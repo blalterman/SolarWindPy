@@ -12,6 +12,20 @@ from collections import Counter
 sys.path.insert(0, os.path.abspath("../../src"))
 import solarwindpy
 
+# A plot block in the Usage guide loads SIDC("m13"), which downloads from
+# SILSO. Serve it from the committed snapshot through a private download cache,
+# so the build needs no network and leaves the user's own cache alone.
+import atexit
+import shutil
+import tempfile
+
+sys.path.insert(0, os.path.abspath("."))
+from _ssn_snapshot import seed_ssn_snapshot
+
+_ssn_cache = tempfile.mkdtemp(prefix="solarwindpy-docs-cache-")
+atexit.register(shutil.rmtree, _ssn_cache, ignore_errors=True)
+seed_ssn_snapshot(_ssn_cache, os.environ.__setitem__)
+
 
 # -- Project information -----------------------------------------------------
 
