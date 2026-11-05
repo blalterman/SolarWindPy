@@ -2,6 +2,10 @@
 
 Thank you for considering contributing to SolarWindPy.
 
+Everyone who takes part in SolarWindPy is expected to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1). Report
+concerns to [blaltermanphd@gmail.com](mailto:blaltermanphd@gmail.com).
+
 ## Development workflow
 
 1. **Set up development environment**:

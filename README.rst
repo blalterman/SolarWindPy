@@ -126,6 +126,12 @@ Development
       make html SPHINXOPTS="-W --keep-going -n"
 
 
+Code of Conduct
+===============
+
+SolarWindPy follows the Contributor Covenant, version 2.1. See
+`CODE_OF_CONDUCT.md`_. Report concerns to blaltermanphd@gmail.com.
+
 License
 =======
 
@@ -151,6 +157,7 @@ Please cite this all-versions DOI rather than a single release's DOI, and give
 the version you used in your text. See `CITATION.rst`_ for details. GitHub's
 "Cite this repository" button reads the same metadata from ``CITATION.cff``.
 
+.. _CODE_OF_CONDUCT.md: ./CODE_OF_CONDUCT.md
 .. _LICENSE: ./LICENSE
 .. _CITATION.rst: ./CITATION.rst
 
