@@ -996,24 +996,16 @@ class BinnedPlot(_AggregateLimits):
         return self._source.columns[-1]
 
     def _cell_codes(self):
-        r"""``binning.codes()``, computed once per binning and data, read-only.
+        r"""``binning.codes()``: each kept row's cell, -1 in none.
 
-        The binning and the data are each set once, by the constructor, but
-        the cache is keyed on both objects, so replacing either recomputes.
+        Not cached: a code per row in a wide integer type would cost each plot
+        8 B per row, where a plot on a shared ``BinnedData`` keeps about 1.
+        ``agg`` computes the codes once per call and passes them on.
         """
-        binning = self.binning
-        source = self._source
-        cached = self.__dict__.get("_codes_cache")
-        if cached is None or cached[0] is not binning or cached[1] is not source:
-            codes = np.asarray(binning.codes())
-            codes.setflags(write=False)
-            cached = (binning, source, codes)
-            self._codes_cache = cached
-        return cached[2]
+        return np.asarray(self.binning.codes())
 
-    def _grouped_by_cell(self):
-        r"""The aggregated column on the rows in a cell, grouped by cell code."""
-        codes = self._cell_codes()
+    def _grouped_by_cell(self, codes):
+        r"""The aggregated column on the rows in a cell, grouped by ``codes``."""
         # By position: the groups are keyed by `codes`, never by row label.
         target = self._source.take(self.agg_axes, labels=False)
         inside = codes >= 0
@@ -1053,6 +1045,10 @@ class BinnedPlot(_AggregateLimits):
         ValueError
             For a share of a sum when a row in a cell has a negative value.
         """
+        return self._agg(fcn, self._cell_codes(), **kwargs)
+
+    def _agg(self, fcn, codes, **kwargs):
+        r"""``agg`` on the rows' cell ``codes``, which the caller computed."""
         tko = self.agg_axes
 
         lbls = self._flat_labels()
@@ -1069,7 +1065,6 @@ class BinnedPlot(_AggregateLimits):
         # cells, as a groupby count would, so empty cells stay NaN after the
         # reindex below. The aggregated column has no NaN on kept rows, so
         # this equals its groupby count. It serves clim and axnorm.
-        codes = self._cell_codes()
         n = np.bincount(codes[codes >= 0], minlength=len(self.binning.cells))
         occupied = np.flatnonzero(n)
         cnt = pd.Series(
@@ -1081,7 +1076,7 @@ class BinnedPlot(_AggregateLimits):
             # Count fast path: the counts are the aggregate; no groupby.
             agg = cnt
         else:
-            agg = self._grouped_by_cell().agg(fcn, **kwargs)
+            agg = self._grouped_by_cell(codes).agg(fcn, **kwargs)
 
         if kind == "sum" and self.axnorm in _SHARE_AXNORMS:
             values = self._source.take(self.agg_axes, labels=False).to_numpy()
@@ -1128,8 +1123,9 @@ class BinnedPlot(_AggregateLimits):
         A cell is shown where ``agg(fcn)`` is not NaN. Looked up by cell code,
         with code -1 (no cell) mapped to the appended False.
         """
-        shown = self.agg(fcn=fcn).notna().to_numpy()
-        return np.append(shown, False)[self._cell_codes()]
+        codes = self._cell_codes()
+        shown = self._agg(fcn, codes).notna().to_numpy()
+        return np.append(shown, False)[codes]
 
     def _kept_source_frame(self):
         r"""The caller's values on the kept rows, one column per ``data`` column.

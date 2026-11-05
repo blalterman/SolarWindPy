@@ -89,7 +89,7 @@ def test_a_count_does_not_group_the_rows():
     """
     h = Hist2D(X, Y, nbins=15)
 
-    def refuse():
+    def refuse(*args):
         raise AssertionError("count went through the groupby")
 
     h._grouped_by_cell = refuse

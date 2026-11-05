@@ -72,7 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `get_plotted_data(fcn=None)` on `Hist1D`, `Hist2D` and `SpiralPlot2D` returns the rows in the
   cells the figure shows (cells whose `agg(fcn)` is not NaN after `clim`, `axnorm`, any cell
   filter and `alim`), with the caller's x, y and z values on the caller's index. Pass the `fcn`
-  given to `make_plot`. Each plot computes its rows' cell codes once and reuses them in `agg`.
+  given to `make_plot`. Each call computes the rows' cell codes once, for the count, the
+  aggregation and the row lookup, and keeps none, so plots on a shared `BinnedData` stay small.
 - `Hist1D.set_alim` (with `alim` and `alim_kind`): the limits on the aggregated value of a bin,
   after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
   honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
