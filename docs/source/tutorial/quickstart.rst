@@ -88,16 +88,17 @@ time:
 >>> plasma.R("p1").round(2).tolist()
 [0.49, 1.69, 0.87]
 
-A species string joined with ``+`` asks for a total over those species. The
-alpha and proton densities add:
+Quantities that add over species, such as density, take a species string
+joined with ``+`` and return the total. The alpha and proton densities add:
 
 >>> plasma.a.n.tolist()
 [0.5, 1.0, 1.5]
 >>> plasma.n("a+p1").tolist()
 [1.5, 3.0, 4.5]
 
-:doc:`/missing_data` lists the quantities that take a total and how a total
-treats a species missing at some times.
+:doc:`/missing_data` lists the quantities that take a total, notes that
+thermal speeds do not, and explains how a total treats a species missing at some
+times.
 
 A 2D Histogram
 --------------
