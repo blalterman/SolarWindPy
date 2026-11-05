@@ -90,10 +90,10 @@ dependencies = [
   "numpy>=2.0,<3.0",   # astropy 8 requires numpy>=2.0
   "scipy>=1.16",       # CODATA 2022 constants; PHEP 3 deviation (excludes SciPy 1.15)
   "pandas>=3,<4",      # one supported major; the suite runs on the latest release
-  "numexpr>=2.10",     # not imported; pandas uses it to accelerate eval and query.
-                       # 2.10 is the first release that imports on numpy 2.0
-  "bottleneck>=1.4",   # not imported; pandas uses it to accelerate reductions.
-                       # 1.4: oldest release verified on numpy 2.0 (1.3.0 does not build on Python 3.12)
+  "numexpr>=2.10.2",   # not imported; pandas uses it to accelerate eval and query.
+                       # 2.10.2 is the oldest pandas 3 accepts; older releases are ignored
+  "bottleneck>=1.4.2", # not imported; pandas uses it to accelerate reductions.
+                       # 1.4.2 is the oldest pandas 3 accepts; older releases are ignored
   "tables>=3.10.1",    # PyTables: the pandas HDF5 backend behind Plasma.save and load_from_file.
                        # 3.10.1: oldest release verified on numpy 2.0 (3.10.0 requires numpy<2)
   "matplotlib>=3.11",  # contour raises on unknown keywords from 3.11 (3.10 only warns);
