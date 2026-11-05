@@ -220,24 +220,38 @@ def density_units(axnorm, axes):
     return r" \, ".join(factors)
 
 
-def validate_axnorm(key):
+def validate_axnorm(key, allowed=None):
     r"""Return the ``axnorm`` key ``key`` in lower case, or None for None.
+
+    The one check of an ``axnorm`` key, shared by the labels and the plots.
+    Matching is case-insensitive and exact.
+
+    Parameters
+    ----------
+    key : str or None
+        The requested key.
+    allowed : iterable of str, optional
+        The lowercase keys accepted, e.g. a binning's ``allowed_axnorm``.
+        None accepts every key of
+        :data:`~solarwindpy.plotting.labels.base.AXNORM`.
 
     Raises
     ------
     TypeError
         If ``key`` is neither a string nor None.
     ValueError
-        If ``key`` is not a key of :data:`~solarwindpy.plotting.labels.base.AXNORM`.
+        If ``key`` is not one of ``allowed``.
     """
+    if allowed is None:
+        allowed = AXNORM
     if key is None:
         return None
     if not isinstance(key, str):
         raise TypeError(f"axnorm must be a string or None; got {type(key).__name__}")
     lower = key.lower()
-    if lower not in AXNORM:
+    if lower not in allowed:
         raise ValueError(
-            f"Unrecognized axnorm '{key}'; expected one of: {', '.join(AXNORM)}"
+            f"Unrecognized axnorm '{key}'; expected one of: {', '.join(allowed)}"
         )
     return lower
 

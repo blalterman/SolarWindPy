@@ -960,7 +960,7 @@ class BinnedPlot(_AggregateLimits):
         ValueError
             If ``new`` is not a key the cells support.
         """
-        self._axnorm = self._validate_axnorm(new, self.binning.allowed_axnorm)
+        self._axnorm = labels.base.validate_axnorm(new, self.binning.allowed_axnorm)
         self._count_with_axnorm(getattr(self.labels, self.agg_axes))
 
     def _count_with_axnorm(self, label):
@@ -989,42 +989,6 @@ class BinnedPlot(_AggregateLimits):
         """
         super().set_labels(**kwargs)
         self._count_with_axnorm(getattr(self.labels, self.agg_axes))
-
-    @staticmethod
-    def _validate_axnorm(new, allowed):
-        r"""Check an ``axnorm`` key and return it in its normalized form.
-
-        Parameters
-        ----------
-        new : str or None
-            The requested key. Matching is case-insensitive and exact.
-        allowed : tuple of str
-            The lowercase keys the plot's cells support.
-
-        Returns
-        -------
-        str or None
-            ``None`` unchanged, otherwise the lowercase key.
-
-        Raises
-        ------
-        TypeError
-            If `new` is neither a string nor None.
-        ValueError
-            If `new` is not one of `allowed`.
-        """
-        if new is None:
-            return None
-        if not isinstance(new, str):
-            raise TypeError(
-                f"axnorm must be a string or None; got {type(new).__name__}"
-            )
-        key = new.lower()
-        if key not in allowed:
-            raise ValueError(
-                f"Unrecognized axnorm '{new}'; expected one of: {', '.join(allowed)}"
-            )
-        return key
 
     @property
     def agg_axes(self):

@@ -728,3 +728,21 @@ def test_normalized_ratio_is_parenthesized(labels_base):
     label = labels_base.TeXlabel(("n", "", "a"), ("n", "", "p1"), axnorm="t")
     assert label.tex == r"(n_{\alpha}/n_{p_1}) / \mathrm{Max}"
     assert "validate_axnorm" in labels_base.__all__
+
+
+def test_plots_and_labels_share_one_axnorm_check(labels_base):
+    """A plot checks ``axnorm`` with the labels' ``validate_axnorm``, against its keys.
+
+    ON FAILURE: the code is wrong -- a second copy of the check exists, or the
+    plot no longer limits the keys to its binning's ``allowed_axnorm``.
+    """
+    import pandas as pd
+    from solarwindpy.plotting import base as plot_base
+    from solarwindpy.plotting.hist1d import Hist1D
+
+    assert not hasattr(plot_base.BinnedPlot, "_validate_axnorm")
+    assert labels_base.validate_axnorm("W", ("d", "t", "w")) == "w"
+    with pytest.raises(ValueError, match="expected one of: d, t, w"):
+        Hist1D(pd.Series([1.0, 2.0, 3.0], name="x"), axnorm="c")
+    with pytest.raises(ValueError, match="expected one of: c, r, t, d"):
+        labels_base.validate_axnorm("q")
