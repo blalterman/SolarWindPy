@@ -183,11 +183,11 @@ random number generator:
 uncertainty is the square root of a diagonal element of the parameter
 covariance ``pcov``, and ``pcov`` is always rescaled by the fit's robust reduced
 chi-squared; ``make_fit(absolute_sigma=True)`` raises ``NotImplementedError``.
-Measurement uncertainties enter through the ``weights`` argument, the 1-sigma
+Measurement uncertainties enter through the ``yerr`` argument, the 1-sigma
 uncertainties of ``y``, one per observation.
 
 ``chisq_dof`` has two kinds. ``linear`` is the sum of squared residuals,
-divided by ``weights`` when given, per degree of freedom. ``robust`` is the
+divided by ``yerr`` when given, per degree of freedom. ``robust`` is the
 same sum after the fit's loss function (``make_fit`` uses a Huber loss by
 default), and it is the one that rescales ``pcov``:
 

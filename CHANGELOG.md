@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - BREAKING CHANGES
+
+- A fit's measurement uncertainty is named `yerr`. Every `FitFunction` subclass takes
+  `yerr=` in place of `weights=`, and `yerr_min=` and `yerr_max=` in place of `wmin=` and `wmax=`;
+  `set_fit_obs` takes the same names. The value is unchanged: the 1-sigma uncertainty of each `y`,
+  as `scipy.optimize.curve_fit` takes `sigma` (elsewhere "weights" usually means 1/sigma). The
+  observations' third field is `yerr` (`fit.observations.used.yerr` and `.raw.yerr`, formerly
+  `.w`). `TrendFit` now refuses `yerr` in `trend_kwargs`, since its own `yerr=` selects the
+  trend's uncertainties. No aliases are kept; the old keywords raise `TypeError`. To migrate,
+  rename the keywords: `Line(x, y, weights=s, wmin=a)` becomes `Line(x, y, yerr=s, yerr_min=a)`.
+
 ### Added
 
 - A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the

@@ -451,10 +451,10 @@ def test_hinge_point_is_continuous(clean_sloped_plateau_data):
 # =============================================================================
 
 
-def test_weighted_fit_respects_weights():
+def test_weighted_fit_respects_yerr():
     """Weighted fitting should correctly use sigma to weight observations.
 
-    In FitFunction, weights are interpreted as uncertainties (sigma). Points
+    In FitFunction, ``yerr`` is the 1-sigma uncertainty of each y. Points
     with larger sigma have MORE uncertainty and thus LESS influence on the fit.
 
     Test strategy: Apply non-uniform sigma values and verify the fit converges
@@ -479,7 +479,7 @@ def test_weighted_fit_respects_weights():
     y = y_true + noise
 
     # Fit with correct sigma values
-    fit_weighted = HingeSaturation(x, y, weights=sigma_true, guess_xh=true_params["xh"])
+    fit_weighted = HingeSaturation(x, y, yerr=sigma_true, guess_xh=true_params["xh"])
     fit_weighted.make_fit()
 
     # Verify fit converged and parameters are accurate

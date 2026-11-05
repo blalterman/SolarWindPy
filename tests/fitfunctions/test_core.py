@@ -47,25 +47,25 @@ class LinearFit(FitFunction):
 
 
 def test_mismatched_observation_lengths_raise_invalid_parameter_error():
-    """``y`` or ``weights`` of a different length than ``x`` is rejected.
+    """``y`` or ``yerr`` of a different length than ``x`` is rejected.
 
     ON FAILURE: the code is wrong.
     """
     with pytest.raises(InvalidParameterError, match="xobs and yobs"):
         LinearFit([0, 1], [1])
-    with pytest.raises(InvalidParameterError, match="weights and xobs"):
-        LinearFit([0, 1], [1, 2], weights=[1])
+    with pytest.raises(InvalidParameterError, match="yerr and xobs"):
+        LinearFit([0, 1], [1, 2], yerr=[1])
 
 
 def test_raw_observations_are_the_inputs_as_arrays():
-    """The raw observations are the given x, y and weights, unchanged.
+    """The raw observations are the given x, y and yerr, unchanged.
 
     ON FAILURE: the code is wrong.
     """
-    raw = LinearFit([0, 1], [1, 2], weights=[1, 1]).observations.raw
+    raw = LinearFit([0, 1], [1, 2], yerr=[1, 1]).observations.raw
     assert np.array_equal(raw.x, np.array([0, 1]))
     assert np.array_equal(raw.y, np.array([1, 2]))
-    assert np.array_equal(raw.w, np.array([1, 1]))
+    assert np.array_equal(raw.yerr, np.array([1, 1]))
 
 
 @pytest.mark.parametrize(
@@ -104,7 +104,7 @@ def test_set_fit_obs_combined_masks():
     x = np.array([0, 1, 2, 3, 4], dtype=float)
     y = np.array([10, 20, 30, 40, 50], dtype=float)
     w = np.array([0.5, 1, 2, 3, 4], dtype=float)
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.set_fit_obs(
         x,
         y,
@@ -113,13 +113,13 @@ def test_set_fit_obs_combined_masks():
         xmax=3,
         ymin=15,
         ymax=45,
-        wmin=0.02,
-        wmax=0.03,
+        yerr_min=0.02,
+        yerr_max=0.03,
         logy=True,
     )
     assert np.array_equal(lf.observations.used.x, np.array([1.0, 2.0]))
     assert np.array_equal(lf.observations.used.y, np.array([20.0, 30.0]))
-    assert np.array_equal(lf.observations.used.w, np.array([1.0, 2.0]))
+    assert np.array_equal(lf.observations.used.yerr, np.array([1.0, 2.0]))
     assert np.array_equal(
         lf.observations.tk_observed, np.array([False, True, True, False, False])
     )
@@ -157,15 +157,15 @@ def test_make_fit_defaults_match_documented_least_squares_call(line_with_outlier
     """make_fit's result equals scipy's least_squares with the documented defaults.
 
     The ``make_fit`` docstring lists method="trf", loss="huber",
-    max_nfev=10000, f_scale=0.1, and weights act as ``sigma`` (residuals
-    divided by ``w``). The same problem solved by calling scipy directly with
+    max_nfev=10000, f_scale=0.1, and ``yerr`` acts as ``sigma`` (residuals
+    divided by ``yerr``). The same problem solved by calling scipy directly with
     those settings is the independent route. The outlier makes the huber and
     linear solutions differ by ~0.6 in slope, so a changed default loss fails.
 
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit()
     p0 = np.array(lf.p0)
     documented = _direct_least_squares(
@@ -187,7 +187,7 @@ def test_make_fit_records_the_initial_guess_and_rejects_args(simple_linear_data)
     ON FAILURE: the code is wrong.
     """
     x, y, w = simple_linear_data
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit()
     guess = lf.initial_guess_info
     assert [guess["m"].p0, guess["b"].p0] == list(lf.p0)
@@ -220,7 +220,7 @@ def test_make_fit_success_failure(simple_linear_data, small_n):
     ON FAILURE: the code is wrong.
     """
     x, y, w = simple_linear_data
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit()
     assert isinstance(lf.fit_result, OptimizeResult)
     assert set(lf.popt) == {"m", "b"}
@@ -230,12 +230,12 @@ def test_make_fit_success_failure(simple_linear_data, small_n):
     assert isinstance(lf.plotter, FFPlot) and isinstance(lf.TeX_info, TeXinfo)
 
     x, y, w = small_n
-    lf_small = LinearFit(x, y, weights=w)
+    lf_small = LinearFit(x, y, yerr=w)
     err = attempt_fit(lf_small)
     assert isinstance(err, InsufficientDataError)
 
     x, y, w = simple_linear_data
-    lf_fail = LinearFit(x, y, weights=w)
+    lf_fail = LinearFit(x, y, yerr=w)
     err = attempt_fit(lf_fail, max_nfev=1)
     assert isinstance(err, FitFailedError)
     assert "Optimal parameters not found" in str(err)
@@ -246,7 +246,7 @@ def test_make_fit_success_failure(simple_linear_data, small_n):
 @pytest.fixture
 def fitted_linear(simple_linear_data):
     x, y, w = simple_linear_data
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit()
     return lf
 
@@ -298,7 +298,7 @@ class TestChisqDofBeforeFit:
     def test_chisq_dof_raises_before_fit(self, simple_linear_data):
         """Verify chisq_dof raises NotFittedError before make_fit."""
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+        lf = LinearFit(x, y, yerr=w)
         with pytest.raises(NotFittedError):
             lf.chisq_dof
 
@@ -312,7 +312,7 @@ class TestInitialGuessInfoBeforeFit:
         ON FAILURE: the code is wrong -- an unfitted object reports a start.
         """
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+        lf = LinearFit(x, y, yerr=w)
         with pytest.raises(NotFittedError):
             lf.initial_guess_info
 
@@ -321,15 +321,15 @@ class TestWeightShapeValidation:
     """Test weight shape validation in _clean_raw_obs (line 414)."""
 
     def test_weight_shape_mismatch_raises(self):
-        """Verify InvalidParameterError when weights shape mismatches x shape."""
+        """Verify InvalidParameterError when yerr shape mismatches x shape."""
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([1.0, 2.0, 3.0])
         w = np.array([1.0, 1.0])  # Wrong shape
 
         with pytest.raises(
-            InvalidParameterError, match="weights and xobs must have the same shape"
+            InvalidParameterError, match="yerr and xobs must have the same shape"
         ):
-            LinearFit(x, y, weights=w)
+            LinearFit(x, y, yerr=w)
 
 
 class TestBoundsDictHandling:
@@ -404,10 +404,10 @@ class TestCallableJacobian:
     """A callable jacobian is used in place of finite differences."""
 
     def test_callable_jac_is_used_and_weighted(self):
-        """``res.jac`` is the caller's jacobian divided by the weights.
+        """``res.jac`` is the caller's jacobian divided by ``yerr``.
 
         The supplied jacobian is 3x the true one, so a finite-difference run
-        would leave ``res.jac`` a factor 3 away. Weights of 2 act as ``sigma``,
+        would leave ``res.jac`` a factor 3 away. A ``yerr`` of 2 acts as ``sigma``,
         so each row is divided by 2 (curve_fit's transform). With loss="linear"
         and a model linear in its parameters, ``res.jac`` is that constant
         matrix.
@@ -416,7 +416,7 @@ class TestCallableJacobian:
         """
         x = np.arange(10.0)
         w = np.full_like(x, 2.0)
-        lf = LinearFit(x, 2.0 * x + 1.0, weights=w)
+        lf = LinearFit(x, 2.0 * x + 1.0, yerr=w)
 
         def tripled_jac(x, m, b):
             return 3.0 * np.column_stack([x, np.ones_like(x)])
@@ -454,7 +454,7 @@ class TestMakeFitAssertionError:
         ON FAILURE: the code is wrong.
         """
         x, y, w = simple_linear_data
-        lf = NeverEnoughData(x, y, weights=w)
+        lf = NeverEnoughData(x, y, yerr=w)
 
         err = attempt_fit(lf)
         assert isinstance(err, InsufficientDataError)
@@ -470,7 +470,7 @@ class TestMakeFitAssertionError:
         ON FAILURE: the code is wrong.
         """
         x, y, w = simple_linear_data
-        lf = NeverEnoughData(x, y, weights=w)
+        lf = NeverEnoughData(x, y, yerr=w)
 
         try:
             lf.make_fit()
@@ -487,7 +487,7 @@ class TestAbsoluteSigmaNotImplemented:
     def test_make_fit_absolute_sigma_raises(self, simple_linear_data):
         """Verify make_fit raises NotImplementedError for absolute_sigma=True."""
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+        lf = LinearFit(x, y, yerr=w)
 
         with pytest.raises(NotImplementedError, match="rescale fit errors"):
             lf.make_fit(absolute_sigma=True)
@@ -499,7 +499,7 @@ class TestResidualsAllOptions:
     def test_residuals_use_all_true(self, simple_linear_data):
         """Verify residuals calculates for all original data when use_all=True."""
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w, xmin=0.2, xmax=0.8)
+        lf = LinearFit(x, y, yerr=w, xmin=0.2, xmax=0.8)
         lf.make_fit()
 
         r_used = lf.residuals(use_all=False)
@@ -511,7 +511,7 @@ class TestResidualsAllOptions:
     def test_residuals_pct_true(self, simple_linear_data):
         """Verify residuals calculates percentage when pct=True."""
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w)
+        lf = LinearFit(x, y, yerr=w)
         lf.make_fit()
 
         r_abs = lf.residuals(pct=False)
@@ -536,7 +536,7 @@ class TestResidualsAllOptions:
     def test_residuals_use_all_and_pct_together(self, simple_linear_data):
         """Verify residuals works with both use_all=True and pct=True."""
         x, y, w = simple_linear_data
-        lf = LinearFit(x, y, weights=w, xmin=0.2, xmax=0.8)
+        lf = LinearFit(x, y, yerr=w, xmin=0.2, xmax=0.8)
         lf.make_fit()
 
         r_all_pct = lf.residuals(use_all=True, pct=True)
@@ -573,26 +573,26 @@ def test_y_limits_select_the_used_observations(limits, expected):
     assert np.array_equal(lf.observations.used.x, np.array(expected))
 
 
-def test_wmin_alone_drops_smaller_weights():
-    """``wmin`` with no ``wmax`` keeps ``w >= wmin``.
+def test_yerr_min_alone_drops_smaller_uncertainties():
+    """``yerr_min`` with no ``yerr_max`` keeps ``yerr >= yerr_min``.
 
-    w = [1, 2, 3, 4] with wmin=2: the sample with w = 1 is dropped and the
+    yerr = [1, 2, 3, 4] with yerr_min=2: the sample with yerr = 1 is dropped and the
     one on the bound stays.
 
     ON FAILURE: the code is wrong.
     """
     x = np.arange(4.0)
-    lf = LinearFit(x, x, weights=np.array([1.0, 2.0, 3.0, 4.0]), wmin=2.0)
+    lf = LinearFit(x, x, yerr=np.array([1.0, 2.0, 3.0, 4.0]), yerr_min=2.0)
     assert np.array_equal(lf.observations.used.x, np.array([1.0, 2.0, 3.0]))
 
 
 def test_logy_selects_on_the_uncertainty_of_log10_y():
-    """With ``logy`` the weight limits apply to ``w / (y ln 10)``.
+    """With ``logy`` the yerr limits apply to ``yerr / (y ln 10)``.
 
-    ``w / (y ln 10)`` is the one-sigma uncertainty of log10(y) propagated from
-    a one-sigma ``w`` on ``y`` (d log10 y = dy / (y ln 10)), as the class
-    docstring states. With y = 1 and w = ln(10) * [0.5, 0.97, 1.0, 1.03, 2.0]
-    that uncertainty is [0.5, 0.97, 1.0, 1.03, 2.0], so wmin=0.99, wmax=1.01
+    ``yerr / (y ln 10)`` is the one-sigma uncertainty of log10(y) propagated from
+    a one-sigma ``yerr`` on ``y`` (d log10 y = dy / (y ln 10)), as the class
+    docstring states. With y = 1 and yerr = ln(10) * [0.5, 0.97, 1.0, 1.03, 2.0]
+    that uncertainty is [0.5, 0.97, 1.0, 1.03, 2.0], so yerr_min=0.99, yerr_max=1.01
     keep only the middle sample. Any other logarithm base moves 1.0 out of
     the window (ln 10 / ln 11 = 0.96).
 
@@ -601,15 +601,15 @@ def test_logy_selects_on_the_uncertainty_of_log10_y():
     x = np.arange(5.0)
     y = np.ones(5)
     w = np.log(10.0) * np.array([0.5, 0.97, 1.0, 1.03, 2.0])
-    lf = LinearFit(x, y, weights=w, wmin=0.99, wmax=1.01, logy=True)
+    lf = LinearFit(x, y, yerr=w, yerr_min=0.99, yerr_max=1.01, logy=True)
     assert np.array_equal(lf.observations.used.x, np.array([2.0]))
 
 
-def test_set_fit_obs_selects_on_raw_weights_unless_logy_is_given():
-    """Called without ``logy``, ``set_fit_obs`` applies ``wmin`` to the weights as given.
+def test_set_fit_obs_selects_on_raw_yerr_unless_logy_is_given():
+    """Called without ``logy``, ``set_fit_obs`` applies ``yerr_min`` to ``yerr`` as given.
 
-    y = 10 and w = [1, 2, 3] with wmin=1.5 keep w = 2 and 3. Under log
-    selection the compared values would be w / (10 ln 10) < 0.14 and nothing
+    y = 10 and yerr = [1, 2, 3] with yerr_min=1.5 keep yerr = 2 and 3. Under log
+    selection the compared values would be yerr / (10 ln 10) < 0.14 and nothing
     would be kept, so the default is observable.
 
     ON FAILURE: the code is wrong.
@@ -617,9 +617,9 @@ def test_set_fit_obs_selects_on_raw_weights_unless_logy_is_given():
     x = np.arange(3.0)
     y = np.full(3, 10.0)
     w = np.array([1.0, 2.0, 3.0])
-    lf = LinearFit(x, y, weights=w)
-    lf.set_fit_obs(x, y, w, wmin=1.5)
-    assert np.array_equal(lf.observations.used.w, np.array([2.0, 3.0]))
+    lf = LinearFit(x, y, yerr=w)
+    lf.set_fit_obs(x, y, w, yerr_min=1.5)
+    assert np.array_equal(lf.observations.used.yerr, np.array([2.0, 3.0]))
 
 
 # ============================================================================
@@ -639,7 +639,7 @@ def test_make_fit_passes_the_method_to_scipy(line_with_outlier):
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit(method="trf")
     with pytest.raises(ValueError):
         lf.make_fit(method="lm")
@@ -659,7 +659,7 @@ def test_make_fit_passes_f_scale_to_scipy(line_with_outlier):
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit(f_scale=1.0)
     p0 = np.array(lf.p0)
     defaults = dict(method="trf", loss="huber", max_nfev=10000)
@@ -683,7 +683,7 @@ def test_make_fit_passes_other_keywords_to_scipy(line_with_outlier):
     """
     x, y, w = line_with_outlier
     loose = dict(ftol=0.5, xtol=0.5, gtol=0.5)
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit(**loose)
     p0 = np.array(lf.p0)
     defaults = dict(method="trf", loss="huber", max_nfev=10000, f_scale=0.1)
@@ -717,7 +717,7 @@ def test_linear_loss_statistics_match_a_hand_computed_weighted_line():
     """
     x = np.array([0.0, 1.0, 2.0, 3.0])
     y = np.array([0.0, 1.0, 1.0, 3.0])
-    lf = LinearFit(x, y, weights=np.full(4, 2.0))
+    lf = LinearFit(x, y, yerr=np.full(4, 2.0))
     lf.make_fit(loss="linear")
 
     assert lf.popt == noise_free({"m": 0.9, "b": -0.1})
@@ -740,7 +740,7 @@ def test_huber_statistics_match_curve_fit_and_the_huber_cost(line_with_outlier):
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     lf.make_fit()
     p0 = np.array(lf.p0)
     _, pcov = curve_fit(
@@ -867,7 +867,7 @@ def test_a_well_posed_fit_emits_no_optimize_warning(line_with_outlier):
     ON FAILURE: the code is wrong.
     """
     x, y, w = line_with_outlier
-    lf = LinearFit(x, y, weights=w)
+    lf = LinearFit(x, y, yerr=w)
     with warnings.catch_warnings():
         warnings.simplefilter("error", OptimizeWarning)
         lf.make_fit()
@@ -903,23 +903,23 @@ def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
 # ============================================================================
 
 
-def test_a_covariance_matrix_as_weights_is_refused():
-    """A 6 x 6 covariance matrix as ``weights`` for six samples raises.
+def test_a_covariance_matrix_as_yerr_is_refused():
+    """A 6 x 6 covariance matrix as ``yerr`` for six samples raises.
 
-    ``weights`` holds one 1-sigma uncertainty per observation, in xobs's
+    ``yerr`` holds one 1-sigma uncertainty per observation, in xobs's
     shape; the author has decided a covariance matrix is not supported.
 
     ON FAILURE: the code is wrong, unless the author now accepts a covariance
-    matrix as ``weights``.
+    matrix as ``yerr``.
     """
     x = np.arange(6.0)
     cov = np.diag(0.5 + 0.2 * x) ** 2
     with pytest.raises(
         InvalidParameterError,
-        match="weights holds one 1-sigma uncertainty per observation, in "
+        match="yerr holds one 1-sigma uncertainty per observation, in "
         "xobs's shape, and a covariance matrix is not supported",
     ):
-        LinearFit(x, 2.0 * x + 1.0, weights=cov)
+        LinearFit(x, 2.0 * x + 1.0, yerr=cov)
 
 
 @pytest.mark.parametrize(
@@ -929,26 +929,21 @@ def test_xobs_that_is_not_1d_is_refused_with_its_shape(x):
     """A fit refuses x that is not 1-d with a ValueError naming the shape.
 
     The author decided that 2-d x is refused: every model here is a function
-    of one variable. y and weights match x's shape, so only the 1-d rule can
+    of one variable. y and yerr match x's shape, so only the 1-d rule can
     refuse the input.
 
     ON FAILURE: the code is wrong.
     """
     shape = re.escape(str(x.shape))
     with pytest.raises(ValueError, match=rf"xobs must be 1-d.*{shape}"):
-        LinearFit(x, 2.0 * x + 1.0, weights=np.full(x.shape, 0.5))
+        LinearFit(x, 2.0 * x + 1.0, yerr=np.full(x.shape, 0.5))
 
 
 # ============================================================================
 # yerr: the 1-sigma uncertainty of y, and its selection limits
 # ============================================================================
 
-_YERR_RENAME = pytest.mark.xfail(
-    strict=True, reason="weights, wmin and wmax are renamed yerr, yerr_min, yerr_max"
-)
 
-
-@_YERR_RENAME
 def test_yerr_is_stored_as_the_observations_yerr():
     """``yerr`` is kept unchanged as ``observations.raw.yerr``.
 
@@ -958,7 +953,6 @@ def test_yerr_is_stored_as_the_observations_yerr():
     assert np.array_equal(raw.yerr, np.array([0.5, 0.25]))
 
 
-@_YERR_RENAME
 def test_yerr_min_and_yerr_max_keep_the_uncertainties_between_them():
     """``yerr_min`` and ``yerr_max`` keep ``yerr_min <= yerr <= yerr_max``.
 
@@ -974,7 +968,6 @@ def test_yerr_min_and_yerr_max_keep_the_uncertainties_between_them():
     assert np.array_equal(lf.observations.used.yerr, np.array([2.0, 3.0]))
 
 
-@_YERR_RENAME
 @pytest.mark.parametrize("old", ["weights", "wmin", "wmax"])
 def test_the_old_uncertainty_keywords_are_refused(old):
     """``weights``, ``wmin`` and ``wmax`` are gone, with no alias.
