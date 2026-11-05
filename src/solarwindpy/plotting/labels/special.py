@@ -309,6 +309,12 @@ class Count(ArbitraryLabel):
         """
         self._axnorm = base.validate_axnorm(norm)
 
+    def _default_name(self):
+        r"""Name "Count", or the normalized count's name from ``base.AXNORM``."""
+        if self.axnorm is None:
+            return "Count"
+        return base.AXNORM[self.axnorm].name
+
     def _build_tex(self):
         axnorm = self.axnorm
         words = "Count" if axnorm is None else base.AXNORM[axnorm].count

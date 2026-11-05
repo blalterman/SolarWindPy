@@ -6,6 +6,8 @@ __all__ = [
     "Base",
     "TeXlabel",
     "format_with_units",
+    "publication_format",
+    "set_publication_format",
     "validate_axnorm",
 ]
 
@@ -28,32 +30,83 @@ _trans_species = quantities.SPECIES
 _trans_component = quantities.COMPONENTS
 _inU = quantities.UNIT_TEX
 
-_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density")
+_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name")
 
 #: How a label names each ``axnorm`` key, keyed by the key: the one table of
 #: the keys ``Count`` and ``TeXlabel`` accept. ``count`` is the words of a
 #: normalized ``Count``; ``quantity`` the TeX of a normalized quantity, with
-#: ``%s`` for the quantity's TeX. ``density`` is True for a density: its units
+#: ``%s`` for the quantity's TeX. ``name`` is the plain-text name of a
+#: normalized ``Count`` in publication format. ``density`` is True for a density: its units
 #: are 1 / (bin width or area in the units of the binned axes, in decades on a
 #: log axis), which a label does not know, so it states none. A count divided
 #: by a maximum is a pure number and states ``\#``. Every key a binning's
 #: ``allowed_axnorm`` holds is a key here.
 AXNORM = MappingProxyType(
     {
-        "c": _AxisNorm("Count / Column Max", r"%s / \mathrm{Column \; Max}", False),
-        "r": _AxisNorm("Count / Row Max", r"%s / \mathrm{Row \; Max}", False),
-        "t": _AxisNorm("Count / Max", r"%s / \mathrm{Max}", False),
-        "d": _AxisNorm("Probability Density", r"\mathrm{Density \; of} \; %s", True),
+        "c": _AxisNorm(
+            "Count / Column Max",
+            r"%s / \mathrm{Column \; Max}",
+            False,
+            "Column-Normalized Count",
+        ),
+        "r": _AxisNorm(
+            "Count / Row Max",
+            r"%s / \mathrm{Row \; Max}",
+            False,
+            "Row-Normalized Count",
+        ),
+        "t": _AxisNorm("Count / Max", r"%s / \mathrm{Max}", False, "Normalized Count"),
+        "d": _AxisNorm(
+            "Probability Density",
+            r"\mathrm{Density \; of} \; %s",
+            True,
+            "Probability Density",
+        ),
         "cd": _AxisNorm(
             "Column Probability Density",
             r"\mathrm{Column \; Density \; of} \; %s",
             True,
+            "Column Probability Density",
         ),
         "rd": _AxisNorm(
-            "Row Probability Density", r"\mathrm{Row \; Density \; of} \; %s", True
+            "Row Probability Density",
+            r"\mathrm{Row \; Density \; of} \; %s",
+            True,
+            "Row Probability Density",
         ),
     }
 )
+
+
+#: The module default of ``publication_format``; read and set it with
+#: :func:`publication_format` and :func:`set_publication_format`.
+_publication_format = False
+
+
+def publication_format():
+    r"""Return the default publication format of every label, True or False.
+
+    A label whose own ``publication_format`` is None follows it. See
+    :func:`set_publication_format`.
+    """
+    return _publication_format
+
+
+def set_publication_format(on):
+    r"""Set whether labels default to publication format.
+
+    In publication format a label is two lines: its name in words, such as
+    "Number Density", over its usual TeX symbol and units. A label without a
+    name keeps one line. Labels read the default when they render, so this
+    also changes labels that plots already hold.
+
+    Parameters
+    ----------
+    on : bool
+        True for publication format; False, the initial default, for one line.
+    """
+    global _publication_format
+    _publication_format = bool(on)
 
 
 def validate_axnorm(key):
@@ -127,6 +180,12 @@ def _template_of(m):
     return _default_template_string
 
 
+def _name_of(key):
+    """Return the registry display name of ``key``, or None if it has none."""
+    entry = quantities.QUANTITIES.get(key)
+    return None if entry is None else entry.name
+
+
 def _units_of(key):
     """Return the TeX of the display unit of ``key``, or ``???`` if it has none."""
     entry = quantities.QUANTITIES.get(key)
@@ -165,6 +224,9 @@ def format_with_units(tex, units, *, new_line=False):
 
 class Base(ABC):
     """Base class for all label objects."""
+
+    _name = None
+    _publication_format = None
 
     def __init__(self):
         """Initialize the logger."""
@@ -217,8 +279,46 @@ class Base(ABC):
             new = str(new)
         self._description = new
 
+    @property
+    def name(self):
+        r"""Plain-text name, the first line in publication format, or None.
+
+        The name given with ``set_name``, otherwise the label's own default
+        (``_default_name``), None when it has none.
+        """
+        if self._name is not None:
+            return self._name
+        return self._default_name()
+
+    def _default_name(self):
+        r"""Name of a label given none; None here."""
+        return None
+
+    def set_name(self, new):
+        r"""Set the name, or None for the label's default name."""
+        if new is not None:
+            new = str(new)
+        self._name = new
+
+    @property
+    def publication_format(self):
+        r"""If True, the label is its name over its symbol line.
+
+        The label's own setting, or the module default
+        (:func:`publication_format`) when that is None.
+        """
+        if self._publication_format is None:
+            return publication_format()
+        return self._publication_format
+
+    def set_publication_format(self, new):
+        r"""Set this label's publication format: True, False, or None to follow the default."""
+        if new is not None:
+            new = bool(new)
+        self._publication_format = new
+
     def _format_with_description(self, label_str):
-        """Prepend description to label string if set.
+        """Prepend the description and, in publication format, the name.
 
         Parameters
         ----------
@@ -228,11 +328,15 @@ class Base(ABC):
         Returns
         -------
         str
-            Label with description prepended if set, otherwise unchanged.
+            The description if set, then the name in publication format if
+            the label has one, each on its own line above ``label_str``.
         """
+        lines = []
         if self.description:
-            return f"{self.description}\n{label_str}"
-        return label_str
+            lines.append(self.description)
+        if self.publication_format and self.name:
+            lines.append(self.name)
+        return "\n".join(lines + [label_str])
 
     @property
     def with_units(self):
@@ -269,7 +373,14 @@ class TeXlabel(Base):
     """
 
     def __init__(
-        self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False, description=None
+        self,
+        mcs0,
+        mcs1=None,
+        axnorm=None,
+        new_line_for_units=False,
+        description=None,
+        name=None,
+        publication_format=None,
     ):
         """Instantiate the label.
 
@@ -289,12 +400,20 @@ class TeXlabel(Base):
             If ``True`` a newline separates label and units.
         description : str or None, optional
             Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format. None uses the quantity's
+            registry name, a ratio's "<Name> Ratio" or "<Name0> / <Name1>".
+        publication_format : bool or None, optional
+            If True, the label is its name over its symbol line. None follows
+            the module default, :func:`publication_format`.
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
         self.set_new_line_for_units(new_line_for_units)
         self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     @property
@@ -324,8 +443,26 @@ class TeXlabel(Base):
 
     @property
     def with_units(self):
-        r"""Label with units, set by ``build_label``."""
-        return self._with_units
+        r"""Label with units, from ``build_label``, under its description and name."""
+        return self._format_with_description(self._with_units)
+
+    def _default_name(self):
+        r"""The registry name; for a ratio, "<Name> Ratio" or "<Name0> / <Name1>".
+
+        None when the registry does not name a measurement.
+        """
+        names = [
+            _name_of(mcs.m.replace("_err", ""))
+            for mcs in (self.mcs0, self.mcs1)
+            if mcs is not None
+        ]
+        if None in names:
+            return None
+        if len(names) == 1:
+            return names[0]
+        if names[0] == names[1]:
+            return f"{names[0]} Ratio"
+        return " / ".join(names)
 
     @property
     def path(self):
@@ -478,10 +615,8 @@ template   : %s
             tex = norm.quantity % tex
             path = path / (axnorm.upper() + "norm")
 
+        # The description and name lines are added when the label is read.
         with_units = format_with_units(tex, units, new_line=self.new_line_for_units)
-
-        # Apply description formatting
-        with_units = self._format_with_description(with_units)
 
         return tex, path, units, with_units
 

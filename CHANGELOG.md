@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every quantity in the registry has a display name: `solarwindpy.core.quantities.Quantity`
   takes a required keyword `name`, a few words in title case such as "Number Density" or
   "Temperature". It names the quantity only, without species or component.
+- Publication-format labels: a label is its name in words over its usual TeX symbol and
+  units, e.g. "Number Density" over `n_{p_1} [cm^-3]`. Turn it on for every label with
+  `solarwindpy.plotting.labels.base.set_publication_format` (read the default with
+  `solarwindpy.plotting.labels.base.publication_format`), or per label with
+  `TeXlabel(..., publication_format=True)`, which overrides the default. The name is the
+  registry's; `TeXlabel(..., name="Solar Wind Speed")` replaces it. A ratio reads
+  "<Name> Ratio" or "<Name0> / <Name1>", and `Count` names its normalization ("Count",
+  "Normalized Count", "Probability Density"). Labels read the default when they render, so
+  it also applies to plots already built.
 
 ### Changed
 
