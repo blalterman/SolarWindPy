@@ -42,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   grid without them is filtered by `scipy.ndimage.gaussian_filter` as before, with unchanged
   results. The `nan_aware_filter` keyword is removed: passing it raises an error from
   matplotlib.
+- `SpiralPlot2D` no longer logs warnings on every construction and draw. Its timing and
+  bin-population messages report normal operation and are now DEBUG records; the message
+  that points outside the mesh are dropped stays a warning.
 
 ## [0.4.0] - 2026-11-05
 
