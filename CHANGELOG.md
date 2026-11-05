@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   points are joined in row order in the points' color.
 - The Usage guide's "Individual points" shows `Scatter` colored by z, with `connect=True` on
   shuffled rows, and without z, each figure drawn by the block beside it.
+- The Usage guide draws SILSO's 13-month smoothed sunspot number on a connected `Scatter`'s
+  time colorbar with `SIDC("m13").plot_on_colorbar`. The docs build and the plot-block test
+  read the series from a snapshot in `docs/source/_data` through a private download cache, so
+  neither needs the network.
 
 ### Changed - BREAKING CHANGES
 

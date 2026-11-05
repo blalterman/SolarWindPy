@@ -402,6 +402,53 @@ skipped, not a gap: the points either side of it in ``z`` are joined.
        s=12, cmap="viridis", connect=True, connect_kwargs={"linewidth": 0.8, "alpha": 0.8}
    )
 
+Over decades, the colorbar can carry the solar cycle. With ``z`` the time of
+each point in matplotlib's date units, ``SIDC("m13").plot_on_colorbar`` draws
+the 13-month smoothed sunspot number along the colorbar, so each segment's
+color places it in the cycle. ``SIDC("m13")`` downloads the series from SILSO
+(https://www.sidc.be/SILSO/) and keeps it in SolarWindPy's download cache for
+a day. The sunspot number's own scale is left unlabelled here: the line shows
+the cycle's phase, not its amplitude.
+
+.. plot::
+
+   import matplotlib.dates as mdates
+   import numpy as np
+   import pandas as pd
+   from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.solar_activity.sunspot_number.sidc import SIDC
+
+   rng = np.random.default_rng(3)
+   epoch = pd.date_range("1994-01-01", "2026-01-01", freq="QS")
+   N = epoch.size
+
+   # Quarterly means that circle once per 11-year cycle, peaking near 2002,
+   # 2013 and 2024.
+   year = epoch.year + (epoch.month - 1) / 12
+   phase = 2 * np.pi * (year - 1996.5) / 11
+   v = pd.Series(440 + 50 * np.sin(phase) + rng.normal(0, 6, N), index=epoch, name="v")
+   b = pd.Series(
+       5.75 - 1.25 * np.cos(phase) + rng.normal(0, 0.15, N), index=epoch, name="b"
+   )
+   # Time as z, in matplotlib's date units: the units the colorbar's SSN uses.
+   t = pd.Series(mdates.date2num(epoch), index=epoch, name="t")
+
+   sc = Scatter(v, b, t)
+   sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("b", "", "")), z="Year")
+   ax, points, segments, cbar = sc.make_plot(
+       s=14, cmap="viridis", connect=True, cbar_kwargs={"aspect": 8}
+   )
+   cbar.ax.yaxis.set_major_locator(mdates.YearLocator(4))
+   cbar.ax.yaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+
+   # The 13-month smoothed sunspot number along the colorbar, downloaded from SILSO.
+   SIDC("m13").plot_on_colorbar(cbar.ax, epoch[0], epoch[-1])
+   cbar.ax.set_xlabel("")
+   cbar.ax.xaxis.set_major_locator(mdates.ticker.NullLocator())
+   cbar.ax.xaxis.set_minor_locator(mdates.ticker.NullLocator())
+   cbar.ax.set_title("SSN", fontsize="medium")
+
 Without ``z``, ``Scatter(x, y)`` draws every point in one color and no
 colorbar, so ``cbar`` is None. ``connect=True`` then joins the points in the
 order of their rows, in the markers' color, skipping any point that is not
