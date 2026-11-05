@@ -44,8 +44,8 @@ a three-level MultiIndex:
 ['M', 'C', 'S']
 >>> plasma.data.shape
 (3, 31)
->>> plasma.data.columns.get_level_values("M").unique().tolist()
-['b', 'n', 'v', 'w']
+>>> plasma.data.columns.get_level_values("M").unique()
+Index(['b', 'n', 'v', 'w'], dtype='str', name='M')
 
 - ``M``, the measurement: ``n`` (number density), ``v`` (velocity), ``w``
   (thermal speed), ``b`` (magnetic field).
