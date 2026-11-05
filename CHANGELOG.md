@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
   `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
   runs each of those code blocks on its own.
+- Every quantity in the registry has a display name: `solarwindpy.core.quantities.Quantity`
+  takes a required keyword `name`, a few words in title case such as "Number Density" or
+  "Temperature". It names the quantity only, without species or component.
 
 ### Changed
 
