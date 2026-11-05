@@ -33,12 +33,6 @@ scientific accuracy.
 
    api_reference
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Development
-
-   documentation_review
-
 .. include:: ../../LICENSE
 .. include:: ../../CITATION.rst
 
