@@ -56,6 +56,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Labels state one dimensionless unit, `\#`, the registry's `UNIT_TEX["dimless"]`: beta and
   the other dimensionless quantities wrote `\mathrm{\#}` while ratios and counts wrote `\#`.
   The temperature anisotropy `R` states it too, in place of `\perp/\parallel`.
+- Normalized labels say what the normalization is. `axnorm="t"` reads "Count / Max" (was
+  "Total Norm Count"), `"c"` and `"r"` "Count / Column Max" and "Count / Row Max"; a
+  normalized quantity reads `n_p / \mathrm{Max}`. A density no longer claims `\#` units: its
+  units are 1 / (bin width or area in the axes' units), which a label does not know, so it
+  states none. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
+  Density" (both were "1D Probability Density"), and `TeXlabel(..., axnorm="d")` reads
+  "Density of n_p" (was "Density Norm n_p [#]").
+- `TeXlabel` accepts the `"cd"` and `"rd"` normalizations that `Count` accepts. Both read
+  the keys from one table, `solarwindpy.plotting.labels.base.AXNORM`, and raise `ValueError`
+  (was `AssertionError`) for any other key.
 
 ## [0.4.0] - 2026-11-05
 

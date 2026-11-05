@@ -161,7 +161,7 @@ class ManualLabel(ArbitraryLabel):
         r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
         result = base.format_with_units(
             r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units
-        ).replace(r" \; \left[\right]", "")
+        )
         return self._format_with_description(result)
 
     @property
@@ -283,7 +283,9 @@ class Count(ArbitraryLabel):
 
     @property
     def units(self):
-        r"""TeX of the count units."""
+        r"""TeX of the units: ``\#``, or empty for a density; see ``base.AXNORM``."""
+        if self.axnorm is not None and base.AXNORM[self.axnorm].density:
+            return ""
         return base._inU["dimless"]
 
     @property
@@ -302,32 +304,15 @@ class Count(ArbitraryLabel):
         Parameters
         ----------
         norm : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"``, ``"cd"``, ``"rd"``
-            (case-insensitive), or None for raw counts.
+            A key of ``base.AXNORM`` (case-insensitive), or None for raw
+            counts.
         """
-        if norm is not None:
-            norm = norm.lower()
-
-        assert norm in base._trans_axnorm.keys()
-        self._axnorm = norm
+        self._axnorm = base.validate_axnorm(norm)
 
     def _build_tex(self):
         axnorm = self.axnorm
-        if axnorm:
-            if axnorm in ("r", "c", "t"):
-                tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm.get(axnorm)
-            elif axnorm == "cd":
-                tex = r"\mathrm{1D Probability Density}"
-            elif axnorm == "rd":
-                tex = r"\mathrm{1D Probability Density}"
-            elif axnorm == "d":
-                tex = r"\mathrm{Probability Density}"
-            else:
-                raise ValueError(f"Unrecognized axis normalization `{axnorm}`")
-        else:
-            tex = r"\mathrm{Count}"
-
-        return tex.replace(" ", r" \, ")
+        words = "Count" if axnorm is None else base.AXNORM[axnorm].count
+        return r"\mathrm{%s}" % words.replace(" ", r" \, ")
 
     def _build_path(self):
         path = Path("count")

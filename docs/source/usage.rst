@@ -433,12 +433,17 @@ $n_{\alpha}/n_{p_1} \; \left[\#\right]$
 A plot labels its axes ``x``, ``y`` and ``z`` until ``set_labels`` sets them.
 A histogram's counts carry the special label
 :py:class:`~solarwindpy.plotting.labels.special.Count`, which follows the
-plot's ``axnorm``:
+plot's ``axnorm``. A count divided by a maximum is a pure number, :math:`[\#]`;
+a density is per unit width or area of the bins, in the axes' units, so its
+label states no units:
 
 >>> from solarwindpy.plotting.hist2d import Hist2D
+>>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="t")
+>>> print(h2.labels.z)
+$\mathrm{Count \, / \, Max} \; \left[\#\right]$
 >>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="cd")
 >>> print(h2.labels.z)
-$\mathrm{1D \, Probability \, Density} \; \left[\#\right]$
+$\mathrm{Column \, Probability \, Density}$
 
 ``solarwindpy.plotting.labels.available()`` prints every measurement,
 component and species ``TeXlabel`` knows, and the special labels.

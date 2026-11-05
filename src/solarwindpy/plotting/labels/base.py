@@ -2,6 +2,7 @@
 r"""Tools for creating physical quantity plot labels."""
 
 __all__ = [
+    "AXNORM",
     "Base",
     "TeXlabel",
     "format_with_units",
@@ -13,6 +14,7 @@ from abc import ABC
 from pathlib import Path
 from string import Template
 from collections import namedtuple
+from types import MappingProxyType
 
 from ...core import quantities
 
@@ -25,15 +27,55 @@ _trans_species = quantities.SPECIES
 _trans_component = quantities.COMPONENTS
 _inU = quantities.UNIT_TEX
 
-_trans_axnorm = {
-    None: "",
-    "c": "Col.",
-    "r": "Row",
-    "t": "Total",
-    "d": "Density",
-    "rd": "1D Probability Density",
-    "cd": "1D Probability Density",
-}
+_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density")
+
+#: How a label names each ``axnorm`` key, keyed by the key: the one table of
+#: the keys ``Count`` and ``TeXlabel`` accept. ``count`` is the words of a
+#: normalized ``Count``; ``quantity`` the TeX of a normalized quantity, with
+#: ``%s`` for the quantity's TeX. ``density`` is True for a density: its units
+#: are 1 / (bin width or area in the units of the binned axes, in decades on a
+#: log axis), which a label does not know, so it states none. A count divided
+#: by a maximum is a pure number and states ``\#``. Every key a binning's
+#: ``allowed_axnorm`` holds is a key here.
+AXNORM = MappingProxyType(
+    {
+        "c": _AxisNorm("Count / Column Max", r"%s / \mathrm{Column \; Max}", False),
+        "r": _AxisNorm("Count / Row Max", r"%s / \mathrm{Row \; Max}", False),
+        "t": _AxisNorm("Count / Max", r"%s / \mathrm{Max}", False),
+        "d": _AxisNorm("Probability Density", r"\mathrm{Density \; of} \; %s", True),
+        "cd": _AxisNorm(
+            "Column Probability Density",
+            r"\mathrm{Column \; Density \; of} \; %s",
+            True,
+        ),
+        "rd": _AxisNorm(
+            "Row Probability Density", r"\mathrm{Row \; Density \; of} \; %s", True
+        ),
+    }
+)
+
+
+def validate_axnorm(key):
+    r"""Return the ``axnorm`` key ``key`` in lower case, or None for None.
+
+    Raises
+    ------
+    TypeError
+        If ``key`` is neither a string nor None.
+    ValueError
+        If ``key`` is not a key of :data:`AXNORM`.
+    """
+    if key is None:
+        return None
+    if not isinstance(key, str):
+        raise TypeError(f"axnorm must be a string or None; got {type(key).__name__}")
+    lower = key.lower()
+    if lower not in AXNORM:
+        raise ValueError(
+            f"Unrecognized axnorm '{key}'; expected one of: {', '.join(AXNORM)}"
+        )
+    return lower
+
 
 # Longest first, so a species is never matched by a code it starts with
 # (``a_bimax`` before ``a``, ``p1`` before ``p``).
@@ -97,14 +139,14 @@ def format_with_units(tex, units, *, new_line=False):
 
     The one home of this form: every label class builds its string here. The
     brackets are sized, ``\left[ \right]``, so they grow with their content,
-    such as a fractional unit.
+    such as a fractional unit. Empty ``units`` state no units: ``$tex$``.
 
     Parameters
     ----------
     tex : str
         TeX of the quantity, without ``$``.
     units : str
-        TeX of the units, without ``$``.
+        TeX of the units, without ``$``. Empty for a label without units.
     new_line : bool, default False
         If True, the units go on a new line; otherwise ``\;`` separates them.
 
@@ -113,6 +155,8 @@ def format_with_units(tex, units, *, new_line=False):
     str
         The label as a TeX math string.
     """
+    if not units:
+        return f"${tex}$"
     sep = "$\n$" if new_line else r"\;"
     left, right = r"\left[", r"\right]"
     return f"${tex} {sep} {left}{units}{right}$"
@@ -237,8 +281,9 @@ class TeXlabel(Base):
         mcs1 : tuple of str or None, optional
             Denominator for fraction style labels. Units are compared and set
             to dimensionless when equal.
-        axnorm : {"c", "r", "t", "d"}, optional
-            Axis normalization used when building colorbar labels.
+        axnorm : str, optional
+            Axis normalization used when building colorbar labels, a key of
+            :data:`AXNORM`.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
         description : str or None, optional
@@ -312,13 +357,9 @@ class TeXlabel(Base):
         Parameters
         ----------
         new : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"`` (case-insensitive), or None.
+            A key of :data:`AXNORM` (case-insensitive), or None.
         """
-        if isinstance(new, str):
-            new = new.lower()
-
-        assert new in (None, "c", "r", "t", "d")
-        self._axnorm = new
+        self._axnorm = validate_axnorm(new)
 
     def make_species(self, pattern):
         r"""Replace each species code in ``pattern`` that has a TeX translation.
@@ -428,10 +469,10 @@ template   : %s
         # display-focused method
         """Finalize label pieces with axis normalization."""
         axnorm = self.axnorm
-        tex_norm = _trans_axnorm[axnorm]
-        if tex_norm:
-            units = _inU["dimless"]
-            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
+        if axnorm is not None:
+            norm = AXNORM[axnorm]
+            units = "" if norm.density else _inU["dimless"]
+            tex = norm.quantity % tex
             path = path / (axnorm.upper() + "norm")
 
         with_units = format_with_units(tex, units, new_line=self.new_line_for_units)

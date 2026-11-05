@@ -140,19 +140,19 @@ class TestCount:
 
     def test_normalized_count(self, count_label_normalized):
         """Test normalized count label."""
-        assert "Col." in count_label_normalized.tex
-        assert "Norm" in count_label_normalized.tex
+        assert "Column" in count_label_normalized.tex
+        assert "Max" in count_label_normalized.tex
         assert count_label_normalized.axnorm == "c"
 
     def test_all_normalization_types(self):
         """Test all normalization types."""
         norm_types = {
-            "c": "Col.",
+            "c": "Column",
             "r": "Row",
-            "t": "Total",
-            "d": "Density",  # Fixed - actual string is "Density" not "Probability Density"
-            "cd": "1D",  # Just check for "1D" since spaces are escaped as \,
-            "rd": "1D",  # Just check for "1D" since spaces are escaped as \,
+            "t": "Max",
+            "d": "Density",
+            "cd": "Column",
+            "rd": "Row",
         }
 
         for norm, expected in norm_types.items():
@@ -166,8 +166,8 @@ class TestCount:
         assert "Cnorm" in path_str
 
     def test_invalid_normalization(self):
-        """Test invalid normalization raises assertion."""
-        with pytest.raises(AssertionError):
+        """An unknown normalization raises ``ValueError``."""
+        with pytest.raises(ValueError):
             labels_special.Count(norm="invalid")
 
     def test_set_axnorm_case_conversion(self, count_label):
@@ -706,16 +706,15 @@ def test_count_other_without_comparison_stores_empty_string(n_p1):
     "norm, tex, path",
     [
         (None, r"\mathrm{Count}", "count"),
-        ("c", r"\mathrm{Col. \, Norm \, Count}", "count/Cnorm"),
-        ("r", r"\mathrm{Row \, Norm \, Count}", "count/Rnorm"),
-        ("t", r"\mathrm{Total \, Norm \, Count}", "count/Tnorm"),
-        ("d", r"\mathrm{Probability \, Density}", "count/Dnorm"),
-        ("cd", r"\mathrm{1D \, Probability \, Density}", "count/CDnorm"),
-        ("rd", r"\mathrm{1D \, Probability \, Density}", "count/RDnorm"),
+        ("c", r"\mathrm{Count \, / \, Column \, Max}", "count/Cnorm"),
+        ("r", r"\mathrm{Count \, / \, Row \, Max}", "count/Rnorm"),
+        ("t", r"\mathrm{Count \, / \, Max}", "count/Tnorm"),
     ],
 )
 def test_count_tex_and_path_per_normalization(norm, tex, path):
     r"""``Count`` names its normalization in ``tex`` (spaces as ``\,``) and in ``path``.
+
+    A count divided by a maximum is a pure number, so it states ``\#``.
 
     ON FAILURE: the code is wrong.
     """
@@ -723,6 +722,30 @@ def test_count_tex_and_path_per_normalization(norm, tex, path):
     assert label.tex == tex
     assert label.path == Path(path)
     assert str(label) == rf"${tex} \; \left[\#\right]$"
+
+
+@pytest.mark.parametrize(
+    "norm, tex, path",
+    [
+        ("d", r"\mathrm{Probability \, Density}", "count/Dnorm"),
+        ("cd", r"\mathrm{Column \, Probability \, Density}", "count/CDnorm"),
+        ("rd", r"\mathrm{Row \, Probability \, Density}", "count/RDnorm"),
+    ],
+)
+def test_count_density_states_no_units(norm, tex, path):
+    r"""A probability density is per unit of the binned axes, which ``Count`` cannot know.
+
+    Its units are 1 / (bin width or area in the axis units, or in decades on a
+    log axis), so the label states none rather than ``\#``. A column and a
+    row density read differently.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.Count(norm)
+    assert label.tex == tex
+    assert label.path == Path(path)
+    assert label.units == ""
+    assert str(label) == f"${tex}$"
 
 
 def test_math_fcn_tex_units_and_both_string_forms(n_p1):

@@ -105,10 +105,9 @@ def test_texlabel_comparison_operators(texlabel_basic, labels_base):
 def test_texlabel_axnorm_types(labels_base):
     """Test different axis normalization types."""
     test_cases = [
-        ("c", "Col."),
+        ("c", "Column"),
         ("r", "Row"),
-        ("t", "Total"),
-        ("d", "Density"),
+        ("t", "Max"),
         (None, ""),
     ]
 
@@ -307,14 +306,14 @@ def test_texlabel_set_methods(labels_base):
 
 def test_axnorm_validation(labels_base):
     """Test axis normalization validation."""
-    valid_values = [None, "c", "r", "t", "d"]
+    valid_values = [None, "c", "r", "t", "d", "cd", "rd"]
 
     for val in valid_values:
         label = labels_base.TeXlabel(("v", "x", "p"), axnorm=val)
         assert label.axnorm == val
 
     # Test invalid axnorm
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         labels_base.TeXlabel(("v", "x", "p"), axnorm="invalid")
 
 
@@ -431,7 +430,7 @@ class TestDescriptionFeature:
         label = labels_base.TeXlabel(("n", "", "p"), axnorm="t", description="count")
         result = label.with_units
         assert result.startswith("count\n")
-        assert "Total" in result or "Norm" in result
+        assert "Max" in result
 
     def test_description_with_ratio_label(self, labels_base):
         """Description works with ratio-style labels."""
@@ -631,15 +630,68 @@ def test_ratio_units_look_up_each_measurement_without_err(
 
 
 def test_axnorm_label_names_the_normalization_in_tex_path_and_units(labels_base):
-    r"""A column-normalized label reads "Col. Norm", saves under ``Cnorm`` and counts ``\#``.
+    r"""A column-normalized label reads "/ Column Max", saves under ``Cnorm``, states ``\#``.
 
     ON FAILURE: the code is wrong.
     """
     label = labels_base.TeXlabel(("n", "", "p"), axnorm="c")
-    assert label.tex == r"\mathrm{Col. \; Norm} \; n_{p}"
+    assert label.tex == r"n_{p} / \mathrm{Column \; Max}"
     assert label.path == Path("n_p/Cnorm")
     assert label.units == "\\#"
-    assert label.with_units == r"$\mathrm{Col. \; Norm} \; n_{p} \; \left[\#\right]$"
+    assert label.with_units == r"$n_{p} / \mathrm{Column \; Max} \; \left[\#\right]$"
+
+
+@pytest.mark.parametrize(
+    "axnorm, tex",
+    [
+        ("d", r"\mathrm{Density \; of} \; n_{p}"),
+        ("cd", r"\mathrm{Column \; Density \; of} \; n_{p}"),
+        ("rd", r"\mathrm{Row \; Density \; of} \; n_{p}"),
+    ],
+)
+def test_density_axnorm_label_states_no_units(labels_base, axnorm, tex):
+    """A density of a quantity is per unit of the binned axes: no units are stated.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_base.TeXlabel(("n", "", "p"), axnorm=axnorm)
+    assert label.tex == tex
+    assert label.units == ""
+    assert label.with_units == f"${tex}$"
+
+
+def test_every_axnorm_a_plot_accepts_has_a_label(labels_base):
+    """Each binning's ``allowed_axnorm`` keys are keys of the one label table.
+
+    ``Count`` and ``TeXlabel`` both accept exactly the table's keys, so a key
+    a binning adds needs one entry there, and this test names it.
+
+    ON FAILURE: the code is wrong -- a binning accepts an ``axnorm`` no label
+    can name; add it to ``labels.base.AXNORM``.
+    """
+    import numpy as np
+    import pandas as pd
+    from solarwindpy.plotting.hist1d import Hist1D
+    from solarwindpy.plotting.hist2d import Hist2D
+    from solarwindpy.plotting.labels.special import Count
+    from solarwindpy.plotting.spiral import SpiralPlot2D
+
+    rng = np.random.default_rng(0)
+    x = pd.Series(rng.random(200), name="x")
+    y = pd.Series(rng.random(200), name="y")
+    plots = [
+        Hist1D(x, nbins=5),
+        Hist2D(x, y, nbins=5),
+        SpiralPlot2D(x, y, x.rename("z"), min_per_bin=20),
+    ]
+    table = set(labels_base.AXNORM)
+    for plot in plots:
+        assert set(plot.binning.allowed_axnorm) <= table, type(plot).__name__
+    for key in table:
+        assert Count(key).axnorm == key
+        assert labels_base.TeXlabel(("n", "", "p"), axnorm=key).axnorm == key
+    with pytest.raises(ValueError):
+        Count("nope")
 
 
 def test_new_line_for_units_splits_label_and_units_into_two_math_lines(labels_base):
