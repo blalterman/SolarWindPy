@@ -6,7 +6,7 @@ The order is the axis first, then the primary artists, then the colorbar,
 which is None when there is none: ``(ax, artists..., cbar_or_None)``. A
 contour method returns its contour set as the last artist, just before the
 colorbar. A method's tuple has the same length whether or not a colorbar
-is drawn, whether a Scatter has z or draws its edges, and whether a
+is drawn, whether a Scatter has z or connects its points, and whether a
 Hist1D draws its uncertainty window. Each position keeps its type too,
 with one exception: Hist1D's line slot holds the ``ErrorbarContainer``
 without the window and the central ``Line2D`` with it, so the error-bar
@@ -117,10 +117,10 @@ COLOR_CASES = [
         (PathCollection, NONE),
     ),
     (
-        "Scatter.make_plot-edges",
+        "Scatter.make_plot-connect",
         lambda: Scatter(X, Y, Z),
         "make_plot",
-        {"edges": True},
+        {"connect": True},
         (PathCollection, LineCollection),
     ),
 ]
@@ -148,7 +148,7 @@ def test_color_plot_returns_ax_then_artists_then_cbar_or_none(
 
 
 def test_scatter_without_z_returns_its_collection_and_no_colorbar():
-    """A Scatter without z keeps the same shape: points, edges or None, then None.
+    """A Scatter without z keeps the same shape: points, segments or None, then None.
 
     ON FAILURE: the code is wrong.
     """

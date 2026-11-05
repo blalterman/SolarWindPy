@@ -393,10 +393,6 @@ EY = np.array([0.0, 1.0, 0.0, 1.0, 0.0])
 EZ = np.array([0.0, 2.0, 9.0, 6.0, 8.0])
 Z_ORDER = [(0, 1), (1, 3), (3, 4), (4, 2)]
 
-_CONNECT_PENDING = pytest.mark.xfail(
-    strict=True, reason="Scatter.make_plot(connect=True) is not implemented"
-)
-
 
 def _segments(x, y, pairs):
     return [np.array([[x[i], y[i]], [x[j], y[j]]]) for i, j in pairs]
@@ -413,7 +409,6 @@ def _mean_z(z, pairs):
     return [(z[i] + z[j]) / 2 for i, j in pairs]
 
 
-@_CONNECT_PENDING
 def test_make_plot_returns_ax_points_segments_then_cbar(ax):
     """``(ax, points, segments, cbar)``; segments is None unless ``connect=True``.
 
@@ -433,7 +428,6 @@ def test_make_plot_returns_ax_points_segments_then_cbar(ax):
     assert out[2] in ax.collections
 
 
-@_CONNECT_PENDING
 def test_connect_joins_the_points_in_increasing_z(ax):
     """n drawn points give n - 1 segments, each to the point next in z.
 
@@ -443,7 +437,6 @@ def test_connect_joins_the_points_in_increasing_z(ax):
     _assert_segments(lc, EX, EY, Z_ORDER)
 
 
-@_CONNECT_PENDING
 def test_connect_does_not_depend_on_row_order(ax):
     """Shuffled rows, with shuffled labels, give the same segments in z order.
 
@@ -456,7 +449,6 @@ def test_connect_does_not_depend_on_row_order(ax):
     np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, Z_ORDER))
 
 
-@_CONNECT_PENDING
 def test_points_with_equal_z_keep_their_row_order(ax):
     """The sort on z is stable: tied points are joined in the order given.
 
@@ -467,7 +459,6 @@ def test_points_with_equal_z_keep_their_row_order(ax):
     _assert_segments(lc, EX, EY, [(1, 3), (3, 0), (0, 2), (2, 4)])
 
 
-@_CONNECT_PENDING
 def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
     ax,
 ):
@@ -489,7 +480,6 @@ def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
     assert cbar.mappable is points
 
 
-@_CONNECT_PENDING
 def test_segments_follow_a_norm_the_caller_passes(ax):
     """``vmin``/``vmax`` given to the points also set the segments' colours.
 
@@ -527,7 +517,6 @@ def _log_x_drops_3():
     return sc, x, EY
 
 
-@_CONNECT_PENDING
 @pytest.mark.parametrize(
     "build, pairs",
     [
@@ -549,7 +538,6 @@ def test_a_point_not_drawn_is_skipped_not_a_gap(ax, build, pairs):
     np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, pairs))
 
 
-@_CONNECT_PENDING
 @pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
 def test_without_varying_z_points_are_joined_in_row_order_in_one_colour(ax, z):
     """With no z, or a constant one, segments follow the rows, in the points' colour.
@@ -568,7 +556,6 @@ def test_without_varying_z_points_are_joined_in_row_order_in_one_colour(ax, z):
     np.testing.assert_array_equal(colors[0], points.get_facecolor()[0])
 
 
-@_CONNECT_PENDING
 def test_segments_sit_below_the_points_and_take_connect_kwargs(ax):
     """Segments default to beneath the markers; ``connect_kwargs`` styles them.
 
@@ -586,7 +573,6 @@ def test_segments_sit_below_the_points_and_take_connect_kwargs(ax):
     assert (lc.get_alpha(), lc.get_zorder()) == (0.4, 5)
 
 
-@_CONNECT_PENDING
 def test_segments_do_not_change_the_axis_limits(ax):
     """The view fits the points with or without segments.
 
