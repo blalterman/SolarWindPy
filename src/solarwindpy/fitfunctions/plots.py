@@ -666,7 +666,6 @@ class FFPlot(object):
             fig = plt.figure(figsize=figsize)
             gs = mpl.gridspec.GridSpec(2, 1, height_ratios=[3, 1], hspace=0.1)
             # sharex in this code requires that I pass the axis object with which the x-axis is being shared.
-            # Source for sharex option: http://stackoverflow.com/questions/22511550/gridspec-with-shared-axes-in-python
             rax = fig.add_subplot(gs[1])
             hax = fig.add_subplot(gs[0], sharex=rax)
 
