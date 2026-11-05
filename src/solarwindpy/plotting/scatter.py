@@ -98,6 +98,7 @@ class Scatter(base.ColorPlot):
             Passed to :class:`~matplotlib.collections.LineCollection`, e.g.
             ``linewidth``, ``alpha`` or ``zorder``. The defaults are a
             ``linewidth`` of 0.75 and a ``zorder`` just below the points'.
+            ``facecolor`` has no visible effect, since lines have no faces.
             A colour, under any of the keys ``color``, ``c``, ``colors``,
             ``edgecolor``, ``edgecolors`` or ``ec``, applies only without a
             varying z (see Notes); at most one of them may be given.
