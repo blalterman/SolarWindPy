@@ -28,8 +28,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PolyCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
-from scipy.interpolate import RBFInterpolator, griddata  # noqa: E402
-from scipy.ndimage import gaussian_filter  # noqa: E402
+from matplotlib.tri import Triangulation  # noqa: E402
+from scipy.stats import multivariate_normal  # noqa: E402
 
 from solarwindpy.plotting.base import ClipAxes  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
@@ -168,9 +168,8 @@ def _plot(min_per_bin, z=Z, log=False, rows=None):
         logx=log,
         logy=log,
         initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+        min_per_bin=min_per_bin,
     )
-    splot.initialize_mesh(min_per_bin=min_per_bin)
-    splot.build_grouped()
     return splot
 
 
@@ -204,11 +203,17 @@ def _occupied_centers(splot, fcn=np.mean, rows=ROWS):
     return x[ok], y[ok], values[ok]
 
 
-def _regular_grid(x, y, resolution):
-    return np.meshgrid(
-        np.linspace(x.min(), x.max(), resolution),
-        np.linspace(y.min(), y.max(), resolution),
-    )
+def _drawn_triangulation(splot, x, y):
+    """The occupied centres ``x``, ``y`` triangulated as the contours need.
+
+    Delaunay in plot coordinates (log10 on a log axis), each axis divided by
+    its span so neither axis's units dominate the distances; the triangles
+    are then placed at ``x``, ``y`` in data units for drawing.
+    """
+    px = np.log10(x) if splot.log.x else x
+    py = np.log10(y) if splot.log.y else y
+    triangles = Triangulation(px / np.ptp(px), py / np.ptp(py)).triangles
+    return Triangulation(x, y, triangles=triangles)
 
 
 def _assert_same_segments(qset, ref):
@@ -746,7 +751,7 @@ class TestMakePlot:
         """
         splot = _plot(2, log=log)
         _, ax = plt.subplots()
-        ax, coll = splot.make_plot(ax=ax, cbar=False)
+        ax, coll, _ = splot.make_plot(ax=ax, cbar=False)
         assert isinstance(coll, PolyCollection)
         expected = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
         assert np.asarray(_rectangles(coll)) == exact(expected)
@@ -761,7 +766,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2, log=True)
-        _, coll = splot.make_plot(cbar=False)
+        _, coll, _ = splot.make_plot(cbar=False)
         rects = _rectangles(coll).tolist()
         assert any(r == exact([1.0, 100.0, 1.0, 10.0]) for r in rects)
 
@@ -772,7 +777,7 @@ class TestMakePlot:
         """
         splot = _plot(2)
         _, ax = plt.subplots()
-        _, cbar = splot.make_plot(ax=ax)
+        _, _, cbar = splot.make_plot(ax=ax)
         assert isinstance(cbar, Colorbar)
         assert isinstance(cbar.mappable, PolyCollection)
         assert cbar.mappable in ax.collections
@@ -803,7 +808,7 @@ class TestMakePlot:
         assert (lo, hi) == exact((1.08, 8.8))  # hand-computed
 
         splot.set_alim(0.01, 0.99, kind="quantile")
-        _, coll = splot.make_plot(cbar=False)
+        _, coll, _ = splot.make_plot(cbar=False)
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
         expected = np.where((means >= lo) & (means <= hi), means, np.nan)
         assert np.asarray(values) == exact(expected, nan_ok=True)
@@ -821,7 +826,7 @@ class TestMakePlot:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, alpha_fcn="max")
+        _, coll, _ = splot.make_plot(cbar=False, alpha_fcn="max")
         vmax = _expected_agg(splot, max)
         scaled = (vmax - np.nanmin(vmax)) / (np.nanmax(vmax) - np.nanmin(vmax))
         expected = np.nan_to_num((1 - scaled) ** 0.25, nan=0.0)
@@ -837,18 +842,11 @@ class TestPlotContours:
     """``plot_contours`` contours the occupied cells' values at their centres."""
 
     LEVELS = [2.0, 4.0, 6.0]
-    RES = 20
 
     def _contour(self, splot, **kwargs):
         _, ax = plt.subplots()
         kwargs.setdefault("cbar", False)
-        kwargs.setdefault("grid_resolution", self.RES)
         return splot.plot_contours(ax=ax, levels=self.LEVELS, **kwargs)
-
-    def _reference(self, XX, YY, ZZ, filled=False):
-        _, ax = plt.subplots()
-        fcn = ax.contourf if filled else ax.contour
-        return fcn(XX, YY, np.ma.masked_invalid(ZZ), self.LEVELS)
 
     def test_centres_include_a_hand_worked_cell(self):
         """Cell [0,2)x[0,1) enters the contour input at (1, 0.5) with z = 1.
@@ -861,115 +859,26 @@ class TestPlotContours:
 
     @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
     def test_tricontour_triangulates_the_occupied_centres(self, log):
-        """``method="tricontour"`` contours exactly the occupied cells' centres.
+        """The contours triangulate the occupied cells' centres in plot coordinates.
 
         Empty cells are excluded; on log axes centres are 10**(mid-edge).
+        The triangles are Delaunay's in plot coordinates (log10 on a log
+        axis) with each axis scaled to its span, drawn in data units. On log
+        axes ROWS' centres triangulate differently in data units, so the
+        reference is shown to separate the two; on linear axes they agree.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1, log=log)
-        _, _, qset = self._contour(splot, method="tricontour")
+        _, qset, _ = self._contour(splot)
         x, y, z = _occupied_centers(splot)
         _, ax = plt.subplots()
-        _assert_same_segments(qset, ax.tricontour(x, y, z, self.LEVELS))
+        ref = ax.tricontour(_drawn_triangulation(splot, x, y), z, self.LEVELS)
+        _assert_same_segments(qset, ref)
         assert list(qset.levels) == self.LEVELS
-
-    def test_grid_without_smoothing_is_griddata_on_the_centres(self):
-        """``method="grid"`` with no smoothing contours ``griddata`` of the centres.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, _, qset = self._contour(
-            splot, method="grid", interpolation="linear", gaussian_filter_std=0
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="linear")
-        _assert_same_segments(qset, self._reference(XX, YY, ZZ))
-
-    def test_grid_smoothing_without_nan_awareness_zero_fills(self):
-        """``nan_aware_filter=False`` smooths ``griddata`` with NaNs set to 0.
-
-        The reference with another sigma differs, so sigma is shown to reach
-        the filter.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, _, qset = self._contour(
-            splot,
-            method="grid",
-            interpolation="linear",
-            gaussian_filter_std=1.5,
-            nan_aware_filter=False,
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = np.nan_to_num(griddata((x, y), z, (XX, YY), method="linear"), nan=0)
-        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
-        assert _segments_differ(qset, self._reference(XX, YY, gaussian_filter(ZZ, 3)))
-
-    def test_nan_aware_smoothing_of_a_complete_grid_is_a_gaussian_filter(self):
-        """With no NaNs, the NaN-aware filter is a plain Gaussian filter.
-
-        Nearest-neighbour interpolation leaves no NaN, so normalised
-        convolution reduces to ``scipy.ndimage.gaussian_filter``.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, _, qset = self._contour(
-            splot,
-            method="grid",
-            interpolation="nearest",
-            gaussian_filter_std=1.5,
-            nan_aware_filter=True,
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="nearest")
-        _assert_same_segments(qset, self._reference(XX, YY, gaussian_filter(ZZ, 1.5)))
-
-    def test_rbf_uses_the_given_interpolator_parameters(self):
-        """``method="rbf"`` contours an RBFInterpolator built with the caller's settings.
-
-        The reference with another smoothing differs, so the parameters are
-        shown to reach the interpolator.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        params = {"neighbors": 5, "smoothing": 0.5, "kernel": "cubic"}
-        _, _, qset = self._contour(
-            splot,
-            method="rbf",
-            rbf_neighbors=params["neighbors"],
-            rbf_smoothing=params["smoothing"],
-            rbf_kernel=params["kernel"],
-        )
-        x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        pts = np.column_stack([XX.ravel(), YY.ravel()])
-
-        def ref(**kw):
-            rbf = RBFInterpolator(np.column_stack([x, y]), z, **kw)
-            return self._reference(XX, YY, rbf(pts).reshape(XX.shape))
-
-        _assert_same_segments(qset, ref(**params))
-        assert _segments_differ(qset, ref(**{**params, "smoothing": 5.0}))
-
-    def test_default_method_is_rbf(self):
-        """With no ``method``, the contours are the default RBF interpolation.
-
-        ON FAILURE: the code is wrong.
-        """
-        splot = _plot(1)
-        _, _, default = self._contour(splot)
-        _, _, rbf = self._contour(splot, method="rbf")
-        _, _, grid = self._contour(splot, method="grid")
-        _assert_same_segments(default, rbf)
-        assert _segments_differ(default, grid)
+        if log:
+            _, ax = plt.subplots()
+            assert _segments_differ(ref, ax.tricontour(x, y, z, self.LEVELS))
 
     def test_use_contourf_fills_the_same_field(self):
         """``use_contourf=True`` draws filled contours of the same field.
@@ -977,35 +886,28 @@ class TestPlotContours:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        _, _, qset = self._contour(
-            splot,
-            method="grid",
-            interpolation="linear",
-            gaussian_filter_std=0,
-            use_contourf=True,
-        )
+        _, qset, _ = self._contour(splot, use_contourf=True)
         assert qset.filled
         x, y, z = _occupied_centers(splot)
-        XX, YY = _regular_grid(x, y, self.RES)
-        ZZ = griddata((x, y), z, (XX, YY), method="linear")
-        _assert_same_segments(qset, self._reference(XX, YY, ZZ, filled=True))
+        _, ax = plt.subplots()
+        tri = _drawn_triangulation(splot, x, y)
+        _assert_same_segments(qset, ax.tricontourf(tri, z, self.LEVELS))
 
     def test_colorbar_and_contour_set_are_returned(self):
-        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` the set.
+        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` None.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        ax, cbar, qset = self._contour(splot, cbar=True)
+        ax, qset, cbar = self._contour(splot, cbar=True)
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
-        _, mappable, qset = self._contour(splot, cbar=False)
-        assert mappable is qset
+        _, qset, cbar = self._contour(splot, cbar=False)
+        assert cbar is None
 
-    @pytest.mark.parametrize("method", ["tricontour", "grid"])
     @pytest.mark.parametrize(
         "keyword", ["label_levels", "clabel_kwargs", "skip_max_clbl"]
     )
-    def test_removed_labelling_keywords_are_rejected(self, method, keyword):
+    def test_removed_labelling_keywords_are_rejected(self, keyword):
         """A removed labelling keyword fails loudly instead of being ignored.
 
         Unknown keywords are forwarded to matplotlib's contour call, whose
@@ -1015,10 +917,9 @@ class TestPlotContours:
         keyword again, or swallows unknown keywords silently.
         """
         with pytest.raises(AttributeError, match=keyword):
-            self._contour(_plot(1), method=method, **{keyword: True})
+            self._contour(_plot(1), **{keyword: True})
 
-    @pytest.mark.parametrize("method", ["tricontour", "grid"])
-    def test_filled_contours_draw_no_labels_and_no_deprecation(self, method):
+    def test_filled_contours_draw_no_labels_and_no_deprecation(self):
         """Filled contours draw no text and emit no ``MatplotlibDeprecationWarning``.
 
         Matplotlib deprecated ``clabel`` on filled contours in 3.11; the old
@@ -1029,17 +930,116 @@ class TestPlotContours:
         """
         with warnings.catch_warnings():
             warnings.simplefilter("error", matplotlib.MatplotlibDeprecationWarning)
-            ax, _, qset = self._contour(_plot(1), method=method, use_contourf=True)
+            ax, qset, _ = self._contour(_plot(1), use_contourf=True)
         assert qset.filled
         assert len(ax.texts) == 0
 
-    def test_unknown_method_is_rejected(self):
-        """A method other than rbf, grid or tricontour raises ValueError.
+    @pytest.mark.parametrize(
+        "keyword, value",
+        [
+            ("method", "rbf"),
+            ("rbf_neighbors", 50),
+            ("rbf_smoothing", 1.0),
+            ("rbf_kernel", "cubic"),
+            ("grid_resolution", 100),
+            ("gaussian_filter_std", 1.5),
+            ("interpolation", "cubic"),
+            ("nan_aware_filter", True),
+        ],
+    )
+    def test_removed_smoothing_keywords_are_rejected(self, keyword, value):
+        """A removed smoothing keyword fails loudly instead of being ignored.
 
-        ON FAILURE: the code is wrong.
+        The adaptive mesh is the smoothing, so the rbf and grid methods and
+        their parameters are gone. Unknown keywords are forwarded to
+        matplotlib's contour call, whose ``Artist.set`` raises
+        ``AttributeError`` naming the keyword.
+
+        ON FAILURE: the code is wrong -- ``plot_contours`` accepts a removed
+        smoothing keyword again, or swallows unknown keywords silently.
         """
-        with pytest.raises(ValueError, match="Invalid method"):
-            self._contour(_plot(1), method="spline")
+        _, ax = plt.subplots()
+        with pytest.raises(AttributeError, match=keyword):
+            _plot(1).plot_contours(
+                ax=ax, levels=self.LEVELS, cbar=False, **{keyword: value}
+            )
+
+
+def _unsplit(rows, yedges=YEDGES):
+    """SpiralPlot2D on ``rows`` over x-bins [0,2), [2,4), [4,6); no cell splits."""
+    x, y, z = (pd.Series(c) for c in zip(*rows))
+    return SpiralPlot2D(
+        x,
+        y,
+        z,
+        initial_bins=(np.array([0.0, 2.0, 4.0, 6.0]), np.array(yedges)),
+        min_per_bin=len(rows),
+    )
+
+
+@pytest.mark.parametrize(
+    "rows, yedges, match",
+    [
+        pytest.param(
+            [(1.0, 0.5, 1.0), (5.0, 1.5, 2.0)],
+            YEDGES,
+            r"at least 3 occupied cells.*got 2",
+            id="two-cells",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (1.0, 1.5, 2.0), (1.0, 3.0, 3.0)],
+            YEDGES,
+            r"occupied cells' centers all lie on one line",
+            id="vertical-line",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (5.0, 0.5, 3.0)],
+            YEDGES,
+            r"occupied cells' centers all lie on one line",
+            id="horizontal-line",
+        ),
+        pytest.param(
+            [(1.0, 0.5, 1.0), (3.0, 1.5, 2.0), (5.0, 2.5, 3.0)],
+            (0.0, 1.0, 2.0, 3.0),
+            r"occupied cells' centers all lie on one line",
+            id="diagonal-line",
+        ),
+    ],
+)
+def test_contours_of_cells_that_cannot_be_triangulated_raise_clearly(
+    rows, yedges, match
+):
+    """Too few occupied cells, or centres all on one line, raise ValueError.
+
+    Chosen input: samples in two cells; three cells of the x-bin [0,2) whose
+    centres share x = 1; three cells of the y-bin [0,1), across x-bins
+    [0,2), [2,4) and [4,6), whose centres share y = 0.5; and three cells on
+    the diagonal of unit y-bins, centres (1, 0.5), (3, 1.5), (5, 2.5). No
+    triangle can be drawn between them, and the message names why.
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _unsplit(rows, yedges)
+    with pytest.raises(ValueError, match=match):
+        splot.plot_contours(levels=[1.5, 2.5], cbar=False)
+
+
+def test_contours_of_three_cells_off_one_line_draw_their_triangle():
+    """Three occupied cells whose centres are not on one line are contoured.
+
+    Chosen input: cells centred at (1, 0.5), (3, 0.5) and (1, 1.5) holding
+    1, 2 and 3. Their one triangle interpolates linearly, so the level 1.5
+    crosses the edge from 1 to 2 halfway, at (2, 0.5), and the edge from 1
+    to 3 a quarter of the way, at (1, 0.75).
+
+    ON FAILURE: the code is wrong.
+    """
+    splot = _unsplit([(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (1.0, 1.5, 3.0)])
+    _, qset, _ = splot.plot_contours(levels=[1.5], cbar=False)
+    (segments,) = qset.allsegs
+    (segment,) = segments
+    ends = np.asarray(sorted(map(tuple, segment)))
+    assert ends == exact(np.array([[1.0, 0.75], [2.0, 0.5]]))
 
 
 # ---------------------------------------------------------------------------
@@ -1220,21 +1220,16 @@ class TestProgressOutput:
         assert "Elapsed Time" in capsys.readouterr().err
         assert _own_or_warning_records(caplog) == []
 
-    @pytest.mark.parametrize("progress", [True, False])
-    def test_initialize_mesh_passes_progress_through(self, capsys, progress):
-        """``SpiralPlot2D.initialize_mesh(progress=...)`` controls the table.
-
-        The default is on.
+    def test_constructor_builds_the_mesh_without_the_progress_table(self, capsys):
+        """``SpiralPlot2D`` refines its mesh in the constructor, writing no table.
 
         ON FAILURE: the code is wrong.
         """
-        splot = SpiralPlot2D(X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
-        if progress:
-            splot.initialize_mesh(min_per_bin=1)
-        else:
-            splot.initialize_mesh(min_per_bin=1, progress=False)
+        splot = SpiralPlot2D(
+            X, Y, Z, initial_bins=(np.array(XEDGES), np.array(YEDGES)), min_per_bin=1
+        )
         err = capsys.readouterr().err
-        assert ("Elapsed Time" in err) is progress
+        assert "Elapsed Time" not in err
         assert set(_cells(splot.mesh.mesh)) == _refine(
             splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
         )
@@ -1303,9 +1298,9 @@ def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip)
-    splot.initialize_mesh(min_per_bin=101, progress=False)
-    splot.build_grouped()
+    splot = SpiralPlot2D(
+        CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, clip=clip, min_per_bin=101
+    )
     assert splot.clip == ClipAxes(x=clip, y=clip, z=False)
     assert splot.agg().tolist() == exact(counts, nan_ok=True)
 
@@ -1315,9 +1310,7 @@ def test_data_are_not_clipped_by_default():
 
     ON FAILURE: the code is wrong.
     """
-    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES)
-    splot.initialize_mesh(min_per_bin=101, progress=False)
-    splot.build_grouped()
+    splot = SpiralPlot2D(CLIP_X, CLIP_Y, initial_bins=CLIP_EDGES, min_per_bin=101)
     assert splot.agg().tolist() == [1, 99, 1]
 
 
@@ -1326,112 +1319,35 @@ def test_data_are_not_clipped_by_default():
 # ---------------------------------------------------------------------------
 
 
-def _nan_aware_gaussian(ZZ, sigma):
-    """Normalised convolution: smooth data and weights, keep NaN cells NaN."""
-    finite = np.isfinite(ZZ)
-    num = gaussian_filter(np.where(finite, ZZ, 0.0), sigma)
-    den = gaussian_filter(finite.astype(float), sigma)
-    with np.errstate(invalid="ignore"):  # 0 / 0 far from data; NaN either way
-        out = num / den
-    out[~finite] = np.nan
-    return out
-
-
-def _default_reference(method, x, y, z):
-    """Contours drawn with every default ``plot_contours`` documents.
-
-    rbf: 50 neighbours, smoothing 1.0, thin-plate spline, 100 x 100 grid.
-    grid: cubic ``griddata`` on a 100 x 100 grid, NaN-aware Gaussian sigma 1.5.
-    tricontour: the centres as given. Line contours, matplotlib's levels.
-    """
-    _, ax = plt.subplots()
-    if method == "tricontour":
-        return ax.tricontour(x, y, z)
-    XX, YY = _regular_grid(x, y, 100)
-    if method == "rbf":
-        rbf = RBFInterpolator(
-            np.column_stack([x, y]),
-            z,
-            neighbors=50,
-            smoothing=1.0,
-            kernel="thin_plate_spline",
-        )
-        ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
-    else:
-        ZZ = _nan_aware_gaussian(griddata((x, y), z, (XX, YY), method="cubic"), 1.5)
-    return ax.contour(XX, YY, np.ma.masked_invalid(ZZ))
-
-
 class TestPlotContoursCalls:
     """Calls with no arguments, with every option, and with one level."""
 
-    @pytest.mark.parametrize("method", [None, "rbf", "grid", "tricontour"])
-    def test_call_without_arguments_uses_the_documented_defaults(self, method):
+    def test_call_without_arguments_uses_the_documented_defaults(self):
         """With no arguments ``plot_contours`` draws its documented default.
 
-        It makes its own axes, draws line contours of the mean per cell with
-        a colorbar, and matches ``_default_reference``; ``None`` calls it
-        with no arguments at all (the default method, rbf).
+        It makes its own axes and draws line contours of the mean per cell,
+        triangulated between the occupied centres at matplotlib's levels,
+        with a colorbar.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        kwargs = {} if method is None else {"method": method}
-        ax, cbar, qset = splot.plot_contours(**kwargs)
+        ax, qset, cbar = splot.plot_contours()
         assert isinstance(cbar, Colorbar) and cbar.mappable is qset
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
-        _assert_same_segments(qset, _default_reference(method or "rbf", x, y, z))
+        _, ref_ax = plt.subplots()
+        _assert_same_segments(
+            qset, ref_ax.tricontour(_drawn_triangulation(splot, x, y), z)
+        )
 
-    def test_default_rbf_uses_fifty_neighbours(self):
-        """With more than 50 occupied cells, the default RBF uses 50 neighbours.
-
-        An 8 x 8 lattice of samples, one per leaf at min_per_bin=1, gives 64
-        occupied cells. The reference with 51 neighbours differs from the one
-        with 50, so this input separates the documented default from its
-        neighbours; with ROWS' 6 cells both would use all 6.
-
-        ON FAILURE: the code is wrong.
-        """
-        rows = [
-            (i + 0.3, j + 0.6, (i + 0.3 - 4.0) ** 2 + (j + 0.6))
-            for i in range(8)
-            for j in range(8)
-        ]
-        x, y, z = (pd.Series([r[k] for r in rows]) for k in range(3))
-        edges = (np.array([0.0, 8.0]), np.array([0.0, 8.0]))
-        splot = SpiralPlot2D(x, y, z, initial_bins=edges)
-        splot.initialize_mesh(min_per_bin=1, progress=False)
-        splot.build_grouped()
-        _, _, qset = splot.plot_contours(cbar=False, grid_resolution=20)
-
-        cx, cy, cz = _occupied_centers(splot, rows=rows)
-        assert len(cz) == 64
-        XX, YY = _regular_grid(cx, cy, 20)
-        pts = np.column_stack([XX.ravel(), YY.ravel()])
-
-        def ref(neighbors):
-            rbf = RBFInterpolator(
-                np.column_stack([cx, cy]),
-                cz,
-                neighbors=neighbors,
-                smoothing=1.0,
-                kernel="thin_plate_spline",
-            )
-            _, ax = plt.subplots()
-            return ax.contour(XX, YY, rbf(pts).reshape(XX.shape))
-
-        _assert_same_segments(qset, ref(50))
-        assert _segments_differ(ref(50), ref(51))
-
-    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
-    def test_every_option_reaches_the_drawing(self, method):
+    def test_every_option_reaches_the_drawing(self):
         """Each option changes the drawing as documented.
 
         ``fcn="max"`` contours the maxima (5 where p2 and p3 share a cell at
-        min_per_bin=2); the method's own options shape the field; ``levels``,
-        ``cmap``, ``norm`` and ``linestyles`` reach the contour set; the
-        colorbar is drawn with ``cbar_kwargs`` on the given axes.
+        min_per_bin=2); ``levels``, ``cmap``, ``norm`` and ``linestyles``
+        reach the contour set; the colorbar is drawn with ``cbar_kwargs`` on
+        the given axes.
 
         ON FAILURE: the code is wrong.
         """
@@ -1439,27 +1355,15 @@ class TestPlotContoursCalls:
         levels = [2.0, 4.0, 6.0]
         norm = matplotlib.colors.Normalize(0.0, 10.0)
         linestyles = ["--", ":", "-."]
-        options = {
-            "rbf": {"rbf_neighbors": 4, "rbf_smoothing": 0.5, "rbf_kernel": "cubic"},
-            "grid": {
-                "interpolation": "linear",
-                "gaussian_filter_std": 0.5,  # between 0 and 1: still smooths
-                "nan_aware_filter": False,
-            },
-            "tricontour": {},
-        }[method]
         _, ax = plt.subplots()
-        got_ax, cbar, qset = splot.plot_contours(
+        got_ax, qset, cbar = splot.plot_contours(
             ax=ax,
-            method=method,
-            grid_resolution=15,
             fcn="max",
             levels=levels,
             cmap="magma",
             norm=norm,
             linestyles=linestyles,
             cbar_kwargs={"label": "chosen"},
-            **options,
         )
         assert got_ax is ax and qset.axes is ax
         assert list(qset.levels) == levels
@@ -1470,27 +1374,10 @@ class TestPlotContoursCalls:
         x, y, z = _occupied_centers(splot, fcn=max)
         assert 5.0 in z.tolist()
         _, ref_ax = plt.subplots()
-        if method == "tricontour":
-            ref = ref_ax.tricontour(x, y, z, levels)
-        else:
-            XX, YY = _regular_grid(x, y, 15)
-            if method == "rbf":
-                rbf = RBFInterpolator(
-                    np.column_stack([x, y]),
-                    z,
-                    neighbors=4,
-                    smoothing=0.5,
-                    kernel="cubic",
-                )
-                ZZ = rbf(np.column_stack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
-            else:
-                ZZ = griddata((x, y), z, (XX, YY), method="linear")
-                ZZ = gaussian_filter(np.nan_to_num(ZZ, nan=0.0), 0.5)
-            ref = ref_ax.contour(XX, YY, np.ma.masked_invalid(ZZ), levels)
-        _assert_same_segments(qset, ref)
+        tri = _drawn_triangulation(splot, x, y)
+        _assert_same_segments(qset, ref_ax.tricontour(tri, z, levels))
 
-    @pytest.mark.parametrize("method", ["rbf", "grid", "tricontour"])
-    def test_one_level_with_a_colorbar_is_a_clear_error(self, method):
+    def test_one_level_with_a_colorbar_is_a_clear_error(self):
         """A single contour level with ``cbar=True`` raises a ValueError saying why.
 
         Without the colorbar the single level is drawn.
@@ -1499,9 +1386,113 @@ class TestPlotContoursCalls:
         """
         splot = _plot(1)
         with pytest.raises(ValueError, match="at least 2 contour levels"):
-            splot.plot_contours(method=method, levels=[3.0])
-        _, mappable, qset = splot.plot_contours(method=method, levels=[3.0], cbar=False)
-        assert mappable is qset and list(qset.levels) == [3.0]
+            splot.plot_contours(levels=[3.0])
+        _, qset, cbar = splot.plot_contours(levels=[3.0], cbar=False)
+        assert cbar is None and list(qset.levels) == [3.0]
+
+
+# ---------------------------------------------------------------------------
+# Contour accuracy against a known density.
+# ---------------------------------------------------------------------------
+
+#: Two bivariate normals in (v [km/s], log10 n [cm^-3]), slow and fast wind:
+#: weight, mean v, mean log10 n, sd v, sd log10 n, correlation.
+_WIND = (
+    (0.75, 380.0, np.log10(8.0), 40.0, 0.15, -0.3),
+    (0.25, 650.0, np.log10(3.0), 50.0, 0.12, 0.0),
+)
+#: Each case's evaluation grid in v and in plot y (log10 n, or n).
+_WIND_GRID = {
+    True: (np.linspace(250.0, 800.0, 120), np.linspace(-0.2, 1.5, 120)),
+    False: (np.linspace(250.0, 800.0, 120), np.linspace(0.6, 30.0, 120)),
+}
+
+
+def _wind_laws():
+    for w, mv, mu, sv, su, rho in _WIND:
+        cov = [[sv**2, rho * sv * su], [rho * sv * su, su**2]]
+        yield w, multivariate_normal([mv, mu], cov)
+
+
+def _wind_sample(size, seed=20261104):
+    """``size`` draws of (v, n) from ``_WIND``."""
+    rng = np.random.default_rng(seed)
+    laws = list(_wind_laws())
+    counts = rng.multinomial(size, [w for w, _ in laws])
+    draws = np.concatenate(
+        [law.rvs(size=k, random_state=rng) for (_, law), k in zip(laws, counts)]
+    )
+    return draws[:, 0], 10.0 ** draws[:, 1]
+
+
+def _wind_density(v, n, log):
+    """The true density SpiralPlot2D's ``axnorm="d"`` estimates.
+
+    Per (km/s dex) on a log n axis; per (km/s cm^-3) on a linear one, the
+    log density times d(log10 n)/dn = 1 / (n ln 10).
+    """
+    vu = np.stack([v, np.log10(n)], axis=-1)
+    pdf = sum(w * law.pdf(vu) for w, law in _wind_laws())
+    return pdf if log else pdf / (n * np.log(10.0))
+
+
+def _misclassified(qset, points, truth):
+    """Fraction of ``points`` whose inclusion in the filled ``qset`` != ``truth``."""
+    inside = np.zeros(len(points), dtype=bool)
+    for path in qset.get_paths():
+        if len(path.vertices):
+            inside |= path.contains_points(points)
+    return np.mean(inside != truth)
+
+
+@pytest.mark.parametrize("log", [True, False], ids=["log n", "linear n"])
+def test_density_contours_misclassify_less_than_data_unit_triangles(log):
+    """Contours of a known density are closer to the truth than data-unit ones.
+
+    20,000 (v, n) draws from ``_WIND``, contoured as a density. For the
+    levels enclosing 99% and 90% of the draws under the true density, each
+    filled region above the level is compared on a 120 x 120 grid in plot
+    coordinates with where the true density lies above it. Delaunay
+    triangles in data units, as plot_contours drew before (v spans hundreds
+    of km/s, n tens of cm^-3), are slivers; scaled plot coordinates must
+    misclassify at most 0.9 of their area at each level. At this seed the
+    ratio is 0.81 (99%) and 0.47 (90%) on log n, 0.60 and 0.34 on linear n;
+    the bound leaves room for Qhull and matplotlib versions. At the 50%
+    level the two are within sampling noise at this size on log n, so it
+    is not asserted.
+
+    ON FAILURE: the code is wrong -- plot_contours triangulates in data
+    units again, or without scaling each axis to its span.
+    """
+    v, n = _wind_sample(20_000)
+    splot = SpiralPlot2D(
+        pd.Series(v), pd.Series(n), logy=log, axnorm="d", min_per_bin=50
+    )
+    agg = splot.agg().to_numpy()
+    occupied = np.isfinite(agg)
+    cells = splot.mesh.mesh[occupied]
+    cx = cells[:, :2].mean(axis=1)
+    cy = cells[:, 2:].mean(axis=1)
+    if log:
+        cy = 10.0**cy
+
+    gv, gy = np.meshgrid(*_WIND_GRID[log])
+    gn = 10.0**gy if log else gy
+    points = np.column_stack([gv.ravel(), gn.ravel()])
+    true_on_grid = _wind_density(points[:, 0], points[:, 1], log)
+    # 1.0 lies far above any density here (the peak is below 0.03).
+    for level in np.quantile(_wind_density(v, n, log), [0.01, 0.10]):
+        truth = true_on_grid > level
+        _, ax = plt.subplots()
+        _, drawn, _ = splot.plot_contours(
+            ax=ax, levels=[level, 1.0], use_contourf=True, cbar=False
+        )
+        _, ref_ax = plt.subplots()
+        data_units = ref_ax.tricontourf(cx, cy, agg[occupied], [level, 1.0])
+        got = _misclassified(drawn, points, truth)
+        before = _misclassified(data_units, points, truth)
+        assert got <= 0.9 * before, (level, got, before)
+        plt.close("all")
 
 
 # ---------------------------------------------------------------------------
@@ -1580,7 +1571,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(2)
-        _, coll = splot.make_plot(cbar=False, fcn="max")
+        _, coll, _ = splot.make_plot(cbar=False, fcn="max")
         values = np.ma.filled(np.ma.asarray(coll.get_array(), dtype=float), np.nan)
         assert np.asarray(values) == exact(_expected_agg(splot, max), nan_ok=True)
         assert 5.0 in values.tolist() and 3.5 not in values.tolist()
@@ -1591,7 +1582,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         norm = matplotlib.colors.Normalize(0.0, 20.0)
-        _, coll = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
+        _, coll, _ = _plot(2).make_plot(cbar=False, cmap="magma", norm=norm)
         assert coll.get_cmap().name == "magma"
         assert coll.norm is norm
 
@@ -1604,7 +1595,7 @@ class TestMakePlotOptions:
 
         ON FAILURE: the code is wrong.
         """
-        ax, _ = _plot(2, log=log).make_plot(cbar=False)
+        ax, _, _ = _plot(2, log=log).make_plot(cbar=False)
         expected = np.array([[0.0, 6.06], [0.0, 4.04]])
         if log:
             expected = 10.0**expected
@@ -1621,7 +1612,7 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         fig, ax = plt.subplots()
-        _, cbar = _plot(2).make_plot(ax=ax)
+        _, _, cbar = _plot(2).make_plot(ax=ax)
         fig.canvas.draw()
         rgba = np.asarray(fig.canvas.buffer_rgba())
         coll = cbar.mappable
@@ -1852,8 +1843,9 @@ def test_spiral_plot_bin_ids_equal_brute_force_on_its_edges():
     ON FAILURE: the code is wrong.
     """
     x, y = _descent_points()
-    splot = SpiralPlot2D(x, y, initial_bins=(np.array(XEDGES), np.array(YEDGES)))
-    splot.initialize_mesh(min_per_bin=3, progress=False)
+    splot = SpiralPlot2D(
+        x, y, initial_bins=(np.array(XEDGES), np.array(YEDGES)), min_per_bin=3
+    )
     xe, ye = splot.initial_bins["x"], splot.initial_bins["y"]
     pts = _points_of(splot.data.x, splot.data.y)
     leaves = _ordered_leaves(tuple(xe), tuple(ye), pts, 3)
@@ -1879,10 +1871,9 @@ def test_drawn_polygons_are_the_mesh_cells_corner_by_corner(log):
         logx=log,
         logy=log,
         initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+        min_per_bin=3,
     )
-    splot.initialize_mesh(min_per_bin=3, progress=False)
-    splot.build_grouped()
-    _, coll = splot.make_plot(cbar=False)
+    _, coll, _ = splot.make_plot(cbar=False)
     assert isinstance(coll, PolyCollection)
     m = 10.0**splot.mesh.mesh if log else splot.mesh.mesh
     paths = coll.get_paths()

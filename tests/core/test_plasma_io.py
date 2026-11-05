@@ -23,15 +23,15 @@ def _example_plasma():
     # What the tests below assume of the example data.
     assert p.species == ("a", "e", "p1", "p2"), "example plasma species changed"
     # test_save_applies_each_modifier_function_before_writing drops "carr".
-    assert "carr" in p.spacecraft.data.columns.get_level_values(
-        "M"
-    ), "example spacecraft no longer has Carrington coordinates"
+    assert "carr" in p.sc.data.columns.get_level_values("M"), (
+        "example spacecraft no longer has Carrington coordinates"
+    )
     aux = pd.DataFrame(
         {("quality", "", ""): [0, 1, 0], ("chisq", "", "p1"): [1.5, 2.5, 3.5]},
         index=p.epoch,
     )
     aux.columns.names = ["M", "C", "S"]
-    p.set_auxiliary_data(aux)
+    p.set_aux(aux)
     return p
 
 
@@ -57,7 +57,7 @@ def test_save_and_load(tmp_path):
     plas = plasma.Plasma(data, "a", "p1")
     fname = tmp_path / "plasma.h5"
     plas.save(fname)
-    loaded = plasma.Plasma.load_from_file(fname, "a", "p1", sckey=None, akey=None)
+    loaded = plasma.Plasma.load_from_file(fname, "a", "p1", sckey=None, auxkey=None)
     assert loaded == plas
     assert loaded.species == plas.species
 
@@ -78,10 +78,10 @@ def test_save_then_load_round_trips_data_spacecraft_and_auxiliary_data(tmp_path)
 
     assert loaded.species == p.species
     _assert_same_frame(loaded.data, p.data)
-    assert loaded.spacecraft.name == SC_NAME
-    assert loaded.spacecraft.frame == SC_FRAME
-    _assert_same_frame(loaded.spacecraft.data, p.spacecraft.data)
-    _assert_same_frame(loaded.auxiliary_data, p.auxiliary_data)
+    assert loaded.sc.name == SC_NAME
+    assert loaded.sc.frame == SC_FRAME
+    _assert_same_frame(loaded.sc.data, p.sc.data)
+    _assert_same_frame(loaded.aux, p.aux)
 
 
 def test_save_writes_data_spacecraft_and_aux_at_the_default_keys(tmp_path):
@@ -101,8 +101,8 @@ def test_save_writes_data_spacecraft_and_aux_at_the_default_keys(tmp_path):
     measured = p.data.drop("scalar", axis=1, level="C")
     assert "scalar" in p.data.columns.get_level_values("C"), "nothing was dropped"
     _assert_same_frame(pd.read_hdf(fname, key="FC"), measured)
-    _assert_same_frame(pd.read_hdf(fname, key="SC"), p.spacecraft.data)
-    _assert_same_frame(pd.read_hdf(fname, key="FC_AUX"), p.auxiliary_data)
+    _assert_same_frame(pd.read_hdf(fname, key="SC"), p.sc.data)
+    _assert_same_frame(pd.read_hdf(fname, key="FC_AUX"), p.aux)
 
 
 @pytest.mark.parametrize(
@@ -138,8 +138,8 @@ def test_load_from_file_keeps_only_rows_between_start_and_stop(tmp_path, start, 
         fname, sc_name=SC_NAME, sc_frame=SC_FRAME, start=start, stop=stop
     )
     _assert_same_frame(loaded.data, p.data.iloc[rows])
-    _assert_same_frame(loaded.spacecraft.data, p.spacecraft.data.iloc[rows])
-    _assert_same_frame(loaded.auxiliary_data, p.auxiliary_data.iloc[rows])
+    _assert_same_frame(loaded.sc.data, p.sc.data.iloc[rows])
+    _assert_same_frame(loaded.aux, p.aux.iloc[rows])
 
 
 def test_save_applies_each_modifier_function_before_writing(tmp_path):
@@ -162,12 +162,8 @@ def test_save_applies_each_modifier_function_before_writing(tmp_path):
 
     assert loaded.species == ("e", "p1", "p2")
     _assert_same_frame(loaded.data, p.data.drop(columns="a", level="S"))
-    _assert_same_frame(
-        loaded.spacecraft.data, p.spacecraft.data.drop(columns="carr", level="M")
-    )
-    _assert_same_frame(
-        loaded.auxiliary_data, p.auxiliary_data.drop(columns="chisq", level="M")
-    )
+    _assert_same_frame(loaded.sc.data, p.sc.data.drop(columns="carr", level="M"))
+    _assert_same_frame(loaded.aux, p.aux.drop(columns="chisq", level="M"))
 
 
 @pytest.mark.parametrize(
@@ -227,7 +223,7 @@ def test_load_from_file_loads_only_the_species_passed(tmp_path):
     p = _example_plasma()
     fname = tmp_path / "plasma.h5"
     p.save(fname)
-    loaded = plasma.Plasma.load_from_file(fname, "p1", sckey=None, akey=None)
+    loaded = plasma.Plasma.load_from_file(fname, "p1", sckey=None, auxkey=None)
     assert loaded.species == ("p1",)
     assert loaded.ions.index.tolist() == ["p1"]
 
@@ -235,16 +231,56 @@ def test_load_from_file_loads_only_the_species_passed(tmp_path):
 def test_load_from_file_passes_extra_keywords_to_plasma(tmp_path):
     """Keywords `load_from_file` does not name go to `Plasma.__init__`.
 
-    With ``akey=None`` nothing is read from the file's aux key, so the
-    auxiliary data can only come from the ``auxiliary_data`` keyword.
+    With ``auxkey=None`` nothing is read from the file's aux key, so the
+    auxiliary data can only come from the ``aux`` keyword.
 
     ON FAILURE: the code is wrong.
     """
     p = _example_plasma()
     fname = tmp_path / "plasma.h5"
     p.save(fname)
-    aux = p.auxiliary_data.drop(columns="chisq", level="M")
+    aux = p.aux.drop(columns="chisq", level="M")
+    loaded = plasma.Plasma.load_from_file(fname, sckey=None, auxkey=None, aux=aux)
+    pdt.assert_frame_equal(loaded.aux, aux)
+
+
+def test_sc_and_aux_are_written_under_the_names_they_are_read_by():
+    """``plasma.sc`` and ``plasma.aux`` are set by ``set_sc`` and ``set_aux``.
+
+    The constructor takes ``sc=`` and ``aux=``, and ``save`` and
+    ``load_from_file`` take ``auxkey=`` beside ``sckey=``. The long names are
+    gone.
+
+    ON FAILURE: the code is wrong.
+    """
+    import inspect
+
+    cls = plasma.Plasma
+    assert hasattr(cls, "set_sc") and hasattr(cls, "set_aux")
+    assert not hasattr(cls, "set_spacecraft")
+    assert not hasattr(cls, "set_auxiliary_data")
+    init = inspect.signature(cls.__init__).parameters
+    assert {"sc", "aux"} <= set(init)
+    assert not {"spacecraft", "auxiliary_data"} & set(init)
+    for method in (cls.save, cls.load_from_file):
+        params = inspect.signature(method).parameters
+        assert {"sckey", "auxkey"} <= set(params)
+        assert "akey" not in params
+
+
+def test_sc_and_aux_keywords_round_trip_at_a_chosen_aux_key(tmp_path):
+    """A plasma built with ``sc=`` and ``aux=`` saves and loads at ``auxkey``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _example_plasma()
+    built = plasma.Plasma(p.data, *p.species, sc=p.sc, aux=p.aux)
+    fname = tmp_path / "plasma.h5"
+    built.save(fname, auxkey="AUX")
+    with pd.HDFStore(fname, mode="r") as store:
+        assert sorted(store.keys()) == ["/AUX", "/FC", "/SC"]
     loaded = plasma.Plasma.load_from_file(
-        fname, sckey=None, akey=None, auxiliary_data=aux
+        fname, auxkey="AUX", sc_name=SC_NAME, sc_frame=SC_FRAME
     )
-    pdt.assert_frame_equal(loaded.auxiliary_data, aux)
+    _assert_same_frame(loaded.sc.data, p.sc.data)
+    _assert_same_frame(loaded.aux, p.aux)

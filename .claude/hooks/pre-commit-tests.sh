@@ -30,8 +30,7 @@ echo "$staged_files" | sed 's/^/   /'
 # 92 is a ratchet set two points under the measured baseline (94%), not a
 # target: it blocks regressions without blocking every commit. Raise it as
 # coverage rises. A threshold above measured coverage never passes, so the hook
-# only teaches people to pass --no-verify, which skips black and flake8 along
-# with it.
+# only teaches people to pass --no-verify, which skips ruff along with it.
 echo "📊 Running coverage analysis (≥92% required)..."
 if ! "$ENV" pytest --cov=solarwindpy --cov-fail-under=92 -q --tb=short; then
     echo ""

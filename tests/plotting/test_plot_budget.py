@@ -84,10 +84,7 @@ def _warm():
     Hist2D(small.x, small.y, nbins=50)
     Hist2D(small.x, small.y, nbins=BinnedData(small, {"x": EDGES, "y": EDGES}))
     Scatter(small.x, small.y)
-    s = SpiralPlot2D(small.x, small.y)
-    s.initialize_mesh(progress=False)
-    s.build_grouped()
-    s.make_plot()
+    SpiralPlot2D(small.x, small.y).make_plot()
     plt.close("all")
     yield
     plt.close("all")
@@ -119,9 +116,7 @@ def _best_seconds(fn, repeats=REPEATS):
 
 
 def _spiral(frame):
-    s = SpiralPlot2D(frame.x, frame.y)
-    s.initialize_mesh(progress=False)
-    return s
+    return SpiralPlot2D(frame.x, frame.y)
 
 
 class TestRetainedMemory:
@@ -199,7 +194,7 @@ class TestRetainedMemory:
         assert per_row <= 0.1, f"{per_row:.3f} B/row"
 
     def test_spiral_mesh_without_nan_shares_the_source_columns(self, no_nan):
-        """SpiralPlot2D after initialize_mesh keeps at most 13 B/row, no NaN.
+        """A built SpiralPlot2D keeps at most 13 B/row, no NaN.
 
         With every row kept and both axes linear, the mesh reads the source
         columns instead of a copy, so x and y (16 B/row) are not counted.
@@ -212,7 +207,7 @@ class TestRetainedMemory:
         assert per_row <= 13.0, f"{per_row:.2f} B/row"
 
     def test_spiral_mesh_with_nan_keeps_one_copy_of_the_kept_points(self, with_nan):
-        """SpiralPlot2D after initialize_mesh keeps at most 36 B/row with NaN.
+        """A built SpiralPlot2D keeps at most 36 B/row with NaN.
 
         ON FAILURE: the code is wrong, unless the author changes the budget.
         """
@@ -276,7 +271,7 @@ class TestBuildTime:
         assert ratio <= 0.5, f"shared {reused * 1e3:.1f} ms = {ratio:.2f} x private"
 
     def test_spiral_mesh_build_scales_about_linearly_in_rows(self):
-        """initialize_mesh on 4x the rows costs at most 6x the time.
+        """Building a SpiralPlot2D on 4x the rows costs at most 6x the time.
 
         With ``min_per_bin`` fixed the cell count grows with the rows, so a
         cost of cells x points would grow 16x. Linear growth is 4x; numpy's own
@@ -287,14 +282,12 @@ class TestBuildTime:
         """
         small = _frame(N, nan_fraction=0.0, seed=7)
         large = _frame(SCALE * N, nan_fraction=0.0, seed=8)
-        s_small = SpiralPlot2D(small.x, small.y)
-        s_large = SpiralPlot2D(large.x, large.y)
-        t_small = _best_seconds(lambda: s_small.initialize_mesh(progress=False), 3)
-        t_large = _best_seconds(lambda: s_large.initialize_mesh(progress=False), 3)
+        t_small = _best_seconds(lambda: SpiralPlot2D(small.x, small.y), 3)
+        t_large = _best_seconds(lambda: SpiralPlot2D(large.x, large.y), 3)
         ratio = t_large / t_small
         # Linear = SCALE (4x); cells x points = SCALE**2 (16x). Bound 6x,
         # 1.5 x linear (measured 3.86-4.34 at 500k -> 2M; 0.14 s -> 0.74 s at
         # 1M -> 4.6M in step 9a is 5.3x for 4.6x rows).
-        assert (
-            ratio <= 1.5 * SCALE
-        ), f"{t_small:.3f} s -> {t_large:.3f} s = {ratio:.2f}x"
+        assert ratio <= 1.5 * SCALE, (
+            f"{t_small:.3f} s -> {t_large:.3f} s = {ratio:.2f}x"
+        )

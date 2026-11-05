@@ -9,6 +9,7 @@ it has the constructor case it needs.
 """
 
 import importlib
+import importlib.util
 import inspect
 import pkgutil
 import warnings
@@ -19,6 +20,7 @@ import pytest
 import solarwindpy.fitfunctions as ff
 from solarwindpy.fitfunctions.core import FitDegeneracyWarning, FitFunction
 from solarwindpy.fitfunctions.hinge import HingeMax
+from tests.fitfunctions._attempt import attempt_fit
 
 
 def _concrete_fit_functions():
@@ -44,29 +46,55 @@ CLASSES = _concrete_fit_functions()
 X = np.linspace(2.0, 10.0, 33)
 Y = 3.0 * np.exp(-0.5 * ((X - 5.0) / 1.5) ** 2) + 1.0
 
-# Constructor keywords a class requires, and set-up it needs before a fit.
-REQUIRED_KWARGS = {
-    "GaussianTimesHeavySide": {"guess_x0": 4.0},
-    "GaussianTimesHeavySidePlusHeavySide": {"guess_x0": 4.0},
-}
-SETUP = {"ExponentialCDF": lambda fit: fit.set_y0(4.0)}
-
 
 def _build(name, **kwargs):
-    fit = CLASSES[name](X, Y, **REQUIRED_KWARGS.get(name, {}), **kwargs)
-    SETUP.get(name, lambda fit: None)(fit)
-    return fit
+    return CLASSES[name](X, Y, **kwargs)
 
 
 def test_every_class_has_a_case():
-    """The discovery found the package's fit functions, and each constructs.
+    """The module scan finds exactly the package's fit functions, and each constructs.
 
-    ON FAILURE: a fit function needs a constructor keyword or set-up that
-    ``REQUIRED_KWARGS`` or ``SETUP`` does not give it; add it there.
+    ``CLASSES`` comes from importing every module and reading what it defines.
+    ``fitfunctions._fit_function_classes`` walks the ``FitFunction`` subclass
+    tree instead. The two discoveries must agree and find at least one class,
+    so every fit function the package lists is checked by these tests.
+
+    ON FAILURE: the code is wrong if the two discoveries differ; otherwise a
+    fit function needs a constructor keyword or set-up before a fit; give
+    ``_build`` a case for it.
     """
-    assert len(CLASSES) >= 20, sorted(CLASSES)
+    by_subclass_tree = {cls.__name__ for cls in ff._fit_function_classes()}
+    assert CLASSES, "the module scan found no fit function"
+    assert set(CLASSES) == by_subclass_tree
     for name in CLASSES:
         _build(name)
+
+
+def test_the_heaviside_step_models_and_exponential_cdf_are_removed():
+    """The step-function modules and ``ExponentialCDF`` no longer exist.
+
+    The author removed ``heaviside`` (``HeavySide``), ``composite`` (the three
+    Gaussian-with-step models) and ``exponentials.ExponentialCDF``.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.fitfunctions import exponentials
+
+    for module in ("heaviside", "composite"):
+        assert importlib.util.find_spec(f"{ff.__name__}.{module}") is None, module
+    assert not hasattr(exponentials, "ExponentialCDF")
+
+
+@pytest.mark.parametrize("name", ff.__all__)
+def test_every_name_in_the_package_all_resolves(name):
+    """Each name in ``fitfunctions.__all__`` is a submodule or a package object.
+
+    ON FAILURE: the code is wrong; ``fitfunctions.__all__`` names something
+    the package no longer defines.
+    """
+    if not hasattr(ff, name):
+        importlib.import_module(f"{ff.__name__}.{name}")
+    assert hasattr(ff, name), name
 
 
 def _generic_start(name, n):
@@ -91,8 +119,7 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
 
     The author decided an explicit ``p0=None`` means the generic start,
     whatever the class's own guess. Same start and same solver give the same
-    exception or the same popt. ``GaussianPlusHeavySide`` used to read its
-    own guess instead.
+    exception or the same popt.
 
     ON FAILURE: the code is wrong.
     """
@@ -105,8 +132,8 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
     # expected nor forbidden here; both routes must report the same pairs.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", FitDegeneracyWarning)
-        got = explicit_none.make_fit(return_exception=True, p0=None)
-        expected = generic.make_fit(return_exception=True, p0=_generic_start(name, n))
+        got = attempt_fit(explicit_none, p0=None)
+        expected = attempt_fit(generic, p0=_generic_start(name, n))
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
     if got is None:
@@ -123,10 +150,10 @@ def test_explicit_p0_none_does_not_read_the_class_guess():
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1, 2, 3, 4, 5])
-    fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_h=2.5)
+    fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_xh=2.5)
     with pytest.raises(NotImplementedError):
         fit.p0
-    got = fit.make_fit(return_exception=True, p0=None)
+    got = attempt_fit(fit, p0=None)
     assert not isinstance(got, NotImplementedError), got
 
 

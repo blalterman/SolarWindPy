@@ -18,8 +18,6 @@ from . import base
 from . import labels
 from .tools import nan_gaussian_filter
 
-from .agg_plot import AggPlot
-from .binned import BinnedData
 from .hist1d import Hist1D
 
 
@@ -50,7 +48,7 @@ def _within(values, lower, upper, bins):
     return (lower < values) & (values <= upper)
 
 
-class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
+class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
     Parameters
@@ -60,12 +58,13 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     z : pd.Series, optional
         If not None, the value to aggregate in each bin. If None, each bin
         counts its points.
-    axnorm : str, optional
-        Normalization of the aggregated values; see ``set_axnorm`` for the keys.
     logx, logy : bool or None
         If True, bin ``log10(abs(x))`` or ``log10(abs(y))``. None means
         False, or, with a ``BinnedData`` as ``nbins``, its setting for that
         axis's column.
+    axnorm : str, optional
+        Normalization of the aggregated values; see ``FixedGrid.normalize``
+        for the keys.
     clip : bool, str, Mapping or None
         If True, clip x and y to their 0.01st and 99.99th percentiles
         (``Base.clip_data``) when assigning points to bins; the bin edges
@@ -75,7 +74,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         ``nbins``, its setting for that axis's column. Stored as ``clip``, a
         ``ClipAxes``.
     nbins : int or str or tuple or BinnedData
-        Bin specification passed to ``calc_bins_intervals``. A
+        Bin specification of the ``FixedGrid``; see its constructor. A
         ``BinnedData`` is shared: its bins and bin codes for the columns named
         ``x.name`` and ``y.name`` are used, ``logx``, ``logy`` and ``clip``
         default to its settings for those columns (an explicit, differing
@@ -103,9 +102,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
     Notes
     -----
-    ``calc_bins_intervals`` computes the bins, ``make_cut`` assigns each point
-    to a bin, ``agg`` aggregates and normalizes, and ``make_plot`` draws the
-    result with an optional colorbar.
+    The constructor bins the points on a 2-D
+    :class:`~solarwindpy.plotting.binning.FixedGrid`; ``agg`` aggregates and
+    normalizes, and ``make_plot`` draws the result with an optional colorbar.
     """
 
     def __init__(
@@ -113,9 +112,9 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         x,
         y,
         z=None,
-        axnorm=None,
         logx=None,
         logy=None,
+        axnorm=None,
         clip=None,
         nbins=101,
         bin_precision=None,
@@ -123,31 +122,21 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
     ):
         r"""Store the data, labels and normalization, then bin the data."""
         super().__init__()
-        log, clip = self._inherit(
+        self._set_grid_data(
+            {"x": x, "y": y, "z": z},
             nbins,
-            {"x": getattr(x, "name", None), "y": getattr(y, "name", None)},
             {"x": logx, "y": logy},
-            self._clip_by_axis(clip),
+            clip,
             bin_precision,
+            mask,
         )
-        self.set_log(**log)
-        within = nbins if isinstance(nbins, BinnedData) else None
-        self._set_data(x, y, z, clip, mask=mask, within=within)
-        self.set_labels(
-            x="x", y="y", z=labels.special.Count(norm=axnorm) if z is None else "z"
-        )
-
-        self.set_axnorm(axnorm)
-        self.calc_bins_intervals(nbins=nbins, precision=bin_precision)
-        self.make_cut()
         self.set_clim(None, None)
+        self.set_axnorm(axnorm)
+        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
 
     # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
     _log_data = True
-
-    @property
-    def _gb_axes(self):
-        return ("x", "y")
+    _grid_axes = ("x", "y")
 
     def _maybe_convert_to_log_scale(self, x, y):
         if self.log.x:
@@ -157,118 +146,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
 
         return x, y
 
-    def set_labels(self, **kwargs):
-        r"""Set axis labels; a ``Count`` z-label is rebuilt with the current ``axnorm``."""
-        z = kwargs.pop("z", self.labels.z)
-        if isinstance(z, labels.special.Count):
-            try:
-                z.set_axnorm(self.axnorm)
-            except AttributeError:
-                pass
-
-            z.build_label()
-
-        super().set_labels(z=z, **kwargs)
-
-    def set_axnorm(self, new):
-        r"""The method by which the gridded data is normalized.
-
-        ===== =============================================================
-         key                           description
-        ===== =============================================================
-         c     Column normalize
-         d     Density normalize
-         r     Row normalize
-         t     Divide by the maximum (peak equals 1)
-         cd    PDFs in each column
-         rd    PDFs in each row
-        ===== ============================================================="""
-        new = self._validate_axnorm(new, ("c", "r", "t", "d", "cd", "rd"))
-
-        zlbl = self.labels.z
-        if isinstance(zlbl, labels.special.Count):
-            zlbl.set_axnorm(new)
-            zlbl.build_label()
-
-        self._axnorm = new
-
-    def _axis_normalizer(self, agg):
-        r"""Takes care of row, column, total, and density normaliation.
-
-        On a log axis the densities ("d", "cd", "rd") are normalised over
-        ``log10`` of that axis: the bins are log-space intervals, so cell areas
-        on the log axes sum to 1.
-        """
-
-        axnorm = self.axnorm
-        if axnorm is None:
-            pass
-        elif axnorm == "c":
-            agg = agg.divide(agg.groupby(level="x").max(), level="x")
-        elif axnorm == "r":
-            agg = agg.divide(agg.groupby(level="y").max(), level="y")
-        elif axnorm == "t":
-            agg = self._divide_by_max(agg)
-        elif axnorm == "d":
-            N = agg.sum().sum()
-            # Widths are in the binned variable, log10 on a log axis.
-            dx = self._bin_widths(self.intervals["x"])
-            dy = self._bin_widths(self.intervals["y"])
-            agg = agg.divide(dx, level="x").divide(dy, level="y").divide(N)
-
-        elif axnorm == "cd":
-            N = agg.groupby(level="x").sum()
-            dy = self._bin_widths(self.intervals["y"])
-            # Divide by total in each column and each row's width
-            agg = agg.divide(N, level="x").divide(dy, level="y")
-
-        elif axnorm == "rd":
-            N = agg.groupby(level="y").sum()
-            dx = self._bin_widths(self.intervals["x"])
-            # Divide by total in each column and each row's width
-            agg = agg.divide(N, level="y").divide(dx, level="x")
-
-        return agg
-
-    def agg(self, **kwargs):
-        r"""Aggregate, normalize by ``axnorm``, and apply the ``alim`` limits.
-
-        Every (x, y) bin is present in the result, indexed by its x and y
-        intervals; a bin no row falls in, or outside ``alim``, is NaN.
-        ``kwargs`` are passed to ``AggPlot.agg``, which normalizes.
-        """
-        return self._apply_alim(super().agg(**kwargs))
-
     def _make_cbar(self, mappable, **kwargs):
         ticks = kwargs.pop(
             "ticks",
             mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
         )
         return super()._make_cbar(mappable, ticks=ticks, **kwargs)
-
-    @staticmethod
-    def _default_norm(axnorm):
-        r"""The colour normalisation a plot uses when the caller passes no ``norm``.
-
-        Parameters
-        ----------
-        axnorm : str or None
-            The histogram's ``axnorm``.
-
-        Returns
-        -------
-        matplotlib.colors.Normalize or None
-            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
-            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
-            ``"cd"``, ``"rd"``) span decades, so they get a clipped
-            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
-            choice to matplotlib.
-        """
-        if axnorm in ("c", "r"):
-            return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
-        if axnorm in ("d", "cd", "rd"):
-            return mpl.colors.LogNorm(clip=True)
-        return None
 
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
@@ -337,7 +220,8 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         alpha_fcn: None, str
             If not None, the function used to aggregate the data for setting alpha
-            value.
+            value; see ``ColorPlot._apply_alpha_fcn``. Ignored, with a warning,
+            when the plot counts points.
         kwargs:
             Passed to `ax.pcolormesh`. `norm` defaults to ten colour bands on
             [0, 1] for row or column normalized data and to a `LogNorm` for
@@ -347,9 +231,10 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         -------
         ax: mpl.axes.Axes
             Axes upon which plot was made.
-        cbar_or_mappable: colorbar.Colorbar, mpl.collections.QuadMesh
-            If `cbar` is True, return the colorbar. Otherwise, return the `Quadmesh` used
-            to create the colorbar.
+        mesh: mpl.collections.QuadMesh
+            The histogram's cells.
+        cbar: colorbar.Colorbar or None
+            The colorbar if `cbar` is True, else None.
         """
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
@@ -366,43 +251,22 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         XX, YY = np.meshgrid(x, y)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
 
-        cbar_or_mappable = pc
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(pc, **cbar_kwargs)
-            cbar_or_mappable = cbar
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
-        color_plot = not self._source.counts
-        if (alpha_fcn is not None) and color_plot:
-            self.logger.warning(
-                "Make sure you verify alpha actually set. I don't yet trust this."
-            )
-            alpha_agg = self.agg(fcn=alpha_fcn)
-            alpha_agg = alpha_agg.unstack("x")
-            alpha_agg = np.ma.masked_invalid(alpha_agg.values.ravel())
-            # Feature scale then invert so smallest STD
-            # is most opaque.
-            alpha = 1 - mpl.colors.Normalize()(alpha_agg)
-            self.logger.warning("Scaling alpha filter as alpha**0.25")
-            alpha = alpha**0.25
+        # The mesh's faces run along x within each y row, as `unstack("x")` does.
+        self._apply_alpha_fcn(
+            pc, alpha_fcn, lambda fcn: self.agg(fcn=fcn).unstack("x").to_numpy().ravel()
+        )
 
-            # Set masked values to zero. Otherwise, masked
-            # values are rendered as black.
-            alpha = alpha.filled(0)
-            # Must draw to initialize `facecolor`s
-            plt.draw()
-            colors = pc.get_facecolors()
-            colors[:, 3] = alpha
-            pc.set_facecolor(colors)
-
-        elif alpha_fcn is not None:
-            self.logger.warning("Ignoring `alpha_fcn` because plotting counts")
-
-        return ax, cbar_or_mappable
+        return ax, pc, cbar
 
     def plot_hist_with_contours(
         self,
@@ -454,9 +318,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         Returns
         -------
         ax : mpl.axes.Axes
-        cbar_or_mappable : colorbar.Colorbar or QuadMesh
+        mesh : QuadMesh
+            The pcolormesh background.
         qset : QuadContourSet
             The contour set from the overlay.
+        cbar : colorbar.Colorbar or None
+            The colorbar of the mesh if `cbar` is True, else None.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -509,19 +376,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         contour_fcn = ax.contourf if use_contourf else ax.contour
 
         # Default linestyles for contour
-        linestyles = contour_kwargs.pop(
-            "linestyles",
-            [
-                "-",
-                ":",
-                "--",
-                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-                "--",
-                ":",
-                "-",
-                (0, (7, 3, 1, 3)),
-            ],
-        )
+        linestyles = contour_kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if levels is None:
             args = [XX_centers, YY_centers, C_centers]
@@ -533,15 +388,16 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         )
 
         # --- 3. Colorbar ---
-        cbar_or_mappable = pc
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-            cbar_or_mappable = self._make_cbar(pc, **cbar_kwargs)
+            cbar = self._make_cbar(pc, **cbar_kwargs)
+        else:
+            cbar = None
 
         # --- 4. Format axis ---
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset
+        return ax, pc, qset, cbar
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -745,25 +601,13 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         Returns
         -------
         ax : mpl.axes.Axes
-        cbar_or_mappable : colorbar.Colorbar or QuadContourSet
-            The colorbar if `cbar` is True, else the contour set.
         qset : QuadContourSet
+        cbar : colorbar.Colorbar or None
+            The colorbar if `cbar` is True, else None.
         """
         cmap = kwargs.pop("cmap", None)
         norm = kwargs.pop("norm", self._default_norm(self.axnorm))
-        linestyles = kwargs.pop(
-            "linestyles",
-            [
-                "-",
-                ":",
-                "--",
-                (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-                "--",
-                ":",
-                "-",
-                (0, (7, 3, 1, 3, 1, 3)),
-            ],
-        )
+        linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -818,15 +662,15 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         if plot_edges:
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
-        cbar_or_mappable = qset
         if cbar:
             # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
             cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-            cbar_or_mappable = cbar
+        else:
+            cbar = None
 
         self._format_axis(ax)
 
-        return ax, cbar_or_mappable, qset
+        return ax, qset, cbar
 
     def _on_source_index(self, values):
         r"""``values``, given on the kept rows, on every row of the source.
@@ -898,12 +742,12 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         if only_plotted:
             keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
         if not project_counts and other != "z":
-            keep &= self._bin_codes()[other] >= 0
+            keep &= self.binning.axis_codes()[other] >= 0
 
         # The Hist1D finds the axis in the BinnedData by its name and reads
         # its codes; the measured values are sent on the source's own index,
         # with a mask, so no row is looked up by label.
-        column = self._bin_columns[axis]
+        column = self.binning.columns[axis]
         x = self._on_source_index(x).rename(column)
         y = None
         if not project_counts:
@@ -912,7 +756,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         h1 = Hist1D(
             x,
             y=y,
-            nbins=self._binned,
+            nbins=self.binning.binned,
             mask=self._on_source_index(pd.Series(keep)),
             **kwargs,
         )
@@ -974,7 +818,7 @@ class Hist2D(base.PlotWithZdata, base._CbarMaker, AggPlot):
         cbar_kwargs = self._prepare_cbar_kwargs(kwargs.pop("cbar_kwargs", None))
         cax = cbar_kwargs.pop("cax", cax)
         orientation = cbar_kwargs.pop("orientation", "horizontal")
-        _, cbar = self.make_plot(
+        _, _, cbar = self.make_plot(
             ax=hax,
             cbar_kwargs=dict(cax=cax, orientation=orientation, **cbar_kwargs),
             **kwargs,

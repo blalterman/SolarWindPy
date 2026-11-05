@@ -20,7 +20,7 @@ Thank you for considering contributing to SolarWindPy.
    pip install -e .
    ```
 
-2. Format code with `black` and lint with `flake8` (includes `flake8-docstrings`).
+2. Format code with `ruff format` and lint with `ruff check` (includes the pydocstyle rules).
 3. Ensure all docstrings follow the NumPy style guide.
 4. Lint documentation with `doc8` and build docs:
 

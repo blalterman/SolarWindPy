@@ -24,18 +24,12 @@ import numpy as np
 import pytest
 
 import solarwindpy
-from solarwindpy.fitfunctions.composite import (
-    GaussianPlusHeavySide,
-    GaussianTimesHeavySide,
-    GaussianTimesHeavySidePlusHeavySide,
-)
 from solarwindpy.fitfunctions.core import (
     FitDegeneracyWarning,
     FitFunction,
     InsufficientDataError,
 )
 from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
-from solarwindpy.fitfunctions.heaviside import HeavySide
 from solarwindpy.fitfunctions.hinge import (
     Hinge,
     HingeAtPoint,
@@ -46,6 +40,7 @@ from solarwindpy.fitfunctions.hinge import (
     TwoLine,
 )
 from tests.tolerances import exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 def _line(x, m, b):
@@ -95,7 +90,7 @@ def test_nan_in_a_subclass_guess_raises_value_error_naming_class_and_parameter()
     msg = r"^_NanGuessLine initial guess is not finite: m=nan\."
     with pytest.raises(ValueError, match=msg):
         fit.make_fit()
-    err = fit.make_fit(return_exception=True)
+    err = attempt_fit(fit)
     assert isinstance(err, ValueError) and "m=nan" in str(err), repr(err)
 
 
@@ -122,23 +117,6 @@ def test_wrong_length_caller_p0_names_entries_by_position():
     msg = r"^_NoGuessLine initial guess is not finite: p0\[1\]=nan\."
     with pytest.raises(ValueError, match=msg):
         fit.make_fit(p0=[2.0, np.nan, 1.0])
-
-
-def test_malformed_bounds_with_no_guess_are_returned_by_the_x0_scan():
-    """``GaussianPlusHeavySide`` with ``p0`` None returns, not raises, a bounds error.
-
-    y summing to zero gives ``p0`` None, so ``make_fit`` builds the feasible
-    default from ``bounds``. A three-element ``bounds`` is malformed (it must
-    be a (lower, upper) pair); with ``return_exception=True`` the resulting
-    ValueError comes back, as the base ``make_fit`` documents.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.arange(6.0)
-    fit = GaussianPlusHeavySide(x, np.array([1.0, -1, 1, -1, 1, -1]))
-    assert fit.p0 is None, fit.p0
-    err = fit.make_fit(return_exception=True, bounds=(0.0, 1.0, 2.0))
-    assert isinstance(err, ValueError), err
 
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
@@ -288,56 +266,48 @@ IMPOSSIBLE = [
     _case(GaussianNormalized, [0.0, 1, 2, 3], [1.0, -1, 1, -1], {}, id="GaussianNorm"),
     # y sums to zero: no weighted mean of ln x.
     _case(GaussianLn, np.exp([0.0, 1, 2, 3]), [1.0, -1, 1, -1], {}, id="GaussianLn"),
-    # No data above guess_x0 = 20.
-    _case(
-        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {"guess_x0": 20.0}, id="Step"
-    ),
-    # y sums to zero: no weighted mean.
-    _case(
-        GaussianPlusHeavySide,
-        [0.0, 1, 2, 3, 4, 5],
-        [1.0, -1, 1, -1, 1, -1],
-        {},
-        id="GaussianPlusHeavySide",
-    ),
-    # No data above guess_x0 = 20 (was "There is no maximum of a zero-size array").
-    _case(
-        GaussianTimesHeavySide,
-        [0.0, 1, 2, 3, 4],
-        [1.0, 2, 3, 2, 1],
-        {"guess_x0": 20.0},
-        id="GaussianTimesHeavySide",
-    ),
-    # No data at or below guess_x0 = -1: no level y1.
-    _case(
-        GaussianTimesHeavySidePlusHeavySide,
-        [0.0, 1, 2, 3, 4, 5],
-        [1.0, 2, 3, 2, 1, 0.5],
-        {"guess_x0": -1.0},
-        id="GaussianTimesHeavySidePlusHeavySide",
-    ),
 ]
 
 
 # Inputs for which each hinge class's estimate is impossible, and why.
 HINGE_IMPOSSIBLE = [
-    # Default xs = 425 leaves no data on the upper side: no slope.
-    _case(TwoLine, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="TwoLine"),
-    _case(Saturation, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 1, 0], {}, id="Saturation"),
+    # h = 425 leaves no data on the upper side: no slope.
+    _case(
+        TwoLine,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_xh": 425.0},
+        id="TwoLine",
+    ),
+    _case(
+        Saturation,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 1, 0],
+        {"guess_xh": 425.0},
+        id="Saturation",
+    ),
     # Plateau x = [3, 3, 4] repeats x with a rise: slope inf.
     _case(
         HingeSaturation,
         [0.0, 1, 2, 3, 3, 4],
         [0.0, 1, 2, 2, 2.5, 2.5],
-        {"guess_xh": 2.5, "guess_yh": 2.0},
+        {"guess_xh": 2.5},
         id="HingeSaturation",
     ),
     # Flat plateau: zero slope, so no x-intercept x2.
     _case(
-        HingeMin, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 2, 2], {"guess_h": 2.5}, id="Min"
+        HingeMin,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 2, 2],
+        {"guess_xh": 2.5},
+        id="Min",
     ),
     _case(
-        HingeMax, [0.0, 1, 2, 3, 4, 5], [0.0, 1, 2, 2, 2, 2], {"guess_h": 2.5}, id="Max"
+        HingeMax,
+        [0.0, 1, 2, 3, 4, 5],
+        [0.0, 1, 2, 2, 2, 2],
+        {"guess_xh": 2.5},
+        id="Max",
     ),
     # Lower side x = [0, 0, 1] repeats x with a rise: slope inf.
     _case(
@@ -351,7 +321,7 @@ HINGE_IMPOSSIBLE = [
 
 
 # The author's reference hinge, translated by hand into each hinge class's
-# parameters: (xh, yh) = (433, 4.12), x-intercept x1 = 250, m1 = 4.12 / 183,
+# parameters: (h, yh) = (433, 4.12), x-intercept x1 = 250, m1 = 4.12 / 183,
 # m2 = 0.01 m1, and the plateau line's x-intercept x2 = 433 - 4.12 / m2,
 # which is 433 - 100 * 183 = -17867.
 M1 = 4.12 / 183
@@ -373,15 +343,14 @@ NO_ESTIMATE = "The data gave no estimate"
 DEGENERATE_FROM_ONES = {
     Gaussian: "mu and sigma are degenerate",
     GaussianNormalized: "mu and sigma are degenerate",
-    GaussianLn: "m and s are degenerate",
-    GaussianPlusHeavySide: "x0 and y0 have a non-finite covariance",
+    GaussianLn: "mu and sigma are degenerate",
 }
 
 # The fits from each hinge class's reference start, on data that give no
 # estimate, leave a pair unconstrained.
 DEGENERATE_FROM_REFERENCE = {
     TwoLine: "x2 and m2 are degenerate",
-    Saturation: "x1 and xs are degenerate",
+    Saturation: "x1 and xh are degenerate",
     HingeSaturation: "xh and yh are degenerate",
     HingeMin: "m1 and x1 are degenerate",
     HingeAtPoint: "xh and yh are degenerate",
@@ -417,11 +386,9 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     assert fit.p0 is None, fit.p0
 
     with _degeneracy_expected(DEGENERATE_FROM_ONES.get(cls)):
-        got = fit.make_fit(return_exception=True)
+        got = attempt_fit(fit)
         explicit = cls(x, y, **kwargs)
-        expected = explicit.make_fit(
-            return_exception=True, p0=np.ones(len(fit.argnames))
-        )
+        expected = attempt_fit(explicit, p0=np.ones(len(fit.argnames)))
     assert "initial guess is not finite" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
@@ -455,7 +422,7 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
     assert np.all(np.isfinite(values)), values
 
     with pytest.warns(FitDegeneracyWarning, match=DEGENERATE_FROM_REFERENCE[cls]):
-        got = fit.make_fit(return_exception=True)
+        got = attempt_fit(fit)
     assert "Residuals are not finite" not in str(got), got
     assert "initial guess is not finite" not in str(got), got
 
@@ -490,8 +457,8 @@ def test_hingemax_without_estimate_raises_not_implemented(caplog):
     """HingeMax has no reference start yet: ``p0`` raises without a warning.
 
     The "data gave no estimate" warning announces a reference start, which
-    HingeMax does not return. ``make_fit`` returns the NotImplementedError
-    under ``return_exception``.
+    HingeMax does not return. ``make_fit`` records the NotImplementedError
+    as ``error``.
 
     ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
     start; then test that start as the other hinge classes are tested.
@@ -501,7 +468,7 @@ def test_hingemax_without_estimate_raises_not_implemented(caplog):
         with pytest.raises(NotImplementedError, match="no reference start"):
             fit.p0
     assert NO_ESTIMATE not in caplog.text, caplog.text
-    got = fit.make_fit(return_exception=True)
+    got = attempt_fit(fit)
     assert isinstance(got, NotImplementedError), got
 
 
@@ -519,7 +486,7 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     start = [1.0, 0.0, 0.5, 2.0]
     # The fit from this start leaves the rising line's m1 and x1 unconstrained.
     with pytest.warns(FitDegeneracyWarning, match="m1 and x1 are degenerate"):
-        got = fit.make_fit(return_exception=True, p0=start)
+        got = attempt_fit(fit, p0=start)
     assert not isinstance(got, NotImplementedError), got
     assert [v.p0 for v in fit.initial_guess_info.values()] == exact(start)
 
@@ -662,46 +629,12 @@ NORMAL = [
         [1.0, S, 2.0],
         id="GaussianLn",
     ),
-    # x0 = midpoint 2; median y above is 2, below is 5, so y1 = 3.
-    _case(
-        HeavySide, [0.0, 1, 2, 3, 4], [5.0, 5, 5, 2, 2], {}, [2.0, 2.0, 3.0], id="Step"
-    ),
-    # Weighted mean (3 + 8 + 10 + 6) / 6 = 4.5 (variance 11/12) gives x0 = 3.375
-    # and y1 = 0.8 * 2; above x0, x = [4, 5, 6] weighted by [2, 2, 1] has mean
-    # 24/5 and variance 2.8/5 = 0.56, a width 0.75 above half the spacing 0.5.
-    _case(
-        GaussianPlusHeavySide,
-        [1.0, 2, 3, 4, 5, 6],
-        [0.0, 0, 1, 2, 2, 1],
-        {},
-        [3.375, 0.0, 1.6, 4.8, np.sqrt(0.56), 2.0],
-        id="GaussianPlusHeavySide",
-    ),
-    # Above x0 = 0.5 the data are the [1, 2, 1] case.
-    _case(
-        GaussianTimesHeavySide,
-        [0.0, 1, 2, 3],
-        [7.0, 1, 2, 1],
-        {"guess_x0": 0.5},
-        [0.5, 2.0, S, 2.0],
-        id="GaussianTimesHeavySide",
-    ),
-    # y1 is the mean y at or below x0 = 1.5, which is 7; above x0, x = [2, 3, 4]
-    # weighted by [1, 2, 1] has mean 3 and variance 0.5.
-    _case(
-        GaussianTimesHeavySidePlusHeavySide,
-        [0.0, 1, 2, 3, 4],
-        [7.0, 7, 1, 2, 1],
-        {"guess_x0": 1.5},
-        [1.5, 7.0, 3.0, S, 2.0],
-        id="GaussianTimesHeavySidePlusHeavySide",
-    ),
     # Below 2.5: y = x, so m1 = 1, x1 = 0. Above: y = 5 - x, so m2 = -1, x2 = 5.
     _case(
         TwoLine,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_xs": 2.5},
+        {"guess_xh": 2.5},
         [0.0, 5.0, 1.0, -1.0],
         id="TwoLine",
     ),
@@ -709,7 +642,7 @@ NORMAL = [
         HingeMin,
         [0.0, 1, 2, 3, 4, 5],
         [0.0, 1, 2, 2, 1, 0],
-        {"guess_h": 2.5},
+        {"guess_xh": 2.5},
         [1.0, 0.0, 5.0, 2.5],
         id="HingeMin",
     ),
@@ -741,19 +674,7 @@ def test_insufficient_data_still_raises_from_p0():
     ON FAILURE: the code is wrong.
     """
     with pytest.raises(InsufficientDataError, match="insufficient data"):
-        HeavySide(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0
-
-
-def test_heavyside_uses_both_level_guesses_when_given():
-    """With ``guess_y0`` and ``guess_y1``, ``p0`` returns them as the levels.
-
-    ``x0`` is the midpoint of the x range, 2; the levels are the chosen 7, 9.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.array([0.0, 1, 2, 3, 4])
-    fit = HeavySide(x, np.array([5.0, 5, 5, 2, 2]), guess_y0=7.0, guess_y1=9.0)
-    assert fit.p0 == exact([2.0, 7.0, 9.0])
+        Gaussian(np.array([0.0, 1.0]), np.array([1.0, 2.0])).p0
 
 
 # The hinge data below: x = 0..5 and y = [0, 1, 2, 2, 1, 0], two lines of slope
@@ -763,7 +684,7 @@ HY = np.array([0.0, 1, 2, 2, 1, 0])
 
 
 @pytest.mark.parametrize(
-    "cls, kwarg", [(HingeMin, "guess_h"), (HingeAtPoint, "guess_xh")]
+    "cls, kwarg", [(HingeMin, "guess_xh"), (HingeAtPoint, "guess_xh")]
 )
 @pytest.mark.parametrize(
     "hinge", [-1.0, 0.5, 4.5], ids=["none-below", "one-below", "one-above"]
@@ -797,8 +718,8 @@ def test_hinge_side_with_fewer_than_two_points_gives_the_reference_start(
 #  HingeSaturation at (3.5, 2): the rising least-squares slope through
 #   (0, 0), (1, 1), (2, 2), (3, 2) is 3.5 / 5 = 0.7, so x1 = 3.5 - 2 / 0.7.
 TWO_POINT_SIDES = [
-    _case(HingeMin, HX, HY, {"guess_h": 1.5}, [1.0, 0.0, 5.0, 1.5], id="Min-below"),
-    _case(HingeMin, HX, HY, {"guess_h": 3.5}, [1.0, 0.0, 5.0, 3.5], id="Min-above"),
+    _case(HingeMin, HX, HY, {"guess_xh": 1.5}, [1.0, 0.0, 5.0, 1.5], id="Min-below"),
+    _case(HingeMin, HX, HY, {"guess_xh": 3.5}, [1.0, 0.0, 5.0, 3.5], id="Min-above"),
     _case(
         HingeAtPoint,
         HX,
@@ -819,7 +740,7 @@ TWO_POINT_SIDES = [
         HingeSaturation,
         HX,
         HY,
-        {"guess_xh": 3.5, "guess_yh": 2.0},
+        {"guess_xh": 3.5},
         [3.5, 2.0, 3.5 - 2.0 / 0.7, -1.0],
         id="Saturation-plateau",
     ),
@@ -840,34 +761,34 @@ def test_hinge_side_with_exactly_two_points_gives_an_estimate(
 # A point exactly at the hinge, off both lines: x = 0..6 and
 # y = [0, 1, 5, 4, 4, 6, 8], hinge at 2. HingeMin, HingeAtPoint and
 # HingeSaturation put x = 2 on the upper side (x >= h), TwoLine and Saturation
-# on the lower side (x <= xs), as their class Notes state. Hand cases:
+# on the lower side (x <= h), as their class Notes state. Hand cases:
 #  upper x >= 2: slopes [-1, 0, 2, 2], median 1, x-intercepts x - y = [-3, -1,
 #   0, -1, -2], median -1. lower x < 2: slope 1, x-intercept 0.
 #  lower x <= 2: slopes [1, 4], median 2.5, x-intercepts x - y/2.5 = [0, 0.6,
 #   0], median 0. upper x > 2: slopes [0, 2, 2], median 2, x-intercepts
 #   x - y/2 = [1, 2, 2, 2], median 2.
-#  Saturation: s = median(2.5 (2 - 0), 2 (2 - 2)) = 2.5 and
+#  Saturation: yh = median(2.5 (2 - 0), 2 (2 - 2)) = 2.5 and
 #   theta = arctan((2.5 - 2) / (1 + 2.5 * 2)) = arctan(1/12).
 #  HingeAtPoint's yh is y at x = 2, 5; HingeSaturation's x1 = 2 - 5 / 1.
 AX = np.array([0.0, 1, 2, 3, 4, 5, 6])
 AY = np.array([0.0, 1, 5, 4, 4, 6, 8])
 AT_THE_HINGE = [
-    _case(HingeMin, AX, AY, {"guess_h": 2.0}, [1.0, 0.0, -1.0, 2.0], id="Min"),
+    _case(HingeMin, AX, AY, {"guess_xh": 2.0}, [1.0, 0.0, -1.0, 2.0], id="Min"),
     _case(HingeAtPoint, AX, AY, {"guess_xh": 2.0}, [2.0, 5.0, 1.0, 1.0], id="AtPoint"),
     _case(
         HingeSaturation,
         AX,
         AY,
-        {"guess_xh": 2.0, "guess_yh": 5.0},
+        {"guess_xh": 2.0},
         [2.0, 5.0, -3.0, 1.0],
         id="HingeSaturation",
     ),
-    _case(TwoLine, AX, AY, {"guess_xs": 2.0}, [0.0, 2.0, 2.5, 2.0], id="TwoLine"),
+    _case(TwoLine, AX, AY, {"guess_xh": 2.0}, [0.0, 2.0, 2.5, 2.0], id="TwoLine"),
     _case(
         Saturation,
         AX,
         AY,
-        {"guess_xs": 2.0},
+        {"guess_xh": 2.0},
         [0.0, 2.0, 2.5, np.arctan(1.0 / 12.0)],
         id="Saturation",
     ),
@@ -889,9 +810,9 @@ def test_a_point_at_the_hinge_belongs_to_the_documented_side(
 @pytest.mark.parametrize(
     "cls, kwargs",
     [
-        (HingeMin, {"guess_h": 2.5}),
+        (HingeMin, {"guess_xh": 2.5}),
         (HingeAtPoint, {"guess_xh": 2.5}),
-        (HingeSaturation, {"guess_xh": 2.5, "guess_yh": 2.0}),
+        (HingeSaturation, {"guess_xh": 2.5}),
     ],
 )
 def test_repeated_point_on_the_upper_side_gives_no_estimate(cls, kwargs):
@@ -920,7 +841,7 @@ def test_a_repeated_point_on_twoline_lower_side_is_skipped():
     """
     x = np.array([0.0, 0, 1, 2, 3, 4])
     y = np.array([0.0, 0, 1, 3, 2, 1])
-    assert TwoLine(x, y, guess_xs=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
+    assert TwoLine(x, y, guess_xh=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
 
 
 def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
@@ -936,17 +857,17 @@ def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
     y = np.array([1.0, 0, 1, 3, 2, 1])
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        assert TwoLine(x, y, guess_xs=1.5).p0 == exact(HINGE_START[TwoLine])
+        assert TwoLine(x, y, guess_xh=1.5).p0 == exact(HINGE_START[TwoLine])
 
 
 @pytest.mark.parametrize(
     "y, expected",
     [
-        # m1 = 2, m2 = -2: x1 = 0, x2 = 5, s = 5, theta = arctan(4 / (1 - 4)).
+        # m1 = 2, m2 = -2: x1 = 0, x2 = 5, yh = 5, theta = arctan(4 / (1 - 4)).
         ([0.0, 2, 4, 4, 2, 0], [0.0, 2.5, 5.0, np.arctan(-4.0 / 3.0)]),
         # m1 = 1, m2 = -1 are perpendicular: theta = +pi/2, the sign of m1 - m2.
         ([0.0, 1, 2, 2, 1, 0], [0.0, 2.5, 2.5, np.pi / 2]),
-        # m1 = -1, m2 = 1: x1 = x2 = 2.5, s = 0, theta = -pi/2.
+        # m1 = -1, m2 = 1: x1 = x2 = 2.5, yh = 0, theta = -pi/2.
         ([2.5, 1.5, 0.5, 0.5, 1.5, 2.5], [2.5, 2.5, 0.0, -np.pi / 2]),
     ],
     ids=["general", "perpendicular+", "perpendicular-"],
@@ -961,25 +882,26 @@ def test_saturation_estimates_the_angle_between_the_lines(y, expected):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        p0 = Saturation(HX, np.array(y), guess_xs=2.5).p0
+        p0 = Saturation(HX, np.array(y), guess_xh=2.5).p0
     assert p0 == exact(expected)
 
 
 @pytest.mark.parametrize(
     "y, kwargs, expected",
     [
-        # One rising point (x = 0): x1 is the data minimum, 0. Plateau x = 1..5,
+        # One rising point (x = 0): x1 is the data minimum, 0. yh is y at the
+        # x nearest 0.5, the first of the tie x = 0, 1: 0. Plateau x = 1..5,
         # slopes [1, 0, -1, -1], median -0.5.
-        (HY, {"guess_xh": 0.5, "guess_yh": 1.0}, [0.5, 1.0, 0.0, -0.5]),
+        (HY, {"guess_xh": 0.5}, [0.5, 0.0, 0.0, -0.5]),
         # Flat rising region: x1 is the data minimum, 0. Plateau slope 1.
         (
             [2.0, 2, 2, 3, 4, 5],
-            {"guess_xh": 2.5, "guess_yh": 2.0},
+            {"guess_xh": 2.5},
             [2.5, 2.0, 0.0, 1.0],
         ),
         # One plateau point (x = 5): m2 is 0. Rising least-squares slope
         # through x = 0..4, y = [0, 1, 2, 2, 1] is 3 / 10, so x1 = 4.5 - 1 / 0.3.
-        (HY, {"guess_xh": 4.5, "guess_yh": 1.0}, [4.5, 1.0, 4.5 - 1.0 / 0.3, 0.0]),
+        (HY, {"guess_xh": 4.5}, [4.5, 1.0, 4.5 - 1.0 / 0.3, 0.0]),
     ],
     ids=["one-rising-point", "flat-rising", "one-plateau-point"],
 )
@@ -993,20 +915,12 @@ def test_hinge_saturation_fallbacks_are_the_documented_values(y, kwargs, expecte
 
 
 @pytest.mark.parametrize(
-    "cls, attribute, default",
-    [
-        (HingeSaturation, "saturation_guess", (326, 0.5)),
-        (TwoLine, "guess_xs", 425.0),
-        (Saturation, "guess_xs", 425.0),
-        (HingeMin, "guess_h", 400.0),
-        (HingeMax, "guess_h", 400.0),
-        (HingeAtPoint, "guess_xh", 400.0),
-    ],
+    "cls", [HingeSaturation, TwoLine, Saturation, HingeMin, HingeMax, HingeAtPoint]
 )
-def test_hinge_guess_defaults_are_the_documented_values(cls, attribute, default):
-    """Each hinge class's guess defaults to the value its Parameters section states.
+def test_hinge_guess_defaults_are_the_documented_values(cls):
+    """Each hinge class's guess defaults to None, as the Hinge Parameters state.
 
-    ON FAILURE: the code is wrong, unless the author changed a default; then
-    update the docstring and this table.
+    ON FAILURE: the code is wrong, unless the author changed the default; then
+    update the docstring and this test.
     """
-    assert getattr(cls(HX, HY), attribute) == default
+    assert cls(HX, HY).guess_xh is None

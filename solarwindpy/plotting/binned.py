@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plot classes stop sourcing data through BinnedData)
-# Supersedes: none
 r"""The data a plot draws from, which of its rows it keeps, and their bins.
 
 ``_PlotSource`` holds the caller's columns without copying them and records,

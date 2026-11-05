@@ -1,18 +1,17 @@
 """Tests for exponential fit functions."""
 
 import inspect
-import warnings
 import numpy as np
 import pytest
-from scipy.optimize import OptimizeWarning, curve_fit
+from scipy.optimize import curve_fit
 
 from solarwindpy.fitfunctions.exponentials import (
     Exponential,
     ExponentialPlusC,
-    ExponentialCDF,
 )
-from solarwindpy.fitfunctions.core import FitDegeneracyWarning, InsufficientDataError
+from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free, printed
+from tests.fitfunctions._attempt import attempt_fit
 
 E_INV = 0.36787944117144233  # e^-1
 
@@ -21,11 +20,14 @@ E_INV = 0.36787944117144233  # e^-1
     "cls, expected_params, sample_args, expected_value",
     [
         # 2 e^-1
-        (Exponential, ("x", "c", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
+        (Exponential, ("x", "k", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
         # 2 e^-1 + 0.5
-        (ExponentialPlusC, ("x", "c", "A", "d"), (1.0, 1.0, 2.0, 0.5), 2 * E_INV + 0.5),
-        # y0 (1 - e^-1) with y0 = 3
-        (ExponentialCDF, ("x", "c"), (1.0, 1.0), 3 * (1 - E_INV)),
+        (
+            ExponentialPlusC,
+            ("x", "k", "y0", "A"),
+            (1.0, 1.0, 0.5, 2.0),
+            2 * E_INV + 0.5,
+        ),
     ],
 )
 def test_function_signature_and_output(
@@ -39,9 +41,6 @@ def test_function_signature_and_output(
     y = np.ones_like(x)
     obj = cls(x, y)
 
-    if cls is ExponentialCDF:
-        obj.set_y0(3.0)  # Not 1, so an ignored amplitude fails.
-
     sig = inspect.signature(obj.function)
     assert tuple(sig.parameters.keys()) == expected_params
 
@@ -53,14 +52,14 @@ def exponential_data():
     """Noisy y = 3 exp(-0.8 x), x in [0, 3], noise sigma 0.05, unit weights."""
     rng = np.random.default_rng(42)
     x = np.linspace(0, 3, 30)
-    c, A = 0.8, 3.0
+    k, A = 0.8, 3.0
     noise = rng.normal(0, 0.05, size=x.shape)
-    y = A * np.exp(-c * x) + noise
+    y = A * np.exp(-k * x) + noise
     w = np.ones_like(x)
     return x, y, w
 
 
-@pytest.mark.parametrize("cls", [Exponential, ExponentialPlusC, ExponentialCDF])
+@pytest.mark.parametrize("cls", [Exponential, ExponentialPlusC])
 def test_p0_zero_size_input(cls):
     """Asking for an initial guess with no data raises InsufficientDataError.
 
@@ -75,7 +74,7 @@ def test_p0_zero_size_input(cls):
 
 
 def test_exponential_p0_estimation():
-    """From its default initial guess, Exponential recovers c = 0.8, A = 3 exactly.
+    """From its default initial guess, Exponential recovers k = 0.8, A = 3 exactly.
 
     ON FAILURE: the code is wrong.
     """
@@ -83,12 +82,12 @@ def test_exponential_p0_estimation():
     obj = Exponential(x, 3.0 * np.exp(-0.8 * x))
     obj.make_fit()
 
-    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["k"] == noise_free(0.8)
     assert obj.popt["A"] == noise_free(3.0)
 
 
 def test_exponential_plus_c_p0_estimation():
-    """From its default initial guess, ExponentialPlusC recovers c, A, d exactly.
+    """From its default initial guess, ExponentialPlusC recovers k, A, y0 exactly.
 
     ON FAILURE: the code is wrong.
     """
@@ -96,30 +95,35 @@ def test_exponential_plus_c_p0_estimation():
     obj = ExponentialPlusC(x, 3.0 * np.exp(-0.8 * x) + 0.5)
     obj.make_fit()
 
-    assert obj.popt["c"] == noise_free(0.8)
+    assert obj.popt["k"] == noise_free(0.8)
     assert obj.popt["A"] == noise_free(3.0)
-    assert obj.popt["d"] == noise_free(0.5)
+    assert obj.popt["y0"] == noise_free(0.5)
 
 
-def test_exponential_cdf_p0_estimation():
-    """From its default initial guess, ExponentialCDF recovers c = 0.8 exactly.
+def test_exponential_plus_c_names_its_constant_y0():
+    """ExponentialPlusC calls its added constant ``y0``, and no parameter ``c``.
+
+    The rate was once ``c``, so an old ``popt["c"]`` must raise KeyError rather
+    than silently return the constant. Data are 3 exp(-0.8 x) + 0.5.
 
     ON FAILURE: the code is wrong.
     """
     x = np.linspace(0, 3, 30)
-    obj = ExponentialCDF(x, 1.0 - np.exp(-0.8 * x))
-    obj.set_y0(1.0)
+    obj = ExponentialPlusC(x, 3.0 * np.exp(-0.8 * x) + 0.5)
     obj.make_fit()
 
-    assert obj.popt["c"] == noise_free(0.8)
+    assert set(obj.popt) == {"k", "A", "y0"}
+    assert obj.popt["y0"] == noise_free(0.5)
+    with pytest.raises(KeyError):
+        obj.popt["c"]
+    assert obj.TeX_function == r"f(x)=A \cdot e^{-kx} + y_0"
 
 
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (Exponential, r"f(x)=A \cdot e^{-cx}"),
-        (ExponentialPlusC, r"f(x)=A \cdot e^{-cx} + d"),
-        (ExponentialCDF, r"f(x)=A \left(1 - e^{-cx}\right)"),
+        (Exponential, r"f(x)=A \cdot e^{-kx}"),
+        (ExponentialPlusC, r"f(x)=A \cdot e^{-kx} + y_0"),
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -141,8 +145,8 @@ def test_make_fit_success_regular(exponential_data):
     x, y, w = exponential_data
 
     for cls, truth in [
-        (Exponential, {"c": 0.8, "A": 3.0}),
-        (ExponentialPlusC, {"c": 0.8, "A": 3.0, "d": 0.0}),
+        (Exponential, {"k": 0.8, "A": 3.0}),
+        (ExponentialPlusC, {"k": 0.8, "A": 3.0, "y0": 0.0}),
     ]:
         obj = cls(x, y)
         obj.make_fit()
@@ -151,23 +155,6 @@ def test_make_fit_success_regular(exponential_data):
         for name, value in truth.items():
             # Fixed seed (default_rng(42)); 4 error bars per TEST_PATTERNS.
             assert abs(obj.popt[name] - value) < 4 * obj.psigma[name], (cls, name)
-
-
-def test_make_fit_success_cdf():
-    """A fit to noisy 1 - exp(-0.8 x) with y0 = 1 recovers c within 4 error bars.
-
-    ON FAILURE: the code is wrong.
-    """
-    rng = np.random.default_rng(42)
-    x = np.linspace(0, 3, 30)
-    y = 1.0 - np.exp(-0.8 * x) + rng.normal(0, 0.05, size=x.shape)
-
-    obj = ExponentialCDF(x, y)
-    obj.set_y0(1.0)
-    obj.make_fit()
-
-    # Fixed seed; 4 error bars per TEST_PATTERNS.
-    assert abs(obj.popt["c"] - 0.8) < 4 * obj.psigma["c"]
 
 
 def test_make_fit_insufficient_data():
@@ -183,39 +170,9 @@ def test_make_fit_insufficient_data():
         with pytest.raises(InsufficientDataError):
             obj.make_fit()
 
-        result = obj.make_fit(return_exception=True)
+        result = attempt_fit(obj)
         assert isinstance(result, InsufficientDataError)
         assert "insufficient data" in str(result).lower()
-
-
-def test_exponential_cdf_fits_one_point():
-    """ExponentialCDF has one free parameter, so one point suffices to fit it.
-
-    The point (1, 1 - e^-0.8) with y0 = 1 fixes c = 0.8. One point has no
-    spread, so R² is undefined: ``rsq`` is NaN, per its docstring, and neither
-    the fit nor ``rsq`` divides by zero.
-
-    ON FAILURE: the code is wrong.
-    """
-    obj = ExponentialCDF(np.array([1.0]), np.array([1.0 - np.exp(-0.8)]))
-    obj.set_y0(1.0)
-
-    # Zero degrees of freedom: the parameter covariance is undefined, and the fit
-    # says so with scipy's OptimizeWarning and a FitDegeneracyWarning.
-    with pytest.warns(
-        FitDegeneracyWarning, match="c has a non-finite variance"
-    ) as record:
-        with pytest.warns(
-            OptimizeWarning, match="Covariance of the parameters could not be estimated"
-        ):
-            assert obj.make_fit() is None
-    assert not [w for w in record if issubclass(w.category, RuntimeWarning)]
-    # One point leaves the optimizer's own xtol (1e-8) as the accuracy limit.
-    assert obj.popt["c"] == noise_free(0.8)
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", RuntimeWarning)
-        assert np.isnan(obj.rsq)
 
 
 def test_exponential_numerical_stability():
@@ -232,35 +189,16 @@ def test_exponential_numerical_stability():
 
 
 def test_exponential_plus_c_constant_term():
-    """ExponentialPlusC is A at x = 0 plus d, and A/2 plus d one half-life later.
+    """ExponentialPlusC is A at x = 0 plus y0, and A/2 plus y0 one half-life later.
 
     ON FAILURE: the code is wrong.
     """
-    c, A, d = 1.0, 2.0, 0.5
-    x = np.array([0.0, np.log(2.0) / c])  # 0 and one half-life
+    k, A, y0 = 1.0, 2.0, 0.5
+    x = np.array([0.0, np.log(2.0) / k])  # 0 and one half-life
     obj = ExponentialPlusC(x, np.ones_like(x))
 
     # 2 + 0.5 and 2/2 + 0.5
-    assert obj.function(x, c, A, d) == exact([2.5, 1.5])
-
-
-def test_exponential_cdf_monotonicity():
-    """ExponentialCDF rises monotonically from 0 toward y0, reaching y0/2 at ln2/c.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.linspace(0, 5, 20)
-    c = 0.5
-
-    obj = ExponentialCDF(x, np.ones_like(x))
-    obj.set_y0(3.0)  # Not 1, so an ignored amplitude fails.
-    result = obj.function(x, c)
-
-    assert np.all(np.diff(result) > 0)
-    assert result[0] == 0.0  # 3 (1 - e^0)
-    assert result[-1] < 3.0
-    # 3 (1 - 1/2) at the half-life.
-    assert obj.function(np.log(2.0) / c, c) == exact(1.5)
+    assert obj.function(x, k, y0, A) == exact([2.5, 1.5])
 
 
 def test_str_and_call_methods_regular():
@@ -276,23 +214,8 @@ def test_str_and_call_methods_regular():
         obj.make_fit()
 
         assert cls.__name__ in str(obj)
-        # A + d at x = 0; A/2 + d at the half-life.
+        # A + y0 at x = 0; A/2 + y0 at the half-life.
         assert obj(x_test) == noise_free([3.0 + offset, 1.5 + offset]), cls
-
-
-def test_str_and_call_methods_cdf():
-    """``str`` names ExponentialCDF; calling a noise-free fit evaluates the curve.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.linspace(0, 3, 30)
-    obj = ExponentialCDF(x, 2.0 * (1.0 - np.exp(-0.8 * x)))
-    obj.set_y0(2.0)
-    obj.make_fit()
-
-    assert "ExponentialCDF" in str(obj)
-    # 2 (1 - 1/2) at the half-life ln2/0.8.
-    assert obj(np.log(2.0) / 0.8) == noise_free(1.0)
 
 
 def test_exponential_decay_behavior():
@@ -311,7 +234,7 @@ def test_exponential_decay_behavior():
     assert obj(x_test) == noise_free([2.0, 1.0, 0.5])
 
 
-@pytest.mark.parametrize("cls", [Exponential, ExponentialPlusC, ExponentialCDF])
+@pytest.mark.parametrize("cls", [Exponential, ExponentialPlusC])
 def test_property_access_before_fit(cls):
     """Fit results do not exist before ``make_fit``: popt and pcov raise.
 
@@ -344,12 +267,12 @@ def test_exponential_with_weights():
     obj = Exponential(x, y, weights=sigma)
     obj.make_fit()
 
-    def model(x, c, A):
-        return A * np.exp(-c * x)
+    def model(x, k, A):
+        return A * np.exp(-k * x)
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 3.0])
-    assert [obj.popt["c"], obj.popt["A"]] == noise_free(weighted)
+    assert [obj.popt["k"], obj.popt["A"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
@@ -357,29 +280,25 @@ def test_exponential_with_weights():
 
 
 @pytest.mark.parametrize(
-    "cls, params, y0, expected",
+    "cls, params, expected",
     [
-        # Slow decay, c = 1e-6: e^{-cx} = 1 - cx to 2e-12.
-        (Exponential, (1e-6, 1.0), None, [1.0, 1 - 1e-6, 1 - 2e-6]),
-        (ExponentialPlusC, (1e-6, 1.0, 0.5), None, [1.5, 1.5 - 1e-6, 1.5 - 2e-6]),
-        (ExponentialCDF, (1e-6,), 1.0, [0.0, 1e-6, 2e-6]),
-        # Fast decay, c = 100: e^-100 ~ 4e-44 vanishes beside O(1) terms.
-        (Exponential, (100.0, 1.0), None, [1.0, 0.0, 0.0]),
-        (ExponentialPlusC, (100.0, 1.0, 0.5), None, [1.5, 0.5, 0.5]),
-        (ExponentialCDF, (100.0,), 1.0, [0.0, 1.0, 1.0]),
+        # Slow decay, k = 1e-6: e^{-kx} = 1 - kx to 2e-12.
+        (Exponential, (1e-6, 1.0), [1.0, 1 - 1e-6, 1 - 2e-6]),
+        (ExponentialPlusC, (1e-6, 0.5, 1.0), [1.5, 1.5 - 1e-6, 1.5 - 2e-6]),
+        # Fast decay, k = 100: e^-100 ~ 4e-44 vanishes beside O(1) terms.
+        (Exponential, (100.0, 1.0), [1.0, 0.0, 0.0]),
+        (ExponentialPlusC, (100.0, 0.5, 1.0), [1.5, 0.5, 0.5]),
     ],
 )
-def test_extreme_decay_rates_reach_their_limits(cls, params, y0, expected):
-    """At c -> 0 each model is linear in x; at large c it jumps to its x -> inf limit.
+def test_extreme_decay_rates_reach_their_limits(cls, params, expected):
+    """At k -> 0 each model is linear in x; at large k it jumps to its x -> inf limit.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1.0, 2.0])
     obj = cls(x, np.array([1.0, 0.5, 0.25]))
-    if y0 is not None:
-        obj.set_y0(y0)
 
-    # The limit forms drop (c x)^2 / 2 <= 2e-12 or e^-100 ~ 4e-44, so they hold
+    # The limit forms drop (k x)^2 / 2 <= 2e-12 or e^-100 ~ 4e-44, so they hold
     # to 11 decimal places.
     assert obj.function(x, *params) == printed(expected, decimals=11)
 
@@ -403,7 +322,7 @@ class TestExponentialP0Phase6:
         obj = Exponential(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 2  # c, A
+        assert len(p0) == len(obj.argnames) == 2  # k, A
         assert np.all(np.isfinite(p0))
 
 
@@ -421,7 +340,7 @@ class TestExponentialPlusCPhase6:
         obj = ExponentialPlusC(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 3  # c, A, d
+        assert len(p0) == len(obj.argnames) == 3  # k, y0, A
         assert np.all(np.isfinite(p0))
 
 
@@ -436,33 +355,5 @@ class TestExponentialTeXPhase6:
         x = np.linspace(0, 5, 20)
         y = np.exp(-x)
 
-        tex = {
-            cls(x, y).TeX_function
-            for cls in [Exponential, ExponentialPlusC, ExponentialCDF]
-        }
-        assert len(tex) == 3
-
-
-def test_cdf_tex_info_reports_the_fixed_amplitude_after_the_rate():
-    """ExponentialCDF's annotation lists the caller's ``y0`` as ``A``, value only.
-
-    ``A = 2.5`` is the chosen amplitude; it is fixed, so it carries no
-    uncertainty and follows the fitted ``c``. The method that was meant to
-    add it called a parent method that does not exist and was never called.
-
-    ON FAILURE: the code is wrong.
-    """
-    x = np.linspace(0, 5, 50)
-    obj = ExponentialCDF(x, 2.5 * (1.0 - np.exp(-0.8 * x)))
-    obj.set_y0(2.5)
-    obj.make_fit()
-
-    lines = [ln.strip("$").strip() for ln in str(obj.TeX_info).split("\n")]
-    (c_at,) = [i for i, ln in enumerate(lines) if ln.startswith("c = ")]
-    (a_at,) = [i for i, ln in enumerate(lines) if ln.startswith("A = ")]
-    assert a_at > c_at
-    value = lines[a_at].split(" = ", 1)[1]
-    assert r"\pm" not in value
-    value = value.replace(r" \times 10^{", "e").replace("}", "").replace(" ", "")
-    assert float(value) == exact(2.5)
-    assert obj.TeX_info.extra_params == {"A": 2.5}
+        tex = {cls(x, y).TeX_function for cls in [Exponential, ExponentialPlusC]}
+        assert len(tex) == 2

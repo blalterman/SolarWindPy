@@ -13,7 +13,7 @@ This directory contains project-specific configuration for Claude Code that is s
 
 When working in this repository, Claude Code will automatically load the configuration from this directory, providing:
 
-1. **Pre-configured development commands** (pytest, black, flake8, conda, git)
+1. **Pre-configured development commands** (pytest, ruff, conda, git)
 2. **Security settings** that protect sensitive files (.env, secrets, tokens)
 3. **Specialized development agents** for physics validation, data architecture, testing, and more
 4. **Project-specific system prompt** with SolarWindPy context
@@ -41,8 +41,8 @@ When working in this repository, Claude Code will automatically load the configu
 
 The configuration enforces these requirements:
 1. All tests must pass (`pytest -q`)
-2. Code must be formatted (`black solarwindpy/`)
-3. No linting errors (`flake8`)
+2. Code must be formatted (`ruff format solarwindpy/ tests/`)
+3. No linting errors (`ruff check solarwindpy/ tests/`)
 4. NumPy-style docstrings required
 5. Coverage at or above the pre-commit hook's floor
 

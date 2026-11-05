@@ -3,7 +3,7 @@
 
 ``Base`` and its mixins exist to be subclassed. The public state they manage
 (``data``, ``labels``, ``log``, ``path``, ``clip``) is tested on ``LinePlot``,
-a minimal ``PlotWithZdata`` subclass. Axis formatting and colorbars are tested
+a minimal ``ColorPlot`` subclass. Axis formatting and colorbars are tested
 through the package's own ``Hist1D`` and ``Scatter``, asserting on the real
 matplotlib ``Axes`` and ``Colorbar`` on the Agg backend. Expected values
 come from the hand-typed ``ROWS`` table or the ``_expected_path`` helper, which rebuilds the documented path
@@ -28,7 +28,7 @@ from solarwindpy.plotting.base import (  # noqa: E402
     Base,
     ClipAxes,
     LogAxes,
-    PlotWithZdata,
+    ColorPlot,
     RangeLimits,
 )
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
@@ -64,7 +64,7 @@ Z = pd.Series([r[3] for r in ROWS], index=INDEX)
 DECADES = pd.Series([1.0, 10.0, 100.0, 1000.0])
 
 # Label objects for the path tests: a plain x label and a column-normalized z
-# label, whose path ends in "norm" and so takes set_path's norm branch.
+# label, whose path ends in "norm" and so takes the path's norm branch.
 PLAIN_XLABEL = TeXlabel(("v", "x", "p1"))
 NORM_ZLABEL = TeXlabel(("n", "", "p1"), axnorm="c")
 
@@ -83,7 +83,7 @@ def _expected_path(cls_name, x, y, z, logx=False, logy=False):
     return Path(cls_name, x, y, z, _scale(logx, logy))
 
 
-class LinePlot(PlotWithZdata):
+class LinePlot(ColorPlot):
     """Minimal concrete plot: points coloured by z."""
 
     def __init__(self, x, y, z=None, clip=None):
@@ -132,7 +132,7 @@ def test_base_and_an_incomplete_subclass_cannot_be_instantiated():
     ON FAILURE: the code is wrong.
     """
 
-    class NoMakePlot(PlotWithZdata):
+    class NoMakePlot(ColorPlot):
         def __init__(self):
             super().__init__()
 
@@ -155,7 +155,7 @@ def test_str_and_logger_name_the_concrete_class():
 
 
 # ---------------------------------------------------------------------------
-# PlotWithZdata._set_data, through the constructor
+# ColorPlot._set_data, through the constructor
 # ---------------------------------------------------------------------------
 
 
@@ -302,7 +302,7 @@ def test_set_labels_changes_only_the_labels_passed():
 
 
 def test_set_labels_rejects_unknown_keywords_naming_each():
-    """Any keyword other than x, y, z, auto_update_path raises ``KeyError``.
+    """Any keyword other than x, y, z raises ``KeyError``.
 
     ON FAILURE: the code is wrong.
     """
@@ -313,8 +313,8 @@ def test_set_labels_rejects_unknown_keywords_naming_each():
     assert plot.labels.x == "x"  # base.py Base.__init__: AxesLabels(x="x", y="y")
 
 
-def test_set_labels_rebuilds_the_path_unless_told_not_to():
-    """By default the save path follows the new labels; opt-out leaves it.
+def test_path_follows_the_labels_on_every_read():
+    """The save path is read from the current labels, after every change.
 
     ON FAILURE: the code is wrong.
     """
@@ -322,41 +322,37 @@ def test_set_labels_rebuilds_the_path_unless_told_not_to():
     plot.set_labels(x="vx", y="np", z="T")
     assert plot.path == _expected_path("LinePlot", "vx", "np", "T")
 
-    plot.set_labels(x="vy", auto_update_path=False)
-    assert plot.labels.x == "vy"
-    assert plot.path == _expected_path("LinePlot", "vx", "np", "T")
+    plot.set_labels(x="vy")
+    assert plot.path == _expected_path("LinePlot", "vy", "np", "T")
 
 
 # ---------------------------------------------------------------------------
-# set_path
+# path
 # ---------------------------------------------------------------------------
 
 
 def test_auto_path_is_class_then_labels_then_scale():
-    """``set_path("auto")`` builds class/x/y/z/scale, scale read at call time.
+    """``path`` is class/x/y[/z]/scale, the scale read when it is read.
 
-    Spaces become hyphens; a missing or ``"None"`` label falls back to the
-    axis name. The literal path was written by hand from reading
-    ``Base.set_path`` and ``PlotWithZdata.set_path`` in ``base.py``: class
-    name ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
-    ``"None"`` and ``None`` fall back to ``"y"`` and ``"z"``; ``add_scale``
-    defaults to True, giving ``"logX"`` and ``"linY"`` joined by ``"-"`` and
-    appended because ``"z"`` does not end in ``norm``.
+    Spaces become hyphens; a ``"None"`` x or y label falls back to the axis
+    name, and a None z label leaves the z part out. The literal path was
+    written by hand from reading ``Base.path`` in ``base.py``: class name
+    ``LinePlot``; ``"bulk speed"`` has its space replaced by a hyphen;
+    ``"None"`` falls back to ``"y"``; no z part; ``"logX"`` and ``"linY"``
+    joined by ``"-"`` and appended because ``"y"`` does not end in ``norm``.
 
     ON FAILURE: the code is wrong.
     """
     plot = LinePlot(X, Y, Z)
-    plot.set_labels(x="bulk speed", y="None", z=None, auto_update_path=False)
+    plot.set_labels(x="bulk speed", y="None", z=None)
     plot.set_log(x=True)
-    plot.set_path("auto")
-    assert plot.path == _expected_path("LinePlot", "bulk-speed", "y", "z", True)
-    assert plot.path == Path("LinePlot/bulk-speed/y/z/logX-linY")  # hand-derived
+    assert plot.path == Path("LinePlot/bulk-speed/y/logX-linY")  # hand-derived
 
 
 def test_norm_label_path_ends_in_norm_and_plain_label_path_does_not():
     """The column-normalized z label reaches the norm branch; the x label not.
 
-    ``set_path`` treats a path whose last part ends in ``norm`` specially, so
+    ``path`` treats a path whose last part ends in ``norm`` specially, so
     the next test needs one label that does and one that does not.
 
     ON FAILURE: the fixture no longer separates a normalized label path from a plain one; fix the fixture.
@@ -378,28 +374,6 @@ def test_auto_path_uses_texlabel_paths_and_puts_scale_before_norm():
     plot.set_labels(x=xl, y="y", z=zl)
     norm = "{}-{}".format(_scale(False, False), zl.path.name)
     expected = Path("LinePlot", xl.path, "y", zl.path.parent, norm)
-    assert plot.path == expected
-
-
-@pytest.mark.parametrize(
-    "add_scale, expected",
-    [
-        (False, Path("figs", "run1")),
-        (True, Path("figs/run1/linX-logY")),
-    ],
-)
-def test_explicit_path_is_used_as_given_plus_optional_scale(add_scale, expected):
-    """A path other than "auto" is used verbatim; ``add_scale`` appends scale.
-
-    The expected paths were written by hand from reading ``set_path`` in
-    ``base.py``: a non-"auto" ``new`` becomes ``Path(new)``, and with linear x
-    and log y the scale tag is ``"linX"`` and ``"logY"`` joined by ``"-"``.
-
-    ON FAILURE: the code is wrong.
-    """
-    plot = LinePlot(X, Y)
-    plot.set_log(y=True)
-    plot.set_path("figs/run1", add_scale=add_scale)
     assert plot.path == expected
 
 
@@ -473,7 +447,7 @@ def test_scatter_colorbar_maps_the_plotted_collection_labelled_z(ax):
     """
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
+    _, _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
     assert isinstance(cbar, Colorbar)
     assert cbar.mappable is ax.collections[0]
     assert cbar.ax.get_ylabel() == "T"
@@ -488,7 +462,7 @@ def test_scatter_colorbar_draws_into_a_given_cax_with_a_given_label(ax):
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
+    _, _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
     assert cbar.ax is cax
     assert cax.get_ylabel() == "custom"
 
@@ -498,7 +472,7 @@ def test_scatter_colorbar_accepts_a_list_of_axes(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
+    _, _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
     assert cbar.ax.figure is ax.figure
     assert len(ax.figure.axes) == 2
 
@@ -560,9 +534,8 @@ def _spiral():
         GRID_Y,
         GRID_Z,
         initial_bins=(GRID_EDGES, GRID_EDGES),
+        min_per_bin=100,
     )
-    splot.initialize_mesh(min_per_bin=100)
-    splot.build_grouped()
     return splot
 
 
@@ -570,20 +543,20 @@ def _spiral():
 CBAR_PLOTS = {
     "Scatter.make_plot": lambda ax, kw: Scatter(X, Y, Z).make_plot(
         ax=ax, cbar_kwargs=kw
-    )[1],
-    "Hist2D.make_plot": lambda ax, kw: _hist2d().make_plot(ax=ax, cbar_kwargs=kw)[1],
+    )[-1],
+    "Hist2D.make_plot": lambda ax, kw: _hist2d().make_plot(ax=ax, cbar_kwargs=kw)[-1],
     "Hist2D.plot_hist_with_contours": lambda ax, kw: _hist2d().plot_hist_with_contours(
         ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[1],
+    )[-1],
     "Hist2D.plot_contours": lambda ax, kw: _hist2d().plot_contours(
         ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[1],
+    )[-1],
     "SpiralPlot2D.make_plot": lambda ax, kw: _spiral().make_plot(ax=ax, cbar_kwargs=kw)[
-        1
+        -1
     ],
     "SpiralPlot2D.plot_contours": lambda ax, kw: _spiral().plot_contours(
-        ax=ax, cbar_kwargs=kw, levels=LEVELS, method="tricontour"
-    )[1],
+        ax=ax, cbar_kwargs=kw, levels=LEVELS
+    )[-1],
 }
 
 

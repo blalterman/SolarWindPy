@@ -2,12 +2,12 @@
 
 The indicator is a real ``SIDC`` monthly-smoothed sunspot series. Only the
 network is faked: SILSO's URL base is pointed at a local directory holding a
-file in SILSO's ``;``-separated format, and the cache home is moved under
-``tmp_path``. The series is chosen so each value is known by hand: the SSN
-of month ``i`` after January 2000 is ``50 + i``.
+file in SILSO's ``;``-separated format, and the download cache is kept under
+``tmp_path`` by the autouse ``isolated_cache`` fixture. The series is chosen
+so each value is known by hand: the SSN of month ``i`` after January 2000 is
+``50 + i``.
 """
 
-import re
 from pathlib import Path
 
 import matplotlib
@@ -29,32 +29,32 @@ SSN = 50.0 + np.arange(MONTHS.size)  # month i after 2000-01 has SSN 50 + i
 STD = 2.0
 
 
-def silso_m13():
-    """The chosen series as SILSO writes it (year; month; frac; ssn; std; n; def)."""
+def silso_m13(ssn=SSN):
+    """``ssn`` as SILSO writes it (year; month; frac; ssn; std; n; def)."""
     return "".join(
         f"{t.year};{t.month:02d};{t.year + (t.month - 0.5) / 12:.3f};"
         f"{s:6.1f};{STD:5.1f};  100;1\n"
-        for t, s in zip(MONTHS, SSN)
+        for t, s in zip(MONTHS, ssn)
     )
 
 
 @pytest.fixture
 def sidc(tmp_path, monkeypatch):
-    """A real ``SIDC("m13")`` downloaded from a local SILSO file.
+    """A real ``SIDC("m13")`` downloaded from a local SILSO file of ``SSN``."""
+    return sidc_from_silso(tmp_path, monkeypatch, SSN)
 
-    ``DataLoader`` reads the cache date from an 8-digit run anywhere in the
-    cache's absolute path, so a ``tmp_path`` that holds one would be misread.
+
+def sidc_from_silso(tmp_path, monkeypatch, ssn):
+    """A real ``SIDC("m13")`` downloaded from a local SILSO file of ``ssn``.
+
+    Build one per test: a second ``SIDC("m13")`` under the same cache reads
+    the fresh cached copy instead of the new file.
     """
-    if re.search(r"\d{8}", str(tmp_path)):
-        pytest.skip(f"tmp_path contains an 8-digit run: {tmp_path}")
-    home = tmp_path / "home"
-    home.mkdir()
     remote = tmp_path / "remote"
     remote.mkdir()
-    (remote / "snmstotcsv.php").write_text(silso_m13())
+    (remote / "snmstotcsv.php").write_text(silso_m13(ssn))
 
     base = remote.as_uri() + "/"
-    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
     monkeypatch.setattr(SIDC_ID, "_url_base", property(lambda self: base))
     return SIDC("m13")
 
@@ -203,16 +203,87 @@ def test_date_ticks_are_labelled_by_year(sidc):
     assert formatter(june_2005) == "2005"
 
 
-def test_ssn_axis_spans_zero_to_two_hundred(sidc):
-    """The SSN plot fixes its y range to 0-200 whatever the data span.
+def test_ssn_axis_of_a_peak_between_100_and_200_spans_zero_to_200(sidc):
+    """A series peaking between 100 and 200 gets an SSN range of 0-200.
 
-    Chosen input: the series peaks at SSN 169, below the upper limit.
+    Chosen input: the series peaks at SSN 169, which rounds up to 200.
 
-    ON FAILURE: the code is wrong, unless the author changed the SSN range.
+    ON FAILURE: the code is wrong.
     """
     fig, ax = plt.subplots()
     SSNPlot(sidc).make_plot(ax)
     assert ax.get_ylim() == (0.0, 200.0)
+
+
+# An active series peaking above 200 (cycle 19 peaked near 285) and a quiet
+# one peaking below 100. A peak between 100 and 200 cannot tell a fixed 0-200
+# range from the round-up rule.
+ACTIVE_SSN = 2.0 * SSN
+QUIET_SSN = SSN / 4.0
+
+
+def test_the_rule_fixtures_bracket_the_old_fixed_range():
+    """The active series peaks above 200 and the quiet one below 100.
+
+    ON FAILURE: the fixtures no longer separate the round-up rule from a
+    fixed 0-200 range; fix the fixtures.
+    """
+    assert ACTIVE_SSN.max() > 200
+    assert QUIET_SSN.max() < 100
+
+
+def test_ssn_axis_tops_an_active_series_at_its_peak_rounded_up_to_100(
+    tmp_path, monkeypatch
+):
+    """An SSN plot's y range starts at 0 and tops the peak at the next 100.
+
+    The top is a multiple of 100, at or above the plotted peak, and less
+    than 100 above it, so no part of a strong cycle is clipped.
+
+    ON FAILURE: the code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, ACTIVE_SSN)
+    plot = SSNPlot(indicator)
+    fig, ax = plt.subplots()
+    plot.make_plot(ax)
+
+    bottom, top = ax.get_ylim()
+    peak = plot.plot_data.max()
+    assert bottom == 0
+    assert top % 100 == 0
+    assert peak <= top < peak + 100
+
+
+def test_ssn_axis_of_a_quiet_series_tops_at_100(tmp_path, monkeypatch):
+    """A series peaking below 100 gets the rule's floor, 0 to 100.
+
+    ON FAILURE: the code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, QUIET_SSN)
+    fig, ax = plt.subplots()
+    SSNPlot(indicator).make_plot(ax)
+
+    assert ax.get_ylim() == (0.0, 100.0)
+
+
+@pytest.mark.parametrize("ssn", [ACTIVE_SSN, QUIET_SSN], ids=["active", "quiet"])
+def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
+    """SSNPlot and ``SIDC.plot_on_colorbar`` scale the same series to one top.
+
+    ``plot_on_colorbar`` labels its scale top as the last major tick.
+
+    ON FAILURE: the two SSN scales have diverged. The code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, ssn)
+    fig, ax = plt.subplots()
+    SSNPlot(indicator).make_plot(ax)
+
+    cbar_fig, cax = plt.subplots()
+    index = indicator.data.index
+    indicator.plot_on_colorbar(cax, index[0], index[-1], vertical_cbar=True)
+    cbar_top = float(cax.xaxis.get_ticklabels()[-1].get_text())
+
+    assert ax.get_ylim()[1] == cbar_top
 
 
 @pytest.mark.parametrize("logx, logy", [(True, False), (False, True)])
@@ -247,18 +318,4 @@ def test_auto_path_is_built_from_class_labels_and_scales(sidc):
     assert plot.path == expected
 
     plot.set_log(y=True)
-    plot.set_path("auto")
     assert plot.path == expected.with_name("linX-logY")
-
-
-def test_explicit_path_is_used_with_or_without_scales(sidc):
-    """An explicit path is kept, with the scale suffix only when asked.
-
-    ON FAILURE: the code is wrong.
-    """
-    plot = SSNPlot(sidc)
-    plot.set_path("figures/ssn")
-    assert plot.path == Path("figures", "ssn", "linX-linY")
-
-    plot.set_path("figures/ssn", add_scale=False)
-    assert plot.path == Path("figures", "ssn")

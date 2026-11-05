@@ -32,8 +32,65 @@ __all__ = [
 ]
 
 import logging
+import os
+import warnings
+
 import numpy as np
 import pandas as pd
+
+# Every frame whose file lies under the package directory is skipped by _warn.
+# Not resolved: a frame's filename keeps the path the package was imported by.
+_PACKAGE_PREFIX = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + os.sep
+
+
+def _warn(message, category=UserWarning):
+    """Issue ``message`` as ``category``, attributed to the caller outside the package.
+
+    A warning names the file and line that triggered it, and a ``-W`` filter
+    matches on that module. Every warning SolarWindPy issues goes through
+    here, which names the first frame outside the package directory, so the
+    user sees their own line however deeply the package nested the call; a
+    hand-counted ``stacklevel`` breaks whenever the call depth changes.
+
+    It lives in this bottom-layer module so the layers in ``pyproject.toml``
+    let every subpackage but :mod:`solarwindpy.core`, this module's
+    independent sibling, import it.
+
+    Parameters
+    ----------
+    message : str
+        The warning text.
+    category : type of Warning, optional
+        The warning class. Default :class:`UserWarning`.
+    """
+    warnings.warn(message, category, skip_file_prefixes=(_PACKAGE_PREFIX,))
+
+
+def _check_core_dominates(data):
+    """Raise unless ``n_p2 / n_p1 <= 1`` on every row where the ratio is defined.
+
+    The post-condition of :func:`swap_protons`: after the swap the core (p1) is at
+    least as dense as the beam (p2). Rows whose ratio is NaN (either density NaN,
+    or both 0) are skipped, as they are by the swap itself.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Frame with ``("n", "", "p1")`` and ``("n", "", "p2")`` columns.
+
+    Raises
+    ------
+    AssertionError
+        If any row has ``n_p2 > n_p1``.
+    """
+    ratio = data.loc[:, ("n", "", "p2")].divide(data.loc[:, ("n", "", "p1")], axis=0)
+    bad = ratio.dropna() > 1.0
+    if bad.any():
+        raise AssertionError(
+            "n_p2 > n_p1 after swapping protons at index {}".format(
+                list(bad.index[bad])
+            )
+        )
 
 
 def swap_protons(data, logger=None):
@@ -100,10 +157,7 @@ def swap_protons(data, logger=None):
     # restore the caller's (M, C, S) so the output can be swapped again.
     new_data.columns = new_data.columns.set_names(data.columns.names)
 
-    chk = new_data.loc[:, ("n", "", "p2")].divide(
-        new_data.loc[:, ("n", "", "p2")], axis=0
-    )
-    assert (chk.dropna() <= 1.0).all()
+    _check_core_dominates(new_data)
 
     if logger is None:
         logger = logging.getLogger("main.{}".format(__name__))

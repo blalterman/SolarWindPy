@@ -22,6 +22,10 @@ perpendicular component, because one component alone does not describe the
 distribution. The field strength in
 :py:meth:`~solarwindpy.core.plasma.Plasma.afsq` needs all three field
 components.
+The rule covers every vector and tensor in ``solarwindpy.core``,
+:py:class:`~solarwindpy.core.spacecraft.Spacecraft` included, so a magnitude,
+a component sum or a dot product is NaN wherever one of its components is
+missing.
 
 Across species
 --------------
@@ -29,24 +33,24 @@ Across species
 A total over species, such as ``"a+p1"``, uses the species present at that time.
 It is NaN only when no species is present. Protons measured without alphas still
 give a total density, temperature and pressure. Weighted means, such as the
-center-of-mass velocity (:py:meth:`~solarwindpy.core.plasma.Plasma.velocity`)
+center-of-mass velocity (:py:meth:`~solarwindpy.core.plasma.Plasma.v`)
 and the electron velocity
 (:py:meth:`~solarwindpy.core.plasma.Plasma.estimate_electrons`), likewise
 average over the species present.
 
 A quantity built from a pair of species needs both. The combined thermal speed
 and the mass-density ratio in :py:meth:`~solarwindpy.core.plasma.Plasma.nuc`,
-and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdynamic`, are
+and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdv`, are
 NaN at a time when either species is missing.
 
 Thermal speeds do not add across species, so
-:py:meth:`~solarwindpy.core.plasma.Plasma.thermal_speed` raises for a total such
+:py:meth:`~solarwindpy.core.plasma.Plasma.w` raises for a total such
 as ``"a+p1"``. Only temperatures and pressures form totals.
 
 The two levels
 --------------
 
-For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.temperature`),
+For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.T`),
 ``ok`` marks a measured value present and ``NaN`` one missing. A species missing
 either component is masked as a whole at that time, so its result there is NaN:
 

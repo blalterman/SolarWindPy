@@ -15,7 +15,7 @@ class BetaRPlot(Hist2D):
     ----------
     beta : pandas.Series
         Proton parallel beta.
-    ani : pandas.Series
+    R : pandas.Series
         Temperature anisotropy.
     species : str
         Label used to generate axis titles.
@@ -31,35 +31,36 @@ class BetaRPlot(Hist2D):
     >>> import matplotlib.pyplot as plt
     >>> rng = np.random.default_rng(0)
     >>> beta = pd.Series(10.0 ** rng.uniform(-1, 1, 500), name="beta")
-    >>> ani = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="ani")
-    >>> br = BetaRPlot(beta, ani, "p")
-    >>> ax, cbar = br.make_plot()
+    >>> R = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="R")
+    >>> br = BetaRPlot(beta, R, "p")
+    >>> ax, mesh, cbar = br.make_plot()
     >>> ax.get_xscale(), ax.get_yscale()
     ('log', 'log')
     >>> plt.close("all")
     """
 
-    def __init__(self, beta, ani, species, **kwargs):
+    def __init__(self, beta, R, species, **kwargs):
         """Instantiate the histogram plot.
 
         Parameters
         ----------
         beta : pandas.Series
             Proton parallel beta.
-        ani : pandas.Series
+        R : pandas.Series
             Temperature anisotropy.
         species : str
-            Label used to generate axis titles.
+            Species of the axis labels, as given: a fit species such as
+            ``"p_bimax"`` names its fit model.
         **kwargs
             Additional options forwarded to
             :class:`~solarwindpy.plotting.hist2d.Hist2D`, e.g. ``nbins``,
             which may be a ``BinnedData`` holding columns named like ``beta``
-            and ``ani``, and ``mask``. ``logx`` and ``logy`` default to True,
+            and ``R``, and ``mask``. ``logx`` and ``logy`` default to True,
             or, with a ``BinnedData``, to its settings for those columns.
         """
 
         x = beta
-        y = ani
+        y = R
 
         # A shared BinnedData sets the log of its columns; see Hist2D.
         default = None if isinstance(kwargs.get("nbins"), BinnedData) else True
@@ -68,13 +69,9 @@ class BetaRPlot(Hist2D):
 
         super(BetaRPlot, self).__init__(x, y, logx=logx, logy=logy, **kwargs)
         self.set_labels(
-            x=TeXlabel(("beta", "par", species.replace("_bimax", ""))),
-            y=TeXlabel(
-                ("R", "P" if "+" in species else "T", species.replace("_bimax", ""))
-            ),
+            x=TeXlabel(("beta", "par", species)),
+            y=TeXlabel(("R", "P" if "+" in species else "T", species)),
         )
-
-        self.set_path("auto")
         self.set_clim(5, None)
 
     def make_plot(self, **kwargs):
@@ -89,10 +86,10 @@ class BetaRPlot(Hist2D):
         -------
         matplotlib.axes.Axes
             Axis containing the plot.
-        matplotlib.colorbar.Colorbar
-            Colorbar associated with the plot.
+        matplotlib.collections.QuadMesh
+            The histogram's cells.
+        matplotlib.colorbar.Colorbar or None
+            Colorbar associated with the plot, or None with ``cbar=False``.
         """
         cmap = kwargs.pop("cmap", "Greens_r")
-        ax, cbar = super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)
-
-        return ax, cbar
+        return super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)

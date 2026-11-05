@@ -10,8 +10,8 @@ def test_timedelta_latex_and_path():
     td = datetime_labels.Timedelta("2h")
     assert str(td.path) in ("dt-2h", "dt-2H")
     assert str(td) in (
-        "$\\Delta t \\; [2 \\; \\mathrm{h}]$",
-        "$\\Delta t \\; [2 \\; \\mathrm{H}]$",
+        "$\\Delta t \\; \\left[2 \\; \\mathrm{h}\\right]$",
+        "$\\Delta t \\; \\left[2 \\; \\mathrm{H}\\right]$",
     )
 
 
@@ -84,9 +84,9 @@ class TestTimedelta:
         for offset in test_cases:
             td = datetime_labels.Timedelta(offset)
             # Offset is a pandas DateOffset object with freqstr attribute
-            assert hasattr(
-                td.offset, "freqstr"
-            ), f"offset should be DateOffset for '{offset}'"
+            assert hasattr(td.offset, "freqstr"), (
+                f"offset should be DateOffset for '{offset}'"
+            )
             assert isinstance(td.path, Path)
             assert r"\Delta t" in td.tex
 

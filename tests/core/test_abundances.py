@@ -164,9 +164,9 @@ class TestDataLoading:
         ON FAILURE: the code is wrong.
         """
         ref = ReferenceAbundances()
-        assert isinstance(
-            ref.data, pd.DataFrame
-        ), f"Expected pd.DataFrame, got {type(ref.data).__name__}"
+        assert isinstance(ref.data, pd.DataFrame), (
+            f"Expected pd.DataFrame, got {type(ref.data).__name__}"
+        )
 
 
 # =============================================================================
@@ -207,9 +207,9 @@ class TestDataStructure:
         ON FAILURE: the code is wrong.
         """
         idx = ref.data.index
-        assert isinstance(
-            idx, pd.MultiIndex
-        ), f"Expected MultiIndex, got {type(idx).__name__}"
+        assert isinstance(idx, pd.MultiIndex), (
+            f"Expected MultiIndex, got {type(idx).__name__}"
+        )
         assert list(idx.names) == [
             "Z",
             "Symbol",
@@ -229,12 +229,12 @@ class TestDataStructure:
 
         ON FAILURE: the code is wrong.
         """
-        assert isinstance(
-            ref.data.columns, pd.MultiIndex
-        ), f"Expected MultiIndex columns, got {type(ref.data.columns).__name__}"
-        assert (
-            ref.data.columns.nlevels >= 2
-        ), f"Expected at least 2 column levels, got {ref.data.columns.nlevels}"
+        assert isinstance(ref.data.columns, pd.MultiIndex), (
+            f"Expected MultiIndex columns, got {type(ref.data.columns).__name__}"
+        )
+        assert ref.data.columns.nlevels >= 2, (
+            f"Expected at least 2 column levels, got {ref.data.columns.nlevels}"
+        )
 
     def test_abundance_values_are_float64(self, ref):
         """``data`` columns are exactly (CI_chondrites, Photosphere) x (Ab, Uncert), all float64.
@@ -279,9 +279,9 @@ class TestDataStructure:
         ON FAILURE: the code is wrong.
         """
         z_values = ref.data.index.get_level_values("Z")
-        assert all(
-            isinstance(z, (int, np.integer)) for z in z_values
-        ), "Z values should be integers"
+        assert all(isinstance(z, (int, np.integer)) for z in z_values), (
+            "Z values should be integers"
+        )
 
     def test_z_range_is_1_to_92(self, ref):
         """Z values range from 1 (H) to 92 (U).
@@ -307,9 +307,9 @@ class TestColumnNaming:
         ON FAILURE: the code is wrong.
         """
         top_level = ref.data.columns.get_level_values(0).unique().tolist()
-        assert (
-            "CI_chondrites" in top_level
-        ), f"'CI_chondrites' not in columns: {top_level}"
+        assert "CI_chondrites" in top_level, (
+            f"'CI_chondrites' not in columns: {top_level}"
+        )
 
     def test_photosphere_in_columns(self, ref):
         """'Photosphere' is a top-level column.
@@ -382,9 +382,9 @@ class TestCommentsColumn:
         table comment.
         """
         comment = ref.get_comment(symbol)
-        assert (
-            comment == expected_comment
-        ), f"{symbol} comment: expected '{expected_comment}', got '{comment}'"
+        assert comment == expected_comment, (
+            f"{symbol} comment: expected '{expected_comment}', got '{comment}'"
+        )
 
     # Comments column blank for these in Asplund+2021 Table 2,
     # doi:10.1051/0004-6361/202140445
@@ -563,9 +563,9 @@ class TestMissingPhotosphereData:
         table's blank cell.
         """
         element = ref.get_element(symbol, kind="Photosphere")
-        assert np.isnan(
-            element.Ab
-        ), f"{symbol} photosphere Ab should be NaN, got {element.Ab}"
+        assert np.isnan(element.Ab), (
+            f"{symbol} photosphere Ab should be NaN, got {element.Ab}"
+        )
 
     @pytest.mark.parametrize("symbol", ELEMENTS_WITHOUT_PHOTOSPHERE[:5])
     def test_missing_photosphere_has_ci_chondrites(self, ref, symbol):
@@ -616,9 +616,9 @@ class TestValueValidation:
         expected = ASPLUND_DATA[symbol]
         element = ref.get_element(symbol, kind="Photosphere")
 
-        assert isinstance(
-            element, pd.Series
-        ), f"Expected pd.Series, got {type(element).__name__}"
+        assert isinstance(element, pd.Series), (
+            f"Expected pd.Series, got {type(element).__name__}"
+        )
         assert element.shape == (2,), f"Expected shape (2,), got {element.shape}"
         assert element.Ab == exact(expected.photosphere_ab)
         assert element.Uncert == exact(expected.photosphere_uncert)
@@ -748,9 +748,9 @@ def test_module_exports_referenceabundances():
     """
     from solarwindpy.core import abundances
 
-    assert (
-        "ReferenceAbundances" in abundances.__all__
-    ), "ReferenceAbundances not in __all__"
+    assert "ReferenceAbundances" in abundances.__all__, (
+        "ReferenceAbundances not in __all__"
+    )
 
 
 def test_module_exports_abundance_namedtuple():

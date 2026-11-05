@@ -4,16 +4,21 @@ __all__ = [
     "ICMECAT_URL",
     "SPACECRAFT_NAMES",
     "ICMECATDownloadError",
+    "ICMECATWarning",
+    "ICMECATVersionWarning",
+    "ICMECATNotHostedWarning",
+    "ICMECATSpacecraftWarning",
     "ICMECAT",
 ]
 
 import logging
-import time
-import warnings
+import re
 import pandas as pd
 import numpy as np
-from pathlib import Path
 from typing import Optional
+
+from ...tools import _warn
+from .. import cache
 
 #: Download URL of the pinned HELIO4CAST ICMECAT release, v23.
 ICMECAT_URL = (
@@ -21,10 +26,14 @@ ICMECAT_URL = (
 )
 
 _PINNED_VERSION = "v23"
-_CACHE_MAX_AGE_DAYS = 30
-# The cache is CSV, the format the catalog downloads in, so caching needs no
-# dependency beyond pandas (parquet would need an undeclared engine).
-_CACHE_FILENAME = "icmecat.csv"
+# HELIO4CAST hosts one ICMECAT version at a time, so when the pinned one is
+# gone (HTTP 404) this many later versions are tried in turn.
+_N_PROBED_VERSIONS = 5
+_ICMECAT_PAGE = "https://helioforecast.space/icmecat"
+_VERSION_IN_URL = re.compile(r"_v(\d+)\.csv$")
+# Freshness window: a cached catalog younger than this is used without
+# downloading (see solarwindpy.solar_activity.cache).
+_MAX_AGE = pd.Timedelta(days=30)
 
 # The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
 # ACE and Cassini were previously (and wrongly) included: both have zero
@@ -64,8 +73,46 @@ the road. As of January 2026, they are:
 """
 
 
-class ICMECATDownloadError(RuntimeError):
-    """Raised when the ICMECAT catalog cannot be downloaded from HELIO4CAST."""
+class ICMECATDownloadError(cache.DownloadError):
+    """Raised when the ICMECAT catalog cannot be downloaded and none is cached."""
+
+
+class ICMECATWarning(UserWarning):
+    """Base class of the warnings ICMECAT issues about the catalog it loaded."""
+
+
+class ICMECATVersionWarning(ICMECATWarning):
+    """Warns that the pinned ICMECAT version is gone and a later one was loaded."""
+
+
+class ICMECATNotHostedWarning(ICMECATWarning):
+    """Warns that neither the pinned ICMECAT version nor any probed successor is hosted."""
+
+
+class ICMECATSpacecraftWarning(ICMECATWarning):
+    """Warns that the catalog names spacecraft outside ``SPACECRAFT_NAMES``."""
+
+
+def _version_of(url):
+    """The ``vNN`` version token in an ICMECAT URL, or None if it has none."""
+    match = _VERSION_IN_URL.search(url)
+    return None if match is None else f"v{match.group(1)}"
+
+
+def _successor_urls(url):
+    """The URLs of the ``_N_PROBED_VERSIONS`` versions after the one in ``url``.
+
+    Empty when ``url`` names no version, e.g. a local file.
+    """
+    match = _VERSION_IN_URL.search(url)
+    if match is None:
+        return []
+    pinned = int(match.group(1))
+    head = url[: match.start()]
+    return [
+        f"{head}_v{version}.csv"
+        for version in range(pinned + 1, pinned + 1 + _N_PROBED_VERSIONS)
+    ]
 
 
 class ICMECAT:
@@ -74,6 +121,22 @@ class ICMECAT:
     See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog's
     citation and co-authorship terms.
 
+    The downloaded catalog is kept in SolarWindPy's download cache
+    (:mod:`solarwindpy.solar_activity.cache`, by default
+    ``~/.cache/solarwindpy``) and downloaded again once it is more than 30
+    days old. If that download fails, the cached catalog is used with a
+    :class:`~solarwindpy.solar_activity.cache.StaleCacheWarning`.
+
+    HELIO4CAST hosts one catalog version at a time. If the pinned version,
+    v23, answers HTTP 404, the next five versions (v24 to v28) are tried in
+    turn and the first one hosted is loaded with an
+    :class:`ICMECATVersionWarning`: its layout may differ from v23's, and
+    ``ICMECAT_URL`` should be updated. If none is hosted, an
+    :class:`ICMECATNotHostedWarning` is issued and the cached v23 is used, or
+    :class:`ICMECATDownloadError` raised when there is none. Any other
+    failure (no connection, a timeout, a server error) never starts or
+    continues that probe; it falls back to the cache as above.
+
     Parameters
     ----------
     spacecraft : str, optional
@@ -81,9 +144,6 @@ class ICMECAT:
         Valid names are the ``SPACECRAFT_NAMES`` values, matched
         case-insensitively: BepiColombo, Juno, MAVEN, MESSENGER, PSP,
         SolarOrbiter, STEREO-A, STEREO-B, ULYSSES, VEX, Wind.
-    cache_dir : Path, optional
-        Directory for caching downloaded data, saved as ``icmecat.csv``
-        (the format the catalog downloads in). If None, no caching.
 
     Attributes
     ----------
@@ -97,6 +157,9 @@ class ICMECAT:
         ``mo_end_time`` is missing.
     spacecraft : str or None
         Spacecraft filter applied (None if full catalog).
+    version : str or None
+        Catalog version loaded, e.g. ``"v23"``; None if the catalog was read
+        from a URL or path that names no version.
 
     Examples
     --------
@@ -143,14 +206,9 @@ class ICMECAT:
     [True, False]
     """
 
-    def __init__(
-        self,
-        spacecraft: Optional[str] = None,
-        cache_dir: Optional[Path] = None,
-    ):
+    def __init__(self, spacecraft: Optional[str] = None):
         self._init_logger()
         self._spacecraft = spacecraft
-        self._cache_dir = Path(cache_dir) if cache_dir else None
         self._data: Optional[pd.DataFrame] = None
         self._intervals: Optional[pd.DataFrame] = None
 
@@ -174,6 +232,11 @@ class ICMECAT:
     def spacecraft(self) -> Optional[str]:
         """Spacecraft filter applied, or None if full catalog."""
         return self._spacecraft
+
+    @property
+    def version(self) -> Optional[str]:
+        """Catalog version loaded, e.g. ``"v23"``, or None if its URL names none."""
+        return self._version
 
     @property
     def data(self) -> pd.DataFrame:
@@ -218,81 +281,87 @@ class ICMECAT:
     # -------------------------------------------------------------------------
 
     def _load_data(self) -> None:
-        """Load ICMECAT data, applying the cache freshness policy.
+        """Load ICMECAT through the download cache, probing later versions on a 404.
 
-        Freshness policy: a cache younger than ``_CACHE_MAX_AGE_DAYS`` is
-        used directly. Otherwise (or with no cache at all) a download is
-        attempted. If the download fails and a cache exists -- even a stale
-        one -- the stale cache is served rather than losing data the user
-        already has on disk, with a warning naming its age. If no cache
-        exists, the download error propagates.
+        A cached catalog younger than ``_MAX_AGE`` is used directly;
+        otherwise it is downloaded again. A 404 on ``ICMECAT_URL`` starts the
+        probe described in the class docstring. Any other failure uses the
+        cached copy with a warning naming its age (see
+        :func:`solarwindpy.solar_activity.cache.fall_back`). With nothing
+        cached, a failed download raises :class:`ICMECATDownloadError`.
         """
-        cached, age_days = self._read_cache()
-
-        if (
-            cached is not None
-            and age_days is not None
-            and age_days <= _CACHE_MAX_AGE_DAYS
-        ):
-            self._data = cached
-            self.logger.info("Loaded from cache: %d events", len(self._data))
-            return
-
+        url = ICMECAT_URL
         try:
-            self._download()
-        except ICMECATDownloadError:
-            if cached is None:
-                raise
-            message = (
-                f"ICMECAT download failed, serving cached data that is "
-                f"{age_days:.0f} days old."
-            )
-            warnings.warn(message)
-            self.logger.warning(message)
-            self._data = cached
-
-    def _read_cache(self) -> "tuple[Optional[pd.DataFrame], Optional[float]]":
-        """Read the on-disk cache with no freshness policy applied.
-
-        Returns
-        -------
-        tuple
-            ``(df, age_days)``, both ``None`` if there is no cache directory
-            configured or no cache file present.
-        """
-        if self._cache_dir is None:
-            return None, None
-
-        cache_path = self._cache_dir / _CACHE_FILENAME
-        if not cache_path.exists():
-            return None, None
-
-        age_days = (time.time() - cache_path.stat().st_mtime) / 86400
-        return pd.read_csv(cache_path, parse_dates=_DATETIME_COLUMNS), age_days
-
-    def _download(self) -> None:
-        """Download ICMECAT from helioforecast.space."""
-        self.logger.info("Downloading ICMECAT from %s", ICMECAT_URL)
-
-        try:
-            self._data = pd.read_csv(ICMECAT_URL, parse_dates=_DATETIME_COLUMNS)
-        except Exception as exc:
+            try:
+                path = cache.fetch(url, _MAX_AGE, fallback=False)
+            except cache.DownloadError as exc:
+                path, url = self._after_failed_download(url, exc)
+        except cache.DownloadError as exc:
             raise ICMECATDownloadError(
                 f"Failed to download ICMECAT {_PINNED_VERSION} from {ICMECAT_URL}. "
-                f"Edit solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL) "
+                f"Edit solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL "
                 f"to point at a working catalog version, see "
-                f"https://helioforecast.space/icmecat for the current URL. "
-                f"Underlying error: {exc!r}"
+                f"{_ICMECAT_PAGE} for the current URL. "
+                f"Underlying error: {exc!r}",
+                status=exc.status,
             ) from exc
 
-        self.logger.info("Downloaded %d ICME events", len(self._data))
+        self._version = _version_of(url)
+        self._data = pd.read_csv(path, parse_dates=_DATETIME_COLUMNS)
+        self.logger.info("Loaded %d ICME events from %s", len(self._data), path)
+        self._warn_unknown_spacecraft()
 
-        # Save to cache if configured
-        if self._cache_dir is not None:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            cache_path = self._cache_dir / _CACHE_FILENAME
-            self._data.to_csv(cache_path, index=False)
-            self.logger.info("Cached to %s", cache_path)
+    def _after_failed_download(self, url, error):
+        """Return ``(path, url)`` of the catalog to read after ``url`` failed.
+
+        Probes the successor versions only when ``error`` is an HTTP 404;
+        a probe that meets anything but a 404 stops there. Otherwise falls
+        back to the cached ``url``.
+        """
+        if error.status != 404:
+            return cache.fall_back(url, error), url
+
+        for successor in _successor_urls(url):
+            try:
+                path = cache.fetch(successor, _MAX_AGE, fallback=False)
+            except cache.DownloadError as exc:
+                if exc.status == 404:
+                    continue
+                return cache.fall_back(url, exc), url
+            found = _version_of(successor)
+            _warn(
+                f"ICMECAT {_version_of(url)} is no longer hosted at {url}; "
+                f"loaded {found} from {successor} instead. SolarWindPy expects "
+                f"{_PINNED_VERSION}, and the {found} catalog layout may differ: "
+                f"update solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL "
+                f"and SPACECRAFT_NAMES to {found}.",
+                ICMECATVersionWarning,
+            )
+            return path, successor
+
+        successors = _successor_urls(url)
+        if successors:
+            _warn(
+                f"No ICMECAT from {_version_of(url)} to "
+                f"{_version_of(successors[-1])} is hosted at "
+                f"{url.rsplit('/', 1)[0]}/; see {_ICMECAT_PAGE} for the current "
+                f"catalog and update "
+                f"solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL.",
+                ICMECATNotHostedWarning,
+            )
+        return cache.fall_back(url, error), url
+
+    def _warn_unknown_spacecraft(self) -> None:
+        """Warn if the catalog names spacecraft outside ``SPACECRAFT_NAMES``."""
+        unknown = sorted(set(self._data["sc_insitu"].dropna()) - SPACECRAFT_NAMES)
+        if unknown:
+            _warn(
+                f"ICMECAT {self._version or ''} names spacecraft that "
+                f"SPACECRAFT_NAMES, written for {_PINNED_VERSION}, does not list: "
+                f"{unknown}. They load and filter normally; update "
+                f"solarwindpy.solar_activity.icme.icmecat.SPACECRAFT_NAMES.",
+                ICMECATSpacecraftWarning,
+            )
 
     # -------------------------------------------------------------------------
     # Filtering
@@ -345,7 +414,7 @@ class ICMECAT:
         new = object.__new__(ICMECAT)
         new._init_logger()
         new._spacecraft = spacecraft  # Keep user's original spelling for display
-        new._cache_dir = self._cache_dir
+        new._version = self._version
         new._data = self._data[self._data["sc_insitu"] == actual_name].copy()
         new._intervals = None
         new._prepare_intervals()

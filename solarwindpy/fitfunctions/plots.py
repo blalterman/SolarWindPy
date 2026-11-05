@@ -6,8 +6,6 @@ models, residuals and associated annotations.
 """
 
 __all__ = [
-    "AxesLabels",
-    "LogAxes",
     "FFPlot",
 ]
 
@@ -17,11 +15,9 @@ import numpy as np
 import matplotlib as mpl
 
 from pathlib import Path
-from collections import namedtuple
 from matplotlib import pyplot as plt
 
-AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
-LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
+from ..plotting.base import AxesLabels, LogAxes
 
 # The single source of FFPlot's default styles. Each plot method merges the
 # caller's normalised Line2D keywords over its entry, so a caller's keyword
@@ -76,7 +72,16 @@ class FFPlot(object):
     constructed directly.
     """
 
-    def __init__(self, observations, y_fit, TeX_info, fit_result, fitfunction_name=""):
+    def __init__(
+        self,
+        observations,
+        y_fit,
+        TeX_info,
+        fit_result,
+        fitfunction_name="",
+        *,
+        residuals_func,
+    ):
         """Container for plotting a :class:`~solarwindpy.fitfunctions.core.FitFunction`.
 
         Parameters
@@ -92,12 +97,18 @@ class FFPlot(object):
             Result object returned from the fitting routine.
         fitfunction_name : str, optional
             Name of the originating fit function.
+        residuals_func : callable
+            The originating fit function's
+            :meth:`~solarwindpy.fitfunctions.core.FitFunction.residuals`,
+            called as ``residuals_func(pct=pct)``. :meth:`residuals`
+            delegates to it, so the plot and the fit report one residual.
         """
 
         self.set_observations(observations, y_fit)
         self.set_TeX_info(TeX_info)
         self.set_fit_result(fit_result)
         self.set_fitfunction_name(fitfunction_name)
+        self._residuals_func = residuals_func
         self._log = LogAxes(x=False, y=False)
         self._labels = AxesLabels("x", "y")
 
@@ -225,12 +236,12 @@ class FFPlot(object):
             ax.set_xscale("log", nonpositive="clip")
 
         if pct:
-            ax.set_ylabel(r"$\mathrm{Residual} \; [\%]$")
+            ax.set_ylabel(r"$\mathrm{Residual} \; \left[\%\right]$")
             ax.set_yscale("symlog", linthresh=10)
             ax.set_ylim(-100, 100)
 
         else:
-            ax.set_ylabel(r"$\mathrm{Residual} \; [\#]$")
+            ax.set_ylabel(r"$\mathrm{Residual} \; \left[\#\right]$")
 
         x = self.observations.raw.x
         if x.size:
@@ -593,7 +604,11 @@ class FFPlot(object):
         return hax, rax
 
     def residuals(self, pct=False, robust=False):
-        r"""Calculate the fit residuals, model minus observation.
+        r"""Calculate the fit residuals, observed minus fitted.
+
+        Simple residuals are the fit function's
+        :meth:`~solarwindpy.fitfunctions.core.FitFunction.residuals` for the
+        observations used in the fit.
 
         Parameters
         ----------
@@ -601,8 +616,10 @@ class FFPlot(object):
             If True, express simple residuals as a percentage of the model.
             Where the model is zero the percent residual is NaN.
         robust : bool, default False
-            If True, return the fit result's residual vector ``fun``, in
-            units of the observation uncertainty.
+            If True, return the negated residual vector ``-fun`` of the fit
+            result, which ``least_squares`` forms as model minus observed in
+            units of the observation uncertainty. The negation gives robust
+            residuals the sign of the simple ones.
 
         Returns
         -------
@@ -621,17 +638,9 @@ class FFPlot(object):
                     "Robust residuals are in units of the observation "
                     "uncertainty and have no percent form; pass pct=False."
                 )
-            return np.asarray(self.fit_result.fun)
+            return -np.asarray(self.fit_result.fun)
 
-        y_fit_used = self.y_fit[self.observations.tk_observed]
-        r = y_fit_used - self.observations.used.y
-
-        if pct:
-            with np.errstate(divide="ignore", invalid="ignore"):
-                r = 100.0 * (r / y_fit_used)
-            r = np.where(y_fit_used == 0, np.nan, r)
-
-        return np.asarray(r)
+        return np.asarray(self._residuals_func(pct=pct))
 
     def set_labels(self, **kwargs):
         r"""Set or update x, y, or z labels.
@@ -650,7 +659,7 @@ class FFPlot(object):
         self._labels = AxesLabels(x, y, z)
 
     def set_log(self, **kwargs):
-        r"""Set :py:class:`LogAxes`.
+        r"""Set :py:class:`~solarwindpy.plotting.base.LogAxes`.
 
         Only used for determining if weights should be :math:`w/(y \ln(10))`.
         """

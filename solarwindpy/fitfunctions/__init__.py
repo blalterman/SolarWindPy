@@ -22,8 +22,8 @@ Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of
 :class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations
 enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,
 ``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few
-subclasses add their own, such as the ``guess_x0`` initial step position of
-:class:`~solarwindpy.fitfunctions.composite.GaussianTimesHeavySide`.
+subclasses add their own, such as the ``guess_xh`` hinge position that every
+subclass of :class:`~solarwindpy.fitfunctions.hinge.Hinge` takes.
 
 How a fit runs
 --------------
@@ -46,8 +46,15 @@ computes the optimized parameters, their covariance and
 - The covariance is the pseudo-inverse of :math:`J^T J` from the final
   Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square
   root of its diagonal.
-- With ``return_exception=True``, a failed fit returns the exception instead
-  of raising it, for loops over many fits.
+- ``results`` holds the outcome as one table: each parameter's value and
+  uncertainty, :math:`\chi^2_\nu`, :math:`R^2`, the observation counts and a
+  ``status``. A failed fit raises, but first records a row of NaN values whose
+  ``status`` names the exception, so a loop over many fits can catch the
+  exception and keep going.
+  Its columns are a MultiIndex with levels ``P`` (parameter, or the quality
+  measure's name) and ``K`` (kind: ``"value"``, ``"uncertainty"``,
+  ``"linear"``, ``"robust"`` or empty), as the plasma data's columns have
+  levels ``M``, ``C`` and ``S`` (measurement, component, species).
 - A fit that leaves parameters unconstrained warns
   :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, naming the
   degenerate pairs, which
@@ -74,11 +81,9 @@ in each bin of 2-D aggregated data and a second to the trend of the results.
 
 __all__ = [
     "available",
-    "composite",
     "core",
     "exponentials",
     "gaussians",
-    "heaviside",
     "hinge",
     "lines",
     "plots",
@@ -89,11 +94,9 @@ __all__ = [
 
 from inspect import isabstract
 
-from . import composite
 from . import core
 from . import exponentials
 from . import gaussians
-from . import heaviside
 from . import hinge
 from . import lines
 from . import plots

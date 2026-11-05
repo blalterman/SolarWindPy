@@ -29,7 +29,7 @@ from tests.tolerances import (
 TESTS = Path(__file__).resolve().parent
 HELPER = TESTS / "tolerances.py"
 
-# A keyword argument as black writes it: the name, then "=" with no space.
+# A keyword argument as the formatter writes it: the name, then "=" with no space.
 KEYWORD = re.compile(r"\b(?:rel|abs|rtol|atol)=(?!=)")
 
 

@@ -10,7 +10,7 @@ import pandas as pd
 from . import base
 
 
-class Tensor(base.Base):
+class Tensor(base._ComponentFrame):
     """Container for tensor-valued quantities.
 
     Parameters
@@ -31,26 +31,6 @@ class Tensor(base.Base):
         """
         super().__init__(data, _time_checked=_time_checked)
 
-    def __call__(self, component: str) -> pd.Series | pd.DataFrame:
-        """Access a specific component of the tensor.
-
-        Parameters
-        ----------
-        component : str
-            The name of the component to access.
-
-        Returns
-        -------
-        pd.Series | pd.DataFrame
-            The requested component data.
-
-        Raises
-        ------
-        AttributeError
-            If the component does not exist.
-        """
-        return self.__getattr__(component)
-
     def set_data(self, new: pd.DataFrame):
         """Set new tensor data.
 
@@ -64,8 +44,8 @@ class Tensor(base.Base):
         Raises
         ------
         ValueError
-            If ``new`` does not contain the required columns, or its time
-            index holds missing timestamps (``NaT``).
+            If ``new`` does not contain the required columns, holds more than
+            one species, or its time index holds missing timestamps (``NaT``).
         """
         new = self._put_in_time_order_unless_checked(new)
         super().set_data(new)
@@ -92,7 +72,7 @@ class Tensor(base.Base):
             raise ValueError(f"Missing required columns: {missing_columns.tolist()}")
 
     @property
-    def magnitude(self) -> pd.Series:
+    def mag(self) -> pd.Series:
         r"""Scalar magnitude of a thermal-speed tensor.
 
         Returns
@@ -111,6 +91,8 @@ class Tensor(base.Base):
         This is the combination ``Plasma`` uses for the stored ``scalar`` thermal
         speed; the ``scalar`` column itself is not read.
         """
-        par = self.data.loc[:, "par"]
-        per = self.data.loc[:, "per"]
-        return par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+        par = self("par")
+        per = self("per")
+        mag = par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+        mag.name = "mag"
+        return mag

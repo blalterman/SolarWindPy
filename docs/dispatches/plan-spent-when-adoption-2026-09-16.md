@@ -71,17 +71,38 @@ mixture of current and stale with nothing marking which is which, the repairs en
 staleness rather than removing it, and they do so invisibly: the result passes every check it
 can run on itself.
 
-That is the whole argument for full coverage rather than a governed subset. A partially
-declared repository hands the next session a surface where some claims are checked and some
-are not, and offers no way to tell them apart. The declaration is what makes the difference
-legible.
+This plan first argued for full coverage, every tracked file declared, on the ground that a
+partially declared repository offers no way to tell checked claims from unchecked ones. That
+100% target is superseded by G* below. Full coverage would put declarations into the modules
+the package ships, where a purge condition has no meaning: a user who installs SolarWindPy
+cannot reap a module, and a header in an installed file is noise in the published record. The
+author ruled the two package modules that carried headers clean of them, and
+`tests/test_package_module_headers.py` now fails on any such header, which makes the old
+target untestable as written. What stays legible under G* is the boundary itself: a file is a
+purge subject exactly when it is a development artifact, and that is decidable from its path.
 
 **The seam this preserves.** A session determines whether a condition holds. The author
 decides whether a file is removed. The tooling proposes; it has no path that removes.
 
+## Scope: development artifacts (G*)
+
+- **G\*.** Package modules under `solarwindpy/` are not purge subjects and carry no
+  Spent-When. `tests/test_package_module_headers.py` enforces this.
+- **Where markers belong.** Development artifacts: docs, dispatches, plans, notes and tests.
+- **What ships.** The wheel ships only `solarwindpy`; the sdist prunes `.claude/`, `.github/`,
+  `docs/dispatches/` and `tmp/` (`MANIFEST.in`). `tests/test_release_artifacts.py`, and
+  `scripts/check_release_artifacts.py` run from `.github/workflows/publish.yml`, check this.
+- **Shipped transitional code.** A shim or migration path in the package carries no
+  declaration. It raises a `DeprecationWarning` that names its removal version, and a test
+  fails once the package reaches that version. The version tag, derived by `setuptools_scm`,
+  is the shared clock.
+
 ## Starting state
 
-Every number below is re-derivable by the command beside it. Re-derive rather than trust.
+The table records the state this plan was first measured against, before Phase 1; it is the
+baseline Phase 1's criteria compare to. Re-derive the current state with the same commands
+rather than trust it, and count coverage against development artifacts, not every tracked
+file.
 
 | Quantity | Value | Command |
 |---|---|---|
@@ -96,7 +117,9 @@ Every number below is re-derivable by the command beside it. Re-derive rather th
 The repository is in corpus: `in_corpus()` returns `True` for a path under this root, and the
 root appears on no exclusion list. The `Write` and `git commit` gates therefore already fire
 here, and every one of the 400 undeclared files is a defect under R5.1b rather than a neutral
-absence. This plan works a backlog that already exists; it does not opt in to one.
+absence. This plan works a backlog that already exists; it does not opt in to one. Under G*
+the package modules are exempt from that backlog, but the Write gate cannot yet be told so;
+the plugin work in the last phase closes that gap.
 
 ## The tooling, and where authority over it lives
 
@@ -123,7 +146,11 @@ moment the spec moved.
 
 ## Phases
 
-### Phase 1 — Reap the residue
+### Phase 1 — Reap the residue (landed)
+
+Landed: the retired `plans/` tree and `.claude/docs` subtrees, and the build logs, `.old` file
+and `.DS_Store`, are out of the tracked tree, and `git log --diff-filter=D` records their
+removal. The text below is the phase as planned.
 
 About 100 tracked files record a session that has ended and inform no execution: the
 `.claude/compaction-*.md` set, the six committed `docs/*build*.log` files, the two coverage
@@ -166,6 +193,10 @@ home for a fact makes two authorities on it.
 
 ### Phase 3 — Declare the 49 sidecar files and the 2 percent-carriers
 
+Under G* this phase covers only the development artifacts among these files. A file the wheel
+ships, such as package data under `solarwindpy/`, takes no sidecar. Re-run the carrier census
+before starting, because Phase 1 removed part of the population counted here.
+
 These are the judged cases, and each earns its sidecar for one of three mechanical reasons:
 the bytes cannot hold a declaration, a consumer is changed by one, or the syntax has nowhere
 to put it that is not content.
@@ -198,19 +229,18 @@ each membership list before it is written. Candidates: `tests/data/*.csv` as one
 - [ ] No file resolves a declaration by more than one carrier.
 - [ ] Every `.spent-group` membership list was read and approved by the author before writing.
 
-### Phase 4 — Declare the 349 inline carriers
+### Phase 4 — Declare the inline carriers among development artifacts
 
-218 hash carriers (`.py`, `.sh`, `.yml`, `.yaml`, `.toml`, `.cfg`, `.ini`) and 131 html
-carriers (`.md`, `.html`).
+As planned this phase declared all 349 inline carriers, 218 hash carriers (`.py`, `.sh`,
+`.yml`, `.yaml`, `.toml`, `.cfg`, `.ini`) and 131 html carriers (`.md`, `.html`), with most
+source modules declaring `PERMANENT`. G* removes the package modules from it: no file under
+`solarwindpy/` is declared. What remains is tests, docs, dispatches, plans, notes, and
+repository tooling and configuration outside the package.
 
-Most source modules will declare `PERMANENT`, and each still owes a real reversal: R3.2
-requires a permanent file to state what would end its permanence, so permanence stays
-falsifiable rather than becoming a default. `PERMANENT(the Plasma class is removed from the
-public API)` records a decision; `PERMANENT(this file is permanent)` records none.
-
-Work the tree in dependency order — `core`, then `plotting`, `fitfunctions`,
-`solar_activity`, `instabilities`, `tools` — so the reversal condition for a module is written
-after the modules it depends on are understood.
+Each `PERMANENT` declaration still owes a real reversal: R3.2 requires a permanent file to
+state what would end its permanence, so permanence stays falsifiable rather than becoming a
+default. `PERMANENT(the repository stops maintaining a test suite)` records a decision;
+`PERMANENT(this file is permanent)` records none.
 
 The `.claude/` and `plans/` markdown carries the largest share of the html set and the
 weakest claim to permanence. Files describing a workflow that no longer runs are Phase 1
@@ -218,9 +248,12 @@ candidates a second pass will surface.
 
 **Acceptance criteria**
 
-- [ ] Declaration coverage reaches 100%: the count of files carrying a declaration equals
-      `git ls-files | wc -l`. *Positive control:* the coverage report names its denominator,
-      so a truncated scan reads `COVERAGE N of M` rather than appearing clean.
+- [ ] Every tracked development artifact carries a declaration, and no tracked file under
+      `solarwindpy/` does. The denominator is `git ls-files` minus the package tree, stated in
+      the report. *Positive control:* the coverage report names its denominator, so a
+      truncated scan reads `COVERAGE N of M` rather than appearing clean, and
+      `tests/test_package_module_headers.py` fails on a scratch header added to a package
+      module.
 - [ ] No declaration reads `PERMANENT` with a reversal that restates permanence, and none
       hedges between two futures. A declaration hedging between futures is a declaration not
       yet made.
@@ -233,6 +266,12 @@ candidates a second pass will surface.
 
 The declarations that unlock the three downstream tasks. Each pins a fact about the world and
 currently states no condition for revisiting it.
+
+Under G* the rows naming files the wheel ships (`icmecat.py`, `ssn_extrema.csv`,
+`asplund2021.csv`) cannot carry their declaration in the file. Where each one's condition
+lives instead is an open design question for the author. A version-tag member (below) or a
+test outside the package are the candidates. The configuration rows sit outside the package
+and are declared as planned.
 
 | Artifact | The pinned fact | The event that ends it |
 |---|---|---|
@@ -258,6 +297,26 @@ declaration.
       is either filled or declared with the event that fills it.
 - [ ] One lockfile is named canonical in `docs/objectives-and-requirements.md`, and the others
       declare their relationship to it.
+
+### Phase 5b — Plugin work in `ai-session-mgmt`
+
+The next phase. G* needs two capabilities the `session` plugin does not have yet, and they are
+built in the `ai-session-mgmt` repository, not here.
+
+1. A Spent-When member tied to a release tag: spent once a tag `>= vX.Y` exists. It lets a
+   development artifact share the clock that shipped transitional code already keys on.
+2. Per-repo exempt-path globs for the Write hook, for example `solarwindpy/**/*.py`, so the
+   gate stops treating an undeclared package module as a defect. The issuer's member paths
+   refuse globs, so the exemption cannot be written as a declaration and needs its own setting.
+
+**Acceptance criteria**
+
+- [ ] A declaration using the release-tag member validates, and `spent_due.py` reports it
+      NOT-YET before the tag exists and SPENT after. *Positive control:* the same check against
+      an existing SolarWindPy tag reports SPENT.
+- [ ] With SolarWindPy's exempt glob configured, writing an undeclared `solarwindpy/` module
+      passes the Write hook, and writing an undeclared file under `docs/dispatches/` is still
+      refused.
 
 ### Phase 6 — Wire the sweep and hand off
 
@@ -289,5 +348,5 @@ a verdict.
 
 ## What this plan does not do
 
-It does not repair a dependency, a test, or a document. Those are the three tasks this unlocks,
+It does not repair a dependency, a test, or a document. Those are the three tasks it prepares for,
 and each gets its own dispatch once the facts they consume are declared and auditable.

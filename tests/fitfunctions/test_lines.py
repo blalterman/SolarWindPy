@@ -11,6 +11,7 @@ from solarwindpy.fitfunctions.lines import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
@@ -132,7 +133,7 @@ def test_make_fit_insufficient_data(cls):
     with pytest.raises(InsufficientDataError):
         obj.make_fit()
 
-    result = obj.make_fit(return_exception=True)
+    result = attempt_fit(obj)
     assert isinstance(result, InsufficientDataError)
     assert "insufficient data" in str(result).lower()
 
@@ -413,3 +414,50 @@ def test_line_numerical_precision():
 
     assert obj.popt["m"] == noise_free(2.0)
     assert obj(1e6 + 0.5) == exact(2e6 + 1.0)  # 2 * (1e6 + 0.5)
+
+
+# y = 2x + 1 on integer x: slope 2, intercept 1, x-intercept -1/2, all exact
+# in floating point, so the initial guesses are compared exactly.
+LINE_X = np.arange(10.0)
+LINE_Y = 2.0 * LINE_X + 1.0
+
+
+def test_line_p0_is_slope_and_intercept_of_exact_line():
+    """``Line.p0`` on exact ``y = 2x + 1`` data is ``[2, 1]``.
+
+    Before the fix the intercept guess was ``median(m*x - y)``, which is
+    ``-b``, so ``p0`` was ``[2, -1]``.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert Line(LINE_X, LINE_Y).p0 == exact([2.0, 1.0])
+
+
+def test_line_x_intercept_p0_is_slope_and_x_intercept_of_exact_line():
+    """``LineXintercept.p0`` on exact ``y = 2x + 1`` data is ``[2, -0.5]``.
+
+    ``y = m (x - x0)`` with ``m = 2`` and ``x0 = -b/m = -1/2``. The intercept
+    sign error in the old guess made ``x0`` come out as ``+0.5``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p0 = LineXintercept(LINE_X, LINE_Y).p0
+    assert p0 == exact([2.0, -0.5])
+
+
+def test_line_fits_exact_data_when_repeated_x_defeats_the_initial_guess():
+    """A repeated ``x`` makes ``Line.p0`` return ``None``; the fit still recovers the line.
+
+    ``make_fit`` falls back to a default starting point when ``p0`` is
+    ``None``. It used to import ``getargspec_no_self`` from SciPy's private
+    ``scipy._lib._util``, which current SciPy no longer has, so the fit raised
+    ``ImportError``, which make_fit does not record as a failed fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 1.0, 2.0, 3.0, 4.0])
+    fit = Line(x, 2.0 * x + 1.0)
+    assert fit.p0 is None  # the input exists to exercise this branch
+
+    assert attempt_fit(fit) is None
+    assert fit.popt == noise_free({"m": 2.0, "b": 1.0})

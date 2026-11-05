@@ -2,19 +2,20 @@
 #
 # This file lists packages WITHOUT version pins. This is intentional:
 # 1. Conda resolves to latest compatible versions from conda-forge
-# 2. `pip install -e .` enforces pyproject.toml's minimum requirements
+# 2. `pip install -e ".[dev]"` enforces pyproject.toml's minimum requirements
 # 3. Avoids PyPI/conda-forge version mismatches that break CI
 #
-# NOTE: Python version is dynamically injected by GitHub Actions workflows
-# during matrix testing to support multiple Python versions.
+# pyproject.toml declares the requirements; this file names their conda
+# packages (PyTables is `pytables` here, `tables` on PyPI) plus test and
+# documentation tools. pyyaml is a test-time dependency.
 #
-# NOTE: Pip-only packages (e.g., ast-grep-py) are included in the pip: subsection
-# at the end of dependencies and installed automatically during env creation.
+# No Python version is listed, so conda picks one; pyproject.toml's
+# requires-python names the supported range. No workflow reads this file.
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
 #   conda activate solarwindpy
-#   pip install -e .  # Installs SolarWindPy in editable mode
+#   pip install -e ".[dev]"  # Installs SolarWindPy in editable mode with dev tools
 #
 name: solarwindpy
 channels:
@@ -24,7 +25,6 @@ dependencies:
 - astropy
 - astropy-iers-data
 - babel
-- black
 - python-blosc2
 - bottleneck
 - certifi
@@ -39,10 +39,7 @@ dependencies:
 - docstring-inheritance
 - docutils
 - filelock
-- flake8
-- flake8-docstrings
 - fonttools
-- h5py
 - identify
 - idna
 - imagesize
@@ -53,7 +50,6 @@ dependencies:
 - llvmlite
 - markupsafe
 - matplotlib
-- mccabe
 - msgpack-python
 - mypy_extensions
 - ndindex
@@ -72,11 +68,8 @@ dependencies:
 - py-cpuinfo
 - pybtex
 - pybtex-docutils
-- pycodestyle
-- pydocstyle
 - pyenchant
 - pyerfa
-- pyflakes
 - pygments
 - pyparsing
 - pytest
@@ -88,6 +81,7 @@ dependencies:
 - requests
 - restructuredtext_lint
 - roman-numerals
+- ruff
 - roman-numerals-py
 - scipy
 - six

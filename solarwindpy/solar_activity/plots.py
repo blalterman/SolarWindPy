@@ -72,32 +72,6 @@ class IndicatorPlot(base.Base):
             pidx = pidx.min()
         return self.indicator.data.loc[pidx:, self.ykey]
 
-    def set_path(self, new, add_scale=True):
-        r"""Set the path figures are saved under.
-
-        Parameters
-        ----------
-        new : str or pathlib.Path
-            ``"auto"`` builds the path from the axis labels.
-        add_scale : bool, optional
-            If True, append the axis scales to the path.
-        """
-        path, x, y, z, scale_info = super(IndicatorPlot, self).set_path(new, add_scale)
-
-        if new == "auto":
-            path = path / x / y
-
-        else:
-            assert x is None
-            assert y is None
-
-        if add_scale:
-            assert scale_info is not None
-            scale_info = "-".join(scale_info)
-            path = path / scale_info
-
-        self._path = path
-
     def _set_data(self, indicator, ykey, plasma_index):
         r"""Set :attr:`indicator`, :attr:`ykey`, and :attr:`plasma_index`.
 
@@ -115,15 +89,26 @@ class IndicatorPlot(base.Base):
         ----------
         ax : matplotlib.axes.Axes, optional
             Axes to draw on. A new figure is created if None.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        line : matplotlib.lines.Line2D
+            The indicator's line.
+        cbar : None
+            An indicator plot draws no colorbar; the slot keeps the return
+            order ``(ax, artists..., cbar)`` shared by every plot.
         """
         if ax is None:
             fig, ax = subplots()
 
         data = self.plot_data
         x = mdates.date2num(data.index)
-        ax.plot(x, data, color="k", ls="--", marker=None)
+        (line,) = ax.plot(x, data, color="k", ls="--", marker=None)
 
         self._format_axis(ax)
+
+        return ax, line, None
 
 
 class SSNPlot(IndicatorPlot):
@@ -143,6 +128,11 @@ class SSNPlot(IndicatorPlot):
         self.set_labels(y=labels.special.SSN(indicator.id.key))
 
     def _format_axis(self, ax):
-        r"""Format ``ax`` as :class:`IndicatorPlot` does, with SSN from 0 to 200."""
+        r"""Format ``ax`` as :class:`IndicatorPlot` does, with SSN from 0 to a top.
+
+        The top is the indicator's
+        :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
+        of :attr:`plot_data`, the same scale ``SIDC.plot_on_colorbar`` uses.
+        """
         super(SSNPlot, self)._format_axis(ax)
-        ax.set_ylim(0, 200)
+        ax.set_ylim(0, self.indicator.ssn_scale_top(self.plot_data))

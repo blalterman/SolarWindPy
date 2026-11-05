@@ -20,6 +20,7 @@ from tests import test_declared_versions
 
 from ._drift import (
     assert_columns_present,
+    assert_extrema_listed,
     assert_head_ok,
     assert_set_equal,
     assert_skiprows_parses,
@@ -118,3 +119,18 @@ def test_declared_versions_check_raises_on_readthedocs_below_floor(
     monkeypatch.setattr(test_declared_versions, "REPO_ROOT", bad)
     with pytest.raises(AssertionError, match=r"\.readthedocs\.yaml.*'3\.9'"):
         check()
+
+
+def test_assert_extrema_listed_allows_a_pinned_extremum_not_yet_published():
+    pinned = {(25, "Min"): "2019-12", (25, "Max"): "2024-10"}
+    assert_extrema_listed(pinned, {(25, "Min"): "2019-12"})
+
+
+def test_assert_extrema_listed_raises_on_a_published_extremum_not_pinned():
+    with pytest.raises(AssertionError, match=r"\(26, 'Min'\)"):
+        assert_extrema_listed({(25, "Min"): "2019-12"}, {(26, "Min"): "2031-01"})
+
+
+def test_assert_extrema_listed_raises_on_a_changed_extremum():
+    with pytest.raises(AssertionError, match="2024-11"):
+        assert_extrema_listed({(25, "Max"): "2024-10"}, {(25, "Max"): "2024-11"})

@@ -72,9 +72,9 @@ class Plasma(base.Base):
         Dictionary-like access to individual ion species objects.
     species : tuple of str
         Available ion species identifiers in the plasma, sorted.
-    spacecraft : Spacecraft, optional
+    sc : Spacecraft, optional
         Spacecraft trajectory and velocity information.
-    auxiliary_data : pandas.DataFrame, optional
+    aux : pandas.DataFrame, optional
         Additional measurements such as quality flags or derived parameters.
 
     Notes
@@ -129,8 +129,8 @@ class Plasma(base.Base):
         self,
         data,
         *species,
-        spacecraft=None,
-        auxiliary_data=None,
+        sc=None,
+        aux=None,
     ):
         r"""Initialize a :class:`Plasma` instance.
 
@@ -145,12 +145,12 @@ class Plasma(base.Base):
             order are sorted with a warning (see Notes).
         *species : str
             Iterable of species contained in ``data``.
-        spacecraft : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
+        sc : :class:`~solarwindpy.core.spacecraft.Spacecraft`, optional
             Spacecraft trajectory and velocity information, at the times of
             ``data`` (see Notes), with column levels named exactly
             ``("M", "C")`` in that order. If ``None``, the Coulomb number
             :py:meth:`~Plasma.nc` method will raise a :class:`ValueError`.
-        auxiliary_data : :class:`pandas.DataFrame`, optional
+        aux : :class:`pandas.DataFrame`, optional
             Additional measurements to carry with the plasma, for example data
             quality flags, at the times of ``data`` (see Notes). Its column
             levels must be named exactly ``("M", "C", "S")`` in that order.
@@ -227,14 +227,14 @@ class Plasma(base.Base):
         self._init_logger()
         self._require_dataframe(data, "Plasma data")
         # Nothing is attached yet, so `set_data` sorts rather than refusing.
-        self._spacecraft = None
-        self._auxiliary_data = None
+        self._sc = None
+        self._aux = None
         source = data.index
         self._set_species(*species)
         super(Plasma, self).__init__(data)
         self._set_ions()
-        self.set_spacecraft(spacecraft)
-        self._set_auxiliary_data(auxiliary_data, source)
+        self.set_sc(sc)
+        self._set_aux(aux, source)
 
     def __getattr__(self, attr):
         r"""Return the :class:`~solarwindpy.core.ions.Ion` named ``attr``.
@@ -275,17 +275,12 @@ class Plasma(base.Base):
         return self.data.index
 
     @property
-    def spacecraft(self):
-        r"""`Spacecraft` object stored in `plasma`."""
-        return self._spacecraft
-
-    @property
     def sc(self):
-        r"""Shortcut to :py:attr:`spacecraft`."""
-        return self.spacecraft
+        r"""`Spacecraft` object stored in `plasma`."""
+        return self._sc
 
     @property
-    def auxiliary_data(self):
+    def aux(self):
         r"""Any data that does not fall into the following categories.
 
         Epoch is index.
@@ -295,19 +290,14 @@ class Plasma(base.Base):
             -ion number density
             -ion thermal speed
         """
-        return self._auxiliary_data
-
-    @property
-    def aux(self):
-        r"""Shortcut to :py:attr:`auxiliary_data`."""
-        return self.auxiliary_data
+        return self._aux
 
     def save(
         self,
         fname,
         dkey="FC",
         sckey="SC",
-        akey="FC_AUX",
+        auxkey="FC_AUX",
         data_modifier_fcn=None,
         sc_modifier_fcn=None,
         aux_modifier_fcn=None,
@@ -320,12 +310,12 @@ class Plasma(base.Base):
             File name pointing to the save location.
             The typical use when creating a data file in `Create_Datafile.ipynb`
             is `fname("swe", "h5", strip_date=True)`.
-        dkey: None
+        dkey: str, "FC"
             The HDF5 file key at which to store the data.
-        sckey: None
+        sckey: str, "SC"
             The HDF5 file key at which to store the spacecraft data.
-        akey: None
-            The HDF5 file key at which to store the auxiliary_data.
+        auxkey: str, "FC_AUX"
+            The HDF5 file key at which to store the auxiliary data.
         data_modifier_fcn: None, FunctionType
             A function to modify the data saved, e.g. if you don't want to save
             a specific species in the data file, you can pass.
@@ -334,11 +324,11 @@ class Plasma(base.Base):
                     return data.drop("a", axis=1, level="S")
 
             It can only take one argument, `data`.
-        spacecraft_modifier_fcn: None, FunctionType
+        sc_modifier_fcn: None, FunctionType
             A function to modifie the spacecraft data saved. See `data_modifier_fcn`
             for syntax.
         aux_modifier_fcn: None, FunctionType
-            A function to modify the auxiliary_data saved. See
+            A function to modify the auxiliary data saved. See
             `data_modifier_fcn` for syntax.
         """
         from types import FunctionType
@@ -351,7 +341,7 @@ class Plasma(base.Base):
         if data_modifier_fcn is not None:
             if not isinstance(data_modifier_fcn, FunctionType):
                 msg = (
-                    "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+                    "`modifier_fcn` must be a FunctionType. You passes '%s`."
                 ) % type(data_modifier_fcn)
                 raise TypeError(msg)
             data = data_modifier_fcn(data)
@@ -367,7 +357,7 @@ class Plasma(base.Base):
             data.shape,
         )
 
-        msg = "`modifier_fcn` must be a FunctionType. " "You passes '%s`."
+        msg = "`modifier_fcn` must be a FunctionType. You passes '%s`."
         if sc is not None:
             sc = sc.data
             if sc_modifier_fcn is not None:
@@ -393,13 +383,13 @@ class Plasma(base.Base):
                     raise TypeError(msg % type(aux_modifier_fcn))
                 aux = aux_modifier_fcn(aux)
 
-            aux.to_hdf(fname, key=akey)
+            aux.to_hdf(fname, key=auxkey)
             self.logger.info(
                 "aux saved\n{:<5}  %s\n{:<5}  %s\n{:<5}  %s".format(
-                    "file", "akey", "shape"
+                    "file", "auxkey", "shape"
                 ),
                 fname,
-                akey,
+                auxkey,
                 aux.shape,
             )
         else:
@@ -412,7 +402,7 @@ class Plasma(base.Base):
         *species,
         dkey="FC",
         sckey="SC",
-        akey="FC_AUX",
+        auxkey="FC_AUX",
         sc_frame=None,
         sc_name=None,
         start=None,
@@ -432,7 +422,7 @@ class Plasma(base.Base):
             The key for getting data from HDF5 file.
         sckey: str, "SC"
             The key for getting spacecraft data from the HDF5 file.
-        akey: str, "FC_AUX"
+        auxkey: str, "FC_AUX"
             key for getting auxiliary data from HDF5 file.
         start, stop: None, parsable by `pd.to_datetime`
             If not None, time to start/stop for loading data.
@@ -485,21 +475,23 @@ class Plasma(base.Base):
 
             sc = spacecraft.Spacecraft(sc, sc_name, sc_frame)
 
-            plasma.set_spacecraft(sc)
+            plasma.set_sc(sc)
             plasma.logger.warning(
-                "Spacecraft data loaded\nsc_key: %s\nshape: %s", sckey, sc.data.shape
+                "Spacecraft data loaded\nsckey: %s\nshape: %s", sckey, sc.data.shape
             )
 
-        if akey:
-            aux = pd.read_hdf(fname, key=akey)
+        if auxkey:
+            aux = pd.read_hdf(fname, key=auxkey)
             aux.columns.names = ("M", "C", "S")
 
             if start is not None or stop is not None:
                 aux = aux.loc[index]
 
-            plasma.set_auxiliary_data(aux)
+            plasma.set_aux(aux)
             plasma.logger.warning(
-                "Auxiliary data loaded from file\nakey: %s\nshape: %s", akey, aux.shape
+                "Auxiliary data loaded from file\nauxkey: %s\nshape: %s",
+                auxkey,
+                aux.shape,
             )
 
         return plasma
@@ -558,9 +550,9 @@ class Plasma(base.Base):
         (see :class:`~solarwindpy.core.base.Base`).
         """
         species = self.species
-        assert np.all(
-            ["+" not in s for s in species]
-        ), "Plasma.species can't contain '+'."
+        assert np.all(["+" not in s for s in species]), (
+            "Plasma.species can't contain '+'."
+        )
         species = tuple(species)
 
         ions_ = pd.Series(
@@ -599,21 +591,21 @@ class Plasma(base.Base):
         data = self.data.loc[:, mask_keep]
 
         aux = None
-        if self.auxiliary_data is not None:
+        if self.aux is not None:
             aux_mask = (
-                self.auxiliary_data.columns.get_level_values("S") == ""
-            ) | self.auxiliary_data.columns.get_level_values("S").isin(remaining)
-            aux = self.auxiliary_data.loc[:, aux_mask]
+                self.aux.columns.get_level_values("S") == ""
+            ) | self.aux.columns.get_level_values("S").isin(remaining)
+            aux = self.aux.loc[:, aux_mask]
 
         new = Plasma(
             data,
             *remaining,
-            spacecraft=self.spacecraft,
-            auxiliary_data=aux,
+            sc=self.sc,
+            aux=aux,
         )
         return new
 
-    def set_spacecraft(self, new):
+    def set_sc(self, new):
         """Set or update the spacecraft trajectory data.
 
         Parameters
@@ -641,17 +633,17 @@ class Plasma(base.Base):
         --------
         >>> import solarwindpy as swp
         >>> plasma = swp.examples.load_plasma()
-        >>> psp = plasma.spacecraft
+        >>> psp = plasma.sc
 
         Setting ``None`` logs "No spacecraft data passed to Plasma" at INFO:
 
-        >>> plasma.set_spacecraft(None)
-        >>> plasma.spacecraft is None
+        >>> plasma.set_sc(None)
+        >>> plasma.sc is None
         True
-        >>> plasma.set_spacecraft(psp)
-        >>> plasma.spacecraft.name
+        >>> plasma.set_sc(psp)
+        >>> plasma.sc.name
         'PSP'
-        >>> plasma.spacecraft.position.data.loc[:, "x"].tolist()  # trajectory
+        >>> plasma.sc.pos.data.loc[:, "x"].tolist()  # trajectory
         [-42.0, -22.0, -34.0]
         """
         assert isinstance(new, spacecraft.Spacecraft) or new is None
@@ -667,9 +659,9 @@ class Plasma(base.Base):
             # spacecraft only has a 2-level MultiIndex.
 
         self._log_if_missing(new, "spacecraft")
-        self._spacecraft = new
+        self._sc = new
 
-    def set_auxiliary_data(self, new):
+    def set_aux(self, new):
         """Set or update auxiliary measurement data.
 
         Parameters
@@ -700,18 +692,18 @@ class Plasma(base.Base):
         --------
         >>> import solarwindpy as swp
         >>> plasma = swp.examples.load_plasma()
-        >>> plasma.auxiliary_data is None
+        >>> plasma.aux is None
         True
         >>> quality_flags = pd.DataFrame({("quality", "", ""): [0, 1, 0]},
         ...                              index=plasma.epoch)
         >>> quality_flags.columns.names = ["M", "C", "S"]
-        >>> plasma.set_auxiliary_data(quality_flags)
+        >>> plasma.set_aux(quality_flags)
         >>> plasma.aux.loc[:, ("quality", "", "")].tolist()  # auxiliary data
         [0, 1, 0]
         """
-        self._set_auxiliary_data(new)
+        self._set_aux(new)
 
-    def _set_auxiliary_data(self, new, source=None):
+    def _set_aux(self, new, source=None):
         """Set the auxiliary data; ``source`` is the index the plasma data arrived on.
 
         Auxiliary data on ``source`` share the plasma data's origin and are put
@@ -728,8 +720,8 @@ class Plasma(base.Base):
             if order is not None:
                 new = new.iloc[order]
 
-        self._log_if_missing(new, "auxiliary_data")
-        self._auxiliary_data = new
+        self._log_if_missing(new, "auxiliary")
+        self._aux = new
 
     def _log_if_missing(self, new, name):
         """Log at INFO that the optional input ``name`` was not passed."""
@@ -855,7 +847,7 @@ class Plasma(base.Base):
             or differs from the current time index.
         """
         refusal = None
-        if self._spacecraft is not None or self._auxiliary_data is not None:
+        if self._sc is not None or self._aux is not None:
             refusal = (
                 "sorting would misalign the attached spacecraft or auxiliary "
                 "data, so sort the data first"
@@ -910,7 +902,7 @@ class Plasma(base.Base):
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
-        #       multiple spacecraft to `auxiliary_data`. (20190216)
+        #       multiple spacecraft to `aux`. (20190216)
         tk_plasma = pd.IndexSlice[
             ["b", "n", "v", "w"],
             ["", "x", "y", "z", "per", "par"],
@@ -928,14 +920,14 @@ class Plasma(base.Base):
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
 
         w = (
-            data.loc[:, pd.IndexSlice["w", ["par", "per"]]]
+            self._select(data.xs("w", axis=1, level="M"), ["par", "per"], "C")
             .pow(2)
             .multiply(coeff, axis=1, level="C")
         )
 
-        # skipna=False: within a species, a time missing either part has no
-        # scalar thermal speed (docs page `missing_data`).
-        w = w.T.groupby("S").sum(skipna=False).T.pow(0.5)
+        # Within a species, a time missing either part has no scalar thermal
+        # speed (docs page `missing_data`).
+        w = self._component_reduce(w).pow(0.5)
 
         # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
         w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
@@ -962,7 +954,7 @@ class Plasma(base.Base):
             self.logger.info("no columns dropped from plasma")
 
         self._bfield = vector.BField(
-            data.b.xs("", axis=1, level="S"), _time_checked=data.index
+            self._select(data.b, "", "S"), _time_checked=data.index
         )
 
     def _mask_invalid_species(self, data):
@@ -992,7 +984,9 @@ class Plasma(base.Base):
         del moments
         # Sorted, as `groupby(level="S")` orders the species.
         invalid = {
-            s: isna.xs(s, axis=1, level="S").any(axis=1)
+            # Not a component reduction: any missing moment or component
+            # invalidates the species (docs page `missing_data`).
+            s: self._select(isna, s, "S").any(axis=1)
             for s in sorted(isna.columns.unique(level="S"))
         }
         del isna
@@ -1010,16 +1004,11 @@ class Plasma(base.Base):
                 )
 
     @property
-    def bfield(self):
+    def b(self):
         r"""Magnetic field data."""
         return self._bfield
 
-    @property
-    def b(self):
-        r"""Shortcut for :py:attr:`bfield`."""
-        return self.bfield
-
-    def number_density(self, *species, skipna=True):
+    def n(self, *species, skipna=True):
         r"""Get the plasma number densities.
 
         Parameters
@@ -1045,17 +1034,15 @@ class Plasma(base.Base):
         n = pd.concat(n, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a total with no species present is NaN, not 0.
+            # Not `_species_total`: `skipna=False` asks for a strict total
+            # (docs page `missing_data`). min_count=1: a total with no
+            # species present is NaN, not 0.
             n = n.sum(axis=1, skipna=skipna, min_count=1)
             n.name = species[0]
 
         return n
 
-    def n(self, *species, skipna=True):
-        r"""Shortcut to :py:meth:`number_density`."""
-        return self.number_density(*species, skipna=skipna)
-
-    def mass_density(self, *species):
+    def rho(self, *species):
         r"""Get the plasma mass densities.
 
         Parameters
@@ -1077,16 +1064,11 @@ class Plasma(base.Base):
         rho = pd.concat(rho, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a total with no species present is NaN, not 0.
-            rho = rho.sum(axis=1, min_count=1)
+            rho = self._species_total(rho)
             rho.name = species[0]
         return rho
 
-    def rho(self, *species):
-        r"""Shortcut to :py:meth:`mass_density`."""
-        return self.mass_density(*species)
-
-    def thermal_speed(self, *species):
+    def w(self, *species):
         r"""Get the thermal speed.
 
         Parameters
@@ -1106,19 +1088,14 @@ class Plasma(base.Base):
             )
 
         slist = self._chk_species(*species)
-        w = {s: self.ions.loc[s].thermal_speed.data for s in slist}
+        w = {s: self.ions.loc[s].w.data for s in slist}
         w = pd.concat(w, axis=1, names=["S"], sort=True)
         w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            # min_count=1: a time where the species is missing stays NaN.
-            w = w.T.groupby(level="C").sum(min_count=1).T
+            w = self._species_total(w)
 
         return w
-
-    def w(self, *species):
-        r"""Shortcut to :py:meth:`thermal_speed`."""
-        return self.thermal_speed(*species)
 
     def pth(self, *species):
         r"""Get the thermal pressure.
@@ -1152,10 +1129,10 @@ class Plasma(base.Base):
         pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            pth = pth.T.groupby("C").sum(min_count=1).T
+            pth = self._species_total(pth)
         return pth
 
-    def temperature(self, *species):
+    def T(self, *species):
         r"""Get the thermal temperature.
 
         Parameters
@@ -1178,12 +1155,12 @@ class Plasma(base.Base):
         where none is: see :doc:`/missing_data`.
         """
         slist = self._chk_species(*species)
-        temp = {s: self.ions.loc[s].temperature for s in slist}
+        temp = {s: self.ions.loc[s].T for s in slist}
         temp = pd.concat(temp, axis=1, names=["S"], sort=True)
         temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
         if len(species) == 1:
-            temp = temp.T.groupby("C").sum(min_count=1).T
+            temp = self._species_total(temp)
         return temp
 
     def beta(self, *species):
@@ -1230,7 +1207,7 @@ class Plasma(base.Base):
             raise NotImplementedError
 
         pth = self.pth(*species)
-        bsq = self.bfield.mag.pow(2)
+        bsq = self.b.mag.pow(2)
         beta = pth.divide(bsq, axis=0)
 
         units = self.units.pth / (self.units.b**2.0)
@@ -1238,7 +1215,7 @@ class Plasma(base.Base):
         beta *= coeff
         return beta
 
-    def anisotropy(self, *species):
+    def R(self, *species):
         r"""Pressure anisotropy.
 
         Note that for a single species, the pressure anisotropy is just the
@@ -1255,7 +1232,7 @@ class Plasma(base.Base):
         ani : pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        pth = self.pth(*species).drop("scalar", axis=1)
+        pth = self._select(self.pth(*species), ["par", "per"], "C")
 
         include_dynamic = False
         if include_dynamic:
@@ -1265,15 +1242,13 @@ class Plasma(base.Base):
 
         exp = pd.Series({"par": -1, "per": 1})
 
-        if len(species) > 1:
-            ani = pth.pow(exp, axis=1, level="C").T.groupby(level="S").prod().T
-        else:
-            ani = pth.pow(exp, axis=1).product(axis=1)
+        ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
+        if len(species) == 1:
             ani.name = species[0]
 
         return ani
 
-    def velocity(self, *species, project_m2q=False):
+    def v(self, *species, project_m2q=False):
         r"""Get an ion velocity or calculate the center-of-mass velocity.
 
         Parameters
@@ -1302,7 +1277,7 @@ class Plasma(base.Base):
 
         if len(stuple) == 1:
             s = stuple[0]
-            v = self.ions.loc[s].velocity
+            v = self.ions.loc[s].v
             if project_m2q:
                 m2q = np.sqrt(
                     self.constants.m_in_mp[s] / self.constants.charge_states[s]
@@ -1318,9 +1293,9 @@ species: {}
             )
 
         else:
-            v = self.ions.loc[list(stuple)].apply(lambda x: x.velocity)
+            v = self.ions.loc[list(stuple)].apply(lambda x: x.v)
             if len(species) == 1:
-                rhos = self.mass_density(*stuple)
+                rhos = self.rho(*stuple)
                 v = pd.concat(
                     v.apply(lambda x: x.cartesian).to_dict(),
                     axis=1,
@@ -1365,15 +1340,11 @@ species: {}
         mean : pd.DataFrame
             One column per component.
         """
-        present = vectors.notna().T.groupby(level="S").all().T & weights.notna()
+        present = Plasma._component_reduce(vectors.notna(), "all") & weights.notna()
         weights = weights.where(present)
         weighted = vectors.multiply(weights, axis=1, level="S")
-        total = weighted.T.groupby(level="C").sum(min_count=1).T
-        return total.divide(weights.sum(axis=1, min_count=1), axis=0)
-
-    def v(self, *species, project_m2q=False):
-        r"""Shortcut to `velocity`."""
-        return self.velocity(*species, project_m2q=project_m2q)
+        total = Plasma._species_total(weighted)
+        return total.divide(Plasma._species_total(weights), axis=0)
 
     def dv(self, s0, s1, project_m2q=False):
         r"""Calculate the differential flow between species `s0` and `s1`.
@@ -1407,15 +1378,15 @@ species: {}
             )
             raise NotImplementedError(msg % (s0, s1))
 
-        v0 = self.velocity(s0, project_m2q=project_m2q).cartesian
-        v1 = self.velocity(s1, project_m2q=project_m2q).cartesian
+        v0 = self.v(s0, project_m2q=project_m2q).cartesian
+        v1 = self.v(s1, project_m2q=project_m2q).cartesian
 
         dv = v0.subtract(v1)
         dv = vector.Vector(dv, _time_checked=self.data.index)
 
         return dv
 
-    def pdynamic(self, *species, project_m2q=False):
+    def pdv(self, *species, project_m2q=False):
         r"""Calculate the dynamic or drift pressure for the given species.
 
             :math:`p_{\tilde{v}} = 0.5 \sum_i \rho_i (v_i - v_\mathrm{com})^2`
@@ -1446,7 +1417,7 @@ species: {}
         if not project_m2q:
             # Calculate as m*v
             scom = "+".join(species)
-            rho_i = self.mass_density(*stuple)
+            rho_i = self.rho(*stuple)
             dv_i = pd.concat(
                 {s: self.dv(s, scom).cartesian for s in stuple},
                 axis=1,
@@ -1455,34 +1426,29 @@ species: {}
             )
             # Within a species, a missing component makes dv^2 NaN; across
             # species, the sum keeps the species present (docs `missing_data`).
-            dvsq_i = dv_i.pow(2.0).T.groupby(level="S").sum(skipna=False).T
+            dvsq_i = self._component_reduce(dv_i.pow(2.0))
             dvsq_rho_i = dvsq_i.multiply(rho_i, axis=1, level="S")
-            pdv = dvsq_rho_i.sum(axis=1, min_count=1)
+            pdv = self._species_total(dvsq_rho_i)
 
         elif len(stuple) == 2:
             # Can only have 2 species with `project_m2q`.
-            dvsq = (
-                self.dv(*stuple, project_m2q=project_m2q)
-                .cartesian.pow(2)
-                .sum(axis=1, skipna=False)
+            dvsq = self._component_reduce(
+                self.dv(*stuple, project_m2q=project_m2q).cartesian.pow(2)
             )
-            rho_i = self.mass_density(*stuple)
-            # skipna=False: the reduced mass needs both species.
+            rho_i = self.rho(*stuple)
+            # Not `_species_total`: the reduced mass needs both species, so
+            # it is strict over species (docs page `missing_data`).
             mu = rho_i.product(axis=1, skipna=False).divide(
                 rho_i.sum(axis=1, skipna=False), axis=0
             )
             pdv = dvsq.multiply(mu, axis=0)
 
         pdv = pdv.multiply(const)
-        pdv.name = "pdynamic"
+        pdv.name = "pdv"
 
         return pdv
 
-    def pdv(self, *species, project_m2q=False):
-        r"""Shortcut to :py:meth:`pdynamic`."""
-        return self.pdynamic(*species, project_m2q=project_m2q)
-
-    def sound_speed(self, *species):
+    def cs(self, *species):
         r"""Calculate the sound speed.
 
         Parameters
@@ -1496,10 +1462,10 @@ species: {}
             Depends on the `species` inputs.
         """
         slist = self._chk_species(*species)
-        rho = self.mass_density(*species) * self.units.rho
+        rho = self.rho(*species) * self.units.rho
         pth = self.pth(*species) * self.units.pth
 
-        pth = pth.loc[:, "scalar"]
+        pth = self._select(pth, "scalar", "C")
 
         gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
         cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
@@ -1511,17 +1477,13 @@ species: {}
 
         return cs
 
-    def cs(self, *species):
-        r"""Shortcut to :py:meth:`sound_speed`."""
-        return self.sound_speed(*species)
-
     def ca(self, *species):
         r"""Calculate the isotropic MHD Alfven speed.
 
         Parameters
         ----------
         species: str
-            Species controlled by :py:meth:`mass_density`
+            Species controlled by :py:meth:`rho`
 
         Returns
         -------
@@ -1530,8 +1492,8 @@ species: {}
         """
         stuple = self._chk_species(*species)  # noqa: F841
 
-        rho = self.mass_density(*species)
-        b = self.bfield.mag
+        rho = self.rho(*species)
+        b = self.b.mag
 
         units = self.units
         mu0 = self.constants.misc.mu0
@@ -1543,7 +1505,7 @@ species: {}
 
         return ca
 
-    def afsq(self, *species, pdynamic=False):
+    def afsq(self, *species, pdv=False):
         r"""Calculate the square of anisotropy factor.
 
             :math:`AF^2 = 1 + \frac{\mu_0}{B^2}\left(p_\perp - p_\parallel - p_{\tilde{v}}\right)`
@@ -1564,7 +1526,7 @@ species: {}
             contain "+". If this is the case, the species are summed over and
             a pd.Series is returned. Otherwise, the individual quantities are
             returned as a pd.DataFrame.
-        pdynamic: bool, str
+        pdv: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 
@@ -1573,14 +1535,14 @@ species: {}
         afsq : pd.Series or pd.DataFrame
             Depends on the number of `species` passed.
         """
-        if pdynamic:
+        if pdv:
             raise NotImplementedError(
                 "Youngest beams analysis shows "
                 "that dynamic pressure is probably not useful."
             )
 
         # A missing field component leaves B^2 unknown.
-        bsq = self.bfield.cartesian.pow(2.0).sum(axis=1, skipna=False)
+        bsq = self._component_reduce(self.b.cartesian.pow(2.0))
 
         # A species is masked as a whole where any moment is missing, so its
         # p_per and p_par are present together and the species sum of
@@ -1588,7 +1550,7 @@ species: {}
         # `missing_data`). Dynamic pressure, if ever included, would be
         # subtracted here with the species aligned.
         pth = self.pth(*species)
-        dp = pth.loc[:, "per"].subtract(pth.loc[:, "par"])
+        dp = self._select(pth, "per", "C").subtract(self._select(pth, "par", "C"))
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
@@ -1600,7 +1562,7 @@ species: {}
 
         return afsq
 
-    def caani(self, *species, pdynamic=False):
+    def caani(self, *species, pdv=False):
         r"""
         Calculate the anisotropic MHD Alfven speed:
 
@@ -1614,7 +1576,7 @@ species: {}
             a pd.Series is returned. This addresses complications from
             combining the mass density in :py:meth:`ca` with the pressures in
             :py:meth:`afsq`, the latter via :py:meth:`pth`.
-        pdynamic: bool, str
+        pdv: bool, str
             If str, the component of the dynamic pressure to use when
             calculating :math:`p_{\tilde{v}}`.
 
@@ -1632,7 +1594,7 @@ species: {}
         ssum = "+".join(stuple)
 
         ca = self.ca(ssum)
-        afsq = self.afsq(ssum, pdynamic=pdynamic)
+        afsq = self.afsq(ssum, pdv=pdv)
         caani = ca.multiply(afsq.pipe(np.sqrt))
 
         return caani
@@ -1684,8 +1646,10 @@ species: {}
         n0 = self.ions.loc[s0].n * units.n
         n1 = self.ions.loc[s1].n * units.n
 
-        T0 = self.ions.loc[s0].temperature.scalar * units.temperature * constants.kb.eV
-        T1 = self.ions.loc[s1].temperature.scalar * units.temperature * constants.kb.eV
+        T0 = self._select(self.ions.loc[s0].T, "scalar", "C")
+        T1 = self._select(self.ions.loc[s1].T, "scalar", "C")
+        T0 = T0 * units.T * constants.kb.eV
+        T1 = T1 * units.T * constants.kb.eV
 
         r0 = n0.multiply(z0**2.0).divide(T0, axis=0)
         r1 = n1.multiply(z1**2.0).divide(T1, axis=0)
@@ -1758,12 +1722,13 @@ species: {}
         nb = self.ions.loc[sb].n * units.n
 
         w = pd.concat(
-            {s: self.ions.loc[s].w.data.par for s in [sa, sb]}, axis=1, sort=True
+            {s: self.ions.loc[s].w("par") for s in [sa, sb]}, axis=1, sort=True
         )
-        # skipna=False: W_ab needs both species' thermal speeds.
+        # Not `_species_total`: W_ab needs both species' thermal speeds, so it
+        # is strict over species (docs page `missing_data`).
         wab = w.pow(2.0).sum(axis=1, skipna=False).pipe(np.sqrt) * units.w
 
-        dv = self.dv(sa, sb).magnitude * units.dv
+        dv = self.dv(sa, sb).mag * units.dv
         dvw = dv.divide(wab, axis=0)
 
         # longitudinal diffusion rate.
@@ -1778,10 +1743,9 @@ species: {}
 
         if both_species:
             exp = pd.Series({sa: 1.0, sb: -1.0})
-            rho_ratio = pd.concat(
-                {s: self.mass_density(s) for s in [sa, sb]}, axis=1, sort=True
-            )
-            # skipna=False: the ratio needs both species.
+            rho_ratio = pd.concat({s: self.rho(s) for s in [sa, sb]}, axis=1, sort=True)
+            # Not a species total: the ratio needs both species (docs page
+            # `missing_data`).
             rho_ratio = rho_ratio.pow(exp, axis=1).product(axis=1, skipna=False)
             nuba = nuab.multiply(rho_ratio, axis=0)
             nu = nuab.add(nuba, axis=0)
@@ -1824,13 +1788,13 @@ species: {}
 
         sa, sb = sa[0], sb[0]
 
-        sc = self.spacecraft
+        sc = self.sc
         if sc is None:
             msg = "Plasma doesn't contain spacecraft data. Can't calculate Coulomb number."
             raise ValueError(msg)
 
         r = sc.distance2sun * self.units.distance2sun
-        vsw = self.velocity("+".join(self.species)).mag * self.units.v
+        vsw = self.v("+".join(self.species)).mag * self.units.v
         tau_exp = r.divide(vsw, axis=0)
 
         nuc = self.nuc(sa, sb, both_species=both_species) * self.units.nuc
@@ -1846,7 +1810,9 @@ species: {}
         Calculate the ratio of a bi-Maxwellian proton beam to a bi-Maxwellian
         proton core VDF at the peak beam velocity.
 
-        To avoid overflow erros, we return ln(ratio).
+        The name ``vdf_ratio`` is shorthand for
+        :math:`\ln(f_\mathrm{beam}/f_\mathrm{core})`: to avoid overflow
+        errors, this returns the natural logarithm of the ratio, not the ratio.
 
         The VDF for species :math:`i` at velocity :math:`v_j` is:
 
@@ -1904,19 +1870,21 @@ species: {}
         beam = beam[0]
         core = core[0]
 
-        n1 = self.data.xs(("n", "", core), axis=1)
-        n2 = self.data.xs(("n", "", beam), axis=1)
+        n1 = self.ions.loc[core].n
+        n2 = self.ions.loc[beam].n
 
-        w = self.w(beam, core).drop("scalar", axis=1, level="C")
-        w1_par = w.par.loc[:, core]
-        w1_per = w.per.loc[:, core]
-        w2_par = w.par.loc[:, beam]
-        w2_per = w.per.loc[:, beam]
+        w = self._select(self.w(beam, core), ["par", "per"], "C")
+        w1 = self._select(w, core, "S")
+        w2 = self._select(w, beam, "S")
+        w1_par = self._select(w1, "par", "C")
+        w1_per = self._select(w1, "per", "C")
+        w2_par = self._select(w2, "par", "C")
+        w2_per = self._select(w2, "per", "C")
 
         dv = self.dv(beam, core, project_m2q=True).project(self.b)
         # skipna=False: where b is missing the projection is NaN, and the
         # ratio must be NaN rather than the drift-free value ln(n2 w1^3 / n1 w2^3).
-        dvw = dv.divide(w.xs(core, axis=1, level="S")).pow(2).sum(axis=1, skipna=False)
+        dvw = self._component_reduce(dv.divide(w1).pow(2))
 
         nbar = n2 / n1
         wbar = (w1_par / w2_par).multiply((w1_per / w2_per).pow(2), axis=0)
@@ -1977,8 +1945,8 @@ species: {}
             raise ValueError(species)
 
         qi = self.constants.charge_states.loc[list(species)]
-        ni = self.number_density(*species)
-        vi = self.velocity(*species)
+        ni = self.n(*species)
+        vi = self.v(*species)
         if isinstance(vi, vector.Vector):
             # Then we only have a single component proton plasma.
             qi = qi.loc[species[0]]
@@ -1993,11 +1961,11 @@ species: {}
             niqi = ni.multiply(qi, axis=1, level="S")
             # Both sums run over the species present at each time; species
             # masking in `set_data` keeps a density from outliving its velocity.
-            ne = niqi.sum(axis=1, min_count=1)
+            ne = self._species_total(niqi)
             ve = self._species_weighted_mean(vi, niqi)
 
         # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
-        wp = self.w(tkw).loc[:, "scalar"]
+        wp = self._select(self.w(tkw), "scalar", "C")
         mpme = self.constants.m_in_mp["e"] ** -1
         we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
         # Isotropic electrons: the scalar thermal speed equals both components.
@@ -2030,13 +1998,13 @@ species: {}
 
         return electrons
 
-    def heat_flux(self, *species):
+    def qpar(self, *species):
         r"""Calculate the parallel-parallel component of the heat flux tensor.
 
         For each species :math:`s` this is the third moment of its velocity
         distribution along the magnetic field, taken in the center-of-mass
         frame of the species passed to this method, and only those: for
-        ``heat_flux("a+p1")`` or ``heat_flux("a", "p1")`` it is the a+p1
+        ``qpar("a+p1")`` or ``qpar("a", "p1")`` it is the a+p1
         center of mass, not that of every species in the plasma,
 
             :math:`Q_{\parallel,s} = \int m_s c_\parallel^3 f_s \, d^3v`,
@@ -2074,28 +2042,23 @@ species: {}
             raise ValueError("Must have >1 species to calculate heatflux.")
 
         scom = "+".join(slist)
-        rho = self.mass_density(*slist)
+        rho = self.rho(*slist)
         dv = {s: self.dv(s, scom).project(self.b).par for s in slist}
         dv = pd.concat(dv, axis=1, names=["S"], sort=True)
         dv.columns.name = "S"
-        w = self.data.w.par.loc[:, slist]
+        w = self._select(self._select(self.data.w, "par", "C"), list(slist), "S")
 
         qa = dv.pow(3)
         qb = dv.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)
 
         qs = qa.add(qb, axis=1, level="S").multiply(rho, axis=0)
         if len(species) == 1:
-            # min_count=1: a partial sum over the species present, NaN where none is.
-            qs = qs.sum(axis=1, min_count=1)
+            qs = self._species_total(qs)
             qs.name = "+".join(species)
 
         coeff = self.units.rho * (self.units.v**3.0) / self.units.qpar
         q = coeff * qs
         return q
-
-    def qpar(self, *species):
-        r"""Shortcut to :py:meth:`heat_flux`."""
-        return self.heat_flux(*species)
 
     def build_alfvenic_turbulence(self, species, **kwargs):
         r"""Create an Alfvenic turbulence instance.
@@ -2112,20 +2075,20 @@ species: {}
         kwargs:
             Passed to
             :py:class:`~solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence`:
-            ``raffaella_version`` and ``sc_vector`` select its GSE-to-RTN
+            ``raffaella_version`` and ``sc`` select its GSE-to-RTN
             verification aid, and the rest reach its ``rolling`` call, e.g.
             ``window`` and ``min_periods``.
         """
         species_ = species.split(",")
 
-        b = self.bfield.cartesian
+        b = self.b.cartesian
 
         if len(species_) == 1:
-            # Don't hold onto `_chk_species` return because we need `velocity` and
-            # `mass_density` to process center-of-mass species. (20190325)
+            # Don't hold onto `_chk_species` return because we need `v` and
+            # `rho` to process center-of-mass species. (20190325)
             self._chk_species(species_[0])
-            v = self.velocity(species)
-            r = self.mass_density(species)
+            v = self.v(species)
+            r = self.rho(species)
 
         elif len(species_) == 2:
             slist0 = self._chk_species(species_[0])
@@ -2134,7 +2097,7 @@ species: {}
             s0 = "+".join(slist0)
             s1 = "+".join(slist1)
             v = self.dv(s0, s1)
-            r = self.mass_density(s1)
+            r = self.rho(s1)
 
         else:
             msg = "`species` can only contain at most 1 comma\nspecies: %s"
@@ -2146,55 +2109,7 @@ species: {}
 
         return turb
 
-    def S(self, *species):
-        r"""Shortcut to :py:meth:`specific_entropy`."""
-        return self.specific_entropy(*species)
-
-    def specific_entropy(self, *species):
-        r"""Calculate the specific entropy following [1] as.
-
-            :math:`p_\mathrm{th} \rho^{-\gamma}`
-
-        where :math:`gamma=5/3`, :math:`p_\mathrm{th}` is the thermal presure,
-        and :math:`rho` is the mass density.
-
-        Parameters
-        ----------
-        species: str or list-like of str
-            Comma separated strings ("a,p1") are invalid.
-            Comma separated lists ("a", "p1") are valid.
-            Total effective species ("a+p1") are valid and use
-
-                :math:`p_\mathrm{th} = \sum_s p_{\mathrm{th},s}`
-                :math:`\rho = \sum_s \rho_s`.
-
-        References
-        ----------
-        [1] Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp.
-            11–100). <https://doi.org/10.1007/978-94-009-7194-3_2>.
-        """
-        multi_species = len(species) > 1
-        gamma = self.constants.polytropic_index["scalar"]
-
-        pth = self.pth(*species).xs(
-            "scalar", axis=1, level="C" if multi_species else None
-        )
-        rho = self.rho(*species)
-
-        pth *= self.units.pth
-        rho *= self.units.rho
-
-        out = pth.multiply(
-            rho.pow(-gamma),
-            axis=1 if multi_species else 0,
-            level="S" if multi_species else None,
-        )
-        out /= self.units.specific_entropy
-        out.name = "S"
-
-        return out
-
-    def kinetic_energy_flux(self, *species):
+    def Wk(self, *species):
         r"""Calculate the plasma kinetic energy flux.
 
         Parameters
@@ -2214,16 +2129,11 @@ species: {}
         """
         slist = self._chk_species(*species)
 
-        w = {s: self.ions.loc[s].kinetic_energy_flux for s in slist}
+        w = {s: self.ions.loc[s].Wk for s in slist}
         w = pd.concat(w, axis=1, names=["S"], sort=True)
 
         if len(species) == 1:
-            # min_count=1: a partial sum over the species present, NaN where none is.
-            w = w.sum(axis=1, min_count=1)
+            w = self._species_total(w)
             w.name = species[0]
 
         return w
-
-    def Wk(self, *species):
-        r"""Shortcut to :py:meth:`~kinetic_energy_flux`."""
-        return self.kinetic_energy_flux(*species)

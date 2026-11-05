@@ -16,7 +16,7 @@ import pandas as pd
 from . import base
 
 
-class Vector(base.Base):
+class Vector(base._ComponentFrame):
     """Three-dimensional vector container.
 
     Parameters
@@ -37,21 +37,6 @@ class Vector(base.Base):
         """
         super().__init__(data, _time_checked=_time_checked)
 
-    def __call__(self, component: str) -> pd.Series:
-        """Return a vector component.
-
-        Parameters
-        ----------
-        component : str
-            Component to return (``'x'``, ``'y'`` or ``'z'``).
-
-        Returns
-        -------
-        pd.Series
-            The requested component.
-        """
-        return self.__getattr__(component)
-
     def set_data(self, new: pd.DataFrame):
         """Set new vector data.
 
@@ -65,8 +50,8 @@ class Vector(base.Base):
         Raises
         ------
         ValueError
-            If ``new`` does not contain the required columns, or its time
-            index holds missing timestamps (``NaT``).
+            If ``new`` does not contain the required columns, holds more than
+            one species, or its time index holds missing timestamps (``NaT``).
         """
         new = self._put_in_time_order_unless_checked(new)
         super().set_data(new)
@@ -89,21 +74,9 @@ class Vector(base.Base):
         pd.Series
             Vector magnitude.
         """
-        mag = self.data.loc[:, ["x", "y", "z"]]
-        mag = mag.pow(2).sum(axis=1, skipna=False).pow(0.5)
+        mag = self._component_reduce(self.cartesian.pow(2)).pow(0.5)
         mag.name = "mag"
         return mag
-
-    @property
-    def magnitude(self) -> pd.Series:
-        """Alias for :py:attr:`mag`.
-
-        Returns
-        -------
-        pd.Series
-            Vector magnitude.
-        """
-        return self.mag
 
     @property
     def rho(self) -> pd.Series:
@@ -114,24 +87,13 @@ class Vector(base.Base):
         pd.Series
             XY-plane magnitude.
         """
-        rho = self.data.loc[:, ["x", "y"]]
-        rho = rho.pow(2).sum(axis=1, skipna=False).pow(0.5)
+        rho = self._select(self.data, ["x", "y"], "C")
+        rho = self._component_reduce(rho.pow(2)).pow(0.5)
         rho.name = "rho"
         return rho
 
     @property
-    def colat(self):
-        """Shortcut to colatitude property.
-
-        Returns
-        -------
-        pd.Series
-            Colatitude in degrees.
-        """
-        return self.colatitude
-
-    @property
-    def colatitude(self) -> pd.Series:
+    def colat(self) -> pd.Series:
         """Colatitude of the vector, the angle from the +z axis.
 
         Returns
@@ -141,25 +103,14 @@ class Vector(base.Base):
 
         Notes
         -----
-        ``colatitude = arctan2(rho, z) = 90 - latitude``.
+        ``colat = arctan2(rho, z) = 90 - lat``.
         """
-        colat = np.rad2deg(np.arctan2(self.rho, self.data.z))
-        colat.name = "colatitude"
+        colat = np.rad2deg(np.arctan2(self.rho, self("z")))
+        colat.name = "colat"
         return colat
 
     @property
     def lat(self):
-        """Shortcut to latitude property.
-
-        Returns
-        -------
-        pd.Series
-            Latitude in degrees.
-        """
-        return self.latitude
-
-    @property
-    def latitude(self):
         """Latitude of the vector, the angle above the xy-plane.
 
         Returns
@@ -169,14 +120,14 @@ class Vector(base.Base):
 
         Notes
         -----
-        ``latitude = arctan2(z, rho) = 90 - colatitude``.
+        ``lat = arctan2(z, rho) = 90 - colat``.
         """
-        lat = np.rad2deg(np.arctan2(self.data.z, self.rho))
-        lat.name = "latitude"
+        lat = np.rad2deg(np.arctan2(self("z"), self.rho))
+        lat.name = "lat"
         return lat
 
     @property
-    def longitude(self) -> pd.Series:
+    def lon(self) -> pd.Series:
         """Longitude of the vector.
 
         Returns
@@ -184,33 +135,9 @@ class Vector(base.Base):
         pd.Series
             Longitude in degrees.
         """
-        lon = np.rad2deg(np.arctan2(self.data.y, self.data.x))
-        lon.name = "longitude"
+        lon = np.rad2deg(np.arctan2(self("y"), self("x")))
+        lon.name = "lon"
         return lon
-
-    @property
-    def lon(self) -> pd.Series:
-        """Shortcut for :py:attr:`longitude`.
-
-        Returns
-        -------
-        pd.Series
-            Longitude in degrees.
-        """
-        return self.longitude
-
-    @property
-    def r(self) -> pd.Series:
-        """Shortcut to :py:attr:`mag` when using spherical coordinates.
-
-        Returns
-        -------
-        pd.Series
-            Vector magnitude.
-        """
-        r = self.mag
-        r.name = "r"
-        return r
 
     @property
     def cartesian(self) -> pd.DataFrame:
@@ -221,10 +148,10 @@ class Vector(base.Base):
         pd.DataFrame
             Columns ``x``, ``y`` and ``z``.
         """
-        return self.data.loc[:, ["x", "y", "z"]]
+        return self._select(self.data, ["x", "y", "z"], "C")
 
     @property
-    def unit_vector(self) -> "Vector":
+    def uv(self) -> "Vector":
         """Cartesian unit vector.
 
         Returns
@@ -236,17 +163,6 @@ class Vector(base.Base):
         uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
         return Vector(uv, _time_checked=self.data.index)
-
-    @property
-    def uv(self) -> "Vector":
-        """Shortcut for :py:attr:`unit_vector`.
-
-        Returns
-        -------
-        Vector
-            Normalised vector.
-        """
-        return self.unit_vector
 
     def project(self, other: "Vector") -> pd.DataFrame:
         """Project self onto ``other``.
@@ -275,13 +191,10 @@ class Vector(base.Base):
             )
 
         cart = self.cartesian
-        par = cart.multiply(other, axis=1).sum(axis=1, skipna=False)
-        per = (
-            cart.subtract(other.multiply(par, axis=0), axis=1)
-            .pow(2)
-            .sum(axis=1, skipna=False)
-            .pipe(np.sqrt)
-        )
+        par = self._component_reduce(cart.multiply(other, axis=1))
+        per = self._component_reduce(
+            cart.subtract(other.multiply(par, axis=0), axis=1).pow(2)
+        ).pipe(np.sqrt)
         return pd.concat([par, per], axis=1, keys=("par", "per"), sort=True)
 
     def cos_theta(self, other: "Vector") -> pd.Series:
@@ -310,14 +223,16 @@ class Vector(base.Base):
                 f"cos_theta method not implemented for {type(other)}"
             )
 
-        return self.uv.data.multiply(other, axis=1).sum(axis=1, skipna=False)
+        cos_theta = self._component_reduce(self.uv.data.multiply(other, axis=1))
+        cos_theta.name = "cos_theta"
+        return cos_theta
 
 
 class BField(Vector):
     """A class representing a magnetic field, inheriting from Vector."""
 
     @property
-    def pressure(self) -> pd.Series:
+    def pb(self) -> pd.Series:
         r"""Calculate the magnetic pressure or energy density.
 
         Returns
@@ -330,21 +245,10 @@ class BField(Vector):
         The magnetic pressure is calculated using
 
         .. math::
-           p_B = \frac{1}{2\mu_0} B^2
+           P_B = \frac{1}{2\mu_0} B^2
         """
         bsq = self.mag.pow(2.0)
         const = self.units.b**2.0 / (2.0 * self.constants.misc.mu0 * self.units.pth)
         pb = bsq * const
         pb.name = "pb"
         return pb
-
-    @property
-    def pb(self) -> pd.Series:
-        """Shortcut for :py:attr:`pressure`.
-
-        Returns
-        -------
-        pd.Series
-            Magnetic pressure.
-        """
-        return self.pressure

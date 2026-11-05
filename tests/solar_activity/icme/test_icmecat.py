@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from solarwindpy.solar_activity import cache
 from solarwindpy.solar_activity.icme import icmecat
 from solarwindpy.solar_activity.icme.icmecat import ICMECAT, ICMECATDownloadError
 from tests.tolerances import exact
@@ -129,9 +130,9 @@ class TestICMECATDataProperty:
         serve_catalog()
         cat = ICMECAT()
         for col in ["icme_start_time", "mo_start_time", "mo_end_time"]:
-            assert pd.api.types.is_datetime64_any_dtype(
-                cat.data[col]
-            ), f"{col} should be datetime64, got {cat.data[col].dtype}"
+            assert pd.api.types.is_datetime64_any_dtype(cat.data[col]), (
+                f"{col} should be datetime64, got {cat.data[col].dtype}"
+            )
 
 
 class TestICMECATIntervalsProperty:
@@ -276,9 +277,9 @@ class TestICMECATFilter:
         """
         marker = "matched case-insensitively:"
         doc = " ".join(ICMECAT.__doc__.split())
-        assert (
-            marker in doc
-        ), f"ICMECAT docstring no longer contains {marker!r}; update this test's marker"
+        assert marker in doc, (
+            f"ICMECAT docstring no longer contains {marker!r}; update this test's marker"
+        )
         listed = doc.split(marker, 1)[1].split(".", 1)[0]
         names = {name.strip() for name in listed.split(",")}
         assert names == set(icmecat.SPACECRAFT_NAMES)
@@ -599,7 +600,28 @@ class TestICMECATEdgeCases:
 
 
 class TestICMECATDownloadAndCache:
-    """Download failure and the on-disk cache."""
+    """Download failure and the shared download cache.
+
+    ``serve_catalog`` points ICMECAT_URL at a plain path, which is read in
+    place and never cached. These tests serve the same file at its
+    ``file://`` URL instead, so the catalog goes through the download cache
+    (kept under ``tmp_path`` by the autouse ``isolated_cache`` fixture), and
+    deleting the file makes the next download fail.
+    """
+
+    @staticmethod
+    def serve_cached(serve_catalog, monkeypatch, frame=None):
+        """Serve ``frame`` at a ``file://`` URL; return the file's path."""
+        path = serve_catalog(frame)
+        monkeypatch.setattr(icmecat, "ICMECAT_URL", path.as_uri())
+        return path
+
+    @staticmethod
+    def backdate(days):
+        """Move the cached catalog's file time ``days`` into the past."""
+        cached = cache.cache_contents().loc[icmecat.ICMECAT_URL, "path"]
+        then = time.time() - days * 86400
+        os.utime(cached, (then, then))
 
     def test_download_failure_without_cache_raises(self):
         """With no catalog at ICMECAT_URL and no cache, ICMECATDownloadError is raised.
@@ -611,10 +633,8 @@ class TestICMECATDownloadAndCache:
         with pytest.raises(ICMECATDownloadError, match="Failed to download ICMECAT"):
             ICMECAT()
 
-    def test_fresh_cache_is_used_without_download(
-        self, serve_catalog, tmp_path, monkeypatch
-    ):
-        """A cache written by one load serves the next even when the URL is gone.
+    def test_fresh_cache_is_used_without_download(self, serve_catalog, monkeypatch):
+        """A cache written by one load serves the next even when the source is gone.
 
         The catalog served from cache equals the one a fresh download gives,
         values and dtypes alike (the datetime columns come back as
@@ -623,73 +643,70 @@ class TestICMECATDownloadAndCache:
 
         ON FAILURE: the code is wrong.
         """
-        cache_dir = tmp_path / "cache"
-        serve_catalog()
-        downloaded = ICMECAT(cache_dir=cache_dir)
-        monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
-        cat = ICMECAT(cache_dir=cache_dir)
+        source = self.serve_cached(serve_catalog, monkeypatch)
+        downloaded = ICMECAT()
+        source.unlink()
+        cat = ICMECAT()
         pd.testing.assert_frame_equal(cat.data, downloaded.data, check_exact=True)
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
         assert cat.estimated_intervals["interval_end"].tolist() == INTERVAL_END
 
     def test_stale_cache_served_with_warning_when_download_fails(
-        self, serve_catalog, tmp_path, monkeypatch
+        self, serve_catalog, monkeypatch
     ):
         """A cache older than 30 days is served, with a warning, if download fails.
 
         ON FAILURE: the code is wrong.
         """
-        cache_dir = tmp_path / "cache"
-        serve_catalog()
-        ICMECAT(cache_dir=cache_dir)
-        forty_days_ago = time.time() - 40 * 86400
-        os.utime(cache_dir / "icmecat.csv", (forty_days_ago, forty_days_ago))
-        monkeypatch.setattr(icmecat, "ICMECAT_URL", str(tmp_path / "gone.csv"))
-        with pytest.warns(UserWarning, match="serving cached data that is 40 days old"):
-            cat = ICMECAT(cache_dir=cache_dir)
+        source = self.serve_cached(serve_catalog, monkeypatch)
+        ICMECAT()
+        self.backdate(40)
+        source.unlink()
+        with pytest.warns(UserWarning, match="cached copy that is 40.0 days old"):
+            cat = ICMECAT()
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
 
     def test_fresh_cache_wins_over_a_reachable_catalog(
-        self, serve_catalog, catalog, tmp_path
+        self, serve_catalog, catalog, monkeypatch
     ):
         """A cache younger than 30 days is read instead of downloading again.
 
-        Chosen input: after the cache is written, ICMECAT_URL serves a
-        different, one-event catalog, so a download would change the events.
+        Chosen input: after the cache is written and moved 29 days back,
+        ICMECAT_URL serves a different, one-event catalog, so a download would
+        change the events.
 
         ON FAILURE: the code is wrong.
         """
-        cache_dir = tmp_path / "cache"
-        serve_catalog()
-        ICMECAT(cache_dir=cache_dir)
-        serve_catalog(catalog.iloc[[5]])
-        cat = ICMECAT(cache_dir=cache_dir)
+        self.serve_cached(serve_catalog, monkeypatch)
+        ICMECAT()
+        self.backdate(29)
+        self.serve_cached(serve_catalog, monkeypatch, catalog.iloc[[5]])
+        cat = ICMECAT()
         assert cat.data["icmecat_id"].tolist() == ALL_IDS
 
-    def test_download_creates_a_missing_nested_cache_directory(
-        self, serve_catalog, tmp_path
-    ):
-        """A cache directory that does not exist yet, parents included, is created.
+    def test_stale_cache_is_downloaded_again(self, serve_catalog, catalog, monkeypatch):
+        """A cache older than 30 days is replaced by a new download.
+
+        Chosen input: the cache is moved 31 days back and ICMECAT_URL then
+        serves the one-event catalog S1, so only a new download gives S1.
 
         ON FAILURE: the code is wrong.
         """
-        cache_dir = tmp_path / "a" / "b"
-        serve_catalog()
-        ICMECAT(cache_dir=cache_dir)
-        assert (cache_dir / "icmecat.csv").is_file()
+        self.serve_cached(serve_catalog, monkeypatch)
+        ICMECAT()
+        self.backdate(31)
+        self.serve_cached(serve_catalog, monkeypatch, catalog.iloc[[5]])
+        cat = ICMECAT()
+        assert cat.data["icmecat_id"].tolist() == ["S1"]
 
-    def test_download_writes_into_an_existing_empty_cache_directory(
-        self, serve_catalog, tmp_path
-    ):
-        """An existing cache directory without a cache file is written into.
+    def test_a_download_is_listed_in_the_cache(self, serve_catalog, monkeypatch):
+        """The downloaded catalog appears in the cache listing under its URL.
 
         ON FAILURE: the code is wrong.
         """
-        cache_dir = tmp_path / "cache"
-        cache_dir.mkdir()
-        serve_catalog()
-        ICMECAT(cache_dir=cache_dir)
-        assert (cache_dir / "icmecat.csv").is_file()
+        self.serve_cached(serve_catalog, monkeypatch)
+        ICMECAT()
+        assert cache.cache_contents().index.tolist() == [icmecat.ICMECAT_URL]
 
 
 class TestICMECATGetEventsInRange:

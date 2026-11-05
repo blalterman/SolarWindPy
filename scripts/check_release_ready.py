@@ -128,11 +128,11 @@ def check_tests() -> Tuple[bool, str]:
 
 def check_linting() -> Tuple[bool, str]:
     """Check if code passes linting."""
-    code, stdout, stderr = run_command(["flake8", "--count"])
+    code, stdout, stderr = run_command(["ruff", "check"])
     if code != 0:
         return (
             False,
-            f"Linting errors found. Fix with 'black .' and address flake8 issues:\n{stderr}",
+            f"Linting errors found. Fix with 'ruff format .' and address ruff check issues:\n{stdout}",
         )
 
     return True, "Code passes linting"

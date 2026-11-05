@@ -15,9 +15,9 @@ _STYLE_PATH = Path(__file__).parent / "solarwindpy.mplstyle"
 plt.style.use(_STYLE_PATH)
 
 __all__ = [
-    "agg_plot",
     "base",
     "binned",
+    "binning",
     "hist1d",
     "hist2d",
     "labels",
@@ -27,9 +27,9 @@ __all__ = [
 ]
 
 from . import (  # noqa: E402 - imports after style application is intentional
-    agg_plot,
     base,
     binned,
+    binning,
     hist1d,
     hist2d,
     labels,

@@ -13,20 +13,15 @@ repos:
     files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
 
-- repo: https://github.com/psf/black
-  rev: 26.5.1
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.17.3
   hooks:
-  - id: black
+  - id: ruff-check
     files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
-
-- repo: https://github.com/pycqa/flake8
-  rev: 7.3.0
-  hooks:
-  - id: flake8
+  - id: ruff-format
     files: ^(solarwindpy|tests|scripts|\.claude)/.*\.py$
     exclude: \.claude/templates/.*\.py$
-    additional_dependencies: [flake8-docstrings==1.7.0]
 
 - repo: https://github.com/PyCQA/doc8
   rev: v1.1.1

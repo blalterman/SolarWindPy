@@ -93,7 +93,7 @@ jobs:
           
           # Optional: Add specific tools for running tests or linting. v1 removed
           # the `allowed_tools` input; tool permissions go through claude_args.
-          # claude_args: "--allowedTools 'Bash(pytest -q),Bash(black --check:*),Bash(flake8:*)'"
+          # claude_args: "--allowedTools 'Bash(pytest -q),Bash(ruff check:*),Bash(ruff format --check:*)'"
           
           # Optional: Skip review for certain conditions
           # if: |

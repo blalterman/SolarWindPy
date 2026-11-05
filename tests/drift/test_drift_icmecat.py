@@ -2,7 +2,7 @@
 # Supersedes: none
 """Drift assertions for the pinned HELIO4CAST ICMECAT catalog.
 
-Restates every fact solarwindpy/solar_activity/icme/icmecat.py:11 depends on
+Restates every fact icmecat.ICMECAT_URL depends on
 as a local, evaluable assertion: the pinned URL still resolves, no successor
 version has appeared, the columns the module indexes are still present, and
 SPACECRAFT_NAMES still matches the catalog exactly.
@@ -34,7 +34,7 @@ REQUIRED_COLUMNS = [
     "sc_insitu",
 ]
 
-_LOCATION = "solarwindpy/solar_activity/icme/icmecat.py:11 (ICMECAT_URL)"
+_LOCATION = "solarwindpy/solar_activity/icme/icmecat.py::ICMECAT_URL"
 
 
 def test_pinned_url_head_ok(head_status):
@@ -64,8 +64,8 @@ def test_successor_url_not_yet_published(head_status):
         fact="HELIO4CAST published ICMECAT v24",
         location=_LOCATION,
         remedy=(
-            "change the version in ICMECAT_URL; re-verify _DATETIME_COLUMNS "
-            "(icmecat.py:32) and REQUIRED_COLUMNS against the new schema; "
+            "change the version in ICMECAT_URL; re-verify "
+            "icmecat._DATETIME_COLUMNS and REQUIRED_COLUMNS against the new schema; "
             "refresh SPACECRAFT_NAMES from the new catalog's sc_insitu values."
         ),
     )
@@ -88,6 +88,6 @@ def test_spacecraft_names_match_catalog(live_catalog):
         SPACECRAFT_NAMES,
         live_catalog["sc_insitu"].unique(),
         fact="SPACECRAFT_NAMES matches the catalog's sc_insitu values",
-        location="solarwindpy/solar_activity/icme/icmecat.py:14 (SPACECRAFT_NAMES)",
+        location="solarwindpy/solar_activity/icme/icmecat.py::SPACECRAFT_NAMES",
         remedy="refresh SPACECRAFT_NAMES from the new catalog's sc_insitu values",
     )

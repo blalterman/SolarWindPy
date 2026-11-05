@@ -13,10 +13,12 @@ from solarwindpy.fitfunctions.core import (
     FitFailedError,
     InvalidParameterError,
     InsufficientDataError,
+    NotFittedError,
 )
 from solarwindpy.fitfunctions.plots import FFPlot
 from solarwindpy.fitfunctions.tex_info import TeXinfo
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 def linear_function(x, m, b):
@@ -229,12 +231,12 @@ def test_make_fit_success_failure(simple_linear_data, small_n):
 
     x, y, w = small_n
     lf_small = LinearFit(x, y, weights=w)
-    err = lf_small.make_fit(return_exception=True)
+    err = attempt_fit(lf_small)
     assert isinstance(err, InsufficientDataError)
 
     x, y, w = simple_linear_data
     lf_fail = LinearFit(x, y, weights=w)
-    err = lf_fail.make_fit(return_exception=True, max_nfev=1)
+    err = attempt_fit(lf_fail, max_nfev=1)
     assert isinstance(err, FitFailedError)
     assert "Optimal parameters not found" in str(err)
     with pytest.raises(FitFailedError, match="Optimal parameters not found"):
@@ -270,14 +272,15 @@ def test_str_call_and_properties(fitted_linear):
     assert isinstance(lf.plotter, FFPlot)
     assert set(lf.popt) == {"m", "b"}
     assert set(lf.psigma) == {"m", "b"}
-    # combined_popt_psigma returns DataFrame; psigma_relative is trivially computable
-    combined = lf.combined_popt_psigma
+    # results holds each parameter's value and uncertainty
+    combined = lf.results
     assert isinstance(combined, pd.DataFrame)
-    assert set(combined.columns) == {"popt", "psigma"}
-    assert set(combined.index) == {"m", "b"}
-    # Verify relative uncertainty is trivially computable from DataFrame
-    psigma_relative = combined["psigma"] / combined["popt"]
-    assert set(psigma_relative.index) == {"m", "b"}
+    assert set(combined.columns.get_level_values("P")) >= {"m", "b"}
+    # Verify relative uncertainty is trivially computable from the table
+    psigma_relative = combined.xs("uncertainty", level="K", axis=1) / combined.xs(
+        "value", level="K", axis=1
+    )
+    assert set(psigma_relative.columns) == {"m", "b"}
     assert lf.pcov.shape == (2, 2)
     assert 0.0 <= lf.rsq <= 1.0
     assert lf.sufficient_data is True
@@ -290,26 +293,28 @@ def test_str_call_and_properties(fitted_linear):
 
 
 class TestChisqDofBeforeFit:
-    """Test chisq_dof property returns None before fit (lines 283-284)."""
+    """Test chisq_dof property raises before fit."""
 
-    def test_chisq_dof_returns_none_before_fit(self, simple_linear_data):
-        """Verify chisq_dof returns None when _chisq_dof attribute not set."""
+    def test_chisq_dof_raises_before_fit(self, simple_linear_data):
+        """Verify chisq_dof raises NotFittedError before make_fit."""
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
-        assert lf.chisq_dof is None
+        with pytest.raises(NotFittedError):
+            lf.chisq_dof
 
 
 class TestInitialGuessInfoBeforeFit:
-    """Test initial_guess_info property returns None before fit (lines 301-302)."""
+    """Test initial_guess_info property raises before fit."""
 
-    def test_initial_guess_info_returns_none_before_fit(self, simple_linear_data):
-        """``initial_guess_info`` is None on a fresh object that has not been fitted.
+    def test_initial_guess_info_raises_before_fit(self, simple_linear_data):
+        """``initial_guess_info`` raises on a fresh object that has not been fitted.
 
         ON FAILURE: the code is wrong -- an unfitted object reports a start.
         """
         x, y, w = simple_linear_data
         lf = LinearFit(x, y, weights=w)
-        assert lf.initial_guess_info is None
+        with pytest.raises(NotFittedError):
+            lf.initial_guess_info
 
 
 class TestWeightShapeValidation:
@@ -444,24 +449,23 @@ class TestMakeFitAssertionError:
     def test_make_fit_assertion_error_returned_as_insufficient_data(
         self, simple_linear_data
     ):
-        """With return_exception=True the falsy check comes back converted.
+        """The recorded error is the falsy check, converted.
 
         ON FAILURE: the code is wrong.
         """
         x, y, w = simple_linear_data
         lf = NeverEnoughData(x, y, weights=w)
 
-        err = lf.make_fit(return_exception=True)
+        err = attempt_fit(lf)
         assert isinstance(err, InsufficientDataError)
         assert "insufficient data to fit the model" in str(err)
 
     def test_make_fit_assertion_error_raised_as_insufficient_data(
         self, simple_linear_data
     ):
-        """With return_exception=False the same InsufficientDataError is raised.
+        """make_fit raises the same InsufficientDataError that it records.
 
-        ``return_exception`` chooses between returning and raising the
-        exception, so both paths must carry the same type.
+        The raised and the recorded exception must carry the same type.
 
         ON FAILURE: the code is wrong.
         """

@@ -23,14 +23,14 @@ class TestMetaclassMRO:
         mro_names = [c.__name__ for c in FitFunctionMeta.__mro__]
 
         # Should include docstring inheritance metaclass
-        assert (
-            "NumpyDocstringInheritanceInitMeta" in mro_names
-        ), "FitFunctionMeta must include NumpyDocstringInheritanceInitMeta in MRO"
+        assert "NumpyDocstringInheritanceInitMeta" in mro_names, (
+            "FitFunctionMeta must include NumpyDocstringInheritanceInitMeta in MRO"
+        )
 
         # Should include ABC metaclass
-        assert (
-            "ABCMeta" in mro_names
-        ), "FitFunctionMeta must include ABCMeta in MRO for abstract methods"
+        assert "ABCMeta" in mro_names, (
+            "FitFunctionMeta must include ABCMeta in MRO for abstract methods"
+        )
 
     def test_metaclass_instantiation(self):
         """Verify FitFunctionMeta can be instantiated without MRO errors."""
@@ -127,8 +127,8 @@ class TestDocstringInheritance:
         from solarwindpy.fitfunctions.lines import Line
 
         class ChildFit(Line):
-            def make_fit(self, return_exception=False, **kwargs):
-                return super().make_fit(return_exception, **kwargs)
+            def make_fit(self, **kwargs):
+                return super().make_fit(**kwargs)
 
         summary = FitFunction.make_fit.__doc__.strip().splitlines()[0]
         assert summary in ChildFit.make_fit.__doc__
@@ -170,12 +170,12 @@ class TestAllFitFunctionsInstantiate:
         for FitClass in fitfunctions:
             try:
                 instance = FitClass(x, y)
-                assert isinstance(
-                    instance, FitFunction
-                ), f"{FitClass.__name__} instantiation failed"
-                assert hasattr(
-                    instance, "function"
-                ), f"{FitClass.__name__} missing function property"
+                assert isinstance(instance, FitFunction), (
+                    f"{FitClass.__name__} instantiation failed"
+                )
+                assert hasattr(instance, "function"), (
+                    f"{FitClass.__name__} missing function property"
+                )
             except Exception as e:
                 pytest.fail(
                     f"{FitClass.__name__} instantiation raised unexpected error: {e}"

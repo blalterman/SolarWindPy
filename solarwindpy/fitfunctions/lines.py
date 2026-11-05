@@ -115,6 +115,8 @@ class LineXintercept(FitFunction):
     or cutoff velocities in solar wind measurements.
     """
 
+    _TeX_argnames = {"x0": "x_0"}
+
     @property
     def function(self):
         def line(x, m, x0):

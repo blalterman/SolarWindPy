@@ -15,9 +15,9 @@ Development guidelines and standards for SolarWindPy scientific software.
 - MultiIndex access via level names: `df.xs('v', level='M')`
 
 ## Testing
-- **Coverage**: ≥80% required (`--cov-fail-under=80` in `.claude/hooks/pre-commit-tests.sh`)
+- **Coverage**: the floor is the `--cov-fail-under` argument in `.claude/hooks/pre-commit-tests.sh`
 - **Structure**: `/tests/` mirrors source structure
-- **Automation**: Smart test execution via `.claude/hooks/test-runner.sh`
+- **Automation**: the pre-commit hook runs the full suite; `.claude/hooks/test-runner.sh` runs subsets by hand
 - **Quality Patterns**: See [TEST_PATTERNS.md](./TEST_PATTERNS.md) for the test standard
 - **Templates**: Use `.claude/scripts/generate-test.py` for test scaffolding
 
@@ -66,8 +66,8 @@ git add pyproject.toml
 ```
 
 ## Code Quality Standards
-- **Formatting**: Black for code formatting (88 characters)
-- **Linting**: Flake8 for style checking (88 characters)
+- **Formatting**: `ruff format` (88 characters)
+- **Linting**: `ruff check`, with pycodestyle, pyflakes, mccabe and numpy-convention pydocstyle rules
 - **Documentation**: NumPy-style docstrings with doc8 validation (100 characters)
 - **Commits**: Conventional Commits format; AI-written commits carry the `Co-Authored-By` trailer
 - **Testing**: All tests must pass before committing
@@ -118,7 +118,7 @@ References
 ### Documentation Standards (doc8)
 
 **Line Length Guidelines**:
-- **Code lines**: 88 characters (black/flake8)
+- **Code lines**: 88 characters (ruff)
 - **Documentation lines**: 100 characters (doc8)
 
 **Scientific Documentation Best Practices**:

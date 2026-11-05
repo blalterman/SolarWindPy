@@ -57,7 +57,7 @@ def test_default_plot_bins_log10_beta_and_anisotropy_and_hides_cells_below_5():
 
     ON FAILURE: the code is wrong.
     """
-    ax, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS).make_plot()
+    ax, _, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS).make_plot()
     mesh = _mesh(ax)
 
     counts, xedges, yedges = np.histogram2d(np.log10(BETA), np.log10(ANI), bins=NBINS)
@@ -78,7 +78,7 @@ def test_logx_false_bins_beta_linearly():
 
     ON FAILURE: the code is wrong.
     """
-    ax, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS, logx=False).make_plot()
+    ax, _, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS, logx=False).make_plot()
     coords = _mesh(ax).get_coordinates()
     xedges = np.histogram_bin_edges(BETA, NBINS)  # [1, 50.5, 100]
     assert np.asarray(coords[0, :, 0]) == exact(xedges)
@@ -89,10 +89,10 @@ def test_logx_false_bins_beta_linearly():
     "species,beta_label,ani_label",
     [
         ("p", ("beta", "par", "p"), ("R", "T", "p")),
-        ("p_bimax", ("beta", "par", "p"), ("R", "T", "p")),
+        ("p_bimax", ("beta", "par", "p_bimax"), ("R", "T", "p_bimax")),
         ("p1+p2", ("beta", "par", "p1+p2"), ("R", "P", "p1+p2")),
     ],
-    ids=["single", "bimax-suffix-dropped", "summed-species-uses-pressure"],
+    ids=["single", "bimax-species-names-the-fit", "summed-species-uses-pressure"],
 )
 def test_axes_are_labelled_parallel_beta_and_anisotropy_of_species(
     species, beta_label, ani_label
@@ -103,7 +103,7 @@ def test_axes_are_labelled_parallel_beta_and_anisotropy_of_species(
 
     ON FAILURE: the code is wrong.
     """
-    ax, _ = BetaRPlot(BETA, ANI, species, nbins=NBINS).make_plot()
+    ax, _, _ = BetaRPlot(BETA, ANI, species, nbins=NBINS).make_plot()
     assert ax.get_xlabel() == str(TeXlabel(beta_label))
     assert ax.get_ylabel() == str(TeXlabel(ani_label))
 
@@ -116,5 +116,5 @@ def test_colormap_defaults_to_greens_r_and_honours_caller(kwargs, expected):
 
     ON FAILURE: the code is wrong.
     """
-    ax, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS).make_plot(**kwargs)
+    ax, _, _ = BetaRPlot(BETA, ANI, "p", nbins=NBINS).make_plot(**kwargs)
     assert _mesh(ax).get_cmap().name == expected

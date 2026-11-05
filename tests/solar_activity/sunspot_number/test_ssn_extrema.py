@@ -4,8 +4,8 @@
 Every test in this module reads the actual CSV that ships with the package,
 ``solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv``, whose own header
 cites <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt> as its source.
-Nothing here mocks :func:`pandas.read_csv`; the ``skiprows=48`` at
-``sidc.py:552`` is the most fragile line in the module and it is executed by
+Nothing here mocks :func:`pandas.read_csv`; the ``skiprows=48`` in
+``sidc.SSNExtrema.load_or_set_data`` is the most fragile line in the module and it is executed by
 every test below.
 
 Expectations are derived from the file itself (parsed independently with the
@@ -108,15 +108,15 @@ SKIPROWS = 48
 
 
 def test_header_line_index_matches_measurement(raw_csv):
-    """The 'Number,' header line is where sidc.py:552's skiprows expects.
+    """The 'Number,' header line is where SSNExtrema's skiprows expects.
 
     skiprows=48 does not land directly on the header line (raw index 49); it
     lands on the blank line immediately before it, which pandas'
     skip_blank_lines default then absorbs. Both facts are measured here, not
     assumed.
 
-    ON FAILURE: the CSV's comment header changed length. Update skiprows at
-    sidc.py:552 to match, and update EXPECTED_HEADER_LINE_INDEX here.
+    ON FAILURE: the CSV's comment header changed length. Update skiprows in
+    sidc.SSNExtrema.load_or_set_data to match, and update EXPECTED_HEADER_LINE_INDEX here.
     """
     header_index, _, _ = raw_csv
     assert header_index == EXPECTED_HEADER_LINE_INDEX
@@ -161,7 +161,7 @@ def test_loaded_rows_match_an_independent_parse(extrema, raw_csv):
 def test_extrema_are_datetimes(extrema):
     """Both columns are parsed to datetimes, not left as strings.
 
-    ON FAILURE: to_datetime at sidc.py:553 is not being applied. The code is
+    ON FAILURE: to_datetime in sidc.SSNExtrema.load_or_set_data is not being applied. The code is
     wrong.
     """
     for column in ("Min", "Max"):
@@ -174,7 +174,7 @@ def test_columns_are_named_kind(extrema):
     IndicatorExtrema.calculate_extrema_bands unstacks on level "kind", so the
     name is part of the contract, not cosmetics.
 
-    ON FAILURE: sidc.py:554 stopped naming the columns. The code is wrong.
+    ON FAILURE: sidc.SSNExtrema.load_or_set_data stopped naming the columns. The code is wrong.
     """
     assert extrema.data.columns.names == ["kind"]
     assert set(extrema.data.columns) == {"Min", "Max"}
@@ -314,7 +314,7 @@ def test_load_or_set_data_rejects_arguments(extrema, args, kwargs):
     The error names the class so a caller of a sibling IndicatorExtrema can
     tell which one rejected them.
 
-    ON FAILURE: the guard at sidc.py:546 is gone and a caller passing a path
+    ON FAILURE: the argument guard in sidc.SSNExtrema.load_or_set_data is gone and a caller passing a path
     would be silently ignored. The code is wrong.
     """
     with pytest.raises(ValueError, match="SSNExtrema expects empty args and kwargs"):

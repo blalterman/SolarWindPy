@@ -16,7 +16,17 @@ import numpy as np
 # accidentally cause a problem.
 
 from . import base
+from . import quantities
 from . import vector
+
+# The spacecraft and frames SolarWindPy supports. Frame transformations are not
+# generalized, so a frame is listed only when `Spacecraft.distance2sun` converts
+# it and the quantity registry has its lower-cased entry, whose `si` is the
+# position unit in metres; `set_frame_name` refuses anything not listed here.
+_SUPPORTED = {
+    "frame": ("GSE", "HCI"),
+    "name": ("PSP", "WIND"),
+}
 
 
 class Spacecraft(base.Base):
@@ -56,7 +66,7 @@ class Spacecraft(base.Base):
 
         >>> import solarwindpy as swp
         >>> from solarwindpy.core.spacecraft import Spacecraft
-        >>> data = swp.examples.load_plasma().spacecraft.data
+        >>> data = swp.examples.load_plasma().sc.data
         >>> data.columns.tolist()  # doctest: +NORMALIZE_WHITESPACE
         [('carr', 'lat'), ('carr', 'lon'), ('pos', 'x'), ('pos', 'y'),
          ('pos', 'z'), ('v', 'x'), ('v', 'y'), ('v', 'z')]
@@ -67,9 +77,9 @@ class Spacecraft(base.Base):
         >>> spacecraft = Spacecraft(data, "psp", "HCI")
         >>> spacecraft.name, spacecraft.frame
         ('PSP', 'HCI')
-        >>> spacecraft.position.data.loc[:, "x"].tolist()
+        >>> spacecraft.pos.data.loc[:, "x"].tolist()
         [-42.0, -22.0, -34.0]
-        >>> spacecraft.velocity.data.loc[:, "y"].tolist()
+        >>> spacecraft.v.data.loc[:, "y"].tolist()
         [-80.0, -70.0, -90.0]
         """
         # `Base.__init__` calls `set_data`, which needs neither frame nor name.
@@ -88,7 +98,7 @@ class Spacecraft(base.Base):
         return self._name
 
     @property
-    def position(self):
+    def pos(self):
         """Position vector of the spacecraft.
 
         Returns
@@ -97,28 +107,34 @@ class Spacecraft(base.Base):
             Position vector with x, y, z components, built from the
             spacecraft's already-checked columns, so it skips the time checks.
         """
-        pos = self.data.xs("pos", axis=1, level="M").loc[:, ("x", "y", "z")]
+        pos = self._select(self.data.xs("pos", axis=1, level="M"), ["x", "y", "z"], "C")
         return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
-    def pos(self):
-        """Shortcut to position property.
+    def pos_units(self):
+        r"""TeX of the position unit, read from the registry entry of the frame.
+
+        The ``pos`` registry entry states no unit because the unit depends on
+        the frame: Earth radii in GSE, solar radii in HCI.
 
         Returns
         -------
-        vector.Vector
-            Position vector with x, y, z components.
+        str
+            ``QUANTITIES[frame.lower()].units``.
+
+        Examples
+        --------
+        >>> import solarwindpy as swp
+        >>> sc = swp.examples.load_plasma().sc
+        >>> sc.frame
+        'HCI'
+        >>> print(sc.pos_units)
+        \mathrm{R}_\odot
         """
-        # Ensures that `sc.pos` returns vector.
-        return self.position
+        return quantities.QUANTITIES[self.frame.lower()].units
 
     @property
-    def r(self):
-        r"""Shortcut to :py:attr:`position`."""
-        return self.position
-
-    @property
-    def velocity(self):
+    def v(self):
         """Velocity vector of the spacecraft.
 
         Returns
@@ -133,32 +149,28 @@ class Spacecraft(base.Base):
             If spacecraft velocity data is not available.
         """
         try:
-            v = self.data.xs("v", axis=1, level="M").loc[:, ("x", "y", "z")]
+            v = self._select(self.data.xs("v", axis=1, level="M"), ["x", "y", "z"], "C")
             return vector.Vector(v, _time_checked=self.data.index)
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know it's velocity.")
 
     @property
-    def v(self):
-        r"""Shortcut to :py:attr:`velocity`."""
-        return self.velocity
-
-    @property
-    def carrington(self):
+    def carr(self):
         r"""Carrington latitude and longitude."""
         try:
-            return self.data.xs("carr", axis=1, level="M").loc[:, ("lat", "lon")]
+            carr = self.data.xs("carr", axis=1, level="M")
+            return self._select(carr, ["lat", "lon"], "C")
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know its Carrington location.")
 
     @property
     def distance2sun(self):
         r"""Radial distance to Sun in meters."""
-        pos = self.position.data
+        pos = self.pos.data
         frame = self.frame
 
         if frame == "GSE":
-            re = self.constants.misc.loc["Re [m]"]
+            re = quantities.QUANTITIES[frame.lower()].si
             au = self.constants.misc.loc["1AU [m]"]
             sign_x = pd.Series(
                 [-1.0, 1.0, 1.0], index=pd.Index(("x", "y", "z"), name="C")
@@ -171,15 +183,22 @@ class Spacecraft(base.Base):
             )
 
         elif frame == "HCI":
-            rs = self.constants.misc.loc["Rs [m]"]
+            rs = quantities.QUANTITIES[frame.lower()].si
             pos_SI = pos.multiply(rs)
 
         else:
-            raise NotImplementedError("Unrecognized reference frame `{}`".format(frame))
+            raise NotImplementedError(
+                "Unrecognized reference frame `{}`; supported frames are {}".format(
+                    frame, ", ".join(_SUPPORTED["frame"])
+                )
+            )
 
         # distance2sun units should be [m], so this shouldn't matter. However, just as
         # beta is treated in this way, we similarly treat distance2sun.
-        d2s = pos_SI.pow(2).sum(axis=1).pipe(np.sqrt) / self.units.distance2sun
+        d2s = (
+            self._component_reduce(pos_SI.pow(2)).pipe(np.sqrt)
+            / self.units.distance2sun
+        )
         d2s.name = "distance2sun"
         return d2s
 
@@ -194,22 +213,30 @@ class Spacecraft(base.Base):
         Parameters
         ----------
         frame : str
-            Coordinate frame ('GSE' or 'HCI').
+            Coordinate frame, one of ``_SUPPORTED["frame"]``.
         name : str
-            Spacecraft name.
+            Spacecraft name, one of ``_SUPPORTED["name"]``.
 
         Raises
         ------
         NotImplementedError
-            If frame is not 'GSE' or 'HCI'.
+            If the frame or the name is not supported.
         """
         frame = frame.upper()
         name = name.upper()
 
-        if frame not in ("GSE", "HCI"):
-            raise NotImplementedError("Unrecognized frame: {}".format(frame))
-        if name not in ("WIND", "PSP"):
-            raise NotImplementedError("Unrecognized name: {}".format(name))
+        if frame not in _SUPPORTED["frame"]:
+            raise NotImplementedError(
+                "Unrecognized frame: {}; supported: {}".format(
+                    frame, ", ".join(_SUPPORTED["frame"])
+                )
+            )
+        if name not in _SUPPORTED["name"]:
+            raise NotImplementedError(
+                "Unrecognized name: {}; supported: {}".format(
+                    name, ", ".join(_SUPPORTED["name"])
+                )
+            )
 
         self._frame = frame
         self._name = name
@@ -240,7 +267,7 @@ class Spacecraft(base.Base):
 
         p = data.xs("pos", axis=1, level="M")
 
-        p = p.loc[:, ["x", "y", "z"]]
+        p = self._select(p, ["x", "y", "z"], "C")
         assert p.shape[1] == 3
 
         target = {"pos": p}
@@ -248,7 +275,7 @@ class Spacecraft(base.Base):
         try:
             v = data.xs("v", axis=1, level="M")
             assert isinstance(v, pd.DataFrame)
-            v = v.loc[:, ["x", "y", "z"]]
+            v = self._select(v, ["x", "y", "z"], "C")
             assert v.shape[1] == 3
             target["v"] = v
         except KeyError:
@@ -257,7 +284,7 @@ class Spacecraft(base.Base):
         try:
             c = data.xs("carr", axis=1, level="M")
             assert isinstance(c, pd.DataFrame)
-            c = c.loc[:, ["lat", "lon"]]
+            c = self._select(c, ["lat", "lon"], "C")
             assert c.shape[1] == 2
             target["carr"] = c
         except KeyError:

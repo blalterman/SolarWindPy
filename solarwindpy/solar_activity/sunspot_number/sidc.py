@@ -207,22 +207,29 @@ class SIDCLoader(DataLoader):
     r"""Download, cache, and load one SIDC sunspot-number series."""
 
     @property
-    def data_path(self):
-        r"""Cache directory for this series, ``<DataLoader.data_path>/sidc/<key>``."""
-        return super().data_path / "sidc" / self.key
+    def max_age(self):
+        r"""One day: SILSO updates its series daily."""
+        return pd.Timedelta(days=1)
 
     def convert_nans(self, data):
         r"""Replace SILSO's missing-value sentinel, -1, with NaN in place."""
         data.replace(-1, np.nan, inplace=True)
 
-    def download_data(self, new_data_path, old_data_path):
-        r"""Download and save the data to `new_data_path`.
+    def read_data(self, path):
+        r"""Parse a series downloaded from SILSO.
 
-        If `old_data_path` exists,
-        remove it.
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            File in SILSO's semicolon-separated, headerless layout.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The series indexed by time, with -1 replaced by NaN and a standard
+            error, std / sqrt(n), added for each standard deviation.
         """
-        url = self.url
-        self.logger.info("Downloading from SIDC sunspot number\nurl: %s", url)
+        self.logger.info("Reading SIDC sunspot number\npath: %s", path)
 
         key = self.key
         dtypes_columns = _Dtypes_Columns._asdict().get(key)
@@ -231,7 +238,7 @@ class SIDCLoader(DataLoader):
                 f"""You have not yet used the SSN specified by your key ({key}). Please verify the column labels before continuing."""
             )
 
-        csv = pd.read_csv(self.url, sep=";", header=None, dtype=dtypes_columns.dtypes)
+        csv = pd.read_csv(path, sep=";", header=None, dtype=dtypes_columns.dtypes)
         csv.columns = dtypes_columns.columns
 
         if key in ("m13", "m", "hm", "hm13"):
@@ -264,7 +271,7 @@ class SIDCLoader(DataLoader):
             cnt.columns = cnt.columns.to_series().str.split("_").apply(lambda x: x[1])
             std_error = std.divide(cnt.apply(np.sqrt), axis=1)
 
-            std_error.columns = (std_error.columns.to_series() + "std_error").values
+            std_error.columns = (std_error.columns.to_series() + "_std_error").values
 
             csv = pd.concat([csv, std_error], axis=1, sort=True)
 
@@ -277,17 +284,10 @@ class SIDCLoader(DataLoader):
 
         csv.set_index(ts, inplace=True)
         self.convert_nans(csv)
-
-        new_data_path = new_data_path.with_suffix(".csv")
-        csv.to_csv(new_data_path, sep=",", na_rep="NaN")
-        old_data_path = old_data_path.with_suffix(".csv")
-        try:
-            old_data_path.unlink()
-        except FileNotFoundError:
-            pass
+        return csv
 
     def load_data(self):
-        r"""Load today's cached series and label each row with its cycle.
+        r"""Load the cached series and label each row with its cycle.
 
         Downloads the series first if the cache is stale. Adds a ``cycle``
         column holding the number of the solar cycle, from
@@ -362,11 +362,9 @@ class SIDC(ActivityIndicator):
         pandas.DataFrame
             Interpolated values; NaN outside the data's time range.
         """
-        interpolated = super(SIDC, self).interpolate_data(
+        return self._interpolate(
             self.data.loc[:, key].dropna(how="any", axis=0), target_index
         )
-        self._interpolated = interpolated
-        return interpolated
 
     def calculate_extrema_kind(self):
         r"""Determine whether an SSN observation belongs to a cycle Minimum or Maximum.
@@ -511,14 +509,57 @@ class SIDC(ActivityIndicator):
         self._ssn_band_intervals = intervals
         return cut
 
+    @staticmethod
+    def ssn_scale_top(ssn):
+        r"""Top of an SSN scale that starts at 0 and holds all of ``ssn``.
+
+        The peak of ``ssn`` rounded up to the next multiple of 100, and never
+        less than 100, so the series always stays inside the scale and a
+        quiet or empty series cannot give a zero-height scale.
+
+        Parameters
+        ----------
+        ssn : pandas.Series
+            Sunspot numbers to fit on the scale.
+
+        Returns
+        -------
+        int
+            The scale top.
+        """
+        # Python's max keeps 100 when the peak is NaN (an empty series).
+        return int(max(100, np.ceil(ssn.max() / 100.0) * 100))
+
     def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
         r"""Plot SSN on the color bar.
 
         The sunspot numbers are scaled onto the colour bar's value axis over
-        ``[0, top]``, where ``top`` is the window's peak SSN rounded up to the
-        next multiple of 100 and never less than 100, so the line always stays
-        inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
+        ``[0, top]``, where ``top`` is :meth:`ssn_scale_top` of the window, so
+        the line always stays inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
         minor ticks fall every 25.
+
+        Parameters
+        ----------
+        cax : matplotlib.axes.Axes
+            The colour bar's axes.
+        t0, t1 : datetime-like
+            Start and end of the window plotted.
+        vertical_cbar : bool
+            If True, the colour bar is vertical: time runs along its y-axis
+            and the SSN scale along its x-axis.
+
+        Returns
+        -------
+        cax : matplotlib.axes.Axes
+        underlay : matplotlib.lines.Line2D
+            The solid white line drawn under the overlay.
+        overlay : matplotlib.lines.Line2D
+            The dash-dotted black sunspot-number line.
+        cbar : None
+            The method receives only the colour bar's axes, not the
+            :class:`matplotlib.colorbar.Colorbar`, so the slot is always None;
+            it keeps the return order ``(ax, artists..., cbar)`` shared by
+            every plot.
         """
         # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
         ssn = self.data.loc[t0:t1, "ssn"]
@@ -532,15 +573,15 @@ class SIDC(ActivityIndicator):
             y0, y1 = cax.get_ylim()
 
         dy = y1 - y0
-        # Round the peak up to the next 100, never below 100, so the line
-        # stays inside the scale and a quiet window cannot divide by zero.
-        s0, s1 = 0, int(max(100, np.ceil(ssn.max() / 100.0) * 100))
+        s0, s1 = 0, self.ssn_scale_top(ssn)
         y = ((y / s1) * dy) + y0
 
         if vertical_cbar:
-            cax.plot(y, x, ls="-", color="w", lw=1)
-            cax.plot(y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
-            cax.set_xlabel(r"$\mathrm{SSN} \; [\#]$")
+            (underlay,) = cax.plot(y, x, ls="-", color="w", lw=1)
+            (overlay,) = cax.plot(
+                y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
+            )
+            cax.set_xlabel(r"$\mathrm{SSN} \; \left[\#\right]$")
             x0, x1 = cax.get_xlim()
 
             # We force the maximum value to be even and minimum value to be
@@ -552,9 +593,11 @@ class SIDC(ActivityIndicator):
             cax.yaxis.set_tick_params(left=True)
 
         else:
-            cax.plot(x, y, ls="-", color="w", lw=1)
-            cax.plot(x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
-            cax.set_ylabel(r"$\mathrm{SSN} \; [\#]$")
+            (underlay,) = cax.plot(x, y, ls="-", color="w", lw=1)
+            (overlay,) = cax.plot(
+                x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
+            )
+            cax.set_ylabel(r"$\mathrm{SSN} \; \left[\#\right]$")
             x0, x1 = cax.get_ylim()
 
             # We force the maximum value to be even and minimum value to be
@@ -566,6 +609,8 @@ class SIDC(ActivityIndicator):
             cax.xaxis.set_tick_params(top=True)
             cax.xaxis.set_ticks_position("top")
             cax.xaxis.set_label_position("top")
+
+        return cax, underlay, overlay, None
 
 
 class SSNExtrema(IndicatorExtrema):

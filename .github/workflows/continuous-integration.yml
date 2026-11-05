@@ -40,18 +40,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
+          # tests/test_release_artifacts.py builds with --no-isolation and needs these
+          pip install build setuptools_scm wheel
       
       - name: Run core tests
         run: |
           pytest --tb=short --disable-warnings tests/
       
       - name: Check code formatting
-        # black and flake8 run at the versions pinned in .pre-commit-config.yaml,
-        # the one place those versions are declared.
+        # ruff runs at the version pinned in .pre-commit-config.yaml,
+        # the one place that version is declared.
         run: |
           pip install pre-commit
-          pre-commit run black --show-diff-on-failure --files $(git ls-files 'solarwindpy/*.py')
-          pre-commit run flake8 --files $(git ls-files 'solarwindpy/*.py')
+          pre-commit run ruff-check --files $(git ls-files 'solarwindpy/*.py')
+          pre-commit run ruff-format --show-diff-on-failure --files $(git ls-files 'solarwindpy/*.py')
       
       - name: Verify imports
         run: |
@@ -61,6 +63,12 @@ jobs:
         # Contracts live in pyproject.toml [tool.importlinter].
         run: |
           lint-imports
+
+      - name: Build and check release artifacts
+        # The same isolated build the publish workflow runs, then the same check.
+        run: |
+          python -m build --outdir dist
+          python scripts/check_release_artifacts.py dist
 
   # Summary job
   ci-summary:

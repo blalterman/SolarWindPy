@@ -2,7 +2,7 @@
 SolarWindPy
 ###########
 
-|Build Status| |Docs Status| |Black Code|
+|Build Status| |Docs Status| |Ruff|
 
 |PyPI| |Conda|
 
@@ -109,7 +109,7 @@ Development
 
       pre-commit install
 
-   This will run ``black`` and ``flake8`` automatically when committing.
+   This will run ``ruff check`` and ``ruff format`` automatically when committing.
 
 5. Build the documentation and fail on warnings:
 
@@ -139,8 +139,8 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
    :target: https://solarwindpy.readthedocs.io/en/latest/?badge=latest
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE
-.. |Black Code| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-   :target: https://github.com/psf/black
+.. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+   :target: https://github.com/astral-sh/ruff
 .. |Zenodo| image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17042839-blue.svg
    :target: https://doi.org/10.5281/zenodo.17042839
 .. |PyPI| image:: https://img.shields.io/pypi/v/solarwindpy.svg

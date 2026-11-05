@@ -122,7 +122,7 @@ class TestCarringtonRotation:
         """Test string representation."""
         result = str(carrington_label)
         assert "CR" in result
-        assert r"[\#]" in result
+        assert r"\left[\#\right]" in result
 
     def test_path(self, carrington_label):
         """Test path property."""
@@ -191,7 +191,7 @@ class TestPower:
         power = labels_special.Power()
         result = str(power)
         assert "Power" in result
-        assert r"[\mathrm{\#}]" in result
+        assert r"\left[\mathrm{\#}\right]" in result
 
 
 class TestProbability:
@@ -677,7 +677,7 @@ def test_probability_tex_units_and_string(n_p1):
     """
     label = labels_special.Probability(n_p1, "> 5")
     assert label.tex == r"\mathrm{Prob.}(n_{p_1} \, > \, 5)"
-    assert str(label) == r"$\mathrm{Prob.}(n_{p_1} \, > \, 5) \; [\%]$"
+    assert str(label) == r"$\mathrm{Prob.}(n_{p_1} \, > \, 5) \; \left[\%\right]$"
 
 
 def test_count_other_tex_and_both_string_forms(n_p1):
@@ -687,9 +687,11 @@ def test_count_other_tex_and_both_string_forms(n_p1):
     """
     label = labels_special.CountOther(n_p1, "> 5")
     assert label.tex == r"\mathrm{Count.}(n_{p_1} \, > \, 5)"
-    assert str(label) == r"$\mathrm{Count.}(n_{p_1} \, > \, 5) \; [\#]$"
+    assert str(label) == r"$\mathrm{Count.}(n_{p_1} \, > \, 5) \; \left[\#\right]$"
     two_lines = labels_special.CountOther(n_p1, "> 5", new_line_for_units=True)
-    assert str(two_lines) == (r"$\mathrm{Count.}(n_{p_1} \, > \, 5) $" "\n" r"$ [\#]$")
+    assert str(two_lines) == (
+        r"$\mathrm{Count.}(n_{p_1} \, > \, 5) $" "\n" r"$ \left[\#\right]$"
+    )
 
 
 def test_count_other_without_comparison_stores_empty_string(n_p1):
@@ -720,7 +722,7 @@ def test_count_tex_and_path_per_normalization(norm, tex, path):
     label = labels_special.Count(norm)
     assert label.tex == tex
     assert label.path == Path(path)
-    assert str(label) == rf"${tex} \; [\#]$"
+    assert str(label) == rf"${tex} \; \left[\#\right]$"
 
 
 def test_math_fcn_tex_units_and_both_string_forms(n_p1):
@@ -798,15 +800,19 @@ def test_fixed_special_labels_print_exact_strings():
     assert str(labels_special.Vsw()) == (
         r"$V_\mathrm{SW} \; \left[\mathrm{km \, s^{-1}}\right]$"
     )
-    assert str(labels_special.CarringtonRotation()) == r"$\mathrm{CR} \; [\#]$"
+    assert (
+        str(labels_special.CarringtonRotation()) == r"$\mathrm{CR} \; \left[\#\right]$"
+    )
     long_cr = labels_special.CarringtonRotation(short_label=False)
     assert long_cr.tex == r"\mathrm{Carrington \; Rotation}"
-    assert str(labels_special.Power()) == r"$\mathrm{Power} \; [\mathrm{\#}]$"
+    assert (
+        str(labels_special.Power()) == r"$\mathrm{Power} \; \left[\mathrm{\#}\right]$"
+    )
     assert str(labels_special.Distance2Sun("m")) == (
-        r"$\mathrm{Distance \; to \; Sun} \; [\mathrm{m}]$"
+        r"$\mathrm{Distance \; to \; Sun} \; \left[\mathrm{m}\right]$"
     )
     assert str(labels_special.SSN("M13")) == (
-        r"$\mathrm{13 \; Month \; Smoothed \; SSN} \; [\#]$"
+        r"$\mathrm{13 \; Month \; Smoothed \; SSN} \; \left[\#\right]$"
     )
 
 
@@ -847,7 +853,9 @@ class TestManualLabelUnits:
         """
         label = labels_special.ManualLabel("Test Label", "b")
         assert label.units == r"\mathrm{nT}"
-        assert label.with_units == r"$\mathrm{Test \; Label} \; [\mathrm{nT}]$"
+        assert (
+            label.with_units == r"$\mathrm{Test \; Label} \; \left[\mathrm{nT}\right]$"
+        )
         assert str(label) == label.with_units
 
     def test_empty_units_leave_no_trailing_space(self):
@@ -894,7 +902,7 @@ class TestComparisonLabelStrings:
         assert label.tex == tex
         assert label.units == r"\mathrm{cm}^{-3}"
         assert label.path == Path(f"{name}-n_a-n_p1")
-        assert str(label) == rf"${tex} \; [\mathrm{{cm}}^{{-3}}]$"
+        assert str(label) == rf"${tex} \; \left[\mathrm{{cm}}^{{-3}}\right]$"
 
     def test_repeated_thin_spaces_collapse_to_one(self, n_a, n_p1):
         r"""Runs of ``\,`` in the filled template collapse to one, including at the start.
@@ -995,7 +1003,7 @@ class TestXcorrStrings:
         long_form = labels_special.Xcorr(n_p1, v, "pearson")
         assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}})"
         assert str(long_form) == (
-            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}}) \; [\#]$"
+            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}}) \; \left[\#\right]$"
         )
         assert long_form.path == Path("XcorrPearson-n_p1-v_x_a")
         short = labels_special.Xcorr(n_p1, v, "pearson", short_tex=True)

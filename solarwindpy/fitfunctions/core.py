@@ -12,14 +12,13 @@ __all__ = [
     "InsufficientDataError",
     "FitFailedError",
     "InvalidParameterError",
+    "NotFittedError",
     "FitDegeneracyWarning",
     "FitFunctionMeta",
     "FitFunction",
 ]
 
 import logging  # noqa: F401
-import os
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -46,6 +45,7 @@ except ImportError:  # pragma: no cover - fall back for older SciPy versions
     )
 from scipy.linalg import svd
 
+from ..tools import _warn
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
@@ -54,10 +54,15 @@ _UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
 _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
+# What make_fit records, success or failure: popt and psigma in argnames
+# order, the covariance, the quality numbers and counts at fit time, the
+# status, and the ``degeneracy_threshold`` keyword the fit was given (None
+# when the caller gave none). The results table is built from it on first read.
+_FitOutcome = namedtuple(
+    "_FitOutcome",
+    "popt,psigma,pcov,chisq,rsq,nobs,dof,status,degeneracy_threshold",
+)
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
-# Frames from files under this directory are skipped when attributing a
-# FitDegeneracyWarning to its caller.
-_FITFUNCTIONS_DIR = os.path.dirname(os.path.abspath(__file__)) + os.sep
 
 
 class FitFunctionError(Exception):
@@ -84,6 +89,16 @@ class InvalidParameterError(FitFunctionError):
     pass
 
 
+class NotFittedError(FitFunctionError, AttributeError):
+    """Raised when a fit result is read before ``make_fit`` has run.
+
+    It is an ``AttributeError`` too, so ``hasattr`` reports a result that does
+    not exist yet as missing.
+    """
+
+    pass
+
+
 class FitDegeneracyWarning(UserWarning):
     """Warned when a fit leaves parameters unconstrained.
 
@@ -96,13 +111,35 @@ class FitDegeneracyWarning(UserWarning):
     It is a :class:`UserWarning`, not a :class:`RuntimeWarning`, so code that
     escalates NumPy's floating-point ``RuntimeWarning`` to an error still fits.
 
-    Escalated to an error, it is raised after the fit is stored.
-    :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits` then
-    treats a degenerate column as a failed fit and excludes it from the
-    trend; without escalation the column stays in the trend with a warning.
+    Escalated to an error, it is raised after the fit is stored, so the fit
+    stays a successful fit. :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit`
+    then records a degenerate bin's fit as a failed fit and leaves it out of
+    the trend; without escalation the bin stays in the trend with a warning.
     """
 
     pass
+
+
+# The exceptions make_fit records as a failed fit: its status names the class.
+_FIT_FAILURES = (FitFunctionError, RuntimeError, ValueError)
+
+# The fit-quality and status columns of every results table, after the
+# parameters' (value, uncertainty) pairs.
+_QUALITY_COLUMNS = (
+    ("chisq_dof", "linear"),
+    ("chisq_dof", "robust"),
+    ("rsq", ""),
+    ("nobs", ""),
+    ("dof", ""),
+    ("status", ""),
+)
+_STATUS_OK = "ok"
+_KINDS = ("value", "uncertainty")
+
+# What a successful fit stores beyond its outcome; make_fit clears them, and
+# the outcome, before each attempt, so a failed refit leaves none from an
+# earlier success.
+_SUCCESS_ONLY = ("_fit_result", "_fit_p0", "_fit_bounds", "_TeX_info", "_plotter")
 
 
 # Combine ABC and docstring inheritance metaclasses. ABCMeta comes first:
@@ -189,9 +226,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     r"""Fit a model to observed data: the base class of every fit function.
 
     A subclass defines the model (``function`` and ``TeX_function``) and its
-    initial guess (``p0``); ``make_fit`` runs the fit. Instances are callable.
-    If the fit fails, calling the instance will return an array of NaNs the
-    same shape as the x-values.
+    initial guess (``p0``); ``make_fit`` runs the fit, and :attr:`results`
+    holds its outcome as one table. Instances are callable. If the fit fails,
+    ``make_fit`` raises, :attr:`results` records the failure, and calling the
+    instance returns an array of NaNs the same shape as the x-values.
 
     Parameters
     ----------
@@ -237,6 +275,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     See Also
     --------
     make_fit : Execute the fitting procedure
+    results : The fit's parameters, uncertainties, quality and status
     popt : Access optimized parameters
     rsq : Calculate coefficient of determination
 
@@ -266,6 +305,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
     """
 
+    #: TeX of each parameter whose name is not its symbol, e.g.
+    #: ``{"mu": r"\mu"}``; the TeX info labels the parameter with it.
+    _TeX_argnames = None
+
     #: Largest absolute correlation between two fitted parameters that
     #: :meth:`make_fit` accepts without warning
     #: :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, from 0 to
@@ -293,6 +336,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # Documented in the class docstring (see FitFunctionMeta).
         self._init_logger()
         self._set_argnames()
+        self._forget_fit()
 
         if weights is None:
             assert wmin is None
@@ -327,6 +371,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # numerical function.
 
         popt_ = self.popt
+        if self._error is not None:
+            # A failed fit has no model: NaN in x's shape, without evaluating
+            # the function at NaN parameters.
+            return np.full(np.shape(x), np.nan)
         popt_ = [popt_[k] for k in self.argnames]
 
         # NOTE
@@ -403,21 +451,53 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         r"""The names of the actual function arguments pulled by getfullargspec."""
         return self._argnames
 
+    def _not_fitted(self):
+        r"""The :class:`NotFittedError` for a result read before a successful fit."""
+        name = type(self).__name__
+        if self._error is None:
+            return NotFittedError(f"{name} is not fitted: call make_fit first.")
+        return NotFittedError(
+            f"{name} has no successful fit: make_fit failed with "
+            f"{type(self._error).__name__}: {self._error}"
+        )
+
+    def _fitted(self, name):
+        r"""Stored result ``name``, or raise :class:`NotFittedError` when it is absent.
+
+        Every result read goes through here or :attr:`results`, so all of them
+        fail one way before a fit.
+        """
+        try:
+            return self.__dict__[name]
+        except KeyError:
+            raise self._not_fitted() from None
+
     @property
     def fit_bounds(self):
-        r"""Bounds used when running the fit."""
-        return dict(self._fit_bounds)
+        r"""Bounds used when running the last successful fit.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return dict(self._fitted("_fit_bounds"))
 
     @property
     def chisq_dof(self):
-        r"""Chisq per degree of freedom :math:`\chi^2_\nu`.
+        r"""Chisq per degree of freedom :math:`\chi^2_\nu`, as in :attr:`results`.
 
-        If None, not calculated by `make_fit_old`. If `np.nan`, fit failed.
+        Returns
+        -------
+        solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom
+            ``(linear, robust)``. NaN after a failed fit.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before :meth:`make_fit`.
         """
-        try:
-            return self._chisq_dof
-        except AttributeError:
-            return None
+        return self._fitted("_outcome").chisq
 
     @property
     def dof(self):
@@ -426,11 +506,18 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def fit_result(self):
-        return self._fit_result
+        r"""The :class:`scipy.optimize.OptimizeResult` of the last successful fit.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_fit_result")
 
     @property
     def initial_guess_info(self):
-        r"""The start and bounds of the last successful fit, per parameter, or None.
+        r"""The start and bounds of the last successful fit, per parameter.
 
         The start is the one :func:`scipy.optimize.least_squares` began from:
         the caller's ``p0``, the class's :attr:`p0` as a subclass's
@@ -439,15 +526,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Returns
         -------
-        dict or None
-            ``{name: _InitialGuessInfo(p0, bounds)}``, or None before a fit
-            succeeds.
+        dict
+            ``{name: _InitialGuessInfo(p0, bounds)}``.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`.
         """
-        try:
-            p0 = self._fit_p0
-            bounds = self.fit_bounds
-        except AttributeError:
-            return None
+        p0 = self._fitted("_fit_p0")
+        bounds = self.fit_bounds
 
         names = self.argnames
         info = {
@@ -468,40 +556,104 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def plotter(self):
-        return self._plotter
+        r"""The :class:`~solarwindpy.fitfunctions.plots.FFPlot` of the last successful fit.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_plotter")
 
     @property
-    def popt(self):
-        r"""Optimized fit parameters."""
-        return dict(self._popt)
+    def results(self):
+        r"""The fit's outcome as one table: parameters, uncertainties, quality, status.
 
-    @property
-    def psigma(self):
-        return dict(self._psigma)
-
-    @property
-    def combined_popt_psigma(self):
-        r"""Return optimized parameters and uncertainties as a DataFrame.
+        Every fit exposes its results in this form, so two fits, functions or
+        setups compare with :func:`pandas.concat`.
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with columns 'popt' and 'psigma', indexed by parameter names.
-            Relative uncertainty can be computed as: df['psigma'] / df['popt']
+        pandas.DataFrame
+            One row. The columns are a MultiIndex with levels ``P`` (the
+            parameter or quality name) and ``K`` (the kind), named in the
+            manner of the plasma data's ``M``, ``C``, ``S`` (measurement,
+            component, species) levels: ``(name,
+            "value")`` and ``(name, "uncertainty")`` for each parameter in
+            :attr:`argnames` order, then ``("chisq_dof", "linear")``,
+            ``("chisq_dof", "robust")``, ``("rsq", "")``, ``("nobs", "")``,
+            ``("dof", "")`` and ``("status", "")``. ``status`` is ``"ok"``
+            after a successful fit; after a failed one it is the exception's
+            class name, the values and quality numbers are NaN, and the
+            exception is :attr:`error`. A copy, so editing it changes nothing.
+            ``make_fit`` stores the outcome without building the table; the
+            first read builds it and later reads copy it.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before :meth:`make_fit` has run.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from solarwindpy.fitfunctions.lines import Line
+        >>> x = np.arange(10.0)
+        >>> fit = Line(x, 2.0 * x + 1.0)
+        >>> fit.make_fit()
+        >>> fit.results.loc[:, ("m", "value")].round(6).item()
+        2.0
+        >>> fit.results.loc[:, ("status", "")].item()
+        'ok'
         """
-        return pd.DataFrame({"popt": self.popt, "psigma": self.psigma})
+        if self._results_table is None:
+            self._results_table = self._results_row(self._fitted("_outcome"))
+        return self._results_table.copy()
+
+    @property
+    def error(self):
+        r"""The exception that made the last :meth:`make_fit` fail, or None after a success.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before :meth:`make_fit`.
+        """
+        self._fitted("_outcome")
+        return self._error
+
+    def _by_argname(self, field):
+        r"""Outcome ``field``, one entry per parameter, as a new ``{name: value}``."""
+        return dict(zip(self.argnames, getattr(self._fitted("_outcome"), field)))
+
+    @property
+    def popt(self):
+        r"""Optimized fit parameters, ``{name: value}``; the ``value`` entries of :attr:`results`."""
+        return self._by_argname("popt")
+
+    @property
+    def psigma(self):
+        r"""Parameter uncertainties, ``{name: uncertainty}``; the ``uncertainty`` entries of :attr:`results`."""
+        return self._by_argname("psigma")
 
     @property
     def pcov(self):
-        r"""Returns a copy so that the matrix isn't accidentally edited."""
-        return self._pcov.copy()
+        r"""The parameter covariance, in :attr:`argnames` order; NaN after a failed fit.
+
+        Returns a copy so that the matrix isn't accidentally edited.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before :meth:`make_fit`.
+        """
+        return self._fitted("_outcome").pcov.copy()
 
     @property
     def degenerate(self):
-        r"""The parameter pairs the last successful fit left unconstrained, or None.
+        r"""The parameter pairs the fit left unconstrained.
 
-        Like :attr:`popt` and :attr:`pcov`, it reflects the last successful
-        fit. It is derived from :attr:`pcov` each time it is read. A pair is
+        It is derived from :attr:`pcov` each time it is read. A pair is
         listed when its covariance, or either parameter's variance, is not
         finite, or when the absolute correlation
         :math:`|C_{ij}| / \sqrt{C_{ii} C_{jj}}` exceeds the threshold: the
@@ -514,28 +666,23 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Returns
         -------
-        list of tuple or None
+        list of tuple
             ``[(name_i, name_j, correlation), ...]`` in :attr:`argnames`
             order, with ``correlation`` NaN for a non-finite covariance; an
-            empty list when the fit is constrained; None before a fit
-            succeeds. A one-parameter model with a non-finite variance is
-            listed as ``(name, name, nan)``.
-        """
-        try:
-            pcov = self._pcov
-        except AttributeError:
-            return None
-        return self._find_degenerate(pcov, self._effective_degeneracy_threshold())
+            empty list when the fit is constrained. A one-parameter model
+            with a non-finite variance is listed as ``(name, name, nan)``.
 
-    def _effective_degeneracy_threshold(self):
-        r"""The threshold :attr:`degenerate` applies.
-
-        The last fit's ``degeneracy_threshold`` keyword, else the current
-        :attr:`degeneracy_threshold`.
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`: a failed fit has no
+            covariance to read.
         """
-        return self._checked_degeneracy_threshold(
-            getattr(self, "_fit_degeneracy_threshold", None)
-        )
+        outcome = self._fitted("_outcome")
+        if self._error is not None:
+            raise self._not_fitted()
+        threshold = self._checked_degeneracy_threshold(outcome.degeneracy_threshold)
+        return self._find_degenerate(outcome.pcov, threshold)
 
     def _checked_degeneracy_threshold(self, threshold):
         r"""Return ``threshold``, or :attr:`degeneracy_threshold` if None, validated.
@@ -555,7 +702,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def rsq(self):
-        r"""Coefficient of determination.
+        r"""Coefficient of determination, as in :attr:`results`.
 
         Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
 
@@ -564,14 +711,19 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         float
             ``1 - SS_res / SS_tot``. When the used ``y`` have no spread (a single
             point, or constant data), ``SS_tot = 0`` and R² is undefined, so
-            ``nan`` is returned without a divide-by-zero warning.
+            ``nan`` is returned without a divide-by-zero warning. NaN after a
+            failed fit.
         """
+        return float(self._fitted("_outcome").rsq)
+
+    def _calc_rsq(self, popt):
+        r"""The :attr:`rsq` of parameters ``popt``, in :attr:`argnames` order."""
         y = self.observations.used.y
         if np.ptp(y) == 0:
             return np.nan
 
         ybar = y.mean()
-        yfit = self(self.observations.used.x)
+        yfit = self.function(self.observations.used.x, *popt)
         sum_squares_total = ((y - ybar) ** 2).sum()
         sum_squares_residual = ((y - yfit) ** 2).sum()
         rsq = 1 - (sum_squares_residual / sum_squares_total)
@@ -682,7 +834,14 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
     @property
     def TeX_info(self):
-        return self._TeX_info
+        r"""The :class:`~solarwindpy.fitfunctions.tex_info.TeXinfo` of the last successful fit.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`.
+        """
+        return self._fitted("_TeX_info")
 
     def _clean_raw_obs(self, xobs, yobs, weights):
         r"""Set the raw x- and y-values along with weights for the fit.
@@ -765,6 +924,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             tex_info,
             fit_result,
             fitfunction_name=self.__class__.__name__,
+            residuals_func=self.residuals,
         )
         self._plotter = plotter
         return plotter
@@ -791,6 +951,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             initial_guess_info=self.initial_guess_info,
             extra_params=self._TeX_extra_params(),
         )
+        if self._TeX_argnames:
+            tex_info.set_TeX_argnames(**self._TeX_argnames)
         self._TeX_info = tex_info
         return tex_info
 
@@ -948,7 +1110,11 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         """
 
     def _run_least_squares(self, **kwargs):
-        """Execute :func:`scipy.optimize.least_squares` with defaults."""
+        """Execute :func:`scipy.optimize.least_squares` with defaults.
+
+        Returns the optimizer result, the start ``p0`` and the bounds as
+        :attr:`fit_bounds` stores them; :meth:`make_fit` stores all three.
+        """
 
         # Read self.p0 only when the caller gave no p0=: a p0 that cannot
         # estimate may raise (HingeMax) or log, which a caller's start avoids.
@@ -1010,9 +1176,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
         fit_bounds = {k: _FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
         fit_bounds = tuple(fit_bounds.items())
-        self._fit_bounds = fit_bounds
 
-        return res, p0
+        return res, p0, fit_bounds
 
     def _calc_popt_pcov_psigma_chisq(self, res, p0):
         """Compute optimized parameters and statistics from the result."""
@@ -1054,9 +1219,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             warn_cov = True
 
         if warn_cov:
-            warnings.warn(
+            _warn(
                 "Covariance of the parameters could not be estimated",
-                category=OptimizeWarning,
+                OptimizeWarning,
             )
 
         psigma = np.sqrt(np.diag(pcov))
@@ -1110,19 +1275,98 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
                 )
         return f"{self.__class__.__name__}: " + " ".join(parts)
 
-    def make_fit(self, return_exception=False, **kwargs):
-        """Fit the function with the independent `xobs` and dependent `yobs`.
-
-        Uses `least_squares` and returns the `OptimizeResult` object, but
-        treats weights as in `curve_fit`.
+    def _results_row(self, outcome):
+        r"""Build the one-row :attr:`results` table of ``outcome``; every row is built here.
 
         Parameters
         ----------
-        return_exception: bool
-            If True, return exceptions from fitting routine, instead of raising.
-            This is useful when looping through many fits and wanting to
-            identify failed fits after the fact.
+        outcome : solarwindpy.fitfunctions.core._FitOutcome
+        """
+        values = [v for pair in zip(outcome.popt, outcome.psigma) for v in pair]
+        values += [
+            outcome.chisq.linear,
+            outcome.chisq.robust,
+            outcome.rsq,
+            outcome.nobs,
+            outcome.dof,
+            outcome.status,
+        ]
+        return pd.DataFrame([values], columns=self.results_columns)
 
+    @property
+    def results_columns(self):
+        r"""The columns of :attr:`results`, available before a fit.
+
+        Returns
+        -------
+        pandas.MultiIndex
+            Levels ``P`` and ``K``, as :attr:`results` describes.
+        """
+        columns = [(name, kind) for name in self.argnames for kind in _KINDS]
+        columns += list(_QUALITY_COLUMNS)
+        return pd.MultiIndex.from_tuples(columns, names=["P", "K"])
+
+    def _record_outcome(
+        self, popt, psigma, pcov, chisq, rsq, error, degeneracy_threshold=None
+    ):
+        r"""Store the outcome :attr:`results` describes; ``error`` is None on success.
+
+        Every outcome is stored here, with the counts at fit time, and the
+        table built from the previous one is dropped. ``degeneracy_threshold``
+        is the fit's keyword, None when the caller gave none, which
+        :attr:`degenerate` reads.
+        """
+        self._outcome = _FitOutcome(
+            popt=np.array(popt, dtype=float),
+            psigma=np.array(psigma, dtype=float),
+            pcov=pcov,
+            chisq=_ChisqPerDegreeOfFreedom(*np.asarray(chisq, dtype=float)),
+            rsq=rsq,
+            nobs=self.nobs,
+            dof=self.dof,
+            status=_STATUS_OK if error is None else type(error).__name__,
+            degeneracy_threshold=degeneracy_threshold,
+        )
+        self._results_table = None
+        self._error = error
+
+    def _record_failure(self, error):
+        r"""Forget the stored fit and store a NaN outcome whose status names ``error``.
+
+        Every failed fit is recorded here: by :meth:`make_fit`, and by
+        :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit` for a
+        bin fit whose escalated
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` it counts
+        as a failure.
+        """
+        self._forget_fit()
+        nan = np.full(len(self.argnames), np.nan)
+        self._record_outcome(
+            nan,
+            nan,
+            np.full((nan.size, nan.size), np.nan),
+            (np.nan, np.nan),
+            np.nan,
+            error,
+        )
+
+    def _prepare_fit(self, kwargs):
+        r"""Return the keywords :meth:`make_fit` passes to the optimizer.
+
+        Unchanged by default. A class that needs to adjust or check the
+        caller's ``bounds`` or ``p0`` overrides it; an exception it raises is
+        recorded as a failed fit, like any other.
+        """
+        return kwargs
+
+    def make_fit(self, **kwargs):
+        """Fit the function with the independent `xobs` and dependent `yobs`.
+
+        Uses `least_squares`, but treats weights as in `curve_fit`. The
+        outcome is :attr:`results`, whether the fit succeeds or fails.
+
+        Parameters
+        ----------
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
@@ -1145,24 +1389,41 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             between two parameters accepted without warning, from 0 to 1,
             for this fit; :attr:`degenerate` keeps applying it.
 
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.InsufficientDataError
+        ~solarwindpy.fitfunctions.core.FitFailedError
+        ValueError
+        RuntimeError
+            When the fit fails, including while building :attr:`TeX_info` or
+            :attr:`plotter`. Before raising, :attr:`results` records the
+            failure: NaN values and the exception's class name as ``status``.
+            The exception is also kept as :attr:`error`. To fit many data sets
+            and inspect failures afterwards, catch the exception and read the
+            status.
+        NotImplementedError
+            If ``absolute_sigma=True``; nothing is recorded.
+        ValueError
+            If ``degeneracy_threshold`` is not a correlation from 0 to 1;
+            nothing is recorded.
+
         Warns
         -----
         ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
             When the fit leaves parameters unconstrained, naming each pair
-            :attr:`degenerate` lists. It is emitted after the fit is stored;
-            escalated to an error, it is raised even with
-            ``return_exception=True``, and
-            :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits`
-            records the column as a failed fit.
-        """
-        try:
-            self._require_sufficient_data()
-        except (ValueError, InsufficientDataError) as e:
-            if return_exception:
-                return e
-            else:
-                raise e
+            :attr:`degenerate` lists. It is issued after the fit is stored, so
+            escalated to an error it raises while the fit stays a successful
+            fit, and :attr:`results` records no failure.
+            :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit`
+            records a bin fit's escalated warning as that bin's failure.
 
+        Notes
+        -----
+        Any other exception, at any step, propagates unrecorded and leaves
+        no outcome: every result then raises
+        :class:`~solarwindpy.fitfunctions.core.NotFittedError`, as before a
+        first fit.
+        """
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
@@ -1170,35 +1431,51 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         threshold = kwargs.pop("degeneracy_threshold", None)
         self._checked_degeneracy_threshold(threshold)
 
+        # Forget the previous fit, so no exception below can leave its
+        # outcome readable.
+        self._forget_fit()
+
+        # All or nothing: the TeX info and plotter read the stored outcome,
+        # so they are built after it is stored, and any exception up to the
+        # last of them forgets every piece already stored.
         try:
-            res, p0 = self._run_least_squares(**kwargs)
-        except (RuntimeError, ValueError, FitFailedError) as e:
-            if return_exception:
-                return e
-            else:
-                raise
+            self._require_sufficient_data()
+            kwargs = self._prepare_fit(kwargs)
+            res, p0, fit_bounds = self._run_least_squares(**kwargs)
+            popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+            rsq = self._calc_rsq(popt)
 
-        popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+            self._record_outcome(
+                popt,
+                psigma,
+                pcov,
+                all_chisq,
+                rsq,
+                error=None,
+                degeneracy_threshold=threshold,
+            )
+            self._fit_result = res
+            self._fit_p0 = tuple(p0)
+            self._fit_bounds = fit_bounds
+            self.build_TeX_info()
+            self.build_plotter()
+        except _FIT_FAILURES as e:
+            self._record_failure(e)
+            raise
+        except BaseException:
+            self._forget_fit()
+            raise
 
-        self._popt = list(zip(self.argnames, popt))
-        self._psigma = list(zip(self.argnames, psigma))
-        self._pcov = pcov
-        self._chisq_dof = all_chisq
-        self._fit_result = res
-        self._fit_p0 = tuple(p0)
-        self._fit_degeneracy_threshold = threshold
-
-        self.build_TeX_info()
-        self.build_plotter()
-
-        # The warning names what the degenerate property returns: one source.
+        # Outside the all-or-nothing block: the fit is stored, so a warning
+        # escalated to an error raises to the caller and leaves a successful
+        # fit. The warning names what the degenerate property returns.
         degenerate = self.degenerate
         if degenerate:
-            # Attribute the warning to the caller's line, outside this package,
-            # even when a subclass's make_fit calls this one, so the default
-            # once-per-location filter tells call sites apart.
-            warnings.warn(
-                self._degeneracy_message(degenerate),
-                category=FitDegeneracyWarning,
-                skip_file_prefixes=(_FITFUNCTIONS_DIR,),
-            )
+            _warn(self._degeneracy_message(degenerate), FitDegeneracyWarning)
+
+    def _forget_fit(self):
+        r"""Drop every stored result, leaving the fit as before its first :meth:`make_fit`."""
+        for name in (*_SUCCESS_ONLY, "_outcome"):
+            self.__dict__.pop(name, None)
+        self._results_table = None
+        self._error = None

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops shipping example data)
-# Supersedes: none
 r"""Example data shipped with SolarWindPy.
 
 The example is three rows of synthetic solar wind measurements: magnetic
@@ -72,9 +70,9 @@ def load_plasma():
      '2022-10-09 01:47:01.234560']
     >>> plasma.data.loc[:, ("n", "", "p1")].tolist()
     [1.0, 2.0, 3.0]
-    >>> plasma.spacecraft.name, plasma.spacecraft.frame
+    >>> plasma.sc.name, plasma.sc.frame
     ('PSP', 'HCI')
-    >>> plasma.spacecraft.position.data.loc[:, "x"].tolist()
+    >>> plasma.sc.pos.data.loc[:, "x"].tolist()
     [-42.0, -22.0, -34.0]
     """
     # Imported here so the package namespace binds only its own objects.
@@ -98,4 +96,4 @@ def load_plasma():
     ).sort_index(axis=1)
     spacecraft = Spacecraft(psp, "PSP", "HCI")
 
-    return Plasma(data, *species, spacecraft=spacecraft)
+    return Plasma(data, *species, sc=spacecraft)

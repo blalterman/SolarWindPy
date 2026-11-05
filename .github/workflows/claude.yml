@@ -53,7 +53,7 @@ jobs:
 
           # Optional: Allow Claude to run specific commands. v1 removed the
           # `allowed_tools` input; tool permissions go through claude_args.
-          # claude_args: "--allowedTools 'Bash(pytest -q),Bash(black:*),Bash(flake8:*)'"
+          # claude_args: "--allowedTools 'Bash(pytest -q),Bash(ruff check:*),Bash(ruff format:*)'"
 
           # Optional: Add custom instructions for Claude. v1 removed the
           # `custom_instructions` input; put project guidance in CLAUDE.md

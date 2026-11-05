@@ -1,5 +1,13 @@
-# Include the README, LICENSE, and CITATION files
+# The sdist starts from every git-tracked file (setuptools_scm's file finder).
+# It keeps what packagers such as conda-forge rebuild and test from (the
+# package, its data, tests/, docs/source/) and drops development-only material.
 include CITATION.rst
-include LICESNSE.rst
+include LICENSE
 include README.rst
 include solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv
+
+prune .claude
+prune .github
+prune docs/dispatches
+prune tmp
+prune spike

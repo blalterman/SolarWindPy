@@ -12,6 +12,7 @@ from solarwindpy.fitfunctions.gaussians import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from tests.tolerances import exact, noise_free, printed
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
@@ -24,7 +25,7 @@ from tests.tolerances import exact, noise_free, printed
             (0.0, 0.0, 1.0, 1.0),
             1.0 / (np.sqrt(2 * np.pi)),
         ),
-        (GaussianLn, ("x", "m", "s", "A"), (1.0, 0.0, 1.0, 1.0), 1.0),
+        (GaussianLn, ("x", "mu", "sigma", "A"), (1.0, 0.0, 1.0, 1.0), 1.0),
     ],
 )
 def test_function_signature_and_output(
@@ -59,7 +60,7 @@ def test_p0_zero_size_input(cls):
     [
         (Gaussian, dict(mu=1.0, sigma=0.5, amp=2.0)),
         (GaussianNormalized, dict(mu=1.0, sigma=0.5, n=5.0)),
-        (GaussianLn, dict(m=0.3, s=0.2, A=3.0)),
+        (GaussianLn, dict(mu=0.3, sigma=0.2, A=3.0)),
     ],
 )
 def test_p0_estimation(cls, params):
@@ -85,12 +86,12 @@ def test_p0_estimation(cls, params):
         expected = [mean, std, n_est]
     else:  # GaussianLn
         x = np.linspace(
-            np.exp(params["m"] - 5 * params["s"]),
-            np.exp(params["m"] + 5 * params["s"]),
+            np.exp(params["mu"] - 5 * params["sigma"]),
+            np.exp(params["mu"] + 5 * params["sigma"]),
             100,
         )
         lnx = np.log(x)
-        y = params["A"] * np.exp(-0.5 * ((lnx - params["m"]) / params["s"]) ** 2)
+        y = params["A"] * np.exp(-0.5 * ((lnx - params["mu"]) / params["sigma"]) ** 2)
         # Estimated in ln x: weighted mean and standard deviation of ln x, and
         # the peak y unlogged. Hand and recovery cases: test_p0_contract.py.
         m = (lnx * y).sum() / y.sum()
@@ -113,14 +114,14 @@ def test_p0_estimation(cls, params):
         ),
         (
             GaussianLn,
-            # A exp[-(ln x - m)^2 / (2 s^2)]: the exponent of the log-normal
+            # A exp[-(ln x - mu)^2 / (2 sigma^2)]: the exponent of the log-normal
             # density on the class's reference,
             # https://mathworld.wolfram.com/LogNormalDistribution.html, with
             # the normalization replaced by A, as GaussianLn.function computes.
             (
                 r"f(x) = A \cdot "
                 r"\exp\left["
-                r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
+                r"-\frac{\left(\ln x - \mu\right)^2}{2 \sigma^2}"
                 r"\right]"
             ),
         ),
@@ -164,30 +165,35 @@ def test_make_fit_TeX_argnames_failure(cls):
     x = np.linspace(0.0, 1.0, 2)
     y = np.ones_like(x)
     obj = cls(x, y)
-    obj.make_fit(return_exception=True)
+    attempt_fit(obj)
     with pytest.raises(AttributeError):
         obj.TeX_info
 
 
 class FailedFitReturnedNone(AssertionError):
-    """make_fit(return_exception=True) returned None for a fit that failed."""
+    """A fit that failed recorded no error."""
 
 
 @pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
 def test_make_fit_returns_exception_for_insufficient_data(cls):
-    """Two points cannot fit three parameters, and the exception comes back.
+    """Two points cannot fit three parameters, and the exception is recorded.
 
-    FitFunction.make_fit(return_exception=True) returns the exception instead
-    of raising it; a subclass override must pass it on.
+    FitFunction.make_fit records the exception as ``error`` before raising
+    it; a subclass override must pass it on.
 
     ON FAILURE: the code is wrong.
     """
     x = np.linspace(0.0, 1.0, 2)
     obj = cls(x, np.ones_like(x))
-    err = obj.make_fit(return_exception=True)
+    err = attempt_fit(obj)
     if err is None:
         raise FailedFitReturnedNone(cls.__name__)
     assert isinstance(err, InsufficientDataError)
+
+
+#: TeX of the linear-space mean and std a GaussianLn annotation can report.
+MEAN = r"\mathrm{mean}(x)"
+STD = r"\mathrm{std}(x)"
 
 
 class TestGaussianLn:
@@ -214,14 +220,14 @@ class TestGaussianLn:
         x = np.linspace(0.5, 5.0, 100)
         lnx = np.log(x)
         y = A * np.exp(-0.5 * ((lnx - m) / s) ** 2)
-        return x, y, dict(m=m, s=s, A=A)
+        return x, y, dict(mu=m, sigma=s, A=A)
 
     def test_normal_parameters_calculation(self, lognormal_data):
-        """Test that normal_parameters correctly converts log-normal to normal.
+        """Test that normal_parameters gives the linear-space mean and std.
 
-        The conversion formulas are:
-        - mu = exp(m + s^2/2)
-        - sigma = sqrt(exp(s^2 + 2m) * (exp(s^2) - 1))
+        The conversion formulas, with mu and sigma fitted to ln x, are:
+        - mean = exp(mu + sigma^2/2)
+        - std = sqrt(exp(sigma^2 + 2 mu) * (exp(sigma^2) - 1))
 
         ON FAILURE: the code is wrong.
         """
@@ -229,15 +235,14 @@ class TestGaussianLn:
         obj = GaussianLn(x, y)
         obj.make_fit()
 
-        m = obj.popt["m"]
-        s = obj.popt["s"]
+        m = obj.popt["mu"]
+        s = obj.popt["sigma"]
 
-        expected_mu = np.exp(m + (s**2) / 2)
-        expected_sigma = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
+        expected_mean = np.exp(m + (s**2) / 2)
+        expected_std = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
 
         normal = obj.normal_parameters
-        assert normal["mu"] == exact(expected_mu)
-        assert normal["sigma"] == exact(expected_sigma)
+        assert normal == {"mean": exact(expected_mean), "std": exact(expected_std)}
 
     @staticmethod
     def _reported(info, name):
@@ -252,11 +257,11 @@ class TestGaussianLn:
         return None
 
     def test_tex_info_reports_normal_parameters_only_when_asked(self, lognormal_data):
-        r"""The annotation lists mu and sigma when the flag is on, and not when off.
+        r"""The annotation lists the mean and std when the flag is on, and not when off.
 
-        The data are noise-free with m = 0.5 and s = 0.3, so the reported
-        values are mu = exp(m + s^2/2) = exp(0.545) = 1.7246 and
-        sigma = sqrt(exp(s^2 + 2m)(exp(s^2) - 1)) = sqrt(2.9743 * 0.094174)
+        The data are noise-free with mu = 0.5 and sigma = 0.3, so the reported
+        values are mean = exp(mu + sigma^2/2) = exp(0.545) = 1.7246 and
+        std = sqrt(exp(sigma^2 + 2mu)(exp(sigma^2) - 1)) = sqrt(2.9743 * 0.094174)
         = 0.5292 (mathworld LogNormalDistribution, the class's reference),
         printed to four significant digits. Turning the flag on or off after
         the fit updates the annotation.
@@ -264,7 +269,7 @@ class TestGaussianLn:
         ON FAILURE: the code is wrong.
         """
         x, y, params = lognormal_data
-        m, s = params["m"], params["s"]
+        m, s = params["mu"], params["sigma"]
         mu = np.exp(m + s**2 / 2)
         sigma = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
         assert mu == printed(1.7246, decimals=4)
@@ -274,15 +279,15 @@ class TestGaussianLn:
         assert obj.TeX_report_normal_parameters is False
         obj.make_fit()
         off = str(obj.TeX_info)
-        assert self._reported(off, r"\mu") is None
-        assert self._reported(off, r"\sigma") is None
+        assert self._reported(off, MEAN) is None
+        assert self._reported(off, STD) is None
 
         obj.set_TeX_report_normal_parameters(True)
         assert obj.TeX_report_normal_parameters is True
         on = str(obj.TeX_info)
-        assert self._reported(on, r"\mu") == printed(mu, decimals=3)
-        assert self._reported(on, r"\sigma") == printed(sigma, decimals=4)
-        for name in ("m", "s", "A"):
+        assert self._reported(on, MEAN) == printed(mu, decimals=3)
+        assert self._reported(on, STD) == printed(sigma, decimals=4)
+        for name in (r"\mu", r"\sigma", "A"):
             assert f"$ {name} = " in on
 
         obj.set_TeX_report_normal_parameters(False)
@@ -297,10 +302,47 @@ class TestGaussianLn:
         obj = GaussianLn(x, y)
         obj.set_TeX_report_normal_parameters(True)
         obj.make_fit()
-        assert self._reported(str(obj.TeX_info), r"\mu") is not None
+        assert self._reported(str(obj.TeX_info), MEAN) is not None
+
+    def test_a_bug_reading_TeX_info_is_not_taken_for_not_fitted(self, lognormal_data):
+        """An AttributeError inside ``TeX_info`` propagates from the flag setter.
+
+        Only NotFittedError means "not fitted yet"; any other AttributeError
+        is a bug and must not be silenced.
+
+        ON FAILURE: the code is wrong.
+        """
+
+        class Broken(GaussianLn):
+            @property
+            def TeX_info(self):
+                raise AttributeError("boom")
+
+        x, y, _ = lognormal_data
+        with pytest.raises(AttributeError, match="boom"):
+            Broken(x, y).set_TeX_report_normal_parameters(True)
+
+    def test_a_bug_computing_normal_parameters_is_not_taken_for_not_fitted(
+        self, lognormal_data
+    ):
+        """An AttributeError inside ``normal_parameters`` reaches the TeX info.
+
+        ON FAILURE: the code is wrong.
+        """
+
+        class Broken(GaussianLn):
+            @property
+            def normal_parameters(self):
+                raise AttributeError("boom")
+
+        x, y, _ = lognormal_data
+        obj = Broken(x, y)
+        obj.set_TeX_report_normal_parameters(True)
+        with pytest.raises(AttributeError, match="boom"):
+            obj._TeX_extra_params()
 
     def test_make_fit_success(self, lognormal_data):
-        """GaussianLn fitted to noise-free log-normal data recovers m, |s|, A.
+        """GaussianLn fitted to noise-free log-normal data recovers mu, |sigma|, A.
 
         ON FAILURE: the code is wrong.
         """
@@ -309,13 +351,13 @@ class TestGaussianLn:
         obj.make_fit()
 
         assert isinstance(obj.fit_result, OptimizeResult)
-        assert "m" in obj.popt
-        assert "s" in obj.popt
+        assert "mu" in obj.popt
+        assert "sigma" in obj.popt
         assert "A" in obj.popt
 
-        # s enters squared, so its fitted sign is arbitrary.
-        assert obj.popt["m"] == noise_free(params["m"])
-        assert np.abs(obj.popt["s"]) == noise_free(params["s"])
+        # sigma enters squared, so its fitted sign is arbitrary.
+        assert obj.popt["mu"] == noise_free(params["mu"])
+        assert np.abs(obj.popt["sigma"]) == noise_free(params["sigma"])
         assert obj.popt["A"] == noise_free(params["A"])
 
 
@@ -418,13 +460,3 @@ def test_a_width_equal_to_half_the_spacing_of_two_distinct_x_is_resolved():
     """
     p0 = Gaussian(np.array([1.0, 1, 3, 3]), np.ones(4)).p0
     assert p0 == exact([2.0, 1.0, 1.0])
-
-
-@pytest.mark.parametrize("cls", [Gaussian, GaussianNormalized])
-def test_make_fit_takes_return_exception_by_position(cls):
-    """``make_fit(True)`` returns the insufficient-data error, as the base does.
-
-    ON FAILURE: the code is wrong.
-    """
-    obj = cls(np.array([1.0, 2.0]), np.array([1.0, 2.0]))
-    assert isinstance(obj.make_fit(True), InsufficientDataError)

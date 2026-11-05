@@ -54,8 +54,8 @@ git push -u origin ${BRANCH_NAME}
 **Before any commit:**
 ```bash
 pytest -q                    # All tests must pass
-black solarwindpy/          # Format code  
-flake8                      # Check linting
+ruff format solarwindpy/ tests/   # Format code
+ruff check solarwindpy/ tests/    # Check linting
 ```
 
 ### Step 5: Push and Track
@@ -115,8 +115,8 @@ git push origin --delete remote-branch-name
 
 ### Pre-Commit Checklist
 - [ ] All tests pass (`pytest -q`)
-- [ ] Code formatted (`black solarwindpy/`)
-- [ ] No linting errors (`flake8`)
+- [ ] Code formatted (`ruff format solarwindpy/ tests/`)
+- [ ] No linting errors (`ruff check solarwindpy/ tests/`)
 - [ ] Physics validation complete (units, calculations)
 - [ ] Documentation updated if needed
 - [ ] Commit message follows Conventional Commits format

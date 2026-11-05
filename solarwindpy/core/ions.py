@@ -88,7 +88,7 @@ class Ion(base.Base):
         >>> proton == plasma.p1
         True
         """
-        self.set_species(species)
+        self._set_species(species)
         super().__init__(data, _time_checked=_time_checked)
 
     def __eq__(self, other: object) -> bool:
@@ -108,7 +108,7 @@ class Ion(base.Base):
             return NotImplemented
         return self.species == other.species and self.data.equals(other.data)
 
-    def set_species(self, species: str) -> None:
+    def _set_species(self, species: str) -> None:
         """Set the species of the ion.
 
         Parameters
@@ -142,7 +142,7 @@ class Ion(base.Base):
 
         if data.columns.names == ["M", "C", "S"]:
             data = data.sort_index(axis=1)
-            data = data.xs(self.species, axis=1, level="S")
+            data = self._select(data, self.species, "S")
         elif data.columns.names != ["M", "C"]:
             raise ValueError(f"Unrecognized data column names: {data.columns.names}")
 
@@ -165,7 +165,7 @@ class Ion(base.Base):
         return self._species
 
     @property
-    def velocity(self) -> vector.Vector:
+    def v(self) -> vector.Vector:
         """Get the ion's velocity as a Vector.
 
         Built from the ion's already-checked columns, so it skips the time
@@ -174,12 +174,7 @@ class Ion(base.Base):
         return vector.Vector(self.data.loc[:, "v"], _time_checked=self.data.index)
 
     @property
-    def v(self) -> vector.Vector:
-        """Alias for velocity property."""
-        return self.velocity
-
-    @property
-    def thermal_speed(self) -> tensor.Tensor:
+    def w(self) -> tensor.Tensor:
         """Get the ion's thermal speed as a Tensor.
 
         Built from the ion's already-checked columns, so it skips the time
@@ -188,34 +183,19 @@ class Ion(base.Base):
         return tensor.Tensor(self.data.loc[:, "w"], _time_checked=self.data.index)
 
     @property
-    def w(self) -> tensor.Tensor:
-        """Alias for thermal_speed property."""
-        return self.thermal_speed
-
-    @property
-    def number_density(self) -> pd.Series:
+    def n(self) -> pd.Series:
         """Get the number density of the ion."""
         return self.data.loc[:, "n"]
 
     @property
-    def n(self) -> pd.Series:
-        """Alias for number_density property."""
-        return self.number_density
-
-    @property
-    def mass_density(self) -> pd.Series:
+    def rho(self) -> pd.Series:
         """Calculate the ion's mass density."""
         out = self.n * self.constants.m_in_mp.loc[self.species]
         out.name = "rho"
         return out
 
     @property
-    def rho(self) -> pd.Series:
-        """Alias for mass_density property."""
-        return self.mass_density
-
-    @property
-    def anisotropy(self) -> pd.Series:
+    def R(self) -> pd.Series:
         """Calculate temperature anisotropy R_T = p_⟂/p_∥.
 
         Returns
@@ -224,13 +204,13 @@ class Ion(base.Base):
             Temperature anisotropy.
         """
         exp = pd.Series({"par": -1, "per": 1})
-        pth = self.pth.drop("scalar", axis=1)
-        ani = pth.pow(exp, axis=1, level="C").product(axis=1, skipna=False)
-        ani.name = "RT"
+        pth = self._select(self.pth, ["par", "per"], "C")
+        ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
+        ani.name = "R"
         return ani
 
     @property
-    def temperature(self) -> pd.DataFrame:
+    def T(self) -> pd.DataFrame:
         """Calculate temperature T = (m / (2 * k_B)) * w^2.
 
         Returns
@@ -240,7 +220,7 @@ class Ion(base.Base):
         """
         m = self.constants.m.loc[self.species]
         w = self.w.data * self.units.w
-        coeff = 0.5 * m / (self.constants.kb.J * self.units.temperature)
+        coeff = 0.5 * m / (self.constants.kb.J * self.units.T)
         temp = coeff * w.pow(2)
         temp.name = "T"
         return temp
@@ -277,34 +257,7 @@ class Ion(base.Base):
         return cs
 
     @property
-    def specific_entropy(self) -> pd.Series:
-        """Calculate the specific entropy S = p_th * ρ^(-γ).
-
-        Returns
-        -------
-        pd.Series
-            Specific entropy of the ion.
-
-        References
-        ----------
-        Siscoe, G. L. (1983). Solar System Magnetohydrodynamics (pp. 11-100).
-        https://doi.org/10.1007/978-94-009-7194-3_2
-        """
-        comp = "scalar"
-        gamma = self.constants.polytropic_index.loc[comp]
-        pth = self.pth.loc[:, comp] * self.units.pth
-        rho = self.rho * self.units.rho
-        out = pth.multiply(rho.pow(-gamma)) / self.units.specific_entropy
-        out.name = "S"
-        return out
-
-    @property
-    def S(self) -> pd.Series:
-        """Alias for specific_entropy property."""
-        return self.specific_entropy
-
-    @property
-    def kinetic_energy_flux(self):
+    def Wk(self):
         r"""Calculate the kinetic energy flux.
 
         The kinetic energy flux is calculated as:
@@ -320,12 +273,7 @@ class Ion(base.Base):
         rho = self.rho * self.units.rho
         v = self.v.mag * self.units.v
         w = rho.multiply(v.pow(3)).multiply(0.5)
-        w /= self.units.kinetic_energy_flux
+        w /= self.units.Wk
 
         w.name = "Wk"
         return w
-
-    @property
-    def Wk(self):
-        r"""Shortcut to :py:attr:`~kinetic_energy_flux`."""
-        return self.kinetic_energy_flux

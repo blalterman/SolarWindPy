@@ -70,8 +70,6 @@ MISC_EXPECTED = {
     "c": SI_C,  # SI defining constant
     "hbar": SI_H / (2 * math.pi),  # SI defining constant h over 2 pi
     "1AU [m]": IAU_2012_AU,  # IAU 2012 Resolution B2
-    "Re [m]": IAU_2015_EARTH_EQUATORIAL_RADIUS,  # IAU 2015 Resolution B3
-    "Rs [m]": IAU_2015_SOLAR_RADIUS,  # IAU 2015 Resolution B3
     "gas constant": SI_NA * SI_K,  # R = N_A k, exact in the 2019 SI
 }
 
@@ -87,9 +85,8 @@ DISPLAY_UNIT_IN_SI = {
     "dv": constants.kilo,  # km s^-1, differential flow
     "ca": constants.kilo,  # km s^-1, Alfven speed
     "cs": constants.kilo,  # km s^-1, sound speed
-    "cfms": constants.kilo,  # km s^-1, fast magnetosonic speed
     "pth": constants.pico,  # pPa
-    "temperature": 1e5,  # 10^5 K
+    "T": 1e5,  # 10^5 K
     "n": constants.centi**-3,  # cm^-3
     "rho": PROTON_MASS * constants.centi**-3,  # m_p cm^-3
     "beta": 1.0,  # dimensionless
@@ -97,12 +94,10 @@ DISPLAY_UNIT_IN_SI = {
     "nuc": 1e-7,  # 10^-7 Hz
     "nc": 1.0,  # dimensionless count
     "qpar": constants.micro,  # uW m^-2
-    "kinetic_energy_flux": constants.micro,  # uW m^-2
+    "Wk": constants.micro,  # uW m^-2
     "distance2sun": 1.0,  # m
-    # eV cm^2 m_p^-5/3
-    "specific_entropy": codata("electron volt")
-    * constants.centi**2
-    * PROTON_MASS ** (-5.0 / 3.0),
+    "gse": IAU_2015_EARTH_EQUATORIAL_RADIUS,  # R_E, IAU 2015 Resolution B3
+    "hci": IAU_2015_SOLAR_RADIUS,  # R_sun, IAU 2015 Resolution B3
 }
 
 
@@ -295,7 +290,7 @@ def test_pressure_unit_is_consistent_with_n_k_t():
     """
     u = uc.Units()
     kb = uc.Constants().kb["J"]
-    p = (1.0 * u.n) * kb * (1.0 * u.temperature) / u.pth
+    p = (1.0 * u.n) * kb * (1.0 * u.T) / u.pth
     assert p == exact(1.380649)
 
 
@@ -304,7 +299,7 @@ def test_temperature_unit_is_8_617_ev():
 
     ON FAILURE: the code is wrong.
     """
-    kt = uc.Units().temperature * uc.Constants().kb["eV"]
+    kt = uc.Units().T * uc.Constants().kb["eV"]
     assert kt == printed(8.617333262, decimals=9)
 
 
@@ -318,19 +313,5 @@ def test_kinetic_energy_flux_of_5_per_cc_protons_at_400_km_s_is_267_6_uw_m2():
     u = uc.Units()
     rho = 5.0 * u.rho
     v = 400.0 * u.v
-    flux = 0.5 * rho * v**3 / u.kinetic_energy_flux
+    flux = 0.5 * rho * v**3 / u.Wk
     assert flux == printed(267.6, decimals=1)
-
-
-def test_specific_entropy_unit_is_p_over_rho_to_five_thirds():
-    """1 cm^-3 protons at kT = 1 eV have p / rho^(5/3) = 1 eV cm^2 m_p^-5/3.
-
-    p = 1 eV cm^-3 and rho = 1 m_p cm^-3, so p / rho^(5/3) is one display unit,
-    computed here in SI from the `Units` density and mass-density units.
-
-    ON FAILURE: the code is wrong.
-    """
-    u = uc.Units()
-    p = u.n * codata("electron volt")  # 1 eV per cm^3, in Pa
-    s = p / u.rho ** (5.0 / 3.0)
-    assert s / u.specific_entropy == exact(1.0)

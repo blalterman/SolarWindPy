@@ -134,11 +134,16 @@ jobs:
       - name: Run full test suite
         run: |
           pip install pre-commit
-          pre-commit run flake8 --files $(git ls-files 'solarwindpy/*.py')
+          pre-commit run ruff-check --files $(git ls-files 'solarwindpy/*.py')
           pytest -q
       
       - name: Build package
         run: python -m build
+
+      - name: Check wheel and sdist contents
+        # The wheel holds only solarwindpy and its dist-info, with no Spent-When
+        # header; the sdist drops development-only directories.
+        run: python scripts/check_release_artifacts.py dist
       
       - name: Check package with twine
         run: twine check dist/*

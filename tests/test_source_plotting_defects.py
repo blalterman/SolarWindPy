@@ -47,7 +47,7 @@ def test_scatter_with_clip_data_plots_points_clipped_to_percentiles():
     y = pd.Series(2.0 * raw)
 
     fig, ax = plt.subplots()
-    ax, cbar = Scatter(x, y, clip=True).make_plot(ax=ax)
+    ax, _, cbar = Scatter(x, y, clip=True).make_plot(ax=ax)
 
     offsets = ax.collections[0].get_offsets()
     expected_x = np.clip(raw, np.quantile(raw, Q_LOWER), np.quantile(raw, Q_UPPER))
@@ -70,7 +70,7 @@ def test_scatter_without_clip_data_plots_raw_points():
     """
     raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
     fig, ax = plt.subplots()
-    ax, cbar = Scatter(pd.Series(raw), pd.Series(raw), clip=False).make_plot(ax=ax)
+    ax, _, cbar = Scatter(pd.Series(raw), pd.Series(raw), clip=False).make_plot(ax=ax)
     np.testing.assert_array_equal(
         np.asarray(ax.collections[0].get_offsets()[:, 0]), raw
     )

@@ -9,143 +9,83 @@ Each defines the model, an initial guess, and its LaTeX form.
 __all__ = [
     "Exponential",
     "ExponentialPlusC",
-    "ExponentialCDF",
 ]
 
 import numpy as np
-
-from numbers import Number
 
 from .core import FitFunction
 
 
 class Exponential(FitFunction):
-    r"""Exponential decay :math:`f(x) = A e^{-c x}`.
+    r"""Exponential decay :math:`f(x) = A e^{-k x}`.
 
-    Parameters are ``c`` (rate) and ``A`` (amplitude at ``x = 0``).
+    Parameters are ``k`` (rate) and ``A`` (amplitude at ``x = 0``).
     """
 
     @property
     def function(self):
-        r"""The model :math:`A e^{-c x}` as ``f(x, c, A)``."""
+        r"""The model :math:`A e^{-k x}` as ``f(x, k, A)``."""
 
-        def exp(x, c, A):
-            """Evaluate ``A * exp(-c * x)``."""
-            return A * np.exp(-(c * x))
+        def exp(x, k, A):
+            """Evaluate ``A * exp(-k * x)``."""
+            return A * np.exp(-(k * x))
 
         return exp
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[c, A]`` for the fit."""
+        r"""Return initial guesses ``[k, A]`` for the fit."""
         self._require_sufficient_data()
 
         y = self.observations.used.y
 
-        c = 1.0
+        k = 1.0
         A = y.max()
 
-        p0 = [c, A]
+        p0 = [k, A]
         return p0
 
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A \cdot e^{-cx}"
+        TeX = r"f(x)=A \cdot e^{-kx}"
         return TeX
 
 
 class ExponentialPlusC(FitFunction):
-    r"""Exponential decay plus a constant, :math:`f(x) = A e^{-c x} + d`.
+    r"""Exponential decay plus a constant, :math:`f(x) = A e^{-k x} + y_0`.
 
-    Parameters are ``c`` (rate), ``A`` (amplitude) and ``d`` (offset).
+    Parameters are ``k`` (rate), ``y0`` (offset) and ``A`` (amplitude).
     """
+
+    _TeX_argnames = {"y0": "y_0"}
 
     @property
     def function(self):
-        r"""The model :math:`A e^{-c x} + d` as ``f(x, c, A, d)``."""
+        r"""The model :math:`A e^{-k x} + y_0` as ``f(x, k, y0, A)``."""
 
-        def expc(x, c, A, d):
-            """Evaluate ``A * exp(-c * x) + d``."""
-            return (A * np.exp(-(c * x))) + d
+        def expc(x, k, y0, A):
+            """Evaluate ``A * exp(-k * x) + y0``."""
+            return (A * np.exp(-(k * x))) + y0
 
         return expc
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[c, A, d]`` for the fit."""
+        r"""Return initial guesses ``[k, y0, A]`` for the fit."""
         self._require_sufficient_data()
 
         y = self.observations.used.y
 
-        c = 1.0
-        d = 0.0
+        k = 1.0
+        y0 = 0.0
         A = y.max()
 
-        p0 = [c, A, d]
+        p0 = [k, y0, A]
         return p0
 
     @property
     def TeX_function(self):
         r"""LaTeX form of the model."""
-        TeX = r"f(x)=A \cdot e^{-cx} + d"
+        TeX = r"f(x)=A \cdot e^{-kx} + y_0"
         return TeX
-
-
-class ExponentialCDF(FitFunction):
-    r"""Exponential CDF shape :math:`f(x) = y_0 (1 - e^{-c x})`.
-
-    Only the rate ``c`` is fitted. The amplitude :attr:`y0` (written ``A``
-    in :attr:`TeX_function`) is fixed by the caller with :meth:`set_y0`,
-    which must be called before :meth:`make_fit`; otherwise the fit
-    raises ``AttributeError``. The TeX info reports it after ``c`` as
-    ``A``, without an uncertainty.
-    """
-
-    @property
-    def function(self):
-        r"""The model :math:`y_0 (1 - e^{-c x})` as ``f(x, c)``."""
-
-        def exp_cdf(x, c):
-            """Evaluate ``y0 * (1 - exp(-c * x))`` with the instance's ``y0``."""
-            return self.y0 * (1.0 - np.exp(-(c * x)))
-
-        return exp_cdf
-
-    @property
-    def y0(self):
-        r"""Amplitude of the CDF."""
-        return self._y0
-
-    def set_y0(self, new):
-        r"""Set the fixed amplitude :attr:`y0`.
-
-        Parameters
-        ----------
-        new : numbers.Number
-            Amplitude the fitted CDF approaches as ``x`` grows.
-        """
-        assert isinstance(new, Number)
-        self._y0 = new
-
-    @property
-    def p0(self):
-        r"""Return initial guess ``[c]`` for the fit."""
-        self._require_sufficient_data()
-
-        y = self.observations.used.y
-
-        c = y.mean()
-
-        p0 = [c]
-        return p0
-
-    @property
-    def TeX_function(self):
-        r"""LaTeX form of the model, writing :attr:`y0` as ``A``."""
-        TeX = r"f(x)=A \left(1 - e^{-cx}\right)"
-        return TeX
-
-    def _TeX_extra_params(self):
-        r"""The fixed amplitude :attr:`y0`, reported in the TeX info as ``A``."""
-        return {"A": self.y0}

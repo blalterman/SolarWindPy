@@ -171,8 +171,8 @@ def __init__(
 
 ```python
 @property
-def xs(self) -> float:
-    """Saturation x-coordinate (derived from fitted params)."""
+def xh(self) -> float:
+    """Hinge x-coordinate (derived from fitted params)."""
     return self.popt["x1"] + self.popt["yh"] / self.popt["m1"]
 ```
 
@@ -180,7 +180,7 @@ def xs(self) -> float:
 
 | Convention | Standard | Example |
 |------------|----------|---------|
-| Class names | PascalCase | `HingeSaturation`, `GaussianPlusHeavySide` |
+| Class names | PascalCase | `HingeSaturation`, `GaussianNormalized` |
 | Method names | snake_case | `make_fit()`, `build_plotter()` |
 | Property names | snake_case | `popt`, `TeX_function` |
 | Docstrings | NumPy style with `r"""` | See example above |
@@ -400,6 +400,5 @@ For complete implementation examples, see:
 
 For test organization patterns:
 
-- **Parameterization:** `tests/fitfunctions/test_composite.py` (lines 359-365)
+- **Parameterization:** `tests/fitfunctions/test_lines.py` (`test_function_signature_and_output`)
 - **Fixtures:** `tests/fitfunctions/test_hinge.py` (fixture definitions)
-- **Categories E1-E7:** `tests/fitfunctions/test_heaviside.py` (section headers)

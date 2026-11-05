@@ -15,7 +15,7 @@ __all__ = [
 
 import numpy as np
 
-from .core import FitFunction
+from .core import FitFunction, NotFittedError
 
 
 def _weighted_moments(fitfunction, x, y):
@@ -84,6 +84,8 @@ class Gaussian(FitFunction):
     Fits data to the form: A * exp(-0.5 * ((x - mu) / sigma)^2)
     """
 
+    _TeX_argnames = {"mu": r"\mu", "sigma": r"\sigma"}
+
     @property
     def function(self):
         r"""The model as ``f(x, mu, sigma, A)``."""
@@ -126,15 +128,6 @@ class Gaussian(FitFunction):
         TeX = r"f(x)=A \cdot e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
-    def make_fit(self, *args, **kwargs):
-        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        result = super().make_fit(*args, **kwargs)
-        try:
-            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
-        except AttributeError:  # Fit failed
-            pass
-        return result
-
 
 class GaussianNormalized(FitFunction):
     """Normalized Gaussian distribution where integral equals n.
@@ -147,6 +140,8 @@ class GaussianNormalized(FitFunction):
     the Gaussian curve, useful for fitting probability distributions
     or particle count distributions.
     """
+
+    _TeX_argnames = {"mu": r"\mu", "sigma": r"\sigma"}
 
     @property
     def function(self):
@@ -188,21 +183,13 @@ class GaussianNormalized(FitFunction):
         TeX = r"f(x)=\frac{n}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2} \left(\frac{x-\mu}{\sigma}\right)^2}"
         return TeX
 
-    def make_fit(self, *args, **kwargs):
-        r"""Run the fit, then label ``mu`` and ``sigma`` as Greek letters in the TeX info."""
-        result = super().make_fit(*args, **kwargs)
-        try:
-            self.TeX_info.set_TeX_argnames(mu=r"\mu", sigma=r"\sigma")
-        except AttributeError:  # Fit failed
-            pass
-        return result
-
 
 class GaussianLn(FitFunction):
     r"""Log-normal distribution for skewed data fitting.
 
     Fits a Gaussian in logarithmic space where :math:`\ln(x)` follows
-    a normal distribution.
+    a normal distribution with mean ``mu`` and standard deviation ``sigma``,
+    the usual parameters of a log-normal.
 
     Parameters
     ----------
@@ -229,6 +216,8 @@ class GaussianLn(FitFunction):
     .. [1] https://mathworld.wolfram.com/LogNormalDistribution.html
     """
 
+    _TeX_argnames = {"mu": r"\mu", "sigma": r"\sigma"}
+
     def __init__(self, xobs, yobs, **kwargs):
         super().__init__(xobs, yobs, **kwargs)
         self.set_TeX_report_normal_parameters(False)
@@ -244,15 +233,15 @@ class GaussianLn(FitFunction):
 
     @property
     def function(self):
-        r"""The model as ``f(x, m, s, A)``."""
+        r"""The model as ``f(x, mu, sigma, A)``."""
 
-        def gaussian_ln(x, m, s, A):
-            """Evaluate ``A * exp(-0.5 * ((ln(x) - m) / s)**2)``."""
+        def gaussian_ln(x, mu, sigma, A):
+            """Evaluate ``A * exp(-0.5 * ((ln(x) - mu) / sigma)**2)``."""
             lnx = np.log(x)
 
             coeff = A
 
-            arg = -0.5 * (((lnx - m) / s) ** 2.0)
+            arg = -0.5 * (((lnx - mu) / sigma) ** 2.0)
 
             return coeff * np.exp(arg)
 
@@ -260,10 +249,10 @@ class GaussianLn(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[m, s, A]`` for the fit, or None.
+        r"""Return initial guesses ``[mu, sigma, A]`` for the fit, or None.
 
         The model is a Gaussian in :math:`\ln x`, so the guess is estimated in
-        :math:`\ln x`: ``m`` and ``s`` are the mean and standard deviation of
+        :math:`\ln x`: ``mu`` and ``sigma`` are the mean and standard deviation of
         :math:`\ln x` weighted by ``y``, and ``A`` is the largest ``y`` (``A``
         multiplies the model directly and is not logged). ``p0`` is None when
         the weighted moments of :math:`\ln x` give no estimate, under the same
@@ -276,9 +265,9 @@ class GaussianLn(FitFunction):
         moments = _weighted_moments(self, np.log(x), y)
         if moments is None:
             return None
-        m, var = moments
+        mu, var = moments
 
-        p0 = [m, np.sqrt(var), y.max()]
+        p0 = [mu, np.sqrt(var), y.max()]
         return p0
 
     @property
@@ -288,36 +277,48 @@ class GaussianLn(FitFunction):
             r"f(x) = "
             r"A \cdot "
             r"\exp\left["
-            r"-\frac{\left(\ln x - m\right)^2}{2 s^2}"
+            r"-\frac{\left(\ln x - \mu\right)^2}{2 \sigma^2}"
             r"\right]"
         )
         return TeX
 
     @property
     def normal_parameters(self):
-        r"""Calculate the normal parameters from log-normal parameters.
+        r"""Linear-space mean and standard deviation of the log-normal variable.
+
+        The fit models :math:`\ln X \sim \mathcal{N}(\mu, \sigma^2)`, with
+        the natural logarithm. This returns the mean and the standard
+        deviation of :math:`X` itself, not of :math:`\ln X`:
 
         .. math::
 
-            \mu = \exp[m + (s^2)/2]
-            \sigma = \sqrt{\exp[s^2 + 2m] (\exp[s^2] - 1)}
+            \mathrm{mean}(X) = \exp[\mu + \sigma^2/2]
+
+            \mathrm{std}(X) = \sqrt{\exp[2\mu + \sigma^2] (\exp[\sigma^2] - 1)}
+
+        Returns
+        -------
+        dict
+            ``mean`` and ``std``, from the fitted ``mu`` and ``sigma``. They
+            are not named ``mu`` and ``sigma``, which are the fitted
+            parameters of :math:`\ln X`.
         """
-        m = self.popt["m"]
-        s = self.popt["s"]
+        mu = self.popt["mu"]
+        sigma = self.popt["sigma"]
 
-        mu = np.exp(m + ((s**2.0) / 2.0))
-        sigma = np.exp(s**2.0 + 2.0 * m)
-        sigma *= np.exp(s**2.0) - 1.0
-        sigma = np.sqrt(sigma)
+        mean = np.exp(mu + ((sigma**2.0) / 2.0))
+        std = np.exp(sigma**2.0 + 2.0 * mu)
+        std *= np.exp(sigma**2.0) - 1.0
+        std = np.sqrt(std)
 
-        return dict(mu=mu, sigma=sigma)
+        return dict(mean=mean, std=std)
 
     @property
     def TeX_report_normal_parameters(self):
-        r"""Whether the TeX info also reports the normal parameters :math:`\mu, \sigma`.
+        r"""Whether the TeX info also reports the linear-space mean and std.
 
         When True, the annotation lists :attr:`normal_parameters` after the
-        fitted ``m``, ``s`` and ``A``, without an uncertainty: the
+        fitted ``mu``, ``sigma`` and ``A``, without an uncertainty: the
         propagation of the log-normal uncertainties is not implemented.
         """
         try:
@@ -334,12 +335,12 @@ class GaussianLn(FitFunction):
         self._use_normal_parameters = new
         try:
             tex_info = self.TeX_info
-        except AttributeError:  # Not fitted yet.
+        except NotFittedError:
             return
         tex_info.set_extra_params(self._TeX_extra_params())
 
     def _TeX_extra_params(self):
-        r"""The normal parameters as ``{r"\mu": mu, r"\sigma": sigma}``, or None.
+        r"""The linear-space mean and std by their TeX, or None.
 
         None unless :attr:`TeX_report_normal_parameters` and a fit has set
         ``popt``.
@@ -348,6 +349,9 @@ class GaussianLn(FitFunction):
             return None
         try:
             normal = self.normal_parameters
-        except AttributeError:  # Not fitted.
+        except NotFittedError:
             return None
-        return {r"\mu": normal["mu"], r"\sigma": normal["sigma"]}
+        return {
+            r"\mathrm{mean}(x)": normal["mean"],
+            r"\mathrm{std}(x)": normal["std"],
+        }

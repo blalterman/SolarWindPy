@@ -104,7 +104,7 @@ def _example_rows(rows):
     """The example plasma, spacecraft and field frames, taking ``rows`` in order."""
     p = swp.examples.load_plasma()
     b = p.data.xs("b", axis=1, level="M").xs("", axis=1, level="S")
-    return p, p.data.iloc[rows], p.spacecraft.data.iloc[rows], b.iloc[rows]
+    return p, p.data.iloc[rows], p.sc.data.iloc[rows], b.iloc[rows]
 
 
 def _build_plasma(p, data):
@@ -280,7 +280,7 @@ def test_a_child_whose_times_differ_from_its_parents_is_checked():
     ON FAILURE: the code is wrong; a child trusted a time index it was not built on.
     """
     p = swp.examples.load_plasma()
-    v = _with_missing_time(p.p1.velocity.data)
+    v = _with_missing_time(p.p1.v.data)
     with pytest.raises(ValueError, match=r"1 of 3 timestamps missing \(NaT\)"):
         vector.Vector(v, _time_checked=p.data.index)
 

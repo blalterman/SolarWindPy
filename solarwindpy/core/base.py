@@ -20,6 +20,9 @@ import pandas as pd
 
 from . import units_constants
 
+# What each column level holds, for messages that name a level.
+_LEVEL_WORDS = {"M": "measurement", "C": "component", "S": "species"}
+
 
 class Core(ABC):
     """Base class for all :mod:`solarwindpy` objects.
@@ -128,6 +131,152 @@ class Core(ABC):
 
     def _init_constants(self) -> None:
         self._constants = units_constants.Constants()
+
+    # --- Column access and reduction by level name -------------------------
+    #
+    # Columns are a MultiIndex with levels "M" (measurement), "C" (component)
+    # and "S" (species), or one of those levels alone as a flat Index, as in a
+    # Vector's x, y and z. Every component and species selection, and every
+    # reduction over columns, in `core` goes through the methods below, which
+    # name the level they act on and never assume its position. Changing how
+    # columns are stored means rewriting these methods only.
+
+    @staticmethod
+    def _level_labels(columns: pd.Index, level: str) -> pd.Index:
+        r"""The labels ``columns`` holds on ``level``.
+
+        A flat Index is one level. It is refused only when its name is
+        another level of the data model, such as ``"S"`` when ``level`` is
+        ``"C"``; an unnamed or otherwise named flat Index is taken as
+        ``level``, so that a frame whose level names are checked elsewhere
+        (as :meth:`~solarwindpy.core.plasma.Plasma.set_sc` checks a
+        spacecraft's) is refused there, as before.
+
+        Raises
+        ------
+        ValueError
+            If ``columns`` has no level ``level``.
+        """
+        if columns.nlevels == 1:
+            if columns.name in _LEVEL_WORDS and columns.name != level:
+                raise ValueError(
+                    f"Expected level {level!r}; these flat columns are level "
+                    f"{columns.name!r}"
+                )
+            return columns
+        if level not in columns.names:
+            raise ValueError(
+                f"Expected level {level!r}; these columns have levels "
+                f"{list(columns.names)}"
+            )
+        return columns.unique(level=level)
+
+    @classmethod
+    def _select(cls, frame: pd.DataFrame, key, level: str):
+        r"""Columns of ``frame`` labelled ``key`` on the column level named ``level``.
+
+        The one accessor for component (``level="C"``) and species
+        (``level="S"``) selection in :mod:`solarwindpy.core`.
+
+        Parameters
+        ----------
+        frame : pd.DataFrame
+            Columns with a level named ``level``, or a flat Index named
+            ``level`` or unnamed.
+        key : str or list of str
+            One label, or a list of labels.
+        level : str
+            The level's name: ``"M"``, ``"C"`` or ``"S"``.
+
+        Returns
+        -------
+        pd.Series or pd.DataFrame
+            For one label, ``frame.xs(key, level=level)``: the level is
+            dropped and the result shares ``frame``'s data rather than
+            copying it. For a list, exactly those labels in the order given,
+            every other level kept, as ``.loc`` with a list selects them.
+
+        Raises
+        ------
+        KeyError
+            If a label is absent, naming the labels the level holds.
+        ValueError
+            If ``frame`` has no level ``level``.
+        """
+        columns = frame.columns
+        labels = cls._level_labels(columns, level)
+        many = isinstance(key, (list, tuple, pd.Index, np.ndarray))
+        keys = list(key) if many else [key]
+        absent = [k for k in keys if k not in labels]
+        if absent:
+            word = _LEVEL_WORDS.get(level, f"level {level!r} label")
+            raise KeyError(
+                f"Unknown {word} {absent[0]!r}. Available: {labels.tolist()}"
+            )
+        flat = columns.nlevels == 1
+        if many:
+            return (
+                frame.loc[:, keys] if flat else frame.reindex(columns=keys, level=level)
+            )
+        return frame.xs(key, axis=1) if flat else frame.xs(key, axis=1, level=level)
+
+    @classmethod
+    def _reduce_level(cls, frame: pd.DataFrame, level: str, how: str, **kwargs):
+        r"""Reduce ``frame`` over the column level named ``level``.
+
+        Every other level is kept: a flat ``frame`` reduces to a Series, and
+        a MultiIndex reduces to one column per combination of the remaining
+        levels. Callers use :meth:`_component_reduce` or
+        :meth:`_species_total`, which fix the missing-data rule by level.
+
+        Parameters
+        ----------
+        frame : pd.DataFrame
+            Columns with a level named ``level``.
+        level : str
+            The level reduced over.
+        how : str
+            The reduction: ``"sum"``, ``"prod"`` or ``"all"``.
+        **kwargs
+            Passed to the reduction.
+        """
+        columns = frame.columns
+        cls._level_labels(columns, level)
+        if columns.nlevels == 1:
+            return getattr(frame, how)(axis=1, **kwargs)
+        keep = [name for name in columns.names if name != level]
+        by = keep[0] if len(keep) == 1 else keep
+        return getattr(frame.T.groupby(level=by), how)(**kwargs).T
+
+    @classmethod
+    def _component_reduce(cls, frame: pd.DataFrame, how: str = "sum"):
+        r"""Reduce over components (level ``"C"``), NaN where any is missing.
+
+        A magnitude, dot product or par-per product needs every component it
+        is built from (docs page :doc:`/missing_data`, Within a species).
+
+        Parameters
+        ----------
+        frame : pd.DataFrame
+            Columns with a component level.
+        how : str, default "sum"
+            ``"sum"``, ``"prod"`` or ``"all"``.
+        """
+        return cls._reduce_level(frame, "C", how, skipna=False)
+
+    @classmethod
+    def _species_total(cls, frame: pd.DataFrame):
+        r"""Sum over species (level ``"S"``) present, NaN where none is.
+
+        A total over species uses the species present at each time (docs
+        page :doc:`/missing_data`, Across species).
+
+        Parameters
+        ----------
+        frame : pd.DataFrame
+            Columns with a species level.
+        """
+        return cls._reduce_level(frame, "S", "sum", min_count=1)
 
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:
@@ -477,3 +626,71 @@ class Base(Core):
             Last few rows of the data.
         """
         return self.data.tail()
+
+
+class _ComponentFrame(Base):
+    r"""One species' components: the common base of Vector and Tensor.
+
+    Holds what :class:`~solarwindpy.core.vector.Vector` and
+    :class:`~solarwindpy.core.tensor.Tensor` share, so neither copies it:
+    calling the object with a component label, and refusing data that hold
+    more than one species. Both are single-species by design: a magnitude or
+    projection of columns spanning several species would reduce across them.
+    """
+
+    def set_data(self, new: pd.DataFrame) -> None:
+        r"""Refuse ``new`` if its species level holds several species, then set it.
+
+        Raises
+        ------
+        ValueError
+            If ``new``'s columns have a level ``"S"`` holding more than one
+            species, naming them; or as :meth:`Base.set_data` raises.
+        """
+        columns = getattr(new, "columns", None)
+        if isinstance(columns, pd.MultiIndex) and "S" in columns.names:
+            species = sorted(columns.unique(level="S"))
+            if len(species) > 1:
+                raise ValueError(
+                    f"A {self.__class__.__name__} holds one species; these "
+                    f"columns hold {len(species)}: "
+                    f"{', '.join(repr(s) for s in species)}. Select one, "
+                    "e.g. with `.xs(species, axis=1, level='S')`."
+                )
+        super().set_data(new)
+
+    @classmethod
+    def _component_reduce(cls, frame: pd.DataFrame, how: str = "sum"):
+        r"""Reduce over components, one value per time for the one species held.
+
+        As :meth:`Core._component_reduce`; when ``frame`` also has a species
+        level, which holds at most one species here (see :meth:`set_data`),
+        the lone species column is returned as an unnamed Series, as a sum
+        over every column would return it.
+        """
+        out = super()._component_reduce(frame, how)
+        if isinstance(out, pd.DataFrame) and out.shape[1] == 1:
+            out = out.iloc[:, 0].rename(None)
+        return out
+
+    def __call__(self, component: str) -> pd.Series:
+        r"""Return one component.
+
+        Parameters
+        ----------
+        component : str
+            The component's label, such as ``'x'`` for a Vector or ``'par'``
+            for a Tensor.
+
+        Returns
+        -------
+        pd.Series
+            The requested component, which shares data with :attr:`data`.
+
+        Raises
+        ------
+        KeyError
+            If ``component`` is not a component of :attr:`data`; the message
+            names the available components.
+        """
+        return self._select(self.data, component, "C")

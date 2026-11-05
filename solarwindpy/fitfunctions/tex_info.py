@@ -201,9 +201,8 @@ class TeXinfo(object):
             x = r"$%s$" % x
 
         if x.count("$") % 2:
-            msg = (
-                "An even number of math escapes are necessary."
-                " You have %s" % x.count("$")
+            msg = "An even number of math escapes are necessary. You have %s" % x.count(
+                "$"
             )
             raise ValueError(msg)
 
@@ -292,7 +291,6 @@ class TeXinfo(object):
             info += ["", self.TeX_relative_error]  # blank for visual cue
 
         if chisq_dof:
-
             chisq_info = (
                 r"\chi^2_\nu = {%.2f} \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \; \chi^2_{\nu;R} = {%.2f}"
                 % (self.chisq_dof.linear, self.chisq_dof.robust)

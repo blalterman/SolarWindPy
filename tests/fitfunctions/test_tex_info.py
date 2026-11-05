@@ -494,3 +494,47 @@ def test_annotate_info_honours_every_option(texinfo):
         assert text.get_fontsize() == 7
     finally:
         plt.close(fig)
+
+
+def _offset_fit_cases():
+    """Return ``(cls, x, y, expected TeX argnames)`` for the offset-parameter fits."""
+    from solarwindpy.fitfunctions.exponentials import ExponentialPlusC
+    from solarwindpy.fitfunctions.lines import LineXintercept
+    from solarwindpy.fitfunctions.power_laws import PowerLawOffCenter, PowerLawPlusC
+
+    x_exp = np.linspace(0.0, 5.0, 20)
+    x_pow = np.linspace(1.0, 10.0, 20)
+    x_off = np.array([2.0, 3.0, 5.0, 9.0])
+    x_lin = np.array([1.0, 2.0, 3.0, 4.0])
+    return [
+        (ExponentialPlusC, x_exp, 2.0 * np.exp(-0.5 * x_exp) + 0.5, {"y0": "y_0"}),
+        (
+            PowerLawPlusC,
+            x_pow,
+            2.0 * x_pow**-1.5 + 0.5,
+            {"alpha": r"\alpha", "y0": "y_0"},
+        ),
+        (
+            PowerLawOffCenter,
+            x_off,
+            4.0 * (x_off - 1.0) ** 2,
+            {"alpha": r"\alpha", "x0": "x_0"},
+        ),
+        (LineXintercept, x_lin, 2.0 * (x_lin - 1.5), {"x0": "x_0"}),
+    ]
+
+
+@pytest.mark.parametrize(
+    "cls, x, y, expected",
+    _offset_fit_cases(),
+    ids=lambda v: v.__name__ if isinstance(v, type) else "",
+)
+def test_offset_parameters_render_with_tex_subscripts(cls, x, y, expected):
+    """x0 and y0 render as x_0 and y_0 in the TeX report, as in the model string.
+
+    ON FAILURE: the code is wrong.
+    """
+    obj = cls(x, y)
+    obj.make_fit()
+    assert obj.TeX_info.TeX_argnames == expected
+    assert set(expected.values()) <= set(obj.TeX_info.TeX_popt)

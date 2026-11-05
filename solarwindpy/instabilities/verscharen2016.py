@@ -69,8 +69,8 @@ insta_params = pd.concat(
         ),
     },
     axis=1,
-    names=["Growth Rate"],
-).stack("Growth Rate", future_stack=True)
+    names=["growth_rate"],
+).stack("growth_rate", future_stack=True)
 
 _plot_contour_kwargs = pd.DataFrame(
     [
@@ -102,7 +102,7 @@ _plot_contour_kwargs = pd.DataFrame(
             (-2, "MM"),
             (-2, "OFI"),
         ],
-        names=["Growth Rate", "Instability"],
+        names=["growth_rate", "Instability"],
     ),
     columns=["color", "linestyle", "marker"],
 )
@@ -137,9 +137,13 @@ def beta_ani_inst(beta, a=None, b=None, c=None):
 
     Examples
     --------
+    The A/IC threshold at gamma / Omega_p = 10^-4, Table 1 of
+    :cite:`Verscharen2016a` (``insta_params`` row ``("AIC", -4)``). Beta
+    below ``c`` has no threshold:
+
     >>> beta = np.logspace(-2, 2, 5)
-    >>> beta_ani_inst(beta, a=0.367, b=-0.408, c=0.011)  # doctest: +ELLIPSIS
-    array([       nan, 1.1367783..., 1.36534751..., 1.93857946..., 3.40240693...])
+    >>> beta_ani_inst(beta, a=0.367, b=0.364, c=0.011)
+    array([       nan, 1.88529518, 1.36848059, 1.15879618, 1.06865678])
     """
     # Effectively, type checking.
     a = float(a)
@@ -157,7 +161,7 @@ class StabilityCondition(object):
         Index of the growth-rate table to use (``-2``, ``-3`` or ``-4``).
     beta : pandas.Series
         Parallel proton beta.
-    anisotropy : pandas.Series
+    R : pandas.Series
         Temperature anisotropy.
 
     Attributes
@@ -168,7 +172,8 @@ class StabilityCondition(object):
         Boolean mask indicating unstable modes.
     stability_bin : pandas.Series
         Integer label describing the dominant instability, named
-        ``"Stability"``.
+        ``"Stability"``; the keys of ``stability_map``. A point outside
+        every bin carries ``fill`` (-9999).
 
     Notes
     -----
@@ -178,19 +183,19 @@ class StabilityCondition(object):
     instability.
     """
 
-    def __init__(self, growth_rate, beta, anisotropy):
+    def __init__(self, growth_rate, beta, R):
         """Initialize the object.
 
         Parameters
         ----------
         growth_rate : int
             Growth rate index (``-2``, ``-3`` or ``-4``).
-        beta, anisotropy : pandas.Series
+        beta, R : pandas.Series
             Arrays of parallel beta and temperature anisotropy.
         """
         self._init_logger()
         self.set_instability_parameters(growth_rate)
-        self.set_beta_ani(beta, anisotropy)
+        self.set_beta_ani(beta, R)
         self.calculate_stability_criteria()
 
     def __str__(self):
@@ -206,8 +211,12 @@ class StabilityCondition(object):
 
     @property
     def fill(self):
-        r"""Placeholder ``stability_bin`` starts from before each bin is assigned."""
-        return -9999.0
+        r"""Integer ``stability_bin`` label of a point outside every bin.
+
+        ``stability_bin`` starts from it before each bin is assigned. It is
+        not a key of ``stability_map``.
+        """
+        return -9999
 
     @property
     def instability_parameters(self):
@@ -228,10 +237,10 @@ class StabilityCondition(object):
         return self.data.loc[:, "beta"]
 
     @property
-    def anisotropy(self):
+    def R(self):
         """The anisotropy values of the object."""
 
-        return self.data.loc[:, "anisotropy"]
+        return self.data.loc[:, "R"]
 
     @property
     def stability_map(self):
@@ -276,7 +285,10 @@ class StabilityCondition(object):
 
     @property
     def stability_bin(self):
-        """The integer corresponding to the (in)stability condition."""
+        """The integer corresponding to the (in)stability condition.
+
+        A point outside every bin carries ``fill`` (-9999).
+        """
 
         return self._stability_bin
 
@@ -331,14 +343,14 @@ class StabilityCondition(object):
         """
 
         growth_rate = int(growth_rate)
-        temp = insta_params.xs(growth_rate, axis=0, level="Growth Rate")
+        temp = insta_params.xs(growth_rate, axis=0, level="growth_rate")
         self._instability_parameters = temp
 
-    def set_beta_ani(self, beta, anisotropy):
+    def set_beta_ani(self, beta, R):
         """Set the beta and anisotropy values."""
 
-        assert beta.shape == anisotropy.shape
-        data = pd.concat({"beta": beta, "anisotropy": anisotropy}, axis=1)
+        assert beta.shape == R.shape
+        data = pd.concat({"beta": beta, "R": R}, axis=1)
         self._data = data
 
     def _calc_instability_thresholds(self):
@@ -362,7 +374,7 @@ class StabilityCondition(object):
         :meth:`calculate_stability_criteria`.
         """
         is_unstable = {
-            k: self.instability_tests[k](self.anisotropy, v)
+            k: self.instability_tests[k](self.R, v)
             for k, v in self.instability_thresholds.items()
         }
         is_unstable = pd.concat(is_unstable, axis=1).sort_index(axis=1)
@@ -454,7 +466,7 @@ class StabilityContours(object):
         return self._contours
 
     def plot_contours(
-        self, ax, fix_scale=True, plot_gamma=None, tk_kind=None, **kwargs
+        self, ax, fix_scale=True, growth_rate=None, tk_kind=None, **kwargs
     ):
         r"""Add the instability contours to the plot.
 
@@ -463,8 +475,8 @@ class StabilityContours(object):
         ax: mpl.axis
         fix_scale: bool
             If True, make x- and y-axes log scaled.
-        plot_gamma: None, -2, -3, -4
-            If not None, the instability parameter to plot.
+        growth_rate: None, -2, -3, -4
+            If not None, plot only the contours of this growth rate.
         tk_kind: None, str, list-like of str
             Contours to plot. Valid options are "MM", "AIC", "FMW", "OFI",
             and any combination thereof.
@@ -475,6 +487,18 @@ class StabilityContours(object):
             ``color``, ``linestyle`` and ``marker`` and is labelled with its
             instability, with ``markersize=10``, ``markeredgewidth=0.5``,
             ``markeredgecolor="k"`` and ``markevery=10``.
+
+        Returns
+        -------
+        ax : matplotlib.axes.Axes
+        lines : dict
+            Maps each drawn ``(growth_rate, instability)`` pair, e.g.
+            ``(-3, "MM")``, to its :class:`matplotlib.lines.Line2D`, in
+            drawing order. Only the curves drawn are keys.
+        cbar : None
+            The contours are lines, not a mappable, so no colorbar is drawn;
+            the slot keeps the return order ``(ax, artists..., cbar)``
+            shared by every plot.
         """
         assert isinstance(ax, mpl.axes.Axes)
 
@@ -504,41 +528,48 @@ class StabilityContours(object):
         if tk_kind is not None:
             target_contours = target_contours.loc[:, tk_kind]
         target_contours = target_contours.stack()
+        lines = {}
+
+        if growth_rate is not None:
+            growth_rate = int(growth_rate)
+            assert growth_rate in [-2, -3, -4], (
+                "Unrecognized growth_rate: %s" % growth_rate
+            )
 
         for k, v in target_contours.items():
-            gamma, itype = k
+            rate, itype = k
 
-            if plot_gamma is not None:
-                plot_gamma = int(plot_gamma)
-                assert plot_gamma in [-2, -3, -4], "Unrecognized gamma: %s" % plot_gamma
-                if gamma != plot_gamma:
-                    # Don't plot this gamma.
-                    continue
+            if growth_rate is not None and rate != growth_rate:
+                # Don't plot this growth rate.
+                continue
 
             style = {
                 **common_style,
-                **_plot_contour_kwargs.loc[(gamma, itype)].to_dict(),
+                **_plot_contour_kwargs.loc[(rate, itype)].to_dict(),
                 "label": itype,
                 **kwargs,
             }
             im = ax.plot(self.beta, v, **style)
             # only want line object, not list of them. so im[0].
-            images_for_table_legend.loc[gamma, itype] = im[0]
+            images_for_table_legend.loc[rate, itype] = im[0]
+            lines[(rate, itype)] = im[0]
 
         if fix_scale:
             ax.set_xscale("log")
             ax.set_yscale("log")
 
-        if plot_gamma is None:
+        if growth_rate is None:
             # Only need legend table if plotting all contours.
             self._add_table_legend(ax, images_for_table_legend)
         else:
             ax.legend(
                 loc=1,
-                title=r"$\gamma/\Omega_{p} = 10^{%s}$" % plot_gamma,
+                title=r"$\gamma/\Omega_{p} = 10^{%s}$" % growth_rate,
                 framealpha=0,
                 ncol=2,
             )
+
+        return ax, lines, None
 
     @staticmethod
     def _add_table_legend(ax, images):
@@ -554,9 +585,9 @@ class StabilityContours(object):
             (0, 0), 1, 1, fc="w", fill=False, edgecolor="none", linewidth=0
         )
 
-        def handle(gamma, itype):
-            """The curve plotted for ``(gamma, itype)``, or the blank cell."""
-            image = images.loc[gamma, itype]
+        def handle(rate, itype):
+            """The curve plotted for ``(rate, itype)``, or the blank cell."""
+            image = images.loc[rate, itype]
             return extra if pd.isna(image) else image
 
         # Create organized list containing all handles for table.

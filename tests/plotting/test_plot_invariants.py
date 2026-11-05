@@ -5,7 +5,7 @@
 A plot keeps some of the rows its caller passes and can hand them back, by
 their original labels, through its selection methods. Whatever a selection
 returns, these hold, for every ``solarwindpy`` plot class (found by walking
-``AggPlot`` and ``PlotWithZdata`` subclasses), every seeded case in
+``BinnedPlot`` and ``ColorPlot`` subclasses), every seeded case in
 ``tests.plotting._cases`` and every way the plot gets its bins (each ``nbins``
 rule on the private path, explicit bins in a shared ``BinnedData``):
 
@@ -47,8 +47,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 import solarwindpy  # noqa: E402
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
-from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
-from solarwindpy.plotting.base import PlotWithZdata  # noqa: E402
+from solarwindpy.plotting.base import BinnedPlot, ColorPlot  # noqa: E402
 from solarwindpy.plotting.binned import BinnedData  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
@@ -80,7 +79,7 @@ class VacuousFixture(AssertionError):
     """A fixture no longer lets an invariant fail."""
 
 
-#: Cell-split threshold for ``SpiralPlot2D.initialize_mesh``. Every case has
+#: Cell-split threshold of ``SpiralPlot2D``'s mesh. Every case has
 #: far fewer identical (x, y) points than this, so no cell splits forever.
 MIN_PER_BIN = 40
 
@@ -96,9 +95,9 @@ def _import_every_module():
 
 
 def _walk_plot_classes():
-    """Every ``solarwindpy`` subclass of ``AggPlot`` or ``PlotWithZdata``."""
+    """Every ``solarwindpy`` subclass of ``BinnedPlot`` or ``ColorPlot``."""
     _import_every_module()
-    found, stack = set(), [AggPlot, PlotWithZdata]
+    found, stack = set(), [BinnedPlot, ColorPlot]
     while stack:
         for sub in stack.pop().__subclasses__():
             if sub not in found:
@@ -199,6 +198,7 @@ def _build_spiral(case, variant):
         initial_bins=spiral_bins_spec(spec, case, log),
         clip=case.clip_data,
         mask=case.mask,
+        min_per_bin=MIN_PER_BIN,
     )
     inputs = {"x": case.x, "y": case.y, "z": case.z}
     return Build(h, inputs, {**log, "z": False}, case.mask)
@@ -377,10 +377,7 @@ EXEMPT = {
     "alim": "aggregate limits, a setting",
     "alim_kind": "kind of the aggregate limits, a setting",
     "axnorm": "normalization key, a setting",
-    "build_grouped": "groups z by mesh cell for agg; returns nothing",
-    "calc_bins_intervals": "computes bin edges at construction; returns nothing",
-    "calc_initial_bins": "returns the initial spiral edges, not rows",
-    "categoricals": "the bins per axis, not rows",
+    "binning": "the cells rows are placed in, not rows",
     "clim": "count limits, a setting",
     "clip": "clip settings per axis",
     "clip_data": "static helper inherited from Base that clips the values it is "
@@ -389,14 +386,11 @@ EXEMPT = {
     "get_border": "the top and bottom bins of each x column, not rows",
     "grouped": "groupby over bins or cells, not a selection of rows",
     "initial_bins": "the initial spiral edges, not rows",
-    "initialize_mesh": "builds the spiral mesh; test_spiral_mesh_places_every_"
-    "kept_row checks it covers every row",
     "intervals": "the bins per axis, not rows",
     "joint": "aggregated values indexed by bin, not by row label",
     "labels": "axis labels",
     "log": "log settings per axis",
     "logger": "the plot's logger",
-    "make_cut": "assigns rows to bins at construction; cut returns the result",
     "make_joint_h2_h1_plot": "draws a figure",
     "make_plot": "draws a figure",
     "mesh": "the spiral mesh, cells not rows",
@@ -409,7 +403,6 @@ EXEMPT = {
     "set_clim": "setter",
     "set_labels": "setter",
     "set_log": "setter",
-    "set_path": "setter",
 }
 
 
@@ -526,7 +519,7 @@ def _params(classes, methods=None):
 
 
 SELECTION_PARAMS = _params(BUILDERS, SELECTIONS)
-AGG_CLASSES = {cls for cls in BUILDERS if issubclass(cls, AggPlot)}
+AGG_CLASSES = {cls for cls in BUILDERS if hasattr(cls, "cut")}
 PROJECTING_CLASSES = {cls for cls in BUILDERS if hasattr(cls, "project_1d")}
 
 
@@ -541,7 +534,7 @@ def test_every_plot_class_has_a_builder():
     Guards the parametrized invariants against passing vacuously, and puts a
     new plot class under them.
 
-    ON FAILURE: a plot class has no builder, or one no longer subclasses AggPlot or PlotWithZdata; add the builder, or restore the parent.
+    ON FAILURE: a plot class has no builder, or one no longer subclasses BinnedPlot or ColorPlot; add the builder, or restore the parent.
     """
     five = {Hist1D, Hist2D, BetaRPlot, Scatter, SpiralPlot2D}
     if not PLOT_CLASSES == set(BUILDERS) == five:
@@ -715,12 +708,11 @@ def test_projected_counts_equal_the_parents_counts_summed_over_the_other_axis(
 
 @pytest.mark.parametrize("cls, case_name, variant", _params({SpiralPlot2D}))
 def test_spiral_mesh_places_every_kept_row(cls, case_name, variant):
-    """After ``initialize_mesh``, ``mesh.cat`` has one entry per row of ``data``.
+    """The constructor's mesh has one ``mesh.cat`` entry per row of ``data``.
 
     ON FAILURE: the code is wrong.
     """
     h = build(cls, CASES[case_name], variant).h
-    h.initialize_mesh(progress=False, min_per_bin=MIN_PER_BIN)
     if h.mesh.cat.size != len(h.data):
         raise InvariantViolation(
             f"mesh.cat has {h.mesh.cat.size} entries, data {len(h.data)} rows"

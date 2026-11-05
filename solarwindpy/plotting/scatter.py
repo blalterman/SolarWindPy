@@ -10,12 +10,25 @@ from matplotlib import pyplot as plt
 from . import base
 
 
-class Scatter(base.PlotWithZdata, base._CbarMaker):
-    r"""Scatter plot of y against x, optionally colored by z."""
+class Scatter(base.ColorPlot):
+    r"""Scatter plot of y against x, optionally colored by z.
+
+    Notes
+    -----
+    ``logx`` and ``logy`` set only the axis scale. ``Hist2D`` and
+    ``SpiralPlot2D`` also store ``log10(abs())`` of a flagged axis, because
+    they bin in log space; a ``Scatter`` keeps its data linear. Quantile
+    clipping gives nearly the same points either way, since a monotone log
+    preserves order. Negative values differ: the binned plots fold them
+    into the log axis with ``abs()``, while a ``Scatter`` leaves them for
+    matplotlib to drop from its log axis.
+
+    This difference is documented for now and needs to be revisited.
+    """
 
     _clipped_axes = ("x", "y", "z")
 
-    def __init__(self, x, y, z=None, clip=None, mask=None):
+    def __init__(self, x, y, z=None, logx=None, logy=None, clip=None, mask=None):
         r"""Initialize scatter plot data.
 
         Parameters
@@ -24,6 +37,10 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             Data defining (x, y) coordinates.
         z: pd.Series, optional
             If not None, used to specify the color for each point.
+        logx, logy: bool or None
+            If True, draw that axis on a log scale. The data stay linear:
+            ``clip`` and ``alim`` read the values as given. None means False;
+            ``set_log`` can change them later.
         clip: bool, str, Mapping or None
             If True, ``make_plot`` clips x, y and z to their 0.01st and 99.99th
             percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
@@ -38,24 +55,14 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
         super(Scatter, self).__init__()
         self._set_data(x, y, z, clip, mask=mask)
         self._labels = base.AxesLabels(x="x", y="y", z="z" if z is not None else None)
-        self._log = base.LogAxes(x=False, y=False)
-        self.set_path(None)
+        self.set_log(x=bool(logx), y=bool(logy))
 
     def _format_axis(self, ax, collection, data):
         super()._format_axis(ax)
 
         x = data.loc[:, "x"]
-        minx, maxx = x.min(), x.max()
-
         y = data.loc[:, "y"]
-        miny, maxy = y.min(), y.max()
-
-        # `pulled from the end of `ax.pcolormesh`.
-        collection.sticky_edges.x[:] = [minx, maxx]
-        collection.sticky_edges.y[:] = [miny, maxy]
-        corners = (minx, miny), (maxx, maxy)
-        ax.update_datalim(corners)
-        ax.autoscale_view()
+        self._fit_view(ax, collection, x.min(), x.max(), y.min(), y.max())
 
     def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
@@ -70,6 +77,14 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
             If not None, kwargs passed to `self._make_cbar`.
         kwargs:
             Passed to `ax.scatter`.
+
+        Returns
+        -------
+        ax: mpl.axes.Axes
+        collection: mpl.collections.PathCollection
+            The points.
+        cbar: mpl.colorbar.Colorbar or None
+            The colorbar if `cbar` is True and z varies, else None.
 
         Notes
         -----
@@ -102,4 +117,4 @@ class Scatter(base.PlotWithZdata, base._CbarMaker):
 
         self._format_axis(ax, collection, data)
 
-        return ax, cbar
+        return ax, collection, cbar

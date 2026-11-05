@@ -14,26 +14,38 @@ from solarwindpy.fitfunctions.power_laws import (
     PowerLawOffCenter,
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.exponentials import Exponential, ExponentialPlusC
+from solarwindpy.fitfunctions.gaussians import (
+    Gaussian,
+    GaussianLn,
+    GaussianNormalized,
+)
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
+from tests.fitfunctions._attempt import attempt_fit
 
 
 @pytest.mark.parametrize(
     "cls, expected_params, sample_args, expected_value",
     [
         # 3 * 2^1.5 = 6 sqrt(2)
-        (PowerLaw, ("x", "A", "b"), (2.0, 3.0, 1.5), 6 * np.sqrt(2.0)),
+        pytest.param(
+            PowerLaw,
+            ("x", "alpha", "A"),
+            (2.0, 1.5, 3.0),
+            6 * np.sqrt(2.0),
+        ),
         # 6 sqrt(2) + 1
-        (
+        pytest.param(
             PowerLawPlusC,
-            ("x", "A", "b", "c"),
-            (2.0, 3.0, 1.5, 1.0),
+            ("x", "alpha", "y0", "A"),
+            (2.0, 1.5, 1.0, 3.0),
             6 * np.sqrt(2.0) + 1,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
-        (
+        pytest.param(
             PowerLawOffCenter,
-            ("x", "A", "b", "x0"),
-            (2.0, 3.0, 1.5, 0.5),
+            ("x", "alpha", "x0", "A"),
+            (2.0, 1.5, 0.5, 3.0),
             4.5 * np.sqrt(1.5),
         ),
     ],
@@ -55,6 +67,48 @@ def test_function_signature_and_output(
     assert obj.function(*sample_args) == exact(expected_value)
 
 
+#: Each sibling's exponent; the Gaussians have none.
+_EXPONENT = {
+    Exponential: "k",
+    ExponentialPlusC: "k",
+    PowerLaw: "alpha",
+    PowerLawPlusC: "alpha",
+    PowerLawOffCenter: "alpha",
+}
+
+
+@pytest.mark.parametrize(
+    "cls, amplitude",
+    [
+        (Exponential, "A"),
+        (ExponentialPlusC, "A"),
+        (PowerLaw, "A"),
+        (PowerLawPlusC, "A"),
+        (PowerLawOffCenter, "A"),
+        (Gaussian, "A"),
+        (GaussianNormalized, "n"),
+        (GaussianLn, "A"),
+    ],
+    ids=lambda v: v.__name__ if isinstance(v, type) else "",
+)
+def test_amplitude_is_the_last_parameter(cls, amplitude):
+    """Every amplitude-scaled fit lists its amplitude last, the exponent first.
+
+    The author ruled one parameter order: the amplitude ``A`` (``n`` for
+    GaussianNormalized) is the last parameter, as in ``f(x, mu, sigma, A)``,
+    and the exponential and power-law fits list their exponent (``k`` or
+    ``alpha``) first. The order sets the positional ``function`` arguments,
+    ``p0`` and ``bounds``.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 3.0])
+    obj = cls(x, np.array([1.0, 4.0, 9.0]))
+    assert obj.argnames[-1] == amplitude
+    if cls in _EXPONENT:
+        assert obj.argnames[0] == _EXPONENT[cls]
+
+
 @pytest.fixture
 def power_law_data():
     """Noisy y = 2 x^-1.5, x in [0.5, 5], noise sigma 0.02, unit weights.
@@ -64,9 +118,9 @@ def power_law_data():
     """
     rng = np.random.default_rng(42)
     x = np.linspace(0.5, 5.0, 20)
-    A, b = 2.0, -1.5
+    A, alpha = 2.0, -1.5
     noise = rng.normal(0, 0.02, size=x.shape)
-    y = A * x**b + noise
+    y = A * x**alpha + noise
     w = np.ones_like(x)
     return x, y, w
 
@@ -106,9 +160,9 @@ def test_power_law_p0_is_fixed(cls, power_law_data):
 @pytest.mark.parametrize(
     "cls, expected_tex",
     [
-        (PowerLaw, r"f(x)=A x^b"),
-        (PowerLawPlusC, r"f(x)=A x^b + c"),
-        (PowerLawOffCenter, r"f(x)=A (x-x_0)^b"),
+        (PowerLaw, r"f(x)=A x^{\alpha}"),
+        (PowerLawPlusC, r"f(x)=A x^{\alpha} + y_0"),
+        (PowerLawOffCenter, r"f(x)=A (x-x_0)^{\alpha}"),
     ],
 )
 def test_TeX_function_strings(cls, expected_tex):
@@ -125,9 +179,9 @@ def test_TeX_function_strings(cls, expected_tex):
 @pytest.mark.parametrize(
     "cls, truth",
     [
-        (PowerLaw, {"A": 2.0, "b": -1.5}),
-        (PowerLawPlusC, {"A": 2.0, "b": -1.5, "c": 0.0}),
-        (PowerLawOffCenter, {"A": 2.0, "b": -1.5, "x0": 0.0}),
+        (PowerLaw, {"A": 2.0, "alpha": -1.5}),
+        (PowerLawPlusC, {"A": 2.0, "alpha": -1.5, "y0": 0.0}),
+        (PowerLawOffCenter, {"A": 2.0, "alpha": -1.5, "x0": 0.0}),
     ],
 )
 def test_make_fit_success(cls, truth, power_law_data):
@@ -158,60 +212,79 @@ def test_make_fit_insufficient_data(cls):
     with pytest.raises(InsufficientDataError):
         obj.make_fit()
 
-    result = obj.make_fit(return_exception=True)
+    result = attempt_fit(obj)
     assert isinstance(result, InsufficientDataError)
     assert "insufficient data" in str(result).lower()
 
 
 def test_power_law_perfect_fit():
-    """PowerLaw recovers A = 16, b = -2 from 16, 4, 1, 0.25 at x = 1, 2, 4, 8.
+    """PowerLaw recovers A = 16, alpha = -2 from 16, 4, 1, 0.25 at x = 1, 2, 4, 8.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    A, b = 16.0, -2.0
+    A, alpha = 16.0, -2.0
     y = np.array([16.0, 4.0, 1.0, 0.25])
 
     obj = PowerLaw(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["alpha"] == noise_free(alpha)
     assert obj(x) == noise_free(y)
 
 
 def test_power_law_plus_c_perfect_fit():
-    """PowerLawPlusC recovers A = 16, b = -2, c = 2 from 18, 6, 3, 2.25.
+    """PowerLawPlusC recovers A = 16, alpha = -2, y0 = 2 from 18, 6, 3, 2.25.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    A, b, c = 16.0, -2.0, 2.0
+    A, alpha, y0 = 16.0, -2.0, 2.0
     y = np.array([18.0, 6.0, 3.0, 2.25])
 
     obj = PowerLawPlusC(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
-    assert obj.popt["c"] == noise_free(c)
+    assert obj.popt["alpha"] == noise_free(alpha)
+    assert obj.popt["y0"] == noise_free(y0)
     assert obj(x) == noise_free(y)
 
 
+def test_power_law_plus_c_names_its_constant_y0():
+    """PowerLawPlusC calls its added constant ``y0``, and no parameter ``c``.
+
+    An old ``popt["c"]`` must raise KeyError. Data are 16 x^-2 + 2 at
+    x = 1, 2, 4, 8: 18, 6, 3, 2.25.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([1.0, 2.0, 4.0, 8.0])
+    obj = PowerLawPlusC(x, np.array([18.0, 6.0, 3.0, 2.25]))
+    obj.make_fit()
+
+    assert set(obj.popt) == {"A", "alpha", "y0"}
+    assert obj.popt["y0"] == noise_free(2.0)
+    with pytest.raises(KeyError):
+        obj.popt["c"]
+    assert obj.TeX_function == r"f(x)=A x^{\alpha} + y_0"
+
+
 def test_power_law_off_center_perfect_fit():
-    """PowerLawOffCenter recovers A = 4, b = 2, x0 = 1 from 4, 16, 64, 256.
+    """PowerLawOffCenter recovers A = 4, alpha = 2, x0 = 1 from 4, 16, 64, 256.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([2.0, 3.0, 5.0, 9.0])
-    A, b, x0 = 4.0, 2.0, 1.0
+    A, alpha, x0 = 4.0, 2.0, 1.0
     y = np.array([4.0, 16.0, 64.0, 256.0])  # 4 * (1, 2, 4, 8)^2
 
     obj = PowerLawOffCenter(x, y)
     obj.make_fit()
 
     assert obj.popt["A"] == noise_free(A)
-    assert obj.popt["b"] == noise_free(b)
+    assert obj.popt["alpha"] == noise_free(alpha)
     assert obj.popt["x0"] == noise_free(x0)
     assert obj(x) == noise_free(y)
 
@@ -226,13 +299,13 @@ def test_power_law_numerical_stability():
 
     obj = PowerLaw(x, y)
 
-    assert obj.function(0.1, 1.0, -10.0) == exact(1e10)
+    assert obj.function(0.1, -10.0, 1.0) == exact(1e10)
     # 10^0.1 = 1.2589254117941673 (tenth root of 10).
-    assert obj.function(10.0, 1.0, 0.1) == exact(1.2589254117941673)
+    assert obj.function(10.0, 0.1, 1.0) == exact(1.2589254117941673)
 
 
 def test_power_law_zero_handling():
-    """PowerLaw is x itself at b = 1 near zero, and the constant A at b = 0.
+    """PowerLaw is x itself at alpha = 1 near zero, and the constant A at alpha = 0.
 
     ON FAILURE: the code is wrong.
     """
@@ -242,7 +315,7 @@ def test_power_law_zero_handling():
     obj = PowerLaw(x, y)
 
     assert obj.function(0.01, 1.0, 1.0) == exact(0.01)
-    assert obj.function(2.0, 5.0, 0.0) == exact(5.0)
+    assert obj.function(2.0, 0.0, 5.0) == exact(5.0)
 
 
 def test_power_law_off_center_centering():
@@ -255,7 +328,7 @@ def test_power_law_off_center_centering():
 
     obj = PowerLawOffCenter(x, np.ones_like(x))
 
-    result = obj.function(x, 2.0, 1.0, x0)
+    result = obj.function(x, 1.0, x0, 2.0)
     assert result == exact([1.0, 3.0, 5.0, 7.0])
 
 
@@ -320,10 +393,10 @@ def test_power_law_off_center_bound_respects_the_caller(x0_upper, expected):
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    obj.make_fit(bounds=([0.0, -5.0, -3.0], [100.0, 5.0, x0_upper]))
+    obj.make_fit(bounds=([-5.0, -3.0, 0.0], [5.0, x0_upper, 100.0]))
 
     assert obj.fit_bounds["A"] == (0.0, 100.0)
-    assert obj.fit_bounds["b"] == (-5.0, 5.0)
+    assert obj.fit_bounds["alpha"] == (-5.0, 5.0)
     assert obj.fit_bounds["x0"] == (-3.0, expected)
 
 
@@ -347,13 +420,13 @@ def test_power_law_off_center_fits_data_at_or_below_zero(x, x0):
     ON FAILURE: the code is wrong.
     """
     x = np.array(x)
-    y = 4.0 * (x - x0) ** 2  # A = 4, b = 2
+    y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
-    assert obj.p0[2] < x.min()
+    assert obj.p0[1] < x.min()
 
     obj.make_fit()
     assert obj.popt["A"] == noise_free(4.0)
-    assert obj.popt["b"] == noise_free(2.0)
+    assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
 
 
@@ -361,23 +434,23 @@ def test_power_law_off_center_fits_data_at_or_below_zero(x, x0):
 def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_lower):
     """A caller's lower bound on ``x0`` at or above the smallest x raises ValueError.
 
-    The error names ``x0`` and the smallest used x, and ``return_exception``
-    returns it. The positive control fits the same data with the lower bound
+    The error names ``x0`` and the smallest used x, and ``make_fit``
+    records it. The positive control fits the same data with the lower bound
     moved below the data.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([0.0, -5.0, x0_lower], [100.0, 5.0, 10.0])
+    bounds = ([-5.0, x0_lower, 0.0], [5.0, 10.0, 100.0])
     match = r"needs x0 below the smallest used x \(1\.0\)"
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(bounds=bounds)
-    assert re.search(match, str(obj.make_fit(return_exception=True, bounds=bounds)))
+    assert re.search(match, str(attempt_fit(obj, bounds=bounds)))
 
     # Positive control: a lower bound below the data fits.
-    bounds[0][2] = -3.0
+    bounds[0][1] = -3.0
     obj.make_fit(bounds=bounds)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -388,14 +461,14 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
     """A caller's ``p0`` starting ``x0`` at or above the smallest x raises ValueError.
 
     The error names ``x0``, the smallest used x and the start, in place of
-    scipy's "x0 is infeasible", and ``return_exception`` returns it. The
+    scipy's "x0 is infeasible", and ``make_fit`` records it. The
     positive control fits the same data from a start below the data.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    p0 = [1.0, 1.0, x0_start]
+    p0 = [1.0, x0_start, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
         + re.escape(str(x0_start))
@@ -403,10 +476,10 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0)
-    assert re.search(match, str(obj.make_fit(return_exception=True, p0=p0)))
+    assert re.search(match, str(attempt_fit(obj, p0=p0)))
 
     # Positive control: a start below the data fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -416,15 +489,15 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     """A caller's ``p0`` starting ``x0`` below its lower bound raises ValueError.
 
     The error names ``x0``, the start and the bound, in place of scipy's
-    "x0 is infeasible", and ``return_exception`` returns it. The positive
+    "x0 is infeasible", and ``make_fit`` records it. The positive
     control fits the same data from a start inside the bounds.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])
-    p0 = [1.0, 1.0, -5.0]
+    bounds = ([-5.0, -3.0, 0.0], [5.0, 10.0, 100.0])
+    p0 = [1.0, -5.0, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at -5\.0, "
         r"below its lower bound -3\.0"
@@ -432,11 +505,11 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0, bounds=bounds)
-    got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+    got = attempt_fit(obj, p0=p0, bounds=bounds)
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a start inside the bounds fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0, bounds=bounds)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -447,14 +520,14 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
     """A caller's ``p0`` starting ``x0`` at NaN or infinity raises ValueError.
 
     The error names ``x0``, the smallest used x and the start, and
-    ``return_exception`` returns it. The positive control fits the same data
+    ``make_fit`` records it. The positive control fits the same data
     from a finite start.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    p0 = [1.0, 1.0, x0_start]
+    p0 = [1.0, x0_start, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
         + re.escape(str(x0_start))
@@ -463,11 +536,11 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
 
     with pytest.raises(ValueError, match=match):
         obj.make_fit(p0=p0)
-    got = obj.make_fit(return_exception=True, p0=p0)
+    got = attempt_fit(obj, p0=p0)
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a finite start below the data fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -494,13 +567,13 @@ def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0, 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
-    y = 4.0 * (x - x0) ** 2  # A = 4, b = 2
+    y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
-    assert obj.p0[2] == exact(0.0)
+    assert obj.p0[1] == exact(0.0)
 
-    obj.make_fit(bounds=([0.0, -5.0, x0_bounds[0]], [100.0, 5.0, x0_bounds[1]]))
+    obj.make_fit(bounds=([-5.0, x0_bounds[0], 0.0], [5.0, x0_bounds[1], 100.0]))
     assert obj.popt["A"] == noise_free(4.0)
-    assert obj.popt["b"] == noise_free(2.0)
+    assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
     assert obj.initial_guess_info["x0"].p0 == exact(start)
 
@@ -522,12 +595,12 @@ def test_power_law_with_weights():
     obj = PowerLaw(x, y, weights=sigma)
     obj.make_fit()
 
-    def model(x, A, b):
-        return A * x**b
+    def model(x, A, alpha):
+        return A * x**alpha
 
     weighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0], sigma=sigma)
     unweighted, _ = curve_fit(model, x, y, p0=[1.0, 1.0])
-    assert [obj.popt["A"], obj.popt["b"]] == noise_free(weighted)
+    assert [obj.popt["A"], obj.popt["alpha"]] == noise_free(weighted)
     # Ignoring the weights must fail the line above by a wide margin: the
     # weighted and unweighted answers differ by over 100x the fit tolerance.
     gap = np.max(np.abs(weighted / unweighted - 1))
@@ -535,7 +608,7 @@ def test_power_law_with_weights():
 
 
 def test_power_law_scaling_behavior():
-    """A fit to 2/x scales by 2^b = 1/2 when x doubles.
+    """A fit to 2/x scales by 2^alpha = 1/2 when x doubles.
 
     ON FAILURE: the code is wrong.
     """
@@ -573,7 +646,7 @@ def test_power_law_negative_x_handling():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 1.0, 2.0) == exact([4.0, 1.0, 1.0, 4.0])
+    assert obj.function(x, 2.0, 1.0) == exact([4.0, 1.0, 1.0, 4.0])
 
 
 def test_power_law_integer_vs_float_exponents():
@@ -586,21 +659,21 @@ def test_power_law_integer_vs_float_exponents():
 
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, A, 2) == exact([2.0, 8.0, 18.0])
-    assert obj.function(x, A, 2.0) == exact([2.0, 8.0, 18.0])
+    assert obj.function(x, 2, A) == exact([2.0, 8.0, 18.0])
+    assert obj.function(x, 2.0, A) == exact([2.0, 8.0, 18.0])
 
 
 def test_power_law_edge_case_exponents():
-    """b = 1, 0, -1 give a line, a constant, and an inverse.
+    """alpha = 1, 0, -1 give a line, a constant, and an inverse.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([1.0, 2.0, 4.0])
     obj = PowerLaw(x, np.ones_like(x))
 
-    assert obj.function(x, 3.0, 1.0) == exact([3.0, 6.0, 12.0])
-    assert obj.function(x, 5.0, 0.0) == exact([5.0, 5.0, 5.0])
-    assert obj.function(x, 2.0, -1.0) == exact([2.0, 1.0, 0.5])
+    assert obj.function(x, 1.0, 3.0) == exact([3.0, 6.0, 12.0])
+    assert obj.function(x, 0.0, 5.0) == exact([5.0, 5.0, 5.0])
+    assert obj.function(x, -1.0, 2.0) == exact([2.0, 1.0, 0.5])
 
 
 # Off-center data: 16 / x^2 on x = [1, 2, 4, 8]; x0's upper bound is the
@@ -619,7 +692,7 @@ def test_power_law_off_center_refusal_names_the_class():
     ON FAILURE: the code is wrong.
     """
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
-    bounds = ([0.0, -5.0, BELOW_ONE], [100.0, 5.0, 10.0])
+    bounds = ([-5.0, BELOW_ONE, 0.0], [5.0, 10.0, 100.0])
     with pytest.raises(ValueError, match=r"^PowerLawOffCenter needs x0 below"):
         obj.make_fit(bounds=bounds)
 
@@ -627,8 +700,8 @@ def test_power_law_off_center_refusal_names_the_class():
 @pytest.mark.parametrize(
     "p0, bounds",
     [
-        ([1.0, 1.0, BELOW_ONE], (-np.inf, np.inf)),
-        ([1.0, 1.0, -3.0], ([0.0, -5.0, -3.0], [100.0, 5.0, 10.0])),
+        ([1.0, BELOW_ONE, 1.0], (-np.inf, np.inf)),
+        ([1.0, -3.0, 1.0], ([-5.0, -3.0, 0.0], [5.0, 10.0, 100.0])),
     ],
     ids=["at-upper-bound", "at-lower-bound"],
 )
@@ -643,7 +716,7 @@ def test_power_law_off_center_accepts_a_start_on_a_bound(p0, bounds):
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        got = obj.make_fit(return_exception=True, p0=p0, bounds=bounds)
+        got = attempt_fit(obj, p0=p0, bounds=bounds)
     assert "p0 starts x0" not in str(got), got
 
 
@@ -658,6 +731,6 @@ def test_power_law_off_center_leaves_malformed_input_to_the_base_fit(kwargs):
     ON FAILURE: the code is wrong.
     """
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
-    got = obj.make_fit(return_exception=True, **kwargs)
+    got = attempt_fit(obj, **kwargs)
     assert isinstance(got, ValueError), repr(got)
     assert "needs x0 below" not in str(got), got

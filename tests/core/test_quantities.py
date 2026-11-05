@@ -107,7 +107,6 @@ class VectorTestBase(QuantityTestBase):
         mag = np.sqrt(x.pow(2) + y.pow(2) + z.pow(2))
         mag.name = "mag"
         pdt.assert_series_equal(mag, self.object_testing.mag)
-        pdt.assert_series_equal(mag, self.object_testing.magnitude)
 
     def test_rho(self):
         """rho is the xy-plane magnitude sqrt(x^2 + y^2).
@@ -134,12 +133,10 @@ class VectorTestBase(QuantityTestBase):
         z = self.data.z
         rho = np.sqrt(x.pow(2) + y.pow(2))
         lat = np.rad2deg(np.arctan2(z, rho))
-        lat.name = "latitude"
+        lat.name = "lat"
         colat = np.rad2deg(np.arctan2(rho, z))
-        colat.name = "colatitude"
-        pdt.assert_series_equal(lat, self.object_testing.latitude)
+        colat.name = "colat"
         pdt.assert_series_equal(lat, self.object_testing.lat)
-        pdt.assert_series_equal(colat, self.object_testing.colatitude)
         pdt.assert_series_equal(colat, self.object_testing.colat)
         assert (
             self.object_testing.lat + self.object_testing.colat
@@ -154,12 +151,11 @@ class VectorTestBase(QuantityTestBase):
         y = self.data.y
         lon = np.arctan2(y, x)
         lon = np.rad2deg(lon)
-        lon.name = "longitude"
+        lon.name = "lon"
         pdt.assert_series_equal(lon, self.object_testing.lon)
-        pdt.assert_series_equal(lon, self.object_testing.longitude)
 
     def test_r(self):
-        """r is the magnitude sqrt(x^2 + y^2 + z^2), named "r".
+        """mag is the magnitude sqrt(x^2 + y^2 + z^2), named "mag".
 
         ON FAILURE: the code is wrong.
         """
@@ -167,8 +163,8 @@ class VectorTestBase(QuantityTestBase):
         y = self.data.y
         z = self.data.z
         r = np.sqrt(x.pow(2) + y.pow(2) + z.pow(2))
-        r.name = "r"
-        pdt.assert_series_equal(r, self.object_testing.r)
+        r.name = "mag"
+        pdt.assert_series_equal(r, self.object_testing.mag)
         pdt.assert_series_equal(r, self.object_testing.mag, check_names=False)
 
     def test_cartesian(self):
@@ -187,9 +183,7 @@ class VectorTestBase(QuantityTestBase):
         v = self.data.loc[:, ["x", "y", "z"]]
         mag = v.pow(2).sum(axis=1).pipe(np.sqrt)
         uv = vector.Vector(v.divide(mag, axis=0))
-        pdt.assert_frame_equal(uv.data, self.object_testing.unit_vector.data)
         pdt.assert_frame_equal(uv.data, self.object_testing.uv.data)
-        self.assertEqual(uv, self.object_testing.unit_vector)
         self.assertEqual(uv, self.object_testing.uv)
 
     def test_project(self):
@@ -258,11 +252,13 @@ class VectorTestBase(QuantityTestBase):
         cos_theta = vuv.multiply(buv, axis=1).sum(axis=1)
 
         b = vector.BField(b)
-        pdt.assert_series_equal(cos_theta, self.object_testing.cos_theta(b))
+        pdt.assert_series_equal(
+            cos_theta.rename("cos_theta"), self.object_testing.cos_theta(b)
+        )
 
         v = vector.Vector(v)
         vuv = vector.Vector(vuv)
-        par = pd.Series(1.0, index=vmag.index)
+        par = pd.Series(1.0, index=vmag.index, name="cos_theta")
         pdt.assert_series_equal(par, self.object_testing.cos_theta(v))
         pdt.assert_series_equal(par, self.object_testing.cos_theta(vuv))
 
@@ -287,7 +283,6 @@ class TestBField(VectorTestBase, base.SWEData):
         const = 1e-18 / (2.0 * constants.mu_0 * 1e-12)  # ([b]**2 / 2.0 * \mu_0 * [p])
         pb = bsq * const
         pb.name = "pb"
-        pdt.assert_series_equal(pb, self.object_testing.pressure)
         pdt.assert_series_equal(pb, self.object_testing.pb)
 
 
@@ -342,7 +337,6 @@ class TestVectorAngleHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [c[1] for c in self.CASES]
-        assert np.asarray(v.latitude) == exact(expected, scale=UNIT_SCALE)
         assert np.asarray(v.lat) == exact(expected, scale=UNIT_SCALE)
 
     def test_colatitude_of_hand_directions(self, v):
@@ -351,7 +345,6 @@ class TestVectorAngleHandCases:
         ON FAILURE: the code is wrong.
         """
         expected = [c[2] for c in self.CASES]
-        assert np.asarray(v.colatitude) == exact(expected, scale=UNIT_SCALE)
         assert np.asarray(v.colat) == exact(expected, scale=UNIT_SCALE)
 
 
@@ -493,7 +486,7 @@ class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
 
 
 class TestTensorMagnitude:
-    """Tensor.magnitude is the thermal-speed scalar sqrt((par^2 + 2 per^2) / 3).
+    """Tensor.mag is the thermal-speed scalar sqrt((par^2 + 2 per^2) / 3).
 
     Thermal speeds combine through the temperatures, T = (T_par + 2 T_per) / 3 with
     T proportional to w^2, so w = sqrt((w_par^2 + 2 w_per^2) / 3) (author decision).
@@ -513,21 +506,21 @@ class TestTensorMagnitude:
             [[3.0, 0.0, -1.0], [0.0, 3.0, -1.0], [4.0, 4.0, -1.0]], columns=cols
         )
         expected = [np.sqrt(3.0), np.sqrt(6.0), 4.0]
-        assert tensor.Tensor(data).magnitude.to_numpy() == exact(expected)
+        assert tensor.Tensor(data).mag.to_numpy() == exact(expected)
 
     def test_magnitude_of_plasma_thermal_speed(self):
         """A Plasma-built p1 thermal-speed Tensor's magnitude is its own scalar column.
 
         Plasma stores w_scalar = sqrt((w_par^2 + 2 w_per^2) / 3), the same thermal-speed
         identity, so magnitude must reproduce it row by row on the package's own
-        Tensor layout (flat par/per/scalar columns from Ion.thermal_speed).
+        Tensor layout (flat par/per/scalar columns from Ion.w).
 
         ON FAILURE: the code is wrong.
         """
         p = plasma.Plasma(base.SyntheticData().plasma_data, "p1", "a")
         w = p.p1.w
-        assert w.magnitude.to_numpy() == exact(w.data.loc[:, "scalar"].to_numpy())
-        pdt.assert_index_equal(w.magnitude.index, w.data.index)
+        assert w.mag.to_numpy() == exact(w.data.loc[:, "scalar"].to_numpy())
+        pdt.assert_index_equal(w.mag.index, w.data.index)
 
 
 class TestTensorSetting:

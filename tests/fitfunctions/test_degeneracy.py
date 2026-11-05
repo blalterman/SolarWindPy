@@ -16,12 +16,13 @@ import pytest
 from scipy.optimize import OptimizeWarning
 
 from solarwindpy.fitfunctions import trend_fits
-from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
 from solarwindpy.fitfunctions.core import (
     FitDegeneracyWarning,
     FitFunction,
     InsufficientDataError,
+    NotFittedError,
 )
+from solarwindpy.fitfunctions.gaussians import Gaussian
 from solarwindpy.fitfunctions.hinge import HingeSaturation
 from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.power_laws import PowerLawOffCenter
@@ -37,12 +38,12 @@ class _StrictLine(Line):
 def _one_branch_hinge():
     """A HingeSaturation fit to data on its rising branch only.
 
-    y = 2 (x - 1) for 2 <= x <= 10, with the hinge guessed at (20, 38), on
-    that line beyond the data. Every hinge on the line fits equally well, so
-    xh and yh trade off exactly.
+    y = 2 (x - 1) for 2 <= x <= 10, with the hinge guessed at xh = 20,
+    beyond the data. Every hinge on the line fits equally well, so xh and yh
+    trade off exactly.
     """
     x = np.linspace(2, 10, 17)
-    return HingeSaturation(x, 2 * (x - 1), guess_xh=20, guess_yh=38)
+    return HingeSaturation(x, 2 * (x - 1), guess_xh=20)
 
 
 def _line_on(lo, seed):
@@ -91,7 +92,7 @@ def test_well_constrained_fit_does_not_warn_degeneracy():
 
 
 def test_degeneracy_warning_can_be_escalated_after_the_fit_is_stored():
-    """Escalated to an error, the warning raises, and the fit is still stored.
+    """Escalated to an error, the warning raises, and the fit stays a successful fit.
 
     ON FAILURE: the code is wrong.
     """
@@ -102,6 +103,8 @@ def test_degeneracy_warning_can_be_escalated_after_the_fit_is_stored():
             fit.make_fit()
     # The rising line y = 2 (x - 1) crosses zero at x1 = 1 (chosen input).
     assert fit.popt["x1"] == noise_free(1.0)
+    assert fit.error is None
+    assert fit.results.loc[:, ("status", "")].item() == "ok"
     assert [pair[:2] for pair in fit.degenerate] == [("xh", "yh")]
 
 
@@ -131,13 +134,57 @@ def test_non_finite_covariance_warns_degeneracy():
     assert np.isnan(fit.degenerate[0][2])
 
 
-def test_degeneracy_is_none_before_a_fit():
-    """``degenerate`` is None before ``make_fit``.
+class _Constant(FitFunction):
+    """A one-parameter model, y = c."""
+
+    @property
+    def function(self):
+        def constant(x, c):
+            return np.full(np.shape(x), c, dtype=float)
+
+        return constant
+
+    @property
+    def p0(self):
+        return [float(np.mean(self.observations.used.y))]
+
+    @property
+    def TeX_function(self):
+        return "c"
+
+
+def test_one_parameter_with_no_degree_of_freedom_warns_its_variance():
+    """One point fixes a constant with no degree of freedom: its variance is infinite.
+
+    A one-parameter model has no pair, so ``degenerate`` lists the parameter
+    with itself.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _Constant(np.array([1.0]), np.array([2.0]))
+    with pytest.warns(FitDegeneracyWarning, match="c has a non-finite variance"):
+        with pytest.warns(OptimizeWarning):
+            fit.make_fit()
+    assert [pair[:2] for pair in fit.degenerate] == [("c", "c")]
+    assert np.isnan(fit.degenerate[0][2])
+
+
+def test_degeneracy_is_not_fitted_before_a_successful_fit():
+    """``degenerate`` raises NotFittedError before a fit and after a failed one.
 
     ON FAILURE: the code is wrong.
     """
     fit = _line_on(-0.5, seed=0)
-    assert fit.degenerate is None
+    with pytest.raises(NotFittedError, match="call make_fit first"):
+        fit.degenerate
+
+    # One point cannot fit two parameters: the failure is recorded.
+    failed = Line(np.array([1.0]), np.array([2.0]))
+    with pytest.raises(InsufficientDataError):
+        failed.make_fit()
+    assert failed.error is not None
+    with pytest.raises(NotFittedError, match="no successful fit"):
+        failed.degenerate
 
 
 def test_line_far_from_zero_separates_the_thresholds():
@@ -206,7 +253,8 @@ def test_identifiable_power_law_warns_only_below_the_default_threshold():
     assert fit.degenerate == []
     assert 0.999 < abs(_correlation(fit, "A", "x0")) < 0.99999
 
-    with pytest.warns(FitDegeneracyWarning, match="A and x0 are degenerate"):
+    # argnames are (alpha, x0, A): the pair is named in that order.
+    with pytest.warns(FitDegeneracyWarning, match="x0 and A are degenerate"):
         fit.make_fit(degeneracy_threshold=0.999)
 
 
@@ -249,6 +297,14 @@ def test_degenerate_keeps_the_threshold_given_to_make_fit():
     assert [pair[:2] for pair in fit.degenerate] == [("m", "b")]
 
 
+def _gaussian():
+    """A Gaussian with mu = 1, sigma = 0.8, A = 3 plus seeded noise."""
+    x = np.linspace(-5, 5, 101)
+    y = 3 * np.exp(-0.5 * ((x - 1) / 0.8) ** 2)
+    y = y + np.random.default_rng(0).normal(0, 0.1, x.size)
+    return Gaussian(x, y)
+
+
 def test_degeneracy_warning_names_exactly_the_degenerate_pairs():
     """The warning prints one sentence per pair ``degenerate`` lists, with its correlation.
 
@@ -256,7 +312,7 @@ def test_degeneracy_warning_names_exactly_the_degenerate_pairs():
 
     ON FAILURE: the code is wrong.
     """
-    fit, _ = _gaussian_plus_heavyside()
+    fit = _gaussian()
     with pytest.warns(FitDegeneracyWarning) as record:
         fit.make_fit(degeneracy_threshold=0)
     message = str(record[0].message)
@@ -288,37 +344,18 @@ def test_threshold_one_silences_correlations_but_not_non_finite_covariance():
 def test_degeneracy_threshold_outside_zero_to_one_raises(threshold):
     """A threshold that is not a correlation from 0 to 1 raises ValueError.
 
+    It is a usage error, like ``absolute_sigma=True``: nothing is recorded,
+    and the previous fit stays.
+
     ON FAILURE: the code is wrong.
     """
     fit = _line_on(-0.5, seed=0)
+    fit.make_fit()
+    popt = fit.popt
     with pytest.raises(ValueError, match="degeneracy_threshold"):
         fit.make_fit(degeneracy_threshold=threshold)
-
-
-def _gaussian_plus_heavyside():
-    """A noise-free GaussianPlusHeavySide with its step between x = 2.0 and 2.1."""
-    x = np.linspace(0, 10, 101)
-    truth = {"y0": 1.0, "y1": 2.0, "mu": 5.0, "sigma": 1.0, "A": 4.0}
-    y = (
-        truth["A"] * np.exp(-0.5 * ((x - truth["mu"]) / truth["sigma"]) ** 2)
-        + truth["y1"] * (x < 2.05)
-        + truth["y0"]
-    )
-    return GaussianPlusHeavySide(x, y), truth
-
-
-def test_composite_scan_accepts_the_threshold_keyword():
-    """GaussianPlusHeavySide's x0 scan does not pass the threshold to SciPy.
-
-    The scan picks the gap midpoint 2.05 between the samples 2.0 and 2.1
-    that straddle the step.
-
-    ON FAILURE: the code is wrong.
-    """
-    fit, truth = _gaussian_plus_heavyside()
-    fit.make_fit(degeneracy_threshold=0.99999)
-    assert fit.popt["x0"] == noise_free(2.05)
-    assert {k: fit.popt[k] for k in truth} == noise_free(truth)
+    assert fit.error is None
+    assert fit.popt == exact(popt)
 
 
 @pytest.mark.parametrize(
@@ -326,14 +363,13 @@ def test_composite_scan_accepts_the_threshold_keyword():
     [
         pytest.param(_one_branch_hinge, id="HingeSaturation"),
         pytest.param(lambda: _line_on(2, seed=1), id="Line"),
-        pytest.param(lambda: _gaussian_plus_heavyside()[0], id="GaussianPlusHeavySide"),
+        pytest.param(_gaussian, id="Gaussian"),
     ],
 )
 def test_degeneracy_warning_points_at_the_caller(build):
-    """The warning names this file, also when a subclass's make_fit calls the base's.
+    """The warning names this file, not a module of the package.
 
     ``degeneracy_threshold=0`` flags any correlated pair, so every fit warns.
-    GaussianPlusHeavySide overrides ``make_fit`` and calls the base class's.
 
     ON FAILURE: the code is wrong.
     """
@@ -345,13 +381,13 @@ def test_degeneracy_warning_points_at_the_caller(build):
     ]
 
 
-def _trend_fit_with_degenerate_columns(skip=()):
-    """A TrendFit of Gaussians: two good columns, two with three points, one empty.
+def _trend_fit_with_degenerate_bins():
+    """A TrendFit of Gaussians: two good bins, two with three points, one empty.
 
-    A Gaussian has three parameters, so a column with three finite points has
-    no degree of freedom and an infinite covariance: degenerate on any
-    platform. The empty column cannot be fitted at all. Columns in ``skip``
-    are left out.
+    A Gaussian has three parameters, so a bin with three finite points has no
+    degree of freedom and an infinite covariance: degenerate on any platform.
+    The empty bin cannot be fitted at all. The trend is a Line through each
+    bin's ``mu``.
     """
     edges = np.linspace(-5, 5.25, 42)
     # TrendFit fits each column at its bin midpoints.
@@ -373,10 +409,13 @@ def _trend_fit_with_degenerate_columns(skip=()):
         pd.Interval(4, 5): np.full(x.size, np.nan),
     }
     index = pd.IntervalIndex.from_breaks(edges)
-    data = {k: v for k, v in data.items() if k not in skip}
-    tf = trend_fits.TrendFit(pd.DataFrame(data, index=index), Line)
-    tf.make_ffunc1ds()
-    return tf
+    return trend_fits.TrendFit(
+        pd.DataFrame(data, index=index),
+        Gaussian,
+        Line,
+        y=("mu", "value"),
+        yerr=None,
+    )
 
 
 GOOD = [pd.Interval(0, 1), pd.Interval(2, 3)]
@@ -384,50 +423,53 @@ DEGENERATE = [pd.Interval(1, 2), pd.Interval(3, 4)]
 EMPTY = [pd.Interval(4, 5)]
 
 
-def test_escalated_degeneracy_marks_trend_columns_as_failed_fits():
-    """Escalated, both degenerate columns join ``bad_fits``; the good ones fit.
+def test_escalated_degeneracy_records_trend_bins_as_failed_fits():
+    """Escalated, a degenerate bin is recorded as a failed fit and left out of the trend.
+
+    The two good bins leave the Line trend two points, so the trend's own
+    escalated warning raises once the bin results and the trend are stored;
+    the trend stays a successful fit.
 
     ON FAILURE: the code is wrong.
     """
-    tf = _trend_fit_with_degenerate_columns()
+    tf = _trend_fit_with_degenerate_bins()
     with warnings.catch_warnings():
         warnings.simplefilter("error", FitDegeneracyWarning)
-        tf.make_1dfits()
+        warnings.simplefilter("ignore", OptimizeWarning)
+        with pytest.raises(FitDegeneracyWarning, match="Line: m and b"):
+            tf.make_fit()
 
-    assert sorted(tf.bad_fits.index) == sorted(DEGENERATE + EMPTY)
-    assert list(tf.ffuncs.index) == GOOD
-    # The good columns recover the generating centres.
-    assert [f.popt["mu"] for f in tf.ffuncs] == noise_free([1.0, 2.0])
+    status = tf.bin_results.loc[:, ("status", "")]
+    assert status.loc[GOOD].tolist() == ["ok", "ok"]
+    assert status.loc[DEGENERATE].tolist() == ["FitDegeneracyWarning"] * 2
+    assert status.loc[EMPTY].tolist() == ["InsufficientDataError"]
+    in_trend = tf.bin_results.loc[:, ("in_trend", "")]
+    assert in_trend[in_trend].index.tolist() == GOOD
+    # The good bins recover the generating centres.
+    assert tf.bin_results.loc[GOOD, ("mu", "value")].tolist() == noise_free([1.0, 2.0])
+    assert tf.trend.results.loc[:, ("status", "")].item() == "ok"
 
 
-def test_degenerate_trend_columns_stay_and_warn_by_default():
-    """With default warning settings, degenerate columns stay in ``ffuncs``.
+def test_degenerate_trend_bins_stay_and_warn_by_default():
+    """With default warning settings, degenerate bins stay in the trend.
 
     ON FAILURE: the code is wrong.
     """
-    tf = _trend_fit_with_degenerate_columns()
-    with pytest.warns(FitDegeneracyWarning, match="non-finite covariance"):
-        tf.make_1dfits()
-
-    assert list(tf.bad_fits.index) == EMPTY
-    assert list(tf.ffuncs.index) == sorted(GOOD + DEGENERATE)
-    assert [bool(tf.ffuncs[k].degenerate) for k in DEGENERATE] == [True, True]
-
-
-def test_escalated_degeneracy_is_raised_without_return_exception():
-    """With ``return_exception=False`` the escalated warning is raised, as failures are.
-
-    ON FAILURE: the code is wrong.
-    """
-    tf = _trend_fit_with_degenerate_columns(skip=EMPTY)
+    tf = _trend_fit_with_degenerate_bins()
     with warnings.catch_warnings():
-        warnings.simplefilter("error", FitDegeneracyWarning)
-        with pytest.raises(FitDegeneracyWarning, match="non-finite covariance"):
-            tf.make_1dfits(return_exception=False)
+        warnings.simplefilter("ignore", OptimizeWarning)
+        with pytest.warns(
+            FitDegeneracyWarning, match="non-finite covariance"
+        ) as record:
+            tf.make_fit()
 
-    # Another failure still raises its own error.
-    tf = _trend_fit_with_degenerate_columns(skip=DEGENERATE)
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", FitDegeneracyWarning)
-        with pytest.raises(InsufficientDataError):
-            tf.make_1dfits(return_exception=False)
+    # Each bin's warning names the caller's line, not TrendFit's module.
+    degenerate = [w for w in record if w.category is FitDegeneracyWarning]
+    assert len(degenerate) == len(DEGENERATE)
+    assert {w.filename for w in degenerate} == {__file__}
+
+    status = tf.bin_results.loc[:, ("status", "")]
+    assert status[status != "ok"].index.tolist() == EMPTY
+    in_trend = tf.bin_results.loc[:, ("in_trend", "")]
+    assert in_trend[in_trend].index.tolist() == sorted(GOOD + DEGENERATE)
+    assert [bool(tf.bin_fits[k].degenerate) for k in DEGENERATE] == [True, True]

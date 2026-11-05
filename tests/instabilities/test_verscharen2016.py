@@ -347,6 +347,54 @@ def test_plot_contours_draws_every_published_threshold_on_log_axes():
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
 
 
+def test_plot_contours_returns_ax_lines_and_no_colorbar():
+    """``plot_contours`` returns ``(ax, lines, None)``, the shared plot order.
+
+    ``lines`` maps each drawn ``(growth_rate, instability)`` to its Line2D,
+    every one of which is on the axes. The colorbar slot is None because
+    the contours are lines, not a mappable.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    try:
+        ret = sc.plot_contours(ax)
+        assert isinstance(ret, tuple) and len(ret) == 3
+        out_ax, lines, cbar = ret
+        assert out_ax is ax
+        assert cbar is None
+        assert isinstance(lines, dict)
+        assert sorted(lines) == sorted((g, k) for g, k in ROWS)
+        for line in lines.values():
+            assert isinstance(line, Line2D)
+            assert any(line is drawn for drawn in ax.lines)
+        assert len(lines) == len(ax.lines)
+    finally:
+        plt.close(fig)
+
+
+def test_plot_contours_returns_only_the_curves_it_draws():
+    """Filtering by growth rate and instability returns only the drawn curves.
+
+    The table-legend placeholders for skipped curves are not returned.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    try:
+        out_ax, lines, cbar = sc.plot_contours(
+            ax, growth_rate=-3, tk_kind=["MM", "AIC"]
+        )
+        assert out_ax is ax
+        assert cbar is None
+        assert sorted(lines) == [(-3, "AIC"), (-3, "MM")]
+        assert [line for line in ax.lines] == list(lines.values())
+    finally:
+        plt.close(fig)
+
+
 def test_plot_contours_fix_scale_false_keeps_caller_scales():
     """fix_scale=False leaves the axes scales as the caller had them.
 
@@ -363,21 +411,21 @@ def test_plot_contours_fix_scale_false_keeps_caller_scales():
 
 
 @pytest.mark.parametrize("growth_rate", GROWTH_RATES)
-def test_plot_gamma_draws_only_that_growth_rate(growth_rate):
-    """plot_gamma selects the four Table 1 curves of one growth rate.
+def test_growth_rate_draws_only_its_curves(growth_rate):
+    """growth_rate selects the four Table 1 curves of one growth rate.
 
     ON FAILURE: the code is wrong.
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
-    sc.plot_contours(ax, plot_gamma=growth_rate)
+    sc.plot_contours(ax, growth_rate=growth_rate)
     assert sorted(_plotted_curves(ax, FINITE_BETA)) == [
         (k, growth_rate) for k in INSTABILITIES
     ]
 
 
 @pytest.mark.parametrize(
-    "tk_kind,plot_gamma,expected",
+    "tk_kind,growth_rate,expected",
     [
         ("mm", None, [("MM", g) for g in GROWTH_RATES]),
         (["aic", "OFI"], -3, [("AIC", -3), ("OFI", -3)]),
@@ -385,7 +433,7 @@ def test_plot_gamma_draws_only_that_growth_rate(growth_rate):
     ids=["one-kind-lowercase", "two-kinds-one-gamma"],
 )
 def test_tk_kind_selects_instabilities_case_insensitively(
-    tk_kind, plot_gamma, expected
+    tk_kind, growth_rate, expected
 ):
     """tk_kind restricts the curves to the named instabilities, in any letter case.
 
@@ -393,7 +441,7 @@ def test_tk_kind_selects_instabilities_case_insensitively(
     """
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
-    sc.plot_contours(ax, tk_kind=tk_kind, plot_gamma=plot_gamma)
+    sc.plot_contours(ax, tk_kind=tk_kind, growth_rate=growth_rate)
     assert sorted(_plotted_curves(ax, FINITE_BETA)) == sorted(expected)
 
 
@@ -497,11 +545,11 @@ def test_table_legend_rows_and_columns_describe_their_curves(tk_kind, plotted):
 
 
 def test_user_visible_names_are_instability_growth_rate_and_stability():
-    """``insta_params`` rows are named Instability and Growth Rate; bins are "Stability".
+    """``insta_params`` rows are named Instability and growth_rate; bins are "Stability".
 
     ON FAILURE: the code is wrong.
     """
-    assert list(v16.insta_params.index.names) == ["Instability", "Growth Rate"]
+    assert list(v16.insta_params.index.names) == ["Instability", "growth_rate"]
     sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
     assert sc.stability_bin.name == "Stability"
 
@@ -556,7 +604,7 @@ def test_plot_contours_style_kwargs_override_every_default():
     fig, ax = plt.subplots()
     sc.plot_contours(
         ax,
-        plot_gamma=-3,
+        growth_rate=-3,
         c="r",
         ls=":",
         marker="s",
@@ -618,3 +666,85 @@ def test_undefined_threshold_is_stable_while_others_hold(anisotropy, expected, l
     assert sc.instability_thresholds["FMW"].isna().all()
     assert sc.is_unstable.iloc[0].to_dict() == expected
     assert sc.stability_map[sc.stability_bin.iloc[0]] == label
+
+
+# ---------------------------------------------------------------------------
+# Docstring examples
+# ---------------------------------------------------------------------------
+
+
+def _beta_ani_inst_example_call():
+    """The ``(a, b, c)`` keywords of the beta_ani_inst call in its docstring."""
+    import re
+
+    match = re.search(
+        r">>> beta_ani_inst\(beta, a=(\S+), b=(\S+), c=([^)\s]+)\)",
+        v16.beta_ani_inst.__doc__,
+    )
+    assert match is not None, "beta_ani_inst's Examples no longer call it"
+    return tuple(float(x) for x in match.groups())
+
+
+def test_beta_ani_inst_example_uses_one_published_row():
+    """The doctest's (a, b, c) is one row of Table 1, as insta_params holds it.
+
+    Verscharen et al. (2016), doi:10.3847/0004-637X/831/2/128, Table 1. The
+    coefficients of different rows (instabilities or growth rates) do not
+    combine into a published threshold.
+
+    ON FAILURE: the docstring is wrong.
+    """
+    call = _beta_ani_inst_example_call()
+    rows = {tuple(row) for row in v16.insta_params.loc[:, ["a", "b", "c"]].values}
+    assert call in rows
+
+
+def test_beta_ani_inst_example_output_is_its_call():
+    """The doctest's printed thresholds are what its call returns.
+
+    The doctest runs only in the CI doctest workflow, so the default suite runs
+    it here.
+
+    ON FAILURE: the docstring is wrong.
+    """
+    import doctest
+
+    finder = doctest.DocTestFinder()
+    (test,) = finder.find(v16.beta_ani_inst, "beta_ani_inst", globs=vars(v16))
+    runner = doctest.DocTestRunner(optionflags=doctest.ELLIPSIS)
+    with np.errstate(invalid="ignore"):
+        result = runner.run(test, out=lambda s: None)
+    assert result.attempted > 0
+    assert result.failed == 0
+
+
+# ---------------------------------------------------------------------------
+# Stability-bin dtype and fill
+# ---------------------------------------------------------------------------
+
+
+def test_stability_bin_is_an_integer_label():
+    """stability_bin has an integer dtype for stable, unstable and missing rows.
+
+    Rows from the hand-derived MM, Stable and OFI cases at 1e-3, plus a NaN row.
+
+    ON FAILURE: the code is wrong.
+    """
+    beta = pd.Series([1.0, 1.0, 10.0, np.nan])
+    anisotropy = pd.Series([3.0, 1.0, 0.5, np.nan])
+    sc = v16.StabilityCondition(-3, beta, anisotropy)
+    assert pd.api.types.is_integer_dtype(sc.stability_bin)
+    assert set(sc.stability_bin) <= set(sc.stability_map)
+
+
+def test_fill_is_an_integer_outside_every_bin():
+    """The fill for a point outside every bin is the integer -9999 (Phase C, B4).
+
+    It is not a key of stability_map, so it never collides with a real bin.
+
+    ON FAILURE: the code is wrong, unless the author changes the fill value.
+    """
+    sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
+    assert isinstance(sc.fill, int)
+    assert sc.fill == -9999
+    assert sc.fill not in sc.stability_map

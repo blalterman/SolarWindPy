@@ -10,14 +10,14 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-from solarwindpy.plotting.agg_plot import AggPlot  # noqa: E402
+from solarwindpy.plotting.base import BinnedPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
 # Bins chosen by the test, so every count below is an input rather than a
 # recorded output. The edges are exact at the 5 decimal places at which
-# `calc_bins_intervals` stores interval endpoints.
+# `FixedGrid` stores interval endpoints.
 KNOWN_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 KNOWN_BIN_COUNTS = [3, 5, 2, 4, 6]
 
@@ -78,25 +78,13 @@ class TestHist1DBasicFunctionality:
         assert hist.data["x"].min() >= 0  # log10(1) = 0
         assert hist.data["x"].max() <= 2  # log10(100) = 2
 
-    def test_hist1d_set_path_auto(self):
-        """Test set_path('auto') builds path from labels."""
+    def test_hist1d_path_follows_labels(self):
+        """Test the path is built from the labels set after construction."""
         hist = Hist1D(self.x_data)
         hist.set_labels(x="density", y="count")
 
-        hist.set_path("auto")
-
         # Documented layout: class, x label, y label, scale tag.
-        assert hist.path == Path("Hist1D", "density", "count", "linX")
-
-    def test_hist1d_set_path_custom(self):
-        """Test set_path('custom', add_scale=False) sets _path to Path('custom')."""
-        from pathlib import Path
-
-        hist = Hist1D(self.x_data)
-        hist.set_path("custom", add_scale=False)
-
-        # Should have the custom path
-        assert hist.path == Path("custom")
+        assert hist.path == Path("Hist1D", "density", "count", "linX-linY")
 
     def test_hist1d_with_y_and_clipping(self):
         """Hist1D(x, y, clip=True) stores columns x and y, and clips x."""
@@ -301,7 +289,7 @@ class TestHist1DPlotting:
         hist = Hist1D(x, nbins=KNOWN_EDGES)
         fig, ax = plt.subplots()
 
-        returned_ax, _ = hist.make_plot(ax)
+        returned_ax, _, _, _ = hist.make_plot(ax)
 
         assert returned_ax is ax
         (line,) = ax.lines
@@ -527,36 +515,34 @@ class TestHist2DAxisNormalization:
 class TestModuleIntegration:
     """Test integration between different histogram plotters."""
 
-    def test_hist1d_inherits_from_aggplot(self):
-        """Test that Hist1D properly inherits from AggPlot."""
-        assert issubclass(Hist1D, AggPlot)
+    def test_hist1d_inherits_from_binnedplot(self):
+        """Test that Hist1D properly inherits from BinnedPlot."""
+        assert issubclass(Hist1D, BinnedPlot)
 
-        # Create instance and verify it has AggPlot methods
+        # Create instance and verify it has BinnedPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
         hist = Hist1D(x_data)
 
-        # Should have AggPlot methods
+        # Should have BinnedPlot methods
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")
-        assert hasattr(hist, "categoricals")
 
-    def test_hist2d_inherits_from_aggplot(self):
-        """Test that Hist2D properly inherits from AggPlot."""
-        assert issubclass(Hist2D, AggPlot)
+    def test_hist2d_inherits_from_binnedplot(self):
+        """Test that Hist2D properly inherits from BinnedPlot."""
+        assert issubclass(Hist2D, BinnedPlot)
 
-        # Create instance and verify it has AggPlot methods
+        # Create instance and verify it has BinnedPlot methods
         np.random.seed(42)
         x_data = pd.Series(np.random.normal(5, 2, 100))
         y_data = pd.Series(np.random.normal(10, 3, 100))
         hist = Hist2D(x_data, y_data)
 
-        # Should have AggPlot methods
+        # Should have BinnedPlot methods
         assert hasattr(hist, "agg")
         assert hasattr(hist, "edges")
         assert hasattr(hist, "intervals")
-        assert hasattr(hist, "categoricals")
 
 
 if __name__ == "__main__":

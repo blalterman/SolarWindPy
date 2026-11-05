@@ -28,7 +28,7 @@ git push origin <tag>
 #### 1.1 Development Completion
 - [ ] All features for the release are complete and merged
 - [ ] All tests are passing
-- [ ] Code quality checks pass (flake8, black)
+- [ ] Code quality checks pass (ruff check, ruff format)
 - [ ] Documentation is up to date
 
 #### 1.2 Release Readiness Validation
@@ -251,8 +251,8 @@ pytest -v
 pytest tests/core/ -v
 
 # Check code quality
-flake8
-black --check .
+ruff check
+ruff format --check .
 ```
 
 **Build Failures**

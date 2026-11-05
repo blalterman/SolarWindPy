@@ -3,3 +3,6 @@
 
 # style: reformat solarwindpy/ with black 26.5.1
 ec080c75832fedc909a2f6eb53a7e38692c3e06d
+
+# style: apply ruff format
+059e0d4935c97f93e06c7e26e4ac45f5c62a0440

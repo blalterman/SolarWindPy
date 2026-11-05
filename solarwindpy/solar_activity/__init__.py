@@ -7,11 +7,13 @@ normalized within that cycle, and the HELIO4CAST ICME catalog.
 
 __all__ = [
     "base",
+    "cache",
     "icme",
     "plots",
     "sunspot_number",
 ]
 
+from . import cache
 from . import base
 from . import icme
 from . import plots
