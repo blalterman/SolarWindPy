@@ -553,6 +553,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   y_h, x_1, x_2, m_1 and m_2, as the model strings do, and Saturation's theta as \theta. popt,
   psigma and the parameter names are unchanged.
 
+- PowerLawPlusC and PowerLawOffCenter take the amplitude last, as PowerLaw and the Gaussians
+  do. Their functions are f(x, alpha, y0, A) and f(x, alpha, x0, A), so a positional p0 or
+  bounds, and positional arguments to function, now give A last, and popt, psigma and the
+  results columns list A last. Each parameter keeps its initial guess. PowerLaw is unchanged,
+  and code that passes these by name is unaffected.
+
+- ExponentialPlusC takes the amplitude last, as Exponential, the power laws and the Gaussians
+  do. Its function is f(x, k, y0, A), so a positional p0 or bounds, and positional arguments
+  to function, now give A last, and popt, psigma and the results columns list A last. Each
+  parameter keeps its initial guess. Code that passes these by name is unaffected.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
