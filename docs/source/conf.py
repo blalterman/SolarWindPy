@@ -156,6 +156,7 @@ numpydoc_xref_aliases = {
     "mpl.collections.QuadMesh": "matplotlib.collections.QuadMesh",
     "mpl.collections.PathCollection": "matplotlib.collections.PathCollection",
     "mpl.collections.PolyCollection": "matplotlib.collections.PolyCollection",
+    "mpl.collections.LineCollection": "matplotlib.collections.LineCollection",
     "mpl.container.ErrorbarContainer": "matplotlib.container.ErrorbarContainer",
     "mpl.lines.Line2D": "matplotlib.lines.Line2D",
     "mpl.colorbar.Colorbar": "matplotlib.colorbar.Colorbar",

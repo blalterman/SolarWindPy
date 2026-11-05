@@ -102,7 +102,7 @@ class Scatter(base.ColorPlot):
         ax: mpl.axes.Axes
         collection: mpl.collections.PathCollection
             The points.
-        segments: matplotlib.collections.LineCollection or None
+        segments: mpl.collections.LineCollection or None
             The segments joining the points if `connect` is True, else None.
         cbar: mpl.colorbar.Colorbar or None
             The colorbar if `cbar` is True and z varies, else None.
