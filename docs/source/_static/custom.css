@@ -1,16 +1,20 @@
 /* Custom CSS for SolarWindPy documentation */
 
 /* ===== Brand palette =====
- * Proposed semantic tokens from the approved branding palette (palette.json).
- * Bright cyan and orange fail text contrast on white (1.7:1 and 2.2:1), so they
- * are accents only. --swp-link is luminous cyan darkened to 4.58:1 on white.
+ * Tokens from the approved branding kit (brand-tokens.css). Luminous cyan and
+ * solar orange fail text contrast on white (1.7:1 and 2.2:1), so they are
+ * accents only. Links use deep teal, 4.71:1 on white.
  */
 :root {
     --swp-navy: #061B30;
+    --swp-deep-ocean: #08283A;
+    --swp-deep-teal: #087E9A;
     --swp-cyan: #1ADDEB;
+    --swp-solar-yellow: #FFE35B;
     --swp-orange: #FF951F;
     --swp-warm-white: #F7F8F6;
-    --swp-link: #0F828B;
+    --swp-slate-text: #52667A;
+    --swp-link: var(--swp-deep-teal);
 }
 
 /* ===== Scientific Typography ===== */
