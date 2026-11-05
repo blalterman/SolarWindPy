@@ -36,9 +36,10 @@ _AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name")
 #: the keys ``Count`` and ``TeXlabel`` accept. ``count`` is the words of a
 #: normalized ``Count``; ``quantity`` the TeX of a normalized quantity, with
 #: ``%s`` for the quantity's TeX. ``name`` is the plain-text name of a
-#: normalized ``Count`` in publication format. ``density`` is True for a density: its units
-#: are 1 / (bin width or area in the units of the binned axes, in decades on a
-#: log axis), which a label does not know, so it states none. A count divided
+#: normalized ``Count`` in publication format. ``density`` is True for a
+#: density: its units are 1 / (bin width or area in the units of the binned
+#: axes, in decades on a log axis), which a label does not know, so it states
+#: none. A count divided
 #: by a maximum is a pure number and states ``\#``. Every key a binning's
 #: ``allowed_axnorm`` holds is a key here.
 AXNORM = MappingProxyType(
@@ -79,7 +80,8 @@ AXNORM = MappingProxyType(
 
 
 #: The module default of ``publication_format``; read and set it with
-#: :func:`publication_format` and :func:`set_publication_format`.
+#: :func:`~solarwindpy.plotting.labels.base.publication_format` and
+#: :func:`~solarwindpy.plotting.labels.base.set_publication_format`.
 _publication_format = False
 
 
@@ -87,7 +89,7 @@ def publication_format():
     r"""Return the default publication format of every label, True or False.
 
     A label whose own ``publication_format`` is None follows it. See
-    :func:`set_publication_format`.
+    :func:`~solarwindpy.plotting.labels.base.set_publication_format`.
     """
     return _publication_format
 
@@ -117,7 +119,7 @@ def validate_axnorm(key):
     TypeError
         If ``key`` is neither a string nor None.
     ValueError
-        If ``key`` is not a key of :data:`AXNORM`.
+        If ``key`` is not a key of :data:`~solarwindpy.plotting.labels.base.AXNORM`.
     """
     if key is None:
         return None
@@ -305,14 +307,15 @@ class Base(ABC):
         r"""If True, the label is its name over its symbol line.
 
         The label's own setting, or the module default
-        (:func:`publication_format`) when that is None.
+        (:func:`~solarwindpy.plotting.labels.base.publication_format`) when that is
+        None.
         """
         if self._publication_format is None:
             return publication_format()
         return self._publication_format
 
     def set_publication_format(self, new):
-        r"""Set this label's publication format: True, False, or None to follow the default."""
+        r"""Set this label's publication format: True, False, or None for the default."""
         if new is not None:
             new = bool(new)
         self._publication_format = new
@@ -395,7 +398,7 @@ class TeXlabel(Base):
             to dimensionless when equal.
         axnorm : str, optional
             Axis normalization used when building colorbar labels, a key of
-            :data:`AXNORM`.
+            :data:`~solarwindpy.plotting.labels.base.AXNORM`.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
         description : str or None, optional
@@ -405,7 +408,8 @@ class TeXlabel(Base):
             registry name, a ratio's "<Name> Ratio" or "<Name0> / <Name1>".
         publication_format : bool or None, optional
             If True, the label is its name over its symbol line. None follows
-            the module default, :func:`publication_format`.
+            the module default,
+            :func:`~solarwindpy.plotting.labels.base.publication_format`.
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
@@ -495,7 +499,8 @@ class TeXlabel(Base):
         Parameters
         ----------
         new : str, optional
-            A key of :data:`AXNORM` (case-insensitive), or None.
+            A key of :data:`~solarwindpy.plotting.labels.base.AXNORM`
+            (case-insensitive), or None.
         """
         self._axnorm = validate_axnorm(new)
 
