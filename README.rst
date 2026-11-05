@@ -2,13 +2,17 @@
 SolarWindPy
 ###########
 
+.. image:: https://raw.githubusercontent.com/blalterman/SolarWindPy/master/docs/source/_static/branding/solarwindpy-readme-banner-1600.png
+   :alt: SolarWindPy: A Python Library for in situ solar wind data analysis
+   :width: 100%
+
 |Build Status| |Docs Status| |Ruff|
 
 |PyPI| |Conda|
 
 |Python| |License| |Zenodo|
 
-Python data analysis tools for solar wind measurements.
+A Python Library for *in situ* solar wind data analysis.
 
 Quick Start
 -----------

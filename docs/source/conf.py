@@ -278,7 +278,8 @@ html_css_files = [
 # Custom JavaScript files (for enhanced scientific features)
 html_js_files = []
 
-# Favicon configuration
+# Logo and favicon: the approved SolarWindPy icon (_static/branding/)
+html_logo = '_static/branding/solarwindpy-icon-256.png'
 html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------

@@ -1,6 +1,10 @@
 SolarWindPy Documentation
 =========================
 
+.. image:: _static/branding/solarwindpy-readme-banner-1600.png
+   :alt: SolarWindPy: A Python Library for in situ solar wind data analysis
+   :width: 100%
+
 |CI| |Docs| |Ruff|
 
 |PyPI| |Conda|
@@ -32,10 +36,9 @@ SolarWindPy Documentation
    :target: https://doi.org/10.5281/zenodo.17042839
    :alt: Zenodo DOI
 
-SolarWindPy is a comprehensive toolkit for analyzing solar wind plasma and
-magnetic field data. This package provides tools for processing spacecraft
-measurements, calculating derived quantities, and visualizing results with
-scientific accuracy.
+A Python Library for *in situ* solar wind data analysis. This package
+provides tools for processing spacecraft measurements, calculating derived
+quantities, and visualizing results with scientific accuracy.
 
 .. toctree::
    :maxdepth: 4
