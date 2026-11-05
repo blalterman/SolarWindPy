@@ -716,24 +716,68 @@ class ColorPlot(Base):
         colors[:, 3] = alpha
         artist.set_facecolor(colors)
 
+    #: Default colormap for values of both signs.
+    _diverging_cmap = "RdBu_r"
+
+    def _color_scale(self, kwargs, values):
+        r"""Pop ``norm`` and ``cmap`` from ``kwargs``, defaulting them by ``values``.
+
+        The one place every colour plot chooses its colour scale. A ``norm``
+        or ``cmap`` in ``kwargs`` is used as given, None included. Otherwise,
+        when the finite ``values`` hold both signs, the default is a
+        :class:`~matplotlib.colors.CenteredNorm` about 0 and the diverging
+        colormap ``_diverging_cmap``; values of one sign get
+        ``_default_norm`` and matplotlib's colormap.
+
+        Parameters
+        ----------
+        kwargs : dict
+            The caller's keywords; ``norm`` and ``cmap`` are removed.
+        values : array-like
+            The values to colour, NaN or masked where none.
+
+        Returns
+        -------
+        norm, cmap
+        """
+        v = np.ma.filled(np.ma.asarray(values, dtype=float), np.nan)
+        v = v[np.isfinite(v)]
+        signed = bool((v < 0).any() and (v > 0).any())
+        axnorm = getattr(self, "axnorm", None)
+        if "norm" in kwargs:
+            norm = kwargs.pop("norm")
+        else:
+            norm = self._default_norm(axnorm, signed)
+        if "cmap" in kwargs:
+            cmap = kwargs.pop("cmap")
+        else:
+            cmap = self._diverging_cmap if signed else None
+        return norm, cmap
+
     @staticmethod
-    def _default_norm(axnorm):
+    def _default_norm(axnorm, signed=False):
         r"""The colour normalisation a plot uses when the caller passes no ``norm``.
 
         Parameters
         ----------
         axnorm : str or None
             The plot's ``axnorm``.
+        signed : bool, default False
+            True when the values hold both signs.
 
         Returns
         -------
         matplotlib.colors.Normalize or None
-            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
-            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
-            ``"cd"``, ``"rd"``) span decades, so they get a clipped
-            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
-            choice to matplotlib.
+            Values of both signs get a
+            :class:`~matplotlib.colors.CenteredNorm` about 0, whatever the
+            ``axnorm``. Otherwise column- and row-normalised values lie in
+            [0, 1], so ``"c"`` and ``"r"`` get ten equal colour bands on
+            [0, 1]; densities (``"d"``, ``"cd"``, ``"rd"``) span decades, so
+            they get a clipped :class:`~matplotlib.colors.LogNorm`; anything
+            else gets None, leaving the choice to matplotlib.
         """
+        if signed:
+            return mpl.colors.CenteredNorm(vcenter=0.0)
         if axnorm in ("c", "r"):
             return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
         if axnorm in ("d", "cd", "rd"):

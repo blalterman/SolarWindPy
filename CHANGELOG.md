@@ -72,6 +72,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Colour plots (`Hist2D`, `SpiralPlot2D`, `Scatter`, and their contours) default to a
+  zero-centred `matplotlib.colors.CenteredNorm` and the diverging colormap `RdBu_r` when the
+  plotted values hold both signs, whatever the `axnorm`. Values of one sign keep the previous
+  defaults (bands on [0, 1] for `c`/`r`, `LogNorm` for densities, matplotlib's otherwise). A
+  `norm` or `cmap` passed by the caller is used as given.
 - A count in `agg` (`fcn="count"`, or the default on a plot without z) counts each cell's rows
   with `numpy.bincount` of the rows' cell codes instead of a pandas groupby: same result, about
   twice as fast at 1e6 rows.

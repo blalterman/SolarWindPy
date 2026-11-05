@@ -1058,8 +1058,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         collection.set_array(C)
 
-        cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
+        norm, cmap = self._color_scale(kwargs, C)
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
 
@@ -1182,12 +1181,11 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
         >>> ax, qset, cbar = splot.plot_contours(levels=[-0.5, 0.0, 0.5])
         """
-        cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
+        norm, cmap = self._color_scale(kwargs, C)
 
         # Cell centers in plot coordinates: log10 on a log axis, as the mesh.
         tk_finite = np.isfinite(C)

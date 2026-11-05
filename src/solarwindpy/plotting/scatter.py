@@ -104,6 +104,9 @@ class Scatter(base.ColorPlot):
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"
+            kwargs["norm"], kwargs["cmap"] = self._color_scale(
+                kwargs, data.loc[:, "z"].to_numpy()
+            )
         else:
             zkey = None
 

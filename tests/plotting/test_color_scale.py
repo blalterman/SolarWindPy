@@ -28,8 +28,6 @@ from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 
-_NEW = pytest.mark.xfail(strict=True, reason="no signed default colour scale yet")
-
 RNG = np.random.default_rng(4)
 N = 3000
 X = pd.Series(RNG.normal(size=N))
@@ -57,7 +55,6 @@ def _spiral(z):
     return SpiralPlot2D(X, Y, z, initial_bins=4, min_per_bin=100)
 
 
-@_NEW
 @pytest.mark.parametrize("axnorm", [None, "t", "c", "d"])
 def test_hist2d_of_signed_values_gets_a_centred_diverging_scale(axnorm):
     """Signed means get vcenter 0 and RdBu_r, whatever the axnorm.
@@ -69,7 +66,6 @@ def test_hist2d_of_signed_values_gets_a_centred_diverging_scale(axnorm):
     assert pc.get_cmap().name == "RdBu_r"
 
 
-@_NEW
 def test_spiral_and_scatter_of_signed_values_get_a_centred_scale():
     """The same default holds for a spiral mesh and for coloured points.
 
@@ -83,7 +79,6 @@ def test_spiral_and_scatter_of_signed_values_get_a_centred_scale():
     assert points.get_cmap().name == "RdBu_r"
 
 
-@_NEW
 def test_contours_of_signed_values_get_a_centred_scale():
     """Hist2D and spiral contours default to the centred norm too.
 
