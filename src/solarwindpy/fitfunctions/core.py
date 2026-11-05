@@ -1165,7 +1165,12 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
 
         bounds = self._bounds_array(bounds)
 
-        # Adapted from `curve_fit` lines 704 and 715 (20200527)
+        # Adapted from SciPy `curve_fit` lines 704 and 715 (20200527).
+        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
+        # https://github.com/scipy/scipy. License: BSD-3-Clause.
+        # Modified: the parameter count comes from self.argnames, not the
+        # function's signature; bounds go through _bounds_lower_upper, which
+        # also takes a dict; a caller's p0 must be finite.
         if p0 is None:
             p0 = np.atleast_1d(np.asarray(self._fallback_p0(bounds), dtype=float))
         else:
@@ -1183,13 +1188,22 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
         ydata = self.observations.used.y
         sigma = self.observations.used.yerr
 
-        # Adapted from `curve_fit` line 749 (20200527): 1-sigma uncertainties
-        # weight the residuals by 1/sigma. set_fit_obs selects x, y and yerr with
-        # one mask after _clean_raw_obs made their shapes equal, so sigma is
-        # 1-d with one entry per used observation.
+        # Adapted from SciPy `curve_fit` line 749 (20200527).
+        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
+        # https://github.com/scipy/scipy. License: BSD-3-Clause.
+        # Modified: keeps only the 1-sigma branch, which weights the residuals
+        # by 1/sigma; the 2-d covariance (Cholesky) branch is dropped.
+        # set_fit_obs selects x, y and yerr with one mask after
+        # _clean_raw_obs made their shapes equal, so sigma is 1-d with one
+        # entry per used observation.
         transform = None if sigma is None else 1.0 / np.asarray(sigma)
 
-        # Copied from `curve_fit` line 769 (20200527)
+        # Copied from SciPy `curve_fit` line 769 (20200527).
+        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
+        # https://github.com/scipy/scipy. License: BSD-3-Clause.
+        # _wrap_func and _wrap_jac are imported from SciPy's private module,
+        # not copied. Modified: the result goes to least_squares directly,
+        # without the _lightweight_memoizer wrapper current SciPy adds.
         loss_func = _wrap_func(self.function, xdata, ydata, transform)
         # Already define default `jac` with `kwargs`. Don't need ELSE clause.
         if callable(jac):

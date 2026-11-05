@@ -271,7 +271,12 @@ class FFPlot(object):
         """
         ax.grid(True, which="major", axis="both")
 
-        # Copied from plt.hist. (20161107_0112)
+        # Adapted from matplotlib's Axes.hist (20161107_0112): widen the x
+        # data limits without changing y. Source:
+        # lib/matplotlib/axes/_axes.py in https://github.com/matplotlib/matplotlib.
+        # License: the matplotlib license (PSF-based, BSD-compatible).
+        # Modified: the limits span the first and last raw x values, where
+        # hist used its bin edges.
         x = self.observations.raw.x
         if x.size:
             ax.update_datalim([(x[0], 0), (x[-1], 0)], updatey=False)
