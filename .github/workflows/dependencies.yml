@@ -1,0 +1,68 @@
+# Spent-When: PERMANENT(SolarWindPy stops following PHEP 3 or stops checking its dependency floors in CI)
+# Supersedes: none
+name: Dependencies
+
+# The dependency policy in CONTRIBUTING.md ("Dependency support"): PHEP 3 with
+# documented deviations, and floors at versions the suite passes on.
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The PHEP 3 support window. The ignore list is the documented deviations;
+  # remove matplotlib once matplotlib 3.10 leaves the window on 2026-12-14.
+  phep3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: heliophysicsPy/pyhc-actions/phep3-compliance@v1
+        with:
+          ignore-errors-for: scipy,pandas,matplotlib
+
+  # The declared floors: install the lowest version each direct dependency
+  # allows and run the suite on them.
+  minimum-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # setuptools_scm versions the editable install from the tags.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install system dependencies (Linux)
+        # A dead runner mirror once hung this step for 25+ minutes; fail fast instead.
+        timeout-minutes: 5
+        env:
+          APT_OPTIONS: -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20
+        run: |
+          sudo apt-get $APT_OPTIONS update
+          sudo apt-get $APT_OPTIONS install -y libhdf5-dev pkg-config
+
+      - name: Install the lowest declared versions
+        run: |
+          python -m pip install --upgrade pip uv
+          uv venv .venv
+          uv pip install --python .venv/bin/python --resolution lowest-direct -e ".[test]"
+          # Not under lowest-direct: unpinned, these would resolve to their
+          # first releases (wheel 0.1). tests/test_release_artifacts.py uses them.
+          uv pip install --python .venv/bin/python build setuptools_scm wheel
+          uv pip list --python .venv/bin/python
+
+      - name: Run tests
+        run: .venv/bin/python -m pytest -q --tb=short
