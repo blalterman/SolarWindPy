@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   JSON API, waiting up to ten minutes with backoff while a new release is not yet listed, instead
   of downloading the file and failing on the CDN's early 404. Its body fills in the version,
   checksum and dependency comparison, which went out as literal placeholders, and its Git Commit
-  line names the released commit rather than the annotated tag object.
+  line names the released commit rather than the annotated tag object. `--max-wait SECONDS` shortens the wait for
+  local runs.
 
 ## [0.5.0] - 2026-11-05
 

@@ -47,6 +47,7 @@ class CondaFeedstockUpdater:
         package_name: str = "solarwindpy",
         feedstock_repo: str = "conda-forge/solarwindpy-feedstock",
         fork_owner: Optional[str] = None,
+        release_wait: float = RELEASE_WAIT,
     ):
         """Initialize the feedstock updater.
 
@@ -58,13 +59,18 @@ class CondaFeedstockUpdater:
             GitHub repository for the feedstock (org/repo format)
         fork_owner : str, optional
             GitHub username for fork (if different from current user)
+        release_wait : float
+            Total seconds to wait for PyPI to list a release and its sdist
         """
         self.package_name = package_name
         self.feedstock_repo = feedstock_repo
         self.fork_owner = fork_owner or self._get_github_username()
         self.project_root = Path(__file__).parent.parent
+        self.release_wait = release_wait
         # Injectable so the tests need not wait out the backoff.
         self._sleep = time.sleep
+        # One fetch per version serves both validation and the checksum.
+        self._release_json = {}
 
     def _get_github_username(self) -> str:
         """Get current GitHub username from git config or environment.
@@ -257,20 +263,22 @@ class CondaFeedstockUpdater:
             return True  # Permissive - don't block on errors
 
     def fetch_release_json(
-        self, version_str: str, max_wait: float = RELEASE_WAIT, timeout: int = 10
+        self, version_str: str, max_wait: Optional[float] = None, timeout: int = 10
     ) -> Optional[dict]:
         """Return PyPI's JSON for the release, once it lists the sdist.
 
         Right after an upload PyPI may not list the release, or may list it
         before its sdist; both are retried with exponential backoff until
-        ``max_wait`` seconds of waiting have passed.
+        ``max_wait`` seconds of waiting have passed. A release once found is
+        kept, so later calls for the same version do not ask PyPI again.
 
         Parameters
         ----------
         version_str : str
             Version to fetch
-        max_wait : float
-            Total seconds to wait between attempts before giving up
+        max_wait : float, optional
+            Total seconds to wait between attempts before giving up; defaults
+            to ``release_wait``
         timeout : int
             Request timeout in seconds
 
@@ -279,6 +287,10 @@ class CondaFeedstockUpdater:
         dict or None
             The release's JSON, or None if it never listed an sdist
         """
+        if version_str in self._release_json:
+            return self._release_json[version_str]
+        if max_wait is None:
+            max_wait = self.release_wait
         url = f"https://pypi.org/pypi/{self.package_name}/{version_str}/json"
         waited = 0.0
         delay = BACKOFF_START
@@ -288,6 +300,7 @@ class CondaFeedstockUpdater:
                 if response.status_code == 200:
                     data = response.json()
                     if self._sdist_entry(data) is not None:
+                        self._release_json[version_str] = data
                         return data
                     reason = "no sdist listed yet"
                 else:
@@ -310,7 +323,7 @@ class CondaFeedstockUpdater:
     @staticmethod
     def _sdist_entry(data: dict) -> Optional[dict]:
         """Return the ``urls`` entry of the sdist in PyPI release JSON, if any."""
-        for entry in data.get("urls", []):
+        for entry in data.get("urls") or []:
             if entry.get("packagetype") == "sdist":
                 return entry
         return None
@@ -813,6 +826,15 @@ def main():
     parser.add_argument(
         "--no-issue", action="store_true", help="Skip creating tracking issue"
     )
+    parser.add_argument(
+        "--max-wait",
+        type=float,
+        default=RELEASE_WAIT,
+        help=(
+            "Seconds to wait for PyPI to list the release and its sdist "
+            f"(default: {RELEASE_WAIT})"
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -824,6 +846,7 @@ def main():
         package_name=args.package,
         feedstock_repo=args.feedstock_repo,
         fork_owner=args.fork_owner,
+        release_wait=args.max_wait,
     )
 
     # Run update workflow

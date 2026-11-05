@@ -154,7 +154,6 @@ def test_a_version_mismatch_is_refused(updater, pypi):
     assert not updater.validate_pypi_release(VERSION)
 
 
-@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
 def test_one_fetch_serves_validation_and_the_checksum(updater, pypi):
     """The release is validated and hashed from one response, asked for once.
 
@@ -167,7 +166,6 @@ def test_one_fetch_serves_validation_and_the_checksum(updater, pypi):
     assert calls == [JSON_URL]
 
 
-@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
 def test_a_null_urls_list_is_a_release_without_its_sdist(updater, pypi):
     """ON FAILURE: the code is wrong."""
     responses, _ = pypi
@@ -179,7 +177,6 @@ def test_a_null_urls_list_is_a_release_without_its_sdist(updater, pypi):
     assert updater.slept == [15]
 
 
-@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
 def test_release_wait_bounds_the_wait(pypi):
     """With ``release_wait=0`` a missing release fails after one request.
 
@@ -193,7 +190,6 @@ def test_release_wait_bounds_the_wait(pypi):
     assert u.slept == []
 
 
-@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
 def test_the_max_wait_flag_reaches_the_updater(monkeypatch):
     """ON FAILURE: the code is wrong."""
     made = {}
