@@ -7,6 +7,7 @@
 
 import os
 import sys
+from collections import Counter
 
 sys.path.insert(0, os.path.abspath("../../src"))
 import solarwindpy
@@ -299,3 +300,35 @@ epub_title = project
 epub_author = author
 epub_publisher = author
 epub_copyright = copyright
+
+
+# -- API page titles ---------------------------------------------------------
+
+# The autosummary templates title each API page by its short name (``Plasma``,
+# ``hist1d``). Where two pages would share a title, such as the ``base``
+# modules of ``core`` and ``plotting``, each of them is titled by its path
+# below the package instead (``core.base``, ``plotting.base``), so a title
+# alone names one object. The pages are the public modules and the public
+# objects each defines; ``repeated_titles`` holds the full names of those whose
+# short name another shares, and the templates read it.
+def _repeated_api_titles():
+    import importlib
+    import inspect
+    import pkgutil
+
+    full_names = []
+    for info in pkgutil.walk_packages(solarwindpy.__path__, "solarwindpy."):
+        if any(part.startswith("_") for part in info.name.split(".")):
+            continue
+        module = importlib.import_module(info.name)
+        full_names.append(info.name)
+        for name, obj in vars(module).items():
+            public = not name.startswith("_")
+            documented = inspect.isclass(obj) or inspect.isfunction(obj)
+            if public and documented and obj.__module__ == info.name:
+                full_names.append(f"{info.name}.{name}")
+    counts = Counter(name.rsplit(".", 1)[-1] for name in full_names)
+    return sorted(name for name in full_names if counts[name.rsplit(".", 1)[-1]] > 1)
+
+
+autosummary_context = {"repeated_titles": _repeated_api_titles()}
