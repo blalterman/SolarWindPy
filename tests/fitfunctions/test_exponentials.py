@@ -22,11 +22,14 @@ E_INV = 0.36787944117144233  # e^-1
         # 2 e^-1
         (Exponential, ("x", "k", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
         # 2 e^-1 + 0.5
-        (
+        pytest.param(
             ExponentialPlusC,
-            ("x", "k", "A", "y0"),
-            (1.0, 1.0, 2.0, 0.5),
+            ("x", "k", "y0", "A"),
+            (1.0, 1.0, 0.5, 2.0),
             2 * E_INV + 0.5,
+            marks=pytest.mark.xfail(
+                strict=True, reason="amplitude A is not yet the last parameter"
+            ),
         ),
     ],
 )

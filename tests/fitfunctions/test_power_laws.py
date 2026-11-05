@@ -15,8 +15,18 @@ from solarwindpy.fitfunctions.power_laws import (
 )
 from solarwindpy.fitfunctions.core import InsufficientDataError
 from solarwindpy.fitfunctions.exponentials import Exponential, ExponentialPlusC
+from solarwindpy.fitfunctions.gaussians import (
+    Gaussian,
+    GaussianLn,
+    GaussianNormalized,
+)
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 from tests.fitfunctions._attempt import attempt_fit
+
+
+_AMPLITUDE_LAST = pytest.mark.xfail(
+    strict=True, reason="amplitude A is not yet the last parameter"
+)
 
 
 @pytest.mark.parametrize(
@@ -32,16 +42,18 @@ from tests.fitfunctions._attempt import attempt_fit
         # 6 sqrt(2) + 1
         pytest.param(
             PowerLawPlusC,
-            ("x", "alpha", "A", "y0"),
-            (2.0, 1.5, 3.0, 1.0),
+            ("x", "alpha", "y0", "A"),
+            (2.0, 1.5, 1.0, 3.0),
             6 * np.sqrt(2.0) + 1,
+            marks=_AMPLITUDE_LAST,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
         pytest.param(
             PowerLawOffCenter,
-            ("x", "alpha", "A", "x0"),
-            (2.0, 1.5, 3.0, 0.5),
+            ("x", "alpha", "x0", "A"),
+            (2.0, 1.5, 0.5, 3.0),
             4.5 * np.sqrt(1.5),
+            marks=_AMPLITUDE_LAST,
         ),
     ],
 )
@@ -62,29 +74,46 @@ def test_function_signature_and_output(
     assert obj.function(*sample_args) == exact(expected_value)
 
 
-@pytest.mark.parametrize(
-    "cls",
-    [
-        Exponential,
-        ExponentialPlusC,
-        PowerLaw,
-        PowerLawPlusC,
-        PowerLawOffCenter,
-    ],
-)
-def test_exponent_then_amplitude_across_exponential_and_power_law_siblings(cls):
-    """The exponential and power-law fits list the exponent, then the amplitude.
+#: Each sibling's exponent; the Gaussians have none.
+_EXPONENT = {
+    Exponential: "k",
+    ExponentialPlusC: "k",
+    PowerLaw: "alpha",
+    PowerLawPlusC: "alpha",
+    PowerLawOffCenter: "alpha",
+}
 
-    The author ruled one parameter order for these siblings: ``k`` then ``A``
-    for the exponentials, ``alpha`` then ``A`` for the power laws. The order
-    sets the positional ``function`` arguments, ``p0`` and ``bounds``.
+
+@pytest.mark.parametrize(
+    "cls, amplitude",
+    [
+        (Exponential, "A"),
+        pytest.param(ExponentialPlusC, "A", marks=_AMPLITUDE_LAST),
+        (PowerLaw, "A"),
+        pytest.param(PowerLawPlusC, "A", marks=_AMPLITUDE_LAST),
+        pytest.param(PowerLawOffCenter, "A", marks=_AMPLITUDE_LAST),
+        (Gaussian, "A"),
+        (GaussianNormalized, "n"),
+        (GaussianLn, "A"),
+    ],
+    ids=lambda v: v.__name__ if isinstance(v, type) else "",
+)
+def test_amplitude_is_the_last_parameter(cls, amplitude):
+    """Every amplitude-scaled fit lists its amplitude last, the exponent first.
+
+    The author ruled one parameter order: the amplitude ``A`` (``n`` for
+    GaussianNormalized) is the last parameter, as in ``f(x, mu, sigma, A)``,
+    and the exponential and power-law fits list their exponent (``k`` or
+    ``alpha``) first. The order sets the positional ``function`` arguments,
+    ``p0`` and ``bounds``.
 
     ON FAILURE: the code is wrong.
     """
-    exponent = "k" if issubclass(cls, (Exponential, ExponentialPlusC)) else "alpha"
     x = np.array([1.0, 2.0, 3.0])
     obj = cls(x, np.array([1.0, 4.0, 9.0]))
-    assert list(obj.argnames[:2]) == [exponent, "A"]
+    assert obj.argnames[-1] == amplitude
+    if cls in _EXPONENT:
+        assert obj.argnames[0] == _EXPONENT[cls]
 
 
 @pytest.fixture
