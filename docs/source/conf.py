@@ -250,7 +250,7 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False,
     'prev_next_buttons_location': 'both',  # Navigation buttons top and bottom
-    'style_nav_header_background': '#2980B9',  # Professional blue header
+    'style_nav_header_background': '#061B30',  # Brand space navy (palette.json)
     'style_external_links': True,  # Mark external links with icon
 }
 
