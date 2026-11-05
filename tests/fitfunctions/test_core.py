@@ -937,3 +937,53 @@ def test_xobs_that_is_not_1d_is_refused_with_its_shape(x):
     shape = re.escape(str(x.shape))
     with pytest.raises(ValueError, match=rf"xobs must be 1-d.*{shape}"):
         LinearFit(x, 2.0 * x + 1.0, weights=np.full(x.shape, 0.5))
+
+
+# ============================================================================
+# yerr: the 1-sigma uncertainty of y, and its selection limits
+# ============================================================================
+
+_YERR_RENAME = pytest.mark.xfail(
+    strict=True, reason="weights, wmin and wmax are renamed yerr, yerr_min, yerr_max"
+)
+
+
+@_YERR_RENAME
+def test_yerr_is_stored_as_the_observations_yerr():
+    """``yerr`` is kept unchanged as ``observations.raw.yerr``.
+
+    ON FAILURE: the code is wrong.
+    """
+    raw = LinearFit([0, 1], [1, 2], yerr=[0.5, 0.25]).observations.raw
+    assert np.array_equal(raw.yerr, np.array([0.5, 0.25]))
+
+
+@_YERR_RENAME
+def test_yerr_min_and_yerr_max_keep_the_uncertainties_between_them():
+    """``yerr_min`` and ``yerr_max`` keep ``yerr_min <= yerr <= yerr_max``.
+
+    yerr = [1, 2, 3, 4] with limits 2 and 3 keeps x = 1 and 2: both bounds
+    are inclusive.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(4.0)
+    yerr = np.array([1.0, 2.0, 3.0, 4.0])
+    lf = LinearFit(x, x, yerr=yerr, yerr_min=2.0, yerr_max=3.0)
+    assert np.array_equal(lf.observations.used.x, np.array([1.0, 2.0]))
+    assert np.array_equal(lf.observations.used.yerr, np.array([2.0, 3.0]))
+
+
+@_YERR_RENAME
+@pytest.mark.parametrize("old", ["weights", "wmin", "wmax"])
+def test_the_old_uncertainty_keywords_are_refused(old):
+    """``weights``, ``wmin`` and ``wmax`` are gone, with no alias.
+
+    The author renamed them: elsewhere "weights" means 1/sigma, here the
+    value was always the 1-sigma uncertainty of y.
+
+    ON FAILURE: the code is wrong.
+    """
+    kwargs = {"weights": np.ones(2)} if old == "weights" else {old: 1.0}
+    with pytest.raises(TypeError, match=old):
+        LinearFit([0.0, 1.0], [1.0, 2.0], **kwargs)

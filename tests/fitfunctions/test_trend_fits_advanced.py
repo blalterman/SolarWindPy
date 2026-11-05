@@ -285,6 +285,22 @@ class TestMakeTrendFuncEdgeCases:
         # Verify the trend was created successfully
         assert isinstance(tf.trend, Line)
 
+    @pytest.mark.xfail(strict=True, reason="weights is renamed yerr")
+    def test_trend_kwargs_cannot_hold_yerr(self):
+        """``trend_kwargs`` holding ``yerr`` raises: TrendFit's ``yerr`` selects it.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match="yerr selects the trend's uncertainties"):
+            TrendFit(
+                self.data_interval,
+                Gaussian,
+                Line,
+                y=MU,
+                yerr=SIGMA,
+                trend_kwargs=dict(yerr=np.ones(5)),
+            )
+
     def test_trend_weights_error(self):
         """Test TrendFit raises ValueError when trend weights are passed."""
         # Passing weights should raise ValueError: yerr selects them
