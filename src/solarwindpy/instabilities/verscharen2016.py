@@ -626,78 +626,58 @@ class StabilityContours(object):
 
     @staticmethod
     def _add_table_legend(ax, images):
-        r"""Create a compact legend in table format identifying the contours.
+        r"""Draw a legend on ``ax`` laid out as a table of instability contours.
 
-        Modified from stackoverflow.
-        Source: https://stackoverflow.com/a/25995730/1200989
+        The legend has five rows and four columns. The first column is a row
+        header naming the instability type (AIC, FMW, MM, OFI). The remaining
+        columns hold growth-rate exponents -2, -3, and -4, each headed by its
+        exponent. Each body cell shows the handle for that (exponent, type)
+        pair, or an invisible placeholder when the pair is missing, so the
+        grid stays aligned.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes on which to draw the legend.
+        images : pandas.DataFrame
+            Legend handles indexed by growth-rate exponent (-2, -3, -4) with
+            columns for instability type ("AIC", "FMW", "MM", "OFI"). Missing
+            cells hold NaN or None.
         """
         assert isinstance(images, pd.DataFrame)
 
-        # create blank rectangle
-        extra = mpl.patches.Rectangle(
-            (0, 0), 1, 1, fc="w", fill=False, edgecolor="none", linewidth=0
-        )
+        def placeholder():
+            return mpl.patches.Rectangle(
+                (0, 0), 1, 1, fill=False, edgecolor="none", linewidth=0
+            )
 
-        def handle(rate, itype):
-            """The curve plotted for ``(rate, itype)``, or the blank cell."""
-            image = images.loc[rate, itype]
-            return extra if pd.isna(image) else image
+        types = ["AIC", "FMW", "MM", "OFI"]
+        rates = [-2, -3, -4]
 
-        # Create organized list containing all handles for table.
-        # Extra represent empty space, including the cell of an instability
-        # not plotted, so the table keeps its layout. Within each column, handles follow
-        # the row labels below: AIC, FMW, MM, OFI.
-        legend_handles = [
-            extra,
-            extra,
-            extra,
-            extra,
-            extra,
-            extra,
-            handle(-2, "AIC"),
-            handle(-2, "FMW"),
-            handle(-2, "MM"),
-            handle(-2, "OFI"),
-            extra,
-            handle(-3, "AIC"),
-            handle(-3, "FMW"),
-            handle(-3, "MM"),
-            handle(-3, "OFI"),
-            extra,
-            handle(-4, "AIC"),
-            handle(-4, "FMW"),
-            handle(-4, "MM"),
-            handle(-4, "OFI"),
-        ]
+        # Matplotlib fills multi-column legends column by column, so entries
+        # are listed one table column at a time, top to bottom.
+        handles = []
+        labels = []
 
-        # Define the labels
-        label_rows = [
-            r"",
-            r"$\mathrm{AIC}$",
-            r"$\mathrm{FMW}$",
-            r"$\mathrm{MM}$",
-            r"$\mathrm{OFI}$",
-        ]
-        label_col_0 = [r"$-2$"]
-        label_col_1 = [r"$-3$"]
-        label_col_2 = [r"$-4$"]
-        label_empty = [""]
+        handles.append(placeholder())
+        labels.append("")
+        for t in types:
+            handles.append(placeholder())
+            labels.append(r"$\mathrm{%s}$" % t)
 
-        # organize labels for table construction
-        legend_labels = (
-            label_rows
-            + label_col_0
-            + label_empty * 4
-            + label_col_1
-            + label_empty * 4
-            + label_col_2
-            + label_empty * 4
-        )
+        for rate in rates:
+            handles.append(placeholder())
+            labels.append(r"$%s$" % rate)
+            for t in types:
+                h = images.loc[rate, t]
+                if h is None or (not isinstance(h, mpl.artist.Artist) and pd.isna(h)):
+                    h = placeholder()
+                handles.append(h)
+                labels.append("")
 
-        # Create legend
         ax.legend(
-            legend_handles,
-            legend_labels,
+            handles,
+            labels,
             loc=1,
             ncol=4,
             shadow=True,
