@@ -54,6 +54,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `publication_format=`. Migrate `description="text"` to `name="text",
   publication_format=True` (or `set_publication_format(True)` for every label). Unlike a
   description, the name is not printed in the default one-line format.
+- The `nan_aware_filter` keyword of `Hist2D.plot_contours` and
+  `Hist2D.plot_hist_with_contours` is removed: a grid with empty bins is now always smoothed
+  NaN-aware (see Fixed). Passing it raises an error from matplotlib; delete the keyword.
+- `solarwindpy.core.quantities.Quantity` takes a required keyword `name`, its display name.
+  A `Quantity` built without it raises `TypeError`; pass `name="..."`.
 - `Scatter.make_plot` returns `(ax, points, segments, cbar)`: the `LineCollection` of the
   segments, or None without `connect=True`, sits before the colorbar. Unpack four values where
   three were unpacked before.
@@ -78,9 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
   honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
   the z of each point.
-- Every quantity in the registry has a display name: `solarwindpy.core.quantities.Quantity`
-  takes a required keyword `name`, a few words in title case such as "Number Density" or
-  "Temperature". It names the quantity only, without species or component.
+- Every quantity in the registry has a display name, a few words in title case such as
+  "Number Density" or "Temperature". It names the quantity only, without species or
+  component.
 - Publication-format labels: a label is its name in words over its usual TeX symbol and
   units, e.g. "Number Density" over `n_{p_1} [cm^-3]`. Turn it on for every label with
   `solarwindpy.plotting.labels.base.set_publication_format` (read the default with
@@ -140,8 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no longer erase the contours around empty bins. A grid with empty (NaN) bins is smoothed by
   `solarwindpy.plotting.tools.nan_gaussian_filter`, which averages only the occupied bins; a
   grid without them is filtered by `scipy.ndimage.gaussian_filter` as before, with unchanged
-  results. The `nan_aware_filter` keyword is removed: passing it raises an error from
-  matplotlib.
+  results.
 - `SpiralPlot2D` no longer logs warnings on every construction and draw. Its timing and
   bin-population messages report normal operation and are now DEBUG records; the message
   that points outside the mesh are dropped stays a warning.
