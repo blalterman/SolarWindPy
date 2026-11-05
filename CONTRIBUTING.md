@@ -128,18 +128,6 @@ run the suite.
 - **Version constraints**: Use lower bounds for compatibility, upper bounds for breaking changes
 - **NumPy 2.0**: Ensure all dependencies support NumPy >=1.26,<3.0
 
-## Documentation reviews
-
-Documentation should be reviewed quarterly. Open an issue using the
-"Documentation Review" template under `.github/ISSUE_TEMPLATE` to track the
-review. 
-
-**Sustainable Review Process:**
-- Focus on scientific accuracy of physics examples
-- Verify core functionality examples still work
-- Update validation approach if package scope changes significantly
-- Annual assessment of validation framework appropriateness for current needs
-
 ## Validation Framework Maintenance
 
 ### Annual Framework Assessment
