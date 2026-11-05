@@ -232,7 +232,7 @@ class CarringtonRotation(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#")
+        result = base.format_with_units(self.tex, base._inU["dimless"])
         return self._format_with_description(result)
 
     @property
@@ -284,7 +284,7 @@ class Count(ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the count units."""
-        return r"\#"
+        return base._inU["dimless"]
 
     @property
     def path(self):
@@ -474,7 +474,7 @@ class CountOther(ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the units."""
-        return r"\#"
+        return base._inU["dimless"]
 
     @property
     def path(self):
@@ -798,7 +798,7 @@ class SSN(ArbitraryLabel):
         self.set_description(description)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#")
+        result = base.format_with_units(self.tex, base._inU["dimless"])
         return self._format_with_description(result)
 
     @property
@@ -1027,7 +1027,7 @@ class Xcorr(ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the dimensionless count units."""
-        return r"\#"
+        return base._inU["dimless"]
 
     @property
     def short_tex(self):

@@ -62,7 +62,7 @@ class ElementalAbundance(base.Base):
         if self.pct_unit:
             return r"\%"
         else:
-            return r"\#"  # noqa: W605
+            return base._inU["dimless"]
 
     @property
     def tex(self):

@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   writes them with the new `$A` placeholder, the component's code in upper case.
 - `TeXlabel` renders the `scalar` component as no component, like `mag`: `("T", "scalar", "p1")`
   reads `T_{p_1}`, not `T_{\mathrm{scalar};p_1}`.
+- Labels state one dimensionless unit, `\#`, the registry's `UNIT_TEX["dimless"]`: beta and
+  the other dimensionless quantities wrote `\mathrm{\#}` while ratios and counts wrote `\#`.
+  The temperature anisotropy `R` states it too, in place of `\perp/\parallel`.
 
 ## [0.4.0] - 2026-11-05
 

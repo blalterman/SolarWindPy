@@ -45,7 +45,7 @@ class Ion(base.Base):
     @property
     def units(self):
         r"""TeX of the count units."""
-        return r"\#"  # noqa: W605
+        return base._inU["dimless"]
 
     @property
     def path(self):
@@ -126,7 +126,7 @@ class ChargeStateRatio(base.Base):
         uA = self.ionA.units
         uB = self.ionB.units
 
-        units = r"\#"
+        units = base._inU["dimless"]
         if uA != uB:
             units = f"{uA}/{uB}"
 

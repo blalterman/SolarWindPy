@@ -422,7 +422,7 @@ ${T}_{{\parallel};{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("T", "scalar", "p1")))
 ${T}_{{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("beta", "", "p1")))
-${\beta}_{{p_1}} \; \left[\mathrm{\#}\right]$
+${\beta}_{{p_1}} \; \left[\#\right]$
 
 A dimensionless quantity, such as :math:`\beta`, has the units
 :math:`[\#]`. A second key makes a ratio:

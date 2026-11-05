@@ -183,7 +183,7 @@ class TestPower:
         """Test Power label properties."""
         power = labels_special.Power()
         assert power.tex == r"\mathrm{Power}"
-        assert power.units == r"\mathrm{\#}"
+        assert power.units == r"\#"
         assert str(power.path) == "power"
 
     def test_string_representation(self):
@@ -191,7 +191,7 @@ class TestPower:
         power = labels_special.Power()
         result = str(power)
         assert "Power" in result
-        assert r"\left[\mathrm{\#}\right]" in result
+        assert r"\left[\#\right]" in result
 
 
 class TestProbability:
@@ -276,7 +276,7 @@ class TestMathFcn:
         math_fcn = labels_special.MathFcn("log", basic_texlabel)
         assert "log" in math_fcn.tex
         assert math_fcn.dimensionless is True
-        assert math_fcn.units == r"\mathrm{\#}"
+        assert math_fcn.units == r"\#"
 
     def test_non_dimensionless(self, basic_texlabel):
         """Test non-dimensionless math function."""
@@ -732,11 +732,9 @@ def test_math_fcn_tex_units_and_both_string_forms(n_p1):
     """
     label = labels_special.MathFcn("log", n_p1)
     assert label.tex == r"\mathrm{log}(n_{p_1})"
-    assert str(label) == r"$\mathrm{log}(n_{p_1}) \; \left[\mathrm{\#}\right]$"
+    assert str(label) == r"$\mathrm{log}(n_{p_1}) \; \left[\#\right]$"
     two_lines = labels_special.MathFcn("log", n_p1, new_line_for_units=True)
-    assert str(two_lines) == (
-        r"$\mathrm{log}(n_{p_1}) $" "\n" r"$ \left[\mathrm{\#}\right]$"
-    )
+    assert str(two_lines) == (r"$\mathrm{log}(n_{p_1}) $" "\n" r"$ \left[\#\right]$")
     dimensional = labels_special.MathFcn("log", n_p1, dimensionless=False)
     assert dimensional.units == r"\mathrm{log}\left(\mathrm{cm}^{-3}\right)"
 
@@ -805,9 +803,7 @@ def test_fixed_special_labels_print_exact_strings():
     )
     long_cr = labels_special.CarringtonRotation(short_label=False)
     assert long_cr.tex == r"\mathrm{Carrington \; Rotation}"
-    assert (
-        str(labels_special.Power()) == r"$\mathrm{Power} \; \left[\mathrm{\#}\right]$"
-    )
+    assert str(labels_special.Power()) == r"$\mathrm{Power} \; \left[\#\right]$"
     assert str(labels_special.Distance2Sun("m")) == (
         r"$\mathrm{Distance \; to \; Sun} \; \left[\mathrm{m}\right]$"
     )

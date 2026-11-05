@@ -197,7 +197,7 @@ def test_units_translation(labels_base):
         ("n", "", "p"): "\\mathrm{cm}^{-3}",
         ("b", "x", ""): "\\mathrm{nT}",
         ("T", "", "p"): "10^5 \\, \\mathrm{K}",
-        ("beta", "", "p"): "\\mathrm{\\#}",
+        ("beta", "", "p"): "\\#",
     }
 
     for mcs, expected_units in test_cases.items():
@@ -503,10 +503,10 @@ def test_latitude_is_lambda_and_colatitude_is_theta(labels_base, mcs, tex):
 @pytest.mark.parametrize(
     "mcs, units",
     [
-        (("cos_phi", "", "p1"), "\\mathrm{\\#}"),
-        (("ratio", "", ""), "\\mathrm{\\#}"),
-        (("Qhat", "", "p1"), "\\mathrm{\\#}"),
-        (("dbeta", "", "p1"), "\\mathrm{\\#}"),
+        (("cos_phi", "", "p1"), "\\#"),
+        (("ratio", "", ""), "\\#"),
+        (("Qhat", "", "p1"), "\\#"),
+        (("dbeta", "", "p1"), "\\#"),
         (("eth", "", "p1"), "\\mathrm{eV}"),
     ],
     ids=["cos_phi", "ratio", "Qhat", "dbeta", "eth"],
@@ -697,3 +697,26 @@ def test_scalar_component_renders_as_no_component(labels_base, m):
     scalar = labels_base.TeXlabel((m, "scalar", "p1"))
     assert scalar.tex == labels_base.TeXlabel((m, "", "p1")).tex
     assert "scalar" not in scalar.tex
+
+
+def test_every_dimensionless_label_shares_one_unit_form(labels_base):
+    r"""Dimensionless quantities, ratios and counts all state the registry's one form.
+
+    beta and the temperature anisotropy R are ratios of like quantities, as
+    a ratio label is; a count is a pure number. Each states
+    ``UNIT_TEX["dimless"]``, ``\#``.
+
+    ON FAILURE: the code is wrong.
+    """
+    from solarwindpy.core import quantities
+    from solarwindpy.plotting.labels.special import CarringtonRotation, Count
+
+    dimless = quantities.UNIT_TEX["dimless"]
+    assert dimless == r"\#"
+    TeXlabel = labels_base.TeXlabel
+    assert TeXlabel(("beta", "", "p1")).units == dimless
+    assert TeXlabel(("R", "", "p1")).units == dimless
+    assert TeXlabel(("n", "", "a"), ("n", "", "p1")).units == dimless
+    assert TeXlabel(("n", "", "p1"), axnorm="t").units == dimless
+    assert Count().units == dimless
+    assert str(CarringtonRotation()).endswith(r"\left[%s\right]$" % dimless)

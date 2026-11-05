@@ -430,7 +430,7 @@ template   : %s
         axnorm = self.axnorm
         tex_norm = _trans_axnorm[axnorm]
         if tex_norm:
-            units = r"\#"
+            units = _inU["dimless"]
             tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
             path = path / (axnorm.upper() + "norm")
 
@@ -457,7 +457,7 @@ template   : %s
                 _units_of(m1.replace("_err", "")),
             )
             if u0 == u1:
-                units = r"\#"
+                units = _inU["dimless"]
             else:
                 units = r"{}/{}".format(u0, u1)
 
