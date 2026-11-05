@@ -245,10 +245,9 @@ def test_insufficient_data_check_survives_python_O(tmp_path):
         "    print('no error')\n"
     )
     root = Path(solarwindpy.__file__).resolve().parents[1]
-    env = {"PYTHONPATH": str(root), "PATH": ""}
-    # Windows processes need SYSTEMROOT to start, e.g. to load system DLLs.
-    if "SYSTEMROOT" in os.environ:
-        env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
+    # Inherit the environment: Windows needs SYSTEMROOT to start a process and
+    # USERPROFILE for Path.home(), which astropy calls on import.
+    env = {**os.environ, "PYTHONPATH": str(root)}
     out = subprocess.run(
         [sys.executable, "-O", str(script)],
         capture_output=True,
