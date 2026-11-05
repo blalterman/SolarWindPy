@@ -719,7 +719,7 @@ def test_beta_ani_inst_example_output_is_its_call():
 
 
 # ---------------------------------------------------------------------------
-# Stability-bin dtype and fill
+# Stability-bin dtype and coverage
 # ---------------------------------------------------------------------------
 
 
@@ -734,6 +734,66 @@ def test_stability_bin_is_an_integer_label():
     anisotropy = pd.Series([3.0, 1.0, 0.5, np.nan])
     sc = v16.StabilityCondition(-3, beta, anisotropy)
     assert pd.api.types.is_integer_dtype(sc.stability_bin)
+    assert set(sc.stability_bin) <= set(sc.stability_map)
+
+
+def _edge_inputs(growth_rate):
+    """Beta and anisotropy at every edge of the classification.
+
+    Missing and infinite values, beta at, just above and just below each fit
+    offset ``c`` (where Eq. (5) is undefined), the anisotropy exactly on each
+    threshold, and values far beyond every threshold.
+    """
+    params = v16.insta_params.xs(growth_rate, level="growth_rate")
+    betas = [np.nan, 0.0, -1.0, np.inf, -np.inf, 1e-12, 1.0, 1e6]
+    betas += list(params["c"]) + list(params["c"] + 1e-9) + list(params["c"] - 1e-9)
+    beta, anisotropy = [], []
+    for b in betas:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            thresholds = [
+                v16.beta_ani_inst(np.array([b]), **row)[0]
+                for _, row in params.iterrows()
+            ]
+        for r in [np.nan, 0.0, -1.0, np.inf, -np.inf, 0.01, 1.0, 100.0] + [
+            t for t in thresholds if np.isfinite(t)
+        ]:
+            beta.append(b)
+            anisotropy.append(r)
+    return pd.Series(beta), pd.Series(anisotropy)
+
+
+@pytest.mark.parametrize("growth_rate", [-2, -3, -4])
+def test_every_point_falls_in_exactly_one_stability_bin(growth_rate):
+    """Every point gets a stability bin; none is left outside every bin.
+
+    ``is_unstable`` is a boolean frame of the four instabilities with no
+    missing values, so each row is one of 16 combinations. Stable is no
+    instability; otherwise OFI, then FMW (between FMW and OFI), then MM, then
+    AIC (between AIC and MM) sets the bin. Checked on edge inputs against that
+    rule written independently.
+
+    ON FAILURE: the code is wrong; a point may be left without a bin.
+    """
+    beta, anisotropy = _edge_inputs(growth_rate)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        sc = v16.StabilityCondition(growth_rate, beta, anisotropy)
+    unstable = sc.is_unstable
+    assert sorted(unstable.columns) == ["AIC", "FMW", "MM", "OFI"]
+    assert all(pd.api.types.is_bool_dtype(d) for d in unstable.dtypes), unstable.dtypes
+    code = sc.stability_map_inverse
+    expected = np.select(
+        [unstable.OFI, unstable.FMW, unstable.MM, unstable.AIC],
+        [
+            code["OFI"],
+            code["Between\nFMW &\nOFI"],
+            code["MM"],
+            code["Between\nAIC &\nMM"],
+        ],
+        default=code["Stable"],
+    )
+    assert pd.api.types.is_integer_dtype(sc.stability_bin)
+    assert sc.stability_bin.tolist() == expected.tolist()
     assert set(sc.stability_bin) <= set(sc.stability_map)
 
 
