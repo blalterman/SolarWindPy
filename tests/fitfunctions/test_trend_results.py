@@ -96,7 +96,7 @@ def _trend5(**kwargs):
     return tf
 
 
-def test_the_authors_example_recovers_the_reference_hinge():
+def test_the_authors_example_recovers_the_generating_hinge():
     """A Gaussian per column, then a hinge on mu with yerr = sigma, finds (433, 4.12).
 
     This is the author's reference use: x is the column center, y each
