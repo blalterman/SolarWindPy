@@ -104,7 +104,7 @@ Monitor conda-forge bot PR creation and CI status during releases:
 ```bash
 # Generate test scaffolding for new modules
 python .claude/scripts/generate-test.py
-python .claude/scripts/generate-test.py solarwindpy/new_module.py
+python .claude/scripts/generate-test.py src/solarwindpy/new_module.py
 
 # Run comprehensive test suite with coverage
 pytest --cov=solarwindpy --cov-report=html -q

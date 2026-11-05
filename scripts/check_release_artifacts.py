@@ -26,6 +26,8 @@ import zipfile
 from pathlib import Path
 
 PACKAGE = "solarwindpy"
+SDIST_SRC = "src/"
+SDIST_PACKAGE = f"{SDIST_SRC}{PACKAGE}/"
 MARKER = b"Spent-When"
 SDIST_REQUIRED = ("tests/", "docs/source/")
 SDIST_PRUNED = (".claude/", ".github/", "docs/dispatches/", "tmp/", "spike/")
@@ -67,11 +69,14 @@ def sdist_pruned_present(members):
 
 
 def wheel_missing_package_files(wheel, members):
-    """Return the sdist's ``solarwindpy/`` files that the wheel does not install.
+    """Return the sdist's ``src/solarwindpy/`` files that the wheel does not install.
 
     Every package file the sdist carries, data files such as
     ``ssn_extrema.csv`` included, must reach the wheel; a data file that
     reaches only the sdist fails at import time for anyone who installs.
+    The sdist holds the package under ``src/``; the wheel installs it at its
+    top level, so ``src/solarwindpy/x`` in the sdist is ``solarwindpy/x`` in
+    the wheel.
     """
     with zipfile.ZipFile(wheel) as zf:
         installed = set(zf.namelist())
@@ -80,7 +85,9 @@ def wheel_missing_package_files(wheel, members):
     return sorted(
         m
         for m in members
-        if m.startswith(f"{PACKAGE}/") and m not in dirs and m not in installed
+        if m.startswith(SDIST_PACKAGE)
+        and m not in dirs
+        and m.removeprefix(SDIST_SRC) not in installed
     )
 
 

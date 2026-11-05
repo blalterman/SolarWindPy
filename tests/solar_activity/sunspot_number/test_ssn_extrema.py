@@ -2,7 +2,7 @@
 """Test SSNExtrema against the real shipped ``ssn_extrema.csv``.
 
 Every test in this module reads the actual CSV that ships with the package,
-``solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv``, whose own header
+``src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv``, whose own header
 cites <http://sidc.oma.be/silso/DATA/Cycles/TableCyclesMiMa.txt> as its source.
 Nothing here mocks :func:`pandas.read_csv`; the ``skiprows=48`` in
 ``sidc.SSNExtrema.load_or_set_data`` is the most fragile line in the module and it is executed by

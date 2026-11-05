@@ -60,7 +60,7 @@ def test_no_fit_function_is_reexported_by_the_package():
     """``solarwindpy.fitfunctions`` binds no fit function at package level.
 
     ON FAILURE: the code is wrong; import the fit function from its module
-    instead of re-exporting it in solarwindpy/fitfunctions/__init__.py.
+    instead of re-exporting it in src/solarwindpy/fitfunctions/__init__.py.
     """
     reexported = [
         name for name in _fit_functions_found_by_scanning_modules() if hasattr(ff, name)

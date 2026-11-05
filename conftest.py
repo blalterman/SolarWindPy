@@ -2,7 +2,7 @@
 # Supersedes: none
 r"""Repository-root pytest configuration for documentation examples.
 
-``pytest --doctest-modules solarwindpy`` collects docstring examples as
+``pytest --doctest-modules src/solarwindpy`` collects docstring examples as
 ``DoctestItem`` objects, which accept no decorators. Examples that document
 correct behavior the library does not yet deliver are marked strict xfail
 here, so the suite reports the day the library catches up.

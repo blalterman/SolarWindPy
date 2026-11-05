@@ -93,9 +93,7 @@ Initial parameter guesses MUST be data-driven. Hardcoded domain values are prohi
   is the same for every class and is not a hook to override.
 - A class whose model is singular at that start does not return `None`: its `p0`
   logs a warning that the data gave no estimate and returns a reference start that the
-  class documents (the hinge classes return the author's reference hinge). A class with
-  no reference start yet raises `NotImplementedError` there, without the warning
-  (`HingeMax`).
+  class documents (the hinge classes return the author's reference hinge).
 - A new hinge model subclasses `Hinge` in `hinge.py` (not exported). `Hinge.p0` holds
   the estimate-or-reference control flow and `Hinge` the reference hinge; the subclass
   writes `function`, `TeX_function`, `_estimate` (its estimate, in `argnames` order, NaN

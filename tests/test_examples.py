@@ -3,7 +3,7 @@
 """The example ``Plasma`` that docstring examples load, and Plasma's input logging.
 
 Expected values are the example CSVs' own bytes (the chosen input):
-``solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
+``src/solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
 """
 
 import logging
@@ -46,7 +46,7 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
     """
     installed = tmp_path / "site-packages"
     shutil.copytree(
-        REPO / "solarwindpy",
+        REPO / "src" / "solarwindpy",
         installed / "solarwindpy",
         ignore=shutil.ignore_patterns("__pycache__"),
     )

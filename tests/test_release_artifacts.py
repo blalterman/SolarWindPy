@@ -71,19 +71,19 @@ def test_wheel_carries_no_spent_when(artifacts):
 
 
 def test_wheel_installs_every_package_file(artifacts):
-    """Each ``solarwindpy/`` file in the sdist, data files included, is in the wheel."""
+    """Each ``src/solarwindpy/`` file in the sdist, data files included, is in the wheel."""
     wheel, sdist = artifacts
     members = check.sdist_members(sdist)
-    assert "solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv" in members
+    assert "src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv" in members
     assert check.wheel_missing_package_files(wheel, members) == []
 
 
 def test_a_package_file_missing_from_the_wheel_is_reported(artifacts):
     """Negative control: a package file absent from the wheel is named."""
     wheel, sdist = artifacts
-    members = check.sdist_members(sdist) + ["solarwindpy/not_shipped.csv"]
+    members = check.sdist_members(sdist) + ["src/solarwindpy/not_shipped.csv"]
     assert check.wheel_missing_package_files(wheel, members) == [
-        "solarwindpy/not_shipped.csv"
+        "src/solarwindpy/not_shipped.csv"
     ]
 
 

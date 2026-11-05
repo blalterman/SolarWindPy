@@ -2430,10 +2430,10 @@ def test_hingeatpoint_psigma_values_are_positive(noisy_hingeatpoint_data):
     "x_rising, expected",
     [
         # Two points at one x: no slope, so the Hinge reference start
-        # (433, 4.12, 250, 1% of m1 = 4.12 / (433 - 250)), from the Hinge Notes.
+        # [xh, yh, x1, m2] = (433, 4.19, 302, 0.0010), from the Hinge Notes.
         pytest.param(
             [1.0, 1.0],
-            [433.0, 4.12, 250.0, 0.01 * 4.12 / (433.0 - 250.0)],
+            [433.0, 4.19, 302.0, 0.0010],
             id="one-distinct-x",
         ),
         # Positive control: rising slope 1 through (1, 2) and (2, 3), so

@@ -31,7 +31,7 @@ def test_class_help_shows_parent_parameters():
     """``Line`` writes no Parameters section and shows FitFunction's entries.
 
     ON FAILURE: ``help()`` on a fit function loses its inherited text; check
-    that ``solarwindpy/__init__.py`` switches docstring-inheritance on before
+    that ``src/solarwindpy/__init__.py`` switches docstring-inheritance on before
     importing ``fitfunctions``.
     """
     assert "xmin : float, optional" in inspect.getdoc(Line)

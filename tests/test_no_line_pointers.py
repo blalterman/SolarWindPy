@@ -12,7 +12,7 @@ import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCANNED_PATHS = ["solarwindpy", "tests", "docs/source", "README.rst", "CLAUDE.md"]
+SCANNED_PATHS = ["src/solarwindpy", "tests", "docs/source", "README.rst", "CLAUDE.md"]
 
 # Assembled from two pieces so this file's own source never matches it.
 LINE_POINTER = re.compile(r"[A-Za-z_/]+\.py" + r":[0-9]+")

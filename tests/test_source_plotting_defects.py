@@ -1,6 +1,6 @@
 # Spent-When: PERMANENT(solarwindpy stops shipping its plotting package)
 # Supersedes: none
-"""Defects found in ``solarwindpy/plotting`` while documenting it.
+"""Defects found in ``src/solarwindpy/plotting`` while documenting it.
 
 Each test failed before its fix landed and passes after it.
 """

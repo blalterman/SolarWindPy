@@ -423,7 +423,7 @@ def main():
         package_root = sys.argv[1]
     else:
         script_dir = Path(__file__).parent
-        package_root = script_dir.parent / "solarwindpy"
+        package_root = script_dir.parent / "src" / "solarwindpy"
 
     print(f"Testing dynamic imports in: {package_root}")
 

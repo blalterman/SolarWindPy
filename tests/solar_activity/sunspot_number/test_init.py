@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Test the sunspot_number package's import surface.
 
-``solarwindpy/solar_activity/sunspot_number/__init__.py`` does one thing:
+``src/solarwindpy/solar_activity/sunspot_number/__init__.py`` does one thing:
 ``from . import sidc``. That makes the package's contract small and checkable
 -- the module is importable, ``sidc`` is bound on it, the SIDC classes are
 reachable through it, and nothing else is exported.

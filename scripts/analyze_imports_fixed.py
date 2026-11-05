@@ -440,9 +440,9 @@ def main():
     if len(sys.argv) > 1:
         package_root = sys.argv[1]
     else:
-        # Default to solarwindpy directory
+        # Default to the src/solarwindpy package directory
         script_dir = Path(__file__).parent
-        package_root = script_dir.parent / "solarwindpy"
+        package_root = script_dir.parent / "src" / "solarwindpy"
 
     print(f"Analyzing imports in: {package_root}")
 

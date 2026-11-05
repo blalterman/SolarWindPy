@@ -19,9 +19,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # `l` as a short loop or unpacking target (a left bound, a label).
-"solarwindpy/plotting/hist1d.py" = ["E741"]
-"solarwindpy/plotting/hist2d.py" = ["E741"]
-"solarwindpy/plotting/tools.py" = ["E741"]
+"src/solarwindpy/plotting/hist1d.py" = ["E741"]
+"src/solarwindpy/plotting/hist2d.py" = ["E741"]
+"src/solarwindpy/plotting/tools.py" = ["E741"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 18
@@ -34,6 +34,9 @@ convention = "numpy"
 quote-style = "double"
 
 [tool.pytest.ini_options]
+# Import this checkout's package, not whichever checkout the editable install
+# points at, so every worktree's suite and commit hook test their own src/.
+pythonpath = ["src"]
 testpaths = ["tests"]
 strict_markers = true
 markers = [
@@ -93,7 +96,7 @@ dependencies = [
   "astropy>=8",        # one download-cache location, ~/.cache/solarwindpy
   "numba>=0.59",       # Minimum for NumPy 2.0 support
   "tabulate>=0.9",
-  "docstring-inheritance>=3.0,<4",  # 3.x: inheritance switched on by solarwindpy/__init__.py
+  "docstring-inheritance>=3.0,<4",  # 3.x: inheritance switched on by src/solarwindpy/__init__.py
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",

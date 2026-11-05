@@ -38,7 +38,7 @@ Thank you for considering contributing to SolarWindPy.
 6. Validate documentation examples (when adding new documentation):
 
    ```bash
-   pytest --doctest-modules solarwindpy -q
+   pytest --doctest-modules src/solarwindpy -q
    pytest --doctest-glob='*.rst' docs/source -q
    ```
 
@@ -73,7 +73,7 @@ Thank you for considering contributing to SolarWindPy.
 **Local Testing Commands:**
 ```bash
 # Docstring examples in the package
-pytest --doctest-modules solarwindpy -q
+pytest --doctest-modules src/solarwindpy -q
 
 # Examples in the reStructuredText documentation
 pytest --doctest-glob='*.rst' docs/source -q

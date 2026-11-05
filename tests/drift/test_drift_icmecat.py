@@ -22,7 +22,7 @@ from ._drift import (
 pytestmark = pytest.mark.drift
 
 # The eight columns icmecat.py actually indexes (see _prepare_intervals and
-# _filter_by_spacecraft in solarwindpy/solar_activity/icme/icmecat.py).
+# _filter_by_spacecraft in src/solarwindpy/solar_activity/icme/icmecat.py).
 REQUIRED_COLUMNS = [
     "icmecat_id",
     "icme_start_time",
@@ -34,7 +34,7 @@ REQUIRED_COLUMNS = [
     "sc_insitu",
 ]
 
-_LOCATION = "solarwindpy/solar_activity/icme/icmecat.py::ICMECAT_URL"
+_LOCATION = "src/solarwindpy/solar_activity/icme/icmecat.py::ICMECAT_URL"
 
 
 def test_pinned_url_head_ok(head_status):
@@ -88,6 +88,6 @@ def test_spacecraft_names_match_catalog(live_catalog):
         SPACECRAFT_NAMES,
         live_catalog["sc_insitu"].unique(),
         fact="SPACECRAFT_NAMES matches the catalog's sc_insitu values",
-        location="solarwindpy/solar_activity/icme/icmecat.py::SPACECRAFT_NAMES",
+        location="src/solarwindpy/solar_activity/icme/icmecat.py::SPACECRAFT_NAMES",
         remedy="refresh SPACECRAFT_NAMES from the new catalog's sc_insitu values",
     )

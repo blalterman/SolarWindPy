@@ -41,8 +41,8 @@ When working in this repository, Claude Code will automatically load the configu
 
 The configuration enforces these requirements:
 1. All tests must pass (`pytest -q`)
-2. Code must be formatted (`ruff format solarwindpy/ tests/`)
-3. No linting errors (`ruff check solarwindpy/ tests/`)
+2. Code must be formatted (`ruff format src/solarwindpy/ tests/`)
+3. No linting errors (`ruff check src/solarwindpy/ tests/`)
 4. NumPy-style docstrings required
 5. Coverage at or above the pre-commit hook's floor
 

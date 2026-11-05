@@ -2,9 +2,9 @@ coverage.json
 nohup.out
 tmp/
 # Byte-compiled / optimized / DLL files
-solarwindpy/solar_activity/data/*.csv
-solarwindpy/solar_activity/data/*.json
-solarwindpy/solar_activity/data/**/*.csv
+src/solarwindpy/solar_activity/data/*.csv
+src/solarwindpy/solar_activity/data/*.json
+src/solarwindpy/solar_activity/data/**/*.csv
 stale
 .*.swp
 .DS_Store
@@ -114,7 +114,7 @@ venv.bak/
 .mypy_cache/
 
 # setuptools_scm auto-generated version files
-solarwindpy/_version.py
+src/solarwindpy/_version.py
 
 # Claude compaction files (timestamped, ephemeral)
 .claude/compaction-*.md

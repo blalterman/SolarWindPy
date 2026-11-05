@@ -156,7 +156,7 @@ def plasma_beta(n, T, B):
 **Common doc8 Commands**:
 ```bash
 # Check all documentation
-doc8 solarwindpy/ --extension .py
+doc8 src/solarwindpy/ --extension .py
 
 # Check specific files
 doc8 README.rst docs/

@@ -17,9 +17,9 @@ calculate_timeout() {
         file_count=$(echo "$changed_files" | wc -l | tr -d ' ')
         
         # Check for physics files (need more time)
-        if echo "$changed_files" | grep -q "solarwindpy/instabilities/\|solarwindpy/core/"; then
+        if echo "$changed_files" | grep -q "src/solarwindpy/instabilities/\|src/solarwindpy/core/"; then
             base_timeout=180
-        elif echo "$changed_files" | grep -q "solarwindpy/plotting/"; then
+        elif echo "$changed_files" | grep -q "src/solarwindpy/plotting/"; then
             base_timeout=120
         elif echo "$changed_files" | grep -q "tests/"; then
             base_timeout=120
@@ -153,9 +153,9 @@ elif [[ "$RUN_CHANGED" == "true" ]]; then
     
     # Convert source files to test targets
     for file in $changed_py_files; do
-        if [[ $file == solarwindpy/* ]]; then
+        if [[ $file == src/solarwindpy/* ]]; then
             # Map source file to test file
-            test_file="tests/${file#solarwindpy/}"
+            test_file="tests/${file#src/solarwindpy/}"
             test_dir=$(dirname "$test_file")
             
             # Add test targets (file or directory)
