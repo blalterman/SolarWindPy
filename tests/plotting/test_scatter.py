@@ -89,7 +89,7 @@ def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
     """
     sc = Scatter(X, Y, Z)
     sc.set_labels(x="Vx", y="Np", z="T")
-    ret_ax, _, cbar = sc.make_plot(ax=ax)
+    ret_ax, _, _, cbar = sc.make_plot(ax=ax)
     coll = ax.collections[0]
     np.testing.assert_array_equal(coll.get_array(), _col(KEPT, 3))
     assert ret_ax is ax
@@ -107,7 +107,7 @@ def test_two_valued_z_is_colour_mapped_with_a_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     z = pd.Series([0.5, 0.5, 0.9, 0.9, 0.5, 0.9])
-    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     kept_z = z.drop(1).to_numpy()  # row 1 has NaN y (ROWS)
     np.testing.assert_array_equal(ax.collections[0].get_array(), kept_z)
     assert isinstance(cbar, Colorbar)
@@ -119,7 +119,7 @@ def test_absent_or_constant_z_gives_uncoloured_points_and_no_colorbar(ax, z):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     assert ax.collections[0].get_array() is None
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -130,7 +130,7 @@ def test_cbar_false_colours_points_but_draws_no_colorbar(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
+    _, _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
     np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -143,7 +143,7 @@ def test_without_ax_a_new_figure_is_made():
     """
     existing, _ = plt.subplots()
     try:
-        new_ax, _, _ = Scatter(X, Y).make_plot()
+        new_ax, _, _, _ = Scatter(X, Y).make_plot()
         assert isinstance(new_ax, Axes)
         assert new_ax.figure is not existing
         assert len(new_ax.collections) == 1
@@ -169,7 +169,7 @@ def test_cbar_kwargs_reach_the_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
-    _, _, cbar = Scatter(X, Y, Z).make_plot(
+    _, _, _, cbar = Scatter(X, Y, Z).make_plot(
         ax=ax, cbar_kwargs={"cax": cax, "label": "custom"}
     )
     assert cbar.ax is cax
@@ -245,7 +245,7 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
         # that warning from pre-empting the assertion under ``-W error``.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
+            _, _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
         if cbar2.ax.figure is not ax2.figure:
             raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
     finally:
@@ -290,7 +290,7 @@ def test_value_alim_draws_only_points_with_z_inside_the_limits(ax, lower, upper)
     z = ALIM_Z[:-1]
     sc = Scatter(ALIM_X[:-1], ALIM_Y[:-1], z)
     sc.set_alim(lower, upper)
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     keep = np.ones(z.size, dtype=bool)
     if lower is not None:
         keep &= z >= lower
@@ -308,7 +308,7 @@ def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.2, 0.8, kind="quantile")
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     lo, hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], [0.2, 0.8])
     keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
     assert 2 < keep.sum() < ALIM_Z.size - 2
@@ -324,7 +324,7 @@ def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.0, 0.5, kind="quantile")
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], 0.5)
     _assert_drawn(ax, cbar, ALIM_Z <= hi)
 
@@ -390,10 +390,6 @@ EX = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
 EY = np.array([0.0, 1.0, 0.0, 1.0, 0.0])
 EZ = np.array([0.0, 2.0, 9.0, 6.0, 8.0])
 
-_EDGES_PENDING = pytest.mark.xfail(
-    strict=True, reason="Scatter.make_plot(edges=True) is not implemented"
-)
-
 
 def _segments(x, y, pairs):
     return [np.array([[x[i], y[i]], [x[j], y[j]]]) for i, j in pairs]
@@ -406,7 +402,6 @@ def _assert_segments(lc, x, y, pairs):
         np.testing.assert_array_equal(g, e)
 
 
-@_EDGES_PENDING
 def test_make_plot_returns_ax_points_edges_then_cbar(ax):
     """``(ax, points, edges, cbar)``; edges is None unless ``edges=True``.
 
@@ -426,7 +421,6 @@ def test_make_plot_returns_ax_points_edges_then_cbar(ax):
     assert out[2] in ax.collections
 
 
-@_EDGES_PENDING
 def test_edges_join_each_pair_of_consecutive_points(ax):
     """n points in row order give n - 1 segments, point i to point i + 1.
 
@@ -436,7 +430,6 @@ def test_edges_join_each_pair_of_consecutive_points(ax):
     _assert_segments(lc, EX, EY, [(0, 1), (1, 2), (2, 3), (3, 4)])
 
 
-@_EDGES_PENDING
 def test_edge_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(ax):
     """Segment i is ``cmap(norm((z[i] + z[i+1]) / 2))``: one colorbar serves both.
 
@@ -456,7 +449,6 @@ def test_edge_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(ax)
     assert cbar.mappable is points
 
 
-@_EDGES_PENDING
 def test_edges_follow_a_norm_the_caller_passes(ax):
     """``vmin``/``vmax`` given to the points also set the edges' colours.
 
@@ -469,7 +461,6 @@ def test_edges_follow_a_norm_the_caller_passes(ax):
     assert (lc.norm.vmin, lc.norm.vmax) == (0.0, 20.0)
 
 
-@_EDGES_PENDING
 def test_a_point_with_nan_breaks_the_chain(ax):
     """A dropped NaN point removes both its segments; no segment bridges it.
 
@@ -482,7 +473,6 @@ def test_a_point_with_nan_breaks_the_chain(ax):
     np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])
 
 
-@_EDGES_PENDING
 def test_a_point_outside_alim_breaks_the_chain(ax):
     """A point ``alim`` hides drops both its segments, as a NaN point does.
 
@@ -496,7 +486,6 @@ def test_a_point_outside_alim_breaks_the_chain(ax):
     np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])
 
 
-@_EDGES_PENDING
 def test_a_masked_point_breaks_the_chain(ax):
     """A point ``mask`` excludes drops both its segments.
 
@@ -507,7 +496,6 @@ def test_a_masked_point_breaks_the_chain(ax):
     _assert_segments(lc, EX, EY, [(0, 1), (1, 2)])
 
 
-@_EDGES_PENDING
 def test_consecutive_is_row_position_not_label(ax):
     """Rows are joined in the order given, even with repeated or unsorted labels.
 
@@ -519,7 +507,6 @@ def test_consecutive_is_row_position_not_label(ax):
     _assert_segments(lc, EX, EY, [(0, 1), (1, 2), (2, 3), (3, 4)])
 
 
-@_EDGES_PENDING
 @pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
 def test_edges_without_varying_z_have_one_colour(ax, z):
     """With no z, or a constant one, every segment has the points' colour.
@@ -535,7 +522,6 @@ def test_edges_without_varying_z_have_one_colour(ax, z):
     np.testing.assert_array_equal(colors[0], points.get_facecolor()[0])
 
 
-@_EDGES_PENDING
 def test_edges_sit_below_the_points_and_take_edge_kwargs(ax):
     """Edges default to beneath the markers; ``edge_kwargs`` styles them.
 
@@ -551,7 +537,6 @@ def test_edges_sit_below_the_points_and_take_edge_kwargs(ax):
     assert (lc.get_alpha(), lc.get_zorder()) == (0.4, 5)
 
 
-@_EDGES_PENDING
 def test_edges_do_not_change_the_axis_limits(ax):
     """The view fits the points with or without edges.
 

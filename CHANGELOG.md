@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
   `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
   runs each of those code blocks on its own.
+- `Scatter.make_plot(edges=True)` joins each pair of consecutive points, in the order the rows
+  were given, with a line segment colored by the mean z of its two points through the points'
+  colormap and norm, so one colorbar serves both and a path through time is visible.
+  `edge_kwargs` styles the segments. A point that is not drawn (NaN, outside `mask` or
+  outside `alim`) breaks the chain. Without a varying z, the segments take the points' color.
+
+### Changed - BREAKING CHANGES
+
+- `Scatter.make_plot` returns `(ax, points, edges, cbar)`: the `LineCollection` of the
+  segments, or None without `edges=True`, sits before the colorbar. Unpack four values where
+  three were unpacked before.
 
 ### Changed
 

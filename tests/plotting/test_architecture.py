@@ -321,6 +321,6 @@ def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():
     plot = Scatter(x, y, logx=True, logy=True)
     assert plot.log == base.LogAxes(True, True)
     assert plot.data.x.to_numpy() == exact(x.to_numpy())  # the chosen input
-    ax, _, _ = plot.make_plot()
+    ax, _, _, _ = plot.make_plot()
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
     plt.close("all")
