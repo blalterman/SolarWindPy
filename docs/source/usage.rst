@@ -28,13 +28,21 @@ three-level MultiIndex named ``M``, ``C``, ``S``:
 >>> epoch = pd.date_range("2023-01-01", periods=3, freq="1h")
 >>> columns = pd.MultiIndex.from_tuples(
 ...     [
-...         ("n", "", "p1"), ("n", "", "a"),
-...         ("v", "x", "p1"), ("v", "x", "a"),
-...         ("v", "y", "p1"), ("v", "y", "a"),
-...         ("v", "z", "p1"), ("v", "z", "a"),
-...         ("w", "par", "p1"), ("w", "par", "a"),
-...         ("w", "per", "p1"), ("w", "per", "a"),
-...         ("b", "x", ""), ("b", "y", ""), ("b", "z", ""),
+...         ("n", "", "p1"),  # density
+...         ("n", "", "a"),
+...         ("v", "x", "p1"),  # velocity
+...         ("v", "x", "a"),
+...         ("v", "y", "p1"),
+...         ("v", "y", "a"),
+...         ("v", "z", "p1"),
+...         ("v", "z", "a"),
+...         ("w", "par", "p1"),  # thermal speed
+...         ("w", "par", "a"),
+...         ("w", "per", "p1"),
+...         ("w", "per", "a"),
+...         ("b", "x", ""),  # magnetic field
+...         ("b", "y", ""),
+...         ("b", "z", ""),
 ...     ],
 ...     names=["M", "C", "S"],
 ... )
