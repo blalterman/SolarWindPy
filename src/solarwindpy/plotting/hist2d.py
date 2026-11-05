@@ -503,7 +503,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         elif (levels is None) and (self.axnorm in ["r", "c"]):
             levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-        elif (levels is None) and (self.axnorm in ["cd", "rd"]):
+        elif (levels is None) and (self.axnorm in ["cd", "rd", "w", "wc", "wr"]):
             levels = None
 
         else:

@@ -70,6 +70,24 @@ def _within(values, lower, upper, bins):
     return (lower < values) & (values <= upper)
 
 
+#: ``axnorm`` keys that give each cell a share of a total.
+_SHARE_AXNORMS = ("d", "cd", "rd", "w", "wc", "wr")
+
+
+def _aggregation_kind(fcn):
+    r"""``"count"``, ``"sum"`` or ``"value"``: how ``axnorm`` treats ``fcn``.
+
+    Only ``"count"`` is a count and only ``"sum"`` or :func:`numpy.sum` a
+    sum; every other aggregation, a custom additive callable included, is a
+    per-cell value.
+    """
+    if isinstance(fcn, str):
+        return {"count": "count", "sum": "sum"}.get(fcn, "value")
+    if fcn is np.sum:
+        return "sum"
+    return "value"
+
+
 class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
@@ -950,6 +968,19 @@ class BinnedPlot(Base):
         normalized by ``axnorm`` (``binning.normalize``). Every cell is in
         the result, indexed by ``binning.cells``; a cell no row falls in is
         NaN. A ``ColorPlot`` then sets the cells outside ``alim`` to NaN.
+
+        How ``axnorm`` treats the result depends on the aggregation, which
+        is classified as a count (``"count"``), a sum (``"sum"`` or
+        :func:`numpy.sum`), or a value (anything else: ``"mean"``,
+        ``"median"``, any callable). A custom callable is a value even when
+        it adds, so pass ``"sum"`` for a sum. A share of a sum (``axnorm``
+        ``"d"``, ``"cd"``, ``"rd"``, ``"w"``, ``"wc"`` or ``"wr"``) needs
+        every aggregated value in a cell to be >= 0.
+
+        Raises
+        ------
+        ValueError
+            For a share of a sum when a row in a cell has a negative value.
         """
         tko = self.agg_axes
 
@@ -961,30 +992,38 @@ class BinnedPlot(Base):
 
         if fcn is None:
             fcn = "count" if self._source.counts else "mean"
+        kind = _aggregation_kind(fcn)
 
-        if isinstance(fcn, str) and fcn == "count" and not kwargs:
-            # Count fast path: rows per cell straight from the cell codes, no
-            # groupby. Keep only occupied cells, as a groupby count would, so
-            # empty cells stay NaN after the reindex below. The aggregated
-            # column has no NaN on kept rows, so this equals its groupby count.
-            codes = self._cell_codes()
-            n = np.bincount(codes[codes >= 0], minlength=len(self.binning.cells))
-            occupied = np.flatnonzero(n)
-            cnt = pd.Series(
-                n[occupied].astype(np.int64),
-                index=pd.Index(occupied, dtype=np.int64),
-                name=self.agg_axes,
-            )
+        # Rows per cell straight from the cell codes, kept only for occupied
+        # cells, as a groupby count would, so empty cells stay NaN after the
+        # reindex below. The aggregated column has no NaN on kept rows, so
+        # this equals its groupby count. It serves clim and axnorm.
+        codes = self._cell_codes()
+        n = np.bincount(codes[codes >= 0], minlength=len(self.binning.cells))
+        occupied = np.flatnonzero(n)
+        cnt = pd.Series(
+            n[occupied].astype(np.int64),
+            index=pd.Index(occupied, dtype=np.int64),
+            name=self.agg_axes,
+        )
+        if kind == "count" and isinstance(fcn, str) and not kwargs:
+            # Count fast path: the counts are the aggregate; no groupby.
             agg = cnt
         else:
-            gb = self._grouped_by_cell()
-            agg = gb.agg(fcn, **kwargs)
-            cnt = None
+            agg = self._grouped_by_cell().agg(fcn, **kwargs)
+
+        if kind == "sum" and self.axnorm in _SHARE_AXNORMS:
+            values = self._source.take(self.agg_axes, labels=False).to_numpy()
+            if (values[codes >= 0] < 0).any():
+                raise ValueError(
+                    f"axnorm={self.axnorm!r} on a sum gives each cell's share of "
+                    f"the total {self.agg_axes}, which needs {self.agg_axes} >= 0; "
+                    "some values in the cells are negative. Use a value "
+                    "aggregation such as 'mean', or axnorm 't', 'c' or 'r'."
+                )
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            if cnt is None:
-                cnt = gb.agg("count")
             tk = pd.Series(True, index=agg.index)
             if c0 is not None:
                 tk = tk & (cnt >= c0)
@@ -1000,8 +1039,10 @@ class BinnedPlot(Base):
         # NaN of an empty one; then fill in every cell.
         cells = binning.cells
         positions = agg.index.to_numpy()
-        agg = agg.set_axis(cells[positions])
-        agg = binning.normalize(agg, self.axnorm, positions)
+        index = cells[positions]
+        agg = agg.set_axis(index)
+        counts = cnt.set_axis(index)
+        agg = binning.normalize(agg, self.axnorm, positions, counts=counts, kind=kind)
         return self._limit_values(agg.reindex(cells))
 
     def _kept_index(self):

@@ -34,8 +34,6 @@ from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
-_NEW = pytest.mark.xfail(strict=True, reason="axnorm ignores the aggregation today")
-
 RNG = np.random.default_rng(21)
 N = 4000
 X = pd.Series(RNG.uniform(0.0, 3.0, N))
@@ -78,7 +76,6 @@ def _inputs(log):
     return ix, iy, _area(XEDGES, YEDGES), np.diff(XEDGES), np.diff(YEDGES)
 
 
-@_NEW
 @pytest.mark.parametrize(
     "build, allowed",
     [
@@ -102,7 +99,6 @@ def test_allowed_axnorm_adds_the_weight_keys(build, allowed):
     assert tuple(build().binning.allowed_axnorm) == allowed
 
 
-@_NEW
 @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
 def test_density_of_a_mean_integrates_to_the_mean_z(log):
     """sum(d A) over the grid is the mean z of every row.
@@ -114,7 +110,6 @@ def test_density_of_a_mean_integrates_to_the_mean_z(log):
     assert np.nansum(d * area) == exact(Z.mean())
 
 
-@_NEW
 @pytest.mark.parametrize("log", [False, True], ids=["linear", "log"])
 def test_column_and_row_densities_of_a_mean_integrate_to_their_means(log):
     """cd integrates over y to each column's mean z, rd over x to each row's.
@@ -130,7 +125,6 @@ def test_column_and_row_densities_of_a_mean_integrate_to_their_means(log):
     assert np.nansum(rd * dx[:, None], axis=0) == exact(row_means)
 
 
-@_NEW
 def test_weights_of_a_mean_sum_to_the_means():
     """w sums to the mean z; wc over each column and wr over each row to theirs.
 
@@ -145,21 +139,23 @@ def test_weights_of_a_mean_sum_to_the_means():
     assert np.nansum(wr, axis=0) == exact(Z.groupby(iy).mean().to_numpy())
 
 
-@_NEW
 def test_density_of_a_median_integrates_to_the_count_weighted_median():
     """sum(d A) is sum(median_i n_i) / N over the cells, not the overall median.
 
     ON FAILURE: the code is wrong.
     """
+    # Positive on the left half, three times as large and negative on the
+    # right: the overall median lies between the halves, far from the
+    # count-weighted median of the cells.
+    z = pd.Series(np.where(X < 1.5, ZPOS, -3.0 * ZPOS))
     ix, iy, area, _, _ = _inputs(False)
-    cells = pd.Series(Z.to_numpy()).groupby([ix, iy])
+    cells = z.groupby([ix, iy])
     expected = (cells.median() * cells.size()).sum() / N
-    d = _h2(Z, "median", "d")
+    d = _h2(z, "median", "d")
     assert np.nansum(d * area) == exact(expected)
-    assert abs(expected - Z.median()) > 0.01  # not the overall median
+    assert abs(expected - z.median()) > 0.5  # not the overall median
 
 
-@_NEW
 @pytest.mark.parametrize("fcn", ["sum", np.sum], ids=["str", "np.sum"])
 def test_shares_of_a_sum_add_to_one(fcn):
     """For a sum, d A, w, cd dy per column and wr per row each add to 1.
@@ -175,7 +171,6 @@ def test_shares_of_a_sum_add_to_one(fcn):
     assert wr == exact(np.ones_like(wr))
 
 
-@_NEW
 def test_a_share_of_a_sum_with_a_negative_z_raises():
     """A sum's share needs z >= 0; t is a peak normalization and still works.
 
@@ -187,7 +182,6 @@ def test_a_share_of_a_sum_with_a_negative_z_raises():
     assert np.nanmax(np.abs(t)) == exact(1.0)
 
 
-@_NEW
 def test_count_weights_are_count_fractions():
     """For a count, w = n_i / N, wc = n_i / N_col and wr = n_i / N_row.
 
@@ -200,7 +194,6 @@ def test_count_weights_are_count_fractions():
     assert _h2(None, None, "wr") == exact(n / n.sum(axis=0))
 
 
-@_NEW
 def test_peak_norms_of_signed_values_divide_by_the_largest_magnitude():
     """t of signed means: the largest |value| becomes 1 and signs are kept.
 
@@ -213,7 +206,6 @@ def test_peak_norms_of_signed_values_divide_by_the_largest_magnitude():
     assert np.nanmin(t) == exact(-1.0)
 
 
-@_NEW
 def test_hist1d_density_of_a_mean_integrates_to_the_mean():
     """A Hist1D of x averaging Z: sum(d width) is the mean of Z.
 
@@ -225,7 +217,6 @@ def test_hist1d_density_of_a_mean_integrates_to_the_mean():
     assert np.nansum(d * np.diff(XEDGES)) == exact(Z.mean())
 
 
-@_NEW
 @pytest.mark.parametrize("key", ["w", "wc", "wr"])
 def test_labels_accept_the_weight_keys(key):
     """Count and TeXlabel take w, wc and wr, and name them in the path.
@@ -238,7 +229,6 @@ def test_labels_accept_the_weight_keys(key):
     assert str(label.path).endswith(key.upper() + "norm")
 
 
-@_NEW
 def test_count_plot_with_a_weight_key_relabels_its_count():
     """A Hist2D count with axnorm="w" labels z as a count fraction.
 

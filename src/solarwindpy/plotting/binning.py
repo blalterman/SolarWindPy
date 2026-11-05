@@ -68,8 +68,25 @@ class Binning(ABC):
         """
         return agg
 
-    def normalize(self, agg, axnorm, positions):
+    def normalize(self, agg, axnorm, positions, counts=None, kind="count"):
         r"""Normalize ``agg``, the occupied cells, by ``axnorm``.
+
+        For cell i with n_i rows, measure A_i (``cell_measure``) and value
+        v_i, and N the rows in the cells ``agg`` shows (not NaN):
+
+        ===== =======================================================
+         key   result
+        ===== =======================================================
+         t     v_i / max(abs(v)): the largest magnitude becomes 1
+         d     density: m_i / (B A_i), integrating to M / B
+         w     weight: m_i / B, summing to M / B
+        ===== =======================================================
+
+        where, by ``kind``: a count has m_i = n_i and B = N, so d is the
+        count PDF and w the count fraction; a sum has m_i = S_i and B the
+        total S, each cell's share of it; a value has m_i = v_i n_i and
+        B = N, so d integrates and w sums to the count-weighted average of
+        v (the mean z, for a mean).
 
         Parameters
         ----------
@@ -79,26 +96,44 @@ class Binning(ABC):
             A key of ``allowed_axnorm``, or None.
         positions : np.ndarray
             Cell code of each entry of ``agg``.
+        counts : pd.Series, optional
+            Rows in each cell of ``agg``, on its index. Required when
+            ``kind`` is ``"value"``.
+        kind : {"count", "sum", "value"}
+            What ``agg`` aggregates; see ``BinnedPlot.agg``.
 
         Returns
         -------
         pd.Series
-            ``"t"`` divides by the maximum, so the peak equals 1. ``"d"``
-            divides by the total and by each cell's ``cell_measure``, so the
-            values integrate to 1 over the binned scale.
 
         Raises
         ------
         ValueError
-            For any other key.
+            For a key not handled here.
         """
         if axnorm is None:
             return agg
         if axnorm == "t":
-            return agg.divide(agg.max())
+            return agg.divide(agg.abs().max())
+        mass, basis = self._mass(agg, counts, kind)
         if axnorm == "d":
-            return agg.divide(self.cell_measure()[positions] * agg.sum())
+            return mass.divide(self.cell_measure()[positions] * basis.sum())
+        if axnorm == "w":
+            return mass.divide(basis.sum())
         raise ValueError(f"{type(self).__name__} cannot normalize by {axnorm!r}.")
+
+    @staticmethod
+    def _mass(agg, counts, kind):
+        r"""Each cell's share numerator and the series whose total divides it.
+
+        A count or a sum is its own: ``(agg, agg)``. A value v_i is weighted
+        by its cell's rows n_i and divided by their total:
+        ``(v n, n)``, with n NaN where ``agg`` is.
+        """
+        if kind == "value":
+            n = counts.where(agg.notna())
+            return agg.multiply(n), n
+        return agg, agg
 
 
 class FixedGrid(Binning):
@@ -523,10 +558,10 @@ class FixedGrid(Binning):
 
     @property
     def allowed_axnorm(self):
-        r"""``d`` and ``t`` in 1-D; also the row and column norms in 2-D."""
+        r"""``d``, ``t`` and ``w`` in 1-D; also the row and column norms in 2-D."""
         if len(self._axes) == 1:
-            return ("d", "t")
-        return ("c", "r", "t", "d", "cd", "rd")
+            return ("d", "t", "w")
+        return ("c", "r", "t", "d", "cd", "rd", "w", "wc", "wr")
 
     @property
     def binned(self):
@@ -617,39 +652,51 @@ class FixedGrid(Binning):
             copy=False,
         )
 
-    def normalize(self, agg, axnorm, positions):
+    def normalize(self, agg, axnorm, positions, counts=None, kind="count"):
         r"""Normalize ``agg`` by ``axnorm``, including the 2-D row and column norms.
 
-        ===== =============================================================
-         key                           description
-        ===== =============================================================
-         c     Column normalize: divide by each column's maximum
-         r     Row normalize: divide by each row's maximum
-         t     Divide by the maximum (peak equals 1)
-         d     Density normalize over the binned scale
-         cd    A PDF in each column
-         rd    A PDF in each row
-        ===== =============================================================
+        With m_i and B as in ``Binning.normalize`` (n_i for a count, the sum
+        S_i for a sum, v_i n_i for any other aggregation), and B taken over
+        all shown cells, a column (x-bin) or a row (y-bin):
+
+        ===== ===================================================================
+         key   description
+        ===== ===================================================================
+         t     Divide by the largest absolute value (peak magnitude equals 1)
+         c     Divide by each column's largest absolute value
+         r     Divide by each row's largest absolute value
+         d     Density: m_i / (B A_i); integrates to M / B over the grid
+         cd    Density in each column: m_i / (B_col dy_i); integrates over y
+         rd    Density in each row: m_i / (B_row dx_i); integrates over x
+         w     Weight: m_i / B; sums to M / B over the grid
+         wc    Weight in each column: m_i / B_col
+         wr    Weight in each row: m_i / B_row
+        ===== ===================================================================
+
+        For a count, d, cd and rd are probability densities and w, wc and wr
+        count fractions. For a sum they are each cell's share of the total z
+        (per unit area for d, cd and rd), which needs z >= 0. For any other
+        aggregation they integrate (d, cd, rd) or sum (w, wc, wr) to the
+        count-weighted average of the per-cell value: overall, per column or
+        per row. For a mean that is the mean z of those rows.
 
         On a log axis the densities ("d", "cd", "rd") are normalized over
         ``log10`` of that axis: the bins are log-space intervals, so cell
-        areas on the log axes sum to 1.
+        areas are measured in ``log10``.
         """
         if axnorm == "c":
-            return agg.divide(agg.groupby(level="x").max(), level="x")
+            return agg.divide(agg.abs().groupby(level="x").max(), level="x")
         if axnorm == "r":
-            return agg.divide(agg.groupby(level="y").max(), level="y")
-        if axnorm == "cd":
-            N = agg.groupby(level="x").sum()
-            dy = self._widths("y")
-            # Divide by the total in each column and each row's width.
-            return agg.divide(N, level="x").divide(dy, level="y")
-        if axnorm == "rd":
-            N = agg.groupby(level="y").sum()
-            dx = self._widths("x")
-            # Divide by the total in each row and each column's width.
-            return agg.divide(N, level="y").divide(dx, level="x")
-        return super().normalize(agg, axnorm, positions)
+            return agg.divide(agg.abs().groupby(level="y").max(), level="y")
+        if axnorm in ("cd", "rd", "wc", "wr"):
+            mass, basis = self._mass(agg, counts, kind)
+            # cd and wc share each column (x-bin); rd and wr each row (y-bin).
+            within, across = ("x", "y") if axnorm in ("cd", "wc") else ("y", "x")
+            out = mass.divide(basis.groupby(level=within).sum(), level=within)
+            if axnorm in ("cd", "rd"):
+                out = out.divide(self._widths(across), level=across)
+            return out
+        return super().normalize(agg, axnorm, positions, counts=counts, kind=kind)
 
     def _widths(self, axis):
         r"""Width of each bin of ``axis``, a Series indexed by its intervals."""

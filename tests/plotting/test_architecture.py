@@ -109,9 +109,13 @@ def test_binning_is_abstract_and_a_strategy_must_declare_its_axnorms():
 @pytest.mark.parametrize(
     "build, strategy, allowed",
     [
-        (lambda: Hist1D(X), "FixedGrid", ("d", "t")),
-        (lambda: Hist2D(X, Y), "FixedGrid", ("c", "r", "t", "d", "cd", "rd")),
-        (_spiral, "AdaptiveMesh", ("d", "t")),
+        (lambda: Hist1D(X), "FixedGrid", ("d", "t", "w")),
+        (
+            lambda: Hist2D(X, Y),
+            "FixedGrid",
+            ("c", "r", "t", "d", "cd", "rd", "w", "wc", "wr"),
+        ),
+        (_spiral, "AdaptiveMesh", ("d", "t", "w")),
     ],
     ids=["Hist1D", "Hist2D", "SpiralPlot2D"],
 )

@@ -818,8 +818,8 @@ class AdaptiveMesh(Binning):
 
     @property
     def allowed_axnorm(self):
-        r"""``d`` and ``t``: the mesh has no rows or columns to normalize."""
-        return ("d", "t")
+        r"""``d``, ``t`` and ``w``: the mesh has no rows or columns to normalize."""
+        return ("d", "t", "w")
 
     @property
     def cells(self):
@@ -889,9 +889,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         logx, logy : bool or None
             If True, use ``log10(abs())`` of that coordinate. None means
             False.
-        axnorm : {"t", "d", None}, optional
+        axnorm : {"t", "d", "w", None}, optional
             Normalization of the aggregated values: ``"t"`` divides by the
-            maximum, ``"d"`` gives a density over the cells' areas.
+            largest magnitude, ``"d"`` gives a density over the cells' areas
+            and ``"w"`` a weight per cell; see ``Binning.normalize``.
         clip : bool, str, Mapping or None
             If True, clip x and y to their 0.01st and 99.99th percentiles
             (``Base.clip_data``) when placing points in the mesh; the

@@ -48,9 +48,10 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             If ``True``, compute bins in logarithmic space. None means False,
             or, with a ``BinnedData`` as ``nbins``, its setting for ``x``'s
             column.
-        axnorm : {"t", "d", None}, optional
+        axnorm : {"t", "d", "w", None}, optional
             Normalisation applied to the histogram. ``"t"`` divides by the
-            maximum (peak equals 1) and ``"d"`` yields a density.
+            largest magnitude (peak equals 1), ``"d"`` yields a density and
+            ``"w"`` a weight per bin; see ``FixedGrid.normalize``.
         clip : bool, str, Mapping or None, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
@@ -165,14 +166,6 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         cdf.loc[:, "position"] = (rank / rank.max()).to_numpy()
 
         return cdf
-
-    def agg(self, **kwargs):
-        if self.axnorm == "d":
-            fcn = kwargs.get("fcn", None)
-            if (fcn != "count") & (fcn is not None):
-                raise ValueError("Unable to calculate a PDF with non-count aggregation")
-
-        return super(Hist1D, self).agg(**kwargs)
 
     def set_labels(self, **kwargs):
         r"""Set the x or y label; see ``BinnedPlot.set_labels``.

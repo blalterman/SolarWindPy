@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `get_plotted_data_boolean_series()` and `get_subset_above_threshold()` are removed from the
   binned plots (`Hist1D`, `Hist2D`, `SpiralPlot2D`); `get_plotted_data(fcn=None)` replaces both.
   It returns the rows of the cells the figure shows, with the caller's values on the caller's
-  index, as the subset did; for a boolean mask use `data.index.isin(plot.get_plotted_data().index)`.
+  index, as the subset did; for a boolean mask on a unique index use
+  `data.index.isin(plot.get_plotted_data().index)`.
   `get_subset_above_threshold(t)` compared each cell's aggregate after `axnorm`: with no
   `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; on a
   `Hist2D` or `SpiralPlot2D` with an `axnorm` or another `fcn`, use `plot.set_alim(t, None)`
@@ -33,6 +34,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Hist2D` now share one implementation, which takes rows of disjoint x-ranges with one
   `numpy.searchsorted` instead of a pass over the data per range (3 to 6 times faster at 1e5
   and 1e6 rows) and lists the x-bins from `intervals["x"]` instead of running `agg()`.
+- `axnorm` now depends on the aggregation. For cell i with n_i rows, area A_i and value v_i, and
+  N the rows in the shown cells (per column for `cd`/`wc`, per row for `rd`/`wr`):
+
+  | aggregation | `d`, `cd`, `rd` | `w`, `wc`, `wr` (new) | `t`, `c`, `r` |
+  |---|---|---|---|
+  | count | n_i / (N A_i), unchanged | n_i / N, the count fraction | v_i / max\|v\| |
+  | `"sum"` or `np.sum` | S_i / (S A_i), S the total z; z < 0 raises `ValueError` | S_i / S | v_i / max\|v\| |
+  | anything else | v_i n_i / (N A_i) | v_i n_i / N | v_i / max\|v\| |
+
+  So a density of a mean integrates, and its weight sums, to the mean z (overall, per column or
+  per row), where it used to divide the means by their own total. `t`, `c` and `r` divide by the
+  largest absolute value, which differs from before only when values are negative. A custom
+  callable is a per-cell value even when it adds; pass `"sum"` for a sum. `Hist1D` no longer
+  raises "Unable to calculate a PDF with non-count aggregation" for `d` with another `fcn`.
+  `allowed_axnorm` adds `w` (1-D and `SpiralPlot2D`) and `w`, `wc`, `wr` (2-D); `Count` and
+  `TeXlabel` accept them. Count plots and `t`/`c`/`r` of non-negative values are unchanged.
 
 ### Added
 
