@@ -1,7 +1,7 @@
 Related packages
 ================
 
-Other Python packages in heliophysics overlap with parts of SolarWindPy.
+These Python packages in heliophysics relate to SolarWindPy's scope.
 
 `PlasmaPy <https://www.plasmapy.org>`_
    A general plasma formulary of single-value, unit-aware functions.
