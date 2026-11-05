@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   then `plot.get_plotted_data(fcn)`. A `Hist1D` has no `alim`, so a threshold on a normalized or
   non-count `Hist1D` has no direct replacement: filter `plot.agg(fcn)` and select the rows of
   the kept bins through `plot.cut`.
+- `Hist1D.take_data_in_yrange_across_x` calls `get_y_bounds(row, expected_logy=False)`, as
+  `Hist2D`'s calls it with its log flag; a callback written as `lambda row: ...` raises
+  `TypeError`. Accept the keyword, e.g. `lambda row, expected_logy=False: ...`. `Hist1D` and
+  `Hist2D` now share one implementation, which takes rows of disjoint x-ranges with one
+  `numpy.searchsorted` instead of a pass over the data per range (3 to 6 times faster at 1e5
+  and 1e6 rows) and lists the x-bins from `intervals["x"]` instead of running `agg()`.
 
 ### Added
 

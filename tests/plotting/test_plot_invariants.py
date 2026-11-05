@@ -299,19 +299,10 @@ def _select_in_yrange(b):
         # The bins are on the stored scale, log10|x| when expected_logx.
         return interval.left, interval.right
 
-    if isinstance(h, Hist2D):
-        available = h.agg().unstack("x").columns
+    def y_bounds(at_x, expected_logy):
+        return at_x.bottom, at_x.top
 
-        def y_bounds(at_x, expected_logy):
-            return at_x.bottom, at_x.top
-
-    else:
-        available = h.agg().index
-
-        def y_bounds(at_x):
-            return at_x.bottom, at_x.top
-
-    ranges = pd.DataFrame({"bottom": bottom, "top": top}, index=available)
+    ranges = pd.DataFrame({"bottom": bottom, "top": top}, index=h.intervals["x"])
     taken = h.take_data_in_yrange_across_x(ranges, x_bounds, y_bounds)
     return [Selection(_as_labels(taken, data.index), None, True)]
 

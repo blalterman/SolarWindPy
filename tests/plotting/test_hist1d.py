@@ -618,7 +618,7 @@ class TestRowsWithNaN:
         taken = h.take_data_in_yrange_across_x(
             ranges,
             lambda key, expected_logx=False: (key.left, key.right),
-            lambda row: (row.bottom, row.top),
+            lambda row, expected_logy: (row.bottom, row.top),
         )
         assert list(taken) == self.KEPT
 
@@ -749,8 +749,8 @@ def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
 
     Bottoms differ from bin to bin, so a window applied to the wrong bin
     selects a different set; the result is index labels, not positions.
-    ``get_y_bounds`` takes the row alone: Hist1D never log-transforms y, so it
-    hands no log flag.
+    ``get_y_bounds`` gets ``expected_logy=False``: Hist1D never log-transforms
+    y.
 
     ON FAILURE: the code is wrong.
     """
@@ -762,7 +762,7 @@ def test_take_data_in_yrange_returns_labels_inside_each_bins_window(xy):
     taken = hist.take_data_in_yrange_across_x(
         ranges,
         lambda interval, expected_logx: (interval.left, interval.right),
-        lambda row: (row["bottom"], row["top"]),
+        lambda row, expected_logy: (row["bottom"], row["top"]),
     )
 
     xv, yv = x.values, y.values
@@ -800,7 +800,7 @@ def test_take_data_in_yrange_windows_are_open_below_and_closed_above():
     hist, ranges = _edge_hist_and_ranges()
 
     taken = hist.take_data_in_yrange_across_x(
-        ranges, _interval_bounds, lambda row: (row["bottom"], row["top"])
+        ranges, _interval_bounds, lambda row, expected_logy: (row["bottom"], row["top"])
     )
 
     np.testing.assert_array_equal(taken, [10, 12, 13])
@@ -810,7 +810,7 @@ def test_take_data_in_yrange_windows_are_open_below_and_closed_above():
     "x_bounds, y_bounds, match",
     [
         (lambda iv, expected_logx: (iv.left, iv.left), None, "Need left < right"),
-        (None, lambda row: (5.0, 5.0), "Need bottom < top"),
+        (None, lambda row, expected_logy: (5.0, 5.0), "Need bottom < top"),
     ],
     ids=["zero-width-x", "zero-width-y"],
 )
@@ -823,7 +823,7 @@ def test_take_data_in_yrange_zero_width_range_raises_value_error(
     """
     hist, ranges = _edge_hist_and_ranges()
     x_bounds = x_bounds or _interval_bounds
-    y_bounds = y_bounds or (lambda row: (row["bottom"], row["top"]))
+    y_bounds = y_bounds or (lambda row, expected_logy: (row["bottom"], row["top"]))
 
     with pytest.raises(ValueError, match=match + r" for x-bin .*, got \("):
         hist.take_data_in_yrange_across_x(ranges, x_bounds, y_bounds)
@@ -843,7 +843,7 @@ def test_take_data_in_yrange_hands_get_x_bounds_the_logx_flag_as_a_bool():
         return interval.left, interval.right
 
     hist.take_data_in_yrange_across_x(
-        ranges, x_bounds, lambda row: (row["bottom"], row["top"])
+        ranges, x_bounds, lambda row, expected_logy: (row["bottom"], row["top"])
     )
 
     assert flags == [True, True]

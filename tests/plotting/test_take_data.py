@@ -21,8 +21,6 @@ matplotlib.use("Agg")
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 
-_MERGED = pytest.mark.xfail(strict=True, reason="two copies of the method today")
-
 # x in (0, 1], (1, 2], (2, 3] by explicit (right-closed) edges, one y each.
 X = pd.Series([0.5, 1.5, 2.5, 0.9], index=[10, 11, 12, 13])
 Y = pd.Series([5.0, 6.0, 7.0, 8.0], index=[10, 11, 12, 13])
@@ -35,7 +33,6 @@ def _build(cls):
     return Hist2D(X, Y, nbins=[EDGES, np.array([0.0, 10.0])])
 
 
-@_MERGED
 def test_hist1d_and_hist2d_share_one_method():
     """Neither class defines its own copy; both use the fixed-grid one.
 
@@ -46,7 +43,6 @@ def test_hist1d_and_hist2d_share_one_method():
     assert Hist1D.take_data_in_yrange_across_x is Hist2D.take_data_in_yrange_across_x
 
 
-@_MERGED
 def test_hist1d_hands_expected_logy_false_to_the_y_callback():
     """A Hist1D's y is never logged, so the y callback gets expected_logy=False.
 

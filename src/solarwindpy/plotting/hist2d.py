@@ -21,33 +21,6 @@ from .tools import nan_gaussian_filter
 from .hist1d import Hist1D
 
 
-def _within(values, lower, upper, bins):
-    r"""Which ``values`` lie between ``lower`` and ``upper``, closed as ``bins`` are.
-
-    Parameters
-    ----------
-    values : pd.Series
-        Values on the binned scale, ``log10(abs())`` on a log axis.
-    lower, upper : scalar
-        The bounds.
-    bins : pd.IntervalIndex
-        The axis's bins. Right-closed bins compare ``lower < v <= upper``;
-        left-closed bins compare ``lower <= v < upper`` and, as the last
-        left-closed bin also holds its right edge (``np.histogram``), keep
-        ``v == upper`` when ``upper`` is that edge.
-
-    Returns
-    -------
-    pd.Series of bool
-    """
-    if bins.closed == "left":
-        inside = (lower <= values) & (values < upper)
-        if upper == bins.right[-1]:
-            inside |= values == upper
-        return inside
-    return (lower < values) & (values <= upper)
-
-
 class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     r"""2D histogram of (x, y), optionally aggregating a z-value in each bin.
 
@@ -895,9 +868,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
                 continue
             left, right = k.left, k.right
             bottom, top = v[tk].index.min().left, v[tk].index.max().right
-            above_contour_at_x = _within(x, left, right, intervals["x"]) & _within(
-                y, bottom, top, intervals["y"]
-            )
+            above_contour_at_x = base._within(
+                x, left, right, intervals["x"]
+            ) & base._within(y, bottom, top, intervals["y"])
             above_contour[above_contour_at_x] = k
 
         above_contour = pd.Series(
@@ -905,84 +878,3 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         )
 
         return above_contour
-
-    def take_data_in_yrange_across_x(
-        self,
-        ranges_by_x,
-        get_x_bounds,
-        get_y_bounds,
-    ):
-        r"""Take data within y-ranges across x-values.
-
-        Parameters
-        ----------
-        ranges_by_x: iterable
-            An iterable with keys used to get the left and right bounds for the data
-            and values used to get the top and bottom bounds for the data.
-
-        get_x_bounds: function
-            First argument is one key of `ranges_by_x` and returns `left, right`.
-            The keyword argument `expected_logx` is the bool ``self.log.x``, so
-            the returned values can be :math:`log(x)` or :math:`x` to match the
-            data stored in Hist2D.
-
-        get_y_bounds: functions
-            First argument is one row of `ranges_by_x` and returns
-            `bottom, top`. The keyword argument `expected_logy` is the bool
-            ``self.log.y``, so the returned values can be :math:`log(y)` or
-            :math:`y` to match the data stored in Hist2D.
-
-        Returns
-        -------
-        taken: np.ndarray 1D
-            Array of indices for selecting data in interval: the points with
-            x between `left` and `right` and y between `bottom` and `top`.
-            Each axis compares on the side its bins close: ``left < x <=
-            right`` for right-closed bins (explicit edges), ``left <= x <
-            right`` for left-closed bins (an integer `nbins`), whose last bin
-            also holds its right edge, so ``x == right`` is kept when `right`
-            is that edge. Likewise for y with the y-bins.
-
-        Raises
-        ------
-        ValueError
-            If a range has ``left >= right`` or ``bottom >= top``, or if an
-            entry of `ranges_by_x` names an x-bin the histogram does not have.
-            Histogram x-bins that `ranges_by_x` omits only log a warning.
-        """
-
-        available_x = self.agg().unstack("x").columns
-        if ranges_by_x.index.symmetric_difference(available_x).size:
-            drop = ranges_by_x.index.symmetric_difference(available_x)
-            if not drop.isin(available_x).all():
-                raise ValueError(
-                    "Need a way to drop values in selector that aren't available."
-                )
-            else:
-                self.logger.warning(
-                    f"Dropping {drop.size} intervals from available for selecting."
-                )
-
-        data = self.data
-        logx = self.log.x
-        logy = self.log.y
-        intervals = self.intervals
-
-        taken = []
-        for x, at_x in ranges_by_x.iterrows():
-            l, r = get_x_bounds(x, expected_logx=logx)
-            b, t = get_y_bounds(at_x, expected_logy=logy)
-
-            if not l < r:
-                raise ValueError(f"Need left < right for x-bin {x}, got ({l}, {r}).")
-            if not b < t:
-                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
-
-            tkx = _within(data.x, l, r, intervals["x"])
-            tky = _within(data.y, b, t, intervals["y"])
-            tk = tkx & tky
-            tk = tk.loc[tk].index
-            taken.append(tk)
-
-        taken = np.sort(np.concatenate(taken))
-        return taken

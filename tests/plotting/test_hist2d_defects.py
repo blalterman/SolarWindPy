@@ -180,7 +180,7 @@ def test_hist1d_yrange_selection_follows_left_closed_integer_bins():
     taken = h.take_data_in_yrange_across_x(
         ranges,
         lambda key, expected_logx: (key.left, key.right),
-        lambda row: (row.bottom, row.top),
+        lambda row, expected_logy: (row.bottom, row.top),
     )
 
     assert list(taken) == [0, 1, 2, 3, 4]

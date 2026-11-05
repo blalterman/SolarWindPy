@@ -43,6 +43,33 @@ AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
 
+def _within(values, lower, upper, bins):
+    r"""Which ``values`` lie between ``lower`` and ``upper``, closed as ``bins`` are.
+
+    Parameters
+    ----------
+    values : pd.Series or np.ndarray
+        Values on the binned scale, ``log10(abs())`` on a log axis.
+    lower, upper : scalar
+        The bounds.
+    bins : pd.IntervalIndex
+        The axis's bins. Right-closed bins compare ``lower < v <= upper``;
+        left-closed bins compare ``lower <= v < upper`` and, as the last
+        left-closed bin also holds its right edge (``np.histogram``), keep
+        ``v == upper`` when ``upper`` is that edge.
+
+    Returns
+    -------
+    pd.Series or np.ndarray of bool
+    """
+    if bins.closed == "left":
+        inside = (lower <= values) & (values < upper)
+        if upper == bins.right[-1]:
+            inside |= values == upper
+        return inside
+    return (lower < values) & (values <= upper)
+
+
 class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
@@ -1089,3 +1116,125 @@ class _OnFixedGrid:
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes."""
         return self.joint.groupby(list(self._grid_axes), observed=True)
+
+    def take_data_in_yrange_across_x(self, ranges_by_x, get_x_bounds, get_y_bounds):
+        r"""Take the rows within a y-range in each of several x-ranges.
+
+        Parameters
+        ----------
+        ranges_by_x : pd.DataFrame
+            Indexed by x-bins of this plot (``intervals["x"]``); each row holds
+            what ``get_y_bounds`` reads for that bin.
+        get_x_bounds : callable
+            ``get_x_bounds(key, expected_logx=bool)`` returns ``left, right``
+            for one index entry of `ranges_by_x`. ``expected_logx`` is
+            ``log.x``, so the bounds can be given as :math:`\log_{10} x` or
+            :math:`x` to match ``data``.
+        get_y_bounds : callable
+            ``get_y_bounds(row, expected_logy=bool)`` returns ``bottom, top``
+            for one row of `ranges_by_x`. ``expected_logy`` is True only on a
+            ``Hist2D`` with a log y; a ``Hist1D`` stores y in linear units and
+            passes False.
+
+        Returns
+        -------
+        taken : np.ndarray
+            Sorted index labels of the rows with x between `left` and `right`
+            and y between `bottom` and `top`, once per range that holds them.
+            x compares on the side its bins close: ``left < x <= right`` for
+            right-closed bins (explicit edges), ``left <= x < right`` for
+            left-closed bins (an integer `nbins`), whose last bin also holds
+            its right edge, so ``x == right`` is kept when `right` is that
+            edge. A binned y (``Hist2D``) compares likewise with its y-bins;
+            a ``Hist1D``'s y is not binned and compares ``bottom < y <= top``.
+
+        Raises
+        ------
+        ValueError
+            If a range has ``left >= right`` or ``bottom >= top`` (the first
+            such range in the order of `ranges_by_x` is named), or if an entry
+            of `ranges_by_x` names an x-bin the plot does not have. x-bins
+            that `ranges_by_x` omits only log a warning.
+
+        Notes
+        -----
+        When the x-ranges do not overlap, each row's range is found with one
+        :func:`numpy.searchsorted` over the sorted left bounds; overlapping
+        ranges are taken one range at a time, so a row in two ranges is
+        taken twice.
+        """
+        intervals = self.intervals
+        xbins = intervals["x"]
+        ybins = intervals.get("y")
+        if ranges_by_x.index.symmetric_difference(xbins).size:
+            drop = ranges_by_x.index.symmetric_difference(xbins)
+            if not drop.isin(xbins).all():
+                raise ValueError(
+                    "Need a way to drop values in selector that aren't available."
+                )
+            self.logger.warning(
+                f"Dropping {drop.size} intervals from available for selecting."
+            )
+
+        logx = bool(self.log.x)
+        logy = bool(ybins is not None and self.log.y)
+        n = ranges_by_x.shape[0]
+        left, right = np.empty(n), np.empty(n)
+        bottom, top = np.empty(n), np.empty(n)
+        for i, (x, at_x) in enumerate(ranges_by_x.iterrows()):
+            lo, hi = get_x_bounds(x, expected_logx=logx)
+            b, t = get_y_bounds(at_x, expected_logy=logy)
+            if not lo < hi:
+                raise ValueError(f"Need left < right for x-bin {x}, got ({lo}, {hi}).")
+            if not b < t:
+                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
+            left[i], right[i], bottom[i], top[i] = lo, hi, b, t
+
+        data = self.data
+        xv = data.loc[:, "x"].to_numpy()
+        yv = data.loc[:, "y"].to_numpy()
+        labels = data.index.to_numpy()
+
+        def in_y(values, b, t):
+            if ybins is None:
+                return (b < values) & (values <= t)
+            return _within(values, b, t, ybins)
+
+        order = np.argsort(left, kind="stable")
+        left, right = left[order], right[order]
+        bottom, top = bottom[order], top[order]
+        last = xbins.right[-1]
+        overlap = np.any(right[:-1] > left[1:])
+        if xbins.closed == "left":
+            # A range ending on the last edge also holds that edge, which the
+            # next range may start on.
+            overlap |= np.any((right[:-1] == last) & (left[1:] == last))
+        if overlap:
+            taken = [
+                labels[_within(xv, lo, hi, xbins) & in_y(yv, b, t)]
+                for lo, hi, b, t in zip(left, right, bottom, top)
+            ]
+            return np.sort(np.concatenate(taken)) if taken else labels[:0]
+
+        # Disjoint ranges: each x is in at most one, found by its left bound.
+        # Left-closed: the range with the largest left <= x; right-closed: the
+        # largest left < x.
+        side = "right" if xbins.closed == "left" else "left"
+        j = np.searchsorted(left, xv, side) - 1
+        inside = j >= 0
+        jj = np.where(inside, j, 0)
+        if n == 0:
+            return labels[:0]
+        r = right[jj]
+        if xbins.closed == "left":
+            inside &= (xv < r) | ((xv == r) & (r == last))
+        else:
+            inside &= xv <= r
+        b, t = bottom[jj], top[jj]
+        if ybins is None:
+            inside &= (b < yv) & (yv <= t)
+        elif ybins.closed == "left":
+            inside &= (b <= yv) & ((yv < t) | ((yv == t) & (t == ybins.right[-1])))
+        else:
+            inside &= (b < yv) & (yv <= t)
+        return np.sort(labels[inside])
