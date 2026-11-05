@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Jupyter and `print`: the class, the x, y and z labels, the number of rows kept, the log flags,
   the bins per axis (or mesh cells for `SpiralPlot2D`), `axnorm`, `clim` and `alim` when set,
   and `path`. `str(plot)` is that summary, no longer just the class name.
+- `solarwindpy.core.plasma.Plasma.info` returns a one-column table summarising a plasma: the
+  spacecraft and its frame (or "none"), the first and last observation times, the number of
+  observations, the species, and whether auxiliary data are attached.
 
 ### Changed
 

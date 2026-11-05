@@ -11,12 +11,9 @@ p1 and p2, no auxiliary data.
 """
 
 import pandas as pd
-import pytest
 
 import solarwindpy as swp
 from solarwindpy.core.plasma import Plasma
-
-_NO_INFO = pytest.mark.xfail(strict=True, reason="Plasma has no info() yet")
 
 FIELDS = [
     "spacecraft",
@@ -29,7 +26,6 @@ FIELDS = [
 ]
 
 
-@_NO_INFO
 def test_info_of_the_example_names_its_spacecraft_times_and_species():
     """The example plasma: PSP in HCI, three rows, four species, no aux.
 
@@ -50,7 +46,6 @@ def test_info_of_the_example_names_its_spacecraft_times_and_species():
     assert value["auxiliary data"] == "no"
 
 
-@_NO_INFO
 def test_info_without_a_spacecraft_says_none():
     """A plasma built without ``sc`` reports "none" for spacecraft and frame.
 
@@ -64,7 +59,6 @@ def test_info_without_a_spacecraft_says_none():
     assert value["observations"] == 3
 
 
-@_NO_INFO
 def test_info_reports_attached_auxiliary_data():
     """After ``set_aux``, auxiliary data reads "yes".
 

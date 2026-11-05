@@ -292,6 +292,47 @@ class Plasma(base.Base):
         """
         return self._aux
 
+    def info(self):
+        r"""Summarise the plasma in a one-column table, one row per field.
+
+        The fields are the spacecraft and its coordinate frame ("none" for
+        both when no spacecraft is attached), the first and last observation
+        times, the number of observations, the species, and whether auxiliary
+        data are attached ("yes" or "no"). The plasma's own ``repr`` is
+        unchanged.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Indexed by field name, with one ``value`` column.
+
+        Examples
+        --------
+        >>> import solarwindpy as swp
+        >>> plasma = swp.examples.load_plasma()
+        >>> plasma.info()
+                                             value
+        spacecraft                             PSP
+        frame                                  HCI
+        start                  1995-01-01 12:35:00
+        end             2022-10-09 01:47:01.234560
+        observations                             3
+        species                       a, e, p1, p2
+        auxiliary data                          no
+        """
+        sc = self.sc
+        epoch = self.epoch
+        fields = {
+            "spacecraft": "none" if sc is None else sc.name,
+            "frame": "none" if sc is None else sc.frame,
+            "start": epoch.min(),
+            "end": epoch.max(),
+            "observations": len(epoch),
+            "species": ", ".join(self.species),
+            "auxiliary data": "no" if self.aux is None else "yes",
+        }
+        return pd.DataFrame({"value": pd.Series(fields, dtype=object)})
+
     def save(
         self,
         fname,
