@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.w`). `TrendFit` now refuses `yerr` in `trend_kwargs`, since its own `yerr=` selects the
   trend's uncertainties. No aliases are kept; the old keywords raise `TypeError`. To migrate,
   rename the keywords: `Line(x, y, weights=s, wmin=a)` becomes `Line(x, y, yerr=s, yerr_min=a)`.
+- `get_plotted_data_boolean_series()` and `get_subset_above_threshold()` are removed from the
+  binned plots (`Hist1D`, `Hist2D`, `SpiralPlot2D`); `get_plotted_data(fcn=None)` replaces both.
+  It returns the rows of the cells the figure shows, with the caller's values on the caller's
+  index, as the subset did; for a boolean mask use `data.index.isin(plot.get_plotted_data().index)`.
+  `get_subset_above_threshold(t)` compared each cell's aggregate after `axnorm`: with no
+  `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; on a
+  `Hist2D` or `SpiralPlot2D` with an `axnorm` or another `fcn`, use `plot.set_alim(t, None)`
+  then `plot.get_plotted_data(fcn)`. A `Hist1D` has no `alim`, so a threshold on a normalized or
+  non-count `Hist1D` has no direct replacement: filter `plot.agg(fcn)` and select the rows of
+  the kept bins through `plot.cut`.
 
 ### Added
 

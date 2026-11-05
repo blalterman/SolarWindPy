@@ -17,7 +17,7 @@ rule on the private path, explicit bins in a shared ``BinnedData``):
   the caller asked to be logged, equal ``h.data`` there. Values a selection
   returns equal the caller's, in absolute value on a logged axis: a logged
   axis bins ``log10|v|``, so its sign is not part of what the plot carries.
-- I4: counting the rows ``get_plotted_data_boolean_series`` keeps, bin by
+- I4: counting the rows ``get_plotted_data`` returns, bin by
   bin through ``h.cut``, gives ``agg(fcn="count")`` on the plotted bins.
 - I5: the counts of ``project_1d`` equal the parent's counts summed over the
   other axis.
@@ -273,26 +273,9 @@ def _select_cut(b):
     return [Selection(b.h.cut.index, None, True)]
 
 
-def _select_plotted(b):
-    return [Selection(_where(b.h.get_plotted_data_boolean_series()), None, True)]
-
-
 def _select_plotted_data(b):
     rows = b.h.get_plotted_data()
     return [Selection(rows.index, rows, True)]
-
-
-def _select_above_threshold(b):
-    # The median bin count: some bins reach it, some do not.
-    threshold = b.h.agg(fcn="count").dropna().median()
-    subset, kept = b.h.get_subset_above_threshold(threshold)
-    labels = _where(kept)
-    if not subset.index.sort_values().equals(labels.sort_values()):
-        raise InvariantViolation(
-            "get_subset_above_threshold returned a subset whose labels are not "
-            "the rows its boolean series keeps"
-        )
-    return [Selection(labels, subset, True)]
 
 
 def _select_above_contour(b):
@@ -341,7 +324,7 @@ def _select_cdf(b):
         # The rows the docstring says the CDF is built from.
         keep = h.cut.loc[:, "x"].notna()
         if only_plotted:
-            keep = keep & h.get_plotted_data_boolean_series()
+            keep = keep & h.cut.index.isin(h.get_plotted_data().index)
         values = pd.DataFrame({"x": cdf.loc[:, "x"].to_numpy(dtype=float)})
         out.append(Selection(_where(keep), values, False))
     return out
@@ -367,9 +350,7 @@ def _select_projection(b):
 SELECTIONS = {
     "data": _select_data,
     "cut": _select_cut,
-    "get_plotted_data_boolean_series": _select_plotted,
     "get_plotted_data": _select_plotted_data,
-    "get_subset_above_threshold": _select_above_threshold,
     "id_data_above_contour": _select_above_contour,
     "take_data_in_yrange_across_x": _select_in_yrange,
     "construct_cdf": _select_cdf,
@@ -645,13 +626,13 @@ def test_plotted_rows_counted_per_bin_equal_the_count_aggregate(
     """Counting the plotted rows bin by bin through ``cut`` gives ``agg("count")``.
 
     The plotted bins are the ones ``agg()`` leaves non-NaN, as
-    ``get_plotted_data_boolean_series`` documents; the rows in each are
+    ``get_plotted_data`` documents; the rows in each are
     counted here with ``collections.Counter`` over ``h.cut``.
 
     ON FAILURE: the code is wrong.
     """
     h = build(cls, CASES[case_name], variant).h
-    plotted = _where(h.get_plotted_data_boolean_series())
+    plotted = h.get_plotted_data().index
     cut = h.cut.loc[plotted]
     counted = Counter(zip(*(cut.loc[:, k].tolist() for k in cut.columns)))
 

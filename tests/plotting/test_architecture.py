@@ -242,9 +242,8 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
     for (x0, x1, y0, y1), n in zip(splot.mesh.mesh, _counts_per_cell(splot)):
         if n >= lower:
             expected |= (x0 <= x) & (x < x1) & (y0 <= y) & (y < y1)
-    plotted = splot.get_plotted_data_boolean_series()
-    assert plotted.index.equals(d.index)
-    assert plotted.to_numpy().tolist() == expected.tolist()
+    plotted = d.index.isin(splot.get_plotted_data().index)
+    assert plotted.tolist() == expected.tolist()
     assert 0 < expected.sum() < len(d)  # the fixture keeps some rows, not all
 
 

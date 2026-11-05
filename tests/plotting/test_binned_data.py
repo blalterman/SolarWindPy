@@ -855,11 +855,8 @@ class TestRowsWithASharedBinnedData:
         ranges = pd.DataFrame(
             {"bottom": 0.0, "top": 3.0}, index=h.agg().unstack("x").columns
         )
-        subset, kept = h.get_subset_above_threshold(1)
         selected = {
-            "plotted": h.get_plotted_data_boolean_series().index,
-            "above": subset.index,
-            "above mask": kept.index,
+            "plotted": h.get_plotted_data().index,
             "yrange": pd.Index(
                 h.take_data_in_yrange_across_x(
                     ranges,

@@ -68,8 +68,8 @@ def test_projection_keeps_the_sign_of_a_negative_x_on_a_log_axis():
     x = -2, -20, -200, 3 bin by log10|x| = 0.30, 1.30, 2.30, 0.48 on edges
     [0, 1, 2, 3]; y = 0.5, 0.5, 1.5, 1.5 on edges [0, 1, 2]. Projected on y,
     y-bin (0, 1] averages x = -2 and -20 to -11, (1, 2] averages -200 and 3 to
-    -98.5 (hand). Projected on x, the subset of rows in bins holding at least
-    one row is every row, with the caller's x.
+    -98.5 (hand). Projected on x, the plotted rows are every row, with the
+    caller's x.
 
     ON FAILURE: the code is wrong.
     """
@@ -79,8 +79,7 @@ def test_projection_keeps_the_sign_of_a_negative_x_on_a_log_axis():
 
     assert h.project_1d("y").agg().to_numpy() == exact([-11.0, -98.5])
 
-    subset, kept = h.project_1d("x", project_counts=True).get_subset_above_threshold(1)
-    assert kept.to_numpy().all()
+    subset = h.project_1d("x", project_counts=True).get_plotted_data()
     assert subset.x.to_numpy() == exact([-2.0, -20.0, -200.0, 3.0])  # the inputs
 
 
@@ -111,17 +110,17 @@ def test_projected_counts_hold_the_row_the_parent_clipped_into_an_edge_bin():
 
 
 # ---------------------------------------------------------------------------
-# get_subset_above_threshold: the caller's values, never inverted
+# get_plotted_data: the caller's values, never inverted
 # ---------------------------------------------------------------------------
 
 
-def test_subset_above_threshold_leaves_a_linear_axis_alone():
-    """A projection of a logy parent averages linear y; its subset holds that y.
+def test_plotted_data_leaves_a_linear_axis_alone():
+    """A projection of a logy parent averages linear y; its plotted rows hold that y.
 
     The parent bins log10(y) for y = 10, 1000 (log10 edges [0, 2, 4]); the
     projection on x sends the caller's y = 10, 1000, linear, and shows its y
-    axis on a log scale. Both rows are in bins of one row, so a threshold of
-    1 keeps both, with x = 0.5, 1.5 and y = 10, 1000 as passed.
+    axis on a log scale. Both rows are in bins of one row, so every row is
+    plotted, with x = 0.5, 1.5 and y = 10, 1000 as passed.
 
     ON FAILURE: the code is wrong.
     """
@@ -130,18 +129,17 @@ def test_subset_above_threshold_leaves_a_linear_axis_alone():
     h = Hist2D(x, y, logy=True, nbins=[np.array([0.0, 1.0, 2.0]), [0.0, 2, 4]])
     projected = h.project_1d("x")
 
-    subset, kept = projected.get_subset_above_threshold(1)
+    subset = projected.get_plotted_data()
 
-    assert kept.to_numpy().all()
     assert subset.x.to_numpy() == exact([0.5, 1.5])  # the inputs
     assert subset.y.to_numpy() == exact([10.0, 1000.0])  # the inputs
 
 
-def test_subset_above_threshold_returns_the_callers_signed_values_on_a_log_axis():
-    """On a log axis the subset holds the caller's x, negative ones included.
+def test_plotted_data_returns_the_callers_signed_values_on_a_log_axis():
+    """On a log axis the plotted rows hold the caller's x, negative ones included.
 
     x = -10, 100 bin by log10|x| = 1, 2 on edges [0, 1.5, 3]; one row per
-    bin, so a threshold of 1 keeps both.
+    bin, so both are plotted.
 
     ON FAILURE: the code is wrong.
     """
@@ -149,7 +147,7 @@ def test_subset_above_threshold_returns_the_callers_signed_values_on_a_log_axis(
     y = pd.Series([0.5, 0.5])
     h = Hist2D(x, y, logx=True, nbins=[np.array([0.0, 1.5, 3.0]), [0.0, 1]])
 
-    subset, _ = h.get_subset_above_threshold(1)
+    subset = h.get_plotted_data()
 
     assert subset.x.to_numpy() == exact([-10.0, 100.0])  # the inputs
     assert subset.y.to_numpy() == exact([0.5, 0.5])  # the inputs

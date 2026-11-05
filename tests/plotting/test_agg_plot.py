@@ -497,8 +497,7 @@ class TestSelection:
         x, y, _ = xyz
         h = Hist2D(x, y, nbins=[X_EDGES, Y_EDGES])
         h.set_clim(self.CLIM, None)
-        mask = h.get_plotted_data_boolean_series()
-        assert mask.index.equals(h.data.index)
+        mask = x.index.isin(h.get_plotted_data().index)
         assert mask[_count_of_own_bin(x, y) >= self.CLIM].all()
 
     def test_plotted_mask_excludes_points_in_bins_dropped_by_clim(self, xyz):
@@ -509,36 +508,36 @@ class TestSelection:
         x, y, _ = xyz
         h = Hist2D(x, y, nbins=[X_EDGES, Y_EDGES])
         h.set_clim(self.CLIM, None)
-        mask = h.get_plotted_data_boolean_series().to_numpy()
+        mask = x.index.isin(h.get_plotted_data().index)
         dropped = _count_of_own_bin(x, y) < self.CLIM
         if mask[dropped].any():
             raise SelectedPointInDroppedBin(f"{mask[dropped].sum()} points")
 
-    def test_subset_above_threshold_holds_every_row_in_a_dense_bin(self, xyz):
-        """Every row whose bin count is >= 14 is in the subset, unchanged.
+    def test_plotted_data_with_clim_is_every_row_of_a_dense_bin(self, xyz):
+        """With clim (14, None) the rows are those whose bin holds >= 14, unchanged.
 
         ON FAILURE: the code is wrong.
         """
         x, y, z = xyz
         h = Hist2D(x, y, z, nbins=[X_EDGES, Y_EDGES])
-        subset, mask = h.get_subset_above_threshold(self.THRESHOLD)
+        h.set_clim(self.THRESHOLD, None)
+        subset = h.get_plotted_data()
         dense = _count_of_own_bin(x, y) >= self.THRESHOLD
-        assert mask[dense].all()
-        pd.testing.assert_frame_equal(subset, h.data.loc[mask])
         expected = pd.DataFrame({"x": x, "y": y, "z": z})[dense]
-        pd.testing.assert_frame_equal(subset.loc[expected.index], expected)
+        pd.testing.assert_frame_equal(subset, expected)
 
-    def test_subset_above_threshold_excludes_rows_in_sparse_bins(self, xyz):
-        """No row whose bin count is < 14 is in the subset.
+    def test_plotted_data_with_clim_excludes_rows_in_sparse_bins(self, xyz):
+        """No row whose bin count is < 14 is returned.
 
         ON FAILURE: the code is wrong.
         """
         x, y, z = xyz
         h = Hist2D(x, y, z, nbins=[X_EDGES, Y_EDGES])
-        subset, mask = h.get_subset_above_threshold(self.THRESHOLD)
+        h.set_clim(self.THRESHOLD, None)
+        mask = x.index.isin(h.get_plotted_data().index)
         sparse = _count_of_own_bin(x, y) < self.THRESHOLD
-        if mask.to_numpy()[sparse].any():
-            raise SelectedPointInDroppedBin(f"{mask.to_numpy()[sparse].sum()} rows")
+        if mask[sparse].any():
+            raise SelectedPointInDroppedBin(f"{mask[sparse].sum()} rows")
 
     def test_1d_plotted_mask_follows_clim(self, xyz):
         """In 1-D a point is plotted iff its x bin holds >= 52 points.
@@ -552,11 +551,11 @@ class TestSelection:
         assert 0 < expected.sum() < N
         h = Hist1D(x, nbins=X_EDGES)
         h.set_clim(52, None)
-        mask = h.get_plotted_data_boolean_series()
-        np.testing.assert_array_equal(mask.to_numpy(), expected)
+        mask = x.index.isin(h.get_plotted_data().index)
+        np.testing.assert_array_equal(mask, expected)
 
-    def test_1d_subset_above_threshold_keeps_rows_in_dense_bins(self, xyz):
-        """In 1-D the subset is the rows whose x bin holds >= 52 points.
+    def test_1d_plotted_data_with_clim_keeps_rows_in_dense_bins(self, xyz):
+        """In 1-D, with clim (52, None), the rows are those whose x bin holds >= 52.
 
         ON FAILURE: the code is wrong.
         """
@@ -564,20 +563,21 @@ class TestSelection:
         counts, _ = np.histogram(x, bins=X_EDGES)
         expected = (counts >= 52)[_bin_index(x.to_numpy(), X_EDGES)]
         h = Hist1D(x, nbins=X_EDGES)
-        subset, mask = h.get_subset_above_threshold(52)
-        np.testing.assert_array_equal(mask.to_numpy(), expected)
+        h.set_clim(52, None)
+        subset = h.get_plotted_data()
+        np.testing.assert_array_equal(x.index.isin(subset.index), expected)
         np.testing.assert_array_equal(subset["x"].to_numpy(), x.to_numpy()[expected])
 
-    def test_subset_above_threshold_returns_linear_values_for_log_axes(self, xyz):
-        """With log axes the subset holds x and y in linear units again.
+    def test_plotted_data_returns_linear_values_for_log_axes(self, xyz):
+        """With log axes the plotted rows hold x and y in linear units.
 
         ON FAILURE: the code is wrong.
         """
         x, y, _ = xyz
         x, y = 10.0**x, 10.0**y
         h = Hist2D(x, y, logx=True, logy=True, nbins=[X_EDGES, Y_EDGES])
-        subset, mask = h.get_subset_above_threshold(1)
-        assert mask.all()
+        subset = h.get_plotted_data()
+        assert len(subset) == len(x)
         assert np.asarray(subset["x"]) == exact(x)
         assert np.asarray(subset["y"]) == exact(y)
         # The histogram's own data stay log10 values: only the subset changed.

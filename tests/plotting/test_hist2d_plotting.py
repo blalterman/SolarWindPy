@@ -1635,7 +1635,7 @@ class TestProject1D:
             [np.nan, 0.3, 0.5, np.nan], nan_ok=True
         )
         assert list(projected.data.index) == [1, 2]
-        assert list(projected.get_plotted_data_boolean_series().index) == [1, 2]
+        assert list(projected.get_plotted_data().index) == [1, 2]
 
     @pytest.mark.parametrize(
         "y, nbins, kept, expected",
@@ -1676,7 +1676,7 @@ class TestProject1D:
         projected = h.project_1d("x", only_plotted=False)
 
         assert list(projected.data.index) == kept
-        assert list(projected.get_plotted_data_boolean_series().index) == kept
+        assert list(projected.get_plotted_data().index) == kept
         assert projected.agg().to_numpy() == exact(expected, nan_ok=True)
 
     def test_log_axes_round_trip_through_the_projection(self):

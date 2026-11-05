@@ -967,23 +967,6 @@ class BinnedPlot(Base):
         index = self._source.index
         return index if rows is None else index[rows]
 
-    def _rows_in_cells(self, positions):
-        r"""Boolean ``pd.Series`` marking each kept row whose cell is in ``positions``.
-
-        Parameters
-        ----------
-        positions : np.ndarray of int
-            Cell codes, positions in ``binning.cells``.
-
-        Returns
-        -------
-        pd.Series
-            On the index of ``data``.
-        """
-        codes = self._cell_codes()
-        keep = np.isin(codes, positions) & (codes >= 0)
-        return pd.Series(keep, index=self._kept_index())
-
     def _plotted_rows(self, fcn=None):
         r"""Boolean array over the kept rows: True where the row's cell is shown.
 
@@ -1029,45 +1012,6 @@ class BinnedPlot(Base):
             whatever ``log`` says.
         """
         return self._kept_source_frame().loc[self._plotted_rows(fcn)]
-
-    def get_plotted_data_boolean_series(self):
-        """Return a boolean ``pd.Series`` identifying each plotted measurement.
-
-        A measurement is plotted when its cell (e.g. its joint (x, y) bin in
-        2-D) survives aggregation. The series shares the same index as the
-        stored data. To align with a different index you may need to adjust
-        the returned series.
-        """
-        agg = self.agg()
-        tk = self._rows_in_cells(np.flatnonzero(agg.notna().to_numpy()))
-
-        self.logger.info(
-            f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
-        )
-
-        return tk
-
-    def get_subset_above_threshold(self, threshold, fcn="count"):
-        r"""Get the subset of data above a given threshold using `fcn` to.
-
-        aggregate. If `axnorm` set, this is used. A row is kept when its cell
-        (e.g. its joint (x, y) bin in 2-D) meets `threshold`.
-
-        Returns
-        -------
-        subset : pd.DataFrame
-            The kept rows, one column per column of ``data``, holding the
-            values the caller passed: never logged, sign included, whatever
-            ``log`` says.
-        tk : pd.Series of bool
-            True for each kept row, on the index of ``data``.
-        """
-        agg = self.agg(fcn=fcn)
-        tk = self._rows_in_cells(np.flatnonzero((agg >= threshold).to_numpy()))
-
-        subset = self._kept_source_frame().loc[tk.to_numpy(dtype=bool)]
-
-        return subset, tk
 
 
 class _OnFixedGrid:

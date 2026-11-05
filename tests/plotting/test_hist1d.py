@@ -611,9 +611,7 @@ class TestRowsWithNaN:
         assert h.data.index.tolist() == self.KEPT
         assert h.cut.index.tolist() == self.KEPT
         assert h.agg().to_numpy() == exact([1.0, 5.0, 3.0, 4.0])
-        assert h.get_plotted_data_boolean_series().index.tolist() == self.KEPT
-        above, _ = h.get_subset_above_threshold(1, fcn="count")
-        assert above.index.tolist() == self.KEPT
+        assert h.get_plotted_data().index.tolist() == self.KEPT
         cdf = h.construct_cdf(only_plotted=False)
         assert cdf["x"].to_numpy() == exact([0.5, 1.5, 2.5, 3.5])
         ranges = pd.DataFrame({"bottom": 0.0, "top": 10.0}, index=h.agg().index)
