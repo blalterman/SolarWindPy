@@ -168,6 +168,7 @@ NOT_QUANTITIES = {
         "drop_species",
         "epoch",
         "estimate_electrons",
+        "info",
         "ions",
         "load_from_file",
         "save",

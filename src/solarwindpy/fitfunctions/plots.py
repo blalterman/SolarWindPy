@@ -9,7 +9,7 @@ __all__ = [
     "FFPlot",
 ]
 
-import logging  # noqa: F401
+import logging
 
 import numpy as np
 import matplotlib as mpl
@@ -288,18 +288,19 @@ class FFPlot(object):
         obs = getattr(self.observations, kind)
         x = obs.x
         y = obs.y
-        w = obs.w
+        yerr = obs.yerr
 
         if not plot_window:
-            plotted = ax.errorbar(x, y, yerr=w, **style)
+            plotted = ax.errorbar(x, y, yerr=yerr, **style)
             self._format_hax(ax)
             return ax, plotted
 
-        if w is None:
-            logging.getLogger().warning(
-                "No weights. Need weights to plot a window for FitFunction. Setting w to 0."
+        if yerr is None:
+            # A fit without uncertainties is ordinary: draw a zero-width window.
+            logging.getLogger(__name__).debug(
+                "No yerr: the %s window has zero width.", kind
             )
-            w = 0
+            yerr = 0
 
         window_kwargs = mpl.cbook.normalize_kwargs(
             window_kwargs, mpl.collections.Collection
@@ -309,8 +310,8 @@ class FFPlot(object):
 
         line = ax.plot(x, y, **style)
 
-        y1 = y - w
-        y2 = y + w
+        y1 = y - yerr
+        y2 = y + yerr
         window = ax.fill_between(
             x,
             y1,
@@ -331,14 +332,14 @@ class FFPlot(object):
         r"""Plot the raw observations.
 
         Plot from ``observations.raw.x``, ``observations.raw.y``, and
-        ``observations.raw.w``.
+        ``observations.raw.yerr``.
 
         Parameters
         ----------
         ax : matplotlib.axes.Axes, optional
             Axes to draw on. If None, a new figure and axes are created.
         plot_window : bool, default True
-            If True, draw a line with a ``y +- w`` window. Otherwise draw
+            If True, draw a line with a ``y +- yerr`` window. Otherwise draw
             error bars.
         edge_kwargs : dict, optional
             If not None, draw the window's edges as lines with these
@@ -362,7 +363,7 @@ class FFPlot(object):
         r"""Plot the observations used in the fit.
 
         Plot from ``observations.used.x``, ``observations.used.y``, and
-        ``observations.used.w``. Parameters and returns are those of
+        ``observations.used.yerr``. Parameters and returns are those of
         :py:meth:`plot_raw`; unless ``markevery`` is given, a marker is
         drawn on every :math:`10^{\lfloor \log_{10} N \rfloor - 1}`-th of
         the :math:`N` used points.
@@ -661,7 +662,8 @@ class FFPlot(object):
     def set_log(self, **kwargs):
         r"""Set :py:class:`~solarwindpy.plotting.base.LogAxes`.
 
-        Only used for determining if weights should be :math:`w/(y \ln(10))`.
+        Only used for determining if the uncertainties should be
+        :math:`\sigma_y/(y \ln(10))`.
         """
         log = self._log._asdict()
         for k, v in kwargs.items():

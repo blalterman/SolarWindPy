@@ -212,6 +212,9 @@ nitpick_ignore = [
     # Private names are not documented, so the show-inheritance line cannot
     # link it.
     ("py:class", "solarwindpy.plotting.base._OnFixedGrid"),
+    # Private base holding ``alim`` for plotting.base.ColorPlot and BinnedPlot,
+    # named on their show-inheritance line for the same reason.
+    ("py:class", "solarwindpy.plotting.base._AggregateLimits"),
     # Private base of core.vector.Vector and core.tensor.Tensor, named on
     # their show-inheritance line for the same reason.
     ("py:class", "solarwindpy.core.base._ComponentFrame"),

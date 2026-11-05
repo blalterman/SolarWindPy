@@ -50,7 +50,7 @@ class TrendFit(object):
         The :attr:`bin_results` column the trend fits, as ``(P, K)``: for
         example ``("mu", "value")``. Required: it is the scientific choice.
     yerr : tuple or None
-        The :attr:`bin_results` column giving the trend's 1-sigma weights, for
+        The :attr:`bin_results` column giving the trend's 1-sigma uncertainties, for
         example ``("sigma", "value")`` (each column's width) or ``("mu",
         "uncertainty")`` (the fitted uncertainty of ``mu``). None fits the
         trend unweighted. Required, like ``y``.
@@ -60,7 +60,7 @@ class TrendFit(object):
     bin_kwargs, trend_kwargs : dict, optional
         Passed to the constructor of each bin fit and of the trend fit, for
         example ``xmax=`` or ``guess_xh=``. ``trend_kwargs`` cannot hold
-        ``weights``, which ``yerr`` selects.
+        ``yerr``, which the ``yerr`` argument selects.
 
     Raises
     ------
@@ -107,8 +107,10 @@ class TrendFit(object):
             if not (isinstance(cls, type) and issubclass(cls, core.FitFunction)):
                 raise TypeError(f"{name} must be a FitFunction subclass, not {cls!r}")
         trend_kwargs = dict(trend_kwargs or {})
-        if "weights" in trend_kwargs:
-            raise ValueError("yerr selects the trend's weights; drop weights=.")
+        if "yerr" in trend_kwargs:
+            raise ValueError(
+                "yerr selects the trend's uncertainties; drop yerr= from trend_kwargs."
+            )
 
         self._agged = agged
         self._bin_function = bin_function
@@ -165,7 +167,7 @@ class TrendFit(object):
 
     @property
     def yerr(self):
-        r"""The :attr:`bin_results` column of the trend's weights, or None."""
+        r"""The :attr:`bin_results` column of the trend's uncertainties, or None."""
         return self._yerr
 
     @property
@@ -312,9 +314,9 @@ class TrendFit(object):
             results.index = self.agged.columns
 
             y = self._column(results, self.y)
-            w = None if self.yerr is None else self._column(results, self.yerr)
+            yerr = None if self.yerr is None else self._column(results, self.yerr)
             trend = self.trend_function(
-                self._trend_x(), y, weights=w, **self._trend_kwargs
+                self._trend_x(), y, yerr=yerr, **self._trend_kwargs
             )
             results[("in_trend", "")] = trend.observations.tk_observed
 
@@ -422,7 +424,7 @@ class TrendFit(object):
             x = x[tk]
 
         y = results.loc[:, self.y]
-        w = None if self.yerr is None else results.loc[:, self.yerr]
+        yerr = None if self.yerr is None else results.loc[:, self.yerr]
 
         window_kwargs = kwargs.pop("window_kwargs", dict())
 
@@ -434,7 +436,7 @@ class TrendFit(object):
         label = kwargs.pop("label", "1D Fits")
 
         if plot_window:
-            if w is None:
+            if yerr is None:
                 raise ValueError("plot_window needs yerr; this TrendFit has yerr=None.")
 
             window_kwargs = mpl.cbook.normalize_kwargs(
@@ -449,8 +451,8 @@ class TrendFit(object):
 
             window = ax.fill_between(
                 x,
-                y - w,
-                y + w,
+                y - yerr,
+                y + yerr,
                 color=window_color,
                 alpha=window_alpha,
                 **window_kwargs,
@@ -464,7 +466,7 @@ class TrendFit(object):
             plotted = ax.errorbar(
                 x=x,
                 y=y,
-                yerr=w,
+                yerr=yerr,
                 color=color,
                 linestyle=linestyle,
                 label=label,
@@ -473,7 +475,7 @@ class TrendFit(object):
 
             pl, cl, bl = plotted
 
-            if w is not None:
+            if yerr is not None:
                 bl[0].set_linestyle(linestyle)
 
         return plotted

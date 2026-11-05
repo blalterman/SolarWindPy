@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - BREAKING CHANGES
+
+- A fit's measurement uncertainty is named `yerr`. Every `FitFunction` subclass takes
+  `yerr=` in place of `weights=`, and `yerr_min=` and `yerr_max=` in place of `wmin=` and `wmax=`;
+  `set_fit_obs` takes the same names. The value is unchanged: the 1-sigma uncertainty of each `y`,
+  as `scipy.optimize.curve_fit` takes `sigma` (elsewhere "weights" usually means 1/sigma). The
+  observations' third field is `yerr` (`fit.observations.used.yerr` and `.raw.yerr`, formerly
+  `.w`). `TrendFit` now refuses `yerr` in `trend_kwargs`, since its own `yerr=` selects the
+  trend's uncertainties. No aliases are kept; the old keywords raise `TypeError`. To migrate,
+  rename the keywords: `Line(x, y, weights=s, wmin=a)` becomes `Line(x, y, yerr=s, yerr_min=a)`.
+- `get_plotted_data_boolean_series()` and `get_subset_above_threshold()` are removed from the
+  binned plots (`Hist1D`, `Hist2D`, `SpiralPlot2D`); `get_plotted_data(fcn=None)` replaces both.
+  It returns the rows of the cells the figure shows, with the caller's values on the caller's
+  index, as the subset did; for a boolean mask on a unique index use
+  `data.index.isin(plot.get_plotted_data().index)`.
+  `get_subset_above_threshold(t)` compared each cell's aggregate after `axnorm`: with no
+  `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; with an
+  `axnorm` or another `fcn`, use `plot.set_alim(t, None)` then `plot.get_plotted_data(fcn)` on
+  any binned plot, `Hist1D` included.
+- `Hist1D.take_data_in_yrange_across_x` calls `get_y_bounds(row, expected_logy=False)`, as
+  `Hist2D`'s calls it with its log flag; a callback written as `lambda row: ...` raises
+  `TypeError`. Accept the keyword, e.g. `lambda row, expected_logy=False: ...`. `Hist1D` and
+  `Hist2D` now share one implementation, which takes rows of disjoint x-ranges with one
+  `numpy.searchsorted` instead of a pass over the data per range (3 to 6 times faster at 1e5
+  and 1e6 rows) and lists the x-bins from `intervals["x"]` instead of running `agg()`.
+- `axnorm` now depends on the aggregation. For cell i with n_i rows, area A_i and value v_i, and
+  N the rows in the shown cells (per column for `cd`/`wc`, per row for `rd`/`wr`):
+
+  | aggregation | `d`, `cd`, `rd` | `w`, `wc`, `wr` (new) | `t`, `c`, `r` |
+  |---|---|---|---|
+  | count | n_i / (N A_i), unchanged | n_i / N, the count fraction | v_i / max\|v\| |
+  | `"sum"` or `np.sum` | S_i / (S A_i), S the total z; z < 0 raises `ValueError` | S_i / S | v_i / max\|v\| |
+  | anything else | v_i n_i / (N A_i) | v_i n_i / N | v_i / max\|v\| |
+
+  So a density of a mean integrates, and its weight sums, to the mean z (overall, per column or
+  per row), where it used to divide the means by their own total. `t`, `c` and `r` divide by the
+  largest absolute value, which differs from before only when values are negative. A custom
+  callable is a per-cell value even when it adds; pass `"sum"` for a sum. `Hist1D` no longer
+  raises "Unable to calculate a PDF with non-count aggregation" for `d` with another `fcn`.
+  `allowed_axnorm` adds `w` (1-D and `SpiralPlot2D`) and `w`, `wc`, `wr` (2-D); `Count` and
+  `TeXlabel` accept them. Count plots and `t`/`c`/`r` of non-negative values are unchanged.
+
+### Added
+
+- A summary `repr` for every plot (`Hist1D`, `Hist2D`, `SpiralPlot2D`, `Scatter`), shown by
+  Jupyter and `print`: the class; per axis its label, bin count and range (the mesh's extent on a
+  `SpiralPlot2D`) and the range of the data on it, in data units on a log axis, to four
+  significant figures (e.g. `x: v  bins 60 [250, 900]  data [251.3, 898.7]`); the number of rows
+  kept, the log flags, the bins per axis (or mesh cells), `axnorm`, `clim` and `alim` when set,
+  and `path`. `str(plot)` is that summary, no longer just the class name.
+- `solarwindpy.core.plasma.Plasma.info` returns a one-column table summarising a plasma: the
+  spacecraft and its frame (or "none"), the first and last observation times, the number of
+  observations, the species, and whether auxiliary data are attached.
+- `get_plotted_data(fcn=None)` on `Hist1D`, `Hist2D` and `SpiralPlot2D` returns the rows in the
+  cells the figure shows (cells whose `agg(fcn)` is not NaN after `clim`, `axnorm`, any cell
+  filter and `alim`), with the caller's x, y and z values on the caller's index. Pass the `fcn`
+  given to `make_plot`. Each plot computes its rows' cell codes once and reuses them in `agg`.
+- `Hist1D.set_alim` (with `alim` and `alim_kind`): the limits on the aggregated value of a bin,
+  after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
+  honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
+  the z of each point.
+
+### Changed
+
+- Colour plots (`Hist2D`, `SpiralPlot2D`, `Scatter`, and their contours) default to a
+  zero-centred `matplotlib.colors.CenteredNorm` and the diverging colormap `RdBu_r` when the
+  plotted values hold both signs, whatever the `axnorm`. Values of one sign keep the previous
+  defaults (bands on [0, 1] for `c`/`r`, `LogNorm` for densities, matplotlib's otherwise). A
+  `norm` or `cmap` passed by the caller is used as given.
+- A count in `agg` (`fcn="count"`, or the default on a plot without z) counts each cell's rows
+  with `numpy.bincount` of the rows' cell codes instead of a pandas groupby: same result, about
+  twice as fast at 1e6 rows.
+
+### Fixed
+
+- Plotting a fit without `yerr` no longer logs "No weights. Need weights to plot a window..."
+  as a warning on every plot; the zero-width window is noted at DEBUG on the
+  `solarwindpy.fitfunctions.plots` logger.
+- The API page of `Plasma.lnlambda` showed a MathJax error ("Double subscripts") in place of
+  its equation, and documented a `species` parameter it does not take; it documents `s0, s1`.
+  A test now rejects double subscripts, double superscripts and unbalanced braces in docstring
+  math.
+
 ## [0.4.1] - 2026-11-05
 
 ### Added

@@ -43,6 +43,51 @@ AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 
 
+def _within(values, lower, upper, bins):
+    r"""Which ``values`` lie between ``lower`` and ``upper``, closed as ``bins`` are.
+
+    Parameters
+    ----------
+    values : pd.Series or np.ndarray
+        Values on the binned scale, ``log10(abs())`` on a log axis.
+    lower, upper : scalar
+        The bounds.
+    bins : pd.IntervalIndex
+        The axis's bins. Right-closed bins compare ``lower < v <= upper``;
+        left-closed bins compare ``lower <= v < upper`` and, as the last
+        left-closed bin also holds its right edge (``np.histogram``), keep
+        ``v == upper`` when ``upper`` is that edge.
+
+    Returns
+    -------
+    pd.Series or np.ndarray of bool
+    """
+    if bins.closed == "left":
+        inside = (lower <= values) & (values < upper)
+        if upper == bins.right[-1]:
+            inside |= values == upper
+        return inside
+    return (lower < values) & (values <= upper)
+
+
+#: ``axnorm`` keys that give each cell a share of a total.
+_SHARE_AXNORMS = ("d", "cd", "rd", "w", "wc", "wr")
+
+
+def _aggregation_kind(fcn):
+    r"""``"count"``, ``"sum"`` or ``"value"``: how ``axnorm`` treats ``fcn``.
+
+    Only ``"count"`` is a count and only ``"sum"`` or :func:`numpy.sum` a
+    sum; every other aggregation, a custom additive callable included, is a
+    per-cell value.
+    """
+    if isinstance(fcn, str):
+        return {"count": "count", "sum": "sum"}.get(fcn, "value")
+    if fcn is np.sum:
+        return "sum"
+    return "value"
+
+
 class Base(ABC):
     r"""Abstract base for SolarWindPy plots.
 
@@ -66,8 +111,84 @@ class Base(ABC):
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
 
-    def __str__(self):
-        return self.__class__.__name__
+    def __repr__(self):
+        r"""A summary of what the plot holds, one ``key: value`` per line.
+
+        The class, then one line per axis (x, y, and z when the plot has
+        one): its label, its bins (``_axis_extent``) and the range of the
+        data on it, then the number of rows the plot keeps, the log flags,
+        the fields ``_repr_fields`` adds (binning, ``axnorm``, ``clim``,
+        ``alim``), and ``path``. ``print`` shows the same text. A plot whose
+        constructor has not run shows its class and "(not built)".
+        """
+        if "_labels" not in self.__dict__:
+            return f"{self.__class__.__name__} (not built)"
+        labels = self._flat_labels()
+        axes = ["x", "y", "z"] if self._has_z_label() else ["x", "y"]
+        fields = {k: self._axis_line(k, labels[k]) for k in axes}
+        source = self.__dict__.get("_source")
+        fields["observations"] = "none" if source is None else source.n_kept
+        fields["log"] = ", ".join(f"{k}={v}" for k, v in self.log._asdict().items())
+        fields.update(self._repr_fields())
+        fields["path"] = self.path
+        lines = [f"  {k}: {v}" for k, v in fields.items()]
+        return "\n".join([self.__class__.__name__, *lines])
+
+    def _repr_fields(self):
+        r"""Fields a subclass adds to ``repr`` before ``path``, as a dict; none here."""
+        return {}
+
+    def _axis_extent(self, axis):
+        r"""``(prefix, lower, upper)`` of ``axis``'s bins on the binned scale, or None.
+
+        None here: the plot bins nothing. ``BinnedPlot`` asks its binning.
+        """
+        return None
+
+    def _axis_line(self, axis, label):
+        r"""One axis's ``repr`` line: label, bin range and data range.
+
+        Ranges are in data units: on a log axis the bins' edges and the binned
+        ``log10(abs())`` values are shown as 10 to that power, so the data
+        range is that of ``abs()``. Numbers have four significant figures.
+        The aggregated column shows no data range when the caller gave none
+        (a count).
+        """
+        parts = [label]
+        source = self.__dict__.get("_source")
+        logged = source is not None and source.is_logged(axis)
+
+        def fmt(v):
+            return f"{10.0**v if logged else v:.4g}"
+
+        extent = self._axis_extent(axis)
+        if extent is not None:
+            prefix, lower, upper = extent
+            parts.append(f"{prefix} [{fmt(lower)}, {fmt(upper)}]")
+        if source is not None and axis in source.columns:
+            coords = source.columns[:-1]
+            if axis in coords or source.has_value:
+                values = source.logged(axis, labels=False).to_numpy(dtype=float)
+                parts.append(
+                    f"data [{fmt(np.nanmin(values))}, {fmt(np.nanmax(values))}]"
+                )
+        return "  ".join(parts)
+
+    @staticmethod
+    def _format_limits(limits):
+        r"""``RangeLimits`` as ``"lower=..., upper=..."``, or None when both are unset."""
+        if limits.lower is None and limits.upper is None:
+            return None
+        return f"lower={limits.lower}, upper={limits.upper}"
+
+    def _flat_labels(self):
+        r"""Each axis's label as one line of text, keyed ``x``, ``y`` and ``z``."""
+        return {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
+
+    def _has_z_label(self):
+        r"""True when ``labels.z`` is set: neither None nor the string ``"None"``."""
+        z = self.labels.z
+        return not (z is None or (isinstance(z, str) and z == "None"))
 
     @property
     def logger(self):
@@ -181,7 +302,7 @@ class Base(ABC):
         """
         labels = self.labels
         parts = [self._path_part(labels.x, "x"), self._path_part(labels.y, "y")]
-        if not (labels.z is None or (isinstance(labels.z, str) and labels.z == "None")):
+        if self._has_z_label():
             parts.append(self._path_part(labels.z, "z"))
         path = Path(self.__class__.__name__, *parts)
 
@@ -367,33 +488,29 @@ class Base(ABC):
         pass
 
 
-class ColorPlot(Base):
-    r"""Base for plots of x and y coloured by a z value, with a colorbar.
+class _AggregateLimits(Base):
+    r"""``alim``: limits on a plot's aggregated or coloured values.
 
-    Holds the data intake of (x, y, z), the z label the colorbar shows, and
-    ``alim``, the limits on the coloured values.
+    The one home of ``alim`` for every plot that has it. A ``BinnedPlot``
+    applies it to each cell's aggregated value (``_limit_values``); a
+    ``Scatter`` to the z of each point.
     """
 
     _alim = RangeLimits(None, None)
     _alim_kind = "value"
-    #: Default linestyles of the contour levels, cycled when there are more.
-    _contour_linestyles = (
-        "-",
-        ":",
-        "--",
-        (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
-        "--",
-        ":",
-        "-",
-        (0, (7, 3, 1, 3, 1, 3)),
-    )
-    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
-    _log_data = False
 
     @property
     def alim(self):
         r"""``RangeLimits`` on the aggregated value; see ``set_alim``."""
         return self._alim
+
+    def _repr_fields(self):
+        r"""Add ``alim`` and its kind to ``repr`` when set."""
+        fields = super()._repr_fields()
+        alim = self._format_limits(self.alim)
+        if alim is not None:
+            fields["alim"] = f"{alim} ({self.alim_kind})"
+        return fields
 
     @property
     def alim_kind(self):
@@ -484,9 +601,28 @@ class ColorPlot(Base):
 
         return agg.where(keep)
 
-    def _limit_values(self, agg):
-        r"""Apply ``alim`` to the aggregated values; see ``BinnedPlot.agg``."""
-        return self._apply_alim(agg)
+
+class ColorPlot(_AggregateLimits):
+    r"""Base for plots of x and y coloured by a z value, with a colorbar.
+
+    Holds the data intake of (x, y, z) and the z label the colorbar shows;
+    ``alim``, the limits on the coloured values, comes from
+    ``_AggregateLimits``.
+    """
+
+    #: Default linestyles of the contour levels, cycled when there are more.
+    _contour_linestyles = (
+        "-",
+        ":",
+        "--",
+        (0, (7, 3, 1, 3, 1, 3, 1, 3, 1, 3)),
+        "--",
+        ":",
+        "-",
+        (0, (7, 3, 1, 3, 1, 3)),
+    )
+    # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
+    _log_data = False
 
     def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
         r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
@@ -587,24 +723,68 @@ class ColorPlot(Base):
         colors[:, 3] = alpha
         artist.set_facecolor(colors)
 
+    #: Default colormap for values of both signs.
+    _diverging_cmap = "RdBu_r"
+
+    def _color_scale(self, kwargs, values):
+        r"""Pop ``norm`` and ``cmap`` from ``kwargs``, defaulting them by ``values``.
+
+        The one place every colour plot chooses its colour scale. A ``norm``
+        or ``cmap`` in ``kwargs`` is used as given, None included. Otherwise,
+        when the finite ``values`` hold both signs, the default is a
+        :class:`~matplotlib.colors.CenteredNorm` about 0 and the diverging
+        colormap ``_diverging_cmap``; values of one sign get
+        ``_default_norm`` and matplotlib's colormap.
+
+        Parameters
+        ----------
+        kwargs : dict
+            The caller's keywords; ``norm`` and ``cmap`` are removed.
+        values : array-like
+            The values to colour, NaN or masked where none.
+
+        Returns
+        -------
+        norm, cmap
+        """
+        v = np.ma.filled(np.ma.asarray(values, dtype=float), np.nan)
+        v = v[np.isfinite(v)]
+        signed = bool((v < 0).any() and (v > 0).any())
+        axnorm = getattr(self, "axnorm", None)
+        if "norm" in kwargs:
+            norm = kwargs.pop("norm")
+        else:
+            norm = self._default_norm(axnorm, signed)
+        if "cmap" in kwargs:
+            cmap = kwargs.pop("cmap")
+        else:
+            cmap = self._diverging_cmap if signed else None
+        return norm, cmap
+
     @staticmethod
-    def _default_norm(axnorm):
+    def _default_norm(axnorm, signed=False):
         r"""The colour normalisation a plot uses when the caller passes no ``norm``.
 
         Parameters
         ----------
         axnorm : str or None
             The plot's ``axnorm``.
+        signed : bool, default False
+            True when the values hold both signs.
 
         Returns
         -------
         matplotlib.colors.Normalize or None
-            Column- and row-normalised values lie in [0, 1], so ``"c"`` and
-            ``"r"`` get ten equal colour bands on [0, 1]. Densities (``"d"``,
-            ``"cd"``, ``"rd"``) span decades, so they get a clipped
-            :class:`~matplotlib.colors.LogNorm`. Otherwise None, leaving the
-            choice to matplotlib.
+            Values of both signs get a
+            :class:`~matplotlib.colors.CenteredNorm` about 0, whatever the
+            ``axnorm``. Otherwise column- and row-normalised values lie in
+            [0, 1], so ``"c"`` and ``"r"`` get ten equal colour bands on
+            [0, 1]; densities (``"d"``, ``"cd"``, ``"rd"``) span decades, so
+            they get a clipped :class:`~matplotlib.colors.LogNorm`; anything
+            else gets None, leaving the choice to matplotlib.
         """
+        if signed:
+            return mpl.colors.CenteredNorm(vcenter=0.0)
         if axnorm in ("c", "r"):
             return mpl.colors.BoundaryNorm(np.linspace(0, 1, 11), 256, clip=True)
         if axnorm in ("d", "cd", "rd"):
@@ -704,14 +884,14 @@ class ColorPlot(Base):
         return cbar
 
 
-class BinnedPlot(Base):
+class BinnedPlot(_AggregateLimits):
     r"""Base for plots that aggregate a value in the cells of a ``Binning``.
 
     The plot's ``binning`` places each kept row in one cell. ``agg`` groups
     the aggregated column by cell, applies ``clim`` to the count in each
     cell, drops the cells the binning filters out, normalizes by ``axnorm``
-    with the cells' measure, and returns every cell. A ``ColorPlot`` then
-    applies ``alim``.
+    with the cells' measure, applies ``alim`` to the result, and returns
+    every cell.
     """
 
     _axnorm = None
@@ -721,6 +901,26 @@ class BinnedPlot(Base):
     def binning(self):
         r"""The ``Binning`` that places each kept row in a cell."""
         return self._binning
+
+    def _axis_extent(self, axis):
+        r"""The binning's ``axis_extent``; None before the binning is built."""
+        binning = self.__dict__.get("_binning")
+        return None if binning is None else binning.axis_extent(axis)
+
+    def _repr_fields(self):
+        r"""Add the binning, ``axnorm`` and, when set, ``clim`` to ``repr``."""
+        fields = super()._repr_fields()
+        binning = self.__dict__.get("_binning")
+        if binning is not None:
+            fields["bins"] = binning.describe()
+        fields["axnorm"] = self.axnorm
+        clim = self._format_limits(self.clim)
+        if clim is not None:
+            fields["clim"] = clim
+        if "alim" in fields:
+            # Show alim after clim, the order they apply in.
+            fields["alim"] = fields.pop("alim")
+        return fields
 
     @property
     def clim(self):
@@ -822,9 +1022,25 @@ class BinnedPlot(Base):
         r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
         return self._source.columns[-1]
 
+    def _cell_codes(self):
+        r"""``binning.codes()``, computed once per binning and data, read-only.
+
+        The binning and the data are each set once, by the constructor, but
+        the cache is keyed on both objects, so replacing either recomputes.
+        """
+        binning = self.binning
+        source = self._source
+        cached = self.__dict__.get("_codes_cache")
+        if cached is None or cached[0] is not binning or cached[1] is not source:
+            codes = np.asarray(binning.codes())
+            codes.setflags(write=False)
+            cached = (binning, source, codes)
+            self._codes_cache = cached
+        return cached[2]
+
     def _grouped_by_cell(self):
         r"""The aggregated column on the rows in a cell, grouped by cell code."""
-        codes = self.binning.codes()
+        codes = self._cell_codes()
         # By position: the groups are keyed by `codes`, never by row label.
         target = self._source.take(self.agg_axes, labels=False)
         inside = codes >= 0
@@ -834,8 +1050,8 @@ class BinnedPlot(Base):
         return target.groupby(codes)
 
     def _limit_values(self, agg):
-        r"""Limits on the final aggregated values: none here; ``ColorPlot`` has ``alim``."""
-        return agg
+        r"""Apply ``alim`` to the final aggregated values; see ``agg``."""
+        return self._apply_alim(agg)
 
     def agg(self, fcn=None, **kwargs):
         r"""Aggregate the values in each cell.
@@ -849,26 +1065,63 @@ class BinnedPlot(Base):
         binning's ``postfilter`` drops. The occupied cells are then
         normalized by ``axnorm`` (``binning.normalize``). Every cell is in
         the result, indexed by ``binning.cells``; a cell no row falls in is
-        NaN. A ``ColorPlot`` then sets the cells outside ``alim`` to NaN.
+        NaN. The cells outside ``alim`` are then set to NaN.
+
+        How ``axnorm`` treats the result depends on the aggregation, which
+        is classified as a count (``"count"``), a sum (``"sum"`` or
+        :func:`numpy.sum`), or a value (anything else: ``"mean"``,
+        ``"median"``, any callable). A custom callable is a value even when
+        it adds, so pass ``"sum"`` for a sum. A share of a sum (``axnorm``
+        ``"d"``, ``"cd"``, ``"rd"``, ``"w"``, ``"wc"`` or ``"wr"``) needs
+        every aggregated value in a cell to be >= 0.
+
+        Raises
+        ------
+        ValueError
+            For a share of a sum when a row in a cell has a negative value.
         """
         tko = self.agg_axes
 
-        lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
+        lbls = self._flat_labels()
         self.logger.info(
             f"Starting {self.__class__.__name__!s} aggregation of ({tko})\n%s",
             "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
         )
 
-        gb = self._grouped_by_cell()
-
         if fcn is None:
             fcn = "count" if self._source.counts else "mean"
+        kind = _aggregation_kind(fcn)
 
-        agg = gb.agg(fcn, **kwargs)
+        # Rows per cell straight from the cell codes, kept only for occupied
+        # cells, as a groupby count would, so empty cells stay NaN after the
+        # reindex below. The aggregated column has no NaN on kept rows, so
+        # this equals its groupby count. It serves clim and axnorm.
+        codes = self._cell_codes()
+        n = np.bincount(codes[codes >= 0], minlength=len(self.binning.cells))
+        occupied = np.flatnonzero(n)
+        cnt = pd.Series(
+            n[occupied].astype(np.int64),
+            index=pd.Index(occupied, dtype=np.int64),
+            name=self.agg_axes,
+        )
+        if kind == "count" and isinstance(fcn, str) and not kwargs:
+            # Count fast path: the counts are the aggregate; no groupby.
+            agg = cnt
+        else:
+            agg = self._grouped_by_cell().agg(fcn, **kwargs)
+
+        if kind == "sum" and self.axnorm in _SHARE_AXNORMS:
+            values = self._source.take(self.agg_axes, labels=False).to_numpy()
+            if (values[codes >= 0] < 0).any():
+                raise ValueError(
+                    f"axnorm={self.axnorm!r} on a sum gives each cell's share of "
+                    f"the total {self.agg_axes}, which needs {self.agg_axes} >= 0; "
+                    "some values in the cells are negative. Use a value "
+                    "aggregation such as 'mean', or axnorm 't', 'c' or 'r'."
+                )
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            cnt = gb.agg("count")
             tk = pd.Series(True, index=agg.index)
             if c0 is not None:
                 tk = tk & (cnt >= c0)
@@ -884,8 +1137,10 @@ class BinnedPlot(Base):
         # NaN of an empty one; then fill in every cell.
         cells = binning.cells
         positions = agg.index.to_numpy()
-        agg = agg.set_axis(cells[positions])
-        agg = binning.normalize(agg, self.axnorm, positions)
+        index = cells[positions]
+        agg = agg.set_axis(index)
+        counts = cnt.set_axis(index)
+        agg = binning.normalize(agg, self.axnorm, positions, counts=counts, kind=kind)
         return self._limit_values(agg.reindex(cells))
 
     def _kept_index(self):
@@ -894,69 +1149,51 @@ class BinnedPlot(Base):
         index = self._source.index
         return index if rows is None else index[rows]
 
-    def _rows_in_cells(self, positions):
-        r"""Boolean ``pd.Series`` marking each kept row whose cell is in ``positions``.
+    def _plotted_rows(self, fcn=None):
+        r"""Boolean array over the kept rows: True where the row's cell is shown.
 
-        Parameters
-        ----------
-        positions : np.ndarray of int
-            Cell codes, positions in ``binning.cells``.
-
-        Returns
-        -------
-        pd.Series
-            On the index of ``data``.
+        A cell is shown where ``agg(fcn)`` is not NaN. Looked up by cell code,
+        with code -1 (no cell) mapped to the appended False.
         """
-        codes = self.binning.codes()
-        keep = np.isin(codes, positions) & (codes >= 0)
-        return pd.Series(keep, index=self._kept_index())
+        shown = self.agg(fcn=fcn).notna().to_numpy()
+        return np.append(shown, False)[self._cell_codes()]
 
-    def get_plotted_data_boolean_series(self):
-        """Return a boolean ``pd.Series`` identifying each plotted measurement.
+    def _kept_source_frame(self):
+        r"""The caller's values on the kept rows, one column per ``data`` column.
 
-        A measurement is plotted when its cell (e.g. its joint (x, y) bin in
-        2-D) survives aggregation. The series shares the same index as the
-        stored data. To align with a different index you may need to adjust
-        the returned series.
+        No ``10**`` round trip: a logged axis holds the values as passed,
+        sign included.
         """
-        agg = self.agg()
-        tk = self._rows_in_cells(np.flatnonzero(agg.notna().to_numpy()))
-
-        self.logger.info(
-            f"Taking {tk.sum()!s} ({100 * tk.mean():.1f}%) {self.__class__.__name__} spectra"
-        )
-
-        return tk
-
-    def get_subset_above_threshold(self, threshold, fcn="count"):
-        r"""Get the subset of data above a given threshold using `fcn` to.
-
-        aggregate. If `axnorm` set, this is used. A row is kept when its cell
-        (e.g. its joint (x, y) bin in 2-D) meets `threshold`.
-
-        Returns
-        -------
-        subset : pd.DataFrame
-            The kept rows, one column per column of ``data``, holding the
-            values the caller passed: never logged, sign included, whatever
-            ``log`` says.
-        tk : pd.Series of bool
-            True for each kept row, on the index of ``data``.
-        """
-        agg = self.agg(fcn=fcn)
-        tk = self._rows_in_cells(np.flatnonzero((agg >= threshold).to_numpy()))
-
-        # The source's values on the kept rows: no 10** round trip, so only
-        # what was stored logged differs from `data`, and it is not inverted.
         source = self._source
-        subset = pd.DataFrame(
+        return pd.DataFrame(
             {k: source.take(k) for k in source.columns},
             index=self._kept_index(),
             copy=False,
         )
-        subset = subset.loc[tk.to_numpy(dtype=bool)]
 
-        return subset, tk
+    def get_plotted_data(self, fcn=None):
+        r"""The rows in the cells the figure shows.
+
+        A cell is shown when ``agg(fcn)`` is not NaN there: after ``clim``,
+        ``axnorm``, any cell filter (a spiral mesh's ``cell_filter``) and
+        ``alim``. ``alim`` acts on the aggregated value, so
+        pass the ``fcn`` you gave ``make_plot``; the default is the same as
+        ``make_plot``'s.
+
+        Parameters
+        ----------
+        fcn : str or callable, optional
+            The aggregation, as ``agg`` takes it.
+
+        Returns
+        -------
+        pd.DataFrame
+            One column per column of ``data`` (``x``, ``y`` and, on a 2-D
+            plot, ``z``), on the caller's index labels, in the caller's row
+            order. The values are the caller's: never logged, sign included,
+            whatever ``log`` says.
+        """
+        return self._kept_source_frame().loc[self._plotted_rows(fcn)]
 
 
 class _OnFixedGrid:
@@ -1034,3 +1271,125 @@ class _OnFixedGrid:
     def grouped(self):
         r"""`joint.groupby` with appropriate axes passes."""
         return self.joint.groupby(list(self._grid_axes), observed=True)
+
+    def take_data_in_yrange_across_x(self, ranges_by_x, get_x_bounds, get_y_bounds):
+        r"""Take the rows within a y-range in each of several x-ranges.
+
+        Parameters
+        ----------
+        ranges_by_x : pd.DataFrame
+            Indexed by x-bins of this plot (``intervals["x"]``); each row holds
+            what ``get_y_bounds`` reads for that bin.
+        get_x_bounds : callable
+            ``get_x_bounds(key, expected_logx=bool)`` returns ``left, right``
+            for one index entry of `ranges_by_x`. ``expected_logx`` is
+            ``log.x``, so the bounds can be given as :math:`\log_{10} x` or
+            :math:`x` to match ``data``.
+        get_y_bounds : callable
+            ``get_y_bounds(row, expected_logy=bool)`` returns ``bottom, top``
+            for one row of `ranges_by_x`. ``expected_logy`` is True only on a
+            ``Hist2D`` with a log y; a ``Hist1D`` stores y in linear units and
+            passes False.
+
+        Returns
+        -------
+        taken : np.ndarray
+            Sorted index labels of the rows with x between `left` and `right`
+            and y between `bottom` and `top`, once per range that holds them.
+            x compares on the side its bins close: ``left < x <= right`` for
+            right-closed bins (explicit edges), ``left <= x < right`` for
+            left-closed bins (an integer `nbins`), whose last bin also holds
+            its right edge, so ``x == right`` is kept when `right` is that
+            edge. A binned y (``Hist2D``) compares likewise with its y-bins;
+            a ``Hist1D``'s y is not binned and compares ``bottom < y <= top``.
+
+        Raises
+        ------
+        ValueError
+            If a range has ``left >= right`` or ``bottom >= top`` (the first
+            such range in the order of `ranges_by_x` is named), or if an entry
+            of `ranges_by_x` names an x-bin the plot does not have. x-bins
+            that `ranges_by_x` omits only log a warning.
+
+        Notes
+        -----
+        When the x-ranges do not overlap, each row's range is found with one
+        :func:`numpy.searchsorted` over the sorted left bounds; overlapping
+        ranges are taken one range at a time, so a row in two ranges is
+        taken twice.
+        """
+        intervals = self.intervals
+        xbins = intervals["x"]
+        ybins = intervals.get("y")
+        if ranges_by_x.index.symmetric_difference(xbins).size:
+            drop = ranges_by_x.index.symmetric_difference(xbins)
+            if not drop.isin(xbins).all():
+                raise ValueError(
+                    "Need a way to drop values in selector that aren't available."
+                )
+            self.logger.warning(
+                f"Dropping {drop.size} intervals from available for selecting."
+            )
+
+        logx = bool(self.log.x)
+        logy = bool(ybins is not None and self.log.y)
+        n = ranges_by_x.shape[0]
+        left, right = np.empty(n), np.empty(n)
+        bottom, top = np.empty(n), np.empty(n)
+        for i, (x, at_x) in enumerate(ranges_by_x.iterrows()):
+            lo, hi = get_x_bounds(x, expected_logx=logx)
+            b, t = get_y_bounds(at_x, expected_logy=logy)
+            if not lo < hi:
+                raise ValueError(f"Need left < right for x-bin {x}, got ({lo}, {hi}).")
+            if not b < t:
+                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
+            left[i], right[i], bottom[i], top[i] = lo, hi, b, t
+
+        data = self.data
+        xv = data.loc[:, "x"].to_numpy()
+        yv = data.loc[:, "y"].to_numpy()
+        labels = data.index.to_numpy()
+
+        def in_y(values, b, t):
+            if ybins is None:
+                return (b < values) & (values <= t)
+            return _within(values, b, t, ybins)
+
+        order = np.argsort(left, kind="stable")
+        left, right = left[order], right[order]
+        bottom, top = bottom[order], top[order]
+        last = xbins.right[-1]
+        overlap = np.any(right[:-1] > left[1:])
+        if xbins.closed == "left":
+            # A range ending on the last edge also holds that edge, which the
+            # next range may start on.
+            overlap |= np.any((right[:-1] == last) & (left[1:] == last))
+        if overlap:
+            taken = [
+                labels[_within(xv, lo, hi, xbins) & in_y(yv, b, t)]
+                for lo, hi, b, t in zip(left, right, bottom, top)
+            ]
+            return np.sort(np.concatenate(taken)) if taken else labels[:0]
+
+        # Disjoint ranges: each x is in at most one, found by its left bound.
+        # Left-closed: the range with the largest left <= x; right-closed: the
+        # largest left < x.
+        side = "right" if xbins.closed == "left" else "left"
+        j = np.searchsorted(left, xv, side) - 1
+        inside = j >= 0
+        jj = np.where(inside, j, 0)
+        if n == 0:
+            return labels[:0]
+        r = right[jj]
+        if xbins.closed == "left":
+            inside &= (xv < r) | ((xv == r) & (r == last))
+        else:
+            inside &= xv <= r
+        b, t = bottom[jj], top[jj]
+        if ybins is None:
+            inside &= (b < yv) & (yv <= t)
+        elif ybins.closed == "left":
+            inside &= (b <= yv) & ((yv < t) | ((yv == t) & (t == ybins.right[-1])))
+        else:
+            inside &= (b < yv) & (yv <= t)
+        return np.sort(labels[inside])

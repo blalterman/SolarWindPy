@@ -50,7 +50,7 @@ def _line_on(lo, seed):
     """A line 3x + 2 sampled on [lo, lo + 1] with 0.1 noise, weighted by it."""
     x = np.linspace(lo, lo + 1, 21)
     y = 3 * x + 2 + np.random.default_rng(seed).normal(0, 0.1, x.size)
-    return Line(x, y, weights=np.full(x.size, 0.1))
+    return Line(x, y, yerr=np.full(x.size, 0.1))
 
 
 def _correlation(fit, a, b):
@@ -227,7 +227,7 @@ def test_degeneracy_threshold_class_attribute_is_the_default():
     x = np.linspace(2, 3, 21)
     y = 3 * x + 2 + np.random.default_rng(1).normal(0, 0.1, x.size)
 
-    fit = _StrictLine(x, y, weights=np.full(x.size, 0.1))
+    fit = _StrictLine(x, y, yerr=np.full(x.size, 0.1))
     with pytest.warns(FitDegeneracyWarning, match="m and b are degenerate"):
         fit.make_fit()
 
@@ -269,7 +269,7 @@ def test_degenerate_follows_the_class_threshold_after_the_fit():
 
     x = np.linspace(2, 3, 21)
     y = 3 * x + 2 + np.random.default_rng(1).normal(0, 0.1, x.size)
-    fit = _Line(x, y, weights=np.full(x.size, 0.1))
+    fit = _Line(x, y, yerr=np.full(x.size, 0.1))
     fit.make_fit()
     assert fit.degenerate == []
 
@@ -290,7 +290,7 @@ def test_degenerate_keeps_the_threshold_given_to_make_fit():
 
     x = np.linspace(2, 3, 21)
     y = 3 * x + 2 + np.random.default_rng(1).normal(0, 0.1, x.size)
-    fit = _Line(x, y, weights=np.full(x.size, 0.1))
+    fit = _Line(x, y, yerr=np.full(x.size, 0.1))
     with pytest.warns(FitDegeneracyWarning):
         fit.make_fit(degeneracy_threshold=0.99)
     _Line.degeneracy_threshold = 0.99999

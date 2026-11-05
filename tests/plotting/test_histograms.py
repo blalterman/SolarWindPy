@@ -202,15 +202,20 @@ class TestHist1DAggregation:
         result = hist.agg(fcn="count")
         assert isinstance(result, pd.Series)
 
-    def test_agg_sum_with_density_raises_value_error(self):
-        """Test that agg(fcn='sum', axnorm='d') raises ValueError."""
+    def test_agg_sum_with_density_is_each_bins_share(self):
+        """agg(fcn='sum') with axnorm='d' gives each bin's share per unit width.
+
+        Without y every row aggregates the value 1, so a sum is a count and
+        the shares integrate to 1 over the bin widths.
+
+        ON FAILURE: the code is wrong.
+        """
         hist = Hist1D(self.x_data)
         hist.set_axnorm("d")
 
-        with pytest.raises(
-            ValueError, match="Unable to calculate a PDF with non-count aggregation"
-        ):
-            hist.agg(fcn="sum")
+        result = hist.agg(fcn="sum")
+        widths = hist.intervals["x"].length
+        assert np.nansum(result.to_numpy() * widths) == exact(1.0)
 
     def test_agg_reproduces_the_constructed_bin_counts(self):
         """Counts equal the population the test placed in each bin.

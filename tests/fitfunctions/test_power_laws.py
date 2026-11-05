@@ -592,7 +592,7 @@ def test_power_law_with_weights():
     y = 2.0 * x**-1.5 + 0.01 * np.array([1, -1] * 6)
     sigma = np.linspace(0.5, 2.0, 12)
 
-    obj = PowerLaw(x, y, weights=sigma)
+    obj = PowerLaw(x, y, yerr=sigma)
     obj.make_fit()
 
     def model(x, A, alpha):

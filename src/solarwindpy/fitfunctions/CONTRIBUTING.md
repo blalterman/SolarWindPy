@@ -216,7 +216,8 @@ Every FitFunction MUST have tests in categories E1-E5. E6-E7 are recommended whe
 
 ### 4.2 Fixture Pattern
 
-All fixtures MUST return `(x, y, w, true_params)`:
+All fixtures MUST return `(x, y, yerr, true_params)`, where `yerr` is the 1-sigma
+uncertainty of each `y`:
 
 ```python
 @pytest.fixture
@@ -225,8 +226,8 @@ def clean_gaussian_data():
     true_params = {"mu": 5.0, "sigma": 1.0, "A": 10.0}
     x = np.linspace(0, 10, 200)
     y = gaussian(x, **true_params)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    yerr = np.ones_like(x)
+    return x, y, yerr, true_params
 
 
 @pytest.fixture
@@ -239,15 +240,15 @@ def noisy_gaussian_data():
     x = np.linspace(0, 10, 200)
     y_true = gaussian(x, **true_params)
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
+    yerr = np.full_like(x, noise_std)
 
-    return x, y, w, true_params
+    return x, y, yerr, true_params
 ```
 
 **Conventions:**
 - Random seed: `np.random.default_rng(42)` for reproducibility
 - Noise level: 3-5% of signal amplitude
-- Weights: `w = np.ones_like(x) / noise_std` for noisy data
+- Uncertainties: `yerr = np.full_like(x, noise_std)` for noisy data
 
 ### 4.3 Assertion Patterns
 
@@ -297,7 +298,7 @@ def test_gaussian_recovers_parameters(true_params):
 @pytest.mark.parametrize("cls", [Line, LineXintercept])
 def test_make_fit_success(cls, simple_linear_data):
     """All line classes should fit successfully."""
-    x, y, w, _ = simple_linear_data
+    x, y, yerr, _ = simple_linear_data
     fit = cls(x, y)
     fit.make_fit()
     assert np.isfinite(fit.popt['m'])

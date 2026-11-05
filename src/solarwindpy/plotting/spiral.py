@@ -818,13 +818,25 @@ class AdaptiveMesh(Binning):
 
     @property
     def allowed_axnorm(self):
-        r"""``d`` and ``t``: the mesh has no rows or columns to normalize."""
-        return ("d", "t")
+        r"""``d``, ``t`` and ``w``: the mesh has no rows or columns to normalize."""
+        return ("d", "t", "w")
 
     @property
     def cells(self):
         r"""Every cell, a ``RangeIndex`` over the rows of ``mesh.mesh``."""
         return pd.RangeIndex(self._mesh.mesh.shape[0])
+
+    def describe(self):
+        r"""Number of mesh cells, e.g. ``"52 mesh cells"``, for a plot's ``repr``."""
+        return f"{self._mesh.mesh.shape[0]} mesh cells"
+
+    def axis_extent(self, axis):
+        r"""``("mesh", lowest edge, highest edge)`` of the mesh along x or y."""
+        columns = {"x": (0, 1), "y": (2, 3)}.get(axis)
+        if columns is None:
+            return None
+        m = self._mesh.mesh
+        return "mesh", m[:, columns[0]].min(), m[:, columns[1]].max()
 
     def codes(self):
         r"""Cell of each kept row, -1 for a row outside the mesh."""
@@ -885,9 +897,10 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         logx, logy : bool or None
             If True, use ``log10(abs())`` of that coordinate. None means
             False.
-        axnorm : {"t", "d", None}, optional
+        axnorm : {"t", "d", "w", None}, optional
             Normalization of the aggregated values: ``"t"`` divides by the
-            maximum, ``"d"`` gives a density over the cells' areas.
+            largest magnitude, ``"d"`` gives a density over the cells' areas
+            and ``"w"`` a weight per cell; see ``Binning.normalize``.
         clip : bool, str, Mapping or None
             If True, clip x and y to their 0.01st and 99.99th percentiles
             (``Base.clip_data``) when placing points in the mesh; the
@@ -1045,8 +1058,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         collection.set_array(C)
 
-        cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
+        norm, cmap = self._color_scale(kwargs, C)
         if len(kwargs):
             raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
 
@@ -1169,12 +1181,11 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
         >>> ax, qset, cbar = splot.plot_contours(levels=[-0.5, 0.0, 0.5])
         """
-        cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
+        norm, cmap = self._color_scale(kwargs, C)
 
         # Cell centers in plot coordinates: log10 on a log axis, as the mesh.
         tk_finite = np.isfinite(C)

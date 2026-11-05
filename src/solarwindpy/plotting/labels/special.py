@@ -302,8 +302,9 @@ class Count(ArbitraryLabel):
         Parameters
         ----------
         norm : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"``, ``"cd"``, ``"rd"``
-            (case-insensitive), or None for raw counts.
+            One of ``"c"``, ``"r"``, ``"t"``, ``"d"``, ``"cd"``, ``"rd"``,
+            ``"w"``, ``"wc"``, ``"wr"`` (case-insensitive), or None for raw
+            counts.
         """
         if norm is not None:
             norm = norm.lower()
@@ -322,6 +323,12 @@ class Count(ArbitraryLabel):
                 tex = r"\mathrm{1D Probability Density}"
             elif axnorm == "d":
                 tex = r"\mathrm{Probability Density}"
+            elif axnorm == "w":
+                tex = r"\mathrm{Count Fraction}"
+            elif axnorm == "wc":
+                tex = r"\mathrm{Col. Count Fraction}"
+            elif axnorm == "wr":
+                tex = r"\mathrm{Row Count Fraction}"
             else:
                 raise ValueError(f"Unrecognized axis normalization `{axnorm}`")
         else:

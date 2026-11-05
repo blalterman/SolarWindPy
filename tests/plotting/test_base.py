@@ -143,12 +143,12 @@ def test_base_and_an_incomplete_subclass_cannot_be_instantiated():
 
 
 def test_str_and_logger_name_the_concrete_class():
-    """``str(plot)`` is the class name and the logger sits under the package.
+    """``str(plot)`` opens with the class name and the logger sits under the package.
 
     ON FAILURE: the code is wrong.
     """
     plot = LinePlot(X, Y)
-    assert str(plot) == "LinePlot"
+    assert str(plot).splitlines()[0] == "LinePlot"
     assert isinstance(plot.logger, logging.Logger)
     assert plot.logger.name.startswith("solarwindpy.plotting.")
     assert plot.logger.name.endswith(".LinePlot")

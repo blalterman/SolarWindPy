@@ -118,10 +118,10 @@ class TestHist2DPandasCompatibility:
         )
 
     def test_density_normalize(self):
-        """Test density normalize (axnorm='d').
+        """Test density normalize (axnorm='d') of the mean z.
 
-        This should create a true 2D probability density function where
-        the integral over the entire domain equals 1.
+        A density of a mean integrates over the domain to the count-weighted
+        average of the cell means, which is the mean z of the binned rows.
 
         ON FAILURE: the code is wrong.
         """
@@ -154,9 +154,10 @@ class TestHist2DPandasCompatibility:
                     dy = dy_values[y_interval]
                     total_integral += value * dx * dy
 
-        # A density integrates to 1 over the cell areas.
-        assert total_integral == exact(1.0), (
-            f"Density integral is {total_integral}, expected 1.0"
+        # A density of the mean integrates to the mean z over the cell areas.
+        mean_z = hist.get_plotted_data().loc[:, "z"].mean()
+        assert total_integral == exact(mean_z), (
+            f"Density integral is {total_integral}, expected {mean_z}"
         )
 
         # Values should be non-negative
@@ -166,9 +167,9 @@ class TestHist2DPandasCompatibility:
         )
 
     def test_pdfs_in_each_column(self):
-        """Test PDFs in each column (axnorm='cd').
+        """Test densities in each column (axnorm='cd') of the mean z.
 
-        This creates PDFs in each column, so integrating over y for each x should give 1.
+        Integrating over y in each column gives that column's mean z.
 
         ON FAILURE: the code is wrong.
         """
@@ -178,6 +179,8 @@ class TestHist2DPandasCompatibility:
         # Get normalized aggregation
         agg = hist.agg()
         agg_unstacked = agg.unstack("x")
+        rows = hist.get_plotted_data()
+        column_means = rows.loc[:, "z"].groupby(hist.cut.loc[rows.index, "x"]).mean()
 
         # Get y bin widths for integration
         y_intervals = hist.intervals["y"]
@@ -195,10 +198,10 @@ class TestHist2DPandasCompatibility:
                     dy = dy_values[y_interval]
                     integral += value * dy
 
-            # Each column should integrate to 1 (if it has data)
-            if integral > 0:  # Only check columns with data
-                assert integral == exact(1.0), (
-                    f"Column {col} PDF integral is {integral}, expected 1.0"
+            # Each column with data integrates to its mean z.
+            if integral > 0:
+                assert integral == exact(column_means[col]), (
+                    f"Column {col} integral is {integral}, expected {column_means[col]}"
                 )
 
         # Values should be non-negative
@@ -208,9 +211,9 @@ class TestHist2DPandasCompatibility:
         )
 
     def test_pdfs_in_each_row(self):
-        """Test PDFs in each row (axnorm='rd').
+        """Test densities in each row (axnorm='rd') of the mean z.
 
-        This creates PDFs in each row, so integrating over x for each y should give 1.
+        Integrating over x in each row gives that row's mean z.
 
         ON FAILURE: the code is wrong.
         """
@@ -220,6 +223,8 @@ class TestHist2DPandasCompatibility:
         # Get normalized aggregation
         agg = hist.agg()
         agg_unstacked = agg.unstack("x")
+        rows = hist.get_plotted_data()
+        row_means = rows.loc[:, "z"].groupby(hist.cut.loc[rows.index, "y"]).mean()
 
         # Get x bin widths for integration
         x_intervals = hist.intervals["x"]
@@ -237,10 +242,10 @@ class TestHist2DPandasCompatibility:
                     dx = dx_values[x_interval]
                     integral += value * dx
 
-            # Each row should integrate to 1 (if it has data)
-            if integral > 0:  # Only check rows with data
-                assert integral == exact(1.0), (
-                    f"Row {row} PDF integral is {integral}, expected 1.0"
+            # Each row with data integrates to its mean z.
+            if integral > 0:
+                assert integral == exact(row_means[row]), (
+                    f"Row {row} integral is {integral}, expected {row_means[row]}"
                 )
 
         # Values should be non-negative

@@ -49,7 +49,7 @@ from ..tools import _warn
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
-_Observations = namedtuple("_Observations", "x,y,w")
+_Observations = namedtuple("_Observations", "x,y,yerr")
 _UsedRawObs = namedtuple("_UsedRawObs", "used,raw,tk_observed")
 _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
@@ -256,21 +256,23 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     youtside : tuple(float, float), optional
         Include only data outside this range.
         Format: (lower, upper) where lower < upper.
-    weights : array-like, optional
+    yerr : array-like, optional
         1-sigma uncertainties of the y values, used for weighted
         least squares fitting: one per observation, in xobs's
-        shape. A covariance matrix is not supported; weights of
-        any other shape raise InvalidParameterError.
-    wmin : float, optional
-        Lower weight limit. Observations with smaller weights
-        are excluded from the fit.
-    wmax : float, optional
-        Upper weight limit. Observations with larger weights
-        are excluded from the fit.
+        shape. Each residual is weighted by 1/yerr, as
+        :func:`scipy.optimize.curve_fit` weights by ``sigma``. A
+        covariance matrix is not supported; yerr of any other
+        shape raises InvalidParameterError.
+    yerr_min : float, optional
+        Lower limit on yerr used in fitting, inclusive (>=).
+        Observations with smaller uncertainties are excluded.
+    yerr_max : float, optional
+        Upper limit on yerr used in fitting, inclusive (<=).
+        Observations with larger uncertainties are excluded.
     logy : bool, default False
-        Whether to interpret y on a log10 scale. Weight selection
-        then uses w/(y*ln(10)) for proper error propagation in
-        log space.
+        Whether to interpret y on a log10 scale. The yerr_min and
+        yerr_max selection then uses yerr/(y*ln(10)), the
+        uncertainty of log10(y).
 
     See Also
     --------
@@ -328,9 +330,9 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ymin=None,
         ymax=None,
         youtside=None,
-        weights=None,
-        wmin=None,
-        wmax=None,
+        yerr=None,
+        yerr_min=None,
+        yerr_max=None,
         logy=False,
     ):
         # Documented in the class docstring (see FitFunctionMeta).
@@ -338,22 +340,22 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         self._set_argnames()
         self._forget_fit()
 
-        if weights is None:
-            assert wmin is None
-            assert wmax is None
+        if yerr is None:
+            assert yerr_min is None
+            assert yerr_max is None
 
         self.set_fit_obs(
             xobs,
             yobs,
-            weights,
+            yerr,
             xmin=xmin,
             xmax=xmax,
             xoutside=xoutside,
             ymin=ymin,
             ymax=ymax,
             youtside=youtside,
-            wmin=wmin,
-            wmax=wmax,
+            yerr_min=yerr_min,
+            yerr_max=yerr_max,
             logy=logy,
         )
 
@@ -845,8 +847,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         """
         return self._fitted("_TeX_info")
 
-    def _clean_raw_obs(self, xobs, yobs, weights):
-        r"""Set the raw x- and y-values along with weights for the fit.
+    def _clean_raw_obs(self, xobs, yobs, yerr):
+        r"""Set the raw x- and y-values along with their uncertainties for the fit.
 
         Doesn't account for extrema, finite data, etc.
 
@@ -855,12 +857,12 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ValueError
             If ``xobs`` is not 1-d: every model is a function of one variable.
         InvalidParameterError
-            If ``yobs`` or ``weights`` does not match ``xobs``'s shape.
+            If ``yobs`` or ``yerr`` does not match ``xobs``'s shape.
         """
         xobs = np.asarray(xobs)
         yobs = np.asarray(yobs)
-        if weights is not None:
-            weights = np.asarray(weights)
+        if yerr is not None:
+            yerr = np.asarray(yerr)
 
         if xobs.ndim != 1:
             raise ValueError(
@@ -871,13 +873,13 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             raise InvalidParameterError(f"""xobs and yobs must have the same shape.
 xobs: {xobs.shape}, yobs: {yobs.shape}""")
 
-        if weights is not None and weights.shape != xobs.shape:
-            raise InvalidParameterError(f"""weights and xobs must have the same shape: \
-weights holds one 1-sigma uncertainty per observation, in xobs's shape, and a \
+        if yerr is not None and yerr.shape != xobs.shape:
+            raise InvalidParameterError(f"""yerr and xobs must have the same shape: \
+yerr holds one 1-sigma uncertainty per observation, in xobs's shape, and a \
 covariance matrix is not supported.
-weights: {weights.shape}, xobs: {xobs.shape}""")
+yerr: {yerr.shape}, xobs: {xobs.shape}""")
 
-        return xobs, yobs, weights
+        return xobs, yobs, yerr
 
     def _build_one_obs_mask(self, axis, x, xmin, xmax):
         """Build observation mask with in-place operations for efficiency."""
@@ -1040,15 +1042,15 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self,
         xobs_raw,
         yobs_raw,
-        weights_raw,
+        yerr_raw,
         xmin=None,
         xmax=None,
         xoutside=None,
         ymin=None,
         ymax=None,
         youtside=None,
-        wmin=None,
-        wmax=None,
+        yerr_min=None,
+        yerr_max=None,
         logy=False,
     ):
         r"""Set the observed values we'll actually use in the fit.
@@ -1057,7 +1059,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         All boundaries are inclusive <= or >=.
 
-        If logy, then make selection of `wmin` and `wmax` based on :math:`w/(y \ln(10))`.
+        If logy, then make selection of ``yerr_min`` and ``yerr_max`` based on
+        :math:`\sigma_y/(y \ln(10))`, the uncertainty of :math:`\log_{10} y`.
 
         Raises
         ------
@@ -1065,9 +1068,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             If ``xobs_raw`` is not 1-d.
         """
 
-        xobs_raw, yobs_raw, weights_raw = self._clean_raw_obs(
-            xobs_raw, yobs_raw, weights_raw
-        )
+        xobs_raw, yobs_raw, yerr_raw = self._clean_raw_obs(xobs_raw, yobs_raw, yerr_raw)
 
         xmask = self._build_one_obs_mask("xobs", xobs_raw, xmin, xmax)
         ymask = self._build_one_obs_mask("yobs", yobs_raw, ymin, ymax)
@@ -1075,25 +1076,27 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         yout_mask = self._build_outside_mask("yobs", yobs_raw, youtside)
 
         mask = xmask & ymask & xout_mask & yout_mask
-        if weights_raw is not None:
-            weights_for_mask = weights_raw
+        if yerr_raw is not None:
+            yerr_for_mask = yerr_raw
 
             if logy:
-                # Enables picking weights based on normalized scale for log stuff
-                weights_for_mask = weights_for_mask / (yobs_raw * np.log(10))
+                # Select on the uncertainty of log10(y).
+                yerr_for_mask = yerr_for_mask / (yobs_raw * np.log(10))
 
-            wmask = self._build_one_obs_mask("weights", weights_for_mask, wmin, wmax)
-            mask = mask & wmask
+            yerr_mask = self._build_one_obs_mask(
+                "yerr", yerr_for_mask, yerr_min, yerr_max
+            )
+            mask = mask & yerr_mask
 
         xobs = xobs_raw[mask]
         yobs = yobs_raw[mask]
-        weights = None
-        if weights_raw is not None:
-            weights = weights_raw[mask]
+        yerr = None
+        if yerr_raw is not None:
+            yerr = yerr_raw[mask]
 
-        used = _Observations(xobs, yobs, weights)
+        used = _Observations(xobs, yobs, yerr)
         self._check_used_obs(used)
-        raw = _Observations(xobs_raw, yobs_raw, weights_raw)
+        raw = _Observations(xobs_raw, yobs_raw, yerr_raw)
         usedrawobs = _UsedRawObs(used, raw, mask)
         self._observations = usedrawobs
 
@@ -1108,7 +1111,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         Parameters
         ----------
         used : _Observations
-            The ``(x, y, w)`` selected for the fit.
+            The ``(x, y, yerr)`` selected for the fit.
         """
 
     def _run_least_squares(self, **kwargs):
@@ -1146,10 +1149,10 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         xdata = self.observations.used.x
         ydata = self.observations.used.y
-        sigma = self.observations.used.w
+        sigma = self.observations.used.yerr
 
         # Adapted from `curve_fit` line 749 (20200527): 1-sigma uncertainties
-        # weight the residuals by 1/sigma. set_fit_obs selects x, y and w with
+        # weight the residuals by 1/sigma. set_fit_obs selects x, y and yerr with
         # one mask after _clean_raw_obs made their shapes equal, so sigma is
         # 1-d with one entry per used observation.
         transform = None if sigma is None else 1.0 / np.asarray(sigma)
@@ -1186,7 +1189,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         xdata = self.observations.used.x
         ydata = self.observations.used.y
-        sigma = self.observations.used.w
+        sigma = self.observations.used.yerr
 
         # The following is from `curve_fit` line 801 and following. (20200625)
         # `cost` is the robust loss, i.e. residuals passed through loss funciton.
@@ -1371,7 +1374,7 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
     def make_fit(self, **kwargs):
         """Fit the function with the independent `xobs` and dependent `yobs`.
 
-        Uses `least_squares`, but treats weights as in `curve_fit`. The
+        Uses `least_squares`, but treats ``yerr`` as `curve_fit` treats ``sigma``. The
         outcome is :attr:`results`, whether the fit succeeds or fails.
 
         Parameters

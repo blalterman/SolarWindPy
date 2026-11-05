@@ -33,6 +33,9 @@ _trans_axnorm = {
     "d": "Density",
     "rd": "1D Probability Density",
     "cd": "1D Probability Density",
+    "w": "Count-Weighted",
+    "wc": "Col. Count-Weighted",
+    "wr": "Row Count-Weighted",
 }
 
 # Longest first, so a species is never matched by a code it starts with
@@ -237,8 +240,10 @@ class TeXlabel(Base):
         mcs1 : tuple of str or None, optional
             Denominator for fraction style labels. Units are compared and set
             to dimensionless when equal.
-        axnorm : {"c", "r", "t", "d"}, optional
-            Axis normalization used when building colorbar labels.
+        axnorm : str, optional
+            Axis normalization used when building colorbar labels: a key of
+            ``_trans_axnorm`` (``"c"``, ``"r"``, ``"t"``, ``"d"``, ``"cd"``,
+            ``"rd"``, ``"w"``, ``"wc"``, ``"wr"``), or None.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
         description : str or None, optional
@@ -312,12 +317,12 @@ class TeXlabel(Base):
         Parameters
         ----------
         new : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"`` (case-insensitive), or None.
+            A key of ``_trans_axnorm`` (case-insensitive), or None.
         """
         if isinstance(new, str):
             new = new.lower()
 
-        assert new in (None, "c", "r", "t", "d")
+        assert new in _trans_axnorm
         self._axnorm = new
 
     def make_species(self, pattern):
