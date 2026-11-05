@@ -49,6 +49,7 @@ quantities, and visualizing results with scientific accuracy.
    usage
    missing_data
    citing
+   related_packages
 
 .. toctree::
    :maxdepth: 2
