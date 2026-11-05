@@ -13,6 +13,7 @@ returns its documented reference start. ``make_fit`` rejects a guess holding NaN
 import contextlib
 import inspect
 import logging
+import os
 import re
 import subprocess
 import sys
@@ -244,13 +245,16 @@ def test_insufficient_data_check_survives_python_O(tmp_path):
         "    print('no error')\n"
     )
     root = Path(solarwindpy.__file__).resolve().parents[1]
+    # Inherit the environment: Windows needs SYSTEMROOT to start a process and
+    # USERPROFILE for Path.home(), which astropy calls on import.
+    env = {**os.environ, "PYTHONPATH": str(root)}
     out = subprocess.run(
         [sys.executable, "-O", str(script)],
         capture_output=True,
         text=True,
-        env={"PYTHONPATH": str(root), "PATH": ""},
-        check=True,
+        env=env,
     )
+    assert out.returncode == 0, out.stderr
     assert out.stdout.strip() == "raised", out.stdout + out.stderr
 
 
