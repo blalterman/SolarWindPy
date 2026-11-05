@@ -31,21 +31,13 @@ from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
 from scipy.optimize import least_squares, OptimizeWarning
 
-try:
-    from scipy.optimize._minpack_py import (
-        _wrap_func,
-        _wrap_jac,
-        _initialize_feasible,
-    )
-except ImportError:  # pragma: no cover - fall back for older SciPy versions
-    from scipy.optimize.minpack import (
-        _wrap_func,
-        _wrap_jac,
-        _initialize_feasible,
-    )
-from scipy.linalg import svd
-
 from ..tools import _warn
+from ._least_squares import (
+    feasible_start,
+    pseudo_inverse_covariance,
+    weighted_jacobian,
+    weighted_residual,
+)
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
@@ -776,15 +768,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Returns
         -------
         numpy.ndarray
-            One value per parameter: ones when unbounded, otherwise a point
-            inside the bounds.
+            One value per parameter: 1 when unbounded, the midpoint when both
+            bounds are finite, ``lower + 1`` when only the lower bound is
+            finite, and ``upper - 1`` when only the upper bound is finite.
         """
         # The fit parameters are the function's arguments after x.
         n = len(self.argnames)
         if n < 1:
             raise ValueError("Unable to determine number of fit parameters.")
         lb, ub = self._bounds_lower_upper(bounds, n)
-        return _initialize_feasible(lb, ub)
+        return feasible_start(lb, ub)
 
     def _bounds_lower_upper(self, bounds, n):
         r"""Return ``bounds`` as lower and upper float arrays of ``n`` values.
@@ -1165,12 +1158,8 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
 
         bounds = self._bounds_array(bounds)
 
-        # Adapted from SciPy `curve_fit` lines 704 and 715 (20200527).
-        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
-        # https://github.com/scipy/scipy. License: BSD-3-Clause.
-        # Modified: the parameter count comes from self.argnames, not the
-        # function's signature; bounds go through _bounds_lower_upper, which
-        # also takes a dict; a caller's p0 must be finite.
+        # Without a p0, start from the feasible point of _fallback_p0, one
+        # value per name in self.argnames. A caller's p0 must be finite.
         if p0 is None:
             p0 = np.atleast_1d(np.asarray(self._fallback_p0(bounds), dtype=float))
         else:
@@ -1188,26 +1177,16 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
         ydata = self.observations.used.y
         sigma = self.observations.used.yerr
 
-        # Adapted from SciPy `curve_fit` line 749 (20200527).
-        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
-        # https://github.com/scipy/scipy. License: BSD-3-Clause.
-        # Modified: keeps only the 1-sigma branch, which weights the residuals
-        # by 1/sigma; the 2-d covariance (Cholesky) branch is dropped.
-        # set_fit_obs selects x, y and yerr with one mask after
+        # Residuals and a callable Jacobian are weighted by 1/sigma, the
+        # convention scipy.optimize.curve_fit documents for a 1-d sigma, so
+        # least_squares minimizes sum(((f(x, *p) - y) / sigma)**2) through
+        # its loss. set_fit_obs selects x, y and yerr with one mask after
         # _clean_raw_obs made their shapes equal, so sigma is 1-d with one
         # entry per used observation.
-        transform = None if sigma is None else 1.0 / np.asarray(sigma)
-
-        # Copied from SciPy `curve_fit` line 769 (20200527).
-        # Source: scipy/optimize/_minpack_py.py (then minpack.py) in
-        # https://github.com/scipy/scipy. License: BSD-3-Clause.
-        # _wrap_func and _wrap_jac are imported from SciPy's private module,
-        # not copied. Modified: the result goes to least_squares directly,
-        # without the _lightweight_memoizer wrapper current SciPy adds.
-        loss_func = _wrap_func(self.function, xdata, ydata, transform)
-        # Already define default `jac` with `kwargs`. Don't need ELSE clause.
+        loss_func = weighted_residual(self.function, xdata, ydata, sigma)
+        # A string jac ("2-point" by default) goes to least_squares as is.
         if callable(jac):
-            jac = _wrap_jac(jac, xdata, transform)
+            jac = weighted_jacobian(jac, xdata, sigma)
 
         res = least_squares(
             loss_func,
@@ -1237,7 +1216,6 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
         ydata = self.observations.used.y
         sigma = self.observations.used.yerr
 
-        # The following is from `curve_fit` line 801 and following. (20200625)
         # `cost` is the robust loss, i.e. residuals passed through loss funciton.
         ysize = len(res.fun)
         cost = 2 * res.cost  # res.cost is half sum of squares!
@@ -1252,12 +1230,12 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
                 r /= sigma
             chisq_dof = (r**2).sum() / dof
 
-        # Do Moore-Penrose inverse discarding zero singular values.
-        _, s, VT = svd(res.jac, full_matrices=False)
-        threshold = np.finfo(float).eps * max(res.jac.shape) * s[0]
-        s = s[s > threshold]
-        VT = VT[: s.size]
-        pcov = np.dot(VT.T / (s**2), VT)
+        # The pseudo-inverse of J^T J at the solution, discarding singular
+        # values of J at or below eps * max(m, n) * s_max; res.jac is the
+        # Jacobian least_squares scaled for the robust loss. Below, it is
+        # scaled by the robust chi-square per degree of freedom, the
+        # absolute_sigma=False convention scipy.optimize.curve_fit documents.
+        pcov = pseudo_inverse_covariance(res.jac)
 
         warn_cov = False
         if ysize > p0.size:

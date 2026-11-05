@@ -69,16 +69,6 @@ def test_scanner_flags_exactly_the_private_scipy_imports(snippet, expected):
     assert _private_scipy_imports(snippet) == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=PrivateScipyImportError,
-    reason=(
-        "fitfunctions/core.py imports _wrap_func, _wrap_jac and "
-        "_initialize_feasible from scipy.optimize._minpack_py (fallback "
-        "scipy.optimize.minpack); expected message lists those names; remove "
-        "this marker when the public-API fitting helpers land"
-    ),
-)
 def test_fitfunctions_modules_import_no_private_scipy_name():
     """No fitfunctions module imports a SciPy name whose dotted path is private.
 
