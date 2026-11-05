@@ -170,6 +170,7 @@ analysis = [
 [project.urls]
 "Bug Tracker" = "https://github.com/blalterman/SolarWindPy/issues"
 "Source" = "https://github.com/blalterman/SolarWindPy"
+"Documentation" = "https://solarwindpy.readthedocs.io"
 
 [tool.setuptools.package-data]
 solarwindpy = ["core/data/*.csv"]

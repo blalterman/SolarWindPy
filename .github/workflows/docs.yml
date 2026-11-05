@@ -66,34 +66,3 @@ jobs:
             docs/build/coverage/
             docs/build/linkcheck/
           retention-days: 90
-
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip wheel
-          # Install pytables separately if needed by the package
-          pip install --verbose tables
-          pip install -e ".[docs]"
-      
-      - name: Build documentation for deployment
-        working-directory: docs
-        run: |
-          make clean
-          make html
-      
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/build/html
-          cname: solarwindpy.github.io  # If you have a custom domain

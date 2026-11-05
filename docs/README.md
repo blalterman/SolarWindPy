@@ -30,4 +30,6 @@ gitignored, and `make clean` removes it.
 
 ## Deployment
 
-Documentation is automatically built and deployed to GitHub Pages via the `.github/workflows/docs.yml` workflow when changes are pushed to the `master` branch.
+Read the Docs builds and hosts the documentation at https://solarwindpy.readthedocs.io,
+configured by `.readthedocs.yaml`. The `.github/workflows/docs.yml` workflow builds the docs
+with warnings as errors on every push and pull request; it does not deploy them.

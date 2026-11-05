@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pre-commit install` now installs the commit-message hook as well as the pre-commit hook
   (`default_install_hook_types` in `.pre-commit-config.yaml`), so the conventional-commit
   check runs without a separate `pre-commit install --hook-type commit-msg`.
+- Read the Docs (https://solarwindpy.readthedocs.io) is the only documentation host. The
+  package metadata lists it as the `Documentation` URL.
+
+### Removed
+
+- The GitHub Pages deployment of the documentation (the `deploy` job in
+  `.github/workflows/docs.yml`). The workflow still builds the docs with warnings as errors on
+  every push and pull request.
 
 ## [0.4.0] - 2026-11-05
 
