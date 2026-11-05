@@ -540,16 +540,29 @@ dtype('int8')
 >>> slow = Hist2D(frame["v"], frame["n"], nbins=binned, mask=frame["v"] < 500)
 >>> counts.agg().index.equals(mean_w.agg().index)
 True
->>> int(counts.agg().sum()), int(slow.agg().sum())
-(10000, 6947)
+>>> int(counts.agg().sum()) == N
+True
+>>> int(slow.agg().sum()) == int((frame["v"] < 500).sum())
+True
 
-Sharing saves time and memory. On an Apple M3 (Python 3.12, pandas 3.1,
-NumPy 2.5), building and aggregating ten ``Hist2D`` of different ``z`` over
-one 70 by 50 grid of :math:`10^6` points took 0.28 s with a shared
-``BinnedData`` and 0.57 s when each plot binned its own columns, the median of
-three runs. Measured with :mod:`tracemalloc`, which counts Python and NumPy
-allocations, the ten plots and their aggregates kept 3 MB against 21 MB, and
-the build peaked at 60 MB against 79 MB.
+Every point lies inside the edges, so the counts add up to the rows a plot
+keeps. A plot passed an unnamed Series, or one renamed after the
+``BinnedData`` was built, cannot find its column:
+
+>>> Hist2D(pd.Series(speed), frame["n"], nbins=binned)
+Traceback (most recent call last):
+...
+KeyError: "The BinnedData has no column None, the name of x; its columns are ('v', 'n')."
+
+Sharing saves time and memory. Building and aggregating ten ``Hist2D`` of
+different ``z`` over one 70 by 50 grid of :math:`10^6` points took 0.17 s with
+a shared ``BinnedData`` and 0.34 s when each plot binned its own columns, the
+median of three runs on an Apple M3 (Python 3.12, pandas 3.1, NumPy 2.5).
+Measured with :mod:`tracemalloc`, which counts Python and NumPy allocations,
+the ten plots and their aggregates kept 3 MB against 21 MB, and the build
+peaked at 52 MB against 71 MB. The script that measures them,
+:download:`benchmark_binned_data.py <../../scripts/benchmark_binned_data.py>`,
+prints the numbers for your machine.
 
 Two plots on one ``BinnedData``, the counts and the mean thermal speed in each
 cell:
