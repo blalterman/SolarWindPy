@@ -533,10 +533,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Hinge`, which holds the estimate-or-reference control flow of `p0` and the shared help
   text. When the data give no estimate (no data on one side of the hinge, repeated `x`,
   a zero slope where an x-intercept is needed, or rising-region points sharing one x),
-  every class but `HingeMax` logs a warning and its `p0` returns the author's reference
-  hinge, (x_h, y_h) = (433, 4.12) with x-intercept x_1 = 250, m_1 = 4.12 / 183 and
-  m_2 = 0.01 m_1, translated to its parameters. `HingeMax` has no reference start yet: in
-  that case its `p0` raises `NotImplementedError`; pass `p0=` to `make_fit`. The TeX
+  every class logs a warning and its `p0` returns the reference hinge, the author's
+  Wind:SWE helium abundance fit (doi:10.3847/2041-8213/adb48e), translated to its
+  parameters: (x_h, y_h) = (433, 4.19), vanishing speed x_1 = 302 and fast-wind slope
+  m_2 = 0.0010, so m_1 = 4.19 / 131 and x_2 = -3757. `HingeMax` starts from the same
+  two lines as `HingeMin`, combined with the maximum. The TeX
   report writes `xh`, `yh`, `x1`, `x2`, `m1`, `m2` and `theta` as `x_h`, `y_h`, `x_1`,
   `x_2`, `m_1`, `m_2` and `\theta`.
 - `FitFunction.results`, a one-row table of every parameter's value and uncertainty with

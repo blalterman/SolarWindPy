@@ -26,8 +26,9 @@ from solarwindpy.fitfunctions.trend_fits import TrendFit
 from tests.tolerances import exact, noise_free
 
 
-# The author's reference hinge: (h, yh) = (433, 4.12), rising with slope
-# yh / (433 - 250) and flattening to a tenth of that slope past the hinge.
+# A synthetic hinge that generates the data, not Hinge's reference start:
+# (h, yh) = (433, 4.12), rising with slope yh / (433 - 250) and flattening to
+# a tenth of that slope past the hinge, so mu stays positive on [250, 650].
 H, YH = 433.0, 4.12
 M1 = YH / (H - 250.0)
 M2 = 0.1 * M1
