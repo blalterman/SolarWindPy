@@ -545,3 +545,23 @@ def test_edges_do_not_change_the_axis_limits(ax):
     Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True)
     assert ax.get_xlim() == (EX.min(), EX.max())
     assert ax.get_ylim() == (EY.min(), EY.max())
+
+
+@pytest.mark.parametrize("axis", ["x", "y"])
+def test_a_point_a_log_axis_cannot_show_breaks_the_chain(ax, axis):
+    """A nonpositive value on a log axis is not drawn, so it breaks the chain.
+
+    ``Scatter`` keeps such rows and matplotlib drops them from a log axis;
+    the edges must not run to them. ``set_log`` after construction counts.
+    ON FAILURE: the code is wrong.
+    """
+    x, y = EX + 1.0, EY + 1.0
+    if axis == "x":
+        x[2] = -1.0
+    else:
+        y[2] = 0.0
+    sc = Scatter(x, y, EZ)
+    sc.set_log(**{axis: True})
+    _, _, lc, _ = sc.make_plot(ax=ax, edges=True)
+    _assert_segments(lc, x, y, [(0, 1), (3, 4)])
+    np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])

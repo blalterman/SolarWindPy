@@ -119,8 +119,9 @@ class Scatter(base.ColorPlot):
         given, by position, not by index label: sort time-indexed data by
         time before building the plot to draw its path through time. A
         segment joins two drawn points only. A row that is not drawn (NaN or
-        infinite, outside ``mask``, or outside ``alim``) breaks the chain:
-        neither of its segments is drawn and its neighbours are not joined.
+        infinite, outside ``mask``, outside ``alim``, or <= 0 on a log axis)
+        breaks the chain: neither of its segments is drawn and its neighbours
+        are not joined.
 
         When z varies, segment i is coloured by ``(z[i] + z[i + 1]) / 2``
         through the points' colormap and norm, the same objects, so the one
@@ -189,9 +190,15 @@ class Scatter(base.ColorPlot):
         else:
             position = np.flatnonzero(rows)
         position = position[shown]
-        start = np.flatnonzero(np.diff(position) == 1)
-
         xy = data.loc[:, ["x", "y"]].to_numpy(dtype=float)
+        # The data stay linear, so a log axis cannot show a value <= 0.
+        drawn = np.ones(position.size, dtype=bool)
+        for i, log in enumerate(self.log):
+            if log:
+                drawn &= xy[:, i] > 0
+        joined = (np.diff(position) == 1) & drawn[:-1] & drawn[1:]
+        start = np.flatnonzero(joined)
+
         segments = np.stack([xy[start], xy[start + 1]], axis=1)
 
         kwargs = cbook.normalize_kwargs(edge_kwargs or {}, LineCollection)
