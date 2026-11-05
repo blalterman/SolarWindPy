@@ -154,3 +154,21 @@ run the suite.
 - **Version constraints**: Use lower bounds for compatibility, upper bounds for breaking changes
 - **NumPy 2**: Ensure all dependencies support NumPy >=2.0,<3.0
 
+### Dependency support
+
+SolarWindPy follows [PHEP 3](https://github.com/heliophysicsPy/standards/blob/main/pheps/phep-0003.md):
+it supports Python versions released in the last 36 months and core Scientific
+Python packages released in the last 24 months. Three floors deliberately
+deviate from it:
+
+- **SciPy >=1.16**: the package uses SciPy's CODATA 2022 physical constants.
+- **pandas >=3**: the code uses pandas-3-only API. pandas 2.3 leaves the PHEP 3
+  window in mid-2027, which ends this deviation.
+- **matplotlib >=3.11**: from 3.11, contour plots raise on an unknown keyword
+  instead of ignoring it. Ends on 2026-12-14, when matplotlib 3.10 leaves the
+  PHEP 3 window.
+
+Otherwise each floor is the oldest version the test suite passes on. CI checks
+both: `.github/workflows/dependencies.yml` runs the PHEP 3 compliance check, with
+the deviations above as its only exceptions, and runs the suite on the lowest
+version of each dependency that `pyproject.toml` allows.
