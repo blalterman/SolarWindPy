@@ -183,7 +183,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             If a z label is passed: a ``Hist1D`` has none.
         """
         if "z" in kwargs:
-            raise ValueError(r"{} doesn't have a z-label".format(self))
+            raise ValueError(f"{self.__class__.__name__} doesn't have a z-label")
 
         super(Hist1D, self).set_labels(**kwargs)
 

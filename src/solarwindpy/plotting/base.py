@@ -66,8 +66,45 @@ class Base(ABC):
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
 
-    def __str__(self):
-        return self.__class__.__name__
+    def __repr__(self):
+        r"""A summary of what the plot holds, one ``key: value`` per line.
+
+        The class, then the x and y labels (and z when the plot has one), the
+        number of rows the plot keeps, the log flags, the fields
+        ``_repr_fields`` adds (binning, ``axnorm``, ``clim``, ``alim``), and
+        ``path``. ``print`` shows the same text.
+        """
+        labels = self._flat_labels()
+        fields = {k: labels[k] for k in ("x", "y")}
+        if self._has_z_label():
+            fields["z"] = labels["z"]
+        source = self.__dict__.get("_source")
+        fields["observations"] = "none" if source is None else source.n_kept
+        fields["log"] = ", ".join(f"{k}={v}" for k, v in self.log._asdict().items())
+        fields.update(self._repr_fields())
+        fields["path"] = self.path
+        lines = [f"  {k}: {v}" for k, v in fields.items()]
+        return "\n".join([self.__class__.__name__, *lines])
+
+    def _repr_fields(self):
+        r"""Fields a subclass adds to ``repr`` before ``path``, as a dict; none here."""
+        return {}
+
+    @staticmethod
+    def _format_limits(limits):
+        r"""``RangeLimits`` as ``"lower=..., upper=..."``, or None when both are unset."""
+        if limits.lower is None and limits.upper is None:
+            return None
+        return f"lower={limits.lower}, upper={limits.upper}"
+
+    def _flat_labels(self):
+        r"""Each axis's label as one line of text, keyed ``x``, ``y`` and ``z``."""
+        return {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
+
+    def _has_z_label(self):
+        r"""True when ``labels.z`` is set: neither None nor the string ``"None"``."""
+        z = self.labels.z
+        return not (z is None or (isinstance(z, str) and z == "None"))
 
     @property
     def logger(self):
@@ -181,7 +218,7 @@ class Base(ABC):
         """
         labels = self.labels
         parts = [self._path_part(labels.x, "x"), self._path_part(labels.y, "y")]
-        if not (labels.z is None or (isinstance(labels.z, str) and labels.z == "None")):
+        if self._has_z_label():
             parts.append(self._path_part(labels.z, "z"))
         path = Path(self.__class__.__name__, *parts)
 
@@ -394,6 +431,14 @@ class ColorPlot(Base):
     def alim(self):
         r"""``RangeLimits`` on the aggregated value; see ``set_alim``."""
         return self._alim
+
+    def _repr_fields(self):
+        r"""Add ``alim`` and its kind to ``repr`` when set."""
+        fields = super()._repr_fields()
+        alim = self._format_limits(self.alim)
+        if alim is not None:
+            fields["alim"] = f"{alim} ({self.alim_kind})"
+        return fields
 
     @property
     def alim_kind(self):
@@ -722,6 +767,18 @@ class BinnedPlot(Base):
         r"""The ``Binning`` that places each kept row in a cell."""
         return self._binning
 
+    def _repr_fields(self):
+        r"""Add the binning, ``axnorm`` and, when set, ``clim`` to ``repr``."""
+        fields = super()._repr_fields()
+        binning = self.__dict__.get("_binning")
+        if binning is not None:
+            fields["bins"] = binning.describe()
+        fields["axnorm"] = self.axnorm
+        clim = self._format_limits(self.clim)
+        if clim is not None:
+            fields["clim"] = clim
+        return fields
+
     @property
     def clim(self):
         r"""``RangeLimits`` of the minimum and maximum counts per cell; see ``set_clim``."""
@@ -853,7 +910,7 @@ class BinnedPlot(Base):
         """
         tko = self.agg_axes
 
-        lbls = {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
+        lbls = self._flat_labels()
         self.logger.info(
             f"Starting {self.__class__.__name__!s} aggregation of ({tko})\n%s",
             "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),

@@ -826,6 +826,10 @@ class AdaptiveMesh(Binning):
         r"""Every cell, a ``RangeIndex`` over the rows of ``mesh.mesh``."""
         return pd.RangeIndex(self._mesh.mesh.shape[0])
 
+    def describe(self):
+        r"""Number of mesh cells, e.g. ``"52 mesh cells"``, for a plot's ``repr``."""
+        return f"{self._mesh.mesh.shape[0]} mesh cells"
+
     def codes(self):
         r"""Cell of each kept row, -1 for a row outside the mesh."""
         bin_id = self._mesh.bin_id

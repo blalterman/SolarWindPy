@@ -56,6 +56,10 @@ class Binning(ABC):
         ``log10`` of the data, so the size is measured in ``log10``.
         """
 
+    def describe(self):
+        r"""One line naming how many cells there are, for a plot's ``repr``."""
+        return f"{len(self.cells)} cells"
+
     def postfilter(self, agg):
         r"""Drop cells of ``agg``, indexed by cell code, that fail a quality filter.
 
@@ -557,6 +561,10 @@ class FixedGrid(Binning):
         if len(intervals) == 1:
             return intervals[0]
         return pd.MultiIndex.from_product(intervals, names=list(self._axes))
+
+    def describe(self):
+        r"""Bins per axis, e.g. ``"x: 4, y: 3"``, for a plot's ``repr``."""
+        return ", ".join(f"{k}: {len(self.intervals[k])}" for k in self._axes)
 
     def cell_measure(self):
         r"""Each bin's width in 1-D, its area in 2-D, on the binned scale."""

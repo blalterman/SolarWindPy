@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
   `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
   and a `Line` fit's `results`. It replaces the tutorial stub.
+- A summary `repr` for every plot (`Hist1D`, `Hist2D`, `SpiralPlot2D`, `Scatter`), shown by
+  Jupyter and `print`: the class, the x, y and z labels, the number of rows kept, the log flags,
+  the bins per axis (or mesh cells for `SpiralPlot2D`), `axnorm`, `clim` and `alim` when set,
+  and `path`. `str(plot)` is that summary, no longer just the class name.
 
 ### Changed
 

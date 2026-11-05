@@ -21,8 +21,6 @@ from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 
-_NO_REPR = pytest.mark.xfail(strict=True, reason="plots have no summary repr yet")
-
 # Six rows; row 2 has NaN x and row 4 NaN y, so a plot on x and y keeps 4 and
 # a Hist1D of x alone keeps 5.
 X = pd.Series([1.0, 2.0, np.nan, 3.0, 4.0, 5.0], name="x")
@@ -52,7 +50,6 @@ def _build(name):
     return Scatter(X, Y, Z)
 
 
-@_NO_REPR
 @pytest.mark.parametrize("name", list(KEPT))
 def test_repr_names_the_class_labels_rows_log_and_path(name):
     """Every plot's repr names its class, labels, kept rows, log flags and path.
@@ -76,7 +73,6 @@ def test_repr_names_the_class_labels_rows_log_and_path(name):
 @pytest.mark.parametrize(
     "name, has_z", [("Hist1D", False), ("Hist2D", True), ("Scatter", True)]
 )
-@_NO_REPR
 def test_repr_shows_z_only_when_the_plot_has_one(name, has_z):
     """A z label is listed for a 2-D histogram and a coloured scatter only.
 
@@ -90,7 +86,6 @@ def test_repr_shows_z_only_when_the_plot_has_one(name, has_z):
         assert fields["z"] == str(plot.labels.z)
 
 
-@_NO_REPR
 def test_hist1d_repr_counts_its_bins_and_axnorm():
     """Three bins from four edges; no ``axnorm`` reads ``None``.
 
@@ -101,7 +96,6 @@ def test_hist1d_repr_counts_its_bins_and_axnorm():
     assert fields["axnorm"] == "None"
 
 
-@_NO_REPR
 def test_hist2d_repr_counts_its_bins_per_axis():
     """``nbins=4`` gives four bins on each axis, and ``axnorm="t"`` is shown.
 
@@ -112,7 +106,6 @@ def test_hist2d_repr_counts_its_bins_per_axis():
     assert fields["axnorm"] == "t"
 
 
-@_NO_REPR
 def test_spiral_repr_counts_its_mesh_cells():
     """A spiral's binning is its number of mesh cells, one per row of ``mesh.mesh``.
 
@@ -123,7 +116,6 @@ def test_spiral_repr_counts_its_mesh_cells():
     assert fields["bins"] == f"{plot.mesh.mesh.shape[0]} mesh cells"
 
 
-@_NO_REPR
 def test_scatter_repr_has_no_binning():
     """A scatter bins nothing, so its repr has no bins, axnorm or clim.
 
@@ -134,7 +126,6 @@ def test_scatter_repr_has_no_binning():
     assert not {"bins", "axnorm", "clim"} & set(fields)
 
 
-@_NO_REPR
 def test_clim_and_alim_appear_only_once_set():
     """Unset limits are left out; set ones are listed with their bounds.
 
@@ -150,7 +141,6 @@ def test_clim_and_alim_appear_only_once_set():
     assert fields["alim"] == "lower=0.1, upper=0.9 (quantile)"
 
 
-@_NO_REPR
 def test_repr_reports_a_log_axis():
     """A logarithmic x is reported as ``x=True``.
 

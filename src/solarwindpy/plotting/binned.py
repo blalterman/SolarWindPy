@@ -402,6 +402,11 @@ class _PlotSource:
         return self._rows
 
     @property
+    def n_kept(self):
+        r"""Number of rows the plot keeps."""
+        return self._n_kept
+
+    @property
     def log_columns(self):
         r"""Coordinates given a log setting, True or False, when built.
 
