@@ -25,8 +25,7 @@ GitHub Release (v*) → PyPI Publish → Wait for PyPI → Calculate SHA256 → 
 
 1. **`scripts/wait_for_pypi.py`** - PyPI availability checker
 2. **`scripts/update_conda_feedstock.py`** - Main automation orchestrator
-3. **`scripts/conda_config.py`** - Configuration and constants
-4. **`.github/workflows/publish.yml`** - GitHub Actions integration
+3. **`.github/workflows/publish.yml`** - GitHub Actions integration
 
 ## Automated Features
 
@@ -324,28 +323,16 @@ These appear as ➕/➖ in comparison table - update manually with `-base` suffi
 
 ## Configuration
 
-The system is configured via `scripts/conda_config.py`:
+Each script takes its settings from command-line options; run it with `--help` for the
+full list.
 
-```python
-# Timeout settings (seconds)
-TIMEOUTS = {
-    'pypi_check': 10,           # PyPI API requests
-    'download': 60,             # Package downloads
-    'pypi_availability': 300,   # Wait for PyPI (5 minutes)
-}
-
-# Automation settings
-AUTOMATION_CONFIG = {
-    'enabled_for_prereleases': False,   # Skip RC versions
-    'create_tracking_issues': True,     # Create GitHub issues
-}
-```
+- `scripts/update_conda_feedstock.py`: `--package`, `--feedstock-repo`, `--fork-owner`,
+  `--dry-run`, `--no-issue`, and `--max-wait`. The PyPI wait and retry backoff defaults are
+  module constants (`RELEASE_WAIT`, `BACKOFF_START`, `BACKOFF_FACTOR`, `BACKOFF_MAX`).
+- `scripts/wait_for_pypi.py`: `--package` and `--timeout` (default 300 seconds).
 
 ### Environment Variables
 
-- `CONDA_AUTOMATION_TIMEOUT`: Override default timeouts
-- `CONDA_AUTOMATION_DRY_RUN`: Set default dry run mode
-- `CONDA_AUTOMATION_DEBUG`: Enable debug logging
 - `GITHUB_TOKEN`: Required for GitHub API operations
 
 ## Usage Examples
