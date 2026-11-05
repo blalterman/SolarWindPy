@@ -30,18 +30,23 @@ _trans_species = quantities.SPECIES
 _trans_component = quantities.COMPONENTS
 _inU = quantities.UNIT_TEX
 
-_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name")
+_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name,symbol")
 
 #: How a label names each ``axnorm`` key, keyed by the key: the one table of
-#: the keys ``Count`` and ``TeXlabel`` accept. ``count`` is the words of a
-#: normalized ``Count``; ``quantity`` the TeX of a normalized quantity, with
-#: ``%s`` for the quantity's TeX. ``name`` is the plain-text name of a
-#: normalized ``Count`` in publication format. ``density`` is True for a
-#: density: its units are 1 / (bin width or area in the units of the binned
-#: axes, in decades on a log axis), which a label does not know, so it states
-#: none. A count divided
-#: by a maximum is a pure number and states ``\#``. Every key a binning's
-#: ``allowed_axnorm`` holds is a key here.
+#: the keys ``Count`` and ``TeXlabel`` accept. A new key a binning accepts
+#: needs one entry here.
+#:
+#: - ``count``: the words of a normalized ``Count``.
+#: - ``quantity``: the TeX of a normalized quantity, with ``%s`` for the
+#:   quantity's TeX.
+#: - ``density``: True for a density. Its units are 1 / (bin width or area in
+#:   the units of the binned axes, in decades on a log axis), which a label
+#:   does not know, so it states none. A count divided by a maximum is a pure
+#:   number and states ``\#``.
+#: - ``name``: the plain-text name of a normalized ``Count`` in publication
+#:   format, its first line.
+#: - ``symbol``: the TeX symbol of a normalized ``Count`` in publication
+#:   format, its second line; a plain count is ``N``.
 AXNORM = MappingProxyType(
     {
         "c": _AxisNorm(
@@ -49,31 +54,42 @@ AXNORM = MappingProxyType(
             r"%s / \mathrm{Column \; Max}",
             False,
             "Column-Normalized Count",
+            r"N / N_{\max,\mathrm{col}}",
         ),
         "r": _AxisNorm(
             "Count / Row Max",
             r"%s / \mathrm{Row \; Max}",
             False,
             "Row-Normalized Count",
+            r"N / N_{\max,\mathrm{row}}",
         ),
-        "t": _AxisNorm("Count / Max", r"%s / \mathrm{Max}", False, "Normalized Count"),
+        "t": _AxisNorm(
+            "Count / Max",
+            r"%s / \mathrm{Max}",
+            False,
+            "Normalized Count",
+            r"N / N_{\max}",
+        ),
         "d": _AxisNorm(
             "Probability Density",
             r"\mathrm{Density \; of} \; %s",
             True,
             "Probability Density",
+            r"p",
         ),
         "cd": _AxisNorm(
             "Column Probability Density",
             r"\mathrm{Column \; Density \; of} \; %s",
             True,
             "Column Probability Density",
+            r"p_{\mathrm{col}}",
         ),
         "rd": _AxisNorm(
             "Row Probability Density",
             r"\mathrm{Row \; Density \; of} \; %s",
             True,
             "Row Probability Density",
+            r"p_{\mathrm{row}}",
         ),
     }
 )

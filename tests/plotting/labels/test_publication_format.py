@@ -112,7 +112,7 @@ def test_module_default_applies_to_labels_already_built(restore_default):
     one_line = (str(label), str(count))
     base.set_publication_format(True)
     assert str(label) == "Number Density\n" + one_line[0]
-    assert str(count) == "Normalized Count\n" + one_line[1]
+    assert str(count) == "Normalized Count\n" + r"$N / N_{\max} \; \left[\#\right]$"
     base.set_publication_format(False)
     assert (str(label), str(count)) == one_line
 
@@ -151,26 +151,38 @@ def test_unregistered_quantity_has_no_name_line():
 
 
 @pytest.mark.parametrize(
-    "norm, name",
+    "norm, name, symbol_line",
     [
-        (None, "Count"),
-        ("t", "Normalized Count"),
-        ("c", "Column-Normalized Count"),
-        ("r", "Row-Normalized Count"),
-        ("d", "Probability Density"),
-        ("cd", "Column Probability Density"),
-        ("rd", "Row Probability Density"),
+        (None, "Count", r"$N \; \left[\#\right]$"),
+        ("t", "Normalized Count", r"$N / N_{\max} \; \left[\#\right]$"),
+        (
+            "c",
+            "Column-Normalized Count",
+            r"$N / N_{\max,\mathrm{col}} \; \left[\#\right]$",
+        ),
+        (
+            "r",
+            "Row-Normalized Count",
+            r"$N / N_{\max,\mathrm{row}} \; \left[\#\right]$",
+        ),
+        ("d", "Probability Density", r"$p$"),
+        ("cd", "Column Probability Density", r"$p_{\mathrm{col}}$"),
+        ("rd", "Row Probability Density", r"$p_{\mathrm{row}}$"),
     ],
 )
-def test_count_names_follow_the_normalization(norm, name, restore_default):
-    """``Count`` names its normalization in words, from ``AXNORM``.
+def test_count_is_its_name_over_its_symbol(norm, name, symbol_line, restore_default):
+    r"""A ``Count`` in publication format is its name over the symbol ``N`` or ``p``.
+
+    The second line is a symbol, as for any quantity, rather than the words
+    of the one-line label, which would repeat the name. A count divided by a
+    maximum is a pure number, ``\#``; a density states no units.
 
     ON FAILURE: the code is wrong.
     """
     base.set_publication_format(True)
     label = Count(norm)
     assert label.name == name
-    assert str(label).split("\n")[0] == name
+    assert str(label) == f"{name}\n{symbol_line}"
 
 
 @pytest.mark.parametrize(

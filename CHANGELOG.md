@@ -25,9 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `solarwindpy.plotting.labels.base.publication_format`), or per label with
   `TeXlabel(..., publication_format=True)`, which overrides the default. The name is the
   registry's; `TeXlabel(..., name="Solar Wind Speed")` replaces it. A ratio reads
-  "<Name> Ratio" or "<Name0> / <Name1>", and `Count` names its normalization ("Count",
-  "Normalized Count", "Probability Density"). Labels read the default when they render, so
-  it also applies to plots already built.
+  "<Name> Ratio" or "<Name0> / <Name1>". A `Count` is its normalization's name over a symbol:
+  "Count" over `N [#]`, "Normalized Count" over `N / N_max [#]`, "Probability Density" over
+  `p`. Labels read the default when they render, so it also applies to plots already built.
 
 ### Changed
 

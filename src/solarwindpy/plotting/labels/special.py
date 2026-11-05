@@ -273,13 +273,23 @@ class Count(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
+        # In publication format the name line says the words, so the second
+        # line is the count's symbol rather than the words again.
+        tex = self.symbol if self.publication_format else self.tex
+        result = base.format_with_units(tex, self.units)
         return self._format_with_description(result)
 
     @property
     def tex(self):
         r"""TeX of the label, set by ``build_label``."""
         return self._tex
+
+    @property
+    def symbol(self):
+        r"""TeX symbol of the count: ``N``, or the normalization's from ``base.AXNORM``."""
+        if self.axnorm is None:
+            return "N"
+        return base.AXNORM[self.axnorm].symbol
 
     @property
     def units(self):
