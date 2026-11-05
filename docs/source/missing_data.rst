@@ -61,7 +61,7 @@ A total density can also be strict:
 ``plasma.n("a+p1", skipna=False)`` is NaN at a time when any of its species is
 missing.
 
-The two levels
+Worked example
 --------------
 
 For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.T`),
@@ -78,16 +78,8 @@ either component is masked as a whole at that time, so its result there is NaN:
    t3      NaN     ok     ->  NaN        NaN     ok     ->  NaN     ->   NaN
 
 Pressure (:py:meth:`~solarwindpy.core.plasma.Plasma.pth`) follows the same
-pattern:
-
-.. code-block:: text
-
-             protons (p1)                   alphas (a)                     total "a+p1"
-   time   p_par   p_perp  ->  p_p1      p_par   p_perp  ->  p_a
-   t0      ok      ok     ->  ok         ok      ok     ->  ok      ->   p1 + a
-   t1      ok      NaN    ->  NaN        ok      ok     ->  ok      ->   a only
-   t2      ok      ok     ->  ok         NaN     NaN    ->  NaN     ->   p1 only
-   t3      NaN     ok     ->  NaN        NaN     ok     ->  NaN     ->   NaN
+pattern, with the parallel and perpendicular pressures in place of the
+temperatures.
 
 The per-species result at each time is the within-species rule; the total is the
 across-species rule applied to those results.
