@@ -280,9 +280,9 @@ class SIDCLoader(DataLoader):
                 csv.loc[:, "n_obs"].apply(np.sqrt), axis=0
             )
             csv.loc[:, "std_error"] = std_error
-            csv.sort_index(axis=1, inplace=True)
+            csv = csv.sort_index(axis=1)
 
-        csv.set_index(ts, inplace=True)
+        csv = csv.set_index(ts)
         self.convert_nans(csv)
         return csv
 
@@ -449,7 +449,9 @@ class SIDC(ActivityIndicator):
         normed = self._run_normalization(ssn, norm_fcn)
 
         self.data.loc[:, "nssn"] = normed
-        self.data.sort_index(axis=1, inplace=True)
+        # The loader holds the frame; sorting returns a new one (pandas deprecates
+        # inplace=True), which replaces it.
+        self.loader._data = self.data.sort_index(axis=1)
 
         try:
             interpolated = self.interpolated.loc[:, "ssn"]

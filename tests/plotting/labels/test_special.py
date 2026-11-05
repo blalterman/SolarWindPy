@@ -140,19 +140,19 @@ class TestCount:
 
     def test_normalized_count(self, count_label_normalized):
         """Test normalized count label."""
-        assert "Col." in count_label_normalized.tex
-        assert "Norm" in count_label_normalized.tex
+        assert "Column" in count_label_normalized.tex
+        assert "Max" in count_label_normalized.tex
         assert count_label_normalized.axnorm == "c"
 
     def test_all_normalization_types(self):
         """Test all normalization types."""
         norm_types = {
-            "c": "Col.",
+            "c": "Column",
             "r": "Row",
-            "t": "Total",
-            "d": "Density",  # Fixed - actual string is "Density" not "Probability Density"
-            "cd": "1D",  # Just check for "1D" since spaces are escaped as \,
-            "rd": "1D",  # Just check for "1D" since spaces are escaped as \,
+            "t": "Max",
+            "d": "Density",
+            "cd": "Column",
+            "rd": "Row",
         }
 
         for norm, expected in norm_types.items():
@@ -166,8 +166,8 @@ class TestCount:
         assert "Cnorm" in path_str
 
     def test_invalid_normalization(self):
-        """Test invalid normalization raises assertion."""
-        with pytest.raises(AssertionError):
+        """An unknown normalization raises ``ValueError``."""
+        with pytest.raises(ValueError):
             labels_special.Count(norm="invalid")
 
     def test_set_axnorm_case_conversion(self, count_label):
@@ -183,7 +183,7 @@ class TestPower:
         """Test Power label properties."""
         power = labels_special.Power()
         assert power.tex == r"\mathrm{Power}"
-        assert power.units == r"\mathrm{\#}"
+        assert power.units == r"\#"
         assert str(power.path) == "power"
 
     def test_string_representation(self):
@@ -191,7 +191,7 @@ class TestPower:
         power = labels_special.Power()
         result = str(power)
         assert "Power" in result
-        assert r"\left[\mathrm{\#}\right]" in result
+        assert r"\left[\#\right]" in result
 
 
 class TestProbability:
@@ -276,7 +276,7 @@ class TestMathFcn:
         math_fcn = labels_special.MathFcn("log", basic_texlabel)
         assert "log" in math_fcn.tex
         assert math_fcn.dimensionless is True
-        assert math_fcn.units == r"\mathrm{\#}"
+        assert math_fcn.units == r"\#"
 
     def test_non_dimensionless(self, basic_texlabel):
         """Test non-dimensionless math function."""
@@ -706,16 +706,15 @@ def test_count_other_without_comparison_stores_empty_string(n_p1):
     "norm, tex, path",
     [
         (None, r"\mathrm{Count}", "count"),
-        ("c", r"\mathrm{Col. \, Norm \, Count}", "count/Cnorm"),
-        ("r", r"\mathrm{Row \, Norm \, Count}", "count/Rnorm"),
-        ("t", r"\mathrm{Total \, Norm \, Count}", "count/Tnorm"),
-        ("d", r"\mathrm{Probability \, Density}", "count/Dnorm"),
-        ("cd", r"\mathrm{1D \, Probability \, Density}", "count/CDnorm"),
-        ("rd", r"\mathrm{1D \, Probability \, Density}", "count/RDnorm"),
+        ("c", r"\mathrm{Count \, / \, Column \, Max}", "count/Cnorm"),
+        ("r", r"\mathrm{Count \, / \, Row \, Max}", "count/Rnorm"),
+        ("t", r"\mathrm{Count \, / \, Max}", "count/Tnorm"),
     ],
 )
 def test_count_tex_and_path_per_normalization(norm, tex, path):
     r"""``Count`` names its normalization in ``tex`` (spaces as ``\,``) and in ``path``.
+
+    A count divided by a maximum is a pure number, so it states ``\#``.
 
     ON FAILURE: the code is wrong.
     """
@@ -725,6 +724,30 @@ def test_count_tex_and_path_per_normalization(norm, tex, path):
     assert str(label) == rf"${tex} \; \left[\#\right]$"
 
 
+@pytest.mark.parametrize(
+    "norm, tex, path",
+    [
+        ("d", r"\mathrm{Probability \, Density}", "count/Dnorm"),
+        ("cd", r"\mathrm{Column \, Probability \, Density}", "count/CDnorm"),
+        ("rd", r"\mathrm{Row \, Probability \, Density}", "count/RDnorm"),
+    ],
+)
+def test_count_density_states_no_units(norm, tex, path):
+    r"""A probability density is per unit of the binned axes, which ``Count`` cannot know.
+
+    Its units are 1 / (bin width or area in the axis units, or in decades on a
+    log axis), so the label states none rather than ``\#``. A column and a
+    row density read differently.
+
+    ON FAILURE: the code is wrong.
+    """
+    label = labels_special.Count(norm)
+    assert label.tex == tex
+    assert label.path == Path(path)
+    assert label.units == ""
+    assert str(label) == f"${tex}$"
+
+
 def test_math_fcn_tex_units_and_both_string_forms(n_p1):
     r"""``MathFcn`` reads ``\mathrm{<fcn>}(<tex>)``, dimensionless unless told otherwise.
 
@@ -732,11 +755,9 @@ def test_math_fcn_tex_units_and_both_string_forms(n_p1):
     """
     label = labels_special.MathFcn("log", n_p1)
     assert label.tex == r"\mathrm{log}(n_{p_1})"
-    assert str(label) == r"$\mathrm{log}(n_{p_1}) \; \left[\mathrm{\#}\right]$"
+    assert str(label) == r"$\mathrm{log}(n_{p_1}) \; \left[\#\right]$"
     two_lines = labels_special.MathFcn("log", n_p1, new_line_for_units=True)
-    assert str(two_lines) == (
-        r"$\mathrm{log}(n_{p_1}) $" "\n" r"$ \left[\mathrm{\#}\right]$"
-    )
+    assert str(two_lines) == (r"$\mathrm{log}(n_{p_1}) $" "\n" r"$ \left[\#\right]$")
     dimensional = labels_special.MathFcn("log", n_p1, dimensionless=False)
     assert dimensional.units == r"\mathrm{log}\left(\mathrm{cm}^{-3}\right)"
 
@@ -805,9 +826,7 @@ def test_fixed_special_labels_print_exact_strings():
     )
     long_cr = labels_special.CarringtonRotation(short_label=False)
     assert long_cr.tex == r"\mathrm{Carrington \; Rotation}"
-    assert (
-        str(labels_special.Power()) == r"$\mathrm{Power} \; \left[\mathrm{\#}\right]$"
-    )
+    assert str(labels_special.Power()) == r"$\mathrm{Power} \; \left[\#\right]$"
     assert str(labels_special.Distance2Sun("m")) == (
         r"$\mathrm{Distance \; to \; Sun} \; \left[\mathrm{m}\right]$"
     )
@@ -1001,13 +1020,13 @@ class TestXcorrStrings:
         """
         v = labels_base.TeXlabel(("v", "x", "a"))
         long_form = labels_special.Xcorr(n_p1, v, "pearson")
-        assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}})"
+        assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{x};{\alpha}})"
         assert str(long_form) == (
-            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}}) \; \left[\#\right]$"
+            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{x};{\alpha}}) \; \left[\#\right]$"
         )
         assert long_form.path == Path("XcorrPearson-n_p1-v_x_a")
         short = labels_special.Xcorr(n_p1, v, "pearson", short_tex=True)
-        assert short.tex == r"\rho_{P}(n_{p_1},{v}_{{X};{\alpha}})"
+        assert short.tex == r"\rho_{P}(n_{p_1},{v}_{{x};{\alpha}})"
 
     def test_string_constituents_spaces_and_tex_spacing(self):
         r"""Spaces in string constituents become one ``\,`` in TeX and ``-`` in the path.
@@ -1022,51 +1041,66 @@ class TestXcorrStrings:
 
 
 def _all_label_factories():
-    """One factory per public label class, each taking ``description``."""
+    """One factory per public label class; each passes its keywords to the class."""
     from solarwindpy.plotting.labels import composition, datetime
     from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 
     n = labels_base.TeXlabel(_N_P1)
     return {
-        "TeXlabel": lambda d: labels_base.TeXlabel(_N_P1, description=d),
-        "ManualLabel": lambda d: labels_special.ManualLabel("M", "b", description=d),
-        "Vsw": lambda d: labels_special.Vsw(description=d),
-        "CarringtonRotation": lambda d: labels_special.CarringtonRotation(
-            description=d
+        "TeXlabel": lambda **kw: labels_base.TeXlabel(_N_P1, **kw),
+        "ManualLabel": lambda **kw: labels_special.ManualLabel("M", "b", **kw),
+        "Vsw": lambda **kw: labels_special.Vsw(**kw),
+        "CarringtonRotation": lambda **kw: labels_special.CarringtonRotation(**kw),
+        "Count": lambda **kw: labels_special.Count(**kw),
+        "Power": lambda **kw: labels_special.Power(**kw),
+        "Probability": lambda **kw: labels_special.Probability(n, "> 5", **kw),
+        "CountOther": lambda **kw: labels_special.CountOther(n, "> 5", **kw),
+        "MathFcn": lambda **kw: labels_special.MathFcn("log", n, **kw),
+        "AbsoluteValue": lambda **kw: labels_special.AbsoluteValue(n, **kw),
+        "Distance2Sun": lambda **kw: labels_special.Distance2Sun("m", **kw),
+        "SSN": lambda **kw: labels_special.SSN("M", **kw),
+        "ComparisonLabel": lambda **kw: labels_special.ComparisonLabel(
+            n, n, "subtract", **kw
         ),
-        "Count": lambda d: labels_special.Count(description=d),
-        "Power": lambda d: labels_special.Power(description=d),
-        "Probability": lambda d: labels_special.Probability(n, "> 5", description=d),
-        "CountOther": lambda d: labels_special.CountOther(n, "> 5", description=d),
-        "MathFcn": lambda d: labels_special.MathFcn("log", n, description=d),
-        "AbsoluteValue": lambda d: labels_special.AbsoluteValue(n, description=d),
-        "Distance2Sun": lambda d: labels_special.Distance2Sun("m", description=d),
-        "SSN": lambda d: labels_special.SSN("M", description=d),
-        "ComparisonLabel": lambda d: labels_special.ComparisonLabel(
-            n, n, "subtract", description=d
+        "Xcorr": lambda **kw: labels_special.Xcorr(n, n, "pearson", **kw),
+        "Timedelta": lambda **kw: datetime.Timedelta("1h", **kw),
+        "DateTime": lambda **kw: datetime.DateTime("Year", **kw),
+        "Epoch": lambda **kw: datetime.Epoch("hour", "day", **kw),
+        "Frequency": lambda **kw: datetime.Frequency("1h", **kw),
+        "January1st": lambda **kw: datetime.January1st(**kw),
+        "Ion": lambda **kw: composition.Ion("O", 6, **kw),
+        "ChargeStateRatio": lambda **kw: composition.ChargeStateRatio(
+            ("O", 7), ("O", 6), **kw
         ),
-        "Xcorr": lambda d: labels_special.Xcorr(n, n, "pearson", description=d),
-        "Timedelta": lambda d: datetime.Timedelta("1h", description=d),
-        "DateTime": lambda d: datetime.DateTime("Year", description=d),
-        "Epoch": lambda d: datetime.Epoch("hour", "day", description=d),
-        "Frequency": lambda d: datetime.Frequency("1h", description=d),
-        "January1st": lambda d: datetime.January1st(description=d),
-        "Ion": lambda d: composition.Ion("O", 6, description=d),
-        "ChargeStateRatio": lambda d: composition.ChargeStateRatio(
-            ("O", 7), ("O", 6), description=d
-        ),
-        "ElementalAbundance": lambda d: ElementalAbundance("Fe", "O", description=d),
+        "ElementalAbundance": lambda **kw: ElementalAbundance("Fe", "O", **kw),
     }
 
 
-@pytest.mark.parametrize("name", sorted(_all_label_factories()))
-def test_description_argument_is_printed_above_the_label(name):
-    """A ``description`` passed to the constructor heads the label on its own line.
+@pytest.mark.parametrize("label", sorted(_all_label_factories()))
+def test_name_argument_heads_the_label_in_publication_format(label):
+    """A ``name`` passed to the constructor heads the label in publication format.
 
-    The expected string is the same label built without a description,
-    prefixed by the description and a newline (``Base._format_with_description``).
+    Below it is the label's one-line form, except for ``Count``, whose second
+    line in publication format is its symbol (``N``) rather than its words.
 
     ON FAILURE: the code is wrong.
     """
-    factory = _all_label_factories()[name]
-    assert str(factory("Protons")) == "Protons\n" + str(factory(None))
+    factory = _all_label_factories()[label]
+    one_line = str(factory(name="Protons", publication_format=False))
+    assert "Protons" not in one_line
+    head, rest = str(factory(name="Protons", publication_format=True)).split("\n", 1)
+    assert head == "Protons"
+    if label == "Count":
+        assert rest == r"$N \; \left[\#\right]$"
+    else:
+        assert rest == one_line
+
+
+@pytest.mark.parametrize("label", sorted(_all_label_factories()))
+def test_description_keyword_is_removed(label):
+    """``description`` was merged into ``name``; passing it raises.
+
+    ON FAILURE: the code is wrong -- a label still accepts ``description``.
+    """
+    with pytest.raises(TypeError):
+        _all_label_factories()[label](description="Protons")

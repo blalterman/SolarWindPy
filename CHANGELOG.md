@@ -7,6 +7,178 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - BREAKING CHANGES
+
+- A fit's measurement uncertainty is named `yerr`. Every `FitFunction` subclass takes
+  `yerr=` in place of `weights=`, and `yerr_min=` and `yerr_max=` in place of `wmin=` and `wmax=`;
+  `set_fit_obs` takes the same names. The value is unchanged: the 1-sigma uncertainty of each `y`,
+  as `scipy.optimize.curve_fit` takes `sigma` (elsewhere "weights" usually means 1/sigma). The
+  observations' third field is `yerr` (`fit.observations.used.yerr` and `.raw.yerr`, formerly
+  `.w`). `TrendFit` now refuses `yerr` in `trend_kwargs`, since its own `yerr=` selects the
+  trend's uncertainties. No aliases are kept; the old keywords raise `TypeError`. To migrate,
+  rename the keywords: `Line(x, y, weights=s, wmin=a)` becomes `Line(x, y, yerr=s, yerr_min=a)`.
+- `get_plotted_data_boolean_series()` and `get_subset_above_threshold()` are removed from the
+  binned plots (`Hist1D`, `Hist2D`, `SpiralPlot2D`); `get_plotted_data(fcn=None)` replaces both.
+  It returns the rows of the cells the figure shows, with the caller's values on the caller's
+  index, as the subset did; for a boolean mask on a unique index use
+  `data.index.isin(plot.get_plotted_data().index)`.
+  `get_subset_above_threshold(t)` compared each cell's aggregate after `axnorm`: with no
+  `axnorm` and a count, it is `plot.set_clim(t, None)` then `plot.get_plotted_data()`; with an
+  `axnorm` or another `fcn`, use `plot.set_alim(t, None)` then `plot.get_plotted_data(fcn)` on
+  any binned plot, `Hist1D` included.
+- `Hist1D.take_data_in_yrange_across_x` calls `get_y_bounds(row, expected_logy=False)`, as
+  `Hist2D`'s calls it with its log flag; a callback written as `lambda row: ...` raises
+  `TypeError`. Accept the keyword, e.g. `lambda row, expected_logy=False: ...`. `Hist1D` and
+  `Hist2D` now share one implementation, which takes rows of disjoint x-ranges with one
+  `numpy.searchsorted` instead of a pass over the data per range (3 to 6 times faster at 1e5
+  and 1e6 rows) and lists the x-bins from `intervals["x"]` instead of running `agg()`.
+- `axnorm` now depends on the aggregation. For cell i with n_i rows, area A_i and value v_i, and
+  N the rows in the shown cells (per column for `cd`/`wc`, per row for `rd`/`wr`):
+
+  | aggregation | `d`, `cd`, `rd` | `w`, `wc`, `wr` (new) | `t`, `c`, `r` |
+  |---|---|---|---|
+  | count | n_i / (N A_i), unchanged | n_i / N, the count fraction | v_i / max\|v\| |
+  | `"sum"` or `np.sum` | S_i / (S A_i), S the total z; z < 0 raises `ValueError` | S_i / S | v_i / max\|v\| |
+  | anything else | v_i n_i / (N A_i) | v_i n_i / N | v_i / max\|v\| |
+
+  So a density of a mean integrates, and its weight sums, to the mean z (overall, per column or
+  per row), where it used to divide the means by their own total. `t`, `c` and `r` divide by the
+  largest absolute value, which differs from before only when values are negative. A custom
+  callable is a per-cell value even when it adds; pass `"sum"` for a sum. `Hist1D` no longer
+  raises "Unable to calculate a PDF with non-count aggregation" for `d` with another `fcn`.
+  `allowed_axnorm` adds `w` (1-D and `SpiralPlot2D`) and `w`, `wc`, `wr` (2-D); `Count` and
+  `TeXlabel` accept them. Count plots and `t`/`c`/`r` of non-negative values are unchanged.
+- The `description=` keyword, `description` property and `set_description` of every
+  plot label class is removed. A label's one optional first line is now its `name`, which the
+  publication format prints above the symbol line; every label class takes `name=` and
+  `publication_format=`. Migrate `description="text"` to `name="text",
+  publication_format=True` (or `set_publication_format(True)` for every label). Unlike a
+  description, the name is not printed in the default one-line format.
+- The `nan_aware_filter` keyword of `Hist2D.plot_contours` and
+  `Hist2D.plot_hist_with_contours` is removed: a grid with empty bins is now always smoothed
+  NaN-aware (see Fixed). Passing it raises an error from matplotlib; delete the keyword.
+- `solarwindpy.core.quantities.Quantity` takes a required keyword `name`, its display name.
+  A `Quantity` built without it raises `TypeError`; pass `name="..."`.
+- `Scatter.make_plot` returns `(ax, points, segments, cbar)`: the `LineCollection` of the
+  segments, or None without `connect=True`, sits before the colorbar. Unpack four values where
+  three were unpacked before.
+
+### Added
+
+- A summary `repr` for every plot (`Hist1D`, `Hist2D`, `SpiralPlot2D`, `Scatter`), shown by
+  Jupyter and `print`: the class; per axis its label, bin count and range (the mesh's extent on a
+  `SpiralPlot2D`) and the range of the data on it, in data units on a log axis, to four
+  significant figures (e.g. `x: v  bins 60 [250, 900]  data [251.3, 898.7]`); the number of rows
+  kept, the log flags, the bins per axis (or mesh cells), `axnorm`, `clim` and `alim` when set,
+  and `path`. `str(plot)` is that summary, no longer just the class name.
+- `solarwindpy.core.plasma.Plasma.info` returns a one-column table summarising a plasma: the
+  spacecraft and its frame (or "none"), the first and last observation times, the number of
+  observations, the species, and whether auxiliary data are attached.
+- `get_plotted_data(fcn=None)` on `Hist1D`, `Hist2D` and `SpiralPlot2D` returns the rows in the
+  cells the figure shows (cells whose `agg(fcn)` is not NaN after `clim`, `axnorm`, any cell
+  filter and `alim`), with the caller's x, y and z values on the caller's index. Pass the `fcn`
+  given to `make_plot`. Each call computes the rows' cell codes once, for the count, the
+  aggregation and the row lookup, and keeps none, so plots on a shared `BinnedData` stay small.
+- `Hist1D.set_alim` (with `alim` and `alim_kind`): the limits on the aggregated value of a bin,
+  after `axnorm` and `clim`, as on `Hist2D` and `SpiralPlot2D`, which `get_plotted_data`
+  honours. Every plot with `alim` now shares one implementation; `Scatter` still applies it to
+  the z of each point.
+- Every quantity in the registry has a display name, a few words in title case such as
+  "Number Density" or "Temperature". It names the quantity only, without species or
+  component.
+- Publication-format labels: a label is its name in words over its usual TeX symbol and
+  units, e.g. "Number Density" over `n_{p_1} [cm^-3]`. Turn it on for every label with
+  `solarwindpy.plotting.labels.base.set_publication_format` (read the default with
+  `solarwindpy.plotting.labels.base.publication_format`), or per label with
+  `TeXlabel(..., publication_format=True)`, which overrides the default. The name is the
+  registry's; `TeXlabel(..., name="Solar Wind Speed")` replaces it. A ratio reads
+  "<Name> Ratio" or "<Name0> / <Name1>". A `Count` is its normalization's name over a symbol:
+  "Count" over `N [#]`, "Normalized Count" over `N / N_max [#]`, "Probability Density" over
+  `p`. Labels read the default when they render, so it also applies to plots already built.
+- `Scatter.make_plot(connect=True)` joins the drawn points with line segments in increasing
+  z, so with z the time of each point they trace its trajectory, and with another z how
+  (x, y) changes as z increases. Rows need not be sorted; equal z keep their row order. Each
+  segment is colored by the mean z of its two points through the points' colormap and norm,
+  so one colorbar serves both. `connect_kwargs` styles the segments. A point that is not drawn
+  (NaN, outside `mask` or `alim`, or <= 0 on a log axis) is skipped. Without a varying z, the
+  points are joined in row order in the points' color.
+- The Usage guide's "Individual points" shows `Scatter` colored by z, with `connect=True` on
+  shuffled rows, and without z, each figure drawn by the block beside it.
+- The Usage guide draws SILSO's 13-month smoothed sunspot number on a connected `Scatter`'s
+  time colorbar with `SIDC("m13").plot_on_colorbar`. The docs build and the plot-block test
+  read the series from a snapshot in `docs/source/_data` through a private download cache, so
+  neither needs the network.
+- The Usage guide documents what each `axnorm` computes for a count, a sum and any other
+  aggregation, with a figure of the weight of a signed mean on the centred colour scale;
+  selecting cells with `clim` and `alim` and their rows with `get_plotted_data`; and the
+  publication format. The quickstart shows `Plasma.info`, a plot's printed summary and a fit
+  with `yerr`. `scripts/benchmark_binned_data.py` measures the time and memory a shared
+  `BinnedData` saves, the numbers the Usage guide quotes.
+
+### Changed
+
+- Colour plots (`Hist2D`, `SpiralPlot2D`, `Scatter`, and their contours) default to a
+  zero-centred `matplotlib.colors.CenteredNorm` and the diverging colormap `RdBu_r` when the
+  plotted values hold both signs, whatever the `axnorm`. Values of one sign keep the previous
+  defaults (bands on [0, 1] for `c`/`r`, `LogNorm` for densities, matplotlib's otherwise). A
+  `norm` or `cmap` passed by the caller is used as given.
+- A count in `agg` (`fcn="count"`, or the default on a plot without z) counts each cell's rows
+  with `numpy.bincount` of the rows' cell codes instead of a pandas groupby: same result, about
+  twice as fast at 1e6 rows.
+- `solarwindpy.plotting.labels.base.validate_axnorm` takes the accepted keys, `allowed`
+  (default every key of `AXNORM`), and is the one check of an `axnorm` key: the plots call it
+  with their binning's `allowed_axnorm`, with the same messages as before.
+
+### Fixed
+
+- Plotting a fit without `yerr` no longer logs "No weights. Need weights to plot a window..."
+  as a warning on every plot; the zero-width window is noted at DEBUG on the
+  `solarwindpy.fitfunctions.plots` logger.
+- The API page of `Plasma.lnlambda` showed a MathJax error ("Double subscripts") in place of
+  its equation, and documented a `species` parameter it does not take; it documents `s0, s1`.
+  A test now rejects double subscripts, double superscripts and unbalanced braces in docstring
+  math.
+- `Hist2D.plot_edges` no longer raises below 50 x-bins. The default Savitzky-Golay window,
+  10% of the edge's points, is raised to the smallest odd length above `polyorder`, and an
+  edge too short for any such window is drawn unsmoothed.
+- `Hist2D.plot_contours` and `Hist2D.plot_hist_with_contours` with `gaussian_filter_std`
+  no longer erase the contours around empty bins. A grid with empty (NaN) bins is smoothed by
+  `solarwindpy.plotting.tools.nan_gaussian_filter`, which averages only the occupied bins; a
+  grid without them is filtered by `scipy.ndimage.gaussian_filter` as before, with unchanged
+  results.
+- `SpiralPlot2D` no longer logs warnings on every construction and draw. Its timing and
+  bin-population messages report normal operation and are now DEBUG records; the message
+  that points outside the mesh are dropped stays a warning.
+- The fit annotation (`TeXinfo.build_info` with `convert_pow_10`) prints a value or uncertainty
+  whose exponent is 0 without an exponent: `2.5 \pm 1 \times 10^{-1}`, not
+  `2.5 \times 10^{+0} \pm 1 \times 10^{-1}`.
+- `TeXlabel` subscripts a vector's `x`, `y` and `z` components lower case, `v_x` rather than
+  `v_X`. A frame's position axes stay upper case, `X_\mathrm{GSE}`: a registry template
+  writes them with the new `$A` placeholder, the component's code in upper case.
+- `TeXlabel` renders the `scalar` component as no component, like `mag`: `("T", "scalar", "p1")`
+  reads `T_{p_1}`, not `T_{\mathrm{scalar};p_1}`.
+- Labels state one dimensionless unit, `\#`, the registry's `UNIT_TEX["dimless"]`: beta and
+  the other dimensionless quantities wrote `\mathrm{\#}` while ratios and counts wrote `\#`.
+  The temperature anisotropy `R` states it too, in place of `\perp/\parallel`.
+- Normalized labels say what the normalization is. `axnorm="t"` reads "Count / Max" (was
+  "Total Norm Count"), `"c"` and `"r"` "Count / Column Max" and "Count / Row Max"; a
+  normalized quantity reads `n_p / \mathrm{Max}`. A density's `Count` label no longer claims
+  `\#` units: it states the inverse of the bins it is per, from the plot's axis labels, e.g.
+  `(km s^-1)^-1 (cm^-3)^-1` for `"d"` on a 2-D plot, `dex^-1` for a log axis; an axis whose
+  label states no units contributes nothing. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
+  Density" (both were "1D Probability Density"), and `TeXlabel(..., axnorm="d")` reads
+  "Density of n_p" (was "Density Norm n_p [#]"). A normalized ratio groups the ratio:
+  `(n_a/n_p) / \mathrm{Max}`. The weights read "Count Fraction" (`w`), "Column Count Fraction"
+  (`wc`) and "Row Count Fraction" (`wr`) on a `Count`, and "Weight of n_p" on a `TeXlabel`,
+  whose value is the weight of another aggregation. A `TeXlabel` normalized by a maximum states
+  `\#`; a density or weight of a quantity states no units, since they depend on the
+  aggregation.
+- `TeXlabel` accepts the `"cd"` and `"rd"` normalizations that `Count` accepts. Both read
+  the keys from one table, `solarwindpy.plotting.labels.base.AXNORM`, and raise `ValueError`
+  (was `AssertionError`) for any other key.
+- `SIDC` no longer warns that pandas deprecates `inplace=True` each time it loads or
+  normalizes the sunspot number.
+
 ## [0.4.1] - 2026-11-05
 
 ### Added

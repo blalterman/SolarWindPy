@@ -12,6 +12,20 @@ from collections import Counter
 sys.path.insert(0, os.path.abspath("../../src"))
 import solarwindpy
 
+# A plot block in the Usage guide loads SIDC("m13"), which downloads from
+# SILSO. Serve it from the committed snapshot through a private download cache,
+# so the build needs no network and leaves the user's own cache alone.
+import atexit
+import shutil
+import tempfile
+
+sys.path.insert(0, os.path.abspath("."))
+from _ssn_snapshot import seed_ssn_snapshot
+
+_ssn_cache = tempfile.mkdtemp(prefix="solarwindpy-docs-cache-")
+atexit.register(shutil.rmtree, _ssn_cache, ignore_errors=True)
+seed_ssn_snapshot(_ssn_cache, os.environ.__setitem__)
+
 
 # -- Project information -----------------------------------------------------
 
@@ -142,6 +156,7 @@ numpydoc_xref_aliases = {
     "mpl.collections.QuadMesh": "matplotlib.collections.QuadMesh",
     "mpl.collections.PathCollection": "matplotlib.collections.PathCollection",
     "mpl.collections.PolyCollection": "matplotlib.collections.PolyCollection",
+    "mpl.collections.LineCollection": "matplotlib.collections.LineCollection",
     "mpl.container.ErrorbarContainer": "matplotlib.container.ErrorbarContainer",
     "mpl.lines.Line2D": "matplotlib.lines.Line2D",
     "mpl.colorbar.Colorbar": "matplotlib.colorbar.Colorbar",
@@ -212,6 +227,9 @@ nitpick_ignore = [
     # Private names are not documented, so the show-inheritance line cannot
     # link it.
     ("py:class", "solarwindpy.plotting.base._OnFixedGrid"),
+    # Private base holding ``alim`` for plotting.base.ColorPlot and BinnedPlot,
+    # named on their show-inheritance line for the same reason.
+    ("py:class", "solarwindpy.plotting.base._AggregateLimits"),
     # Private base of core.vector.Vector and core.tensor.Tensor, named on
     # their show-inheritance line for the same reason.
     ("py:class", "solarwindpy.core.base._ComponentFrame"),

@@ -231,7 +231,7 @@ def test_line_with_weights():
     y = 2.0 * x + 1.0 + np.array([0.02, -0.02, 0.02, -0.02, 0.02, -0.02])
     sigma = np.array([0.5, 0.5, 1.0, 1.0, 2.0, 2.0])
 
-    obj = Line(x, y, weights=sigma)
+    obj = Line(x, y, yerr=sigma)
     obj.make_fit()
 
     m_w, b_w = np.polyfit(x, y, 1, w=1.0 / sigma)

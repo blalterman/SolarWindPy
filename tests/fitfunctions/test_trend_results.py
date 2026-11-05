@@ -90,7 +90,7 @@ def _noisy_agged5():
 def _trend5(**kwargs):
     kwargs.setdefault("y", ("mu", "value"))
     kwargs.setdefault("yerr", ("sigma", "value"))
-    kwargs.setdefault("trend_kwargs", {"ymax": 6.5, "wmin": 1.05})
+    kwargs.setdefault("trend_kwargs", {"ymax": 6.5, "yerr_min": 1.05})
     tf = TrendFit(_agged5(), Gaussian, Line, **kwargs)
     tf.make_fit()
     return tf
@@ -118,7 +118,7 @@ def test_the_authors_example_recovers_the_generating_hinge():
     assert tf.bin_results.loc[:, ("mu", "value")].to_numpy() == noise_free(_hinge_mu(v))
     np.testing.assert_array_equal(tf.trend.observations.raw.x, v)  # column centers
     np.testing.assert_array_equal(
-        tf.trend.observations.raw.w, tf.bin_results.loc[:, ("sigma", "value")]
+        tf.trend.observations.raw.yerr, tf.bin_results.loc[:, ("sigma", "value")]
     )
     hinge = tf.trend.results.xs("value", level="K", axis=1).iloc[0]
     assert [hinge["xh"], hinge["yh"]] == noise_free([H, YH])  # the generating hinge
@@ -266,11 +266,11 @@ def test_yerr_can_be_the_uncertainty_of_mu_or_none():
     tf.make_fit()
     psigma = tf.bin_results.loc[:, ("mu", "uncertainty")]
     assert (psigma > 0).all()  # the noise exists to make these nonzero
-    np.testing.assert_array_equal(tf.trend.observations.raw.w, psigma)
+    np.testing.assert_array_equal(tf.trend.observations.raw.yerr, psigma)
 
     unweighted = TrendFit(_agged5(), Gaussian, Line, y=("mu", "value"), yerr=None)
     unweighted.make_fit()
-    assert unweighted.trend.observations.raw.w is None
+    assert unweighted.trend.observations.raw.yerr is None
 
 
 def test_an_unknown_key_raises_naming_the_available_ones():

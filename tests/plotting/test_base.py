@@ -143,12 +143,12 @@ def test_base_and_an_incomplete_subclass_cannot_be_instantiated():
 
 
 def test_str_and_logger_name_the_concrete_class():
-    """``str(plot)`` is the class name and the logger sits under the package.
+    """``str(plot)`` opens with the class name and the logger sits under the package.
 
     ON FAILURE: the code is wrong.
     """
     plot = LinePlot(X, Y)
-    assert str(plot) == "LinePlot"
+    assert str(plot).splitlines()[0] == "LinePlot"
     assert isinstance(plot.logger, logging.Logger)
     assert plot.logger.name.startswith("solarwindpy.plotting.")
     assert plot.logger.name.endswith(".LinePlot")
@@ -447,7 +447,7 @@ def test_scatter_colorbar_maps_the_plotted_collection_labelled_z(ax):
     """
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
+    _, _, _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
     assert isinstance(cbar, Colorbar)
     assert cbar.mappable is ax.collections[0]
     assert cbar.ax.get_ylabel() == "T"
@@ -462,7 +462,7 @@ def test_scatter_colorbar_draws_into_a_given_cax_with_a_given_label(ax):
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
+    _, _, _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
     assert cbar.ax is cax
     assert cax.get_ylabel() == "custom"
 
@@ -472,7 +472,7 @@ def test_scatter_colorbar_accepts_a_list_of_axes(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
+    _, _, _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
     assert cbar.ax.figure is ax.figure
     assert len(ax.figure.axes) == 2
 

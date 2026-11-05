@@ -1234,6 +1234,31 @@ class TestProgressOutput:
             splot.initial_bins["x"], splot.initial_bins["y"], _points(), 1
         )
 
+    def test_constructing_and_drawing_log_no_warning(self, caplog):
+        """Building a ``SpiralPlot2D`` and drawing it log nothing at WARNING.
+
+        Timing and bin statistics report normal operation, so they are DEBUG
+        records. Every point here lies inside the mesh, so nothing is dropped.
+
+        ON FAILURE: the code is wrong.
+        """
+        logging.disable(logging.NOTSET)
+        with caplog.at_level(logging.DEBUG):
+            splot = SpiralPlot2D(
+                X,
+                Y,
+                Z,
+                initial_bins=(np.array(XEDGES), np.array(YEDGES)),
+                min_per_bin=1,
+            )
+            splot.make_plot()
+        plt.close("all")
+        assert [r for r in caplog.records if r.levelno >= logging.WARNING] == []
+        assert any(
+            r.name.startswith("solarwindpy") and r.levelno == logging.DEBUG
+            for r in caplog.records
+        )
+
 
 # ---------------------------------------------------------------------------
 # The top initial edge.

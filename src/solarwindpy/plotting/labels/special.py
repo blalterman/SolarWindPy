@@ -122,7 +122,7 @@ class ArbitraryLabel(base.Base):
     """Abstract base class for custom labels."""
 
     def __init__(self):
-        r"""Initialize the logger and an empty description."""
+        r"""Initialize the logger."""
         super().__init__()
 
     @abstractmethod
@@ -133,7 +133,7 @@ class ArbitraryLabel(base.Base):
 class ManualLabel(ArbitraryLabel):
     r"""Label defined by raw LaTeX text and unit."""
 
-    def __init__(self, tex, unit, path=None, description=None):
+    def __init__(self, tex, unit, path=None, name=None, publication_format=None):
         r"""Instantiate the label.
 
         Parameters
@@ -144,14 +144,17 @@ class ManualLabel(ArbitraryLabel):
             Units, either a key of the module's units table or raw TeX.
         path : str or Path, optional
             Save path. If None, ``tex`` with spaces replaced by ``-``.
-        description : str, optional
-            Human-readable description shown above the label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_tex(tex)
         self.set_unit(unit)
         self._path = path
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         return self.with_units
@@ -161,8 +164,8 @@ class ManualLabel(ArbitraryLabel):
         r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
         result = base.format_with_units(
             r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units
-        ).replace(r" \; \left[\right]", "")
-        return self._format_with_description(result)
+        )
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -201,10 +204,11 @@ class ManualLabel(ArbitraryLabel):
 class Vsw(base.Base):
     """Solar wind speed."""
 
-    def __init__(self, description=None):
-        r"""Instantiate the label with an optional description."""
+    def __init__(self, name=None, publication_format=None):
+        r"""Instantiate the label with an optional name."""
         super().__init__()
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     @property
     def tex(self):
@@ -225,15 +229,16 @@ class Vsw(base.Base):
 class CarringtonRotation(ArbitraryLabel):
     """Carrington rotation count."""
 
-    def __init__(self, short_label=True, description=None):
+    def __init__(self, short_label=True, name=None, publication_format=None):
         """Instantiate the label."""
         super().__init__()
         self._short_label = bool(short_label)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#")
-        return self._format_with_description(result)
+        result = base.format_with_units(self.tex, base._inU["dimless"])
+        return self._format_with_name(result)
 
     @property
     def short_label(self):
@@ -257,24 +262,31 @@ class CarringtonRotation(ArbitraryLabel):
 class Count(ArbitraryLabel):
     """Count histogram label."""
 
-    def __init__(self, norm=None, description=None):
+    def __init__(self, norm=None, name=None, publication_format=None):
         r"""Instantiate the label.
 
         Parameters
         ----------
         norm : str, optional
             Axis normalization key; see ``set_axnorm``.
-        description : str, optional
-            Human-readable description shown above the label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_axnorm(norm)
-        self.set_description(description)
+        self.set_binned_axes({})
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        # In publication format the name line says the words, so the second
+        # line is the count's symbol rather than the words again.
+        tex = self.symbol if self.publication_format else self.tex
+        result = base.format_with_units(tex, self.units)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -282,9 +294,26 @@ class Count(ArbitraryLabel):
         return self._tex
 
     @property
+    def symbol(self):
+        r"""TeX symbol of the count: ``N``, or the normalization's from ``base.AXNORM``."""
+        if self.axnorm is None:
+            return "N"
+        return base.AXNORM[self.axnorm].symbol
+
+    @property
     def units(self):
-        r"""TeX of the count units."""
-        return r"\#"
+        r"""TeX of the units: ``\#``, or a density's from ``base.density_units``.
+
+        A density's units are those of the binned axes ``set_binned_axes``
+        gave; without them it states none.
+        """
+        if self.axnorm is not None and base.AXNORM[self.axnorm].density:
+            return base.density_units(self.axnorm, self._binned_axes)
+        return base._inU["dimless"]
+
+    def set_binned_axes(self, axes):
+        r"""Store the plot's binned axes, ``{axis: (label, log)}``, for density units."""
+        self._binned_axes = dict(axes)
 
     @property
     def path(self):
@@ -302,32 +331,21 @@ class Count(ArbitraryLabel):
         Parameters
         ----------
         norm : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"``, ``"cd"``, ``"rd"``
-            (case-insensitive), or None for raw counts.
+            A key of ``base.AXNORM`` (case-insensitive), or None for raw
+            counts.
         """
-        if norm is not None:
-            norm = norm.lower()
+        self._axnorm = base.validate_axnorm(norm)
 
-        assert norm in base._trans_axnorm.keys()
-        self._axnorm = norm
+    def _default_name(self):
+        r"""Name "Count", or the normalized count's name from ``base.AXNORM``."""
+        if self.axnorm is None:
+            return "Count"
+        return base.AXNORM[self.axnorm].name
 
     def _build_tex(self):
         axnorm = self.axnorm
-        if axnorm:
-            if axnorm in ("r", "c", "t"):
-                tex = r"\mathrm{%s Norm Count}" % base._trans_axnorm.get(axnorm)
-            elif axnorm == "cd":
-                tex = r"\mathrm{1D Probability Density}"
-            elif axnorm == "rd":
-                tex = r"\mathrm{1D Probability Density}"
-            elif axnorm == "d":
-                tex = r"\mathrm{Probability Density}"
-            else:
-                raise ValueError(f"Unrecognized axis normalization `{axnorm}`")
-        else:
-            tex = r"\mathrm{Count}"
-
-        return tex.replace(" ", r" \, ")
+        words = "Count" if axnorm is None else base.AXNORM[axnorm].count
+        return r"\mathrm{%s}" % words.replace(" ", r" \, ")
 
     def _build_path(self):
         path = Path("count")
@@ -347,14 +365,15 @@ class Count(ArbitraryLabel):
 class Power(ArbitraryLabel):
     """Power spectrum label."""
 
-    def __init__(self, description=None):
-        r"""Instantiate the label with an optional description."""
+    def __init__(self, name=None, publication_format=None):
+        r"""Instantiate the label with an optional name."""
         super().__init__()
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -375,17 +394,20 @@ class Power(ArbitraryLabel):
 class Probability(ArbitraryLabel):
     """Probability that a quantity meets a comparison criterion."""
 
-    def __init__(self, other_label, comparison=None, description=None):
+    def __init__(
+        self, other_label, comparison=None, name=None, publication_format=None
+    ):
         """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
         result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -449,14 +471,20 @@ class CountOther(ArbitraryLabel):
     """Count of samples of another label fulfilling a comparison."""
 
     def __init__(
-        self, other_label, comparison=None, new_line_for_units=False, description=None
+        self,
+        other_label,
+        comparison=None,
+        new_line_for_units=False,
+        name=None,
+        publication_format=None,
     ):
         """Instantiate the label."""
         super().__init__()
         self.set_other_label(other_label)
         self.set_comparison(comparison)
         self.set_new_line_for_units(new_line_for_units)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
         self.build_label()
 
@@ -464,7 +492,7 @@ class CountOther(ArbitraryLabel):
         result = base.format_with_units(
             self.tex, self.units, new_line=self.new_line_for_units
         )
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -474,7 +502,7 @@ class CountOther(ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the units."""
-        return r"\#"
+        return base._inU["dimless"]
 
     @property
     def path(self):
@@ -542,7 +570,8 @@ class MathFcn(ArbitraryLabel):
         other_label,
         dimensionless=True,
         new_line_for_units=False,
-        description=None,
+        name=None,
+        publication_format=None,
     ):
         """Instantiate the label."""
         super().__init__()
@@ -550,14 +579,15 @@ class MathFcn(ArbitraryLabel):
         self.set_function(fcn)
         self.set_dimensionless(dimensionless)
         self.set_new_line_for_units(new_line_for_units)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
         result = base.format_with_units(
             self.tex, self.units, new_line=self.new_line_for_units
         )
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -649,7 +679,9 @@ class AbsoluteValue(ArbitraryLabel):
     :math:`|x|` has the same dimensions as :math:`x`.
     """
 
-    def __init__(self, other_label, new_line_for_units=False, description=None):
+    def __init__(
+        self, other_label, new_line_for_units=False, name=None, publication_format=None
+    ):
         r"""Instantiate the label.
 
         Parameters
@@ -658,8 +690,10 @@ class AbsoluteValue(ArbitraryLabel):
             The label to wrap with absolute value bars.
         new_line_for_units : bool, default False
             If True, place units on a new line.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
 
         Notes
         -----
@@ -671,14 +705,15 @@ class AbsoluteValue(ArbitraryLabel):
         super().__init__()
         self.set_other_label(other_label)
         self.set_new_line_for_units(new_line_for_units)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
         result = base.format_with_units(
             self.tex, self.units, new_line=self.new_line_for_units
         )
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -729,23 +764,26 @@ class AbsoluteValue(ArbitraryLabel):
 class Distance2Sun(ArbitraryLabel):
     """Distance to the Sun."""
 
-    def __init__(self, units, description=None):
+    def __init__(self, units, name=None, publication_format=None):
         r"""Instantiate the label.
 
         Parameters
         ----------
         units : str
             ``"rs"``, ``"re"``, ``"au"`` (case-insensitive), ``"m"`` or ``"km"``.
-        description : str, optional
-            Human-readable description shown above the label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_units(units)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         result = base.format_with_units(self.tex, r"\mathrm{%s}" % self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def units(self):
@@ -783,23 +821,26 @@ class Distance2Sun(ArbitraryLabel):
 class SSN(ArbitraryLabel):
     """Sunspot number label."""
 
-    def __init__(self, key, description=None):
+    def __init__(self, key, name=None, publication_format=None):
         r"""Instantiate the label.
 
         Parameters
         ----------
         key : str
             Sunspot number kind; see ``set_kind``.
-        description : str, optional
-            Human-readable description shown above the label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_kind(key)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\#")
-        return self._format_with_description(result)
+        result = base.format_with_units(self.tex, base._inU["dimless"])
+        return self._format_with_name(result)
 
     @property
     def kind(self):
@@ -855,17 +896,20 @@ class SSN(ArbitraryLabel):
 class ComparisonLabel(ArbitraryLabel):
     """Label comparing two other labels via a function."""
 
-    def __init__(self, labelA, labelB, fcn_name, fcn=None, description=None):
+    def __init__(
+        self, labelA, labelB, fcn_name, fcn=None, name=None, publication_format=None
+    ):
         """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_function(fcn_name, fcn)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
         result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -1006,18 +1050,27 @@ keys : {",".join(keys)}
 class Xcorr(ArbitraryLabel):
     """Cross-correlation coefficient between two labels."""
 
-    def __init__(self, labelA, labelB, method, short_tex=False, description=None):
+    def __init__(
+        self,
+        labelA,
+        labelB,
+        method,
+        short_tex=False,
+        name=None,
+        publication_format=None,
+    ):
         """Instantiate the label."""
         super().__init__()
         self.set_constituents(labelA, labelB)
         self.set_method(method)
         self.set_short_tex(short_tex)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
         result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -1027,7 +1080,7 @@ class Xcorr(ArbitraryLabel):
     @property
     def units(self):
         r"""TeX of the dimensionless count units."""
-        return r"\#"
+        return base._inU["dimless"]
 
     @property
     def short_tex(self):

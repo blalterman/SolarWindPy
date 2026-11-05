@@ -386,7 +386,7 @@ def test_labels_instance_and_update(trend_fit):
 MUS = [5.0, 4.0, 5.5, 6.0, 7.0]
 SIGMAS = [1.0, 1.1, 1.3, 1.2, 1.2]
 IN_TREND = [False, True, True, True, False]
-TREND_LIMITS = {"ymax": 6.5, "wmin": 1.05}
+TREND_LIMITS = {"ymax": 6.5, "yerr_min": 1.05}
 
 
 def _agged5():

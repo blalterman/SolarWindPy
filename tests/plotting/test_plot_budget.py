@@ -164,6 +164,29 @@ class TestRetainedMemory:
         # 0.5 B headroom: the plan's 1.5 per extra plot (measured 1.02).
         assert per_row / plots <= 1.5, f"{per_row / plots:.2f} B/row per plot"
 
+    def test_aggregating_keeps_no_per_row_codes(self, with_nan):
+        """``agg`` and ``get_plotted_data`` keep the shared plots' budget.
+
+        Each call computes the rows' cell codes and lets them go, so a plot on
+        a shared BinnedData still keeps at most 1.5 B/row after it aggregates.
+        A cached int64 code per row would keep 8.
+
+        ON FAILURE: the code is wrong, unless the author changes the budget.
+        """
+        f = with_nan
+        shared = BinnedData(f, {"x": EDGES, "y": EDGES})
+        plots = 4
+
+        def build():
+            built = [Hist2D(f.x, f.y, nbins=shared) for _ in range(plots)]
+            for plot in built:
+                plot.agg()
+                plot.get_plotted_data()
+            return built
+
+        per_row = _retained_per_row(build)
+        assert per_row / plots <= 1.5, f"{per_row / plots:.2f} B/row per plot"
+
     def test_scatter_keeps_only_a_row_mask(self, with_nan):
         """Scatter keeps at most 1.5 B/row: a mask, not a copy of x and y.
 

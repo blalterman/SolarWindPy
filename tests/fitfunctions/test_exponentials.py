@@ -264,7 +264,7 @@ def test_exponential_with_weights():
     y = 3.0 * np.exp(-0.8 * x) + 0.01 * np.array([1, -1] * 6)
     sigma = np.linspace(0.5, 2.0, 12)
 
-    obj = Exponential(x, y, weights=sigma)
+    obj = Exponential(x, y, yerr=sigma)
     obj.make_fit()
 
     def model(x, k, A):

@@ -21,7 +21,8 @@ m=2.00, b=1.00
 Every subclass takes ``(xobs, yobs, **kwargs)``. The keyword arguments of
 :class:`~solarwindpy.fitfunctions.core.FitFunction` select which observations
 enter the fit (``xmin``, ``xmax``, ``xoutside``, ``ymin``, ``ymax``,
-``youtside``, ``wmin``, ``wmax``) and supply 1-sigma ``weights``. A few
+``youtside``, ``yerr_min``, ``yerr_max``) and supply 1-sigma uncertainties
+``yerr``. A few
 subclasses add their own, such as the ``guess_xh`` hinge position that every
 subclass of :class:`~solarwindpy.fitfunctions.hinge.Hinge` takes.
 
@@ -38,10 +39,10 @@ computes the optimized parameters, their covariance and
 - The default loss is ``"huber"`` with ``f_scale=0.1``, method ``"trf"``;
   ``loss``, ``f_scale``, ``method``, ``bounds``, ``p0`` and other
   :func:`~scipy.optimize.least_squares` keywords pass through ``make_fit``.
-- ``weights`` are treated as :func:`scipy.optimize.curve_fit` treats a 1-D
+- ``yerr`` is treated as :func:`scipy.optimize.curve_fit` treats a 1-D
   ``sigma``: one 1-sigma uncertainty per observation, in the shape of the
-  1-D ``xobs``. A covariance matrix is not supported; weights of any other
-  shape raise :class:`~solarwindpy.fitfunctions.core.InvalidParameterError`.
+  1-D ``xobs``. A covariance matrix is not supported; ``yerr`` of any other
+  shape raises :class:`~solarwindpy.fitfunctions.core.InvalidParameterError`.
   ``absolute_sigma=True`` raises ``NotImplementedError``.
 - The covariance is the pseudo-inverse of :math:`J^T J` from the final
   Jacobian, scaled by the robust :math:`\chi^2_\nu`; ``psigma`` is the square

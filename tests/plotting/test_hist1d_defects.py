@@ -119,7 +119,7 @@ def _interval_bounds(interval, expected_logx):
     return interval.left, interval.right
 
 
-def _row_bounds(row):
+def _row_bounds(row, expected_logy):
     return row["bottom"], row["top"]
 
 

@@ -48,9 +48,10 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             If ``True``, compute bins in logarithmic space. None means False,
             or, with a ``BinnedData`` as ``nbins``, its setting for ``x``'s
             column.
-        axnorm : {"t", "d", None}, optional
+        axnorm : {"t", "d", "w", None}, optional
             Normalisation applied to the histogram. ``"t"`` divides by the
-            maximum (peak equals 1) and ``"d"`` yields a density.
+            largest magnitude (peak equals 1), ``"d"`` yields a density and
+            ``"w"`` a weight per bin; see ``FixedGrid.normalize``.
         clip : bool, str, Mapping or None, optional
             If True, clip x to its 0.01st and 99.99th percentiles before
             binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
@@ -131,7 +132,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         ----------
         only_plotted : bool
             If True, use only the measurements in bins that survive
-            aggregation (see ``get_plotted_data_boolean_series``). Otherwise,
+            aggregation (see ``get_plotted_data``). Otherwise,
             use every measurement inside the bins.
 
         Returns
@@ -149,9 +150,9 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
                 cdf.plot(x="x", y="position")
         """
         data = self.data
-        tk = self.cut.loc[:, "x"].notna()
+        tk = self.cut.loc[:, "x"].notna().to_numpy()
         if only_plotted:
-            tk = tk & self.get_plotted_data_boolean_series()
+            tk = tk & self._plotted_rows()
 
         x = data.loc[tk, "x"]
         # Stable sort, so tied x values keep their original label order.
@@ -166,14 +167,6 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
 
         return cdf
 
-    def agg(self, **kwargs):
-        if self.axnorm == "d":
-            fcn = kwargs.get("fcn", None)
-            if (fcn != "count") & (fcn is not None):
-                raise ValueError("Unable to calculate a PDF with non-count aggregation")
-
-        return super(Hist1D, self).agg(**kwargs)
-
     def set_labels(self, **kwargs):
         r"""Set the x or y label; see ``BinnedPlot.set_labels``.
 
@@ -183,7 +176,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             If a z label is passed: a ``Hist1D`` has none.
         """
         if "z" in kwargs:
-            raise ValueError(r"{} doesn't have a z-label".format(self))
+            raise ValueError(f"{self.__class__.__name__} doesn't have a z-label")
 
         super(Hist1D, self).set_labels(**kwargs)
 
@@ -341,87 +334,3 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         self._format_axis(ax, transpose_axes=transpose_axes)
 
         return ax, line, band, None
-
-    def take_data_in_yrange_across_x(
-        self,
-        ranges_by_x,
-        get_x_bounds,
-        get_y_bounds,
-    ):
-        r"""Take data within y-ranges across x-values.
-
-        Parameters
-        ----------
-        ranges_by_x: iterable
-            An iterable with keys used to get the left and right bounds for the data
-            and values used to get the top and bottom bounds for the data.
-
-        get_x_bounds: function
-            First argument is one key of `ranges_by_x` and returns `left, right`.
-            The keyword argument `expected_logx` is the bool ``self.log.x``, so
-            the returned values can be :math:`log(x)` or :math:`x` to match the
-            data stored in Hist1D.
-
-        get_y_bounds: function
-            Takes one row of `ranges_by_x` and returns `bottom, top`. It gets
-            no log flag: Hist1D stores y in linear units.
-
-        Returns
-        -------
-        taken: np.ndarray 1D
-            Array of indices for selecting data in interval: the points with
-            x between `left` and `right` and ``bottom < y <= top``. x compares
-            on the side its bins close: ``left < x <= right`` for right-closed
-            bins (explicit edges), ``left <= x < right`` for left-closed bins
-            (an integer `nbins`), whose last bin also holds its right edge, so
-            ``x == right`` is kept when `right` is that edge. y is not binned,
-            so its range stays closed on the top.
-
-        Raises
-        ------
-        ValueError
-            If a range has ``left >= right`` or ``bottom >= top``, or if an
-            entry of `ranges_by_x` names an x-bin the histogram does not have.
-            Histogram x-bins that `ranges_by_x` omits only log a warning.
-        """
-
-        available_x = self.agg().index
-        if ranges_by_x.index.symmetric_difference(available_x).size:
-            drop = ranges_by_x.index.symmetric_difference(available_x)
-            if not drop.isin(available_x).all():
-                raise ValueError(
-                    "Need a way to drop values in selector that aren't available."
-                )
-            else:
-                self.logger.warning(
-                    f"Dropping {drop.size} intervals from available for selecting."
-                )
-
-        data = self.data
-        logx = self.log.x
-
-        taken = []
-        for x, at_x in ranges_by_x.iterrows():
-            l, r = get_x_bounds(x, expected_logx=logx)
-            b, t = get_y_bounds(at_x)
-
-            if not l < r:
-                raise ValueError(f"Need left < right for x-bin {x}, got ({l}, {r}).")
-            if not b < t:
-                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
-
-            bins = self.intervals["x"]
-            if bins.closed == "left":
-                tkx = (l <= data.x) & (data.x < r)
-                if r == bins.right[-1]:
-                    # The last left-closed bin also holds its right edge.
-                    tkx |= data.x == r
-            else:
-                tkx = (l < data.x) & (data.x <= r)
-            tky = (b < data.y) & (data.y <= t)
-            tk = tkx & tky
-            tk = tk.loc[tk].index
-            taken.append(tk)
-
-        taken = np.sort(np.concatenate(taken))
-        return taken

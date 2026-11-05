@@ -1,7 +1,7 @@
 """Tests for :class:`solarwindpy.fitfunctions.plots.FFPlot`.
 
 The fixture is a ``Line`` fitted to ``y = 2x + 1`` at x = 0..5 with unit
-weights and ``1 <= x <= 3``, so the used observations are x = 1, 2, 3 and the
+uncertainties ``yerr`` and ``1 <= x <= 3``, so the used observations are x = 1, 2, 3 and the
 raw ones extend past them on both sides. The plotter is given a hand-chosen
 model ``Y_FIT``, a stand-in for the fit function's ``residuals`` that returns
 the residuals of that model, and a residual vector ``FUN``, so every residual
@@ -11,6 +11,7 @@ is known. The relation of the plotter's residuals to a real fit's is tested on
 
 import io
 import logging
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -72,10 +73,10 @@ PINNED_STYLES = {
 }
 
 
-def _fit(n=6, xmin=1, xmax=3, weights=True):
+def _fit(n=6, xmin=1, xmax=3, yerr=True):
     x = np.arange(float(n))
-    w = np.ones_like(x) if weights else None
-    fit = Line(x, 2.0 * x + 1.0, weights=w, xmin=xmin, xmax=xmax)
+    sigma = np.ones_like(x) if yerr else None
+    fit = Line(x, 2.0 * x + 1.0, yerr=sigma, xmin=xmin, xmax=xmax)
     fit.make_fit()
     return fit
 
@@ -99,7 +100,7 @@ def residuals_returning(simple, pct):
 def make_ffplot(
     y_fit=Y_FIT,
     fun=FUN,
-    weights=True,
+    yerr=True,
     residuals_func=residuals_returning(SIMPLE, SIMPLE_PCT),
 ):
     """FFPlot of the fixture fit with model ``y_fit`` and residuals ``fun``.
@@ -107,7 +108,7 @@ def make_ffplot(
     ``residuals_func`` stands in for the fit function's ``residuals``; by
     default it returns the residuals of ``Y_FIT``.
     """
-    obs = _fit(weights=weights).observations
+    obs = _fit(yerr=yerr).observations
     tex = make_texinfo()
     plot = FFPlot(
         obs,
@@ -403,7 +404,7 @@ def test_window_spans_y_minus_w_to_y_plus_w(kind):
     o = getattr(plot.observations, kind)
     ax, (line, window, edges) = getattr(plot, f"plot_{kind}")(edge_kwargs={})
     vy = window.get_paths()[0].vertices[:, 1]
-    assert vy.min() == o.y.min() - 1.0  # unit weights
+    assert vy.min() == o.y.min() - 1.0  # unit yerr
     assert vy.max() == o.y.max() + 1.0
     assert window.get_alpha() == 0.15
     color = to_rgba(PINNED_STYLES[kind]["color"])
@@ -442,24 +443,25 @@ def test_window_and_edge_keywords_take_effect(kind):
 
 
 @pytest.mark.parametrize("kind", ["raw", "used"])
-def test_without_weights_the_window_collapses_onto_the_line(kind, caplog):
-    """No weights logs a warning and draws a zero-width window.
+def test_without_yerr_the_window_collapses_onto_the_line(kind, caplog):
+    """No yerr draws a zero-width window and says so only at DEBUG.
 
     ON FAILURE: the code is wrong.
     """
-    plot, *_ = make_ffplot(weights=False)
+    plot, *_ = make_ffplot(yerr=False)
     o = getattr(plot.observations, kind)
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.DEBUG):
         _, (_, window, _) = getattr(plot, f"plot_{kind}")()
-    assert "No weights" in caplog.text
+    records = [r for r in caplog.records if "No yerr" in r.getMessage()]
+    assert [r.levelno for r in records] == [logging.DEBUG]
     vy = window.get_paths()[0].vertices[:, 1]
     assert vy.min() == o.y.min()
     assert vy.max() == o.y.max()
 
 
 @pytest.mark.parametrize("kind", ["raw", "used"])
-def test_without_a_window_error_bars_span_the_weights(kind):
-    """``plot_window=False`` draws error bars from ``y - w`` to ``y + w``.
+def test_without_a_window_error_bars_span_the_yerr(kind):
+    """``plot_window=False`` draws error bars from ``y - yerr`` to ``y + yerr``.
 
     ON FAILURE: the code is wrong.
     """
@@ -592,7 +594,7 @@ def test_plot_raw_used_fit_passes_each_keyword_set_to_its_plot():
 
 
 def _noisy_fit():
-    """``Line`` fitted to ``2x + 1`` perturbed at the used points, unit weights.
+    """``Line`` fitted to ``2x + 1`` perturbed at the used points, unit yerr.
 
     The perturbations give residuals of order one, so a sign flip between
     two residual definitions cannot hide inside a tolerance.
@@ -600,7 +602,7 @@ def _noisy_fit():
     x = np.arange(10.0)
     y = 2.0 * x + 1.0
     y[2:8] += np.array([1.0, -2.0, 0.5, 1.5, -1.0, 2.0])
-    fit = Line(x, y, weights=np.ones_like(x), xmin=2, xmax=7)
+    fit = Line(x, y, yerr=np.ones_like(x), xmin=2, xmax=7)
     fit.make_fit()
     return fit
 
@@ -643,7 +645,7 @@ def test_percent_residuals_are_the_simple_ones_relative_to_the_model():
 def test_robust_residuals_share_the_sign_of_the_simple_ones():
     """Robust residuals are ``-fit_result.fun``, observed minus fitted over sigma.
 
-    With unit weights they equal the simple residuals, so ``kind="both"``
+    With unit yerr they equal the simple residuals, so ``kind="both"``
     draws two lines of the same sign at every point.
 
     ON FAILURE: the code is wrong.
@@ -962,3 +964,23 @@ def test_an_ffplot_figure_renders_to_png():
     assert buf.getvalue().startswith(b"\x89PNG\r\n\x1a\n")
     pixels = render(hax.figure)
     assert len(np.unique(pixels.reshape(-1, 4), axis=0)) > 2
+
+
+def test_a_fit_plot_without_yerr_is_silent(capsys, caplog):
+    """Plotting a fit without yerr writes nothing and warns of nothing.
+
+    A fit without uncertainties is ordinary, so its plot logs at most at
+    DEBUG: no record at INFO or above, nothing on stdout or stderr, and no
+    Python warning.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(10.0)
+    fit = Line(x, 2.0 * x + 1.0)
+    fit.make_fit()
+    with caplog.at_level(logging.DEBUG), warnings.catch_warnings():
+        warnings.simplefilter("error")
+        fit.plotter.plot_raw_used_fit_resid()
+    assert [r for r in caplog.records if r.levelno >= logging.INFO] == []
+    out, err = capsys.readouterr()
+    assert out == "" and err == ""

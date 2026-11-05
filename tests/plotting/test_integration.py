@@ -155,7 +155,7 @@ _V_X_A = ("v", "x", "a")
 _STRUCTURED_LABELS = {
     "TeXlabel-ratio": lambda: TeXlabel(_N_A, _N_P1),
     "TeXlabel-new-line-for-units": lambda: TeXlabel(_N_P1, new_line_for_units=True),
-    "TeXlabel-description": lambda: TeXlabel(_N_P1, description="Protons"),
+    "TeXlabel-name": lambda: TeXlabel(_N_P1, name="Protons", publication_format=True),
     **{
         f"TeXlabel-axnorm-{norm}": (lambda norm=norm: TeXlabel(_N_P1, axnorm=norm))
         for norm in ("c", "r", "t", "d")
