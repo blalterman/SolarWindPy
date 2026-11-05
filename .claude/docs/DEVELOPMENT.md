@@ -53,7 +53,7 @@ packages by name only and defers versions to `pyproject.toml`.
 ```bash
 # 1. Edit dependencies in pyproject.toml
 [project.dependencies]
-numpy>=1.26,<3.0
+numpy>=2.0,<3.0
 
 # 2. Reinstall
 pip install -e ".[dev]"

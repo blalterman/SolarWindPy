@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Dependency floors raised to the oldest versions that install together on Python 3.12 and pass
+  the suite: `numpy>=2.0` (was `>=1.26`; astropy 8 requires it), `numba>=0.60` (was `>=0.59`),
+  `numexpr>=2.10` (was `>=2.8`), `bottleneck>=1.4` (was `>=1.3`), `tables>=3.10.1` (was `>=3.9`),
+  `matplotlib>=3.11` (was `>=3.10`); in the test extra, `pyyaml>=6.0.1` and `packaging>=25.0`.
+
 ### Fixed
 
 - `Scatter.make_plot(connect=True)`: with a varying z, a colour in `connect_kwargs` replaced the

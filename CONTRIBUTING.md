@@ -152,4 +152,5 @@ run the suite.
 - **Runtime dependencies**: Keep minimal - only packages users need to import solarwindpy
 - **Optional dependencies**: Group by purpose (`test`, `docs`, `dev`)
 - **Version constraints**: Use lower bounds for compatibility, upper bounds for breaking changes
-- **NumPy 2.0**: Ensure all dependencies support NumPy >=1.26,<3.0
+- **NumPy 2**: Ensure all dependencies support NumPy >=2.0,<3.0
+
