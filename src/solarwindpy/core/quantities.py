@@ -15,7 +15,10 @@ This module sits at the bottom layer and imports nothing from the rest of
 each other.
 
 TeX templates are :class:`string.Template` strings: ``$C`` takes the TeX of the
-component and ``$S`` the TeX of the species.
+component, ``$A`` the component's code in upper case and ``$S`` the TeX of the
+species. ``$A`` writes a frame's coordinate axes upper case, as is
+conventional (:math:`X_\mathrm{GSE}`), where a vector's components are lower
+case (:math:`v_x`).
 """
 
 __all__ = [
@@ -85,8 +88,8 @@ QUANTITIES = MappingProxyType(
         # Coordinates and angles.
         # A frame's position is in its body's radius; `Spacecraft.distance2sun`
         # converts with it.
-        "gse": Quantity(r"{$C}_{\mathrm{GSE}}", _U["Re"], si=_EARTH_EQUATORIAL_RADIUS),
-        "hci": Quantity(r"{$C}_{\mathrm{HCI}}", _U["Rs"], si=_SOLAR_RADIUS),
+        "gse": Quantity(r"{$A}_{\mathrm{GSE}}", _U["Re"], si=_EARTH_EQUATORIAL_RADIUS),
+        "hci": Quantity(r"{$A}_{\mathrm{HCI}}", _U["Rs"], si=_SOLAR_RADIUS),
         "colat": Quantity(r"\theta_{$C}", _U["deg"]),
         "lat": Quantity(r"{lat}_{{$C};{$S}}", _U["deg"]),
         "lon": Quantity(r"{lon}_{{$C};{$S}}", _U["deg"]),
@@ -193,10 +196,11 @@ QUANTITIES = MappingProxyType(
 #: TeX of each component (C level).
 COMPONENTS = MappingProxyType(
     {
-        # Coordinates.
-        "x": r"X",
-        "y": r"Y",
-        "z": r"Z",
+        # Cartesian components subscript lower case (v_x); a frame entry's
+        # template writes its axes upper case with `$A` (X_GSE).
+        "x": r"x",
+        "y": r"y",
+        "z": r"z",
         "r": r"R",
         # A vector's magnitude is its bare symbol: B, not B_mag.
         "mag": r"",

@@ -367,7 +367,7 @@ class TeXlabel(Base):
         m1 = m
         c1 = _trans_component.get(c, c)
         s1 = self.make_species(s)
-        d = {"M": m1, "C": c1, "S": s1}
+        d = {"M": m1, "C": c1, "A": c.upper(), "S": s1}
 
         template_string = _template_of(m)
         template = Template(template_string)

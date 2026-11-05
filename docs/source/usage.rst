@@ -409,7 +409,7 @@ $n_{p_1} \; \left[\mathrm{cm}^{-3}\right]$
 >>> print(TeXlabel(("b", "", "")))
 $B \; \left[\mathrm{nT}\right]$
 >>> print(TeXlabel(("v", "x", "a")))
-${v}_{{X};{\alpha}} \; \left[\mathrm{km \; s^{-1}}\right]$
+${v}_{{x};{\alpha}} \; \left[\mathrm{km \; s^{-1}}\right]$
 
 A derived quantity uses its plasma method's name as ``M``. Methods such as
 :py:meth:`~solarwindpy.core.plasma.Plasma.T` and

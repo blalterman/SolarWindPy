@@ -58,23 +58,23 @@ def test_run_species_substitution(texlabel_basic):
 
 def test_texlabel_attributes(texlabel_basic):
     """Check attributes of a typical :class:`TeXlabel`."""
-    assert texlabel_basic.tex == "{v}_{{X};{p}}"
+    assert texlabel_basic.tex == "{v}_{{x};{p}}"
     assert texlabel_basic.units == "\\mathrm{km \\; s^{-1}}"
     assert texlabel_basic.path == Path("v_x_p")
     assert (
         texlabel_basic.with_units
-        == "${v}_{{X};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
+        == "${v}_{{x};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
     )
 
 
 def test_texlabel_ratio_attributes(texlabel_ratio):
     """Check attributes of a ratio :class:`TeXlabel`."""
-    assert texlabel_ratio.tex == "{v}_{{X};{p}}/n_{p}"
+    assert texlabel_ratio.tex == "{v}_{{x};{p}}/n_{p}"
     assert texlabel_ratio.units == "\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}"
     assert texlabel_ratio.path == Path("v_x_p-OV-n_p")
     assert (
         texlabel_ratio.with_units
-        == "${v}_{{X};{p}}/n_{p} \\; \\left[\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}\\right]$"
+        == "${v}_{{x};{p}}/n_{p} \\; \\left[\\mathrm{km \\; s^{-1}}/\\mathrm{cm}^{-3}\\right]$"
     )
 
 
@@ -124,7 +124,7 @@ def test_texlabel_axnorm_types(labels_base):
 def test_texlabel_error_measurement(texlabel_with_error):
     """Test error measurement handling."""
     assert "\\sigma" in texlabel_with_error.tex
-    assert "{v}_{{X};{p}}" in texlabel_with_error.tex
+    assert "{v}_{{x};{p}}" in texlabel_with_error.tex
 
 
 def test_texlabel_newline_units(texlabel_newline_units):
@@ -177,9 +177,9 @@ def test_measurement_translation(labels_base):
 def test_component_translation(labels_base):
     """Test component translation."""
     test_cases = {
-        ("v", "x", "p"): "X",
-        ("v", "y", "p"): "Y",
-        ("v", "z", "p"): "Z",
+        ("v", "x", "p"): "x",
+        ("v", "y", "p"): "y",
+        ("v", "z", "p"): "z",
         ("v", "r", "p"): "R",
         ("v", "per", "p"): "\\perp",
         ("v", "par", "p"): "\\parallel",
@@ -242,7 +242,7 @@ def test_template_substitution(labels_base):
 
     # Test default template
     label = labels_base.TeXlabel(("unknown_measurement", "x", "p"))
-    assert "{unknown_measurement}_{{X};{p}}" in label.tex
+    assert "{unknown_measurement}_{{x};{p}}" in label.tex
 
 
 def test_tex_cleanup(labels_base):
@@ -409,7 +409,7 @@ class TestDescriptionFeature:
         label = labels_base.TeXlabel(("v", "x", "p"))
         assert label.description is None
         assert label.with_units == (
-            "${v}_{{X};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
+            "${v}_{{x};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
         )
 
     def test_format_with_description_adds_prefix(self, labels_base):
@@ -534,11 +534,11 @@ def test_measurement_units_follow_author_decision(labels_base, mcs, units):
         # A component with no TeX translation is used as written.
         (("v", "w", "p"), "{v}_{{w};{p}}"),
         # "_err" wraps the label in sigma().
-        (("v_err", "x", "p"), "\\sigma({v}_{{X};{p}})"),
+        (("v_err", "x", "p"), "\\sigma({v}_{{x};{p}})"),
         # "caani" template "... \; ($C)" with C empty drops "\; ()".
         (("caani", "", ""), "C^{(\\mathrm{Ani})}_{A}"),
         # "nuc" template "\nu_{$C,$S}": an empty side drops its comma.
-        (("nuc", "x", ""), "\\nu_{X}"),
+        (("nuc", "x", ""), "\\nu_{x}"),
         (("nuc", "", "p1"), "\\nu_{p_1}"),
         # "SEP_differential_flux" template "{{$S}} \: dJ/dE" with S empty
         # drops "{{}}" and the leading space.
@@ -658,3 +658,29 @@ def test_logger_is_named_for_module_and_class(labels_base):
     """
     label = labels_base.TeXlabel(("n", "", "p"))
     assert label.logger.name == "solarwindpy.plotting.labels.base.TeXlabel"
+
+
+@pytest.mark.parametrize("c", ["x", "y", "z"])
+def test_cartesian_component_is_a_lowercase_subscript(labels_base, c):
+    """A vector's x, y and z components subscript as written: v_x, B_z.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(("v", c, "p1")).tex == "{v}_{{%s};{p_1}}" % c
+    assert labels_base.TeXlabel(("b", c, "")).tex == "B_{%s}" % c
+
+
+@pytest.mark.parametrize(
+    "mcs, tex",
+    [
+        (("gse", "x", ""), r"{X}_{\mathrm{GSE}}"),
+        (("gse", "z", ""), r"{Z}_{\mathrm{GSE}}"),
+        (("hci", "y", ""), r"{Y}_{\mathrm{HCI}}"),
+    ],
+)
+def test_frame_position_axes_stay_upper_case(labels_base, mcs, tex):
+    """A frame's coordinate axes are upper case by convention: X_GSE, not x_GSE.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert labels_base.TeXlabel(mcs).tex == tex

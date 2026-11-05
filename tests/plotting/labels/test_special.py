@@ -1001,13 +1001,13 @@ class TestXcorrStrings:
         """
         v = labels_base.TeXlabel(("v", "x", "a"))
         long_form = labels_special.Xcorr(n_p1, v, "pearson")
-        assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}})"
+        assert long_form.tex == r"\mathrm{{Pearson}}(n_{p_1},{v}_{{x};{\alpha}})"
         assert str(long_form) == (
-            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{X};{\alpha}}) \; \left[\#\right]$"
+            r"$\mathrm{{Pearson}}(n_{p_1},{v}_{{x};{\alpha}}) \; \left[\#\right]$"
         )
         assert long_form.path == Path("XcorrPearson-n_p1-v_x_a")
         short = labels_special.Xcorr(n_p1, v, "pearson", short_tex=True)
-        assert short.tex == r"\rho_{P}(n_{p_1},{v}_{{X};{\alpha}})"
+        assert short.tex == r"\rho_{P}(n_{p_1},{v}_{{x};{\alpha}})"
 
     def test_string_constituents_spaces_and_tex_spacing(self):
         r"""Spaces in string constituents become one ``\,`` in TeX and ``-`` in the path.

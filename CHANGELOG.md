@@ -48,6 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The fit annotation (`TeXinfo.build_info` with `convert_pow_10`) prints a value or uncertainty
   whose exponent is 0 without an exponent: `2.5 \pm 1 \times 10^{-1}`, not
   `2.5 \times 10^{+0} \pm 1 \times 10^{-1}`.
+- `TeXlabel` subscripts a vector's `x`, `y` and `z` components lower case, `v_x` rather than
+  `v_X`. A frame's position axes stay upper case, `X_\mathrm{GSE}`: a registry template
+  writes them with the new `$A` placeholder, the component's code in upper case.
 
 ## [0.4.0] - 2026-11-05
 
