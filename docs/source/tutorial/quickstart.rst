@@ -62,59 +62,92 @@ not an input.
 Derived Quantities
 ------------------
 
-Each species is an attribute of the plasma. Densities are in
+Each species is an attribute of the plasma, and each of its quantities is a
+pandas Series indexed by the measurement time, ``epoch``. Densities are in
 cm\ :sup:`-3` and speeds in km/s. The second proton speed is
 :math:`\sqrt{200^2 + 300^2 + 600^2} = 700` km/s:
 
->>> plasma.p1.n.tolist()
-[1.0, 2.0, 3.0]
->>> plasma.p1.v.mag.round(1).tolist()
-[458.3, 700.0, 1044.0]
+>>> plasma.p1.n
+epoch
+1995-01-01 12:35:00.000000    1.0
+2022-03-23 19:29:09.000000    2.0
+2022-10-09 01:47:01.234560    3.0
+Name: n, dtype: float64
+>>> plasma.p1.v.mag.round(1)
+epoch
+1995-01-01 12:35:00.000000     458.3
+2022-03-23 19:29:09.000000     700.0
+2022-10-09 01:47:01.234560    1044.0
+Name: mag, dtype: float64
 
 The magnetic field is in nT:
 
->>> plasma.b.mag.round(2).tolist()
-[0.63, 0.77, 1.03]
+>>> plasma.b.mag.round(2)
+epoch
+1995-01-01 12:35:00.000000    0.63
+2022-03-23 19:29:09.000000    0.77
+2022-10-09 01:47:01.234560    1.03
+Name: mag, dtype: float64
 
 Thermal speeds, in km/s, have parallel, perpendicular and scalar components.
 The scalar thermal speed is
 :math:`w = \sqrt{(w_\parallel^2 + 2 w_\perp^2) / 3}`, the combination of a
 temperature :math:`T = (T_\parallel + 2 T_\perp) / 3`; at the first time it is
-:math:`\sqrt{(10^2 + 2 \cdot 7^2) / 3} \approx 8.12` km/s:
+:math:`\sqrt{(10^2 + 2 \cdot 7^2) / 3} \approx 8.12` km/s. A quantity with
+components is a DataFrame whose columns are the components, ``C``:
 
->>> w = plasma.w("p1")
->>> w.columns.tolist()
-['par', 'per', 'scalar']
->>> w["par"].tolist()
-[10.0, 20.0, 30.0]
->>> w["scalar"].round(2).tolist()
-[8.12, 24.17, 28.68]
+>>> plasma.w("p1").round(2)
+C                            par   per  scalar
+epoch
+1995-01-01 12:35:00.000000  10.0   7.0    8.12
+2022-03-23 19:29:09.000000  20.0  26.0   24.17
+2022-10-09 01:47:01.234560  30.0  28.0   28.68
 
 Temperatures are stored in units of :math:`10^5` K, under the convention
 :math:`m w^2 = 2 k_B T`. ``plasma.units`` holds each quantity's factor to SI,
 so multiplying by ``plasma.units.T`` gives kelvin:
 
 >>> T = plasma.T("p1")["scalar"] * plasma.units.T
->>> T.round(-2).tolist()
-[4000.0, 35400.0, 49800.0]
+>>> T.round(-2)
+epoch
+1995-01-01 12:35:00.000000     4000.0
+2022-03-23 19:29:09.000000    35400.0
+2022-10-09 01:47:01.234560    49800.0
+Name: scalar, dtype: float64
 
 The plasma beta and the anisotropy ``R`` are dimensionless. ``R`` is the
 perpendicular over the parallel pressure; for one species it is
 :math:`(w_\perp / w_\parallel)^2`, so :math:`7^2 / 10^2 = 0.49` at the first
 time:
 
->>> plasma.beta("p1")["scalar"].round(2).tolist()
-[0.34, 4.18, 4.93]
->>> plasma.R("p1").round(2).tolist()
-[0.49, 1.69, 0.87]
+>>> plasma.beta("p1").round(2)
+C                            par   per  scalar
+epoch
+1995-01-01 12:35:00.000000  0.52  0.26    0.34
+2022-03-23 19:29:09.000000  2.86  4.84    4.18
+2022-10-09 01:47:01.234560  5.39  4.70    4.93
+>>> plasma.R("p1").round(2)
+epoch
+1995-01-01 12:35:00.000000    0.49
+2022-03-23 19:29:09.000000    1.69
+2022-10-09 01:47:01.234560    0.87
+Name: p1, dtype: float64
 
 Quantities that add over species, such as density, take a species string
 joined with ``+`` and return the total. The alpha and proton densities add:
 
->>> plasma.a.n.tolist()
-[0.5, 1.0, 1.5]
->>> plasma.n("a+p1").tolist()
-[1.5, 3.0, 4.5]
+>>> plasma.a.n
+epoch
+1995-01-01 12:35:00.000000    0.5
+2022-03-23 19:29:09.000000    1.0
+2022-10-09 01:47:01.234560    1.5
+Name: n, dtype: float64
+>>> plasma.n("a+p1")
+epoch
+1995-01-01 12:35:00.000000    1.5
+2022-03-23 19:29:09.000000    3.0
+2022-10-09 01:47:01.234560    4.5
+Name: a+p1, dtype: float64
 
 :doc:`/missing_data` lists the quantities that take a total, notes that
 thermal speeds do not, and explains how a total treats a species missing at some

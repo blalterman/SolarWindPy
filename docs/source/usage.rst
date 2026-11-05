@@ -77,17 +77,27 @@ Vectors carry their magnitude. The first proton speed is
 :math:`\sqrt{400^2 + 10^2 + 20^2} \approx 400.62` km/s, and the first field
 magnitude is :math:`\sqrt{3.5^2 + 1.2^2 + 0.8^2} \approx 3.79` nT:
 
->>> plasma.p1.v.mag.round(2).tolist()
-[400.62, 450.94, 420.75]
->>> plasma.b.mag.round(2).tolist()
-[3.79, 4.53, 4.12]
+>>> plasma.p1.v.mag.round(2)
+2023-01-01 00:00:00    400.62
+2023-01-01 01:00:00    450.94
+2023-01-01 02:00:00    420.75
+Freq: h, Name: mag, dtype: float64
+>>> plasma.b.mag.round(2)
+2023-01-01 00:00:00    3.79
+2023-01-01 01:00:00    4.53
+2023-01-01 02:00:00    4.12
+Freq: h, Name: mag, dtype: float64
 
 The plasma combines species and field. Proton beta is
 :math:`\beta = 2 \mu_0 p / B^2`, with thermal pressure :math:`p = n m w^2 / 2`
-under the :math:`m w^2 = 2 k_B T` convention:
+under the :math:`m w^2 = 2 k_B T` convention. Like temperature and thermal
+speed, it has ``par``, ``per`` and ``scalar`` columns:
 
->>> plasma.beta("p1")["par"].round(2).tolist()
-[0.66, 1.0, 0.83]
+>>> plasma.beta("p1").round(2)
+C                     par   per  scalar
+2023-01-01 00:00:00  0.66  0.46    0.53
+2023-01-01 01:00:00  1.00  0.64    0.76
+2023-01-01 02:00:00  0.83  0.55    0.64
 
 Fit a Function
 --------------
@@ -322,9 +332,8 @@ Edges given as an array are used as given:
 >>> from solarwindpy.plotting.hist1d import Hist1D
 >>> rng = np.random.default_rng(0)
 >>> v = pd.Series(rng.normal(400, 50, 1000), name="v")
->>> bins = Hist1D(v, nbins=[250, 350, 450, 550]).intervals["x"]
->>> bins.left.tolist(), bins.right.tolist()
-([250, 350, 450], [350, 450, 550])
+>>> Hist1D(v, nbins=[250, 350, 450, 550]).intervals["x"]
+IntervalIndex([(250, 350], (350, 450], (450, 550]], dtype='interval[int64, right]')
 
 Normalizations
 ~~~~~~~~~~~~~~
