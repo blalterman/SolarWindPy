@@ -264,14 +264,6 @@ class AgeShortError(AssertionError):
     """``age`` came out shorter than the cached copy's age."""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AgeShortError,
-    reason="DataLoader.age (solar_activity/base.py) reads the clock before "
-    "ctime reads it again, so age falls short by the time between the reads; "
-    "expected 'age ... is shorter than five days'; remove this marker when "
-    "age is a single reading of the cached copy's age",
-)
 def test_age_does_not_depend_on_when_the_clock_is_read(remote, monkeypatch):
     """``age`` is the cached copy's age, however the wall clock moves while it is read.
 
