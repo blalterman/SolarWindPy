@@ -72,17 +72,13 @@ def test_name_overrides_the_registry_name():
     )
 
 
-def test_description_stays_above_the_name():
-    """A description keeps its own line, above the name.
+def test_description_keyword_is_removed():
+    """``description`` was merged into ``name``: one optional first line.
 
     ON FAILURE: the code is wrong.
     """
-    label = TeXlabel(("n", "", "p1"), description="Wind", publication_format=True)
-    assert str(label).split("\n") == [
-        "Wind",
-        "Number Density",
-        r"$n_{p_1} \; \left[\mathrm{cm}^{-3}\right]$",
-    ]
+    with pytest.raises(TypeError):
+        TeXlabel(("n", "", "p1"), description="Wind")
 
 
 def test_per_label_setting_overrides_the_module_default(restore_default):

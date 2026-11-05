@@ -1041,51 +1041,66 @@ class TestXcorrStrings:
 
 
 def _all_label_factories():
-    """One factory per public label class, each taking ``description``."""
+    """One factory per public label class; each passes its keywords to the class."""
     from solarwindpy.plotting.labels import composition, datetime
     from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 
     n = labels_base.TeXlabel(_N_P1)
     return {
-        "TeXlabel": lambda d: labels_base.TeXlabel(_N_P1, description=d),
-        "ManualLabel": lambda d: labels_special.ManualLabel("M", "b", description=d),
-        "Vsw": lambda d: labels_special.Vsw(description=d),
-        "CarringtonRotation": lambda d: labels_special.CarringtonRotation(
-            description=d
+        "TeXlabel": lambda **kw: labels_base.TeXlabel(_N_P1, **kw),
+        "ManualLabel": lambda **kw: labels_special.ManualLabel("M", "b", **kw),
+        "Vsw": lambda **kw: labels_special.Vsw(**kw),
+        "CarringtonRotation": lambda **kw: labels_special.CarringtonRotation(**kw),
+        "Count": lambda **kw: labels_special.Count(**kw),
+        "Power": lambda **kw: labels_special.Power(**kw),
+        "Probability": lambda **kw: labels_special.Probability(n, "> 5", **kw),
+        "CountOther": lambda **kw: labels_special.CountOther(n, "> 5", **kw),
+        "MathFcn": lambda **kw: labels_special.MathFcn("log", n, **kw),
+        "AbsoluteValue": lambda **kw: labels_special.AbsoluteValue(n, **kw),
+        "Distance2Sun": lambda **kw: labels_special.Distance2Sun("m", **kw),
+        "SSN": lambda **kw: labels_special.SSN("M", **kw),
+        "ComparisonLabel": lambda **kw: labels_special.ComparisonLabel(
+            n, n, "subtract", **kw
         ),
-        "Count": lambda d: labels_special.Count(description=d),
-        "Power": lambda d: labels_special.Power(description=d),
-        "Probability": lambda d: labels_special.Probability(n, "> 5", description=d),
-        "CountOther": lambda d: labels_special.CountOther(n, "> 5", description=d),
-        "MathFcn": lambda d: labels_special.MathFcn("log", n, description=d),
-        "AbsoluteValue": lambda d: labels_special.AbsoluteValue(n, description=d),
-        "Distance2Sun": lambda d: labels_special.Distance2Sun("m", description=d),
-        "SSN": lambda d: labels_special.SSN("M", description=d),
-        "ComparisonLabel": lambda d: labels_special.ComparisonLabel(
-            n, n, "subtract", description=d
+        "Xcorr": lambda **kw: labels_special.Xcorr(n, n, "pearson", **kw),
+        "Timedelta": lambda **kw: datetime.Timedelta("1h", **kw),
+        "DateTime": lambda **kw: datetime.DateTime("Year", **kw),
+        "Epoch": lambda **kw: datetime.Epoch("hour", "day", **kw),
+        "Frequency": lambda **kw: datetime.Frequency("1h", **kw),
+        "January1st": lambda **kw: datetime.January1st(**kw),
+        "Ion": lambda **kw: composition.Ion("O", 6, **kw),
+        "ChargeStateRatio": lambda **kw: composition.ChargeStateRatio(
+            ("O", 7), ("O", 6), **kw
         ),
-        "Xcorr": lambda d: labels_special.Xcorr(n, n, "pearson", description=d),
-        "Timedelta": lambda d: datetime.Timedelta("1h", description=d),
-        "DateTime": lambda d: datetime.DateTime("Year", description=d),
-        "Epoch": lambda d: datetime.Epoch("hour", "day", description=d),
-        "Frequency": lambda d: datetime.Frequency("1h", description=d),
-        "January1st": lambda d: datetime.January1st(description=d),
-        "Ion": lambda d: composition.Ion("O", 6, description=d),
-        "ChargeStateRatio": lambda d: composition.ChargeStateRatio(
-            ("O", 7), ("O", 6), description=d
-        ),
-        "ElementalAbundance": lambda d: ElementalAbundance("Fe", "O", description=d),
+        "ElementalAbundance": lambda **kw: ElementalAbundance("Fe", "O", **kw),
     }
 
 
-@pytest.mark.parametrize("name", sorted(_all_label_factories()))
-def test_description_argument_is_printed_above_the_label(name):
-    """A ``description`` passed to the constructor heads the label on its own line.
+@pytest.mark.parametrize("label", sorted(_all_label_factories()))
+def test_name_argument_heads_the_label_in_publication_format(label):
+    """A ``name`` passed to the constructor heads the label in publication format.
 
-    The expected string is the same label built without a description,
-    prefixed by the description and a newline (``Base._format_with_description``).
+    Below it is the label's one-line form, except for ``Count``, whose second
+    line in publication format is its symbol (``N``) rather than its words.
 
     ON FAILURE: the code is wrong.
     """
-    factory = _all_label_factories()[name]
-    assert str(factory("Protons")) == "Protons\n" + str(factory(None))
+    factory = _all_label_factories()[label]
+    one_line = str(factory(name="Protons", publication_format=False))
+    assert "Protons" not in one_line
+    head, rest = str(factory(name="Protons", publication_format=True)).split("\n", 1)
+    assert head == "Protons"
+    if label == "Count":
+        assert rest == r"$N \; \left[\#\right]$"
+    else:
+        assert rest == one_line
+
+
+@pytest.mark.parametrize("label", sorted(_all_label_factories()))
+def test_description_keyword_is_removed(label):
+    """``description`` was merged into ``name``; passing it raises.
+
+    ON FAILURE: the code is wrong -- a label still accepts ``description``.
+    """
+    with pytest.raises(TypeError):
+        _all_label_factories()[label](description="Protons")

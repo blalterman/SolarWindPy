@@ -347,111 +347,57 @@ def test_empty_string_handling(labels_base):
         assert hasattr(label, "path")
 
 
-class TestDescriptionFeature:
-    """Tests for the description property on Base/TeXlabel classes.
+class TestNameFeature:
+    """``name``: the first line of a label in publication format.
 
-    The description feature allows human-readable text to be prepended
-    above the mathematical LaTeX label for axis/colorbar labels.
+    ON FAILURE: the code is wrong.
     """
 
-    def test_description_default_none(self, labels_base):
-        """Default description is None when not specified."""
+    def test_default_name_is_the_registry_name(self, labels_base):
+        assert labels_base.TeXlabel(("v", "x", "p")).name == "Velocity"
+
+    def test_set_name_stores_a_string(self, labels_base):
         label = labels_base.TeXlabel(("v", "x", "p"))
-        assert label.description is None
+        label.set_name(42)
+        assert label.name == "42"
 
-    def test_set_description_stores_value(self, labels_base):
-        """set_description() stores the given string."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description("Test description")
-        assert label.description == "Test description"
+    def test_set_name_none_restores_the_default(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="Speed")
+        assert label.name == "Speed"
+        label.set_name(None)
+        assert label.name == "Velocity"
 
-    def test_set_description_converts_to_string(self, labels_base):
-        """set_description() converts non-string values to string."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description(42)
-        assert label.description == "42"
-        assert isinstance(label.description, str)
-
-    def test_set_description_none_clears(self, labels_base):
-        """set_description(None) clears the description."""
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        label.set_description("Some text")
-        assert label.description == "Some text"
-        label.set_description(None)
-        assert label.description is None
-
-    def test_description_init_parameter(self, labels_base):
-        """TeXlabel accepts description in __init__."""
-        label = labels_base.TeXlabel(("n", "", "p"), description="density")
-        assert label.description == "density"
-
-    def test_description_appears_in_with_units(self, labels_base):
-        """Description is prepended to with_units output."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="velocity")
-        result = label.with_units
-        assert result.startswith("velocity\n")
-        assert "$" in result  # Still contains the TeX label
-
-    def test_description_with_newline_separator(self, labels_base):
-        """Description uses newline to separate from label."""
-        label = labels_base.TeXlabel(("T", "", "p"), description="temperature")
-        result = label.with_units
-        lines = result.split("\n")
-        assert len(lines) >= 2
-        assert lines[0] == "temperature"
-
-    def test_format_with_description_none_unchanged(self, labels_base):
-        """Without a description, ``with_units`` is the bare TeX label.
-
-        ON FAILURE: the code is wrong.
-        """
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        assert label.description is None
+    def test_name_is_not_shown_in_the_default_format(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="Speed")
         assert label.with_units == (
             "${v}_{{x};{p}} \\; \\left[\\mathrm{km \\; s^{-1}}\\right]$"
         )
 
-    def test_format_with_description_adds_prefix(self, labels_base):
-        """A description set and built prepends itself and a newline to ``with_units``.
-
-        ``with_units`` is documented as set by ``build_label``, so the label is
-        rebuilt after ``set_description``.
-
-        ON FAILURE: the code is wrong.
-        """
-        label = labels_base.TeXlabel(("v", "x", "p"))
-        bare = label.with_units
-        label.set_description("info")
-        label.build_label()
-        assert label.with_units == "info\n" + bare
-
-    def test_description_with_axnorm(self, labels_base):
-        """Description works correctly with axis normalization."""
-        label = labels_base.TeXlabel(("n", "", "p"), axnorm="t", description="count")
-        result = label.with_units
-        assert result.startswith("count\n")
-        assert "Max" in result
-
-    def test_description_with_ratio_label(self, labels_base):
-        """Description works with ratio-style labels."""
+    def test_name_heads_the_label_in_publication_format(self, labels_base):
         label = labels_base.TeXlabel(
-            ("v", "x", "p"), ("n", "", "p"), description="v/n ratio"
+            ("v", "x", "p"), name="Speed", publication_format=True
         )
-        result = label.with_units
-        assert result.startswith("v/n ratio\n")
-        assert "/" in result  # Contains ratio
+        assert str(label) == "Speed\n" + str(labels_base.TeXlabel(("v", "x", "p")))
 
-    def test_description_empty_string_treated_as_falsy(self, labels_base):
-        """Empty string description is treated as no description."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="")
-        result = label.with_units
-        # Empty string is falsy, so _format_with_description returns unchanged
-        assert not result.startswith("\n")
+    def test_name_with_axnorm_and_ratio(self, labels_base):
+        norm = labels_base.TeXlabel(
+            ("n", "", "p"), axnorm="t", name="count", publication_format=True
+        )
+        assert norm.with_units.startswith("count\n")
+        assert "Max" in norm.with_units
+        ratio = labels_base.TeXlabel(
+            ("v", "x", "p"), ("n", "", "p"), name="v/n", publication_format=True
+        )
+        assert ratio.with_units.startswith("v/n\n")
 
-    def test_str_includes_description(self, labels_base):
-        """__str__ returns with_units which includes description."""
-        label = labels_base.TeXlabel(("v", "x", "p"), description="speed")
-        assert str(label).startswith("speed\n")
+    def test_empty_name_adds_no_line(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"), name="", publication_format=True)
+        assert "\n" not in label.with_units
+
+    def test_description_is_gone(self, labels_base):
+        label = labels_base.TeXlabel(("v", "x", "p"))
+        assert not hasattr(label, "description")
+        assert not hasattr(label, "set_description")
 
 
 @pytest.mark.parametrize(

@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- BREAKING: the `description=` keyword, `description` property and `set_description` of every
+  plot label class. A label's one optional first line is now its `name`, which the
+  publication format prints above the symbol line; every label class takes `name=` and
+  `publication_format=`. Migrate `description="text"` to `name="text",
+  publication_format=True` (or `set_publication_format(True)` for every label). Unlike a
+  description, the name is not printed in the default one-line format.
+
 - The GitHub Pages deployment of the documentation (the `deploy` job in
   `.github/workflows/docs.yml`). The workflow still builds the docs with warnings as errors on
   every push and pull request.

@@ -298,7 +298,6 @@ class Base(ABC):
     def __init__(self):
         """Initialize the logger."""
         self._init_logger()
-        self._description = None
 
     def __str__(self):
         return self.with_units
@@ -328,23 +327,6 @@ class Base(ABC):
         """Create a logger at the INFO level."""
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
-
-    @property
-    def description(self):
-        """Optional human-readable description shown above the label."""
-        return self._description
-
-    def set_description(self, new):
-        """Set the description string.
-
-        Parameters
-        ----------
-        new : str or None
-            Human-readable description. None disables the description.
-        """
-        if new is not None:
-            new = str(new)
-        self._description = new
 
     @property
     def name(self):
@@ -385,8 +367,8 @@ class Base(ABC):
             new = bool(new)
         self._publication_format = new
 
-    def _format_with_description(self, label_str):
-        """Prepend the description and, in publication format, the name.
+    def _format_with_name(self, label_str):
+        """Prepend the name in publication format.
 
         Parameters
         ----------
@@ -396,21 +378,18 @@ class Base(ABC):
         Returns
         -------
         str
-            The description if set, then the name in publication format if
-            the label has one, each on its own line above ``label_str``.
+            ``label_str`` under the name and a newline when the label is in
+            publication format and has a name, otherwise unchanged.
         """
-        lines = []
-        if self.description:
-            lines.append(self.description)
         if self.publication_format and self.name:
-            lines.append(self.name)
-        return "\n".join(lines + [label_str])
+            return f"{self.name}\n{label_str}"
+        return label_str
 
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
         result = format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -446,7 +425,6 @@ class TeXlabel(Base):
         mcs1=None,
         axnorm=None,
         new_line_for_units=False,
-        description=None,
         name=None,
         publication_format=None,
     ):
@@ -466,8 +444,6 @@ class TeXlabel(Base):
             :data:`~solarwindpy.plotting.labels.base.AXNORM`.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
         name : str or None, optional
             The first line in publication format. None uses the quantity's
             registry name, a ratio's "<Name> Ratio" or "<Name0> / <Name1>".
@@ -480,7 +456,6 @@ class TeXlabel(Base):
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
         self.set_new_line_for_units(new_line_for_units)
-        self.set_description(description)
         self.set_name(name)
         self.set_publication_format(publication_format)
         self.build_label()
@@ -512,8 +487,8 @@ class TeXlabel(Base):
 
     @property
     def with_units(self):
-        r"""Label with units, from ``build_label``, under its description and name."""
-        return self._format_with_description(self._with_units)
+        r"""Label with units, from ``build_label``, under its name in publication format."""
+        return self._format_with_name(self._with_units)
 
     def _default_name(self):
         r"""The registry name; for a ratio, "<Name> Ratio" or "<Name0> / <Name1>".
@@ -685,7 +660,7 @@ template   : %s
             tex = norm.quantity % tex
             path = path / (axnorm.upper() + "norm")
 
-        # The description and name lines are added when the label is read.
+        # The name line is added when the label is read.
         with_units = format_with_units(tex, units, new_line=self.new_line_for_units)
 
         return tex, path, units, with_units
