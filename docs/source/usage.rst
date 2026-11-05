@@ -758,20 +758,24 @@ Every binned plot, ``Hist1D`` included, has both. Here the bins with at least
 >>> h1 = Hist1D(v, nbins=20)
 >>> counts = h1.agg()
 >>> h1.set_clim(20, None)
->>> int(h1.agg().notna().sum()), int(counts[counts >= 20].sum())
-(11, 953)
->>> h1 = Hist1D(v, nbins=20, axnorm="t")
->>> h1.set_alim(0.1, None)
->>> int(h1.agg().notna().sum())
-11
+>>> h1.agg().notna().equals(counts >= 20)
+True
+>>> peak = Hist1D(v, nbins=20, axnorm="t")
+>>> peak.set_alim(0.1, None)
+>>> peak.agg().notna().equals(counts >= 0.1 * counts.max())
+True
 
 ``get_plotted_data`` returns the rows in the cells the figure shows: the
-values you passed, on your index, in your order. ``alim`` acts on the
-aggregated value, so pass the ``fcn`` you give ``make_plot``. Here the cells
-with at least 10 rows whose mean ``z`` is not negative:
+values you passed, on your index, in your order. Its rows are the ones the
+shown bins count:
 
->>> len(h1.get_plotted_data())
-953
+>>> len(h1.get_plotted_data()) == int(counts[counts >= 20].sum())
+True
+
+``alim`` acts on the aggregated value, so pass the ``fcn`` you give
+``make_plot``. Here the cells with at least 10 rows whose mean ``z`` is not
+negative:
+
 >>> h2 = Hist2D(v, y, z, nbins=10)
 >>> h2.set_clim(10, None)
 >>> h2.set_alim(0, None)
@@ -941,9 +945,10 @@ in percent of the fit instead, which is large wherever the fit nears zero.
 The plotter labels its axes ``x`` and ``y`` until its ``set_labels`` sets
 them, as for the plots above; here the counts of a velocity component. The
 Gaussian is the seeded, noisy one whose results table
-:doc:`tutorial/quickstart` prints, fitted with ``yerr``, the 1-sigma
-uncertainty of each ``y`` (the noise's 0.3), which the plot draws as error
-bars:
+fitted to the data whose unweighted results table :doc:`tutorial/quickstart`
+prints, here with ``yerr``, the 1-sigma uncertainty of each ``y`` (the
+noise's 0.3). The plot shades the observations :math:`\pm` ``yerr``, and the
+annotation is this weighted fit's:
 
 .. plot::
 

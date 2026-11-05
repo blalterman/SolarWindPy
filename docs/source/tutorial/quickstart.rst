@@ -255,8 +255,10 @@ uncertainties of ``y``, one per observation, as
 :func:`scipy.optimize.curve_fit` takes ``sigma``. The noise above has a
 standard deviation of 0.5, so with ``yerr=0.5`` for every point the linear
 reduced chi-squared is near 1, as it should be for a good fit with the right
-uncertainties. The fitted parameters are the same, since equal uncertainties
-weight every point alike:
+uncertainties. The parameters move a little: the default Huber loss acts on
+each residual divided by its ``yerr``, so the uncertainties change which
+residuals count as large. With ``make_fit(loss="linear")``, equal
+uncertainties would leave them unchanged:
 
 >>> yerr = np.full(x.size, 0.5)
 >>> weighted = swp.fitfunctions.lines.Line(x, y, yerr=yerr)

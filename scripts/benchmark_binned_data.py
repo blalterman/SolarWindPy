@@ -88,8 +88,18 @@ def memory(build, frame):
     return current / 1e6, peak / 1e6
 
 
+def check_same_grid(frame):
+    """Raise unless both builds give the same aggregate on the same cells."""
+    (_, (shared, *_)), (_, (separate, *_)) = (
+        build_shared(frame),
+        build_separate(frame),
+    )
+    np.testing.assert_allclose(shared.to_numpy(), separate.to_numpy())
+
+
 def main():
     frame = make_frame()
+    check_same_grid(frame)
     print(
         f"{platform.machine()} Python {platform.python_version()}, "
         f"pandas {pd.__version__}, NumPy {np.__version__}"
