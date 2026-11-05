@@ -11,6 +11,7 @@ it has the constructor case it needs.
 import importlib
 import importlib.util
 import inspect
+import logging
 import pkgutil
 import warnings
 
@@ -141,19 +142,20 @@ def test_explicit_p0_none_fits_from_the_generic_start(name):
         assert explicit_none.degenerate == generic.degenerate
 
 
-def test_explicit_p0_none_does_not_read_the_class_guess():
-    """HingeMax, whose guess raises on these data, fits from ``p0=None``.
+def test_explicit_p0_none_does_not_read_the_class_guess(caplog):
+    """HingeMax, whose guess warns on these data, fits from ``p0=None``.
 
-    A flat plateau gives no estimate, so HingeMax's ``p0`` raises
-    NotImplementedError; the generic start must not consult it.
+    A flat plateau gives no estimate, so reading HingeMax's ``p0`` logs "The
+    data gave no estimate"; the generic start must not consult it, so the
+    fit logs no such warning.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1, 2, 3, 4, 5])
     fit = HingeMax(x, np.array([0.0, 1, 2, 2, 2, 2]), guess_xh=2.5)
-    with pytest.raises(NotImplementedError):
-        fit.p0
-    got = attempt_fit(fit, p0=None)
+    with caplog.at_level(logging.WARNING):
+        got = attempt_fit(fit, p0=None)
+    assert "The data gave no estimate" not in caplog.text, caplog.text
     assert not isinstance(got, NotImplementedError), got
 
 

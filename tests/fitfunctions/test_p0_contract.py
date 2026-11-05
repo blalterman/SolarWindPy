@@ -5,8 +5,7 @@
 A ``p0`` returns one finite guess per parameter, or None when the data make a
 guess impossible; the fit then starts from the feasible default (ones when
 unbounded). A hinge class, singular at that default, instead logs a warning and
-returns its documented reference start; ``HingeMax`` has none yet and raises
-NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
+returns its documented reference start. ``make_fit`` rejects a guess holding NaN or infinity with a
 ``ValueError`` naming the class and the parameter. The contract is stated in
 ``FitFunction.p0``'s docstring.
 """
@@ -320,19 +319,23 @@ HINGE_IMPOSSIBLE = [
 ]
 
 
-# The author's reference hinge, translated by hand into each hinge class's
-# parameters: (h, yh) = (433, 4.12), x-intercept x1 = 250, m1 = 4.12 / 183,
-# m2 = 0.01 m1, and the plateau line's x-intercept x2 = 433 - 4.12 / m2,
-# which is 433 - 100 * 183 = -17867.
-M1 = 4.12 / 183
-M2 = 0.01 * M1
+# The reference hinge: the Wind:SWE helium abundance fit of
+# doi:10.3847/2041-8213/adb48e, saturation (xh, yh) = (433, 4.19), vanishing
+# speed x1 = 302 and fast-wind slope m2 = 0.0010. Derived: m1 = yh / (xh - x1)
+# = 4.19 / 131, and the plateau line's x-intercept x2 = xh - yh / m2
+# = 433 - 4190 = -3757. Translated by hand into each class's parameters.
+XH, YH, X1, M2 = 433.0, 4.19, 302.0, 0.0010
+M1 = 4.19 / 131
+X2 = -3757.0
 HINGE_START = {
-    HingeSaturation: [433.0, 4.12, 250.0, M2],
-    TwoLine: [250.0, -17867.0, M1, M2],
+    HingeSaturation: [XH, YH, X1, M2],
+    TwoLine: [X1, X2, M1, M2],
     # theta = arctan(m1) - arctan(m2) inverts m2 = tan(arctan(m1) - theta).
-    Saturation: [250.0, 433.0, 4.12, np.arctan(M1) - np.arctan(M2)],
-    HingeMin: [M1, 250.0, -17867.0, 433.0],
-    HingeAtPoint: [433.0, 4.12, M1, M2],
+    Saturation: [X1, XH, YH, np.arctan(M1) - np.arctan(M2)],
+    HingeMin: [M1, X1, X2, XH],
+    # The same two lines combined with max: a convex start at the same hinge.
+    HingeMax: [M1, X1, X2, XH],
+    HingeAtPoint: [XH, YH, M1, M2],
 }
 
 
@@ -353,6 +356,7 @@ DEGENERATE_FROM_REFERENCE = {
     Saturation: "x1 and xh are degenerate",
     HingeSaturation: "xh and yh are degenerate",
     HingeMin: "m1 and x1 are degenerate",
+    HingeMax: "m1 and x1 are degenerate",
     HingeAtPoint: "xh and yh are degenerate",
 }
 
@@ -397,10 +401,8 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
         assert fit.popt == explicit.popt
 
 
-@pytest.mark.parametrize(
-    "cls, x, y, kwargs",
-    [p for p in HINGE_IMPOSSIBLE if p.values[0] is not HingeMax],
-)
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, caplog):
     """A hinge input with no estimate: ``p0`` is the author's point, with a warning.
 
@@ -427,6 +429,7 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
     assert "initial guess is not finite" not in str(got), got
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_hinge_without_estimate_checks_before_dividing(cls, x, y, kwargs):
     """An undefined hinge estimate comes from a check, not a numpy warning.
@@ -440,36 +443,13 @@ def test_hinge_without_estimate_checks_before_dividing(cls, x, y, kwargs):
     fit = cls(x, y, **kwargs)
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        if cls is HingeMax:
-            with pytest.raises(NotImplementedError, match="no reference start"):
-                fit.p0
-        else:
-            assert fit.p0 == exact(HINGE_START[cls])
+        assert fit.p0 == exact(HINGE_START[cls])
 
 
 def _hingemax_without_estimate():
     (row,) = [p for p in HINGE_IMPOSSIBLE if p.values[0] is HingeMax]
     cls, x, y, kwargs = row.values
     return cls(x, y, **kwargs)
-
-
-def test_hingemax_without_estimate_raises_not_implemented(caplog):
-    """HingeMax has no reference start yet: ``p0`` raises without a warning.
-
-    The "data gave no estimate" warning announces a reference start, which
-    HingeMax does not return. ``make_fit`` records the NotImplementedError
-    as ``error``.
-
-    ON FAILURE: the code is wrong, unless the author chose a HingeMax reference
-    start; then test that start as the other hinge classes are tested.
-    """
-    fit = _hingemax_without_estimate()
-    with caplog.at_level(logging.WARNING):
-        with pytest.raises(NotImplementedError, match="no reference start"):
-            fit.p0
-    assert NO_ESTIMATE not in caplog.text, caplog.text
-    got = attempt_fit(fit)
-    assert isinstance(got, NotImplementedError), got
 
 
 def test_hingemax_without_estimate_fits_from_a_caller_start():
@@ -515,25 +495,39 @@ def test_the_hinge_cases_cover_every_hinge_class():
     assert covered == _concrete_hinge_classes() == six, covered
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
     cls, x, y, kwargs
 ):
     """Each hinge class subclasses ``Hinge``; with no estimate ``p0`` is its start.
 
-    The start is the hand translation in ``HINGE_START``; HingeMax has none and
-    raises NotImplementedError.
+    The start is the hand translation in ``HINGE_START``.
 
-    ON FAILURE: the code is wrong, unless the author moved the reference hinge
-    or chose a HingeMax start; then update ``HINGE_START``.
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge;
+    then update ``HINGE_START``.
     """
     assert issubclass(cls, Hinge), cls.__mro__
     fit = cls(x, y, **kwargs)
-    if cls is HingeMax:
-        with pytest.raises(NotImplementedError, match="no reference start"):
-            fit.p0
-    else:
-        assert fit.p0 == exact(HINGE_START[cls]), fit.p0
+    assert fit.p0 == exact(HINGE_START[cls]), fit.p0
+
+
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
+@pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
+def test_each_reference_start_passes_through_the_paper_saturation_point(
+    cls, x, y, kwargs
+):
+    """Each class's reference start evaluates to y_h = 4.19 at x_h = 433.
+
+    Every translation, HingeMax's included, is the same hinge: the model at
+    the paper's saturation speed gives the paper's saturation abundance.
+
+    ON FAILURE: a translation in the code is wrong, unless the author moved the
+    reference hinge.
+    """
+    fit = cls(x, y, **kwargs)
+    (got,) = fit.function(np.array([XH]), *fit.p0)
+    assert got == exact(YH), got
 
 
 def _notes(doc):
@@ -543,14 +537,31 @@ def _notes(doc):
     return " ".join(rest.split("\n\n", 1)[0].split())
 
 
-@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
+@pytest.mark.parametrize(
+    "cls",
+    [
+        pytest.param(
+            cls,
+            marks=(
+                [
+                    pytest.mark.xfail(
+                        strict=True, reason="HingeMax gains a reference start"
+                    )
+                ]
+                if cls is HingeMax
+                else []
+            ),
+        )
+        for cls in sorted(_concrete_hinge_classes(), key=str)
+    ],
+)
 def test_each_hinge_class_describes_its_estimate_and_inherits_p0(cls):
     """A hinge class's Notes describe its estimate; its ``p0`` is ``Hinge.p0``.
 
     ``Hinge.p0`` is the one ``p0`` property, and its docstring points to the
     class description. The merged class docstring's Notes therefore name the
     class's parameters in ``argnames`` order (the estimate) and its start
-    when the data give none (the reference hinge, or NotImplementedError).
+    when the data give none (the reference hinge; no class raises instead).
 
     ON FAILURE: the code is wrong; a hinge class's help() and API page lost
     its estimate description, or a hinge class defines ``p0`` itself.
@@ -560,8 +571,8 @@ def test_each_hinge_class_describes_its_estimate_and_inherits_p0(cls):
     argnames = cls(np.arange(5.0), np.arange(5.0)).argnames
     notes = _notes(inspect.getdoc(cls))
     assert f"``p0`` estimates ``[{', '.join(argnames)}]``" in notes, notes
-    start = "NotImplementedError" if cls is HingeMax else "reference hinge"
-    assert start in notes, notes
+    assert "reference hinge" in notes, notes
+    assert "NotImplementedError" not in notes, notes
 
 
 def _reference_hinge_in_hinge_notes():
@@ -571,8 +582,8 @@ def _reference_hinge_in_hinge_notes():
     patterns = {
         "xh, yh": rf"\(x_h, y_h\) = \({number}, {number}\)",
         "x1": rf"x_1 = {number}`",
+        "m2": rf"m_2 = {number}`",
         "m1": rf"m_1 = y_h / \(x_h - x_1\) = {number} / {number}`",
-        "m2": rf"m_2 = {number}\\,m_1",
         "x2": rf"x_2 = x_h - y_h / m_2 = {number}`",
     }
     found = {}
@@ -583,27 +594,42 @@ def _reference_hinge_in_hinge_notes():
     return found
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 def test_the_hinge_notes_state_the_stored_reference_hinge():
     """The numbers in ``Hinge``'s Notes are the stored reference hinge.
 
-    The Notes are the one place the reference hinge is written for readers;
-    ``_XH``, ``_YH``, ``_X1``, ``_M1``, ``_M2`` and ``_X2`` are what ``p0``
-    returns. m1 is written as yh / (xh - x1), m2 as a multiple of m1.
+    The Notes are the one place the reference hinge is written for readers,
+    citing the paper it comes from; ``_XH``, ``_YH``, ``_X1``, ``_M1``,
+    ``_M2`` and ``_X2`` are what ``p0`` returns. m1 is written as
+    yh / (xh - x1).
 
     ON FAILURE: the Notes and the constants disagree. The author decides which
     is right; update the other.
     """
+    assert "10.3847/2041-8213/adb48e" in inspect.getdoc(Hinge)
     found = _reference_hinge_in_hinge_notes()
     assert found["xh, yh"] == [Hinge._XH, Hinge._YH], found
     assert found["x1"] == [Hinge._X1], found
+    assert found["m2"] == [Hinge._M2], found
     yh, run = found["m1"]
     assert yh == Hinge._YH, found
     assert run == Hinge._XH - Hinge._X1, found
     assert yh / run == exact(Hinge._M1), found
-    (factor,) = found["m2"]
-    assert factor * Hinge._M1 == exact(Hinge._M2), found
     (x2,) = found["x2"]
     assert x2 == exact(Hinge._X2), found
+
+
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
+def test_the_reference_hinge_is_the_paper_fit():
+    """``Hinge`` stores the fit of doi:10.3847/2041-8213/adb48e.
+
+    The four fitted values are stored; m1 and x2 are derived from them.
+
+    ON FAILURE: the code is wrong, unless the author moved the reference hinge.
+    """
+    assert [Hinge._XH, Hinge._YH, Hinge._X1, Hinge._M2] == [XH, YH, X1, M2]
+    assert Hinge._M1 == exact(M1)
+    assert Hinge._X2 == exact(X2)
 
 
 S = np.sqrt(0.5)
@@ -683,6 +709,7 @@ HX = np.array([0.0, 1, 2, 3, 4, 5])
 HY = np.array([0.0, 1, 2, 2, 1, 0])
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize(
     "cls, kwarg", [(HingeMin, "guess_xh"), (HingeAtPoint, "guess_xh")]
 )
@@ -807,6 +834,7 @@ def test_a_point_at_the_hinge_belongs_to_the_documented_side(
     assert cls(x, y, **kwargs).p0 == exact(expected)
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize(
     "cls, kwargs",
     [
@@ -844,6 +872,7 @@ def test_a_repeated_point_on_twoline_lower_side_is_skipped():
     assert TwoLine(x, y, guess_xh=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
 
 
+@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
     """Slopes -inf and +inf at the middle make TwoLine's lower slope undefined.
 
