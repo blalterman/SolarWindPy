@@ -27,10 +27,19 @@ that hook puts each document's examples back in line order.
 
 Docstring examples that need a ``Plasma`` build one with
 ``solarwindpy.examples.load_plasma()``; no fixture injects one.
+
+Every example, doctest or Sybil, runs under pandas' display defaults for a
+session without a terminal (``PANDAS_DISPLAY``), so a printed Series or
+DataFrame does not depend on the width of the terminal running pytest, and a
+reader who copies an example sees the output it shows. Whitespace in an
+expected output of an rst example is normalized, under Sybil and under the
+doctest plugin alike; docstring examples keep exact whitespace.
 """
 
+import doctest
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 # Doctest node id -> reason. Each entry names the defect that retires it.
@@ -42,6 +51,30 @@ SYBIL_DOCUMENTS = [
     "docs/source/tutorial/quickstart.rst",
     "docs/source/installation.rst",
 ]
+
+# pandas' own defaults when output is not a terminal, set explicitly so an
+# example's printed table never follows the terminal pytest runs in.
+PANDAS_DISPLAY = {
+    "display.width": 80,
+    "display.max_columns": 20,
+    "display.max_rows": 60,
+    "display.precision": 6,
+}
+_pandas_display_contexts = []
+
+
+def _enter_pandas_display():
+    """Apply ``PANDAS_DISPLAY`` until the matching ``_exit_pandas_display``."""
+    context = pd.option_context(*(x for item in PANDAS_DISPLAY.items() for x in item))
+    context.__enter__()
+    _pandas_display_contexts.append(context)
+
+
+def _exit_pandas_display():
+    """Restore the pandas options ``_enter_pandas_display`` replaced."""
+    _pandas_display_contexts.pop().__exit__(None, None, None)
+
+
 _SYBIL_PATHS = {
     Path(__file__).resolve().parent / document for document in SYBIL_DOCUMENTS
 }
@@ -57,9 +90,28 @@ else:
     from sybil.parsers.rest import DocTestParser, PythonCodeBlockParser, SkipParser
 
     pytest_collect_file = Sybil(
-        parsers=[DocTestParser(), PythonCodeBlockParser(), SkipParser()],
+        parsers=[
+            DocTestParser(optionflags=doctest.NORMALIZE_WHITESPACE),
+            PythonCodeBlockParser(),
+            SkipParser(),
+        ],
         patterns=SYBIL_DOCUMENTS,
+        setup=lambda namespace: _enter_pandas_display(),
+        teardown=lambda namespace: _exit_pandas_display(),
     ).pytest()
+
+
+@pytest.fixture(autouse=True)
+def _pandas_display_defaults(request):
+    """Run each doctest under ``PANDAS_DISPLAY``; Sybil sets it per document."""
+    if not isinstance(request.node, pytest.DoctestItem):
+        yield
+        return
+    _enter_pandas_display()
+    try:
+        yield
+    finally:
+        _exit_pandas_display()
 
 
 def _restore_document_order(items):
@@ -93,6 +145,9 @@ def _deselect_doctest_duplicates(config, items):
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
+        if isinstance(item, pytest.DoctestItem) and item.path.suffix == ".rst":
+            # One runner serves a file's examples, so this sets the file's flag.
+            item.runner.optionflags |= doctest.NORMALIZE_WHITESPACE
         reason = DOCTEST_XFAIL.get(item.nodeid)
         if reason is not None:
             item.add_marker(pytest.mark.xfail(strict=True, reason=reason))
