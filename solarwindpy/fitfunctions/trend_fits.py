@@ -243,32 +243,55 @@ class TrendFit(object):
         ValueError
         RuntimeError
             If the trend fit fails. :attr:`bin_results` and :attr:`trend` are
-            set first, and the trend's results record the failure.
+            set, and the trend's results record the failure.
+
+        Any other exception, from a bin fit or the trend fit, propagates and
+        leaves the TrendFit and every bin fit unfitted, as before a first
+        fit, rather than a mix of this fit and the previous one.
         """
+        # Forget the previous fit; store the new one only once all of it,
+        # the trend fit's recorded failure included, is known.
+        self._bin_results = None
+        self._trend = None
         bin_fit_kwargs = dict(bin_fit_kwargs or {})
-        for fit in self.bin_fits:
-            try:
-                fit.make_fit(**bin_fit_kwargs)
-            except core._FIT_FAILURES:
-                # Recorded in the fit's results.
-                pass
+        trend_failure = None
+        try:
+            for fit in self.bin_fits:
+                try:
+                    fit.make_fit(**bin_fit_kwargs)
+                except core._FIT_FAILURES:
+                    # Recorded in the fit's results.
+                    pass
 
-        if len(self.bin_fits):
-            results = pd.concat([fit.results for fit in self.bin_fits])
-        else:
-            results = pd.DataFrame(
-                columns=pd.MultiIndex.from_tuples([], names=["P", "K"])
+            if len(self.bin_fits):
+                results = pd.concat([fit.results for fit in self.bin_fits])
+            else:
+                results = pd.DataFrame(
+                    columns=pd.MultiIndex.from_tuples([], names=["P", "K"])
+                )
+            results.index = self.agged.columns
+
+            y = self._column(results, self.y)
+            w = None if self.yerr is None else self._column(results, self.yerr)
+            trend = self.trend_function(
+                self._trend_x(), y, weights=w, **self._trend_kwargs
             )
-        results.index = self.agged.columns
+            results[("in_trend", "")] = trend.observations.tk_observed
 
-        y = self._column(results, self.y)
-        w = None if self.yerr is None else self._column(results, self.yerr)
-        trend = self.trend_function(self._trend_x(), y, weights=w, **self._trend_kwargs)
-        results[("in_trend", "")] = trend.observations.tk_observed
+            try:
+                trend.make_fit(**dict(trend_fit_kwargs or {}))
+            except core._FIT_FAILURES as exc:
+                # Recorded in the trend's results; raised once stored.
+                trend_failure = exc
+        except BaseException:
+            for fit in self.bin_fits:
+                fit._forget_fit()
+            raise
+
         self._bin_results = results
         self._trend = trend
-
-        trend.make_fit(**dict(trend_fit_kwargs or {}))
+        if trend_failure is not None:
+            raise trend_failure
 
     @staticmethod
     def _column(results, key):

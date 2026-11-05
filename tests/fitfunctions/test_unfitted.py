@@ -167,13 +167,6 @@ def _refit_with_step_raising(step, exc):
     return fit
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=LeftHalfFitted,
-    reason="make_fit stores fit_bounds in the optimizer step and the outcome "
-    "before building TeX_info and the plotter, so a later exception leaves "
-    "some results readable; remove this marker when make_fit commits all or nothing",
-)
 @pytest.mark.parametrize("step", ["_calc_rsq", "build_TeX_info", "build_plotter"])
 def test_an_unexpected_error_after_the_optimizer_leaves_the_fit_unfitted(step):
     """A refit raising after the optimizer ran leaves every result unread.
@@ -190,13 +183,6 @@ def test_an_unexpected_error_after_the_optimizer_leaves_the_fit_unfitted(step):
         raise LeftHalfFitted(answered)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=LeftHalfFitted,
-    reason="make_fit keeps fit_bounds after a recorded failure past the "
-    "optimizer and records no failure from building TeX_info or the plotter; "
-    "remove this marker when make_fit commits all or nothing",
-)
 @pytest.mark.parametrize("step", ["_calc_rsq", "build_TeX_info", "build_plotter"])
 def test_a_recorded_failure_after_the_optimizer_leaves_no_success_only_result(step):
     """A refit failing with a recorded error after the optimizer is a failed fit.

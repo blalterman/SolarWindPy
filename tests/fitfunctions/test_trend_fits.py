@@ -146,13 +146,6 @@ def _trend_failing_to_plot(tf, monkeypatch):
     monkeypatch.setattr(LineFailingToPlot, "fail", True)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=LeftHalfFitted,
-    reason="TrendFit.make_fit keeps the previous bin_results and trend until "
-    "it reaches the new ones, so an unexpected error leaves the old ones "
-    "beside refit bins; remove this marker when make_fit commits all or nothing",
-)
 @pytest.mark.parametrize(
     "break_step",
     [

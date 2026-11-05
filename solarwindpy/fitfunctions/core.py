@@ -300,8 +300,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         # Documented in the class docstring (see FitFunctionMeta).
         self._init_logger()
         self._set_argnames()
-        self._results_table = None
-        self._error = None
+        self._forget_fit()
 
         if weights is None:
             assert wmin is None
@@ -1024,7 +1023,11 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         """
 
     def _run_least_squares(self, **kwargs):
-        """Execute :func:`scipy.optimize.least_squares` with defaults."""
+        """Execute :func:`scipy.optimize.least_squares` with defaults.
+
+        Returns the optimizer result, the start ``p0`` and the bounds as
+        :attr:`fit_bounds` stores them; :meth:`make_fit` stores all three.
+        """
 
         # Read self.p0 only when the caller gave no p0=: a p0 that cannot
         # estimate may raise (HingeMax) or log, which a caller's start avoids.
@@ -1086,9 +1089,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         fit_bounds = np.concatenate([lb, ub]).reshape((2, -1)).T
         fit_bounds = {k: _FitBounds(*b) for k, b in zip(self.argnames, fit_bounds)}
         fit_bounds = tuple(fit_bounds.items())
-        self._fit_bounds = fit_bounds
 
-        return res, p0
+        return res, p0, fit_bounds
 
     def _calc_popt_pcov_psigma_chisq(self, res, p0):
         """Compute optimized parameters and statistics from the result."""
@@ -1246,7 +1248,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         ~solarwindpy.fitfunctions.core.FitFailedError
         ValueError
         RuntimeError
-            When the fit fails. Before raising, :attr:`results` records the
+            When the fit fails, including while building :attr:`TeX_info` or
+            :attr:`plotter`. Before raising, :attr:`results` records the
             failure: NaN values and the exception's class name as ``status``.
             The exception is also kept as :attr:`error`. To fit many data sets
             and inspect failures afterwards, catch the exception and read the
@@ -1254,8 +1257,8 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         NotImplementedError
             If ``absolute_sigma=True``; nothing is recorded.
 
-        Any other exception propagates unrecorded and leaves no outcome:
-        every result then raises
+        Any other exception, at any step, propagates unrecorded and leaves
+        no outcome: every result then raises
         :class:`~solarwindpy.fitfunctions.core.NotFittedError`, as before a
         first fit.
         """
@@ -1263,26 +1266,37 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
 
-        # Forget the previous fit, so an exception outside _FIT_FAILURES
-        # leaves the fit unfitted rather than reporting the old outcome.
+        # Forget the previous fit, so no exception below can leave its
+        # outcome readable.
+        self._forget_fit()
+
+        # All or nothing: the TeX info and plotter read the stored outcome,
+        # so they are built after it is stored, and any exception up to the
+        # last of them forgets every piece already stored.
+        try:
+            self._require_sufficient_data()
+            kwargs = self._prepare_fit(kwargs)
+            res, p0, fit_bounds = self._run_least_squares(**kwargs)
+            popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
+            rsq = self._calc_rsq(popt)
+
+            self._record_outcome(popt, psigma, pcov, all_chisq, rsq, error=None)
+            self._fit_result = res
+            self._fit_p0 = tuple(p0)
+            self._fit_bounds = fit_bounds
+            self.build_TeX_info()
+            self.build_plotter()
+        except _FIT_FAILURES as e:
+            self._forget_fit()
+            self._record_failure(e)
+            raise
+        except BaseException:
+            self._forget_fit()
+            raise
+
+    def _forget_fit(self):
+        r"""Drop every stored result, leaving the fit as before its first :meth:`make_fit`."""
         for name in (*_SUCCESS_ONLY, "_outcome"):
             self.__dict__.pop(name, None)
         self._results_table = None
         self._error = None
-
-        try:
-            self._require_sufficient_data()
-            kwargs = self._prepare_fit(kwargs)
-            res, p0 = self._run_least_squares(**kwargs)
-            popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
-            rsq = self._calc_rsq(popt)
-        except _FIT_FAILURES as e:
-            self._record_failure(e)
-            raise
-
-        self._record_outcome(popt, psigma, pcov, all_chisq, rsq, error=None)
-        self._fit_result = res
-        self._fit_p0 = tuple(p0)
-
-        self.build_TeX_info()
-        self.build_plotter()
