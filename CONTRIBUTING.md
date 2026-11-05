@@ -6,6 +6,22 @@ Everyone who takes part in SolarWindPy is expected to follow the
 [Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1). Report
 concerns to [blaltermanphd@gmail.com](mailto:blaltermanphd@gmail.com).
 
+## When a contribution is not accepted
+
+A pull request is not merged when:
+
+- it is outside SolarWindPy's scope, *in situ* solar wind data analysis;
+- its CI checks fail (tests, ruff, import layering, docs built with warnings
+  as errors);
+- it changes a public name, a column label, or a physical result without the
+  maintainer's agreement. Open an issue to propose these first;
+- it adds behavior without tests, or tests that cannot fail;
+- it includes code under a license other than MIT, BSD, Apache 2.0, or public
+  domain, or code whose provenance is unclear;
+- it adds a dependency without a stated need.
+
+A declined contribution can be revised and resubmitted.
+
 ## Development workflow
 
 1. **Set up development environment**:
