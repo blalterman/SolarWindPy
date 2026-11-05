@@ -10,7 +10,12 @@ from matplotlib import cbook
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
+from ..tools import _warn
 from . import base
+
+# Every spelling of the segments' colour that LineCollection accepts, and
+# ``c``, which ``ax.scatter`` accepts.
+_COLOR_KEYS = ("color", "c", "colors", "edgecolor", "edgecolors", "ec")
 
 
 class Scatter(base.ColorPlot):
@@ -93,6 +98,9 @@ class Scatter(base.ColorPlot):
             Passed to :class:`~matplotlib.collections.LineCollection`, e.g.
             ``linewidth``, ``alpha`` or ``zorder``. The defaults are a
             ``linewidth`` of 0.75 and a ``zorder`` just below the points'.
+            A colour, under any of the keys ``color``, ``c``, ``colors``,
+            ``edgecolor``, ``edgecolors`` or ``ec``, applies only without a
+            varying z (see Notes); at most one of them may be given.
             Not modified.
         kwargs:
             Passed to `ax.scatter`.
@@ -125,9 +133,11 @@ class Scatter(base.ColorPlot):
 
         When z varies, each segment is coloured by the mean z of its two
         points, ``(z_a + z_b) / 2``, through the points' colormap and norm,
-        the same objects, so the one colorbar reads both. Otherwise every
-        segment has the points' colour, unless ``connect_kwargs`` sets
-        ``color``. The segments do not set the axis limits.
+        the same objects, so the one colorbar reads both; a colour in
+        ``connect_kwargs`` is then ignored, with a ``UserWarning`` naming its
+        key. Otherwise every segment has the colour that ``connect_kwargs``
+        sets, or the points' colour if it sets none. The segments do not set
+        the axis limits.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -176,7 +186,8 @@ class Scatter(base.ColorPlot):
         zkey: str or None
             ``"z"`` if the points are colour-mapped, else None.
         connect_kwargs: Mapping or None
-            Passed to ``LineCollection``.
+            Passed to ``LineCollection``, except a colour key, which sets the
+            segments' colour only when `zkey` is None.
 
         Returns
         -------
@@ -190,14 +201,30 @@ class Scatter(base.ColorPlot):
                 drawn &= xy[:, i] > 0
         xy = xy[drawn]
 
-        kwargs = cbook.normalize_kwargs(connect_kwargs or {}, LineCollection)
+        kwargs = dict(connect_kwargs or {})
+        given = [k for k in _COLOR_KEYS if k in kwargs]
+        if len(given) > 1:
+            raise TypeError(
+                f"connect_kwargs gives the colour twice, as {given!r}; give one."
+            )
+        color = kwargs.pop(given[0]) if given else None
+        kwargs = cbook.normalize_kwargs(kwargs, LineCollection)
         kwargs.setdefault("linewidth", 0.75)
         kwargs.setdefault("zorder", collection.get_zorder() - 0.5)
 
         if zkey is None:
-            kwargs.setdefault("color", collection.get_facecolor()[0])
-            segments = LineCollection(np.stack([xy[:-1], xy[1:]], axis=1), **kwargs)
+            if color is None:
+                color = collection.get_facecolor()[0]
+            segments = LineCollection(
+                np.stack([xy[:-1], xy[1:]], axis=1), color=color, **kwargs
+            )
         else:
+            if given:
+                _warn(
+                    f"connect_kwargs[{given[0]!r}] is ignored: z varies, so each "
+                    "segment is coloured by the mean z of its two points through "
+                    "the points' colormap and norm."
+                )
             z = data.loc[:, zkey].to_numpy(dtype=float)[drawn]
             order = np.argsort(z, kind="stable")
             xy, z = xy[order], z[order]

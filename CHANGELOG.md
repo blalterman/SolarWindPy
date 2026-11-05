@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `Scatter.make_plot(connect=True)`: with a varying z, a colour in `connect_kwargs` replaced the
+  segments' z colouring, so they no longer matched the colorbar. The segments now keep the
+  colormap and the colour is ignored with a `UserWarning` naming its key. Without a varying z,
+  every spelling of the colour (`color`, `c`, `colors`, `edgecolor`, `edgecolors`, `ec`) now sets
+  the segments' colour; before, only `color` did, `c` raised `AttributeError`, and the others were
+  overridden by the points' colour. Giving two of them raises `TypeError`.
+
 ## [0.5.0] - 2026-11-05
 
 ### Changed - BREAKING CHANGES
