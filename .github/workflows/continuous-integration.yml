@@ -70,9 +70,37 @@ jobs:
           python -m build --outdir dist
           python scripts/check_release_artifacts.py dist
 
+  # Decide whether a PR needs the Windows suite: skip it only when every changed
+  # file is documentation. Runs on pull requests only, so branch pushes skip Windows.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: diff
+        name: Detect changes the Windows suite covers
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          files=$(git diff --name-only "$BASE_SHA"...HEAD)
+          echo "$files"
+          if printf '%s\n' "$files" | grep -vqE '^(docs/|paper/|\.claude/)|\.(md|rst)$|^(CITATION\.cff|LICENSE)$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Test suite on Windows (PyHC standard #4: support all major operating systems).
   # Lint, import layering, and the release build stay on the Linux validate job.
+  # Pull requests that change code only; the release matrix also tests Windows on tags.
   test-windows:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: windows-latest
     # The suite takes about 2 minutes here; bound a hung test well below
     # GitHub's 6-hour default.
@@ -105,7 +133,7 @@ jobs:
 
   # Summary job
   ci-summary:
-    needs: [validate, test-windows]
+    needs: [changes, validate, test-windows]
     runs-on: ubuntu-latest
     if: always()
     
@@ -120,7 +148,14 @@ jobs:
           echo "- Quick Validation: ${{ needs.validate.result }}"
           echo "- Windows Tests: ${{ needs.test-windows.result }}"
           echo ""
-          if [[ "${{ needs.validate.result }}" == "success" && "${{ needs.test-windows.result }}" == "success" ]]; then
+          # Windows may be skipped (docs-only PR, or a branch push), but only when the
+          # change detection itself did not fail.
+          windows="${{ needs.test-windows.result }}"
+          changes="${{ needs.changes.result }}"
+          if [[ "$windows" == "skipped" && "$changes" != "failure" && "$changes" != "cancelled" ]]; then
+            windows=success
+          fi
+          if [[ "${{ needs.validate.result }}" == "success" && "$windows" == "success" ]]; then
             echo "✅ PR validation passed - ready for review"
           else
             echo "❌ PR validation failed - requires fixes"
