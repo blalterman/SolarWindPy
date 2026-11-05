@@ -74,6 +74,9 @@ jobs:
   # Lint, import layering, and the release build stay on the Linux validate job.
   test-windows:
     runs-on: windows-latest
+    # The suite takes about 2 minutes here; bound a hung test well below
+    # GitHub's 6-hour default.
+    timeout-minutes: 30
     defaults:
       run:
         shell: bash
@@ -121,4 +124,5 @@ jobs:
             echo "✅ PR validation passed - ready for review"
           else
             echo "❌ PR validation failed - requires fixes"
+            exit 1
           fi
