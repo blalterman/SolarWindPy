@@ -1082,6 +1082,19 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         return ax, collection, cbar
 
+    @staticmethod
+    def _scaled_centers(x, y):
+        r"""Cell centers ``x``, ``y`` as an ``(n, 2)`` array, each axis divided by its span.
+
+        An axis of zero span is left unscaled: its centers all share one
+        value, which no scale changes.
+        """
+        centers = np.column_stack([x, y])
+        if not centers.size:
+            return centers
+        span = np.ptp(centers, axis=0)
+        return centers / np.where(span > 0, span, 1.0)
+
     def plot_contours(
         self,
         ax=None,
@@ -1140,8 +1153,9 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         ------
         ValueError
             If fewer than 3 cells hold finite values, or their centers all
-            share one x or one y, so no triangle can be drawn between them.
-            Or if ``cbar=True`` and the contour set has fewer than 2 levels.
+            lie on one line in plot coordinates, so no triangle can be drawn
+            between them. Or if ``cbar=True`` and the contour set has fewer
+            than 2 levels.
 
         Examples
         --------
@@ -1168,29 +1182,32 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         y = self.mesh.mesh[tk_finite][:, [2, 3]].mean(axis=1)
         C = C[tk_finite]
 
-        # Matplotlib's Triangulation fails here with a length or qhull error.
-        if C.size < 3:
-            raise ValueError(
-                f"Contours need at least 3 occupied cells to triangulate, got {C.size}."
+        # Triangulate where the plot is drawn, each axis scaled to its span:
+        # in data units one axis's range (hundreds of km/s against a decade
+        # or two of n) dominates the Delaunay distances and the triangles
+        # are slivers. The same triangles are then drawn in data units.
+        scaled = self._scaled_centers(x, y)
+        # A triangle needs 3 centers not all on one line: the centered,
+        # scaled coordinates have rank 2. Otherwise matplotlib's
+        # Triangulation fails with a length or qhull error.
+        if C.size < 3 or np.linalg.matrix_rank(scaled - scaled.mean(axis=0)) < 2:
+            got = (
+                f"got {C.size}"
+                if C.size < 3
+                else f"the {C.size} occupied cells' centers all lie on one "
+                f"line in plot coordinates"
             )
-        for axis, centers in (("x", x), ("y", y)):
-            if np.ptp(centers) == 0:
-                raise ValueError(
-                    f"Contours cannot be triangulated: the occupied cells' "
-                    f"centers all share one {axis}, {centers[0]:g} in plot "
-                    f"coordinates."
-                )
+            raise ValueError(
+                f"Contours need at least 3 occupied cells whose centers are "
+                f"not all on one line to triangulate; {got}."
+            )
 
         if ax is None:
             fig, ax = plt.subplots()
 
         cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
 
-        # Triangulate where the plot is drawn, each axis scaled to its span:
-        # in data units one axis's range (hundreds of km/s against a decade
-        # or two of n) dominates the Delaunay distances and the triangles
-        # are slivers. The same triangles are then drawn in data units.
-        triangles = Triangulation(x / np.ptp(x), y / np.ptp(y)).triangles
+        triangles = Triangulation(*scaled.T).triangles
         if self.log.x:
             x = 10.0**x
         if self.log.y:

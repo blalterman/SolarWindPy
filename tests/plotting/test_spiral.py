@@ -977,15 +977,6 @@ def _unsplit(rows, yedges=YEDGES):
     )
 
 
-def _old_message(reason):
-    return pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason=f"plot_contours names {reason} instead of the one condition, "
-        "centres on one line; remove this marker when it checks the centres' rank",
-    )
-
-
 @pytest.mark.parametrize(
     "rows, yedges, match",
     [
@@ -1000,27 +991,18 @@ def _old_message(reason):
             YEDGES,
             r"occupied cells' centers all lie on one line",
             id="vertical-line",
-            marks=_old_message("a shared x"),
         ),
         pytest.param(
             [(1.0, 0.5, 1.0), (3.0, 0.5, 2.0), (5.0, 0.5, 3.0)],
             YEDGES,
             r"occupied cells' centers all lie on one line",
             id="horizontal-line",
-            marks=_old_message("a shared y"),
         ),
         pytest.param(
             [(1.0, 0.5, 1.0), (3.0, 1.5, 2.0), (5.0, 2.5, 3.0)],
             (0.0, 1.0, 2.0, 3.0),
             r"occupied cells' centers all lie on one line",
             id="diagonal-line",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=RuntimeError,
-                reason="centres on a diagonal pass the shared-x and shared-y "
-                "checks and reach qhull's RuntimeError; remove this marker "
-                "when plot_contours checks the centres' rank",
-            ),
         ),
     ],
 )
