@@ -87,6 +87,7 @@ dependencies:
 - six
 - snowballstemmer
 - sphinx
+- sphinx-copybutton
 - sphinx-rtd-theme
 - sphinxcontrib-applehelp
 - sphinxcontrib-bibtex

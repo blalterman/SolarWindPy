@@ -42,9 +42,17 @@ extensions = [
     "numpydoc",
     "sphinxcontrib.bibtex",
     "matplotlib.sphinxext.plot_directive",
+    "sphinx_copybutton",
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
+
+# -- Copy button configuration ---------------------------------------------
+
+# Copy doctest examples without their ``>>> `` and ``... `` prompts, so a
+# reader can paste them into a session.
+copybutton_prompt_text = r">>> |\.\.\. "
+copybutton_prompt_is_regexp = True
 
 # -- Plot directive configuration -------------------------------------------
 
