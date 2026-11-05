@@ -138,7 +138,7 @@ See `CITATION.rst`_ for instructions on citing SolarWindPy.
 
 .. |Build Status| image:: https://github.com/blalterman/SolarWindPy/actions/workflows/ci-master.yml/badge.svg?branch=master
    :target: https://github.com/blalterman/SolarWindPy/actions/workflows/ci-master.yml
-.. |Docs Status| image:: https://readthedocs.org/projects/solarwindpy/badge/?version=latest
+.. |Docs Status| image:: https://img.shields.io/readthedocs/solarwindpy.svg
    :target: https://solarwindpy.readthedocs.io/en/latest/?badge=latest
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
    :target: ./LICENSE
