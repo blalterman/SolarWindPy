@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   every spelling of the colour (`color`, `c`, `colors`, `edgecolor`, `edgecolors`, `ec`) now sets
   the segments' colour; before, only `color` did, `c` raised `AttributeError`, and the others were
   overridden by the points' colour. Giving two of them raises `TypeError`.
+- `Ion` built directly from rows out of time order now sorts them with one warning that counts
+  and locates them, as `Plasma`, `Spacecraft`, `Vector` and `Tensor` do. Before, it kept the rows
+  unsorted and logged only that the index was "not monotonically increasing". An `Ion` built by a
+  `Plasma` was already sorted and is unchanged.
 - Release automation: the conda-forge tracking issue now reads the sdist's SHA256 from PyPI's
   JSON API, waiting up to ten minutes with backoff while a new release is not yet listed, instead
   of downloading the file and failing on the CDN's early 404. Its body fills in the version,

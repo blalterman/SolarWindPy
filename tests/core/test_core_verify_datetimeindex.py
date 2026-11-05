@@ -41,17 +41,7 @@ def _ion_data(index):
     "index, expected",
     [
         (pd.RangeIndex(2), {NOT_DATETIME}),
-        pytest.param(
-            pd.to_datetime(["2020-01-02", "2020-01-01"]),
-            set(),
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="Ion keeps out-of-order rows and logs the vague 'not "
-                "monotonically increasing' warning; remove this marker when Ion "
-                "sorts its data",
-            ),
-        ),
+        (pd.to_datetime(["2020-01-02", "2020-01-01"]), set()),
         (pd.to_datetime(["2020-01-01", "2020-01-02"]), set()),
     ],
     ids=["range-index", "decreasing-datetimes", "increasing-datetimes"],
@@ -70,13 +60,6 @@ def test_ion_warns_about_exactly_the_index_problems_present(caplog, index, expec
     assert found == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Ion keeps out-of-order rows and logs the vague 'not monotonically "
-    "increasing' warning; expected one 'earlier than the row before them' "
-    "warning and sorted rows; remove this marker when Ion sorts its data",
-)
 def test_ion_sorts_out_of_order_rows_with_one_warning(caplog):
     """An Ion built directly from rows out of time order sorts them, warning once.
 
