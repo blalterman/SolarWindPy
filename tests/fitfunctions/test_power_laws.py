@@ -45,7 +45,6 @@ _AMPLITUDE_LAST = pytest.mark.xfail(
             ("x", "alpha", "y0", "A"),
             (2.0, 1.5, 1.0, 3.0),
             6 * np.sqrt(2.0) + 1,
-            marks=_AMPLITUDE_LAST,
         ),
         # 3 * 1.5^1.5 = 4.5 sqrt(1.5)
         pytest.param(
@@ -53,7 +52,6 @@ _AMPLITUDE_LAST = pytest.mark.xfail(
             ("x", "alpha", "x0", "A"),
             (2.0, 1.5, 0.5, 3.0),
             4.5 * np.sqrt(1.5),
-            marks=_AMPLITUDE_LAST,
         ),
     ],
 )
@@ -90,8 +88,8 @@ _EXPONENT = {
         (Exponential, "A"),
         pytest.param(ExponentialPlusC, "A", marks=_AMPLITUDE_LAST),
         (PowerLaw, "A"),
-        pytest.param(PowerLawPlusC, "A", marks=_AMPLITUDE_LAST),
-        pytest.param(PowerLawOffCenter, "A", marks=_AMPLITUDE_LAST),
+        (PowerLawPlusC, "A"),
+        (PowerLawOffCenter, "A"),
         (Gaussian, "A"),
         (GaussianNormalized, "n"),
         (GaussianLn, "A"),
@@ -335,7 +333,7 @@ def test_power_law_off_center_centering():
 
     obj = PowerLawOffCenter(x, np.ones_like(x))
 
-    result = obj.function(x, 1.0, 2.0, x0)
+    result = obj.function(x, 1.0, x0, 2.0)
     assert result == exact([1.0, 3.0, 5.0, 7.0])
 
 
@@ -400,7 +398,7 @@ def test_power_law_off_center_bound_respects_the_caller(x0_upper, expected):
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    obj.make_fit(bounds=([-5.0, 0.0, -3.0], [5.0, 100.0, x0_upper]))
+    obj.make_fit(bounds=([-5.0, -3.0, 0.0], [5.0, x0_upper, 100.0]))
 
     assert obj.fit_bounds["A"] == (0.0, 100.0)
     assert obj.fit_bounds["alpha"] == (-5.0, 5.0)
@@ -429,7 +427,7 @@ def test_power_law_off_center_fits_data_at_or_below_zero(x, x0):
     x = np.array(x)
     y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
-    assert obj.p0[2] < x.min()
+    assert obj.p0[1] < x.min()
 
     obj.make_fit()
     assert obj.popt["A"] == noise_free(4.0)
@@ -449,7 +447,7 @@ def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_low
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([-5.0, 0.0, x0_lower], [5.0, 100.0, 10.0])
+    bounds = ([-5.0, x0_lower, 0.0], [5.0, 10.0, 100.0])
     match = r"needs x0 below the smallest used x \(1\.0\)"
 
     with pytest.raises(ValueError, match=match):
@@ -457,7 +455,7 @@ def test_power_law_off_center_refuses_a_bound_with_no_room_below_the_data(x0_low
     assert re.search(match, str(attempt_fit(obj, bounds=bounds)))
 
     # Positive control: a lower bound below the data fits.
-    bounds[0][2] = -3.0
+    bounds[0][1] = -3.0
     obj.make_fit(bounds=bounds)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -475,7 +473,7 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    p0 = [1.0, 1.0, x0_start]
+    p0 = [1.0, x0_start, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
         + re.escape(str(x0_start))
@@ -486,7 +484,7 @@ def test_power_law_off_center_refuses_a_caller_p0_above_the_data(x0_start):
     assert re.search(match, str(attempt_fit(obj, p0=p0)))
 
     # Positive control: a start below the data fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -503,8 +501,8 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    bounds = ([-5.0, 0.0, -3.0], [5.0, 100.0, 10.0])
-    p0 = [1.0, 1.0, -5.0]
+    bounds = ([-5.0, -3.0, 0.0], [5.0, 10.0, 100.0])
+    p0 = [1.0, -5.0, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at -5\.0, "
         r"below its lower bound -3\.0"
@@ -516,7 +514,7 @@ def test_power_law_off_center_refuses_a_caller_p0_below_its_lower_bound():
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a start inside the bounds fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0, bounds=bounds)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -534,7 +532,7 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
     """
     x = np.array([1.0, 2.0, 4.0, 8.0])
     obj = PowerLawOffCenter(x, 16.0 * x**-2.0)
-    p0 = [1.0, 1.0, x0_start]
+    p0 = [1.0, x0_start, 1.0]
     match = (
         r"needs x0 below the smallest used x \(1\.0\).*p0 starts x0 at "
         + re.escape(str(x0_start))
@@ -547,7 +545,7 @@ def test_power_law_off_center_refuses_a_caller_p0_with_a_nonfinite_x0(x0_start):
     assert isinstance(got, ValueError) and re.search(match, str(got))
 
     # Positive control: a finite start below the data fits.
-    p0[2] = -1.0
+    p0[1] = -1.0
     obj.make_fit(p0=p0)
     # 16 / x^2 = 16 (x - 0)^-2; x is of order 1.
     assert obj.popt["x0"] == noise_free(0.0, scale=1.0)
@@ -576,9 +574,9 @@ def test_power_law_off_center_clips_its_x0_start_into_the_bounds(x0_bounds, x0, 
     x = np.array([1.0, 2.0, 4.0, 8.0])
     y = 4.0 * (x - x0) ** 2  # A = 4, alpha = 2
     obj = PowerLawOffCenter(x, y)
-    assert obj.p0[2] == exact(0.0)
+    assert obj.p0[1] == exact(0.0)
 
-    obj.make_fit(bounds=([-5.0, 0.0, x0_bounds[0]], [5.0, 100.0, x0_bounds[1]]))
+    obj.make_fit(bounds=([-5.0, x0_bounds[0], 0.0], [5.0, x0_bounds[1], 100.0]))
     assert obj.popt["A"] == noise_free(4.0)
     assert obj.popt["alpha"] == noise_free(2.0)
     assert obj.popt["x0"] == noise_free(x0)
@@ -699,7 +697,7 @@ def test_power_law_off_center_refusal_names_the_class():
     ON FAILURE: the code is wrong.
     """
     obj = PowerLawOffCenter(OFF_X, OFF_Y)
-    bounds = ([-5.0, 0.0, BELOW_ONE], [5.0, 100.0, 10.0])
+    bounds = ([-5.0, BELOW_ONE, 0.0], [5.0, 10.0, 100.0])
     with pytest.raises(ValueError, match=r"^PowerLawOffCenter needs x0 below"):
         obj.make_fit(bounds=bounds)
 
@@ -707,8 +705,8 @@ def test_power_law_off_center_refusal_names_the_class():
 @pytest.mark.parametrize(
     "p0, bounds",
     [
-        ([1.0, 1.0, BELOW_ONE], (-np.inf, np.inf)),
-        ([1.0, 1.0, -3.0], ([-5.0, 0.0, -3.0], [5.0, 100.0, 10.0])),
+        ([1.0, BELOW_ONE, 1.0], (-np.inf, np.inf)),
+        ([1.0, -3.0, 1.0], ([-5.0, -3.0, 0.0], [5.0, 10.0, 100.0])),
     ],
     ids=["at-upper-bound", "at-lower-bound"],
 )

@@ -143,7 +143,7 @@ def test_a_subclass_precheck_failure_is_recorded_too():
     x = np.linspace(1.0, 5.0, 20)
     fit = PowerLawOffCenter(x, 2.0 * x**1.5)
     with pytest.raises(ValueError, match="needs x0 below"):
-        fit.make_fit(bounds=([-np.inf, -np.inf, 2.0], [np.inf, np.inf, np.inf]))
+        fit.make_fit(bounds=([-np.inf, 2.0, -np.inf], [np.inf, np.inf, np.inf]))
     assert fit.results.loc[:, ("status", "")].item() == "ValueError"
 
 
