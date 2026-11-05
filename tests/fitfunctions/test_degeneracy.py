@@ -134,6 +134,41 @@ def test_non_finite_covariance_warns_degeneracy():
     assert np.isnan(fit.degenerate[0][2])
 
 
+class _Constant(FitFunction):
+    """A one-parameter model, y = c."""
+
+    @property
+    def function(self):
+        def constant(x, c):
+            return np.full(np.shape(x), c, dtype=float)
+
+        return constant
+
+    @property
+    def p0(self):
+        return [float(np.mean(self.observations.used.y))]
+
+    @property
+    def TeX_function(self):
+        return "c"
+
+
+def test_one_parameter_with_no_degree_of_freedom_warns_its_variance():
+    """One point fixes a constant with no degree of freedom: its variance is infinite.
+
+    A one-parameter model has no pair, so ``degenerate`` lists the parameter
+    with itself.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _Constant(np.array([1.0]), np.array([2.0]))
+    with pytest.warns(FitDegeneracyWarning, match="c has a non-finite variance"):
+        with pytest.warns(OptimizeWarning):
+            fit.make_fit()
+    assert [pair[:2] for pair in fit.degenerate] == [("c", "c")]
+    assert np.isnan(fit.degenerate[0][2])
+
+
 def test_degeneracy_is_not_fitted_before_a_successful_fit():
     """``degenerate`` raises NotFittedError before a fit and after a failed one.
 
@@ -423,8 +458,15 @@ def test_degenerate_trend_bins_stay_and_warn_by_default():
     tf = _trend_fit_with_degenerate_bins()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", OptimizeWarning)
-        with pytest.warns(FitDegeneracyWarning, match="non-finite covariance"):
+        with pytest.warns(
+            FitDegeneracyWarning, match="non-finite covariance"
+        ) as record:
             tf.make_fit()
+
+    # Each bin's warning names the caller's line, not TrendFit's module.
+    degenerate = [w for w in record if w.category is FitDegeneracyWarning]
+    assert len(degenerate) == len(DEGENERATE)
+    assert {w.filename for w in degenerate} == {__file__}
 
     status = tf.bin_results.loc[:, ("status", "")]
     assert status[status != "ok"].index.tolist() == EMPTY
