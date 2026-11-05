@@ -198,3 +198,21 @@ span.math {
         color: #000 !important;
     }
 }
+/* ===== Branding ===== */
+
+/* Sidebar logo: the theme stretches it to the full sidebar width */
+.wy-side-nav-search > a img.logo,
+.wy-side-nav-search .wy-dropdown > a img.logo {
+    max-width: 120px;
+}
+
+/* The home page banner already shows the name, so hide the duplicate title
+ * visually while keeping it for screen readers, the browser tab and links. */
+#solarwindpy-documentation > h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
