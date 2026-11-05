@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-05
+
 ### Added
 
 - A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
