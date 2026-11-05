@@ -82,7 +82,6 @@ def test_count_equals_a_groupby_count(name, h, axnorm, clim):
     assert got.isna().any()  # the gap leaves empty cells
 
 
-@pytest.mark.xfail(strict=True, reason="agg counts with a groupby today")
 def test_a_count_does_not_group_the_rows():
     """A count runs without ``_grouped_by_cell``; a mean still uses it.
 

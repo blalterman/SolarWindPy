@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- A count in `agg` (`fcn="count"`, or the default on a plot without z) counts each cell's rows
+  with `numpy.bincount` of the rows' cell codes instead of a pandas groupby: same result, about
+  twice as fast at 1e6 rows.
 - `pre-commit install` now installs the commit-message hook as well as the pre-commit hook
   (`default_install_hook_types` in `.pre-commit-config.yaml`), so the conventional-commit
   check runs without a separate `pre-commit install --hook-type commit-msg`.

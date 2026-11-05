@@ -959,16 +959,32 @@ class BinnedPlot(Base):
             "\n".join([f"""{k!s}: {v!s}""" for k, v in lbls.items()]),
         )
 
-        gb = self._grouped_by_cell()
-
         if fcn is None:
             fcn = "count" if self._source.counts else "mean"
 
-        agg = gb.agg(fcn, **kwargs)
+        if isinstance(fcn, str) and fcn == "count" and not kwargs:
+            # Count fast path: rows per cell straight from the cell codes, no
+            # groupby. Keep only occupied cells, as a groupby count would, so
+            # empty cells stay NaN after the reindex below. The aggregated
+            # column has no NaN on kept rows, so this equals its groupby count.
+            codes = self._cell_codes()
+            n = np.bincount(codes[codes >= 0], minlength=len(self.binning.cells))
+            occupied = np.flatnonzero(n)
+            cnt = pd.Series(
+                n[occupied].astype(np.int64),
+                index=pd.Index(occupied, dtype=np.int64),
+                name=self.agg_axes,
+            )
+            agg = cnt
+        else:
+            gb = self._grouped_by_cell()
+            agg = gb.agg(fcn, **kwargs)
+            cnt = None
 
         c0, c1 = self.clim
         if c0 is not None or c1 is not None:
-            cnt = gb.agg("count")
+            if cnt is None:
+                cnt = gb.agg("count")
             tk = pd.Series(True, index=agg.index)
             if c0 is not None:
                 tk = tk & (cnt >= c0)
