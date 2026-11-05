@@ -116,6 +116,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   publication format. The quickstart shows `Plasma.info`, a plot's printed summary and a fit
   with `yerr`. `scripts/benchmark_binned_data.py` measures the time and memory a shared
   `BinnedData` saves, the numbers the Usage guide quotes.
+- A "How to cite" page in the User Guide and a "How to cite" section in the README with the
+  BibTeX entry, both asking readers to cite the all-versions DOI 10.5281/zenodo.17042839;
+  `tests/test_citation.py` keeps the README's copy identical to `CITATION.rst`.
+- Windows is tested: pull-request CI runs the test suite on `windows-latest`, and the release
+  workflow's platform matrix includes Windows.
 
 ### Changed
 
@@ -130,6 +135,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `solarwindpy.plotting.labels.base.validate_axnorm` takes the accepted keys, `allowed`
   (default every key of `AXNORM`), and is the one check of an `axnorm` key: the plots call it
   with their binning's `allowed_axnorm`, with the same messages as before.
+- The documentation uses the SolarWindPy branding kit: the banner, icon, favicon and social
+  card, the brand palette and Lato headings, and the README's badges on the docs home page.
+- `ci-summary` fails when a CI job fails (it previously exited 0), and the Windows job is
+  limited to 30 minutes.
 
 ### Fixed
 
@@ -180,6 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (was `AssertionError`) for any other key.
 - `SIDC` no longer warns that pandas deprecates `inplace=True` each time it loads or
   normalizes the sunspot number.
+- `DataLoader.age` reads the cached copy's age in one step; it was short by the time between
+  two clock reads.
 
 ## [0.4.1] - 2026-11-05
 
