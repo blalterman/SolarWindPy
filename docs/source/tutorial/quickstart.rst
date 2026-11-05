@@ -201,12 +201,54 @@ quality name (``P``) and the kind (``K``): each parameter's ``value`` and
 of freedom and the status:
 
 >>> results = fit.results
->>> results.columns.get_level_values("P").unique().tolist()
-['m', 'b', 'chisq_dof', 'rsq', 'nobs', 'dof', 'status']
+>>> print(results.round(3).T.to_string(header=False, index_names=False))
+m         value        1.992
+          uncertainty  0.029
+b         value        1.078
+          uncertainty  0.189
+chisq_dof linear       0.197
+          robust       0.064
+rsq                    0.995
+nobs                      21
+dof                       19
+status                    ok
+
+Printed on its side, the table reads as a checklist. Each parameter's
+``value`` is the fit and its ``uncertainty`` the 1-sigma error from ``pcov``.
+``chisq_dof`` gives the ``linear`` and ``robust`` reduced chi-squared, ``rsq``
+the coefficient of determination, ``nobs`` the observations used and ``dof``
+the degrees of freedom, ``nobs`` less the number of parameters. ``status`` is
+``"ok"`` for a fit that converged; a failed fit holds NaN values and names the
+exception instead. A cell reads by its column pair:
+
 >>> round(float(results.loc[0, ("m", "uncertainty")]), 2)
 0.03
 >>> results.loc[0, ("status", "")]
 'ok'
+
+Every fit function's table has this layout, with one pair of columns per
+parameter. A :py:class:`~solarwindpy.fitfunctions.gaussians.Gaussian` fit to a
+seeded, noisy peak of height 10 at :math:`\mu = 0.5` with width
+:math:`\sigma = 1.2` recovers all three within their uncertainties:
+
+>>> rng = np.random.default_rng(1)
+>>> x = np.linspace(-5, 5, 41)
+>>> y = 10.0 * np.exp(-0.5 * ((x - 0.5) / 1.2) ** 2) + rng.normal(0.0, 0.3, x.size)
+>>> gaussian = swp.fitfunctions.gaussians.Gaussian(x, y)
+>>> gaussian.make_fit()
+>>> print(gaussian.results.round(3).T.to_string(header=False, index_names=False))
+mu        value        0.502
+          uncertainty  0.015
+sigma     value        1.201
+          uncertainty  0.018
+A         value         9.93
+          uncertainty  0.131
+chisq_dof linear       0.084
+          robust       0.035
+rsq                    0.993
+nobs                      41
+dof                       38
+status                    ok
 
 Next Steps
 ----------
