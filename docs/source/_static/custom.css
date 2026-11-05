@@ -220,3 +220,24 @@ span.math {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
+
+/* ===== Typography =====
+ * The branding kit asks for a humanist sans: Lato, which sphinx_rtd_theme
+ * already bundles (regular, bold, and their italics) and uses for body text.
+ * Headings switch from the theme's Roboto Slab to bold upright Lato; the
+ * brand name in the sidebar takes the kit's italic display treatment.
+ */
+h1, h2, h3, h4, h5, h6,
+.rst-content .toctree-wrapper > p.caption,
+.wy-menu-vertical p.caption {
+    font-family: Lato, "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+}
+
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-dropdown > a {
+    font-family: Lato, "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 130%;
+}
