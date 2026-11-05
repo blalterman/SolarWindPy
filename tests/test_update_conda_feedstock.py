@@ -55,13 +55,17 @@ def released(*urls):
     return Response(200, {"info": {"version": VERSION}, "urls": list(urls)})
 
 
-@pytest.fixture
-def updater():
+def make_updater(**kwargs):
     """An updater whose sleeps are recorded, not waited."""
-    u = feedstock.CondaFeedstockUpdater(fork_owner="someone")
+    u = feedstock.CondaFeedstockUpdater(fork_owner="someone", **kwargs)
     u.slept = []
     u._sleep = u.slept.append
     return u
+
+
+@pytest.fixture
+def updater():
+    return make_updater()
 
 
 @pytest.fixture
@@ -142,8 +146,73 @@ def test_validation_waits_for_the_release_and_checks_its_version(updater, pypi):
     assert updater.validate_pypi_release(VERSION)
     assert updater.slept == [15]
 
+
+def test_a_version_mismatch_is_refused(updater, pypi):
+    """ON FAILURE: the code is wrong."""
+    responses, _ = pypi
     responses += [Response(200, {"info": {"version": "0.4.1"}, "urls": [SDIST]})]
     assert not updater.validate_pypi_release(VERSION)
+
+
+@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
+def test_one_fetch_serves_validation_and_the_checksum(updater, pypi):
+    """The release is validated and hashed from one response, asked for once.
+
+    ON FAILURE: the code is wrong.
+    """
+    responses, calls = pypi
+    responses += [released(SDIST)]
+    assert updater.validate_pypi_release(VERSION)
+    assert updater.get_sdist_sha256(VERSION) == SHA
+    assert calls == [JSON_URL]
+
+
+@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
+def test_a_null_urls_list_is_a_release_without_its_sdist(updater, pypi):
+    """ON FAILURE: the code is wrong."""
+    responses, _ = pypi
+    responses += [
+        Response(200, {"info": {"version": VERSION}, "urls": None}),
+        released(SDIST),
+    ]
+    assert updater.get_sdist_sha256(VERSION) == SHA
+    assert updater.slept == [15]
+
+
+@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
+def test_release_wait_bounds_the_wait(pypi):
+    """With ``release_wait=0`` a missing release fails after one request.
+
+    ON FAILURE: the code is wrong.
+    """
+    u = make_updater(release_wait=0)
+    responses, calls = pypi
+    responses += [Response(404)]
+    assert u.get_sdist_sha256(VERSION) is None
+    assert calls == [JSON_URL]
+    assert u.slept == []
+
+
+@pytest.mark.xfail(strict=True, reason="the shared fetch and --max-wait land next")
+def test_the_max_wait_flag_reaches_the_updater(monkeypatch):
+    """ON FAILURE: the code is wrong."""
+    made = {}
+
+    class Recorder:
+        def __init__(self, **kwargs):
+            made.update(kwargs)
+
+        def update_feedstock(self, version_str, dry_run=False):
+            return True
+
+    monkeypatch.setattr(feedstock, "CondaFeedstockUpdater", Recorder)
+    monkeypatch.setattr(
+        feedstock.sys, "argv", ["update_conda_feedstock.py", VERSION, "--max-wait", "0"]
+    )
+    with pytest.raises(SystemExit) as exit_:
+        feedstock.main()
+    assert exit_.value.code == 0
+    assert made["release_wait"] == 0
 
 
 def test_a_prerelease_is_refused_without_asking_pypi(updater, pypi):
