@@ -11,11 +11,17 @@ naming the pairs, attributed to the caller's line, and lists them in
 import warnings
 
 import numpy as np
+import pandas as pd
 import pytest
 from scipy.optimize import OptimizeWarning
 
+from solarwindpy.fitfunctions import trend_fits
 from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
-from solarwindpy.fitfunctions.core import FitDegeneracyWarning, FitFunction
+from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
+    FitFunction,
+    InsufficientDataError,
+)
 from solarwindpy.fitfunctions.hinge import HingeSaturation
 from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.fitfunctions.power_laws import PowerLawOffCenter
@@ -337,3 +343,91 @@ def test_degeneracy_warning_points_at_the_caller(build):
     assert [w.filename for w in record if w.category is FitDegeneracyWarning] == [
         __file__
     ]
+
+
+def _trend_fit_with_degenerate_columns(skip=()):
+    """A TrendFit of Gaussians: two good columns, two with three points, one empty.
+
+    A Gaussian has three parameters, so a column with three finite points has
+    no degree of freedom and an infinite covariance: degenerate on any
+    platform. The empty column cannot be fitted at all. Columns in ``skip``
+    are left out.
+    """
+    edges = np.linspace(-5, 5.25, 42)
+    # TrendFit fits each column at its bin midpoints.
+    x = 0.5 * (edges[1:] + edges[:-1])
+
+    def gaussian(mu):
+        return 3 * np.exp(-0.5 * ((x - mu) / 0.8) ** 2)
+
+    def three_points(mu):
+        y = np.full(x.size, np.nan)
+        y[19:22] = gaussian(mu)[19:22]
+        return y
+
+    data = {
+        pd.Interval(0, 1): gaussian(1.0),
+        pd.Interval(1, 2): three_points(0.0),
+        pd.Interval(2, 3): gaussian(2.0),
+        pd.Interval(3, 4): three_points(0.5),
+        pd.Interval(4, 5): np.full(x.size, np.nan),
+    }
+    index = pd.IntervalIndex.from_breaks(edges)
+    data = {k: v for k, v in data.items() if k not in skip}
+    tf = trend_fits.TrendFit(pd.DataFrame(data, index=index), Line)
+    tf.make_ffunc1ds()
+    return tf
+
+
+GOOD = [pd.Interval(0, 1), pd.Interval(2, 3)]
+DEGENERATE = [pd.Interval(1, 2), pd.Interval(3, 4)]
+EMPTY = [pd.Interval(4, 5)]
+
+
+def test_escalated_degeneracy_marks_trend_columns_as_failed_fits():
+    """Escalated, both degenerate columns join ``bad_fits``; the good ones fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    tf = _trend_fit_with_degenerate_columns()
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FitDegeneracyWarning)
+        tf.make_1dfits()
+
+    assert sorted(tf.bad_fits.index) == sorted(DEGENERATE + EMPTY)
+    assert list(tf.ffuncs.index) == GOOD
+    # The good columns recover the generating centres.
+    assert [f.popt["mu"] for f in tf.ffuncs] == noise_free([1.0, 2.0])
+
+
+def test_degenerate_trend_columns_stay_and_warn_by_default():
+    """With default warning settings, degenerate columns stay in ``ffuncs``.
+
+    ON FAILURE: the code is wrong.
+    """
+    tf = _trend_fit_with_degenerate_columns()
+    with pytest.warns(FitDegeneracyWarning, match="non-finite covariance"):
+        tf.make_1dfits()
+
+    assert list(tf.bad_fits.index) == EMPTY
+    assert list(tf.ffuncs.index) == sorted(GOOD + DEGENERATE)
+    assert [bool(tf.ffuncs[k].degenerate) for k in DEGENERATE] == [True, True]
+
+
+def test_escalated_degeneracy_is_raised_without_return_exception():
+    """With ``return_exception=False`` the escalated warning is raised, as failures are.
+
+    ON FAILURE: the code is wrong.
+    """
+    tf = _trend_fit_with_degenerate_columns(skip=EMPTY)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FitDegeneracyWarning)
+        with pytest.raises(FitDegeneracyWarning, match="non-finite covariance"):
+            tf.make_1dfits(return_exception=False)
+
+    # Another failure still raises its own error.
+    tf = _trend_fit_with_degenerate_columns(skip=DEGENERATE)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FitDegeneracyWarning)
+        with pytest.raises(InsufficientDataError):
+            tf.make_1dfits(return_exception=False)

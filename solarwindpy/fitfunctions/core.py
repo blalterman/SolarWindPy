@@ -95,6 +95,11 @@ class FitDegeneracyWarning(UserWarning):
 
     It is a :class:`UserWarning`, not a :class:`RuntimeWarning`, so code that
     escalates NumPy's floating-point ``RuntimeWarning`` to an error still fits.
+
+    Escalated to an error, it is raised after the fit is stored.
+    :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits` then
+    treats a degenerate column as a failed fit and excludes it from the
+    trend; without escalation the column stays in the trend with a warning.
     """
 
     pass
@@ -1144,7 +1149,11 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         -----
         ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
             When the fit leaves parameters unconstrained, naming each pair
-            :attr:`degenerate` lists.
+            :attr:`degenerate` lists. It is emitted after the fit is stored;
+            escalated to an error, it is raised even with
+            ``return_exception=True``, and
+            :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits`
+            records the column as a failed fit.
         """
         try:
             self._require_sufficient_data()

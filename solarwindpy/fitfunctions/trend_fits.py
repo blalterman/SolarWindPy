@@ -152,6 +152,15 @@ class TrendFit(object):
 
         Removes bad fits from `ffuncs` and saves them in `bad_fits`.
 
+        A :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`
+        escalated to an error (for example by
+        ``warnings.simplefilter("error", FitDegeneracyWarning)``) counts as a
+        failed fit: the column moves to `bad_fits`, is excluded from the trend,
+        and the loop continues. Without escalation a degenerate column stays
+        in `ffuncs`, and in the trend, with a warning. With
+        ``return_exception=False`` the escalated warning is raised, as any
+        other failure is.
+
         Parameters
         ----------
         **kwargs
@@ -178,9 +187,18 @@ class TrendFit(object):
         # Successful fits return None, which pandas treats as NaN.
         return_exception = kwargs.pop("return_exception", True)
 
-        fit_success = self.ffuncs.apply(
-            lambda x: x.make_fit(return_exception=return_exception, **kwargs)
-        )
+        def fit(ffunc):
+            """Fit ``ffunc``, returning a failure or an escalated degeneracy."""
+            try:
+                return ffunc.make_fit(return_exception=return_exception, **kwargs)
+            except core.FitDegeneracyWarning as e:
+                # Raised only when the warning is escalated to an error. It is
+                # a failure like those make_fit returns; the fit's state stays.
+                if return_exception:
+                    return e
+                raise
+
+        fit_success = self.ffuncs.apply(fit)
 
         # Handle failed fits
         bad_idx = fit_success.dropna().index
