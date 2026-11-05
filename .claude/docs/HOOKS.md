@@ -25,6 +25,3 @@ python .claude/hooks/coverage-monitor.py   # per-module coverage report (advisor
 python .claude/hooks/create-compaction.py  # write a session-state compaction file
 .claude/hooks/validate-tags.sh             # check git tags follow the release conventions
 ```
-
-`input-validation.sh` defines argument-sanitizing helpers, but no script sources
-it.
