@@ -66,7 +66,7 @@ type = "acyclic_siblings"
 ancestors = ["solarwindpy"]
 
 [build-system]
-requires = ["setuptools>=61", "wheel", "setuptools_scm"]
+requires = ["setuptools>=77", "wheel", "setuptools_scm"]  # 77: SPDX license expressions
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
@@ -80,7 +80,8 @@ name = "solarwindpy"
 description = "A Python Library for in situ solar wind data analysis."
 readme = "README.rst"
 requires-python = ">=3.12,<4"
-license = {file = "LICENSE"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [
   {name = "B. L. Alterman", email = "blaltermanphd@gmail.com"}
 ]
@@ -101,7 +102,6 @@ dependencies = [
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -110,6 +110,7 @@ classifiers = [
   "Intended Audience :: Education",
   "Topic :: Scientific/Engineering",
   "Topic :: Scientific/Engineering :: Physics",
+  "Operating System :: OS Independent",
 ]
 keywords = [
   "plasma",
@@ -127,6 +128,7 @@ test = [
     "packaging>=23.0",
     "pyyaml>=6.0",  # tests/test_declared_versions.py reads YAML
     "requests>=2.31",  # tests/test_update_conda_feedstock.py stubs requests.get
+    "sphinx>=7.0",  # tests/test_public_imports.py imports sphinx
 ]
 docs = [
     "sphinx>=7.0",
