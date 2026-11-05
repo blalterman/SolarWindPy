@@ -209,8 +209,7 @@ def test_the_plotted_rows_are_the_binned_rows(spec):
     ON FAILURE: the code is wrong.
     """
     h = _hist(spec)
-    plotted = h.get_plotted_data_boolean_series()
-    assert plotted.index.equals(X.index)
+    plotted = X.index.isin(h.get_plotted_data().index)
     assert plotted.tolist() == spec["plotted"]
 
 

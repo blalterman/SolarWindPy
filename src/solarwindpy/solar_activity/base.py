@@ -212,7 +212,12 @@ class DataLoader(Base):
     @property
     def age(self):
         r"""Time since :attr:`ctime`."""
-        return pd.Timestamp.now() - self.ctime
+        # One reading of the cached copy's age. Subtracting ctime from a
+        # separate now() falls short by the time spent computing ctime.
+        age = cache.cached_age(self.url)
+        if age is None:
+            return pd.Timestamp.now() - pd.to_datetime(0)
+        return age
 
     def set_key(self, key):
         r"""Set :attr:`key`.

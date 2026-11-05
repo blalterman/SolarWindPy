@@ -402,6 +402,20 @@ class _PlotSource:
         return self._rows
 
     @property
+    def n_kept(self):
+        r"""Number of rows the plot keeps."""
+        return self._n_kept
+
+    @property
+    def has_value(self):
+        r"""True if the caller gave the aggregated column; False for a count."""
+        return self._value is not None
+
+    def is_logged(self, col):
+        r"""True if ``col`` is held as ``log10(abs())``."""
+        return bool(self._log.get(col, False))
+
+    @property
     def log_columns(self):
         r"""Coordinates given a log setting, True or False, when built.
 
@@ -484,7 +498,7 @@ class _PlotSource:
             ``labels`` is True, it shares the source's values and index.
         """
         values = self.take(col, labels=labels)
-        if self._log.get(col, False):
+        if self.is_logged(col):
             values = np.log10(np.abs(values))
         return values
 

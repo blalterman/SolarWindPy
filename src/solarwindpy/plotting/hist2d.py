@@ -11,6 +11,7 @@ import matplotlib as mpl
 
 from matplotlib import pyplot as plt
 from collections import namedtuple
+from scipy.ndimage import gaussian_filter
 from scipy.signal import savgol_filter
 
 
@@ -19,33 +20,6 @@ from . import labels
 from .tools import nan_gaussian_filter
 
 from .hist1d import Hist1D
-
-
-def _within(values, lower, upper, bins):
-    r"""Which ``values`` lie between ``lower`` and ``upper``, closed as ``bins`` are.
-
-    Parameters
-    ----------
-    values : pd.Series
-        Values on the binned scale, ``log10(abs())`` on a log axis.
-    lower, upper : scalar
-        The bounds.
-    bins : pd.IntervalIndex
-        The axis's bins. Right-closed bins compare ``lower < v <= upper``;
-        left-closed bins compare ``lower <= v < upper`` and, as the last
-        left-closed bin also holds its right edge (``np.histogram``), keep
-        ``v == upper`` when ``upper`` is that edge.
-
-    Returns
-    -------
-    pd.Series of bool
-    """
-    if bins.closed == "left":
-        inside = (lower <= values) & (values < upper)
-        if upper == bins.right[-1]:
-            inside |= values == upper
-        return inside
-    return (lower < values) & (values <= upper)
 
 
 class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
@@ -212,9 +186,23 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         return C, x, y
 
-    def _nan_gaussian_filter(self, array, sigma, **kwargs):
-        """Wrapper for shared nan_gaussian_filter. See tools.nan_gaussian_filter."""
-        return nan_gaussian_filter(array, sigma, **kwargs)
+    @staticmethod
+    def _gaussian_filter(array, sigma, kwargs):
+        r"""Smooth the grid ``array`` with a Gaussian of ``sigma`` bins.
+
+        A grid without empty (NaN) bins is filtered by
+        :func:`scipy.ndimage.gaussian_filter`. A grid with empty bins is
+        filtered by :func:`~solarwindpy.plotting.tools.nan_gaussian_filter`,
+        which averages only the occupied neighbours and keeps the empty bins
+        empty: the plain filter spreads each NaN over the kernel, blanking the
+        bins around every gap. ``kwargs``, a dict or None, is passed to the
+        filter.
+        """
+        kwargs = {} if kwargs is None else kwargs
+        array = np.asarray(array, dtype=float)
+        if np.isnan(array).any():
+            return nan_gaussian_filter(array, sigma, **kwargs)
+        return gaussian_filter(array, sigma, **kwargs)
 
     def make_plot(
         self,
@@ -242,9 +230,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             value; see ``ColorPlot._apply_alpha_fcn``. Ignored, with a warning,
             when the plot counts points.
         kwargs:
-            Passed to `ax.pcolormesh`. `norm` defaults to ten colour bands on
-            [0, 1] for row or column normalized data and to a `LogNorm` for
-            densities ("d", "cd", "rd").
+            Passed to `ax.pcolormesh`. For values of both signs, `norm`
+            defaults to a `CenteredNorm` about 0 and `cmap` to "RdBu_r";
+            otherwise `norm` defaults to ten colour bands on [0, 1] for row or
+            column normalized data and to a `LogNorm` for densities ("d",
+            "cd", "rd"). See ``ColorPlot._color_scale``.
 
         Returns
         -------
@@ -264,11 +254,10 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         x, y = self._maybe_convert_to_log_scale(x, y)
 
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
-
         C = np.ma.masked_invalid(agg.values)
+        norm, cmap = self._color_scale(kwargs, C)
         XX, YY = np.meshgrid(x, y)
-        pc = ax.pcolormesh(XX, YY, C, norm=norm, **kwargs)
+        pc = ax.pcolormesh(XX, YY, C, norm=norm, cmap=cmap, **kwargs)
 
         if cbar:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
@@ -299,7 +288,6 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_kwargs=None,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
-        nan_aware_filter=False,
         **kwargs,
     ):
         """Make a 2D pcolormesh plot with contour overlay.
@@ -324,12 +312,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_kwargs : dict, None
             Additional kwargs passed to contour/contourf (e.g., linestyles, colors).
         gaussian_filter_std : int
-            If > 0, apply Gaussian filter to contour data.
+            If > 0, smooth the contour data with a Gaussian of this standard
+            deviation, in bins, as :py:meth:`plot_contours` does: the filter
+            skips empty bins.
         gaussian_filter_kwargs : dict, None
-            Kwargs passed to `scipy.ndimage.gaussian_filter`.
-        nan_aware_filter : bool
-            If True and gaussian_filter_std > 0, use NaN-aware filtering via
-            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+            Kwargs passed to the Gaussian filter.
         kwargs :
             Passed to `ax.pcolormesh`. `norm` defaults as in `make_plot` and
             is shared by the mesh and the contours.
@@ -350,13 +337,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         if contour_kwargs is None:
             contour_kwargs = {}
 
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
-
-        # Get cmap from kwargs (shared between pcolormesh and contour)
-        cmap = kwargs.pop("cmap", None)
-
         # --- 1. Plot pcolormesh background ---
         C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
+
+        # norm and cmap are shared between pcolormesh and contour.
+        norm, cmap = self._color_scale(kwargs, C_edges)
 
         XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
         pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)
@@ -370,19 +355,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         # Apply Gaussian filter if requested
         if needs_filter:
-            if gaussian_filter_kwargs is None:
-                gaussian_filter_kwargs = {}
-
-            if nan_aware_filter:
-                C_centers = self._nan_gaussian_filter(
-                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
-                )
-            else:
-                from scipy.ndimage import gaussian_filter
-
-                C_centers = gaussian_filter(
-                    C_centers, gaussian_filter_std, **gaussian_filter_kwargs
-                )
+            C_centers = self._gaussian_filter(
+                C_centers, gaussian_filter_std, gaussian_filter_kwargs
+            )
 
             C_centers = np.ma.masked_invalid(C_centers)
 
@@ -449,6 +424,26 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         border = Border(top, bottom)
         return border
 
+    @staticmethod
+    def _default_savgol_window(n, polyorder):
+        r"""Default Savitzky-Golay window for an edge of ``n`` points, or None.
+
+        10% of ``n``, made odd by subtracting 1 when even; raised to the
+        smallest odd length above ``polyorder`` when it is not above it; capped
+        at the largest odd length within ``n``. None when no odd length within
+        ``n`` exceeds ``polyorder``: the edge is too short to smooth.
+        """
+        wlength = int(np.floor(n / 10))
+        if not wlength % 2:
+            wlength -= 1
+        if wlength <= polyorder:
+            wlength = polyorder + 1 + polyorder % 2
+        if wlength > n:
+            wlength = n if n % 2 else n - 1
+        if wlength <= polyorder:
+            return None
+        return wlength
+
     def _plot_one_edge(
         self,
         ax,
@@ -467,13 +462,13 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         sg_kwargs = dict() if sg_kwargs is None else dict(sg_kwargs)
 
         if smooth:
-            wlength = sg_kwargs.pop("window_length", int(np.floor(y.shape[0] / 10)))
             polyorder = sg_kwargs.pop("polyorder", 3)
+            wlength = sg_kwargs.pop("window_length", None)
+            if wlength is None:
+                wlength = self._default_savgol_window(y.shape[0], polyorder)
 
-            if not wlength % 2:
-                wlength -= 1
-
-            y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
+            if wlength is not None:
+                y = savgol_filter(y, wlength, polyorder, **sg_kwargs)
 
         if self.log.x:
             x = 10.0**x
@@ -510,18 +505,22 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             to the y-values before plotting to smooth the curve.
         sg_kwargs: dict, None
             If not None, dict of kwargs passed to Savitzky-Golay filter. Also allows
-            for setting of `window_length` and `polyorder` as kwargs. They default to
-            10% of the number of observations (`window_length`) and 3 (`polyorder`).
-            Note that because `window_length` must be odd, if the 10% value is even, we
-            take 1-window_length.
+            for setting of `window_length` and `polyorder` as kwargs. `polyorder`
+            defaults to 3. `window_length` defaults to 10% of the number of points
+            on the edge, less 1 when even, as the filter needs an odd window. A
+            default window that is not above `polyorder`, as below 50 points
+            for `polyorder` 3, is raised to the smallest odd length above it, and
+            a window longer than the edge to the longest odd length within it.
+            When no odd length within the edge exceeds `polyorder` the edge is
+            drawn unsmoothed. A `window_length` the caller passes is used as given.
+        xlim, ylim: tuple of (float or None, float or None), optional
+            Inclusive ``(lower, upper)`` limits, in data coordinates, on the edge
+            vertices drawn. A vertex outside a limit is dropped; a vertex exactly
+            on a limit is kept. ``None`` leaves that side unbounded. Default
+            ``(None, None)``.
         **kwargs
-            ``xlim`` and ``ylim``, each a tuple ``(lower, upper)`` of float
-            or None: inclusive limits, in data coordinates, on the edge
-            vertices drawn. A vertex outside a limit is dropped; a vertex
-            exactly on a limit is kept. ``None`` leaves that side unbounded.
-            Default ``(None, None)``. ``color`` defaults to ``"cyan"`` and
-            ``label`` labels the top edge only. The rest are passed to
-            `ax.plot`.
+            ``color`` defaults to ``"cyan"`` and ``label`` labels the top
+            edge only. The rest are passed to `ax.plot`.
 
         Returns
         -------
@@ -555,7 +554,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         elif (levels is None) and (self.axnorm in ["r", "c"]):
             levels = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-        elif (levels is None) and (self.axnorm in ["cd", "rd"]):
+        elif (levels is None) and (self.axnorm in ["cd", "rd", "w", "wc", "wr"]):
             levels = None
 
         else:
@@ -583,7 +582,6 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         use_contourf=False,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
-        nan_aware_filter=False,
         levels=None,
         **kwargs,
     ):
@@ -606,22 +604,24 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         use_contourf: bool
             If True, use `ax.contourf`. Else use `ax.contour`.
         gaussian_filter_std: int
-            If > 0, apply `scipy.ndimage.gaussian_filter` to the z-values using the
-            standard deviation specified by `gaussian_filter_std`.
+            If > 0, smooth the z-values with a Gaussian of this standard
+            deviation, in bins. A grid without empty bins is filtered by
+            :func:`scipy.ndimage.gaussian_filter`; a grid with empty bins by
+            :func:`~solarwindpy.plotting.tools.nan_gaussian_filter`, which
+            averages only the occupied bins and leaves the empty ones empty.
         gaussian_filter_kwargs: None, dict
-            If not None and gaussian_filter_std > 0, passed to :func:`scipy.ndimage.gaussian_filter`
-        nan_aware_filter: bool
-            If True and gaussian_filter_std > 0, use NaN-aware filtering via
-            normalized convolution. Otherwise use standard scipy.ndimage.gaussian_filter.
+            If not None and gaussian_filter_std > 0, passed to the filter.
         levels: array-like, int, None
             Contour levels. If None, the default for the ``axnorm``, or
             matplotlib's choice when there is none.
         kwargs:
             Passed to :meth:`matplotlib.axes.Axes.contour` or
-            :meth:`matplotlib.axes.Axes.contourf`. `norm` defaults to ten
-            colour bands on [0, 1] for row or column normalized data and to a
-            `LogNorm` for densities ("d", "cd", "rd"); otherwise, with at
-            least two levels, to a `BoundaryNorm` on the levels.
+            :meth:`matplotlib.axes.Axes.contourf`. For values of both signs,
+            `norm` defaults to a `CenteredNorm` about 0 and `cmap` to
+            "RdBu_r". Otherwise `norm` defaults to ten colour bands on [0, 1]
+            for row or column normalized data and to a `LogNorm` for
+            densities ("d", "cd", "rd"); otherwise, with at least two levels,
+            to a `BoundaryNorm` on the levels.
 
         Returns
         -------
@@ -630,8 +630,6 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         cbar : colorbar.Colorbar or None
             The colorbar if `cbar` is True, else None.
         """
-        cmap = kwargs.pop("cmap", None)
-        norm = kwargs.pop("norm", self._default_norm(self.axnorm))
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if ax is None:
@@ -651,19 +649,10 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         C = agg.values
         if gaussian_filter_std:
-            if gaussian_filter_kwargs is None:
-                gaussian_filter_kwargs = dict()
-
-            if nan_aware_filter:
-                C = self._nan_gaussian_filter(
-                    C, gaussian_filter_std, **gaussian_filter_kwargs
-                )
-            else:
-                from scipy.ndimage import gaussian_filter
-
-                C = gaussian_filter(C, gaussian_filter_std, **gaussian_filter_kwargs)
+            C = self._gaussian_filter(C, gaussian_filter_std, gaussian_filter_kwargs)
 
         C = np.ma.masked_invalid(C)
+        norm, cmap = self._color_scale(kwargs, C)
 
         assert XX.shape == C.shape
         assert YY.shape == C.shape
@@ -765,7 +754,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         x = source.take(axis, labels=False)
         keep = np.ones(x.size, dtype=bool)
         if only_plotted:
-            keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
+            keep &= self._plotted_rows()
         if not project_counts and other != "z":
             keep &= self.binning.axis_codes()[other] >= 0
 
@@ -920,9 +909,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
                 continue
             left, right = k.left, k.right
             bottom, top = v[tk].index.min().left, v[tk].index.max().right
-            above_contour_at_x = _within(x, left, right, intervals["x"]) & _within(
-                y, bottom, top, intervals["y"]
-            )
+            above_contour_at_x = base._within(
+                x, left, right, intervals["x"]
+            ) & base._within(y, bottom, top, intervals["y"])
             above_contour[above_contour_at_x] = k
 
         above_contour = pd.Series(
@@ -930,84 +919,3 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         )
 
         return above_contour
-
-    def take_data_in_yrange_across_x(
-        self,
-        ranges_by_x,
-        get_x_bounds,
-        get_y_bounds,
-    ):
-        r"""Take data within y-ranges across x-values.
-
-        Parameters
-        ----------
-        ranges_by_x: iterable
-            An iterable with keys used to get the left and right bounds for the data
-            and values used to get the top and bottom bounds for the data.
-
-        get_x_bounds: function
-            First argument is one key of `ranges_by_x` and returns `left, right`.
-            The keyword argument `expected_logx` is the bool ``self.log.x``, so
-            the returned values can be :math:`log(x)` or :math:`x` to match the
-            data stored in Hist2D.
-
-        get_y_bounds: functions
-            First argument is one row of `ranges_by_x` and returns
-            `bottom, top`. The keyword argument `expected_logy` is the bool
-            ``self.log.y``, so the returned values can be :math:`log(y)` or
-            :math:`y` to match the data stored in Hist2D.
-
-        Returns
-        -------
-        taken: np.ndarray 1D
-            Array of indices for selecting data in interval: the points with
-            x between `left` and `right` and y between `bottom` and `top`.
-            Each axis compares on the side its bins close: ``left < x <=
-            right`` for right-closed bins (explicit edges), ``left <= x <
-            right`` for left-closed bins (an integer `nbins`), whose last bin
-            also holds its right edge, so ``x == right`` is kept when `right`
-            is that edge. Likewise for y with the y-bins.
-
-        Raises
-        ------
-        ValueError
-            If a range has ``left >= right`` or ``bottom >= top``, or if an
-            entry of `ranges_by_x` names an x-bin the histogram does not have.
-            Histogram x-bins that `ranges_by_x` omits only log a warning.
-        """
-
-        available_x = self.agg().unstack("x").columns
-        if ranges_by_x.index.symmetric_difference(available_x).size:
-            drop = ranges_by_x.index.symmetric_difference(available_x)
-            if not drop.isin(available_x).all():
-                raise ValueError(
-                    "Need a way to drop values in selector that aren't available."
-                )
-            else:
-                self.logger.warning(
-                    f"Dropping {drop.size} intervals from available for selecting."
-                )
-
-        data = self.data
-        logx = self.log.x
-        logy = self.log.y
-        intervals = self.intervals
-
-        taken = []
-        for x, at_x in ranges_by_x.iterrows():
-            l, r = get_x_bounds(x, expected_logx=logx)
-            b, t = get_y_bounds(at_x, expected_logy=logy)
-
-            if not l < r:
-                raise ValueError(f"Need left < right for x-bin {x}, got ({l}, {r}).")
-            if not b < t:
-                raise ValueError(f"Need bottom < top for x-bin {x}, got ({b}, {t}).")
-
-            tkx = _within(data.x, l, r, intervals["x"])
-            tky = _within(data.y, b, t, intervals["y"])
-            tk = tkx & tky
-            tk = tk.loc[tk].index
-            taken.append(tk)
-
-        taken = np.sort(np.concatenate(taken))
-        return taken

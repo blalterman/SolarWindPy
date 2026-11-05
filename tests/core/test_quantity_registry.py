@@ -168,6 +168,7 @@ NOT_QUANTITIES = {
         "drop_species",
         "epoch",
         "estimate_electrons",
+        "info",
         "ions",
         "load_from_file",
         "save",
@@ -465,3 +466,49 @@ def test_bimax_species_have_their_own_tex(species, tex):
     from solarwindpy.plotting.labels.base import TeXlabel
 
     assert TeXlabel(("n", "", species)).tex == tex
+
+
+# --- display names -----------------------------------------------------------
+
+# Words a title-case name keeps lower case after its first word.
+_MINOR_WORDS = {"of", "to", "per", "and", "in", "the"}
+
+
+def _is_title_case(name):
+    """Each word capitalized, a minor word lower case after the first, any acronym."""
+    words = name.split(" ")
+    for i, word in enumerate(words):
+        if not word:
+            return False
+        if i and word in _MINOR_WORDS:
+            continue
+        if not (word[0].isupper() or word[0].isdigit()):
+            return False
+    return True
+
+
+def test_every_quantity_has_a_short_title_case_name():
+    """Each registry entry carries a short display name in title case.
+
+    The name is the quantity in two to four words at most (one, as
+    "Temperature", is fine); it is not a description.
+
+    ON FAILURE: the code is wrong -- an entry lacks its ``name``, or the name
+    is not title case or is too long.
+    """
+    for key, entry in _quantities().QUANTITIES.items():
+        name = entry.name
+        assert isinstance(name, str) and name, key
+        assert 1 <= len(name.split(" ")) <= 4, (key, name)
+        assert _is_title_case(name), (key, name)
+
+
+def test_name_is_a_required_keyword():
+    """A ``Quantity`` without a ``name`` fails at construction.
+
+    ON FAILURE: the code is wrong -- an entry could silently lack its name.
+    """
+    Quantity = _quantities().Quantity
+    with pytest.raises(TypeError):
+        Quantity(r"x", r"\mathrm{m}")
+    assert Quantity(r"x", r"\mathrm{m}", name="Distance").name == "Distance"

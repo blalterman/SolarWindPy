@@ -49,6 +49,7 @@ ENTRY_POINTS = [
     "solarwindpy.plotting.hist2d.Hist2D",
     "solarwindpy.plotting.labels.available",
     "solarwindpy.plotting.labels.base.TeXlabel",
+    "solarwindpy.plotting.labels.base.set_publication_format",
     "solarwindpy.plotting.scatter.Scatter",
     "solarwindpy.plotting.spiral.SpiralPlot2D",
     "solarwindpy.solar_activity.icme.icmecat.ICMECAT",

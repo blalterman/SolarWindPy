@@ -2,13 +2,17 @@
 SolarWindPy
 ###########
 
+.. image:: https://raw.githubusercontent.com/blalterman/SolarWindPy/master/docs/source/_static/branding/solarwindpy-readme-banner-1600.png
+   :alt: SolarWindPy: A Python Library for in situ solar wind data analysis
+   :width: 100%
+
 |Build Status| |Docs Status| |Ruff|
 
 |PyPI| |Conda|
 
 |Python| |License| |Zenodo|
 
-Python data analysis tools for solar wind measurements.
+A Python Library for *in situ* solar wind data analysis.
 
 Quick Start
 -----------
@@ -122,17 +126,38 @@ Development
       make html SPHINXOPTS="-W --keep-going -n"
 
 
+Code of Conduct
+===============
+
+SolarWindPy follows the Contributor Covenant, version 2.1. See
+`CODE_OF_CONDUCT.md`_. Report concerns to blaltermanphd@gmail.com.
+
 License
 =======
 
 SolarWindPy is licensed under a standard 3-clause BSD license. See
 `LICENSE`_.
 
-Acknowledging and Citing SolarWindPy
-====================================
+How to cite
+===========
 
-See `CITATION.rst`_ for instructions on citing SolarWindPy.
+If SolarWindPy contributes to published work, please cite it:
 
+.. code-block:: bibtex
+
+   @software{Alterman_SolarWindPy,
+     author    = {Alterman, B. L.},
+     title     = {SolarWindPy},
+     publisher = {Zenodo},
+     doi       = {10.5281/zenodo.17042839},
+     url       = {https://doi.org/10.5281/zenodo.17042839}
+   }
+
+Please cite this all-versions DOI rather than a single release's DOI, and give
+the version you used in your text. See `CITATION.rst`_ for details. GitHub's
+"Cite this repository" button reads the same metadata from ``CITATION.cff``.
+
+.. _CODE_OF_CONDUCT.md: ./CODE_OF_CONDUCT.md
 .. _LICENSE: ./LICENSE
 .. _CITATION.rst: ./CITATION.rst
 

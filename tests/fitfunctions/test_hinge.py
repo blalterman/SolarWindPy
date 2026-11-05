@@ -49,8 +49,7 @@ def clean_saturation_data():
         m1 * (x - true_params["x1"]),
         true_params["yh"],  # m2=0 means flat plateau at yh
     )
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -70,8 +69,7 @@ def clean_sloped_plateau_data():
         m1 * (x - true_params["x1"]),
         true_params["m2"] * (x - x2),
     )
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -92,8 +90,7 @@ def noisy_saturation_data():
     )
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -111,8 +108,7 @@ def offset_x1_data():
         m1 * (x - true_params["x1"]),
         true_params["yh"],
     )
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # =============================================================================
@@ -193,7 +189,7 @@ def test_func_evaluates_sloped_plateau_correctly():
 
 def test_fit_recovers_exact_parameters_from_clean_data(clean_saturation_data):
     """Fitting noise-free data should recover parameters within 1%."""
-    x, y, w, true_params = clean_saturation_data
+    x, y, true_params = clean_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -216,7 +212,7 @@ def test_fit_recovers_exact_parameters_from_clean_data(clean_saturation_data):
 
 def test_fit_recovers_sloped_plateau_parameters(clean_sloped_plateau_data):
     """Fitting clean data with m2≠0 should recover parameters within 2%."""
-    x, y, w, true_params = clean_sloped_plateau_data
+    x, y, true_params = clean_sloped_plateau_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -237,7 +233,7 @@ def test_fit_recovers_sloped_plateau_parameters(clean_sloped_plateau_data):
 
 def test_fit_recovers_offset_x1_parameters(offset_x1_data):
     """Fitting clean data with x1≠0 should recover parameters within 2%."""
-    x, y, w, true_params = offset_x1_data
+    x, y, true_params = offset_x1_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -318,7 +314,7 @@ def test_fit_with_noise_recovers_parameters_within_2sigma(noisy_saturation_data)
 
     For well-behaved Gaussian noise, we expect deviations < 2σ with high confidence.
     """
-    x, y, w, true_params = noisy_saturation_data
+    x, y, true_params = noisy_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -374,7 +370,7 @@ def test_fit_uncertainty_scales_with_noise():
 
 def test_p0_returns_list_with_correct_length(clean_saturation_data):
     """p0 should return a list with 4 elements."""
-    x, y, w, true_params = clean_saturation_data
+    x, y, true_params = clean_saturation_data
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
 
     p0 = obj.p0
@@ -384,7 +380,7 @@ def test_p0_returns_list_with_correct_length(clean_saturation_data):
 
 def test_p0_enables_successful_convergence(noisy_saturation_data):
     """Fit should converge when initialized with estimated p0."""
-    x, y, w, true_params = noisy_saturation_data
+    x, y, true_params = noisy_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -405,7 +401,7 @@ def test_fitted_m1_is_consistent_with_xh_yh_x1(offset_x1_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params = offset_x1_data
+    x, y, true_params = offset_x1_data
     # True m1 = 10 / (5 - 1) = 2.5
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
@@ -431,7 +427,7 @@ def test_hinge_point_is_continuous(clean_sloped_plateau_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params = clean_sloped_plateau_data
+    x, y, true_params = clean_sloped_plateau_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -451,10 +447,10 @@ def test_hinge_point_is_continuous(clean_sloped_plateau_data):
 # =============================================================================
 
 
-def test_weighted_fit_respects_weights():
+def test_weighted_fit_respects_yerr():
     """Weighted fitting should correctly use sigma to weight observations.
 
-    In FitFunction, weights are interpreted as uncertainties (sigma). Points
+    In FitFunction, ``yerr`` is the 1-sigma uncertainty of each y. Points
     with larger sigma have MORE uncertainty and thus LESS influence on the fit.
 
     Test strategy: Apply non-uniform sigma values and verify the fit converges
@@ -479,7 +475,7 @@ def test_weighted_fit_respects_weights():
     y = y_true + noise
 
     # Fit with correct sigma values
-    fit_weighted = HingeSaturation(x, y, weights=sigma_true, guess_xh=true_params["xh"])
+    fit_weighted = HingeSaturation(x, y, yerr=sigma_true, guess_xh=true_params["xh"])
     fit_weighted.make_fit()
 
     # Verify fit converged and parameters are accurate
@@ -546,7 +542,7 @@ def test_tex_function_property():
 
 def test_callable_interface(clean_saturation_data):
     """Test that fitted object is callable and returns correct shape."""
-    x, y, w, true_params = clean_saturation_data
+    x, y, true_params = clean_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -563,7 +559,7 @@ def test_callable_interface(clean_saturation_data):
 
 def test_popt_has_correct_keys(clean_saturation_data):
     """Test that popt contains expected parameter names."""
-    x, y, w, true_params = clean_saturation_data
+    x, y, true_params = clean_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -578,7 +574,7 @@ def test_popt_has_correct_keys(clean_saturation_data):
 
 def test_psigma_has_same_keys_as_popt(noisy_saturation_data):
     """Test that psigma has same keys as popt."""
-    x, y, w, true_params = noisy_saturation_data
+    x, y, true_params = noisy_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -591,7 +587,7 @@ def test_psigma_has_same_keys_as_popt(noisy_saturation_data):
 
 def test_psigma_values_are_positive(noisy_saturation_data):
     """Test that all parameter uncertainties are positive."""
-    x, y, w, true_params = noisy_saturation_data
+    x, y, true_params = noisy_saturation_data
 
     obj = HingeSaturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -645,8 +641,7 @@ def clean_twoline_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = true_params["m2"] * (x - true_params["x2"])
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -664,8 +659,7 @@ def noisy_twoline_data():
     y_true = np.minimum(y1, y2)
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -682,8 +676,7 @@ def twoline_parallel_slopes_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = true_params["m2"] * (x - true_params["x2"])
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # -----------------------------------------------------------------------------
@@ -764,7 +757,7 @@ def test_twoline_func_evaluates_intersection_correctly():
 
 def test_twoline_fit_recovers_exact_parameters_from_clean_data(clean_twoline_data):
     """Fitting noise-free TwoLine data should recover parameters within 2%."""
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -786,7 +779,7 @@ def test_twoline_fit_recovers_exact_parameters_from_clean_data(clean_twoline_dat
 
 def test_twoline_fit_recovers_parallel_slopes_parameters(twoline_parallel_slopes_data):
     """Fitting TwoLine with same-sign slopes should recover parameters within 2%."""
-    x, y, w, true_params = twoline_parallel_slopes_data
+    x, y, true_params = twoline_parallel_slopes_data
 
     obj = TwoLine(x, y, guess_xh=-2.0)
     obj.make_fit()
@@ -815,7 +808,7 @@ def test_twoline_fit_with_noise_recovers_parameters_within_2sigma(noisy_twoline_
 
     With 4 parameters at 2sigma (95%), joint probability is (0.95)^4 = 81%.
     """
-    x, y, w, true_params = noisy_twoline_data
+    x, y, true_params = noisy_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -844,7 +837,7 @@ def test_twoline_xs_property_is_consistent(clean_twoline_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -869,7 +862,7 @@ def test_twoline_s_property_is_consistent(clean_twoline_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -891,7 +884,7 @@ def test_twoline_theta_property_is_positive_for_converging_lines(clean_twoline_d
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -933,7 +926,7 @@ def test_twoline_function_signature():
 
 def test_twoline_popt_has_correct_keys(clean_twoline_data):
     """Test that TwoLine popt contains expected parameter names."""
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -948,7 +941,7 @@ def test_twoline_popt_has_correct_keys(clean_twoline_data):
 
 def test_twoline_callable_interface(clean_twoline_data):
     """Test that fitted TwoLine object is callable and returns correct shape."""
-    x, y, w, true_params = clean_twoline_data
+    x, y, true_params = clean_twoline_data
 
     obj = TwoLine(x, y, guess_xh=5.0)
     obj.make_fit()
@@ -1006,8 +999,7 @@ def clean_saturation_twoline_data():
     y1 = m1 * (x - true_params["x1"])
     y2 = m2 * (x - x2)
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params, {"m1": m1, "m2": m2, "x2": x2}
+    return x, y, true_params, {"m1": m1, "m2": m2, "x2": x2}
 
 
 @pytest.fixture
@@ -1028,8 +1020,7 @@ def noisy_saturation_twoline_data():
     y_true = np.minimum(y1, y2)
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -1047,8 +1038,7 @@ def saturation_small_theta_data():
     y1 = m1 * (x - true_params["x1"])
     y2 = m2 * (x - x2)
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # -----------------------------------------------------------------------------
@@ -1128,7 +1118,7 @@ def test_saturation_fit_recovers_exact_parameters_from_clean_data(
     clean_saturation_twoline_data,
 ):
     """Fitting noise-free Saturation data should recover parameters within 2%."""
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1149,7 +1139,7 @@ def test_saturation_fit_recovers_exact_parameters_from_clean_data(
 
 def test_saturation_fit_recovers_small_theta_parameters(saturation_small_theta_data):
     """Fitting Saturation with small theta should recover parameters within 5%."""
-    x, y, w, true_params = saturation_small_theta_data
+    x, y, true_params = saturation_small_theta_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1178,7 +1168,7 @@ def test_saturation_fit_with_noise_recovers_parameters_within_2sigma(
     noisy_saturation_twoline_data,
 ):
     """Fitted Saturation parameters should be within 2sigma of true values."""
-    x, y, w, true_params = noisy_saturation_twoline_data
+    x, y, true_params = noisy_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1204,7 +1194,7 @@ def test_saturation_m1_property_is_consistent(clean_saturation_twoline_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1223,7 +1213,7 @@ def test_saturation_m2_property_is_consistent(clean_saturation_twoline_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1243,7 +1233,7 @@ def test_saturation_x2_property_is_consistent(clean_saturation_twoline_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1282,7 +1272,7 @@ def test_saturation_function_signature():
 
 def test_saturation_popt_has_correct_keys(clean_saturation_twoline_data):
     """Test that Saturation popt contains expected parameter names."""
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1297,7 +1287,7 @@ def test_saturation_popt_has_correct_keys(clean_saturation_twoline_data):
 
 def test_saturation_callable_interface(clean_saturation_twoline_data):
     """Test that fitted Saturation object is callable and returns correct shape."""
-    x, y, w, true_params, derived = clean_saturation_twoline_data
+    x, y, true_params, derived = clean_saturation_twoline_data
 
     obj = Saturation(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1361,8 +1351,7 @@ def clean_hingemin_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = m2 * (x - true_params["x2"])
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params, {"m2": m2, "yh": yh}
+    return x, y, true_params, {"m2": m2, "yh": yh}
 
 
 @pytest.fixture
@@ -1385,8 +1374,7 @@ def noisy_hingemin_data():
     y_true = np.minimum(y1, y2)
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -1410,8 +1398,7 @@ def hingemin_positive_slopes_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = m2 * (x - true_params["x2"])
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # -----------------------------------------------------------------------------
@@ -1490,7 +1477,7 @@ def test_hingemin_func_evaluates_line2_region_correctly():
 
 def test_hingemin_fit_recovers_exact_parameters_from_clean_data(clean_hingemin_data):
     """Fitting noise-free HingeMin data should recover parameters within 2%."""
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1513,7 +1500,7 @@ def test_hingemin_fit_recovers_positive_slopes_parameters(
     hingemin_positive_slopes_data,
 ):
     """Fitting HingeMin with positive slopes should recover parameters within 2%."""
-    x, y, w, true_params = hingemin_positive_slopes_data
+    x, y, true_params = hingemin_positive_slopes_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1539,7 +1526,7 @@ def test_hingemin_fit_recovers_positive_slopes_parameters(
 
 def test_hingemin_fit_with_noise_recovers_parameters_within_2sigma(noisy_hingemin_data):
     """Fitted HingeMin parameters should be within 2sigma of true values."""
-    x, y, w, true_params = noisy_hingemin_data
+    x, y, true_params = noisy_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1567,7 +1554,7 @@ def test_hingemin_m2_property_is_consistent(clean_hingemin_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1587,7 +1574,7 @@ def test_hingemin_theta_property_is_consistent(clean_hingemin_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1606,7 +1593,7 @@ def test_hingemin_lines_intersect_at_hinge(clean_hingemin_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1650,7 +1637,7 @@ def test_hingemin_function_signature():
 
 def test_hingemin_popt_has_correct_keys(clean_hingemin_data):
     """Test that HingeMin popt contains expected parameter names."""
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1665,7 +1652,7 @@ def test_hingemin_popt_has_correct_keys(clean_hingemin_data):
 
 def test_hingemin_callable_interface(clean_hingemin_data):
     """Test that fitted HingeMin object is callable and returns correct shape."""
-    x, y, w, true_params, derived = clean_hingemin_data
+    x, y, true_params, derived = clean_hingemin_data
 
     obj = HingeMin(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1729,8 +1716,7 @@ def clean_hingemax_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = m2 * (x - true_params["x2"])
     y = np.maximum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params, {"m2": m2, "yh": yh}
+    return x, y, true_params, {"m2": m2, "yh": yh}
 
 
 @pytest.fixture
@@ -1753,8 +1739,7 @@ def noisy_hingemax_data():
     y_true = np.maximum(y1, y2)
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -1778,8 +1763,7 @@ def hingemax_negative_slopes_data():
     y1 = true_params["m1"] * (x - true_params["x1"])
     y2 = m2 * (x - true_params["x2"])
     y = np.maximum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # -----------------------------------------------------------------------------
@@ -1858,7 +1842,7 @@ def test_hingemax_func_evaluates_line2_region_correctly():
 
 def test_hingemax_fit_recovers_exact_parameters_from_clean_data(clean_hingemax_data):
     """Fitting noise-free HingeMax data should recover parameters within 2%."""
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1881,7 +1865,7 @@ def test_hingemax_fit_recovers_negative_slopes_parameters(
     hingemax_negative_slopes_data,
 ):
     """Fitting HingeMax with negative slopes should recover parameters within 2%."""
-    x, y, w, true_params = hingemax_negative_slopes_data
+    x, y, true_params = hingemax_negative_slopes_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1907,7 +1891,7 @@ def test_hingemax_fit_recovers_negative_slopes_parameters(
 
 def test_hingemax_fit_with_noise_recovers_parameters_within_2sigma(noisy_hingemax_data):
     """Fitted HingeMax parameters should be within 2sigma of true values."""
-    x, y, w, true_params = noisy_hingemax_data
+    x, y, true_params = noisy_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1935,7 +1919,7 @@ def test_hingemax_m2_property_is_consistent(clean_hingemax_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1955,7 +1939,7 @@ def test_hingemax_theta_property_is_consistent(clean_hingemax_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -1974,7 +1958,7 @@ def test_hingemax_lines_intersect_at_hinge(clean_hingemax_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2018,7 +2002,7 @@ def test_hingemax_function_signature():
 
 def test_hingemax_popt_has_correct_keys(clean_hingemax_data):
     """Test that HingeMax popt contains expected parameter names."""
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2033,7 +2017,7 @@ def test_hingemax_popt_has_correct_keys(clean_hingemax_data):
 
 def test_hingemax_callable_interface(clean_hingemax_data):
     """Test that fitted HingeMax object is callable and returns correct shape."""
-    x, y, w, true_params, derived = clean_hingemax_data
+    x, y, true_params, derived = clean_hingemax_data
 
     obj = HingeMax(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2091,8 +2075,7 @@ def clean_hingeatpoint_data():
     y1 = true_params["m1"] * (x - x1)
     y2 = true_params["m2"] * (x - x2)
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params, {"x1": x1, "x2": x2}
+    return x, y, true_params, {"x1": x1, "x2": x2}
 
 
 @pytest.fixture
@@ -2112,8 +2095,7 @@ def noisy_hingeatpoint_data():
     y_true = np.minimum(y1, y2)
     noise_std = 0.5
     y = y_true + rng.normal(0, noise_std, len(x))
-    w = np.ones_like(x) / noise_std
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 @pytest.fixture
@@ -2132,8 +2114,7 @@ def hingeatpoint_positive_slopes_data():
     y1 = true_params["m1"] * (x - x1)
     y2 = true_params["m2"] * (x - x2)
     y = np.minimum(y1, y2)
-    w = np.ones_like(x)
-    return x, y, w, true_params
+    return x, y, true_params
 
 
 # -----------------------------------------------------------------------------
@@ -2215,7 +2196,7 @@ def test_hingeatpoint_fit_recovers_exact_parameters_from_clean_data(
     clean_hingeatpoint_data,
 ):
     """Fitting noise-free HingeAtPoint data should recover parameters within 2%."""
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2238,7 +2219,7 @@ def test_hingeatpoint_fit_recovers_positive_slopes_parameters(
     hingeatpoint_positive_slopes_data,
 ):
     """Fitting HingeAtPoint with positive slopes should recover parameters within 2%."""
-    x, y, w, true_params = hingeatpoint_positive_slopes_data
+    x, y, true_params = hingeatpoint_positive_slopes_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2266,7 +2247,7 @@ def test_hingeatpoint_fit_with_noise_recovers_parameters_within_2sigma(
     noisy_hingeatpoint_data,
 ):
     """Fitted HingeAtPoint parameters should be within 2sigma of true values."""
-    x, y, w, true_params = noisy_hingeatpoint_data
+    x, y, true_params = noisy_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2294,7 +2275,7 @@ def test_hingeatpoint_x_intercepts_property_has_correct_values(clean_hingeatpoin
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2317,7 +2298,7 @@ def test_hingeatpoint_x_intercepts_property_has_correct_values(clean_hingeatpoin
 
 def test_hingeatpoint_x_intercepts_is_namedtuple(clean_hingeatpoint_data):
     """Verify x_intercepts is a namedtuple with x1 and x2 attributes."""
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2331,7 +2312,7 @@ def test_hingeatpoint_lines_pass_through_hinge(clean_hingeatpoint_data):
 
     ON FAILURE: the code is wrong.
     """
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2375,7 +2356,7 @@ def test_hingeatpoint_function_signature():
 
 def test_hingeatpoint_popt_has_correct_keys(clean_hingeatpoint_data):
     """Test that HingeAtPoint popt contains expected parameter names."""
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2390,7 +2371,7 @@ def test_hingeatpoint_popt_has_correct_keys(clean_hingeatpoint_data):
 
 def test_hingeatpoint_callable_interface(clean_hingeatpoint_data):
     """Test that fitted HingeAtPoint object is callable and returns correct shape."""
-    x, y, w, true_params, derived = clean_hingeatpoint_data
+    x, y, true_params, derived = clean_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()
@@ -2417,7 +2398,7 @@ def test_hingeatpoint_insufficient_data_raises_error():
 
 def test_hingeatpoint_psigma_values_are_positive(noisy_hingeatpoint_data):
     """Test that all parameter uncertainties are positive."""
-    x, y, w, true_params = noisy_hingeatpoint_data
+    x, y, true_params = noisy_hingeatpoint_data
 
     obj = HingeAtPoint(x, y, guess_xh=true_params["xh"])
     obj.make_fit()

@@ -165,8 +165,8 @@ class TestElementalAbundancePath:
             warnings.simplefilter("ignore")
             abundance = ElementalAbundance("C/N", "H", photospheric=False)
         path = abundance.path
-        # Path should contain separator
-        assert "C/N-OV-H" in str(path)
+        # The "/" in the species becomes a path separator on every OS.
+        assert path == Path("C/N-OV-H")
 
 
 class TestElementalAbundanceSetMethods:

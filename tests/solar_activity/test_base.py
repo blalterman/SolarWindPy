@@ -260,6 +260,36 @@ def test_age_is_the_time_since_the_cache_was_written(remote):
     assert pd.Timedelta(days=5) <= loader.age < pd.Timedelta(days=5, minutes=1)
 
 
+class AgeShortError(AssertionError):
+    """``age`` came out shorter than the cached copy's age."""
+
+
+def test_age_does_not_depend_on_when_the_clock_is_read(remote, monkeypatch):
+    """``age`` is the cached copy's age, however the wall clock moves while it is read.
+
+    Chosen input: the cached copy is moved five days back, then the clock
+    (``pd.Timestamp.now``, a clock boundary) is faked to advance one minute on
+    every read. An age assembled from two clock reads comes out a minute
+    short; the cached copy is still at least five days old.
+
+    ON FAILURE: the code is wrong.
+    """
+    CacheLoader.DOWNLOADED.to_csv(remote)
+    loader = CacheLoader("daily", remote.as_uri())
+    loader.load_data()
+    backdate(loader.url, 5)
+    clock = {"now": pd.Timestamp.now()}
+
+    def advancing_now(tz=None):
+        clock["now"] += pd.Timedelta(minutes=1)
+        return clock["now"]
+
+    monkeypatch.setattr(pd.Timestamp, "now", staticmethod(advancing_now))
+    age = loader.age
+    if age < pd.Timedelta(days=5):
+        raise AgeShortError(f"age {age} is shorter than five days")
+
+
 def test_load_data_downloads_again_when_the_cache_is_stale(remote):
     """A cached copy older than ``max_age`` is replaced by a new download.
 

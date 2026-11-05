@@ -2,6 +2,7 @@
 # Supersedes: none
 """The commit-msg hook accepts every Conventional Commits form the project uses."""
 
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -12,12 +13,17 @@ SCRIPT = (
 )
 
 
+# Resolve bash on PATH. A bare "bash" makes Windows search System32 before
+# PATH and run the WSL launcher, which cannot see this Windows path.
+BASH = shutil.which("bash")
+
+
 def _check(tmp_path, message):
+    if BASH is None:
+        pytest.skip("bash is not on PATH")
     msg = tmp_path / "COMMIT_EDITMSG"
     msg.write_text(message)
-    return subprocess.run(
-        ["bash", str(SCRIPT), str(msg)], capture_output=True
-    ).returncode
+    return subprocess.run([BASH, str(SCRIPT), str(msg)], capture_output=True).returncode
 
 
 @pytest.mark.parametrize(

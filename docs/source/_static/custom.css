@@ -1,10 +1,27 @@
 /* Custom CSS for SolarWindPy documentation */
 
+/* ===== Brand palette =====
+ * Tokens from the approved branding kit (brand-tokens.css). Luminous cyan and
+ * solar orange fail text contrast on white (1.7:1 and 2.2:1), so they are
+ * accents only. Links use deep teal, 4.71:1 on white.
+ */
+:root {
+    --swp-navy: #061B30;
+    --swp-deep-ocean: #08283A;
+    --swp-deep-teal: #087E9A;
+    --swp-cyan: #1ADDEB;
+    --swp-solar-yellow: #FFE35B;
+    --swp-orange: #FF951F;
+    --swp-warm-white: #F7F8F6;
+    --swp-slate-text: #52667A;
+    --swp-link: var(--swp-deep-teal);
+}
+
 /* ===== Scientific Typography ===== */
 
 /* Mathematical expressions and scientific notation */
 .math {
-    color: #2c3e50;
+    color: var(--swp-navy);
     font-family: 'Computer Modern', 'Latin Modern Math', 'STIX', serif;
 }
 
@@ -21,7 +38,7 @@
 /* Inline code */
 .rst-content code.literal {
     background-color: #f1f3f4;
-    color: #2c3e50;
+    color: var(--swp-navy);
     padding: 2px 4px;
     border-radius: 3px;
     font-size: 0.9em;
@@ -30,15 +47,25 @@
 /* ===== Navigation Enhancements ===== */
 
 /* Improved sidebar scrolling for deep navigation */
-.wy-side-nav-search {
-    background-color: #2980b9;
+.wy-side-nav-search,
+.wy-nav-top {
+    background-color: var(--swp-navy);
+}
+
+/* Sidebar in brand navy, with a cyan marker on the current page */
+.wy-nav-side {
+    background-color: var(--swp-navy);
+}
+
+.wy-menu-vertical li.current > a {
+    border-left: 3px solid var(--swp-cyan);
 }
 
 /* API documentation sections */
 .rst-content .section h1,
 .rst-content .section h2,
 .rst-content .section h3 {
-    color: #2c3e50;
+    color: var(--swp-navy);
     border-bottom: 1px solid #bdc3c7;
     padding-bottom: 6px;
 }
@@ -48,7 +75,7 @@
 .rst-content dl.function > dt,
 .rst-content dl.method > dt {
     background-color: #ecf0f1;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--swp-cyan);
     padding: 8px 12px;
     margin-bottom: 8px;
 }
@@ -63,8 +90,8 @@
 }
 
 .rst-content table.docutils th {
-    background-color: #34495e;
-    color: white;
+    background-color: var(--swp-navy);
+    color: var(--swp-warm-white);
     padding: 8px 12px;
     text-align: left;
 }
@@ -86,12 +113,12 @@
 /* Physics warnings and notes */
 .rst-content .admonition.physics-note {
     background-color: #e8f4fd;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--swp-cyan);
 }
 
 .rst-content .admonition.warning {
     background-color: #fdf2e9;
-    border-left: 4px solid #e67e22;
+    border-left: 4px solid var(--swp-orange);
 }
 
 /* ===== Mobile Responsiveness ===== */
@@ -138,13 +165,15 @@ span.math {
 }
 
 /* Reference links */
+.rst-content a,
 .rst-content a.reference {
-    color: #2980b9;
+    color: var(--swp-link);
     text-decoration: none;
 }
 
+.rst-content a:hover,
 .rst-content a.reference:hover {
-    color: #3498db;
+    color: var(--swp-navy);
     text-decoration: underline;
 }
 
@@ -172,4 +201,43 @@ span.math {
     .math {
         color: #000 !important;
     }
+}
+/* ===== Branding ===== */
+
+/* Sidebar logo: the theme stretches it to the full sidebar width */
+.wy-side-nav-search > a img.logo,
+.wy-side-nav-search .wy-dropdown > a img.logo {
+    max-width: 120px;
+}
+
+/* The home page banner already shows the name, so hide the duplicate title
+ * visually while keeping it for screen readers, the browser tab and links. */
+#solarwindpy-documentation > h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ===== Typography =====
+ * The branding kit asks for a humanist sans: Lato, which sphinx_rtd_theme
+ * already bundles (regular, bold, and their italics) and uses for body text.
+ * Headings switch from the theme's Roboto Slab to bold upright Lato; the
+ * brand name in the sidebar takes the kit's italic display treatment.
+ */
+h1, h2, h3, h4, h5, h6,
+.rst-content .toctree-wrapper > p.caption,
+.wy-menu-vertical p.caption {
+    font-family: Lato, "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+}
+
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-dropdown > a {
+    font-family: Lato, "proxima-nova", "Helvetica Neue", Arial, sans-serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 130%;
 }

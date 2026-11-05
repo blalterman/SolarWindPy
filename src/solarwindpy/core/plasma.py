@@ -292,6 +292,47 @@ class Plasma(base.Base):
         """
         return self._aux
 
+    def info(self):
+        r"""Summarise the plasma in a one-column table, one row per field.
+
+        The fields are the spacecraft and its coordinate frame ("none" for
+        both when no spacecraft is attached), the first and last observation
+        times, the number of observations, the species, and whether auxiliary
+        data are attached ("yes" or "no"). The plasma's own ``repr`` is
+        unchanged.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Indexed by field name, with one ``value`` column.
+
+        Examples
+        --------
+        >>> import solarwindpy as swp
+        >>> plasma = swp.examples.load_plasma()
+        >>> plasma.info()
+                                             value
+        spacecraft                             PSP
+        frame                                  HCI
+        start                  1995-01-01 12:35:00
+        end             2022-10-09 01:47:01.234560
+        observations                             3
+        species                       a, e, p1, p2
+        auxiliary data                          no
+        """
+        sc = self.sc
+        epoch = self.epoch
+        fields = {
+            "spacecraft": "none" if sc is None else sc.name,
+            "frame": "none" if sc is None else sc.frame,
+            "start": epoch.min(),
+            "end": epoch.max(),
+            "observations": len(epoch),
+            "species": ", ".join(self.species),
+            "auxiliary data": "no" if self.aux is None else "yes",
+        }
+        return pd.DataFrame({"value": pd.Series(fields, dtype=object)})
+
     def save(
         self,
         fname,
@@ -1631,13 +1672,13 @@ species: {}
     def lnlambda(self, s0, s1):
         r"""Calculate the Coulomb logarithm between species s0 and s1.
 
-            :math:`\ln_\lambda_{i,i} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
+            :math:`\ln \lambda_{0,1} = 29.9 - \ln(\frac{z_0 * z_1 * (a_0 + a_1)}{a_0 * T_1 + a_1 * T_0} \sqrt{\frac{n_0 z_0^2}{T_0} + \frac{n_1 z_1^2}{T_1}})`
 
         Parameters
         ----------
         s0, s1 : str
-            The two species. Each must name a single species: it cannot be
-            a sum of species, nor an iterable of species.
+            The two species, one each. Neither can be a sum of species
+            nor an iterable of species.
 
         Returns
         -------

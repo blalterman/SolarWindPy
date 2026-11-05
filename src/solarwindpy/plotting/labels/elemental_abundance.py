@@ -18,7 +18,8 @@ class ElementalAbundance(base.Base):
         reference_species,
         pct_unit=False,
         photospheric=True,
-        description=None,
+        name=None,
+        publication_format=None,
     ):
         """Instantiate the abundance label.
 
@@ -32,14 +33,17 @@ class ElementalAbundance(base.Base):
             If True, use percent units instead of #.
         photospheric : bool, default True
             If True, label indicates ratio to photospheric value.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_species(species, reference_species)
         self._pct_unit = bool(pct_unit)
         self._photospheric = bool(photospheric)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     @property
     def species(self):
@@ -62,7 +66,7 @@ class ElementalAbundance(base.Base):
         if self.pct_unit:
             return r"\%"
         else:
-            return r"\#"  # noqa: W605
+            return base._inU["dimless"]
 
     @property
     def tex(self):

@@ -5,7 +5,10 @@ __all__ = [
     "Scatter",
 ]
 
+import numpy as np
+from matplotlib import cbook
 from matplotlib import pyplot as plt
+from matplotlib.collections import LineCollection
 
 from . import base
 
@@ -34,13 +37,13 @@ class Scatter(base.ColorPlot):
     >>> y = pd.Series([4.0, 5.0, 6.0])
     >>> z = pd.Series([7.0, 8.0, 9.0])
     >>> s = Scatter(x, y, z)
-    >>> ax, collection, cbar = s.make_plot()
+    >>> ax, collection, segments, cbar = s.make_plot()
     >>> collection.get_offsets().tolist()
     [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
     >>> collection.get_array().tolist()
     [7.0, 8.0, 9.0]
-    >>> cbar is None
-    False
+    >>> segments is None, cbar is None
+    (True, False)
     >>> plt.close("all")
     """
 
@@ -82,7 +85,15 @@ class Scatter(base.ColorPlot):
         y = data.loc[:, "y"]
         self._fit_view(ax, collection, x.min(), x.max(), y.min(), y.max())
 
-    def make_plot(self, ax=None, cbar=True, cbar_kwargs=None, **kwargs):
+    def make_plot(
+        self,
+        ax=None,
+        cbar=True,
+        cbar_kwargs=None,
+        connect=False,
+        connect_kwargs=None,
+        **kwargs,
+    ):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
 
         Parameters
@@ -93,6 +104,14 @@ class Scatter(base.ColorPlot):
             If True, create color bar with `labels.z`.
         cbar_kwargs: dict, None
             If not None, kwargs passed to `self._make_cbar`.
+        connect: bool
+            If True, join the drawn points with line segments in increasing
+            z (see Notes).
+        connect_kwargs: dict, None
+            Passed to :class:`~matplotlib.collections.LineCollection`, e.g.
+            ``linewidth``, ``alpha`` or ``zorder``. The defaults are a
+            ``linewidth`` of 0.75 and a ``zorder`` just below the points'.
+            Not modified.
         kwargs:
             Passed to `ax.scatter`.
 
@@ -101,6 +120,8 @@ class Scatter(base.ColorPlot):
         ax: mpl.axes.Axes
         collection: mpl.collections.PathCollection
             The points.
+        segments: mpl.collections.LineCollection or None
+            The segments joining the points if `connect` is True, else None.
         cbar: mpl.colorbar.Colorbar or None
             The colorbar if `cbar` is True and z varies, else None.
 
@@ -109,6 +130,22 @@ class Scatter(base.ColorPlot):
         Points whose z is outside ``alim`` (see ``set_alim``) are not drawn,
         do not enter the colour scale, and do not set the axis limits. With
         ``kind="quantile"`` the thresholds are quantiles of the plotted z.
+
+        With ``connect=True`` each drawn point is joined to the drawn point
+        next in increasing z, a stable sort, so points with equal z keep the
+        order of their rows and the rows need not be sorted. With z the time
+        of each point, the segments trace its trajectory; with any other z
+        they trace how (x, y) changes as z increases. Without a varying z
+        (no z, or one value), the points are joined in row order. A point
+        that is not drawn (NaN or infinite, outside ``mask``, outside
+        ``alim``, or <= 0 on a log axis) is skipped, not a gap: the points
+        on either side of it are joined.
+
+        When z varies, each segment is coloured by the mean z of its two
+        points, ``(z_a + z_b) / 2``, through the points' colormap and norm,
+        the same objects, so the one colorbar reads both. Otherwise every
+        segment has the points' colour, unless ``connect_kwargs`` sets
+        ``color``. The segments do not set the axis limits.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -122,10 +159,17 @@ class Scatter(base.ColorPlot):
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"
+            kwargs["norm"], kwargs["cmap"] = self._color_scale(
+                kwargs, data.loc[:, "z"].to_numpy()
+            )
         else:
             zkey = None
 
         collection = ax.scatter(x="x", y="y", c=zkey, data=data, **kwargs)
+
+        segments = None
+        if connect:
+            segments = self._connect(ax, collection, data, zkey, connect_kwargs)
 
         if cbar and zkey is not None:
             cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
@@ -135,4 +179,54 @@ class Scatter(base.ColorPlot):
 
         self._format_axis(ax, collection, data)
 
-        return ax, collection, cbar
+        return ax, collection, segments, cbar
+
+    def _connect(self, ax, collection, data, zkey, connect_kwargs):
+        r"""Add segments joining the drawn points to `ax`; see `make_plot`.
+
+        Parameters
+        ----------
+        ax: mpl.axes.Axes
+        collection: mpl.collections.PathCollection
+            The points, whose colormap, norm and colour the segments share.
+        data: pd.DataFrame
+            The points not hidden by ``alim``, in row order.
+        zkey: str or None
+            ``"z"`` if the points are colour-mapped, else None.
+        connect_kwargs: Mapping or None
+            Passed to ``LineCollection``.
+
+        Returns
+        -------
+        matplotlib.collections.LineCollection
+        """
+        xy = data.loc[:, ["x", "y"]].to_numpy(dtype=float)
+        # The data stay linear, so a log axis cannot show a value <= 0.
+        drawn = np.ones(xy.shape[0], dtype=bool)
+        for i, log in enumerate(self.log):
+            if log:
+                drawn &= xy[:, i] > 0
+        xy = xy[drawn]
+
+        kwargs = cbook.normalize_kwargs(connect_kwargs or {}, LineCollection)
+        kwargs.setdefault("linewidth", 0.75)
+        kwargs.setdefault("zorder", collection.get_zorder() - 0.5)
+
+        if zkey is None:
+            kwargs.setdefault("color", collection.get_facecolor()[0])
+            segments = LineCollection(np.stack([xy[:-1], xy[1:]], axis=1), **kwargs)
+        else:
+            z = data.loc[:, zkey].to_numpy(dtype=float)[drawn]
+            order = np.argsort(z, kind="stable")
+            xy, z = xy[order], z[order]
+            collection.autoscale_None()
+            segments = LineCollection(
+                np.stack([xy[:-1], xy[1:]], axis=1),
+                cmap=collection.get_cmap(),
+                norm=collection.norm,
+                **kwargs,
+            )
+            segments.set_array((z[:-1] + z[1:]) / 2)
+
+        ax.add_collection(segments, autolim=False)
+        return segments

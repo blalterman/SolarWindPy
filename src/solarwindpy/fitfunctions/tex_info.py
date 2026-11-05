@@ -13,9 +13,8 @@ import numpy as np
 from numbers import Real
 from tabulate import tabulate
 
-# Compile this once on import to save time.
-_remove_exponential_pattern = r"e\+00+"  # Replace the `e+00`for 2 or more zeros.
-_remove_exponential_pattern = re.compile(_remove_exponential_pattern)
+# A zero exponent, `e+00`, which the 10^{X} notation leaves out.
+_zero_exponent_pattern = re.compile(r"e\+00(?![0-9])")
 
 
 class TeXinfo(object):
@@ -303,6 +302,8 @@ class TeXinfo(object):
         if convert_pow_10 and (not simplify_info_for_paper):
             # Convert to 10^X notation.
             info = "\n".join(info)
+            # A zero exponent prints as no exponent: 2.5, not 2.5 \times 10^{+0}.
+            info = _zero_exponent_pattern.sub("", info)
             info, eplus_cnt = re.subn(r"e\+", r" \\times 10^{+", info)
             info, eminus_cnt = re.subn(r"e-", r" \\times 10^{-", info)
 

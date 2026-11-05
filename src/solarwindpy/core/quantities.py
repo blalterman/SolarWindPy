@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-r"""The quantity registry: one entry per quantity, keyed by its canonical name.
+r"""The quantity registry: one entry per quantity, keyed by its canonical key.
 
-A name is canonical when it is the same string at every layer: the attribute or
+A key is canonical when it is the same string at every layer: the attribute or
 method that computes the quantity, the returned Series ``.name``, the M- or
 C-level column label, and the key here. Each :class:`Quantity` holds the SI
-value of the quantity's display unit, the TeX template of its symbol and the TeX
-of its display unit. Stored data stay in display units: ``core`` multiplies by
-``si`` to convert, and ``plotting`` reads ``tex`` and ``units`` to label. The
-method docstring is the one explanation of each quantity, so entries carry no
+value of the quantity's display unit, the TeX template of its symbol, the TeX
+of its display unit and its display name, a few words such as "Number Density"
+that a publication-format label prints above the symbol. Stored data stay in
+display units: ``core`` multiplies by ``si`` to convert, and ``plotting`` reads
+``tex``, ``units`` and ``name`` to label. The method docstring is the one
+explanation of each quantity, so entries carry a short display name but no
 description.
 
 This module sits at the bottom layer and imports nothing from the rest of
@@ -15,7 +17,10 @@ This module sits at the bottom layer and imports nothing from the rest of
 each other.
 
 TeX templates are :class:`string.Template` strings: ``$C`` takes the TeX of the
-component and ``$S`` the TeX of the species.
+component, ``$A`` the component's code in upper case and ``$S`` the TeX of the
+species. ``$A`` writes a frame's coordinate axes upper case, as is
+conventional (:math:`X_\mathrm{GSE}`), where a vector's components are lower
+case (:math:`v_x`).
 """
 
 __all__ = [
@@ -26,7 +31,7 @@ __all__ = [
     "UNIT_TEX",
 ]
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 
 from scipy import constants
@@ -46,11 +51,17 @@ class Quantity:
     si : float or None, optional
         SI value of one display unit, for quantities ``core`` converts. None for
         a quantity only labels use.
+    name : str
+        Keyword only. The quantity's display name, a few words in title case,
+        such as "Number Density": the first line of a publication-format
+        label. The quantity only, without species or component.
     """
 
     tex: str | None
     units: str | None
     si: float | None = None
+    _: KW_ONLY
+    name: str
 
 
 #: TeX of the display units several quantities share.
@@ -62,7 +73,7 @@ UNIT_TEX = MappingProxyType(
         "kms": r"\mathrm{km \; s^{-1}}",
         "pPa": r"\mathrm{pPa}",
         "cm-3": r"\mathrm{cm}^{-3}",
-        "dimless": r"\mathrm{\#}",
+        "dimless": r"\#",
         "unknown": r"???",
         "km": r"\mathrm{km}",
         "deg": r"\mathrm{deg.}",
@@ -79,124 +90,213 @@ _U = UNIT_TEX
 _KMS_SQ = r"(%s)^2" % _U["kms"]
 _FLUX_DENSITY = r"\mathrm{\mu W \, m^{-2}}"
 
-#: Every quantity, keyed by canonical name (M level).
+#: Every quantity, keyed by canonical key (M level).
 QUANTITIES = MappingProxyType(
     {
         # Coordinates and angles.
         # A frame's position is in its body's radius; `Spacecraft.distance2sun`
         # converts with it.
-        "gse": Quantity(r"{$C}_{\mathrm{GSE}}", _U["Re"], si=_EARTH_EQUATORIAL_RADIUS),
-        "hci": Quantity(r"{$C}_{\mathrm{HCI}}", _U["Rs"], si=_SOLAR_RADIUS),
-        "colat": Quantity(r"\theta_{$C}", _U["deg"]),
-        "lat": Quantity(r"{lat}_{{$C};{$S}}", _U["deg"]),
-        "lon": Quantity(r"{lon}_{{$C};{$S}}", _U["deg"]),
-        "carr": Quantity(r"{$C}_\mathrm{Carrington}", _U["deg"]),
+        "gse": Quantity(
+            r"{$A}_{\mathrm{GSE}}",
+            _U["Re"],
+            si=_EARTH_EQUATORIAL_RADIUS,
+            name="GSE Position",
+        ),
+        "hci": Quantity(
+            r"{$A}_{\mathrm{HCI}}", _U["Rs"], si=_SOLAR_RADIUS, name="HCI Position"
+        ),
+        "colat": Quantity(r"\theta_{$C}", _U["deg"], name="Colatitude"),
+        "lat": Quantity(r"{lat}_{{$C};{$S}}", _U["deg"], name="Latitude"),
+        "lon": Quantity(r"{lon}_{{$C};{$S}}", _U["deg"], name="Longitude"),
+        "carr": Quantity(
+            r"{$C}_\mathrm{Carrington}", _U["deg"], name="Carrington Coordinate"
+        ),
         # The unit depends on the frame, so the entry states none: the frame
         # entries (gse, hci) carry it, and `Spacecraft.pos_units` exposes it.
-        "pos": Quantity(r"\mathbf{r}_{$C}", None),
+        "pos": Quantity(r"\mathbf{r}_{$C}", None, name="Position"),
         "distance2sun": Quantity(
-            r"\mathrm{Distance \; to \; Sun}", r"\mathrm{m}", si=1.0
+            r"\mathrm{Distance \; to \; Sun}",
+            r"\mathrm{m}",
+            si=1.0,
+            name="Distance to Sun",
         ),
         # Trigonometry.
-        "theta": Quantity(r"{\theta}_{{$C};{$S}}", _U["deg"]),
-        "phi": Quantity(r"{phi}_{{$C};{$S}}", _U["deg"]),
-        "deg": Quantity(r"{deg}_{{$C};{$S}}", _U["deg"]),
-        "cos": Quantity(r"\cos", _U["dimless"]),
-        "cos_theta": Quantity(r"\cos \theta_{{$C}_{$S}}", _U["dimless"]),
-        "cos_phi": Quantity(r"\cos \phi_{{$C}_{$S}}", _U["dimless"]),
-        "ratio": Quantity(r"\mathrm{Ratio}", _U["dimless"]),
+        "theta": Quantity(r"{\theta}_{{$C};{$S}}", _U["deg"], name="Polar Angle"),
+        "phi": Quantity(r"{phi}_{{$C};{$S}}", _U["deg"], name="Azimuthal Angle"),
+        "deg": Quantity(r"{deg}_{{$C};{$S}}", _U["deg"], name="Angle"),
+        "cos": Quantity(r"\cos", _U["dimless"], name="Cosine"),
+        "cos_theta": Quantity(
+            r"\cos \theta_{{$C}_{$S}}", _U["dimless"], name="Angle Cosine"
+        ),
+        "cos_phi": Quantity(
+            r"\cos \phi_{{$C}_{$S}}", _U["dimless"], name="Azimuthal Angle Cosine"
+        ),
+        "ratio": Quantity(r"\mathrm{Ratio}", _U["dimless"], name="Ratio"),
         # Timestamps.
-        "year": Quantity(r"\mathrm{Year}", r"\mathrm{Year}"),
-        "fdoy": Quantity(r"\mathrm{Fractional \; Day \; of \; Year}", r"\mathrm{fdoy}"),
+        "year": Quantity(r"\mathrm{Year}", r"\mathrm{Year}", name="Year"),
+        "fdoy": Quantity(
+            r"\mathrm{Fractional \; Day \; of \; Year}",
+            r"\mathrm{fdoy}",
+            name="Fractional Day of Year",
+        ),
         # Plasma measurements.
-        "b": Quantity(r"B_{$C}", _U["b"], si=1e-9),
-        "pb": Quantity(r"P_B", _U["pPa"]),
-        "n": Quantity(r"n_{$S}", _U["cm-3"], si=1e6),
-        "rho": Quantity(r"\rho_{$S}", r"m_p \; " + _U["cm-3"], si=1e6 * constants.m_p),
-        "v": Quantity(r"{v}_{{$C};{$S}}", _U["kms"], si=1e3),
-        "w": Quantity(r"{w}_{{$C};{$S}}", _U["kms"], si=1e3),
-        "dv": Quantity(r"{\Delta v}_{{$C};{$S}}", _U["kms"], si=1e3),
-        "dn": Quantity(r"\delta n_{{$S}}", _U["cm-3"]),
-        "cs": Quantity(r"C_{s;$S}", _U["kms"], si=1e3),
-        "ca": Quantity(r"C_{A;$S}", _U["kms"], si=1e3),
-        "afsq": Quantity(r"\mathrm{Anisotropy \, Factor}^2_{$S}", _U["dimless"]),
-        "caani": Quantity(r"C^{(\mathrm{Ani})}_{A;$S} \; ($C)", _U["kms"]),
+        "b": Quantity(r"B_{$C}", _U["b"], si=1e-9, name="Magnetic Field"),
+        "pb": Quantity(r"P_B", _U["pPa"], name="Magnetic Pressure"),
+        "n": Quantity(r"n_{$S}", _U["cm-3"], si=1e6, name="Number Density"),
+        "rho": Quantity(
+            r"\rho_{$S}",
+            r"m_p \; " + _U["cm-3"],
+            si=1e6 * constants.m_p,
+            name="Mass Density",
+        ),
+        "v": Quantity(r"{v}_{{$C};{$S}}", _U["kms"], si=1e3, name="Velocity"),
+        "w": Quantity(r"{w}_{{$C};{$S}}", _U["kms"], si=1e3, name="Thermal Speed"),
+        "dv": Quantity(
+            r"{\Delta v}_{{$C};{$S}}", _U["kms"], si=1e3, name="Differential Flow"
+        ),
+        "dn": Quantity(r"\delta n_{{$S}}", _U["cm-3"], name="Density Fluctuation"),
+        "cs": Quantity(r"C_{s;$S}", _U["kms"], si=1e3, name="Sound Speed"),
+        "ca": Quantity(r"C_{A;$S}", _U["kms"], si=1e3, name="Alfven Speed"),
+        "afsq": Quantity(
+            r"\mathrm{Anisotropy \, Factor}^2_{$S}",
+            _U["dimless"],
+            name="Anisotropy Factor Squared",
+        ),
+        "caani": Quantity(
+            r"C^{(\mathrm{Ani})}_{A;$S} \; ($C)",
+            _U["kms"],
+            name="Anisotropic Alfven Speed",
+        ),
         # Temperatures, pressures, anisotropies and fluxes.
-        "p": Quantity(r"{p}_{{$C};{$S}}", _U["pPa"]),
-        "pth": Quantity(r"{P}_{{$C};{$S}}", _U["pPa"], si=1e-12),
-        "T": Quantity(r"{T}_{{$C};{$S}}", r"10^5 \, \mathrm{K}", si=1e5),
-        "qpar": Quantity(r"q_{{\parallel};{$S}}", _FLUX_DENSITY, si=1e-6),
-        "qhat": Quantity(r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"]),
-        "Qhat": Quantity(r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"]),
-        "Wk": Quantity(r"W_{K;{$S}}", _FLUX_DENSITY, si=1e-6),
-        "R": Quantity(r"{R}_{{$C};{$S}}", r"\perp/\parallel"),
-        "beta": Quantity(r"{\beta}_{{$C};{$S}}", _U["dimless"], si=1.0),
-        "dbeta": Quantity(r"{\Delta \beta}_{{$C};{$S}}", _U["dimless"]),
-        "pdv": Quantity(r"P_{\Delta v_{$S}}", _U["pPa"]),
-        "edv": Quantity(r"P_{\Delta v}/P_\mathrm{th}|_{$S}", _U["dimless"]),
+        "p": Quantity(r"{p}_{{$C};{$S}}", _U["pPa"], name="Pressure"),
+        "pth": Quantity(
+            r"{P}_{{$C};{$S}}", _U["pPa"], si=1e-12, name="Thermal Pressure"
+        ),
+        "T": Quantity(
+            r"{T}_{{$C};{$S}}", r"10^5 \, \mathrm{K}", si=1e5, name="Temperature"
+        ),
+        "qpar": Quantity(
+            r"q_{{\parallel};{$S}}", _FLUX_DENSITY, si=1e-6, name="Parallel Heat Flux"
+        ),
+        "qhat": Quantity(
+            r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"], name="Normalized Heat Flux"
+        ),
+        "Qhat": Quantity(
+            r"{\widehat{q}}_{{$C};{$S}}", _U["dimless"], name="Normalized Heat Flux"
+        ),
+        "Wk": Quantity(
+            r"W_{K;{$S}}", _FLUX_DENSITY, si=1e-6, name="Kinetic Energy Flux"
+        ),
+        "R": Quantity(r"{R}_{{$C};{$S}}", _U["dimless"], name="Temperature Anisotropy"),
+        "beta": Quantity(
+            r"{\beta}_{{$C};{$S}}", _U["dimless"], si=1.0, name="Plasma Beta"
+        ),
+        "dbeta": Quantity(
+            r"{\Delta \beta}_{{$C};{$S}}", _U["dimless"], name="Beta Difference"
+        ),
+        "pdv": Quantity(r"P_{\Delta v_{$S}}", _U["pPa"], name="Drift Pressure"),
+        "edv": Quantity(
+            r"P_{\Delta v}/P_\mathrm{th}|_{$S}",
+            _U["dimless"],
+            name="Drift to Thermal Pressure",
+        ),
         "flux": Quantity(
             r"\mathrm{Flux}_{$C}({$S})",
             r"10^{-9} \, %s \, s^{-1}" % _U["cm-3"].replace("-3", "-2"),
+            name="Particle Flux",
         ),
         # Collisions.
-        "lnlambda": Quantity(r"\ln\Lambda_{$S}", _U["dimless"], si=1.0),
-        "nuc": Quantity(r"\nu_{$C,$S}", r"10^{-7} \mathrm{Hz}", si=1e-7),
-        "nc": Quantity(r"N_{C;$S}", _U["dimless"], si=1.0),
-        # Fits and distributions.
-        "chisq": Quantity(r"\chi^2", _U["dimless"]),
-        "chisqnu": Quantity(r"\chi^2_\nu", _U["dimless"]),
-        "vdf_ratio": Quantity(
-            r"\mathrm{ln}(\frac{f_i}{f_j} \left(v_i\right)_{$S})", _U["dimless"]
+        "lnlambda": Quantity(
+            r"\ln\Lambda_{$S}", _U["dimless"], si=1.0, name="Coulomb Logarithm"
         ),
-        "ab": Quantity(r"A_{$S}", r"\%"),
-        "e": Quantity(r"e\left({$C}_{$S}\right)", _U["kms"]),
+        "nuc": Quantity(
+            r"\nu_{$C,$S}", r"10^{-7} \mathrm{Hz}", si=1e-7, name="Collision Rate"
+        ),
+        "nc": Quantity(r"N_{C;$S}", _U["dimless"], si=1.0, name="Coulomb Number"),
+        # Fits and distributions.
+        "chisq": Quantity(r"\chi^2", _U["dimless"], name="Chi-Squared"),
+        "chisqnu": Quantity(r"\chi^2_\nu", _U["dimless"], name="Reduced Chi-Squared"),
+        "vdf_ratio": Quantity(
+            r"\mathrm{ln}(\frac{f_i}{f_j} \left(v_i\right)_{$S})",
+            _U["dimless"],
+            name="VDF Ratio",
+        ),
+        "ab": Quantity(r"A_{$S}", r"\%", name="Abundance"),
+        "e": Quantity(r"e\left({$C}_{$S}\right)", _U["kms"], name="E Term"),
         # Alfvenic turbulence.
-        "zp": Quantity(r"Z^+_{{$S}}", _U["kms"]),
-        "zm": Quantity(r"Z^-_{{$S}}", _U["kms"]),
-        "ep": Quantity(r"e^+_{{$S}}", _KMS_SQ),
-        "em": Quantity(r"e^-_{{$S}}", _KMS_SQ),
-        "ev": Quantity(r"e^v_{{$S}}", _KMS_SQ),
-        "eb": Quantity(r"e^b_{{$S}}", _KMS_SQ),
-        "etot": Quantity(r"E_{{$S}}", _KMS_SQ),
-        "eres": Quantity(r"e^r_{{$S}}", _KMS_SQ),
-        "cross_helicity": Quantity(r"e^c_{{$S}}", _KMS_SQ),
-        "sigma_m": Quantity(r"\sigma_{m}", _U["dimless"]),
-        "sigma_c": Quantity(r"\sigma_{c;{$S}}", _U["dimless"]),
-        "sigma_r": Quantity(r"\sigma_{r;{$S}}", _U["dimless"]),
-        "sigma_xy": Quantity(r"\sigma_{\parallel}", _U["dimless"]),
-        "rA": Quantity(r"r_{A;{$S}}", _U["dimless"]),
-        "rE": Quantity(r"r_{E;{$S}}", _U["dimless"]),
+        "zp": Quantity(r"Z^+_{{$S}}", _U["kms"], name="Elsasser Variable Z+"),
+        "zm": Quantity(r"Z^-_{{$S}}", _U["kms"], name="Elsasser Variable Z-"),
+        "ep": Quantity(r"e^+_{{$S}}", _KMS_SQ, name="Z+ Energy"),
+        "em": Quantity(r"e^-_{{$S}}", _KMS_SQ, name="Z- Energy"),
+        "ev": Quantity(r"e^v_{{$S}}", _KMS_SQ, name="Kinetic Fluctuation Energy"),
+        "eb": Quantity(r"e^b_{{$S}}", _KMS_SQ, name="Magnetic Fluctuation Energy"),
+        "etot": Quantity(r"E_{{$S}}", _KMS_SQ, name="Total Fluctuation Energy"),
+        "eres": Quantity(r"e^r_{{$S}}", _KMS_SQ, name="Residual Energy"),
+        "cross_helicity": Quantity(r"e^c_{{$S}}", _KMS_SQ, name="Cross Helicity"),
+        "sigma_m": Quantity(
+            r"\sigma_{m}", _U["dimless"], name="Normalized Magnetic Helicity"
+        ),
+        "sigma_c": Quantity(
+            r"\sigma_{c;{$S}}", _U["dimless"], name="Normalized Cross Helicity"
+        ),
+        "sigma_r": Quantity(
+            r"\sigma_{r;{$S}}", _U["dimless"], name="Normalized Residual Energy"
+        ),
+        "sigma_xy": Quantity(
+            r"\sigma_{\parallel}", _U["dimless"], name="Parallel Sigma"
+        ),
+        "rA": Quantity(r"r_{A;{$S}}", _U["dimless"], name="Alfven Ratio"),
+        "rE": Quantity(r"r_{E;{$S}}", _U["dimless"], name="Elsasser Ratio"),
         # Instabilities.
-        "Wn": Quantity(r"\mathrm{W_n}", _U["dimless"]),
-        "omegaR": Quantity(r"\omega_R", _U["Hz"]),
-        "gamma": Quantity(r"\gamma", _U["Hz"]),
-        "gamma_max": Quantity(r"\gamma_\mathrm{max}", _U["Hz"]),
-        "gyro_freq": Quantity(r"\Omega_{{$S}}", _U["Hz"]),
-        "eth": Quantity(r"\eth", r"\mathrm{eV}"),
-        "kvec": Quantity(r"\mathbf{k}_{$C}\rho_{$S}", _U["dimless"]),
-        "k": Quantity(r"k_{$C}\rho_{$S}", _U["dimless"]),
-        "insta_power": Quantity(r"\mathcal{P}_{{$S}}", _U["unknown"]),
+        "Wn": Quantity(r"\mathrm{W_n}", _U["dimless"], name="Wn"),
+        "omegaR": Quantity(r"\omega_R", _U["Hz"], name="Real Frequency"),
+        "gamma": Quantity(r"\gamma", _U["Hz"], name="Growth Rate"),
+        "gamma_max": Quantity(
+            r"\gamma_\mathrm{max}", _U["Hz"], name="Maximum Growth Rate"
+        ),
+        "gyro_freq": Quantity(r"\Omega_{{$S}}", _U["Hz"], name="Gyrofrequency"),
+        "eth": Quantity(r"\eth", r"\mathrm{eV}", name="Eth"),
+        "kvec": Quantity(
+            r"\mathbf{k}_{$C}\rho_{$S}", _U["dimless"], name="Wave Vector"
+        ),
+        "k": Quantity(r"k_{$C}\rho_{$S}", _U["dimless"], name="Wavenumber"),
+        "insta_power": Quantity(
+            r"\mathcal{P}_{{$S}}", _U["unknown"], name="Instability Power"
+        ),
         # Spectra and energetic particles.
-        "spectral_exponent": Quantity(r"\mathrm{Spectral \, Exponent}", _U["dimless"]),
-        "MeV/nuc": Quantity(r"\mathrm{Energy}", r"\mathrm{MeV/nuc}"),
+        "spectral_exponent": Quantity(
+            r"\mathrm{Spectral \, Exponent}", _U["dimless"], name="Spectral Exponent"
+        ),
+        "MeV/nuc": Quantity(
+            r"\mathrm{Energy}", r"\mathrm{MeV/nuc}", name="Energy per Nucleon"
+        ),
         "SEP_differential_flux": Quantity(
-            r"{{$S}} \: dJ/dE", r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}"
+            r"{{$S}} \: dJ/dE",
+            r"\mathrm{\frac{\#}{cm^2 \, sr \, s \, MeV/nuc}}",
+            name="SEP Differential Flux",
         ),
         "SEP_intensity": Quantity(
-            r"{{$S}} \: \mathrm{Intensity}", r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}"
+            r"{{$S}} \: \mathrm{Intensity}",
+            r"\mathrm{cm^2 \, sr \, s \, MeV/nuc}",
+            name="SEP Intensity",
         ),
-        "SEP_energy": Quantity(r"{{$S}} \: \mathrm{Energy}", r"\mathrm{MeV/nuc}"),
-        "SEP_spectrum_index": Quantity(r"\gamma_{{$S}}", _U["dimless"]),
+        "SEP_energy": Quantity(
+            r"{{$S}} \: \mathrm{Energy}", r"\mathrm{MeV/nuc}", name="SEP Energy"
+        ),
+        "SEP_spectrum_index": Quantity(
+            r"\gamma_{{$S}}", _U["dimless"], name="SEP Spectral Index"
+        ),
     }
 )
 
 #: TeX of each component (C level).
 COMPONENTS = MappingProxyType(
     {
-        # Coordinates.
-        "x": r"X",
-        "y": r"Y",
-        "z": r"Z",
+        # Cartesian components subscript lower case (v_x); a frame entry's
+        # template writes its axes upper case with `$A` (X_GSE).
+        "x": r"x",
+        "y": r"y",
+        "z": r"z",
         "r": r"R",
         # A vector's magnitude is its bare symbol: B, not B_mag.
         "mag": r"",
@@ -205,7 +305,8 @@ COMPONENTS = MappingProxyType(
         "lat": r"\lambda",
         "lon": r"\phi",
         "R": r"\mathrm{R}",
-        "scalar": r"\mathrm{scalar}",
+        # A tensor quantity's scalar is its bare symbol, like a magnitude.
+        "scalar": r"",
         "theta": r"\theta",
         "phi": r"\phi",
         "per": r"\perp",

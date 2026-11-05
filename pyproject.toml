@@ -77,7 +77,7 @@ git_describe_command = "git describe --dirty --tags --long --match 'v*'"
 
 [project]
 name = "solarwindpy"
-description = "Python package for solar wind data analysis."
+description = "A Python Library for in situ solar wind data analysis."
 readme = "README.rst"
 requires-python = ">=3.12,<4"
 license = {file = "LICENSE"}

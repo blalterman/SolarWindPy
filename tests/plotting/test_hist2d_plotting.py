@@ -134,23 +134,17 @@ def z_valued_hist():
     return hist, counts, z_means
 
 
-@pytest.fixture
-def smoothable_hist():
-    """A Hist2D wide enough in x that a savgol window of 5 is meaningful.
+def _moving_band_hist(nx):
+    """A Hist2D with ``nx`` x-bins whose occupied y-band moves with x.
 
-    61 x-bins is not arbitrary: `_plot_one_edge` defaults `window_length` to
-    floor(n / 10), decremented to the next odd number, and defaults
-    `polyorder` to 3. Fewer columns make the default window too narrow for that
-    polynomial order and scipy refuses outright, which would mask the parameter
-    mix-up this fixture exists to expose.
+    The occupied band moves up and down with x, so neither border is flat.
+    A flat border is invariant under savgol at any polynomial order, which
+    would make the smoothing comparisons vacuous.
     """
-    xedges = np.round(np.linspace(0.0, 1.0, 62), 5)
+    xedges = np.round(np.linspace(0.0, 1.0, nx + 1), 5)
     yedges = np.round(np.linspace(0.0, 1.0, 9), 5)
-    ny, nx = len(yedges) - 1, len(xedges) - 1
+    ny = len(yedges) - 1
 
-    # The occupied band moves up and down with x, so neither border is flat.
-    # A flat border is invariant under savgol at any polynomial order, which
-    # would make the smoothing comparisons vacuous.
     counts = np.zeros((ny, nx), dtype=int)
     for j in range(nx):
         lo = j % 3
@@ -160,6 +154,31 @@ def smoothable_hist():
 
     x, y = _points_from_counts(counts, xedges, yedges)
     return Hist2D(x, y, nbins=[xedges, yedges])
+
+
+@pytest.fixture
+def smoothable_hist():
+    """A Hist2D wide enough in x that a savgol window of 5 is meaningful.
+
+    61 x-bins puts the default `window_length`, floor(n / 10) made odd, at 5:
+    above the default `polyorder` of 3 without raising it to the minimum.
+    """
+    return _moving_band_hist(61)
+
+
+def _contour_set(hist, method, **kwargs):
+    """The contour set ``method`` (a contour-drawing method name) draws on ``hist``."""
+    out = getattr(hist, method)(cbar=False, **kwargs)
+    return out[2] if method == "plot_hist_with_contours" else out[1]
+
+
+def _assert_same_contours(got, want):
+    """``got`` and ``want`` hold the same vertices at every level."""
+    assert len(got.allsegs) == len(want.allsegs)
+    for got_at_level, want_at_level in zip(got.allsegs, want.allsegs):
+        assert len(got_at_level) == len(want_at_level)
+        for g, w in zip(got_at_level, want_at_level):
+            assert np.asarray(g) == exact(w)
 
 
 def _expected_grid(counts):
@@ -336,50 +355,6 @@ class TestPlotHistWithContours:
         assert np.asarray(values.reshape(expected.shape)) == exact(
             expected, nan_ok=True
         )
-        plt.close("all")
-
-    def test_nan_aware_filter_contours_the_normalised_convolution(
-        self, known_hist, known_counts
-    ):
-        """With ``nan_aware_filter`` the contours trace the normalised convolution.
-
-        ``KNOWN_COUNTS`` leaves bins empty, so the grid has NaN gaps. The
-        expectation is computed here from the algorithm the docstring names
-        (Knutsson & Westin 1993, normalised convolution): smooth the grid with
-        gaps set to 0, divide by the smoothed validity mask, and keep the gaps
-        blank. Contouring that grid at the same levels must reproduce the
-        overlay vertex for vertex.
-
-        ON FAILURE: the code is wrong.
-        """
-        levels = [0.2, 0.4, 0.6]
-        sigma = 1.0
-        known_hist.set_axnorm("t")
-        _, _, qset, _ = known_hist.plot_hist_with_contours(
-            cbar=False,
-            levels=levels,
-            use_contourf=True,
-            gaussian_filter_std=sigma,
-            nan_aware_filter=True,
-        )
-
-        # axnorm "t" divides every bin by the largest bin count in the grid.
-        grid = _expected_grid(known_counts) / known_counts.max()
-        valid = ~np.isnan(grid)
-        smoothed = gaussian_filter(np.where(valid, grid, 0.0), sigma) / gaussian_filter(
-            valid.astype(float), sigma
-        )
-        smoothed[~valid] = np.nan
-        XX, YY = np.meshgrid(_bin_centers(XEDGES), _bin_centers(YEDGES))
-        _, ref_ax = plt.subplots()
-        expected = ref_ax.contourf(XX, YY, np.ma.masked_invalid(smoothed), levels)
-
-        assert sum(len(segs) for segs in expected.allsegs) > 0  # contours exist
-        assert len(qset.allsegs) == len(expected.allsegs)
-        for got_at_level, want_at_level in zip(qset.allsegs, expected.allsegs):
-            assert len(got_at_level) == len(want_at_level)
-            for got, want in zip(got_at_level, want_at_level):
-                assert np.asarray(got) == exact(want)
         plt.close("all")
 
 
@@ -1472,6 +1447,42 @@ class TestPlotEdges:
         )
         plt.close("all")
 
+    def test_default_smoothing_widens_the_window_for_few_bins(self):
+        """Below 50 x-bins the default window is the smallest that fits polyorder 3.
+
+        floor(n / 10) is at most 3 there, which savgol rejects for polyorder 3;
+        the default window must be the smallest odd length above the
+        polynomial order, 5, so the edge is smoothed rather than refused.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = _moving_band_hist(20)
+        fig, ax = plt.subplots()
+        (raw,), _ = hist.plot_edges(ax, smooth=False)
+        (smoothed,), _ = hist.plot_edges(ax, smooth=True)
+
+        expected = savgol_filter(np.asarray(raw.get_ydata(), float), 5, 3)
+        assert np.asarray(np.asarray(smoothed.get_ydata(), float)) == exact(expected)
+        plt.close("all")
+
+    def test_default_smoothing_is_skipped_when_no_window_fits(self):
+        """With too few x-bins for any odd window above polyorder, draw the raw edge.
+
+        Four x-bins admit odd windows of 1 and 3, neither above polyorder 3, so
+        the default smoothing has nothing to fit and leaves the edge as is.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = _moving_band_hist(4)
+        fig, ax = plt.subplots()
+        (raw,), _ = hist.plot_edges(ax, smooth=False)
+        (smoothed,), _ = hist.plot_edges(ax, smooth=True)
+
+        assert np.asarray(np.asarray(smoothed.get_ydata(), float)) == exact(
+            np.asarray(raw.get_ydata(), float)
+        )
+        plt.close("all")
+
 
 class TestProject1D:
     """Projecting a 2D histogram is marginalisation, and must conserve counts."""
@@ -1635,7 +1646,7 @@ class TestProject1D:
             [np.nan, 0.3, 0.5, np.nan], nan_ok=True
         )
         assert list(projected.data.index) == [1, 2]
-        assert list(projected.get_plotted_data_boolean_series().index) == [1, 2]
+        assert list(projected.get_plotted_data().index) == [1, 2]
 
     @pytest.mark.parametrize(
         "y, nbins, kept, expected",
@@ -1676,7 +1687,7 @@ class TestProject1D:
         projected = h.project_1d("x", only_plotted=False)
 
         assert list(projected.data.index) == kept
-        assert list(projected.get_plotted_data_boolean_series().index) == kept
+        assert list(projected.get_plotted_data().index) == kept
         assert projected.agg().to_numpy() == exact(expected, nan_ok=True)
 
     def test_log_axes_round_trip_through_the_projection(self):
@@ -2189,38 +2200,94 @@ class TestContourFiltering:
         x, y = _points_from_counts(counts, edges, edges)
         return Hist2D(x, y, nbins=[edges, edges], axnorm="t")
 
-    def test_nan_aware_filter_reduces_to_the_plain_filter_without_gaps(
-        self, complete_hist
+    @pytest.mark.parametrize("method", ["plot_contours", "plot_hist_with_contours"])
+    @pytest.mark.parametrize("mode", ["reflect", "constant"])
+    def test_without_gaps_the_filter_is_scipy_gaussian_filter(
+        self, complete_hist, method, mode
     ):
-        """With no missing bins the two filters must agree exactly.
+        """With no empty bins the smoothing is exactly ``scipy.ndimage.gaussian_filter``.
 
-        `nan_aware_filter` is a normalised convolution: the weighted average is
-        divided by the summed weight of the *valid* neighbours. When every
-        neighbour is valid that divisor is the full kernel sum, and the
-        expression collapses to an ordinary Gaussian convolution. So this is an
-        identity the implementation has to satisfy, not a recorded agreement.
+        The expectation is the grid filtered by scipy directly, with the same
+        keywords, and contoured at the same levels.
 
-        ON FAILURE: the code is wrong -- one of the two filters is not doing
-        what its name says.
+        ON FAILURE: the code is wrong.
         """
-        assert not np.isnan(complete_hist.agg().unstack("x").values).any()
-
-        plain = complete_hist.plot_contours(
+        grid = complete_hist.agg().unstack("x").values
+        assert not np.isnan(grid).any()
+        levels = [0.3, 0.5, 0.7]
+        got = _contour_set(
+            complete_hist,
+            method,
+            levels=levels,
+            use_contourf=False,
             gaussian_filter_std=1.5,
-            nan_aware_filter=False,
-            cbar=False,
-        )[1]
-        nan_aware = complete_hist.plot_contours(
-            gaussian_filter_std=1.5,
-            nan_aware_filter=True,
-            cbar=False,
-        )[1]
+            gaussian_filter_kwargs={"mode": mode},
+        )
 
-        assert len(plain.allsegs) == len(nan_aware.allsegs)
-        for at_plain, at_nan_aware in zip(plain.allsegs, nan_aware.allsegs):
-            assert len(at_plain) == len(at_nan_aware)
-            for left, right in zip(at_plain, at_nan_aware):
-                np.testing.assert_allclose(left, right)
+        x = complete_hist.intervals["x"].mid
+        y = complete_hist.intervals["y"].mid
+        XX, YY = np.meshgrid(x, y)
+        _, ref_ax = plt.subplots()
+        want = ref_ax.contour(XX, YY, gaussian_filter(grid, 1.5, mode=mode), levels)
+        _assert_same_contours(got, want)
+        plt.close("all")
+
+    @pytest.mark.parametrize("method", ["plot_contours", "plot_hist_with_contours"])
+    def test_with_gaps_the_filter_is_the_normalised_convolution(
+        self, known_hist, known_counts, method
+    ):
+        """Empty bins are skipped by the smoothing, not spread over the grid.
+
+        ``KNOWN_COUNTS`` leaves bins empty, so the grid has NaN gaps. A plain
+        Gaussian filter spreads each NaN over the kernel, and on this grid
+        erases every contour. The expectation is computed here from the
+        normalised convolution (Knutsson & Westin 1993): smooth the grid with
+        gaps set to 0, divide by the smoothed validity mask, and keep the gaps
+        blank. Contouring that grid at the same levels must reproduce the
+        contours vertex for vertex.
+
+        ON FAILURE: the code is wrong.
+        """
+        levels = [0.2, 0.4, 0.6]
+        sigma = 1.0
+        known_hist.set_axnorm("t")
+        got = _contour_set(
+            known_hist,
+            method,
+            levels=levels,
+            use_contourf=True,
+            gaussian_filter_std=sigma,
+        )
+
+        # axnorm "t" divides every bin by the largest bin count in the grid.
+        grid = _expected_grid(known_counts) / known_counts.max()
+        valid = ~np.isnan(grid)
+        smoothed = gaussian_filter(np.where(valid, grid, 0.0), sigma) / gaussian_filter(
+            valid.astype(float), sigma
+        )
+        smoothed[~valid] = np.nan
+        XX, YY = np.meshgrid(_bin_centers(XEDGES), _bin_centers(YEDGES))
+        _, ref_ax = plt.subplots()
+        want = ref_ax.contourf(XX, YY, np.ma.masked_invalid(smoothed), levels)
+
+        assert sum(len(segs) for segs in want.allsegs) > 0  # contours exist
+        _assert_same_contours(got, want)
+        plt.close("all")
+
+    @pytest.mark.parametrize("method", ["plot_contours", "plot_hist_with_contours"])
+    def test_nan_aware_filter_keyword_is_rejected(self, complete_hist, method):
+        """The removed ``nan_aware_filter`` keyword fails loudly.
+
+        The filter skips empty bins on its own, so the switch is gone. An
+        unknown keyword reaches matplotlib's contour call, which raises.
+
+        ON FAILURE: the code is wrong -- the keyword is accepted again, or
+        unknown keywords are swallowed silently.
+        """
+        with pytest.raises((AttributeError, TypeError)):
+            _contour_set(
+                complete_hist, method, gaussian_filter_std=1, nan_aware_filter=True
+            )
         plt.close("all")
 
 

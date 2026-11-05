@@ -37,6 +37,20 @@ display:
 The species are alphas (``a``), electrons (``e``), the proton core (``p1``)
 and a proton beam (``p2``), a second proton population.
 
+:py:meth:`~solarwindpy.core.plasma.Plasma.info` summarises a plasma in one
+table: its spacecraft and frame, the first and last times, the number of
+observations, the species and whether auxiliary data are attached:
+
+>>> plasma.info()
+                                     value
+spacecraft                             PSP
+frame                                  HCI
+start                  1995-01-01 12:35:00
+end             2022-10-09 01:47:01.234560
+observations                             3
+species                       a, e, p1, p2
+auxiliary data                          no
+
 The measurements live in one pandas DataFrame, ``plasma.data``. Its columns are
 a three-level MultiIndex:
 
@@ -167,6 +181,22 @@ rows make only a demonstration, so this histogram uses three bins per axis:
 >>> int(h.agg().sum())
 3
 
+Printing a plot, or leaving it as the last line of a Jupyter cell, shows a
+summary: per axis its label, its bins and their range, and the range of the
+data on it, then the rows kept, the log flags, the bins per axis, ``axnorm``
+and the ``path``. The axes are labelled ``x`` and ``y`` until labels are set:
+
+>>> print(h)
+Hist2D
+  x: x  bins 3 [1, 3]  data [1, 3]
+  y: y  bins 3 [458.3, 1044]  data [458.3, 1044]
+  z: $\mathrm{Count} \; \left[\#\right]$
+  observations: 3
+  log: x=False, y=False
+  bins: x: 3, y: 3
+  axnorm: None
+  path: Hist2D/x/y/count/linX-linY
+
 Without a ``z`` value, :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.agg`
 counts the points in each bin. Axis labels name the quantities, and the plot's
 ``path`` is built from them:
@@ -220,11 +250,31 @@ random number generator:
 uncertainty is the square root of a diagonal element of the parameter
 covariance ``pcov``, and ``pcov`` is always rescaled by the fit's robust reduced
 chi-squared; ``make_fit(absolute_sigma=True)`` raises ``NotImplementedError``.
-Measurement uncertainties enter through the ``weights`` argument, the 1-sigma
-uncertainties of ``y``, one per observation.
+Measurement uncertainties enter through the ``yerr`` argument, the 1-sigma
+uncertainties of ``y``, one per observation, as
+:func:`scipy.optimize.curve_fit` takes ``sigma``. The noise above has a
+standard deviation of 0.5, so with ``yerr=0.5`` for every point the linear
+reduced chi-squared is near 1, as it should be for a good fit with the right
+uncertainties. The parameters move a little: the default Huber loss acts on
+each residual divided by its ``yerr``, so the uncertainties change which
+residuals count as large. With ``make_fit(loss="linear")``, equal
+uncertainties would leave them unchanged:
+
+>>> yerr = np.full(x.size, 0.5)
+>>> weighted = swp.fitfunctions.lines.Line(x, y, yerr=yerr)
+>>> weighted.make_fit()
+>>> {name: round(float(value), 2) for name, value in weighted.popt.items()}
+{'m': 1.99, 'b': 1.1}
+>>> round(float(weighted.chisq_dof.linear), 2)
+0.8
+>>> weighted.observations.used.yerr[:3]
+array([0.5, 0.5, 0.5])
+
+``yerr_min`` and ``yerr_max`` drop the observations whose uncertainty is
+outside those bounds, as ``xmin`` and ``xmax`` do for ``x``.
 
 ``chisq_dof`` has two kinds. ``linear`` is the sum of squared residuals,
-divided by ``weights`` when given, per degree of freedom. ``robust`` is the
+divided by ``yerr`` when given, per degree of freedom. ``robust`` is the
 same sum after the fit's loss function (``make_fit`` uses a Huber loss by
 default), and it is the one that rescales ``pcov``:
 

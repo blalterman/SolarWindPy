@@ -22,6 +22,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
+from matplotlib.collections import LineCollection, PathCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
 
 from solarwindpy.plotting.base import AxesLabels, ClipAxes, LogAxes  # noqa: E402
@@ -88,7 +89,7 @@ def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
     """
     sc = Scatter(X, Y, Z)
     sc.set_labels(x="Vx", y="Np", z="T")
-    ret_ax, _, cbar = sc.make_plot(ax=ax)
+    ret_ax, _, _, cbar = sc.make_plot(ax=ax)
     coll = ax.collections[0]
     np.testing.assert_array_equal(coll.get_array(), _col(KEPT, 3))
     assert ret_ax is ax
@@ -106,7 +107,7 @@ def test_two_valued_z_is_colour_mapped_with_a_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     z = pd.Series([0.5, 0.5, 0.9, 0.9, 0.5, 0.9])
-    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     kept_z = z.drop(1).to_numpy()  # row 1 has NaN y (ROWS)
     np.testing.assert_array_equal(ax.collections[0].get_array(), kept_z)
     assert isinstance(cbar, Colorbar)
@@ -118,7 +119,7 @@ def test_absent_or_constant_z_gives_uncoloured_points_and_no_colorbar(ax, z):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
     assert ax.collections[0].get_array() is None
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -129,7 +130,7 @@ def test_cbar_false_colours_points_but_draws_no_colorbar(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
+    _, _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
     np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
     assert cbar is None
     assert ax.figure.axes == [ax]
@@ -142,7 +143,7 @@ def test_without_ax_a_new_figure_is_made():
     """
     existing, _ = plt.subplots()
     try:
-        new_ax, _, _ = Scatter(X, Y).make_plot()
+        new_ax, _, _, _ = Scatter(X, Y).make_plot()
         assert isinstance(new_ax, Axes)
         assert new_ax.figure is not existing
         assert len(new_ax.collections) == 1
@@ -168,7 +169,7 @@ def test_cbar_kwargs_reach_the_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
-    _, _, cbar = Scatter(X, Y, Z).make_plot(
+    _, _, _, cbar = Scatter(X, Y, Z).make_plot(
         ax=ax, cbar_kwargs={"cax": cax, "label": "custom"}
     )
     assert cbar.ax is cax
@@ -244,7 +245,7 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
         # that warning from pre-empting the assertion under ``-W error``.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
+            _, _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
         if cbar2.ax.figure is not ax2.figure:
             raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
     finally:
@@ -289,7 +290,7 @@ def test_value_alim_draws_only_points_with_z_inside_the_limits(ax, lower, upper)
     z = ALIM_Z[:-1]
     sc = Scatter(ALIM_X[:-1], ALIM_Y[:-1], z)
     sc.set_alim(lower, upper)
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     keep = np.ones(z.size, dtype=bool)
     if lower is not None:
         keep &= z >= lower
@@ -307,7 +308,7 @@ def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.2, 0.8, kind="quantile")
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     lo, hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], [0.2, 0.8])
     keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
     assert 2 < keep.sum() < ALIM_Z.size - 2
@@ -323,7 +324,7 @@ def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.0, 0.5, kind="quantile")
-    _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, cbar = sc.make_plot(ax=ax)
     hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], 0.5)
     _assert_drawn(ax, cbar, ALIM_Z <= hi)
 
@@ -378,3 +379,205 @@ def test_scatter_figure_renders_to_png():
     finally:
         plt.close("all")
     assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
+
+
+# ---------------------------------------------------------------------------
+# connect: line segments joining the drawn points in increasing z, row order
+# without a varying z. EZ is not sorted, so z order differs from row order:
+# rows by increasing z are 0, 1, 3, 4, 2, and each segment's mean z is
+# distinct.
+# ---------------------------------------------------------------------------
+
+EX = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+EY = np.array([0.0, 1.0, 0.0, 1.0, 0.0])
+EZ = np.array([0.0, 2.0, 9.0, 6.0, 8.0])
+Z_ORDER = [(0, 1), (1, 3), (3, 4), (4, 2)]
+
+
+def _segments(x, y, pairs):
+    return [np.array([[x[i], y[i]], [x[j], y[j]]]) for i, j in pairs]
+
+
+def _assert_segments(lc, x, y, pairs):
+    got = lc.get_segments()
+    assert len(got) == len(pairs)
+    for g, e in zip(got, _segments(x, y, pairs)):
+        np.testing.assert_array_equal(g, e)
+
+
+def _mean_z(z, pairs):
+    return [(z[i] + z[j]) / 2 for i, j in pairs]
+
+
+def test_make_plot_returns_ax_points_segments_then_cbar(ax):
+    """``(ax, points, segments, cbar)``; segments is None unless ``connect=True``.
+
+    ON FAILURE: the code is wrong.
+    """
+    out = Scatter(EX, EY, EZ).make_plot(ax=ax)
+    assert len(out) == 4
+    assert out[0] is ax
+    assert isinstance(out[1], PathCollection)
+    assert out[2] is None
+    assert isinstance(out[3], Colorbar)
+    assert not any(isinstance(c, LineCollection) for c in ax.collections)
+
+    out = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
+    assert len(out) == 4
+    assert isinstance(out[2], LineCollection)
+    assert out[2] in ax.collections
+
+
+def test_connect_joins_the_points_in_increasing_z(ax):
+    """n drawn points give n - 1 segments, each to the point next in z.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, Z_ORDER)
+
+
+def test_connect_does_not_depend_on_row_order(ax):
+    """Shuffled rows, with shuffled labels, give the same segments in z order.
+
+    ON FAILURE: the code is wrong.
+    """
+    perm = np.array([3, 0, 4, 2, 1])
+    x, y, z = (pd.Series(v[perm], index=perm[::-1]) for v in (EX, EY, EZ))
+    _, _, lc, _ = Scatter(x, y, z).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, Z_ORDER)
+    np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, Z_ORDER))
+
+
+def test_points_with_equal_z_keep_their_row_order(ax):
+    """The sort on z is stable: tied points are joined in the order given.
+
+    ON FAILURE: the code is wrong.
+    """
+    z = np.array([1.0, 0.0, 1.0, 0.0, 2.0])
+    _, _, lc, _ = Scatter(EX, EY, z).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, [(1, 3), (3, 0), (0, 2), (2, 4)])
+
+
+def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
+    ax,
+):
+    """A segment is ``cmap(norm((z_a + z_b) / 2))``: one colorbar serves both.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, lc, cbar = Scatter(EX, EY, EZ).make_plot(
+        ax=ax, connect=True, cmap="plasma"
+    )
+    mean = _mean_z(EZ, Z_ORDER)
+    np.testing.assert_array_equal(lc.get_array(), mean)
+    assert lc.norm is points.norm
+    assert lc.get_cmap() is points.get_cmap()
+    assert (points.norm.vmin, points.norm.vmax) == (EZ.min(), EZ.max())
+    lc.update_scalarmappable()
+    expected = points.get_cmap()(points.norm(mean))
+    np.testing.assert_allclose(lc.get_edgecolor(), expected)
+    assert cbar.mappable is points
+
+
+def test_segments_follow_a_norm_the_caller_passes(ax):
+    """``vmin``/``vmax`` given to the points also set the segments' colours.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(
+        ax=ax, connect=True, vmin=0.0, vmax=20.0
+    )
+    assert lc.norm is points.norm
+    assert (lc.norm.vmin, lc.norm.vmax) == (0.0, 20.0)
+
+
+def _nan_y_at_3():
+    y = EY.copy()
+    y[3] = np.nan
+    return Scatter(EX, y, EZ), EX, y
+
+
+def _alim_hides_2():
+    sc = Scatter(EX, EY, EZ)
+    sc.set_alim(None, 8.0)
+    return sc, EX, EY
+
+
+def _mask_drops_1():
+    mask = pd.Series([True, False, True, True, True])
+    return Scatter(EX, EY, EZ, mask=mask), EX, EY
+
+
+def _log_x_drops_3():
+    x = EX + 1.0
+    x[3] = -1.0
+    sc = Scatter(x, EY, EZ)
+    sc.set_log(x=True)
+    return sc, x, EY
+
+
+@pytest.mark.parametrize(
+    "build, pairs",
+    [
+        (_nan_y_at_3, [(0, 1), (1, 4), (4, 2)]),
+        (_alim_hides_2, [(0, 1), (1, 3), (3, 4)]),
+        (_mask_drops_1, [(0, 3), (3, 4), (4, 2)]),
+        (_log_x_drops_3, [(0, 1), (1, 4), (4, 2)]),
+    ],
+    ids=["nan", "alim", "mask", "log-nonpositive"],
+)
+def test_a_point_not_drawn_is_skipped_not_a_gap(ax, build, pairs):
+    """A point that is not drawn is left out: its z neighbours are joined.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc, x, y = build()
+    _, _, lc, _ = sc.make_plot(ax=ax, connect=True)
+    _assert_segments(lc, x, y, pairs)
+    np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, pairs))
+
+
+@pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
+def test_without_varying_z_points_are_joined_in_row_order_in_one_colour(ax, z):
+    """With no z, or a constant one, segments follow the rows, in the points' colour.
+
+    A point that is not drawn (here a NaN y) is skipped there too.
+    ON FAILURE: the code is wrong.
+    """
+    y = EY.copy()
+    y[2] = np.nan
+    _, points, lc, cbar = Scatter(EX, y, z).make_plot(ax=ax, connect=True)
+    assert cbar is None
+    assert lc.get_array() is None
+    _assert_segments(lc, EX, y, [(0, 1), (1, 3), (3, 4)])
+    colors = lc.get_edgecolor()
+    assert len(colors) == 1
+    np.testing.assert_array_equal(colors[0], points.get_facecolor()[0])
+
+
+def test_segments_sit_below_the_points_and_take_connect_kwargs(ax):
+    """Segments default to beneath the markers; ``connect_kwargs`` styles them.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
+    assert lc.get_zorder() < points.get_zorder()
+
+    kwargs = {"linewidth": 3.0, "alpha": 0.4, "zorder": 5}
+    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(
+        ax=ax, connect=True, connect_kwargs=kwargs
+    )
+    assert kwargs == {"linewidth": 3.0, "alpha": 0.4, "zorder": 5}
+    np.testing.assert_array_equal(lc.get_linewidth(), [3.0])
+    assert (lc.get_alpha(), lc.get_zorder()) == (0.4, 5)
+
+
+def test_segments_do_not_change_the_axis_limits(ax):
+    """The view fits the points with or without segments.
+
+    ON FAILURE: the code is wrong.
+    """
+    Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
+    assert ax.get_xlim() == (EX.min(), EX.max())
+    assert ax.get_ylim() == (EY.min(), EY.max())

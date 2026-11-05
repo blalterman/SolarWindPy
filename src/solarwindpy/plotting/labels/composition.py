@@ -11,7 +11,7 @@ known_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
 class Ion(base.Base):
     """Represent a single ion."""
 
-    def __init__(self, species, charge, description=None):
+    def __init__(self, species, charge, name=None, publication_format=None):
         """Instantiate the ion.
 
         Parameters
@@ -20,12 +20,15 @@ class Ion(base.Base):
             The element symbol, e.g. ``"He"``, ``"O"``, ``"Fe"``.
         charge : int or str
             The ion charge state, e.g. ``6``, ``"7"``, ``"i"``.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_species_charge(species, charge)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     @property
     def species(self):
@@ -45,7 +48,7 @@ class Ion(base.Base):
     @property
     def units(self):
         r"""TeX of the count units."""
-        return r"\#"  # noqa: W605
+        return base._inU["dimless"]
 
     @property
     def path(self):
@@ -92,7 +95,7 @@ class Ion(base.Base):
 class ChargeStateRatio(base.Base):
     """Ratio of two ion abundances."""
 
-    def __init__(self, ionA, ionB, description=None):
+    def __init__(self, ionA, ionB, name=None, publication_format=None):
         """Instantiate the charge-state ratio.
 
         Parameters
@@ -101,12 +104,15 @@ class ChargeStateRatio(base.Base):
             The numerator ion. If tuple, passed to Ion constructor.
         ionB : Ion or tuple
             The denominator ion. If tuple, passed to Ion constructor.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_ions(ionA, ionB)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     @property
     def ionA(self):
@@ -134,7 +140,7 @@ class ChargeStateRatio(base.Base):
         uA = self.ionA.units
         uB = self.ionB.units
 
-        units = r"\#"
+        units = base._inU["dimless"]
         if uA != uB:
             units = f"{uA}/{uB}"
 

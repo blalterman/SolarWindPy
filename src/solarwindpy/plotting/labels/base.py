@@ -2,9 +2,14 @@
 r"""Tools for creating physical quantity plot labels."""
 
 __all__ = [
+    "AXNORM",
     "Base",
     "TeXlabel",
+    "density_units",
     "format_with_units",
+    "publication_format",
+    "set_publication_format",
+    "validate_axnorm",
 ]
 
 import logging
@@ -13,6 +18,7 @@ from abc import ABC
 from pathlib import Path
 from string import Template
 from collections import namedtuple
+from types import MappingProxyType
 
 from ...core import quantities
 
@@ -25,15 +31,254 @@ _trans_species = quantities.SPECIES
 _trans_component = quantities.COMPONENTS
 _inU = quantities.UNIT_TEX
 
-_trans_axnorm = {
-    None: "",
-    "c": "Col.",
-    "r": "Row",
-    "t": "Total",
-    "d": "Density",
-    "rd": "1D Probability Density",
-    "cd": "1D Probability Density",
-}
+_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name,symbol,per,pure")
+
+#: How a label names each ``axnorm`` key, keyed by the key: the one table of
+#: the keys ``Count`` and ``TeXlabel`` accept. A new key a binning accepts
+#: needs one entry here.
+#:
+#: - ``count``: the words of a normalized ``Count``.
+#: - ``quantity``: the TeX of a normalized quantity, with ``%s`` for the
+#:   quantity's TeX.
+#: - ``density``: True for a density. Its units are the inverse of the bin
+#:   measure it is taken over; see ``per``. A count divided by a maximum is a
+#:   pure number and states ``\#``.
+#: - ``name``: the plain-text name of a normalized ``Count`` in publication
+#:   format, its first line.
+#: - ``symbol``: the TeX symbol of a normalized ``Count`` in publication
+#:   format, its second line; a plain count is ``N``.
+#: - ``per``: the binned axes a density is per, as ``binning.normalize``
+#:   divides by their widths; empty for a normalization that is no density.
+#:   :func:`~solarwindpy.plotting.labels.base.density_units` reads it.
+#: - ``pure``: True when the normalized value is a pure number whatever the
+#:   aggregation: a ratio to a maximum, which a ``TeXlabel`` states as ``\#``.
+#:   Otherwise the units of a normalized quantity depend on the aggregation (a
+#:   weight of a mean carries the mean's units, of a sum it is a fraction), so
+#:   a ``TeXlabel`` states none.
+#:
+#: A normalized ``Count`` is a count aggregation, so ``count``, ``name`` and
+#: ``symbol`` name counts. A ``TeXlabel`` is the aggregated value of another
+#: aggregation, so ``quantity`` names the normalization without saying count:
+#: ``d`` is the density and ``w`` the weight of the quantity, as
+#: ``binning.normalize`` defines them.
+AXNORM = MappingProxyType(
+    {
+        "c": _AxisNorm(
+            "Count / Column Max",
+            r"%s / \mathrm{Column \; Max}",
+            False,
+            "Column-Normalized Count",
+            r"N / N_{\max,\mathrm{col}}",
+            (),
+            True,
+        ),
+        "r": _AxisNorm(
+            "Count / Row Max",
+            r"%s / \mathrm{Row \; Max}",
+            False,
+            "Row-Normalized Count",
+            r"N / N_{\max,\mathrm{row}}",
+            (),
+            True,
+        ),
+        "t": _AxisNorm(
+            "Count / Max",
+            r"%s / \mathrm{Max}",
+            False,
+            "Normalized Count",
+            r"N / N_{\max}",
+            (),
+            True,
+        ),
+        "d": _AxisNorm(
+            "Probability Density",
+            r"\mathrm{Density \; of} \; %s",
+            True,
+            "Probability Density",
+            r"p",
+            ("x", "y"),
+            False,
+        ),
+        "cd": _AxisNorm(
+            "Column Probability Density",
+            r"\mathrm{Column \; Density \; of} \; %s",
+            True,
+            "Column Probability Density",
+            r"p_{\mathrm{col}}",
+            ("y",),
+            False,
+        ),
+        "rd": _AxisNorm(
+            "Row Probability Density",
+            r"\mathrm{Row \; Density \; of} \; %s",
+            True,
+            "Row Probability Density",
+            r"p_{\mathrm{row}}",
+            ("x",),
+            False,
+        ),
+        "w": _AxisNorm(
+            "Count Fraction",
+            r"\mathrm{Weight \; of} \; %s",
+            False,
+            "Count Fraction",
+            r"N / N_{\mathrm{tot}}",
+            (),
+            False,
+        ),
+        "wc": _AxisNorm(
+            "Column Count Fraction",
+            r"\mathrm{Column \; Weight \; of} \; %s",
+            False,
+            "Column Count Fraction",
+            r"N / N_{\mathrm{tot,col}}",
+            (),
+            False,
+        ),
+        "wr": _AxisNorm(
+            "Row Count Fraction",
+            r"\mathrm{Row \; Weight \; of} \; %s",
+            False,
+            "Row Count Fraction",
+            r"N / N_{\mathrm{tot,row}}",
+            (),
+            False,
+        ),
+    }
+)
+
+
+#: The module default of ``publication_format``; read and set it with
+#: :func:`~solarwindpy.plotting.labels.base.publication_format` and
+#: :func:`~solarwindpy.plotting.labels.base.set_publication_format`.
+_publication_format = False
+
+
+def publication_format():
+    r"""Return the default publication format of every label, True or False.
+
+    A label whose own ``publication_format`` is None follows it. See
+    :func:`~solarwindpy.plotting.labels.base.set_publication_format`.
+
+    Returns
+    -------
+    bool
+        The module default; False until ``set_publication_format`` changes it.
+    """
+    return _publication_format
+
+
+def set_publication_format(on):
+    r"""Set whether labels default to publication format.
+
+    In publication format a label is two lines: its name in words, such as
+    "Number Density", over its usual TeX symbol and units. A label without a
+    name keeps one line. Labels read the default when they render, so this
+    also changes labels that plots already hold.
+
+    Parameters
+    ----------
+    on : bool
+        True for publication format; False, the initial default, for one line.
+
+    Examples
+    --------
+    >>> from solarwindpy.plotting.labels import base
+    >>> label = base.TeXlabel(("n", "", "p"))
+    >>> print(label)
+    $n_{p} \; \left[\mathrm{cm}^{-3}\right]$
+    >>> base.set_publication_format(True)
+    >>> print(label)
+    Number Density
+    $n_{p} \; \left[\mathrm{cm}^{-3}\right]$
+    >>> base.set_publication_format(False)
+    >>> base.publication_format()
+    False
+    """
+    global _publication_format
+    _publication_format = bool(on)
+
+
+def density_units(axnorm, axes):
+    r"""Return the TeX units of the ``axnorm`` density over the binned ``axes``.
+
+    A density is divided by the measure of the bins it is taken over (see
+    ``AXNORM[axnorm].per``), so its units are the inverse of each such axis's
+    units, joined by ``\,``: ``\left(u\right)^{-1}`` for a linear axis whose
+    label states units ``u``, and ``\mathrm{dex}^{-1}`` for a log axis, whose
+    bins are measured in ``log10``. An axis whose label states no units (a
+    plain string, no ``units``, ``???``) or is dimensionless contributes no
+    factor, so the result is empty when no axis does.
+
+    Parameters
+    ----------
+    axnorm : str or None
+        A key of ``AXNORM``, or None.
+    axes : dict
+        Each binned axis, ``"x"`` or ``"y"``, mapped to ``(label, log)``: its
+        label and whether it is on a log scale.
+
+    Returns
+    -------
+    str
+        The units, or ``""`` when ``axnorm`` is no density.
+    """
+    if axnorm is None or not AXNORM[axnorm].density:
+        return ""
+    factors = []
+    for axis in AXNORM[axnorm].per:
+        if axis not in axes:
+            continue
+        label, log = axes[axis]
+        if log:
+            factors.append(r"\mathrm{dex}^{-1}")
+            continue
+        units = getattr(label, "units", "")
+        if units and units not in ("???", _inU["dimless"]):
+            factors.append(r"\left(%s\right)^{-1}" % units)
+    return r" \, ".join(factors)
+
+
+def validate_axnorm(key, allowed=None):
+    r"""Return the ``axnorm`` key ``key`` in lower case, or None for None.
+
+    The one check of an ``axnorm`` key, shared by the labels and the plots.
+    Matching is case-insensitive and exact.
+
+    Parameters
+    ----------
+    key : str or None
+        The requested key.
+    allowed : iterable of str, optional
+        The lowercase keys accepted, e.g. a binning's ``allowed_axnorm``.
+        None accepts every key of
+        :data:`~solarwindpy.plotting.labels.base.AXNORM`.
+
+    Returns
+    -------
+    str or None
+        ``key`` in lower case, or None when ``key`` is None.
+
+    Raises
+    ------
+    TypeError
+        If ``key`` is neither a string nor None.
+    ValueError
+        If ``key`` is not one of ``allowed``.
+    """
+    if allowed is None:
+        allowed = AXNORM
+    if key is None:
+        return None
+    if not isinstance(key, str):
+        raise TypeError(f"axnorm must be a string or None; got {type(key).__name__}")
+    lower = key.lower()
+    if lower not in allowed:
+        raise ValueError(
+            f"Unrecognized axnorm '{key}'; expected one of: {', '.join(allowed)}"
+        )
+    return lower
+
 
 # Longest first, so a species is never matched by a code it starts with
 # (``a_bimax`` before ``a``, ``p1`` before ``p``).
@@ -84,6 +329,12 @@ def _template_of(m):
     return _default_template_string
 
 
+def _name_of(key):
+    """Return the registry display name of ``key``, or None if it has none."""
+    entry = quantities.QUANTITIES.get(key)
+    return None if entry is None else entry.name
+
+
 def _units_of(key):
     """Return the TeX of the display unit of ``key``, or ``???`` if it has none."""
     entry = quantities.QUANTITIES.get(key)
@@ -97,14 +348,14 @@ def format_with_units(tex, units, *, new_line=False):
 
     The one home of this form: every label class builds its string here. The
     brackets are sized, ``\left[ \right]``, so they grow with their content,
-    such as a fractional unit.
+    such as a fractional unit. Empty ``units`` state no units: ``$tex$``.
 
     Parameters
     ----------
     tex : str
         TeX of the quantity, without ``$``.
     units : str
-        TeX of the units, without ``$``.
+        TeX of the units, without ``$``. Empty for a label without units.
     new_line : bool, default False
         If True, the units go on a new line; otherwise ``\;`` separates them.
 
@@ -113,6 +364,8 @@ def format_with_units(tex, units, *, new_line=False):
     str
         The label as a TeX math string.
     """
+    if not units:
+        return f"${tex}$"
     sep = "$\n$" if new_line else r"\;"
     left, right = r"\left[", r"\right]"
     return f"${tex} {sep} {left}{units}{right}$"
@@ -121,10 +374,12 @@ def format_with_units(tex, units, *, new_line=False):
 class Base(ABC):
     """Base class for all label objects."""
 
+    _name = None
+    _publication_format = None
+
     def __init__(self):
         """Initialize the logger."""
         self._init_logger()
-        self._description = None
 
     def __str__(self):
         return self.with_units
@@ -156,24 +411,61 @@ class Base(ABC):
         self._logger = logger
 
     @property
-    def description(self):
-        """Optional human-readable description shown above the label."""
-        return self._description
+    def name(self):
+        r"""Plain-text name, the first line in publication format, or None.
 
-    def set_description(self, new):
-        """Set the description string.
+        The name given with ``set_name``, otherwise the label's own default
+        (``_default_name``), None when it has none.
+        """
+        if self._name is not None:
+            return self._name
+        return self._default_name()
+
+    def _default_name(self):
+        r"""Name of a label given none; None here."""
+        return None
+
+    def set_name(self, new):
+        r"""Set the name, or None for the label's default name.
 
         Parameters
         ----------
         new : str or None
-            Human-readable description. None disables the description.
+            The first line in publication format; converted with ``str``.
+            None for the label's default name.
         """
         if new is not None:
             new = str(new)
-        self._description = new
+        self._name = new
 
-    def _format_with_description(self, label_str):
-        """Prepend description to label string if set.
+    @property
+    def publication_format(self):
+        r"""If True, the label is its name over its symbol line.
+
+        The label's own setting, or the module default
+        (:func:`~solarwindpy.plotting.labels.base.publication_format`) when that is
+        None.
+        """
+        if self._publication_format is None:
+            return publication_format()
+        return self._publication_format
+
+    def set_publication_format(self, new):
+        r"""Set this label's publication format: True, False, or None for the default.
+
+        Parameters
+        ----------
+        new : bool or None
+            True to head the label with its name, False for one line, None
+            to follow the module default; any other value is converted with
+            ``bool``.
+        """
+        if new is not None:
+            new = bool(new)
+        self._publication_format = new
+
+    def _format_with_name(self, label_str):
+        """Prepend the name in publication format.
 
         Parameters
         ----------
@@ -183,17 +475,18 @@ class Base(ABC):
         Returns
         -------
         str
-            Label with description prepended if set, otherwise unchanged.
+            ``label_str`` under the name and a newline when the label is in
+            publication format and has a name, otherwise unchanged.
         """
-        if self.description:
-            return f"{self.description}\n{label_str}"
+        if self.publication_format and self.name:
+            return f"{self.name}\n{label_str}"
         return label_str
 
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
         result = format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):
@@ -229,11 +522,11 @@ class TeXlabel(Base):
     >>> from solarwindpy.plotting.labels.base import TeXlabel
     >>> label = TeXlabel(("v", "x", "p"))
     >>> print(label.tex)
-    {v}_{{X};{p}}
+    {v}_{{x};{p}}
     >>> print(label.units)
     \mathrm{km \; s^{-1}}
     >>> print(label)
-    ${v}_{{X};{p}} \; \left[\mathrm{km \; s^{-1}}\right]$
+    ${v}_{{x};{p}} \; \left[\mathrm{km \; s^{-1}}\right]$
     >>> label.path.as_posix()
     'v_x_p'
 
@@ -249,7 +542,13 @@ class TeXlabel(Base):
     """
 
     def __init__(
-        self, mcs0, mcs1=None, axnorm=None, new_line_for_units=False, description=None
+        self,
+        mcs0,
+        mcs1=None,
+        axnorm=None,
+        new_line_for_units=False,
+        name=None,
+        publication_format=None,
     ):
         """Instantiate the label.
 
@@ -262,18 +561,25 @@ class TeXlabel(Base):
         mcs1 : tuple of str or None, optional
             Denominator for fraction style labels. Units are compared and set
             to dimensionless when equal.
-        axnorm : {"c", "r", "t", "d"}, optional
-            Axis normalization used when building colorbar labels.
+        axnorm : str, optional
+            Axis normalization used when building colorbar labels, a key of
+            :data:`~solarwindpy.plotting.labels.base.AXNORM`.
         new_line_for_units : bool, default ``False``
             If ``True`` a newline separates label and units.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format. None uses the quantity's
+            registry name, a ratio's "<Name> Ratio" or "<Name0> / <Name1>".
+        publication_format : bool or None, optional
+            If True, the label is its name over its symbol line. None follows
+            the module default,
+            :func:`~solarwindpy.plotting.labels.base.publication_format`.
         """
         super(TeXlabel, self).__init__()
         self.set_axnorm(axnorm)
         self.set_mcs(mcs0, mcs1)
         self.set_new_line_for_units(new_line_for_units)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     @property
@@ -303,8 +609,26 @@ class TeXlabel(Base):
 
     @property
     def with_units(self):
-        r"""Label with units, set by ``build_label``."""
-        return self._with_units
+        r"""Label with units, from ``build_label``, under its name in publication format."""
+        return self._format_with_name(self._with_units)
+
+    def _default_name(self):
+        r"""The registry name; for a ratio, "<Name> Ratio" or "<Name0> / <Name1>".
+
+        None when the registry does not name a measurement.
+        """
+        names = [
+            _name_of(mcs.m.replace("_err", ""))
+            for mcs in (self.mcs0, self.mcs1)
+            if mcs is not None
+        ]
+        if None in names:
+            return None
+        if len(names) == 1:
+            return names[0]
+        if names[0] == names[1]:
+            return f"{names[0]} Ratio"
+        return " / ".join(names)
 
     @property
     def path(self):
@@ -352,13 +676,10 @@ class TeXlabel(Base):
         Parameters
         ----------
         new : str, optional
-            One of ``"c"``, ``"r"``, ``"t"``, ``"d"`` (case-insensitive), or None.
+            A key of :data:`~solarwindpy.plotting.labels.base.AXNORM`
+            (case-insensitive), or None.
         """
-        if isinstance(new, str):
-            new = new.lower()
-
-        assert new in (None, "c", "r", "t", "d")
-        self._axnorm = new
+        self._axnorm = validate_axnorm(new)
 
     def make_species(self, pattern):
         r"""Replace each species code in ``pattern`` that has a TeX translation.
@@ -417,7 +738,7 @@ class TeXlabel(Base):
         m1 = m
         c1 = _trans_component.get(c, c)
         s1 = self.make_species(s)
-        d = {"M": m1, "C": c1, "S": s1}
+        d = {"M": m1, "C": c1, "A": c.upper(), "S": s1}
 
         template_string = _template_of(m)
         template = Template(template_string)
@@ -478,16 +799,16 @@ template   : %s
         # display-focused method
         """Finalize label pieces with axis normalization."""
         axnorm = self.axnorm
-        tex_norm = _trans_axnorm[axnorm]
-        if tex_norm:
-            units = r"\#"
-            tex = r"\mathrm{%s \; Norm} \; %s" % (tex_norm, tex)  # noqa: W605
+        if axnorm is not None:
+            norm = AXNORM[axnorm]
+            units = _inU["dimless"] if norm.pure else ""
+            if self.mcs1 is not None:
+                tex = f"({tex})"
+            tex = norm.quantity % tex
             path = path / (axnorm.upper() + "norm")
 
+        # The name line is added when the label is read.
         with_units = format_with_units(tex, units, new_line=self.new_line_for_units)
-
-        # Apply description formatting
-        with_units = self._format_with_description(with_units)
 
         return tex, path, units, with_units
 
@@ -507,7 +828,7 @@ template   : %s
                 _units_of(m1.replace("_err", "")),
             )
             if u0 == u1:
-                units = r"\#"
+                units = _inU["dimless"]
             else:
                 units = r"{}/{}".format(u0, u1)
 

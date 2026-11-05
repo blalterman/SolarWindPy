@@ -418,6 +418,23 @@ def test_normalization_by_max_gives_each_cycle_a_unit_maximum(sidc):
         np.testing.assert_allclose(group.max(), 1.0)
 
 
+@pytest.mark.filterwarnings("error:The inplace keyword")
+def test_normalization_sorts_the_columns_without_inplace(sidc):
+    """``run_normalization`` adds ``nssn`` and keeps the columns sorted.
+
+    pandas deprecates ``inplace=True``; the filter turns its warning into a
+    failure, so the sort must return a new frame.
+
+    ON FAILURE: the code is wrong -- it sorts in place again, or the sorted
+    frame does not replace the loader's.
+    """
+    sidc.run_normalization(norm_by="max")
+
+    columns = list(sidc.data.columns)
+    assert "nssn" in columns
+    assert columns == sorted(columns)
+
+
 def test_normalization_by_max_preserves_the_ratio_to_the_peak(sidc):
     """Each normalized value is its share of its own cycle's peak.
 

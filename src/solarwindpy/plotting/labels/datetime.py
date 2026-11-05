@@ -18,19 +18,22 @@ from . import special
 class Timedelta(special.ArbitraryLabel):
     """Label for a time interval."""
 
-    def __init__(self, offset, description=None):
+    def __init__(self, offset, name=None, publication_format=None):
         """Instantiate the label.
 
         Parameters
         ----------
         offset : str or pandas offset
             Value convertible via :func:`pandas.tseries.frequencies.to_offset`.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_offset(offset)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         return self.with_units
@@ -39,7 +42,7 @@ class Timedelta(special.ArbitraryLabel):
     def with_units(self):
         r"""Label with units, as a TeX math string."""
         result = base.format_with_units(self.tex, self.units)
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def offset(self):
@@ -89,19 +92,22 @@ class Timedelta(special.ArbitraryLabel):
 class DateTime(special.ArbitraryLabel):
     """Generic datetime label."""
 
-    def __init__(self, kind, description=None):
+    def __init__(self, kind, name=None, publication_format=None):
         """Instantiate the label.
 
         Parameters
         ----------
         kind : str
             Text used to build the label, e.g. ``"Year"`` or ``"Month"``.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_kind(kind)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         return self.with_units
@@ -110,7 +116,7 @@ class DateTime(special.ArbitraryLabel):
     def with_units(self):
         r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def kind(self):
@@ -141,7 +147,7 @@ class DateTime(special.ArbitraryLabel):
 class Epoch(special.ArbitraryLabel):
     r"""Create epoch analysis labels, e.g. ``Hour of Day``."""
 
-    def __init__(self, kind, of_thing, space=r"\,", description=None):
+    def __init__(self, kind, of_thing, space=r"\,", name=None, publication_format=None):
         r"""Instantiate the label.
 
         Parameters
@@ -152,14 +158,17 @@ class Epoch(special.ArbitraryLabel):
             The larger time unit, e.g. ``"Day"``.
         space : str, default ``"\,"``
             TeX spacing command placed between words.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_smaller(kind)
         self.set_larger(of_thing)
         self.set_space(space)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         return self.with_units
@@ -198,7 +207,7 @@ class Epoch(special.ArbitraryLabel):
     def with_units(self):
         r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     def set_larger(self, new):
         r"""Store the larger time unit, title-cased.
@@ -242,19 +251,22 @@ class Epoch(special.ArbitraryLabel):
 class Frequency(special.ArbitraryLabel):
     """Frequency of another quantity."""
 
-    def __init__(self, other, description=None):
+    def __init__(self, other, name=None, publication_format=None):
         """Instantiate the label.
 
         Parameters
         ----------
         other : Timedelta or str
             The time interval for frequency calculation.
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
         self.set_other(other)
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
         self.build_label()
 
     def __str__(self):
@@ -309,16 +321,19 @@ class Frequency(special.ArbitraryLabel):
 class January1st(special.ArbitraryLabel):
     """Label for the first day of the year."""
 
-    def __init__(self, description=None):
+    def __init__(self, name=None, publication_format=None):
         """Instantiate the label.
 
         Parameters
         ----------
-        description : str or None, optional
-            Human-readable description displayed above the mathematical label.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
         """
         super().__init__()
-        self.set_description(description)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
 
     def __str__(self):
         return self.with_units
@@ -327,7 +342,7 @@ class January1st(special.ArbitraryLabel):
     def with_units(self):
         r"""Label as a TeX math string; it has no units."""
         result = r"$%s$" % self.tex
-        return self._format_with_description(result)
+        return self._format_with_name(result)
 
     @property
     def tex(self):

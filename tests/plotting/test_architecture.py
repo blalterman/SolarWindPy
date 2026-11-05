@@ -109,9 +109,13 @@ def test_binning_is_abstract_and_a_strategy_must_declare_its_axnorms():
 @pytest.mark.parametrize(
     "build, strategy, allowed",
     [
-        (lambda: Hist1D(X), "FixedGrid", ("d", "t")),
-        (lambda: Hist2D(X, Y), "FixedGrid", ("c", "r", "t", "d", "cd", "rd")),
-        (_spiral, "AdaptiveMesh", ("d", "t")),
+        (lambda: Hist1D(X), "FixedGrid", ("d", "t", "w")),
+        (
+            lambda: Hist2D(X, Y),
+            "FixedGrid",
+            ("c", "r", "t", "d", "cd", "rd", "w", "wc", "wr"),
+        ),
+        (_spiral, "AdaptiveMesh", ("d", "t", "w")),
     ],
     ids=["Hist1D", "Hist2D", "SpiralPlot2D"],
 )
@@ -242,9 +246,8 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
     for (x0, x1, y0, y1), n in zip(splot.mesh.mesh, _counts_per_cell(splot)):
         if n >= lower:
             expected |= (x0 <= x) & (x < x1) & (y0 <= y) & (y < y1)
-    plotted = splot.get_plotted_data_boolean_series()
-    assert plotted.index.equals(d.index)
-    assert plotted.to_numpy().tolist() == expected.tolist()
+    plotted = d.index.isin(splot.get_plotted_data().index)
+    assert plotted.tolist() == expected.tolist()
     assert 0 < expected.sum() < len(d)  # the fixture keeps some rows, not all
 
 
@@ -321,6 +324,6 @@ def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():
     plot = Scatter(x, y, logx=True, logy=True)
     assert plot.log == base.LogAxes(True, True)
     assert plot.data.x.to_numpy() == exact(x.to_numpy())  # the chosen input
-    ax, _, _ = plot.make_plot()
+    ax, _, _, _ = plot.make_plot()
     assert (ax.get_xscale(), ax.get_yscale()) == ("log", "log")
     plt.close("all")

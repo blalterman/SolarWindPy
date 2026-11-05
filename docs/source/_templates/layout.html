@@ -8,7 +8,7 @@
   {{ super() }}
   <div class="sidebar-custom-info">
     <p class="sidebar-title">SolarWindPy</p>
-    <p class="sidebar-subtitle">Solar Wind Analysis Toolkit</p>
+    <p class="sidebar-subtitle">A Python Library for <em>in situ</em> solar wind data analysis</p>
     <hr style="margin: 10px 0; border-color: #bdc3c7;">
   </div>
 {% endblock %}
@@ -18,7 +18,7 @@
   {{ super() }}
   <div class="custom-footer" style="text-align: center; padding: 20px; border-top: 1px solid #bdc3c7; margin-top: 40px; color: #7f8c8d;">
     <p>
-      <strong>SolarWindPy:</strong> A comprehensive toolkit for solar wind plasma and magnetic field data analysis
+      <strong>SolarWindPy:</strong> A Python Library for <em>in situ</em> solar wind data analysis
     </p>
     <p style="font-size: 0.9em;">
       Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> | 
@@ -31,10 +31,22 @@
 {# Add scientific notation support #}
 {% block extrahead %}
   {{ super() }}
+  {# Link previews: the branding kit's 1280x640 social card. Crawlers need an
+     absolute HTTPS URL, so this points at the published latest docs. #}
+  {%- set swp_card = "https://solarwindpy.readthedocs.io/en/latest/_static/branding/solarwindpy-social-card.jpg" %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SolarWindPy">
+  <meta property="og:title" content="{{ title|striptags|e }} | SolarWindPy">
+  <meta property="og:description" content="A Python Library for in situ solar wind data analysis">
+  <meta property="og:image" content="{{ swp_card }}">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ swp_card }}">
   <style>
     .sidebar-custom-info {
-      background-color: #34495e;
-      color: white;
+      background-color: var(--swp-deep-ocean);
+      color: var(--swp-warm-white);
       padding: 15px;
       margin: 10px 0;
       border-radius: 4px;
