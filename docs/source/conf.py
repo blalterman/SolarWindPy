@@ -7,6 +7,7 @@
 
 import os
 import sys
+from collections import Counter
 
 sys.path.insert(0, os.path.abspath("../../src"))
 import solarwindpy
@@ -25,7 +26,7 @@ release = version
 
 # -- General configuration ---------------------------------------------------
 
-needs_sphinx = "1.8"
+needs_sphinx = "7.0"  # the docs extra's floor, sphinx>=7.0 in pyproject.toml
 
 # numpydoc is the only docstring processor. Running napoleon beside it made
 # both rewrite every docstring; napoleon's ``Attributes`` sections then emitted
@@ -41,9 +42,41 @@ extensions = [
     "sphinx.ext.mathjax",
     "numpydoc",
     "sphinxcontrib.bibtex",
+    "matplotlib.sphinxext.plot_directive",
+    "sphinx_copybutton",
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
+
+# -- Copy button configuration ---------------------------------------------
+
+# Copy doctest examples without their ``>>> `` and ``... `` prompts, so a
+# reader can paste them into a session.
+copybutton_prompt_text = r">>> |\.\.\. "
+copybutton_prompt_is_regexp = True
+
+# -- Plot directive configuration -------------------------------------------
+
+# Every figure in the guide is drawn by the code shown with it, and that code
+# must run on its own when pasted into a fresh session: no hidden setup code
+# (the default would import numpy and pyplot), one PNG per figure, and the
+# package's style, which the directive's per-figure reset would otherwise
+# discard after the first import of solarwindpy.plotting.
+import matplotlib  # noqa: E402
+
+plot_include_source = True
+plot_pre_code = ""
+plot_formats = [("png", 100)]
+plot_html_show_formats = False
+plot_html_show_source_link = False
+plot_rcparams = dict(
+    matplotlib.rc_params_from_file(
+        os.path.join(
+            os.path.dirname(solarwindpy.__file__), "plotting", "solarwindpy.mplstyle"
+        ),
+        use_default_template=False,
+    )
+)
 
 # -- Templates configuration ------------------------------------------------
 
@@ -232,7 +265,7 @@ html_favicon = '_static/favicon.ico'
 
 # -- Options for other output formats ----------------------------------------
 
-# PDF output configuration (enabled for RTD)
+# PDF output configuration
 latex_engine = 'pdflatex'
 latex_elements = {
     'papersize': 'letterpaper',
@@ -245,7 +278,7 @@ latex_elements = {
     ''',
 }
 
-# EPUB output configuration (enabled for RTD)
+# EPUB output configuration
 epub_show_urls = 'footnote'
 epub_use_index = True
 
@@ -267,3 +300,35 @@ epub_title = project
 epub_author = author
 epub_publisher = author
 epub_copyright = copyright
+
+
+# -- API page titles ---------------------------------------------------------
+
+# The autosummary templates title each API page by its short name (``Plasma``,
+# ``hist1d``). Where two pages would share a title, such as the ``base``
+# modules of ``core`` and ``plotting``, each of them is titled by its path
+# below the package instead (``core.base``, ``plotting.base``), so a title
+# alone names one object. The pages are the public modules and the public
+# objects each defines; ``repeated_titles`` holds the full names of those whose
+# short name another shares, and the templates read it.
+def _repeated_api_titles():
+    import importlib
+    import inspect
+    import pkgutil
+
+    full_names = []
+    for info in pkgutil.walk_packages(solarwindpy.__path__, "solarwindpy."):
+        if any(part.startswith("_") for part in info.name.split(".")):
+            continue
+        module = importlib.import_module(info.name)
+        full_names.append(info.name)
+        for name, obj in vars(module).items():
+            public = not name.startswith("_")
+            documented = inspect.isclass(obj) or inspect.isfunction(obj)
+            if public and documented and obj.__module__ == info.name:
+                full_names.append(f"{info.name}.{name}")
+    counts = Counter(name.rsplit(".", 1)[-1] for name in full_names)
+    return sorted(name for name in full_names if counts[name.rsplit(".", 1)[-1]] > 1)
+
+
+autosummary_context = {"repeated_titles": _repeated_api_titles()}

@@ -48,7 +48,8 @@ After installation, import the package and create a plasma object with sample da
 >>> print(f"Proton density: {plasma.p1.n.mean():.1f} cm⁻³")
 Proton density: 6.7 cm⁻³
 
-See the documentation for detailed usage examples and API reference.
+See the `documentation <https://solarwindpy.readthedocs.io>`_ for the
+quickstart, usage examples and the API reference.
 
 Installation
 ============
@@ -93,7 +94,7 @@ Development
 
       conda env create -f solarwindpy.yml
       conda activate solarwindpy
-      pip install -e .
+      pip install -e ".[dev]"
 
 3. Run the test suite with ``pytest``:
 
@@ -109,14 +110,19 @@ Development
 
       pre-commit install
 
-   This will run ``ruff check`` and ``ruff format`` automatically when committing.
+   Each commit then runs ``ruff check``, ``ruff format`` and whitespace,
+   merge-conflict and large-file checks on staged Python files, ``doc8`` on
+   staged ``.rst``, ``.md`` and ``.py`` files, and the conventional-commit check
+   on the message. A commit that stages a ``.py`` file also runs the full test
+   suite with a coverage floor (``.claude/hooks/pre-commit-tests.sh``), and one
+   that stages a Python file under ``src/solarwindpy`` runs an import test.
 
 5. Build the documentation and fail on warnings:
 
    .. code-block:: bash
 
       cd docs
-      make html SPHINXOPTS=-W
+      make html SPHINXOPTS="-W --keep-going -n"
 
 
 License

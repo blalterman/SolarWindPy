@@ -43,11 +43,25 @@ and the mass-density ratio in :py:meth:`~solarwindpy.core.plasma.Plasma.nuc`,
 and the reduced mass in :py:meth:`~solarwindpy.core.plasma.Plasma.pdv`, are
 NaN at a time when either species is missing.
 
-Thermal speeds do not add across species, so
-:py:meth:`~solarwindpy.core.plasma.Plasma.w` raises for a total such
-as ``"a+p1"``. Only temperatures and pressures form totals.
+Quantities that sum over species take a total: number density
+(:py:meth:`~solarwindpy.core.plasma.Plasma.n`), mass density
+(:py:meth:`~solarwindpy.core.plasma.Plasma.rho`), thermal pressure
+(:py:meth:`~solarwindpy.core.plasma.Plasma.pth`), temperature
+(:py:meth:`~solarwindpy.core.plasma.Plasma.T`) and kinetic energy flux
+(:py:meth:`~solarwindpy.core.plasma.Plasma.Wk`). So do the quantities built
+from those totals, such as the plasma beta
+(:py:meth:`~solarwindpy.core.plasma.Plasma.beta`), the anisotropy
+(:py:meth:`~solarwindpy.core.plasma.Plasma.R`), the sound speed
+(:py:meth:`~solarwindpy.core.plasma.Plasma.cs`) and the Alfvén speed
+(:py:meth:`~solarwindpy.core.plasma.Plasma.ca`). Thermal speeds do not add
+across species, so :py:meth:`~solarwindpy.core.plasma.Plasma.w` raises for a
+total such as ``"a+p1"``.
 
-The two levels
+A total density can also be strict:
+``plasma.n("a+p1", skipna=False)`` is NaN at a time when any of its species is
+missing.
+
+Worked example
 --------------
 
 For temperature (:py:meth:`~solarwindpy.core.plasma.Plasma.T`),
@@ -64,16 +78,8 @@ either component is masked as a whole at that time, so its result there is NaN:
    t3      NaN     ok     ->  NaN        NaN     ok     ->  NaN     ->   NaN
 
 Pressure (:py:meth:`~solarwindpy.core.plasma.Plasma.pth`) follows the same
-pattern:
-
-.. code-block:: text
-
-             protons (p1)                   alphas (a)                     total "a+p1"
-   time   p_par   p_perp  ->  p_p1      p_par   p_perp  ->  p_a
-   t0      ok      ok     ->  ok         ok      ok     ->  ok      ->   p1 + a
-   t1      ok      NaN    ->  NaN        ok      ok     ->  ok      ->   a only
-   t2      ok      ok     ->  ok         NaN     NaN    ->  NaN     ->   p1 only
-   t3      NaN     ok     ->  NaN        NaN     ok     ->  NaN     ->   NaN
+pattern, with the parallel and perpendicular pressures in place of the
+temperatures.
 
 The per-species result at each time is the within-species rule; the total is the
 across-species rule applied to those results.

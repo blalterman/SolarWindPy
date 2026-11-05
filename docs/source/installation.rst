@@ -8,6 +8,8 @@ Installation
 Requirements
 ------------
 
+SolarWindPy supports Python 3.12 and newer (``requires-python = ">=3.12,<4"``).
+
 ``pyproject.toml`` is the single declaration of what SolarWindPy needs:
 ``requires-python`` gives the supported Python versions and ``dependencies``
 gives the supported range of each required package. The
@@ -39,19 +41,13 @@ Development Installation
 ------------------------
 
 To work with the development version, clone the repository and install it in
-editable mode:
+editable mode with the testing, documentation, and linting tools declared in
+the ``dev`` extra:
 
 .. code-block:: bash
 
    git clone https://github.com/blalterman/SolarWindPy.git
    cd SolarWindPy
-   pip install -e .
-
-Contributors can install the testing, documentation, and linting tools
-declared in the ``dev`` extra instead:
-
-.. code-block:: bash
-
    pip install -e ".[dev]"
 
 Conda Environment Setup
@@ -65,7 +61,7 @@ package into the environment afterwards:
 
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
-   pip install -e .
+   pip install -e ".[dev]"
 
 Verification
 ------------

@@ -23,8 +23,8 @@ scientific accuracy.
    :caption: User Guide
 
    installation
+   tutorial/quickstart
    usage
-   tutorial
    missing_data
 
 .. toctree::
@@ -32,12 +32,6 @@ scientific accuracy.
    :caption: API Reference
 
    api_reference
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Development
-
-   documentation_review
 
 .. include:: ../../LICENSE
 .. include:: ../../CITATION.rst
