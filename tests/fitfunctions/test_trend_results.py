@@ -9,6 +9,8 @@ concatenation of each bin fit's ``results``; the trend reads its ``y`` and
 ``yerr`` from that table by ``(P, K)`` name, with no default.
 """
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -141,6 +143,73 @@ def test_bin_results_is_the_concatenation_of_each_bin_fits_results():
         assert got.drop(("status", "")).astype(float).to_numpy() == exact(values)
     assert res.loc[:, ("mu", "value")].to_numpy() == noise_free(MUS)
     assert res.loc[:, ("sigma", "value")].to_numpy() == noise_free(SIGMAS)
+
+
+def _concatenated_bin_results(tf):
+    """``bin_results`` rebuilt from each bin fit's public one-row ``results``.
+
+    Concatenate the rows, index them by the columns, and add the trend's
+    ``in_trend`` selection: the table ``bin_results`` documents, built
+    independently of how ``make_fit`` builds it.
+    """
+    res = pd.concat([fit.results for fit in tf.bin_fits])
+    res.index = tf.agged.columns
+    res[("in_trend", "")] = tf.trend.observations.tk_observed
+    return res
+
+
+def _hinge_trend():
+    agged = _hinge_agged()[0]
+    tf = TrendFit(
+        agged,
+        Gaussian,
+        HingeAtPoint,
+        y=("mu", "value"),
+        yerr=("sigma", "value"),
+        trend_kwargs={"guess_xh": 433.0},
+    )
+    tf.make_fit()
+    return tf
+
+
+def _failed_bins_trend():
+    """Column 1 too sparse to fit; column 3 degenerate, escalated to a failure.
+
+    Column 3's counts sum to zero, so its Gaussian has no estimate and the fit
+    from ones leaves mu and sigma degenerate; the escalated
+    FitDegeneracyWarning records that bin as failed.
+    """
+    agged = _agged5()
+    sparse, degenerate = agged.columns[1], agged.columns[3]
+    agged[sparse] = np.where(np.arange(agged.shape[0]) < 8, np.nan, agged[sparse])
+    agged[degenerate] = np.tile([1.0, -1.0], agged.shape[0] // 2)
+    tf = TrendFit(agged, Gaussian, Line, y=("mu", "value"), yerr=("sigma", "value"))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FitDegeneracyWarning)
+        tf.make_fit()
+    status = tf.bin_results.loc[:, ("status", "")]
+    assert status[sparse] == "InsufficientDataError"  # the fixture's failures
+    assert status[degenerate] == "FitDegeneracyWarning"
+    return tf
+
+
+@pytest.mark.parametrize(
+    "build",
+    [_trend5, _hinge_trend, _failed_bins_trend],
+    ids=["line-trend", "hinge-trend", "failed-bins"],
+)
+def test_bin_results_equals_the_concatenated_bin_fit_results(build):
+    """``bin_results`` is exactly the concatenation of the bin fits' ``results``.
+
+    Values, column MultiIndex, dtypes, index, and failed bins' NaN rows and
+    statuses, with Line and HingeAtPoint trends and with failed bins.
+
+    ON FAILURE: the code is wrong.
+    """
+    tf = build()
+    pd.testing.assert_frame_equal(
+        tf.bin_results, _concatenated_bin_results(tf), check_exact=True
+    )
 
 
 def test_in_trend_marks_the_bins_the_trend_fit_used():
