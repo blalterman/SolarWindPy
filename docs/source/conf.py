@@ -41,9 +41,33 @@ extensions = [
     "sphinx.ext.mathjax",
     "numpydoc",
     "sphinxcontrib.bibtex",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
 bibtex_bibfiles = ['solarwindpy.bib']
+
+# -- Plot directive configuration -------------------------------------------
+
+# Every figure in the guide is drawn by the code shown with it, and that code
+# must run on its own when pasted into a fresh session: no hidden setup code
+# (the default would import numpy and pyplot), one PNG per figure, and the
+# package's style, which the directive's per-figure reset would otherwise
+# discard after the first import of solarwindpy.plotting.
+import matplotlib  # noqa: E402
+
+plot_include_source = True
+plot_pre_code = ""
+plot_formats = [("png", 100)]
+plot_html_show_formats = False
+plot_html_show_source_link = False
+plot_rcparams = dict(
+    matplotlib.rc_params_from_file(
+        os.path.join(
+            os.path.dirname(solarwindpy.__file__), "plotting", "solarwindpy.mplstyle"
+        ),
+        use_default_template=False,
+    )
+)
 
 # -- Templates configuration ------------------------------------------------
 

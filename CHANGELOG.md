@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
   `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
   and a `Line` fit's `results`. It replaces the tutorial stub.
+- A "Make a Plot" section in the Usage guide: when to use `Hist1D`, `Hist2D`, `SpiralPlot2D`
+  and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
+  `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
+  runs each of those code blocks on its own.
 
 ### Changed
 
