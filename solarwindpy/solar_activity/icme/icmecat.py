@@ -13,11 +13,11 @@ __all__ = [
 
 import logging
 import re
-import warnings
 import pandas as pd
 import numpy as np
 from typing import Optional
 
+from ...tools import _warn
 from .. import cache
 
 #: Download URL of the pinned HELIO4CAST ICMECAT release, v23.
@@ -34,11 +34,6 @@ _VERSION_IN_URL = re.compile(r"_v(\d+)\.csv$")
 # Freshness window: a cached catalog younger than this is used without
 # downloading (see solarwindpy.solar_activity.cache).
 _MAX_AGE = pd.Timedelta(days=30)
-# Warnings name the user's ICMECAT() call. ICMECAT's own warnings are raised in
-# methods _load_data calls, and __init__ calls _load_data directly, so they use
-# stacklevel=4 (method, _load_data, __init__, user); cache.fall_back sits one
-# frame deeper, under _after_failed_download. Moving _load_data changes both.
-_FALL_BACK_STACKLEVEL = 5
 
 # The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
 # ACE and Cassini were previously (and wrongly) included: both have zero
@@ -324,7 +319,7 @@ class ICMECAT:
         back to the cached ``url``.
         """
         if error.status != 404:
-            return cache.fall_back(url, error, stacklevel=_FALL_BACK_STACKLEVEL), url
+            return cache.fall_back(url, error), url
 
         for successor in _successor_urls(url):
             try:
@@ -332,43 +327,40 @@ class ICMECAT:
             except cache.DownloadError as exc:
                 if exc.status == 404:
                     continue
-                return cache.fall_back(url, exc, stacklevel=_FALL_BACK_STACKLEVEL), url
+                return cache.fall_back(url, exc), url
             found = _version_of(successor)
-            warnings.warn(
+            _warn(
                 f"ICMECAT {_version_of(url)} is no longer hosted at {url}; "
                 f"loaded {found} from {successor} instead. SolarWindPy expects "
                 f"{_PINNED_VERSION}, and the {found} catalog layout may differ: "
                 f"update solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL "
                 f"and SPACECRAFT_NAMES to {found}.",
                 ICMECATVersionWarning,
-                stacklevel=4,
             )
             return path, successor
 
         successors = _successor_urls(url)
         if successors:
-            warnings.warn(
+            _warn(
                 f"No ICMECAT from {_version_of(url)} to "
                 f"{_version_of(successors[-1])} is hosted at "
                 f"{url.rsplit('/', 1)[0]}/; see {_ICMECAT_PAGE} for the current "
                 f"catalog and update "
                 f"solarwindpy.solar_activity.icme.icmecat.ICMECAT_URL.",
                 ICMECATNotHostedWarning,
-                stacklevel=4,
             )
-        return cache.fall_back(url, error, stacklevel=_FALL_BACK_STACKLEVEL), url
+        return cache.fall_back(url, error), url
 
     def _warn_unknown_spacecraft(self) -> None:
         """Warn if the catalog names spacecraft outside ``SPACECRAFT_NAMES``."""
         unknown = sorted(set(self._data["sc_insitu"].dropna()) - SPACECRAFT_NAMES)
         if unknown:
-            warnings.warn(
+            _warn(
                 f"ICMECAT {self._version or ''} names spacecraft that "
                 f"SPACECRAFT_NAMES, written for {_PINNED_VERSION}, does not list: "
                 f"{unknown}. They load and filter normally; update "
                 f"solarwindpy.solar_activity.icme.icmecat.SPACECRAFT_NAMES.",
                 ICMECATSpacecraftWarning,
-                stacklevel=4,
             )
 
     # -------------------------------------------------------------------------

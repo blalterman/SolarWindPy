@@ -18,7 +18,6 @@ __all__ = [
 ]
 
 import logging  # noqa: F401
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -44,6 +43,7 @@ except ImportError:  # pragma: no cover - fall back for older SciPy versions
     )
 from scipy.linalg import svd
 
+from ..tools import _warn
 from .tex_info import TeXinfo
 from .plots import FFPlot
 
@@ -1130,9 +1130,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             warn_cov = True
 
         if warn_cov:
-            warnings.warn(
+            _warn(
                 "Covariance of the parameters could not be estimated",
-                category=OptimizeWarning,
+                OptimizeWarning,
             )
 
         psigma = np.sqrt(np.diag(pcov))

@@ -5,7 +5,7 @@
 A warning's ``filename`` and ``lineno`` tell the user which of their lines
 triggered it, and ``-W error::<category>:<module>`` filters match on that
 module. A warning attributed to a frame inside ``solarwindpy`` names a file the
-user never wrote. The rule is one shared helper, ``solarwindpy._warn.warn``,
+user never wrote. The rule is one shared helper, ``solarwindpy.tools._warn``,
 that skips every frame under the package directory; the cases below trigger
 warnings from different subpackages at different call depths and check each
 lands on this file, and the guard checks no ``warnings.warn`` call bypasses the
@@ -39,7 +39,8 @@ from solarwindpy.solar_activity.base import DataLoader
 from solarwindpy.solar_activity.icme import icmecat
 
 PACKAGE_DIR = Path(solarwindpy.__file__).resolve().parent
-HELPER = PACKAGE_DIR / "_warn.py"
+# The helper's module and name; only the call inside its body may be direct.
+HELPER = (PACKAGE_DIR / "tools" / "__init__.py", "_warn")
 
 BASE = "https://helioforecast.space/static/sync/icmecat/HELIO4CAST_ICMECAT_v{}.csv"
 V23 = BASE.format(23)
@@ -159,30 +160,16 @@ def covariance_from_a_fit_with_no_degree_of_freedom(tmp_path, monkeypatch):
     return OptimizeWarning
 
 
-def _inside_package(category):
-    return pytest.mark.xfail(
-        strict=True,
-        raises=WarnedFromInsidePackage,
-        reason=f"the {category} is attributed to a solarwindpy module; it should "
-        "name this file; remove this marker when warnings skip package frames",
-    )
-
-
 @pytest.mark.parametrize(
     "trigger",
     [
-        pytest.param(
-            stale_cache_from_the_base_loader,
-            id="base-loader-stale-cache",
-            marks=_inside_package("StaleCacheWarning"),
-        ),
+        pytest.param(stale_cache_from_the_base_loader, id="base-loader-stale-cache"),
         pytest.param(stale_cache_from_icmecat, id="icmecat-stale-cache"),
         pytest.param(icmecat_version_from_a_404, id="icmecat-version"),
         pytest.param(icmecat_unknown_spacecraft, id="icmecat-spacecraft"),
         pytest.param(
             covariance_from_a_fit_with_no_degree_of_freedom,
             id="fitfunction-covariance",
-            marks=_inside_package("OptimizeWarning"),
         ),
     ],
 )
@@ -248,26 +235,42 @@ def test_the_guard_finds_a_direct_call():
     assert _calls_to_warnings_warn(ast.parse(source)) == [3, 4]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=WarnBypassesHelper,
-    reason="package modules call warnings.warn with hand-counted stacklevels; "
-    "remove this marker when every warning goes through solarwindpy._warn.warn",
-)
+def _helper_lines(tree):
+    """The line range of the helper's own body in its module's ``tree``."""
+    (helper,) = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == HELPER[1]
+    ]
+    return range(helper.lineno, helper.end_lineno + 1)
+
+
 def test_every_package_warning_goes_through_the_shared_helper():
-    """No module but the helper calls ``warnings.warn``.
+    """No package code but the helper's own body calls ``warnings.warn``.
 
     ON FAILURE: the code is wrong; issue the warning with
-    ``solarwindpy._warn.warn``.
+    ``solarwindpy.tools._warn``.
     """
     bypasses = []
     for path in sorted(PACKAGE_DIR.rglob("*.py")):
-        if path == HELPER:
-            continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
+        allowed = _helper_lines(tree) if path == HELPER[0] else range(0)
         bypasses += [
             f"{path.relative_to(PACKAGE_DIR)}, line {line}"
             for line in _calls_to_warnings_warn(tree)
+            if line not in allowed
         ]
     if bypasses:
         raise WarnBypassesHelper(bypasses)
+
+
+def test_the_helper_itself_calls_warnings_warn_once():
+    """The helper's body holds the package's one direct call.
+
+    ON FAILURE: the guard's exemption no longer names the helper; fix
+    ``HELPER``.
+    """
+    tree = ast.parse(HELPER[0].read_text(encoding="utf-8"))
+    calls = _calls_to_warnings_warn(tree)
+    assert len(calls) == 1
+    assert calls[0] in _helper_lines(tree)

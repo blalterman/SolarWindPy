@@ -38,6 +38,8 @@ import pandas as pd
 
 from astropy.utils import data as _astropy_data
 
+from ..tools import _warn
+
 #: Package name under which astropy keeps SolarWindPy's downloads.
 PKGNAME = "solarwindpy"
 
@@ -195,7 +197,7 @@ def fetch(url, max_age, fallback=True):
         return fall_back(url, exc)
 
 
-def fall_back(url, error, *, stacklevel=3):
+def fall_back(url, error):
     """Return the cached copy of ``url`` after its download failed with ``error``.
 
     Parameters
@@ -204,10 +206,6 @@ def fall_back(url, error, *, stacklevel=3):
         URL whose download failed.
     error : BaseException
         The failure, named in the warning or chained to the raised error.
-    stacklevel : int, optional
-        Passed to :func:`warnings.warn`, counting this function as 1. The
-        default 3 attributes the warning to the caller of :func:`fetch`; a
-        direct caller passes 2, and one called deeper adds a frame per level.
 
     Returns
     -------
@@ -237,7 +235,7 @@ def fall_back(url, error, *, stacklevel=3):
         f"Could not download {url} ({error!r}); using the cached copy that "
         f"is {days:.1f} days old: {cached}"
     )
-    warnings.warn(message, StaleCacheWarning, stacklevel=stacklevel)
+    _warn(message, StaleCacheWarning)
     _logger.warning(message)
     return cached
 
