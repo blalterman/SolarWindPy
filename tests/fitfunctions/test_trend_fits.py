@@ -10,7 +10,11 @@ from matplotlib.container import ErrorbarContainer
 from scipy.optimize import OptimizeWarning
 
 from solarwindpy.fitfunctions import gaussians, trend_fits, lines
-from solarwindpy.fitfunctions.core import InsufficientDataError, NotFittedError
+from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
+    InsufficientDataError,
+    NotFittedError,
+)
 from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
 from tests.tolerances import exact, noise_free
@@ -18,6 +22,13 @@ from tests.tolerances import exact, noise_free
 # The trend's y and yerr: each column's Gaussian centroid and width.
 MU = ("mu", "value")
 SIGMA = ("sigma", "value")
+
+
+def _two_point_trend():
+    """Expect the warning of a Line trend through two bins: its covariance is not finite."""
+    return pytest.warns(
+        FitDegeneracyWarning, match="m and b have a non-finite covariance"
+    )
 
 
 @pytest.fixture
@@ -42,7 +53,8 @@ def trend_fit(agged):
     tf = trend_fits.TrendFit(agged, gaussians.Gaussian, lines.Line, y=MU, yerr=SIGMA)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=OptimizeWarning)
-        tf.make_fit()
+        with _two_point_trend():
+            tf.make_fit()
     return tf
 
 
@@ -71,7 +83,8 @@ def test_bin_fits_and_bin_results(agged):
     assert isinstance(tf.bin_fits.iloc[0], gaussians.Gaussian)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=OptimizeWarning)
-        tf.make_fit()
+        with _two_point_trend():
+            tf.make_fit()
     assert (tf.bin_results.loc[:, ("status", "")] == "ok").all()
     assert tf.bin_results.loc[:, MU].notna().all()
     assert tf.bin_results.loc[:, ("mu", "uncertainty")].notna().all()
@@ -168,7 +181,8 @@ def test_an_unexpected_refit_error_leaves_the_trend_fit_unfitted(
     )
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=OptimizeWarning)
-        trend_fit.make_fit()
+        with _two_point_trend():
+            trend_fit.make_fit()
     break_step(trend_fit, monkeypatch)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=OptimizeWarning)
@@ -277,7 +291,8 @@ def test_plot_bin_results_returns_errorbar_artists(agged):
     ON FAILURE: the code is wrong.
     """
     tf = trend_fits.TrendFit(agged, gaussians.Gaussian, lines.Line, y=MU, yerr=SIGMA)
-    tf.make_fit()
+    with _two_point_trend():
+        tf.make_fit()
 
     fig, ax = plt.subplots()
     plotted = tf.plot_bin_results(
@@ -664,7 +679,8 @@ def test_keywords_reach_the_bin_and_trend_fit_functions():
         assert isinstance(ff, gaussians.GaussianNormalized)
         assert ff.observations.used.x.max() == 6.5
 
-    tf.make_fit()
+    with _two_point_trend():
+        tf.make_fit()
     assert tf.trend.observations.used.x.max() == 1.5
 
     stopped = trend_fits.TrendFit(

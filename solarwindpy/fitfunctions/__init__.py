@@ -55,6 +55,10 @@ computes the optimized parameters, their covariance and
   measure's name) and ``K`` (kind: ``"value"``, ``"uncertainty"``,
   ``"linear"``, ``"robust"`` or empty), as the plasma data's columns have
   levels ``M``, ``C`` and ``S`` (measurement, component, species).
+- A fit that leaves parameters unconstrained warns
+  :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, naming the
+  degenerate pairs, which
+  :attr:`~solarwindpy.fitfunctions.core.FitFunction.degenerate` also lists.
 
 Failures are reported with
 :class:`~solarwindpy.fitfunctions.core.FitFunctionError` and its subclasses

@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 
 from solarwindpy.fitfunctions import gaussians, trend_fits, lines
+from solarwindpy.fitfunctions.core import FitDegeneracyWarning
 
 # The trend's y and yerr: each column's Gaussian centroid and width.
 MU = ("mu", "value")
@@ -26,5 +27,7 @@ def test_logx_true_make_fit(agged):
         agged, gaussians.Gaussian, lines.Line, y=MU, yerr=SIGMA, logx=True
     )
     assert trend_fit.logx is True
-    trend_fit.make_fit()
+    # Two bins for a two-parameter trend: the covariance is not finite.
+    with pytest.warns(FitDegeneracyWarning, match="m and b have a non-finite"):
+        trend_fit.make_fit()
     assert isinstance(trend_fit.trend, lines.Line)

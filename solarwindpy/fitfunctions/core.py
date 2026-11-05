@@ -13,6 +13,7 @@ __all__ = [
     "FitFailedError",
     "InvalidParameterError",
     "NotFittedError",
+    "FitDegeneracyWarning",
     "FitFunctionMeta",
     "FitFunction",
 ]
@@ -24,6 +25,7 @@ import pandas as pd
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from itertools import combinations
 from inspect import cleandoc, getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
@@ -53,9 +55,13 @@ _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
 # What make_fit records, success or failure: popt and psigma in argnames
-# order, the covariance, the quality numbers and counts at fit time, and the
-# status. The results table is built from it on first read.
-_FitOutcome = namedtuple("_FitOutcome", "popt,psigma,pcov,chisq,rsq,nobs,dof,status")
+# order, the covariance, the quality numbers and counts at fit time, the
+# status, and the ``degeneracy_threshold`` keyword the fit was given (None
+# when the caller gave none). The results table is built from it on first read.
+_FitOutcome = namedtuple(
+    "_FitOutcome",
+    "popt,psigma,pcov,chisq,rsq,nobs,dof,status,degeneracy_threshold",
+)
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
 
 
@@ -88,6 +94,27 @@ class NotFittedError(FitFunctionError, AttributeError):
 
     It is an ``AttributeError`` too, so ``hasattr`` reports a result that does
     not exist yet as missing.
+    """
+
+    pass
+
+
+class FitDegeneracyWarning(UserWarning):
+    """Warned when a fit leaves parameters unconstrained.
+
+    :meth:`FitFunction.make_fit` warns it when the fitted covariance holds a
+    non-finite entry, or when two parameters are correlated beyond
+    :attr:`FitFunction.degeneracy_threshold`. Their uncertainties
+    (:attr:`FitFunction.psigma`) are then not meaningful. Filter or escalate it
+    with :mod:`warnings`; :attr:`FitFunction.degenerate` holds the same pairs.
+
+    It is a :class:`UserWarning`, not a :class:`RuntimeWarning`, so code that
+    escalates NumPy's floating-point ``RuntimeWarning`` to an error still fits.
+
+    Escalated to an error, it is raised after the fit is stored, so the fit
+    stays a successful fit. :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit`
+    then records a degenerate bin's fit as a failed fit and leaves it out of
+    the trend; without escalation the bin stays in the trend with a warning.
     """
 
     pass
@@ -281,6 +308,15 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     #: TeX of each parameter whose name is not its symbol, e.g.
     #: ``{"mu": r"\mu"}``; the TeX info labels the parameter with it.
     _TeX_argnames = None
+
+    #: Largest absolute correlation between two fitted parameters that
+    #: :meth:`make_fit` accepts without warning
+    #: :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, from 0 to
+    #: 1. A subclass may set its own; ``make_fit(degeneracy_threshold=...)``
+    #: overrides it for one fit. A threshold of 1.0 silences the correlation
+    #: check but not the non-finite-covariance check; to silence the warning
+    #: entirely, filter ``FitDegeneracyWarning`` with :mod:`warnings`.
+    degeneracy_threshold = 0.99999
 
     def __init__(
         self,
@@ -612,6 +648,57 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
             Before :meth:`make_fit`.
         """
         return self._fitted("_outcome").pcov.copy()
+
+    @property
+    def degenerate(self):
+        r"""The parameter pairs the fit left unconstrained.
+
+        It is derived from :attr:`pcov` each time it is read. A pair is
+        listed when its covariance, or either parameter's variance, is not
+        finite, or when the absolute correlation
+        :math:`|C_{ij}| / \sqrt{C_{ii} C_{jj}}` exceeds the threshold: the
+        ``degeneracy_threshold`` given to that :meth:`make_fit` call if any,
+        otherwise the current :attr:`degeneracy_threshold`, so changing the
+        attribute after a fit changes the pairs. :meth:`make_fit` warns
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` naming
+        the pairs this property returns right after the fit. A pair whose
+        correlation is undefined because a variance is zero is not listed.
+
+        Returns
+        -------
+        list of tuple
+            ``[(name_i, name_j, correlation), ...]`` in :attr:`argnames`
+            order, with ``correlation`` NaN for a non-finite covariance; an
+            empty list when the fit is constrained. A one-parameter model
+            with a non-finite variance is listed as ``(name, name, nan)``.
+
+        Raises
+        ------
+        ~solarwindpy.fitfunctions.core.NotFittedError
+            Before a successful :meth:`make_fit`: a failed fit has no
+            covariance to read.
+        """
+        outcome = self._fitted("_outcome")
+        if self._error is not None:
+            raise self._not_fitted()
+        threshold = self._checked_degeneracy_threshold(outcome.degeneracy_threshold)
+        return self._find_degenerate(outcome.pcov, threshold)
+
+    def _checked_degeneracy_threshold(self, threshold):
+        r"""Return ``threshold``, or :attr:`degeneracy_threshold` if None, validated.
+
+        Raises
+        ------
+        ValueError
+            If the threshold is not a correlation from 0 to 1.
+        """
+        if threshold is None:
+            threshold = self.degeneracy_threshold
+        if not 0 <= threshold <= 1:
+            raise ValueError(
+                f"degeneracy_threshold is a correlation from 0 to 1; got {threshold}."
+            )
+        return threshold
 
     @property
     def rsq(self):
@@ -1146,6 +1233,48 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return popt, pcov, psigma, all_chisq
 
+    def _find_degenerate(self, pcov, threshold):
+        r"""Return the parameter pairs ``pcov`` leaves unconstrained.
+
+        See :attr:`degenerate`.
+        """
+        names = self.argnames
+        n = pcov.shape[0]
+        var = np.diag(pcov)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            # A correlation lies in [-1, 1]; clipping drops rounding beyond it,
+            # so a threshold of 1 never flags a correlation.
+            corr = np.clip(pcov / np.sqrt(np.outer(var, var)), -1.0, 1.0)
+
+        pairs = combinations(range(n), 2) if n > 1 else [(0, 0)]
+        found = []
+        for i, j in pairs:
+            if not np.isfinite([pcov[i, i], pcov[j, j], pcov[i, j]]).all():
+                found.append((names[i], names[j], np.nan))
+            elif i != j and np.isfinite(corr[i, j]) and abs(corr[i, j]) > threshold:
+                found.append((names[i], names[j], float(corr[i, j])))
+        return found
+
+    def _degeneracy_message(self, degenerate):
+        r"""The :class:`FitDegeneracyWarning` text naming ``degenerate``."""
+        parts = []
+        for a, b, c in degenerate:
+            if a == b:
+                parts.append(
+                    f"{a} has a non-finite variance; its uncertainty is not meaningful."
+                )
+            elif np.isnan(c):
+                parts.append(
+                    f"{a} and {b} have a non-finite covariance; their "
+                    "uncertainties are not meaningful."
+                )
+            else:
+                parts.append(
+                    f"{a} and {b} are degenerate (correlation {c:.6f}); their "
+                    "uncertainties are not meaningful."
+                )
+        return f"{self.__class__.__name__}: " + " ".join(parts)
+
     def _results_row(self, outcome):
         r"""Build the one-row :attr:`results` table of ``outcome``; every row is built here.
 
@@ -1177,11 +1306,15 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         columns += list(_QUALITY_COLUMNS)
         return pd.MultiIndex.from_tuples(columns, names=["P", "K"])
 
-    def _record_outcome(self, popt, psigma, pcov, chisq, rsq, error):
+    def _record_outcome(
+        self, popt, psigma, pcov, chisq, rsq, error, degeneracy_threshold=None
+    ):
         r"""Store the outcome :attr:`results` describes; ``error`` is None on success.
 
         Every outcome is stored here, with the counts at fit time, and the
-        table built from the previous one is dropped.
+        table built from the previous one is dropped. ``degeneracy_threshold``
+        is the fit's keyword, None when the caller gave none, which
+        :attr:`degenerate` reads.
         """
         self._outcome = _FitOutcome(
             popt=np.array(popt, dtype=float),
@@ -1192,12 +1325,21 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             nobs=self.nobs,
             dof=self.dof,
             status=_STATUS_OK if error is None else type(error).__name__,
+            degeneracy_threshold=degeneracy_threshold,
         )
         self._results_table = None
         self._error = error
 
     def _record_failure(self, error):
-        r"""Store a NaN outcome whose status names ``error``."""
+        r"""Forget the stored fit and store a NaN outcome whose status names ``error``.
+
+        Every failed fit is recorded here: by :meth:`make_fit`, and by
+        :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit` for a
+        bin fit whose escalated
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` it counts
+        as a failure.
+        """
+        self._forget_fit()
         nan = np.full(len(self.argnames), np.nan)
         self._record_outcome(
             nan,
@@ -1228,19 +1370,24 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
-                ============= ======================================
-                    kwarg                    default
-                ============= ======================================
-                 p0            Setup by `{self.__class__.__name__}`
-                 return_full   False
-                 method        "trf"
-                 loss          "huber"
-                 max_nfev      10000
-                 f_scale       0.1
-                ============= ======================================
+                ==================== ======================================
+                 kwarg                default
+                ==================== ======================================
+                 p0                   Setup by `{self.__class__.__name__}`
+                 return_full          False
+                 method               "trf"
+                 loss                 "huber"
+                 max_nfev             10000
+                 f_scale              0.1
+                 degeneracy_threshold :attr:`degeneracy_threshold`
+                ==================== ======================================
 
             An explicit ``p0=None`` starts from the feasible default that
             a :attr:`p0` of None gives, without reading :attr:`p0`.
+
+            ``degeneracy_threshold`` is the largest absolute correlation
+            between two parameters accepted without warning, from 0 to 1,
+            for this fit; :attr:`degenerate` keeps applying it.
 
         Raises
         ------
@@ -1256,7 +1403,22 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             status.
         NotImplementedError
             If ``absolute_sigma=True``; nothing is recorded.
+        ValueError
+            If ``degeneracy_threshold`` is not a correlation from 0 to 1;
+            nothing is recorded.
 
+        Warns
+        -----
+        ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
+            When the fit leaves parameters unconstrained, naming each pair
+            :attr:`degenerate` lists. It is issued after the fit is stored, so
+            escalated to an error it raises while the fit stays a successful
+            fit, and :attr:`results` records no failure.
+            :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_fit`
+            records a bin fit's escalated warning as that bin's failure.
+
+        Notes
+        -----
         Any other exception, at any step, propagates unrecorded and leaves
         no outcome: every result then raises
         :class:`~solarwindpy.fitfunctions.core.NotFittedError`, as before a
@@ -1265,6 +1427,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
+
+        threshold = kwargs.pop("degeneracy_threshold", None)
+        self._checked_degeneracy_threshold(threshold)
 
         # Forget the previous fit, so no exception below can leave its
         # outcome readable.
@@ -1280,19 +1445,33 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
             popt, pcov, psigma, all_chisq = self._calc_popt_pcov_psigma_chisq(res, p0)
             rsq = self._calc_rsq(popt)
 
-            self._record_outcome(popt, psigma, pcov, all_chisq, rsq, error=None)
+            self._record_outcome(
+                popt,
+                psigma,
+                pcov,
+                all_chisq,
+                rsq,
+                error=None,
+                degeneracy_threshold=threshold,
+            )
             self._fit_result = res
             self._fit_p0 = tuple(p0)
             self._fit_bounds = fit_bounds
             self.build_TeX_info()
             self.build_plotter()
         except _FIT_FAILURES as e:
-            self._forget_fit()
             self._record_failure(e)
             raise
         except BaseException:
             self._forget_fit()
             raise
+
+        # Outside the all-or-nothing block: the fit is stored, so a warning
+        # escalated to an error raises to the caller and leaves a successful
+        # fit. The warning names what the degenerate property returns.
+        degenerate = self.degenerate
+        if degenerate:
+            _warn(self._degeneracy_message(degenerate), FitDegeneracyWarning)
 
     def _forget_fit(self):
         r"""Drop every stored result, leaving the fit as before its first :meth:`make_fit`."""

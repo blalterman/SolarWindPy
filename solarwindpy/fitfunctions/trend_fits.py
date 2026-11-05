@@ -229,6 +229,15 @@ class TrendFit(object):
         A bin whose fit fails is recorded in :attr:`bin_results` and left out
         of the trend: its NaN values do not pass the trend's selection.
 
+        A bin fit's
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` escalated
+        to an error (for example by
+        ``warnings.simplefilter("error", FitDegeneracyWarning)``) counts as
+        that bin's failed fit: :attr:`bin_results` records NaN values and the
+        status ``"FitDegeneracyWarning"``, the bin is left out of the trend,
+        and the remaining bins are fit. Without escalation a degenerate bin
+        stays in the trend, with a warning.
+
         Parameters
         ----------
         bin_fit_kwargs, trend_fit_kwargs : dict, optional
@@ -244,10 +253,32 @@ class TrendFit(object):
         RuntimeError
             If the trend fit fails. :attr:`bin_results` and :attr:`trend` are
             set, and the trend's results record the failure.
+        ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
+            If the trend fit is degenerate and the warning is escalated to an
+            error. :attr:`bin_results` and :attr:`trend` are set, and the
+            trend's results record a successful fit, as
+            :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit` leaves
+            it.
 
+        Notes
+        -----
         Any other exception, from a bin fit or the trend fit, propagates and
         leaves the TrendFit and every bin fit unfitted, as before a first
         fit, rather than a mix of this fit and the previous one.
+
+        Every bin fit warns
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` from the
+        same location, the caller's line, so Python's default warning filter
+        shows only the first degenerate bin. Each fit's
+        :attr:`~solarwindpy.fitfunctions.core.FitFunction.degenerate` lists
+        its own degenerate parameter pairs. Collect the degenerate bins,
+        skipping the bins whose fit failed, with::
+
+            degenerate = {
+                k: f.degenerate
+                for k, f in tf.bin_fits.items()
+                if f.error is None and f.degenerate
+            }
         """
         # Forget the previous fit; store the new one only once all of it,
         # the trend fit's recorded failure included, is known.
@@ -262,6 +293,11 @@ class TrendFit(object):
                 except core._FIT_FAILURES:
                     # Recorded in the fit's results.
                     pass
+                except core.FitDegeneracyWarning as exc:
+                    # Raised only when the warning is escalated to an error,
+                    # after the fit is stored: record it as this bin's
+                    # failure, which leaves the bin out of the trend.
+                    fit._record_failure(exc)
 
             if len(self.bin_fits):
                 results = pd.concat([fit.results for fit in self.bin_fits])
@@ -280,8 +316,10 @@ class TrendFit(object):
 
             try:
                 trend.make_fit(**dict(trend_fit_kwargs or {}))
-            except core._FIT_FAILURES as exc:
-                # Recorded in the trend's results; raised once stored.
+            except (*core._FIT_FAILURES, core.FitDegeneracyWarning) as exc:
+                # Raised once stored. A failure is recorded in the trend's
+                # results; an escalated FitDegeneracyWarning leaves the trend
+                # a successful fit.
                 trend_failure = exc
         except BaseException:
             for fit in self.bin_fits:

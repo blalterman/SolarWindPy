@@ -688,6 +688,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `FitFunction.make_fit` warns `fitfunctions.core.FitDegeneracyWarning` (a
+  `UserWarning`) when a fit leaves parameters unconstrained: a non-finite covariance
+  entry, or two parameters whose correlation from `pcov` exceeds
+  `FitFunction.degeneracy_threshold` (0.99999; a subclass may set its own, and
+  `make_fit(degeneracy_threshold=...)` overrides it for one fit). The warning names each
+  pair, e.g. "xh and yh are degenerate (correlation 1.000000); their uncertainties are
+  not meaningful", and `FitFunction.degenerate` lists the same pairs (it raises
+  `NotFittedError` before a successful fit). The warning comes after the fit is stored:
+  escalated to an error, it raises and the fit stays a successful fit. In
+  `TrendFit.make_fit`, a bin fit's escalated warning records that bin as a failed fit,
+  left out of the trend.
 - `solarwindpy.tools.normal_parameters(m, s, base=np.e)`: `base` gives the log base of
   `m` and `s`, e.g. `base=10` for a base-10 log-normal. The default is unchanged.
 - `Hist1D.set_axnorm("t")` (and `Hist1D(axnorm="t")`) divides the histogram by its

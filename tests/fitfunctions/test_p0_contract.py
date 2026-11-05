@@ -11,6 +11,7 @@ NotImplementedError. ``make_fit`` rejects a guess holding NaN or infinity with a
 ``FitFunction.p0``'s docstring.
 """
 
+import contextlib
 import inspect
 import logging
 import re
@@ -23,7 +24,11 @@ import numpy as np
 import pytest
 
 import solarwindpy
-from solarwindpy.fitfunctions.core import FitFunction, InsufficientDataError
+from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
+    FitFunction,
+    InsufficientDataError,
+)
 from solarwindpy.fitfunctions.gaussians import Gaussian, GaussianLn, GaussianNormalized
 from solarwindpy.fitfunctions.hinge import (
     Hinge,
@@ -333,6 +338,36 @@ HINGE_START = {
 
 NO_ESTIMATE = "The data gave no estimate"
 
+# The fits from the feasible default (ones) that leave parameters unconstrained,
+# by class, and a pair FitDegeneracyWarning names. Other classes must not warn.
+DEGENERATE_FROM_ONES = {
+    Gaussian: "mu and sigma are degenerate",
+    GaussianNormalized: "mu and sigma are degenerate",
+    GaussianLn: "mu and sigma are degenerate",
+}
+
+# The fits from each hinge class's reference start, on data that give no
+# estimate, leave a pair unconstrained.
+DEGENERATE_FROM_REFERENCE = {
+    TwoLine: "x2 and m2 are degenerate",
+    Saturation: "x1 and xh are degenerate",
+    HingeSaturation: "xh and yh are degenerate",
+    HingeMin: "m1 and x1 are degenerate",
+    HingeAtPoint: "xh and yh are degenerate",
+}
+
+
+@contextlib.contextmanager
+def _degeneracy_expected(match):
+    """Expect a FitDegeneracyWarning matching ``match``; with None, forbid one."""
+    if match is None:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", FitDegeneracyWarning)
+            yield
+    else:
+        with pytest.warns(FitDegeneracyWarning, match=match):
+            yield
+
 
 @pytest.mark.parametrize("cls, x, y, kwargs", IMPOSSIBLE)
 def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
@@ -350,9 +385,10 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
     fit = cls(x, y, **kwargs)
     assert fit.p0 is None, fit.p0
 
-    got = attempt_fit(fit)
-    explicit = cls(x, y, **kwargs)
-    expected = attempt_fit(explicit, p0=np.ones(len(fit.argnames)))
+    with _degeneracy_expected(DEGENERATE_FROM_ONES.get(cls)):
+        got = attempt_fit(fit)
+        explicit = cls(x, y, **kwargs)
+        expected = attempt_fit(explicit, p0=np.ones(len(fit.argnames)))
     assert "initial guess is not finite" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     assert str(got) == str(expected), (got, expected)
@@ -385,7 +421,8 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
         values = fit.function(np.linspace(0.0, 1000.0, 101), *start)
     assert np.all(np.isfinite(values)), values
 
-    got = attempt_fit(fit)
+    with pytest.warns(FitDegeneracyWarning, match=DEGENERATE_FROM_REFERENCE[cls]):
+        got = attempt_fit(fit)
     assert "Residuals are not finite" not in str(got), got
     assert "initial guess is not finite" not in str(got), got
 
@@ -447,7 +484,9 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     """
     fit = _hingemax_without_estimate()
     start = [1.0, 0.0, 0.5, 2.0]
-    got = attempt_fit(fit, p0=start)
+    # The fit from this start leaves the rising line's m1 and x1 unconstrained.
+    with pytest.warns(FitDegeneracyWarning, match="m1 and x1 are degenerate"):
+        got = attempt_fit(fit, p0=start)
     assert not isinstance(got, NotImplementedError), got
     assert [v.p0 for v in fit.initial_guess_info.values()] == exact(start)
 
