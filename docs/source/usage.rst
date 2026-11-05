@@ -604,24 +604,71 @@ cell:
 Normalizations
 ~~~~~~~~~~~~~~
 
-``axnorm`` normalizes the aggregated values:
+``axnorm`` normalizes the aggregated values, and what it computes depends on
+the aggregation, ``make_plot``'s ``fcn``. For cell :math:`i`, let
+:math:`n_i` be its rows, :math:`A_i` its area (its width in 1-D, measured in
+:math:`\log_{10}` along a log axis), :math:`v_i` its aggregated value and
+:math:`S_i` the sum of ``z`` over its rows; :math:`N = \sum_i n_i` and
+:math:`S = \sum_i S_i` run over the cells the plot shows. There are three
+families, a density ``"d"``, a weight ``"w"`` and a scaling ``"t"``:
 
-- ``None``: no normalization; counts, or the aggregated ``y`` or ``z``.
-- ``"t"``: divide by the maximum, so the peak is 1.
-- ``"d"``: divide by the total and by each bin's width (1-D) or area (2-D), a
-  probability density. On a log axis the width is measured in
-  :math:`\log_{10}`.
-- ``"c"`` and ``"r"``: divide each column (``x`` bin) or row (``y`` bin) by its
-  own maximum, so every column or row peaks at 1. Use them to compare shapes
-  across ``x`` when the counts vary greatly with ``x``.
-- ``"cd"`` and ``"rd"``: make each column or row a probability density along
-  the other axis: divide by its total and by the bin width along that axis.
+.. list-table::
+   :header-rows: 1
+
+   * - aggregation
+     - ``"d"``
+     - ``"w"``
+     - ``"t"``
+   * - a count (no ``z``, or ``fcn="count"``)
+     - :math:`n_i / (N A_i)`
+     - :math:`n_i / N`
+     - :math:`n_i / \max_j n_j`
+   * - a sum (``fcn="sum"`` or :func:`numpy.sum`)
+     - :math:`S_i / (S A_i)`
+     - :math:`S_i / S`
+     - :math:`S_i / \max_j |S_j|`
+   * - any other (``"mean"``, ``"median"``, a callable)
+     - :math:`v_i n_i / (N A_i)`
+     - :math:`v_i n_i / N`
+     - :math:`v_i / \max_j |v_j|`
+
+- A count's ``"d"`` is the probability density, :math:`\sum_i d_i A_i = 1`,
+  and its ``"w"`` the fraction of the rows in each cell, which sums to 1.
+- A sum's ``"d"`` and ``"w"`` are each cell's share of the total ``z``, per
+  unit area for ``"d"``. A share needs ``z`` >= 0, so a negative ``z`` in a
+  cell raises ``ValueError``. A callable that adds is still "any other"; pass
+  ``"sum"`` for a share.
+- Any other aggregation is weighted by its rows: ``"d"`` integrates, and
+  ``"w"`` sums, to :math:`\sum_i v_i n_i / N`, the count-weighted average of
+  :math:`v`. For a mean that is the mean ``z`` of the rows shown, so ``"w"``
+  shows how much each cell contributes to it.
+- ``"t"`` divides by the largest magnitude, so the peak is 1, or -1 when the
+  largest value is negative.
+
+``"cd"``, ``"wc"`` and ``"c"`` do the same within each column (``x`` bin):
+:math:`N` and :math:`S` are the column's, the area is the bin's height, and
+``"c"`` divides by the column's largest magnitude. ``"rd"``, ``"wr"`` and
+``"r"`` do it within each row (``y`` bin). Use ``"c"`` or ``"cd"`` to compare
+the shape of ``y`` across ``x`` when the counts vary greatly with ``x``. The
+sums hold to rounding:
+
+>>> from solarwindpy.plotting.hist2d import Hist2D
+>>> h1 = Hist1D(v, nbins=20, axnorm="d")
+>>> round(float((h1.agg() * h1.intervals["x"].length).sum()), 6)
+1.0
+>>> y = (v / 100 + rng.normal(0, 0.5, v.size)).rename("y")
+>>> round(float(Hist2D(v, y, nbins=10, axnorm="w").agg().sum()), 6)
+1.0
+>>> z = (v - 400).rename("z")
+>>> mean_z = Hist2D(v, y, z, nbins=10, axnorm="w").agg(fcn="mean")
+>>> bool(np.isclose(mean_z.sum(), z.mean()))
+True
 
 The binning decides which keys a plot accepts.
-:py:class:`~solarwindpy.plotting.hist2d.Hist2D` accepts all six;
+:py:class:`~solarwindpy.plotting.hist2d.Hist2D` accepts all nine;
 :py:class:`~solarwindpy.plotting.hist1d.Hist1D` and
-:py:class:`~solarwindpy.plotting.spiral.SpiralPlot2D` accept ``"d"`` and
-``"t"``, since they have no rows or columns; a
+:py:class:`~solarwindpy.plotting.spiral.SpiralPlot2D` accept ``"d"``, ``"t"``
+and ``"w"``, since they have no rows or columns; a
 :py:class:`~solarwindpy.plotting.scatter.Scatter` has no bins and no
 ``axnorm``. Any other key raises:
 
@@ -632,8 +679,12 @@ Traceback (most recent call last):
 ...
 ValueError: Unrecognized axnorm 'c'; expected one of: d, t, w
 
-With ``"c"`` or ``"r"`` the colorbar defaults to ten bands on [0, 1]; with the
-densities it is logarithmic. Four normalizations of the same data:
+The colour scale follows the values. Values of both signs get a scale centred
+on zero, :class:`~matplotlib.colors.CenteredNorm` with the diverging colormap
+``RdBu_r``, whatever the ``axnorm``. Otherwise ``"c"`` and ``"r"`` get ten
+bands on [0, 1] and the densities a logarithmic scale. A ``norm`` or ``cmap``
+passed to ``make_plot`` is used as given. Four normalizations of the same
+counts:
 
 .. plot::
 
@@ -657,6 +708,82 @@ densities it is logarithmic. Four normalizations of the same data:
        ax.set_title(f"axnorm={axnorm!r}")
        ax.label_outer()
    fig.tight_layout()
+
+A density of the counts against the weight of a signed mean: the left panel
+is where the rows are, and the right is how much each cell adds to the mean
+:math:`B_x`, here positive in the fast wind and negative in the slow. Its
+values hold both signs, so the scale is centred on zero, and its cells sum to
+the mean :math:`B_x` of all the rows:
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
+   from solarwindpy.plotting.hist2d import Hist2D
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(0)
+   N = 20_000
+   fast = rng.random(N) < 0.3
+   v = pd.Series(np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N)), name="v")
+   n = (8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N))).rename("n")
+   bx = (0.01 * (v - 450) + rng.normal(0, 2, N)).rename("bx")
+
+   pdf = Hist2D(v, n, logy=True, nbins=40, axnorm="d")
+   weight = Hist2D(v, n, bx, logy=True, nbins=40, axnorm="w")
+   weight.set_labels(z=TeXlabel(("b", "x", ""), axnorm="w"))
+
+   fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
+   for h2, ax in zip([pdf, weight], axes):
+       h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
+   pdf.make_plot(ax=axes[0])
+   weight.make_plot(ax=axes[1], fcn="mean")
+   axes[0].set_title('count, axnorm="d"')
+   axes[1].set_title('mean $B_x$, axnorm="w"')
+   axes[1].set_ylabel("")
+   fig.tight_layout()
+
+Select the data a figure shows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Two limits decide which cells a binned plot shows. ``set_clim`` bounds the
+number of rows in a cell; ``set_alim`` bounds the aggregated value, after
+``axnorm`` and ``clim``. Bounds are inclusive and None leaves a side open;
+``set_alim(..., kind="quantile")`` reads them as quantiles of the aggregated
+values. A cell outside either limit is NaN in ``agg`` and blank in the figure.
+Every binned plot, ``Hist1D`` included, has both. Here the bins with at least
+20 rows, then the bins at least a tenth of the peak:
+
+>>> h1 = Hist1D(v, nbins=20)
+>>> counts = h1.agg()
+>>> h1.set_clim(20, None)
+>>> int(h1.agg().notna().sum()), int(counts[counts >= 20].sum())
+(11, 953)
+>>> h1 = Hist1D(v, nbins=20, axnorm="t")
+>>> h1.set_alim(0.1, None)
+>>> int(h1.agg().notna().sum())
+11
+
+``get_plotted_data`` returns the rows in the cells the figure shows: the
+values you passed, on your index, in your order. ``alim`` acts on the
+aggregated value, so pass the ``fcn`` you give ``make_plot``. Here the cells
+with at least 10 rows whose mean ``z`` is not negative:
+
+>>> len(h1.get_plotted_data())
+953
+>>> h2 = Hist2D(v, y, z, nbins=10)
+>>> h2.set_clim(10, None)
+>>> h2.set_alim(0, None)
+>>> rows = h2.get_plotted_data(fcn="mean")
+>>> list(rows.columns)
+['x', 'y', 'z']
+>>> shown = h2.agg(fcn="mean").notna()
+>>> len(rows) == int(Hist2D(v, y, nbins=10).agg()[shown].sum())
+True
+
+For a boolean mask over your data, use ``v.index.isin(rows.index)`` on a
+unique index.
 
 Labels
 ~~~~~~
@@ -714,6 +841,77 @@ $\mathrm{Column \, Probability \, Density}$
 ``solarwindpy.plotting.labels.available()`` prints every measurement,
 component and species ``TeXlabel`` knows, and the special labels.
 
+Publication format
+~~~~~~~~~~~~~~~~~~
+
+In publication format a label is two lines: its name in words over its symbol
+and units. Turn it on for one label with ``publication_format=True``, or for
+every label with
+:py:func:`~solarwindpy.plotting.labels.base.set_publication_format`, which
+:py:func:`~solarwindpy.plotting.labels.base.publication_format` reads back. A
+label's own setting overrides the default. The name comes from the quantity
+registry; ``name=`` replaces it, and a ratio is named after its parts:
+
+>>> print(TeXlabel(("n", "", "p1"), publication_format=True))
+Number Density
+$n_{p_1} \; \left[\mathrm{cm}^{-3}\right]$
+>>> print(TeXlabel(("v", "", "p1"), name="Solar Wind Speed", publication_format=True))
+Solar Wind Speed
+${v}_{{p_1}} \; \left[\mathrm{km \; s^{-1}}\right]$
+>>> print(TeXlabel(("n", "", "a"), ("n", "", "p1"), publication_format=True))
+Number Density Ratio
+$n_{\alpha}/n_{p_1} \; \left[\#\right]$
+
+A :py:class:`~solarwindpy.plotting.labels.special.Count` in publication format
+is its normalization's name over a symbol: :math:`N` for a count,
+:math:`N / N_{\max}` for ``"t"``, :math:`N / N_{\mathrm{tot}}` for ``"w"``
+and :math:`p` for a probability density. A density's units are the inverse of
+the binned axes' units, :math:`\mathrm{dex}^{-1}` along a log axis, read from
+the plot's axis labels:
+
+>>> from solarwindpy.plotting.labels.base import set_publication_format
+>>> from solarwindpy.plotting.labels.special import Count
+>>> print(Count(norm="w", publication_format=True))
+Count Fraction
+$N / N_{\mathrm{tot}} \; \left[\#\right]$
+>>> h2 = Hist2D(v, y, logy=True, axnorm="d")
+>>> h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
+>>> set_publication_format(True)
+>>> print(h2.labels.z)
+Probability Density
+$p \; \left[\left(\mathrm{km \; s^{-1}}\right)^{-1} \, \mathrm{dex}^{-1}\right]$
+>>> print(TeXlabel(("n", "", "p1"), publication_format=False))
+$n_{p_1} \; \left[\mathrm{cm}^{-3}\right]$
+>>> set_publication_format(False)
+
+Labels read the default when they are drawn, so ``set_publication_format``
+also changes the labels of plots already built. A figure in publication
+format, its speed axis renamed:
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   from solarwindpy.plotting.hist2d import Hist2D
+   from solarwindpy.plotting.labels.base import TeXlabel, set_publication_format
+
+   set_publication_format(True)  # every label: its name over its symbol
+
+   rng = np.random.default_rng(0)
+   N = 20_000
+   fast = rng.random(N) < 0.3
+   v = pd.Series(np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N)), name="v")
+   n = (8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N))).rename("n")
+
+   h2 = Hist2D(v, n, logy=True, nbins=50, axnorm="d")
+   h2.set_labels(
+       x=TeXlabel(("v", "", "p1"), name="Solar Wind Speed"),  # replaces the name
+       y=TeXlabel(("n", "", "p1")),  # the registry's name, "Number Density"
+   )
+   h2.make_plot()
+
+   set_publication_format(False)  # restore the one-line default
+
 Plot a Fit
 ----------
 
@@ -743,7 +941,9 @@ in percent of the fit instead, which is large wherever the fit nears zero.
 The plotter labels its axes ``x`` and ``y`` until its ``set_labels`` sets
 them, as for the plots above; here the counts of a velocity component. The
 Gaussian is the seeded, noisy one whose results table
-:doc:`tutorial/quickstart` prints:
+:doc:`tutorial/quickstart` prints, fitted with ``yerr``, the 1-sigma
+uncertainty of each ``y`` (the noise's 0.3), which the plot draws as error
+bars:
 
 .. plot::
 
@@ -755,7 +955,7 @@ Gaussian is the seeded, noisy one whose results table
    rng = np.random.default_rng(1)
    x = np.linspace(-5, 5, 41)
    y = 10.0 * np.exp(-0.5 * ((x - 0.5) / 1.2) ** 2) + rng.normal(0.0, 0.3, x.size)
-   fit = Gaussian(x, y)
+   fit = Gaussian(x, y, yerr=np.full(x.size, 0.3))
    fit.make_fit()
    fit.plotter.set_labels(x=TeXlabel(("v", "x", "p1")), y=Count())
    fit.plotter.plot_raw_used_fit_resid(resid_kwargs=dict(resid_pct=False))
