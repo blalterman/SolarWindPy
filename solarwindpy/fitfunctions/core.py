@@ -12,11 +12,13 @@ __all__ = [
     "InsufficientDataError",
     "FitFailedError",
     "InvalidParameterError",
+    "FitDegeneracyWarning",
     "FitFunctionMeta",
     "FitFunction",
 ]
 
 import logging  # noqa: F401
+import os
 import warnings
 
 import numpy as np
@@ -24,6 +26,7 @@ import pandas as pd
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from itertools import combinations
 from inspect import cleandoc, getfullargspec
 from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
@@ -52,6 +55,9 @@ _InitialGuessInfo = namedtuple("_InitialGuessInfo", "p0,bounds")
 _ChisqPerDegreeOfFreedom = namedtuple("_ChisqPerDegreeOfFreedom", "linear,robust")
 _FitBounds = namedtuple("_FitBounds", "lower,upper")
 _INSUFFICIENT_DATA = "There is insufficient data to fit the model."
+# Frames from files under this directory are skipped when attributing a
+# FitDegeneracyWarning to its caller.
+_FITFUNCTIONS_DIR = os.path.dirname(os.path.abspath(__file__)) + os.sep
 
 
 class FitFunctionError(Exception):
@@ -74,6 +80,27 @@ class FitFailedError(FitFunctionError):
 
 class InvalidParameterError(FitFunctionError):
     """Raised when invalid parameters are provided to fit functions."""
+
+    pass
+
+
+class FitDegeneracyWarning(UserWarning):
+    """Warned when a fit leaves parameters unconstrained.
+
+    :meth:`FitFunction.make_fit` warns it when the fitted covariance holds a
+    non-finite entry, or when two parameters are correlated beyond
+    :attr:`FitFunction.degeneracy_threshold`. Their uncertainties
+    (:attr:`FitFunction.psigma`) are then not meaningful. Filter or escalate it
+    with :mod:`warnings`; :attr:`FitFunction.degenerate` holds the same pairs.
+
+    It is a :class:`UserWarning`, not a :class:`RuntimeWarning`, so code that
+    escalates NumPy's floating-point ``RuntimeWarning`` to an error still fits.
+
+    Escalated to an error, it is raised after the fit is stored.
+    :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits` then
+    treats a degenerate column as a failed fit and excludes it from the
+    trend; without escalation the column stays in the trend with a warning.
+    """
 
     pass
 
@@ -238,6 +265,15 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     >>> {k: round(float(v), 1) for k, v in fit.popt.items()}
     {'mu': 1.0, 'sigma': 0.8, 'A': 3.0}
     """
+
+    #: Largest absolute correlation between two fitted parameters that
+    #: :meth:`make_fit` accepts without warning
+    #: :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning`, from 0 to
+    #: 1. A subclass may set its own; ``make_fit(degeneracy_threshold=...)``
+    #: overrides it for one fit. A threshold of 1.0 silences the correlation
+    #: check but not the non-finite-covariance check; to silence the warning
+    #: entirely, filter ``FitDegeneracyWarning`` with :mod:`warnings`.
+    degeneracy_threshold = 0.99999
 
     def __init__(
         self,
@@ -459,6 +495,63 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     def pcov(self):
         r"""Returns a copy so that the matrix isn't accidentally edited."""
         return self._pcov.copy()
+
+    @property
+    def degenerate(self):
+        r"""The parameter pairs the last successful fit left unconstrained, or None.
+
+        Like :attr:`popt` and :attr:`pcov`, it reflects the last successful
+        fit. It is derived from :attr:`pcov` each time it is read. A pair is
+        listed when its covariance, or either parameter's variance, is not
+        finite, or when the absolute correlation
+        :math:`|C_{ij}| / \sqrt{C_{ii} C_{jj}}` exceeds the threshold: the
+        ``degeneracy_threshold`` given to that :meth:`make_fit` call if any,
+        otherwise the current :attr:`degeneracy_threshold`, so changing the
+        attribute after a fit changes the pairs. :meth:`make_fit` warns
+        :class:`~solarwindpy.fitfunctions.core.FitDegeneracyWarning` naming
+        the pairs this property returns right after the fit. A pair whose
+        correlation is undefined because a variance is zero is not listed.
+
+        Returns
+        -------
+        list of tuple or None
+            ``[(name_i, name_j, correlation), ...]`` in :attr:`argnames`
+            order, with ``correlation`` NaN for a non-finite covariance; an
+            empty list when the fit is constrained; None before a fit
+            succeeds. A one-parameter model with a non-finite variance is
+            listed as ``(name, name, nan)``.
+        """
+        try:
+            pcov = self._pcov
+        except AttributeError:
+            return None
+        return self._find_degenerate(pcov, self._effective_degeneracy_threshold())
+
+    def _effective_degeneracy_threshold(self):
+        r"""The threshold :attr:`degenerate` applies.
+
+        The last fit's ``degeneracy_threshold`` keyword, else the current
+        :attr:`degeneracy_threshold`.
+        """
+        return self._checked_degeneracy_threshold(
+            getattr(self, "_fit_degeneracy_threshold", None)
+        )
+
+    def _checked_degeneracy_threshold(self, threshold):
+        r"""Return ``threshold``, or :attr:`degeneracy_threshold` if None, validated.
+
+        Raises
+        ------
+        ValueError
+            If the threshold is not a correlation from 0 to 1.
+        """
+        if threshold is None:
+            threshold = self.degeneracy_threshold
+        if not 0 <= threshold <= 1:
+            raise ValueError(
+                f"degeneracy_threshold is a correlation from 0 to 1; got {threshold}."
+            )
+        return threshold
 
     @property
     def rsq(self):
@@ -975,6 +1068,48 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
 
         return popt, pcov, psigma, all_chisq
 
+    def _find_degenerate(self, pcov, threshold):
+        r"""Return the parameter pairs ``pcov`` leaves unconstrained.
+
+        See :attr:`degenerate`.
+        """
+        names = self.argnames
+        n = pcov.shape[0]
+        var = np.diag(pcov)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            # A correlation lies in [-1, 1]; clipping drops rounding beyond it,
+            # so a threshold of 1 never flags a correlation.
+            corr = np.clip(pcov / np.sqrt(np.outer(var, var)), -1.0, 1.0)
+
+        pairs = combinations(range(n), 2) if n > 1 else [(0, 0)]
+        found = []
+        for i, j in pairs:
+            if not np.isfinite([pcov[i, i], pcov[j, j], pcov[i, j]]).all():
+                found.append((names[i], names[j], np.nan))
+            elif i != j and np.isfinite(corr[i, j]) and abs(corr[i, j]) > threshold:
+                found.append((names[i], names[j], float(corr[i, j])))
+        return found
+
+    def _degeneracy_message(self, degenerate):
+        r"""The :class:`FitDegeneracyWarning` text naming ``degenerate``."""
+        parts = []
+        for a, b, c in degenerate:
+            if a == b:
+                parts.append(
+                    f"{a} has a non-finite variance; its uncertainty is not meaningful."
+                )
+            elif np.isnan(c):
+                parts.append(
+                    f"{a} and {b} have a non-finite covariance; their "
+                    "uncertainties are not meaningful."
+                )
+            else:
+                parts.append(
+                    f"{a} and {b} are degenerate (correlation {c:.6f}); their "
+                    "uncertainties are not meaningful."
+                )
+        return f"{self.__class__.__name__}: " + " ".join(parts)
+
     def make_fit(self, return_exception=False, **kwargs):
         """Fit the function with the independent `xobs` and dependent `yobs`.
 
@@ -991,19 +1126,34 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         kwargs:
             Unless specified here, defaults are as defined by `curve_fit`.
 
-                ============= ======================================
-                    kwarg                    default
-                ============= ======================================
-                 p0            Setup by `{self.__class__.__name__}`
-                 return_full   False
-                 method        "trf"
-                 loss          "huber"
-                 max_nfev      10000
-                 f_scale       0.1
-                ============= ======================================
+                ==================== ======================================
+                 kwarg                default
+                ==================== ======================================
+                 p0                   Setup by `{self.__class__.__name__}`
+                 return_full          False
+                 method               "trf"
+                 loss                 "huber"
+                 max_nfev             10000
+                 f_scale              0.1
+                 degeneracy_threshold :attr:`degeneracy_threshold`
+                ==================== ======================================
 
             An explicit ``p0=None`` starts from the feasible default that
             a :attr:`p0` of None gives, without reading :attr:`p0`.
+
+            ``degeneracy_threshold`` is the largest absolute correlation
+            between two parameters accepted without warning, from 0 to 1,
+            for this fit; :attr:`degenerate` keeps applying it.
+
+        Warns
+        -----
+        ~solarwindpy.fitfunctions.core.FitDegeneracyWarning
+            When the fit leaves parameters unconstrained, naming each pair
+            :attr:`degenerate` lists. It is emitted after the fit is stored;
+            escalated to an error, it is raised even with
+            ``return_exception=True``, and
+            :meth:`~solarwindpy.fitfunctions.trend_fits.TrendFit.make_1dfits`
+            records the column as a failed fit.
         """
         try:
             self._require_sufficient_data()
@@ -1016,6 +1166,9 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         absolute_sigma = kwargs.pop("absolute_sigma", False)
         if absolute_sigma:
             raise NotImplementedError("We want to rescale fit errors by chisq_dof")
+
+        threshold = kwargs.pop("degeneracy_threshold", None)
+        self._checked_degeneracy_threshold(threshold)
 
         try:
             res, p0 = self._run_least_squares(**kwargs)
@@ -1033,6 +1186,19 @@ weights: {weights.shape}, xobs: {xobs.shape}""")
         self._chisq_dof = all_chisq
         self._fit_result = res
         self._fit_p0 = tuple(p0)
+        self._fit_degeneracy_threshold = threshold
 
         self.build_TeX_info()
         self.build_plotter()
+
+        # The warning names what the degenerate property returns: one source.
+        degenerate = self.degenerate
+        if degenerate:
+            # Attribute the warning to the caller's line, outside this package,
+            # even when a subclass's make_fit calls this one, so the default
+            # once-per-location filter tells call sites apart.
+            warnings.warn(
+                self._degeneracy_message(degenerate),
+                category=FitDegeneracyWarning,
+                skip_file_prefixes=(_FITFUNCTIONS_DIR,),
+            )

@@ -11,7 +11,7 @@ from solarwindpy.fitfunctions.exponentials import (
     ExponentialPlusC,
     ExponentialCDF,
 )
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import FitDegeneracyWarning, InsufficientDataError
 from tests.tolerances import NOISE_FREE_REL, exact, noise_free, printed
 
 E_INV = 0.36787944117144233  # e^-1
@@ -201,11 +201,14 @@ def test_exponential_cdf_fits_one_point():
     obj.set_y0(1.0)
 
     # Zero degrees of freedom: the parameter covariance is undefined, and the fit
-    # says so with scipy's OptimizeWarning.
+    # says so with scipy's OptimizeWarning and a FitDegeneracyWarning.
     with pytest.warns(
-        OptimizeWarning, match="Covariance of the parameters could not be estimated"
+        FitDegeneracyWarning, match="c has a non-finite variance"
     ) as record:
-        assert obj.make_fit() is None
+        with pytest.warns(
+            OptimizeWarning, match="Covariance of the parameters could not be estimated"
+        ):
+            assert obj.make_fit() is None
     assert not [w for w in record if issubclass(w.category, RuntimeWarning)]
     # One point leaves the optimizer's own xtol (1e-8) as the accuracy limit.
     assert obj.popt["c"] == noise_free(0.8)

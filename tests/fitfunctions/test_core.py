@@ -8,6 +8,7 @@ import pytest
 from scipy.optimize import OptimizeResult, OptimizeWarning, curve_fit, least_squares
 
 from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
     FitFunction,
     FitFailedError,
     InvalidParameterError,
@@ -806,7 +807,9 @@ def test_degenerate_parameters_get_the_pseudo_inverse_covariance():
     fit = SumSlopeFit(x, y)
     # Killing the `eps / m` threshold mutant relies on a rounding-level second
     # singular value; that may not hold on another BLAS or platform.
-    fit.make_fit(loss="linear", jac=_sum_slope_jac)
+    # a and b enter only as a + b: the fit warns that they are degenerate.
+    with pytest.warns(FitDegeneracyWarning, match="a and b are degenerate"):
+        fit.make_fit(loss="linear", jac=_sum_slope_jac)
 
     assert fit.pcov == noise_free(np.full((2, 2), 0.0028125))
     _, pcov = curve_fit(
@@ -878,8 +881,11 @@ def test_as_many_samples_as_parameters_leaves_the_covariance_infinite():
     """
     x = np.array([0.0, 1.0])
     lf = LinearFit(x, 2.0 * x + 1.0)
-    with pytest.warns(OptimizeWarning):
-        lf.make_fit()
+    with pytest.warns(
+        FitDegeneracyWarning, match="m and b have a non-finite covariance"
+    ):
+        with pytest.warns(OptimizeWarning):
+            lf.make_fit()
 
     assert lf.popt == noise_free({"m": 2.0, "b": 1.0})
     assert np.all(lf.pcov == np.inf)

@@ -119,7 +119,8 @@ class GaussianPlusHeavySide(FitFunction):
         return_exception : bool, default False
             As in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
         **kwargs
-            Passed to every fit, as in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
+            Passed to every fit, as in :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`,
+            except ``degeneracy_threshold``, which applies only to the refit.
 
         Returns
         -------
@@ -143,7 +144,10 @@ class GaussianPlusHeavySide(FitFunction):
                 return super().make_fit(return_exception=return_exception, **kwargs)
         p0 = list(p0)
 
-        scan_kwargs = {k: v for k, v in kwargs.items() if k != "absolute_sigma"}
+        # The scan runs least_squares directly: drop the keywords only
+        # FitFunction.make_fit reads.
+        make_fit_only = ("absolute_sigma", "degeneracy_threshold")
+        scan_kwargs = {k: v for k, v in kwargs.items() if k not in make_fit_only}
         x = np.unique(self.observations.used.x)
         gaps = 0.5 * (x[1:] + x[:-1])
 

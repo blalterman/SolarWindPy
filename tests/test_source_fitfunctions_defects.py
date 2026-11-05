@@ -17,7 +17,11 @@ import pandas as pd
 import pytest
 
 from solarwindpy.fitfunctions.composite import GaussianPlusHeavySide
-from solarwindpy.fitfunctions.core import FitFailedError, InsufficientDataError
+from solarwindpy.fitfunctions.core import (
+    FitDegeneracyWarning,
+    FitFailedError,
+    InsufficientDataError,
+)
 from solarwindpy.fitfunctions.lines import Line, LineXintercept
 from tests.tolerances import exact, noise_free
 
@@ -317,10 +321,12 @@ def test_gaussian_plus_heavyside_with_no_guess_starts_inside_caller_bounds():
     fit = GaussianPlusHeavySide(x, y)
     assert fit.p0 is None
 
-    got = fit.make_fit(return_exception=True, bounds=bounds)
-    explicit = GaussianPlusHeavySide(x, y)
-    start = [1.0, 2.5, 1.0, 1.0, 1.1, 1.0]
-    expected = explicit.make_fit(return_exception=True, bounds=bounds, p0=start)
+    # Six points barely fit six parameters: the covariance is not finite.
+    with pytest.warns(FitDegeneracyWarning, match="non-finite covariance"):
+        got = fit.make_fit(return_exception=True, bounds=bounds)
+        explicit = GaussianPlusHeavySide(x, y)
+        start = [1.0, 2.5, 1.0, 1.0, 1.1, 1.0]
+        expected = explicit.make_fit(return_exception=True, bounds=bounds, p0=start)
     assert "infeasible" not in str(got), got
     assert type(got) is type(expected), (got, expected)
     if got is None:
