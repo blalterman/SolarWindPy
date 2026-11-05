@@ -795,16 +795,3 @@ def test_every_point_falls_in_exactly_one_stability_bin(growth_rate):
     assert pd.api.types.is_integer_dtype(sc.stability_bin)
     assert sc.stability_bin.tolist() == expected.tolist()
     assert set(sc.stability_bin) <= set(sc.stability_map)
-
-
-def test_fill_is_an_integer_outside_every_bin():
-    """The fill for a point outside every bin is the integer -9999 (Phase C, B4).
-
-    It is not a key of stability_map, so it never collides with a real bin.
-
-    ON FAILURE: the code is wrong, unless the author changes the fill value.
-    """
-    sc = v16.StabilityCondition(-3, pd.Series([1.0]), pd.Series([1.0]))
-    assert isinstance(sc.fill, int)
-    assert sc.fill == -9999
-    assert sc.fill not in sc.stability_map

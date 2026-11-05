@@ -358,9 +358,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`"Re [m]"`, `"Rs [m]"`) to the quantity registry, as `QUANTITIES["gse"].si` and
   `QUANTITIES["hci"].si`; `Constants().misc["Re [m]"]` and `Constants().misc["Rs [m]"]`
   raise `KeyError`. `Spacecraft.distance2sun` reads the radius from the registry.
-- `StabilityCondition.stability_bin` is an integer Series, as documented, not float64. A
-  point outside every bin carries the fill value `-9999` (`StabilityCondition.fill`,
-  previously the float `-9999.0`).
+- `StabilityCondition.stability_bin` is an integer Series, as documented, not float64.
 - Fit-function parameters are renamed and reordered so that every model takes its
   amplitude `A` last. A positional `p0` or bounds, and positional arguments to
   `function`, follow the new order, and `popt`, `psigma` and the `results` columns list
@@ -823,6 +821,8 @@ These change computed values; rerun any analysis that used them.
 - `FitFunction.psigma_relative`; compute `results` uncertainties over values instead.
 - The `logx` argument of `FitFunction` and `set_fit_obs`, which was never used.
 - `TeXinfo.npts` and `TeXinfo.set_npts`.
+- `StabilityCondition.fill`, the `-9999.0` label of a point outside every stability bin.
+  No point can carry it: every point is stable or falls in one of the four other bins.
 - `solarwindpy.plotting.labels.available_labels()`; call `available()`.
 - `solarwindpy.plotting.tools.multipanel_figure_shared_cbar`, a wrapper of
   `build_ax_array_with_common_colorbar`; call that directly.

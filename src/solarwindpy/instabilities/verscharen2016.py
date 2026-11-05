@@ -172,8 +172,8 @@ class StabilityCondition(object):
         Boolean mask indicating unstable modes.
     stability_bin : pandas.Series
         Integer label describing the dominant instability, named
-        ``"Stability"``; the keys of ``stability_map``. A point outside
-        every bin carries ``fill`` (-9999).
+        ``"Stability"``; the keys of ``stability_map``. Every point carries
+        one.
 
     Notes
     -----
@@ -208,15 +208,6 @@ class StabilityCondition(object):
 
         logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
         self._logger = logger
-
-    @property
-    def fill(self):
-        r"""Integer ``stability_bin`` label of a point outside every bin.
-
-        ``stability_bin`` starts from it before each bin is assigned. It is
-        not a key of ``stability_map``.
-        """
-        return -9999
 
     @property
     def instability_parameters(self):
@@ -287,7 +278,7 @@ class StabilityCondition(object):
     def stability_bin(self):
         """The integer corresponding to the (in)stability condition.
 
-        A point outside every bin carries ``fill`` (-9999).
+        A key of ``stability_map`` for every point.
         """
 
         return self._stability_bin
@@ -392,14 +383,13 @@ class StabilityCondition(object):
         unstable = self.is_unstable
         between_AIC_MM = unstable.AIC & unstable.MM.pipe(np.logical_not)
         between_FMW_OFI = unstable.FMW & unstable.OFI.pipe(np.logical_not)
-        stable = unstable.pipe(np.logical_not).all(axis=1)
 
         # Here, we use integer identifiers b/c they are more
         # computationally efficient to process.
-        stability_bin = pd.Series(self.fill, index=unstable.index, name="Stability")
-
         map_inverse = self.stability_map_inverse
-        stability_bin.mask(stable, map_inverse["Stable"], inplace=True)
+        stability_bin = pd.Series(
+            map_inverse["Stable"], index=unstable.index, name="Stability"
+        )
         stability_bin.mask(
             between_AIC_MM, map_inverse["Between\nAIC &\nMM"], inplace=True
         )
@@ -409,8 +399,8 @@ class StabilityCondition(object):
         )
         stability_bin.mask(unstable.OFI, map_inverse["OFI"], inplace=True)
 
-        # Every row is now assigned: stable when no instability holds, and
-        # otherwise AIC, MM, FMW or OFI each set one of the four other bins.
+        # ``is_unstable`` is boolean, so a row is stable exactly when none of
+        # the masks above holds, and every row carries a stability_map key.
         self._stability_bin = stability_bin
 
     def calculate_stability_criteria(self):
