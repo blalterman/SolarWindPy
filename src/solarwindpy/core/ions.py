@@ -131,13 +131,17 @@ class Ion(base.Base):
         Parameters
         ----------
         data : pd.DataFrame
-            The data to set for the ion.
+            The data to set for the ion. Rows out of time order are sorted
+            with one warning, as :class:`~solarwindpy.core.plasma.Plasma`
+            sorts its data.
 
         Raises
         ------
         ValueError
-            If the data column names are unrecognized.
+            If the data column names are unrecognized, or the time index holds
+            missing timestamps (``NaT``).
         """
+        data = self._put_in_time_order_unless_checked(data)
         super().set_data(data)
 
         if data.columns.names == ["M", "C", "S"]:

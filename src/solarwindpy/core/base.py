@@ -456,12 +456,11 @@ class Core(ABC):
 
         Completeness and order are decided by :meth:`_time_disorder`, as for
         :meth:`_put_in_time_order`.
-        :class:`~solarwindpy.core.plasma.Plasma` and
-        :class:`~solarwindpy.core.spacecraft.Spacecraft` sort their data
-        before this runs, so they never reach the order warning. An index whose
-        values cannot be compared, such as ``[1, "a", 2.0]``, has no order: it
-        gets the order warning, as pandas' ``is_monotonic_increasing`` is False
-        for it, and the data are kept.
+        Every subclass of :class:`Base` sorts its data before this runs, with
+        one warning that counts and locates the rows out of order, so only an
+        index whose values cannot be compared, such as ``[1, "a", 2.0]``,
+        reaches the order warning: it has no order, as pandas'
+        ``is_monotonic_increasing`` is False for it, and the data are kept.
 
         Parameters
         ----------
@@ -580,6 +579,7 @@ class Base(Core):
         r"""Return ``new`` in time order, warning once, unless already checked.
 
         For classes that sort their data on setting, as
+        :class:`~solarwindpy.core.ions.Ion`,
         :class:`~solarwindpy.core.vector.Vector` and
         :class:`~solarwindpy.core.tensor.Tensor` do. Missing timestamps
         (``NaT``) raise :class:`ValueError`; see :meth:`_put_in_time_order`.
