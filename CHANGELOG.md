@@ -299,7 +299,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Units.temperature` -> `Units.T`, `Units.bfield` -> `Units.b`. Every `Units` field
     reads its default from `solarwindpy.core.quantities.QUANTITIES`, and `Units` gains
     fields for every quantity `Plasma` stores (`rho`, `w`, `dv`, `cs`, `ca`, `Wk`, `gse`,
-    `hci`). `Units().cfms` is removed.
+    `hci`). Its constructor parameters are in a new order, `Units(gse, hci, distance2sun,
+    b, n, rho, v, w, dv, cs, ca, pth, T, qpar, Wk, beta, lnlambda, nuc, nc)`; pass them by
+    keyword. `Units().cfms` is removed.
   - `Plasma`: `number_density` -> `n`, `mass_density` -> `rho`, `velocity` -> `v`,
     `thermal_speed` -> `w`, `bfield` -> `b`, `sound_speed` -> `cs`,
     `kinetic_energy_flux` -> `Wk`, `temperature` -> `T`, `anisotropy` -> `R`,
@@ -408,7 +410,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `FFPlot.residuals` and `FFPlot.plot_residuals` (simple, percent and robust) return
   observed minus fitted, the sign of `FitFunction.residuals`; they returned model minus
   observed. Robust residuals are `-fit_result.fun`. `FFPlot` takes a required keyword-only
-  `residuals_func`, which `FitFunction.plotter` supplies.
+  `residuals_func`, which `FitFunction.plotter` supplies. `FFPlot.plot_residuals`
+  draws the simple residuals by default (`kind="simple"`; was `"both"`).
 - `AxesLabels` and `LogAxes` in `fitfunctions.plots` are the `plotting.base` classes. They
   remain importable from `fitfunctions.plots` but leave its `__all__`, so
   `from solarwindpy.fitfunctions.plots import *` no longer brings them.
@@ -872,7 +875,7 @@ These change computed values; rerun any analysis that used them.
   share bins across many histograms by passing one `BinnedData` as `nbins`.
 - Plotting: `Hist2D.agg()` returns every bin; call `.dropna()` for the occupied bins
   only. Its index levels are `IntervalIndex`.
-- Upgrade note: downloaded solar-activity data (the SILSO sunspot numbers `SIDC` reads,
+- Upgrade notes: downloaded solar-activity data (the SILSO sunspot numbers `SIDC` reads,
   and the `ICMECAT` catalog) live in astropy's download cache for package `solarwindpy`,
   `~/.cache/solarwindpy` by default. Files under `~/solarwindpy/data` are not migrated
   (they hold processed tables; the new cache holds SILSO's raw download). The first

@@ -14,13 +14,20 @@ Checked:
   (both sides backticked, fully qualified): the new path resolves, the old one
   does not;
 - every backticked fully qualified ``solarwindpy.`` path in the Added
-  subsection resolves (a trailing call such as ``(frame, ...)`` is ignored).
+  subsection resolves (a trailing call such as ``(frame, ...)`` is ignored);
+- every attribute rename on a class listed in ``_CLASSES``, written as
+  ``Cls.old`` -> ``Cls.new``, ``Cls.old`` -> ``new``, or as ``old`` -> ``new``
+  (also ``a`` and ``b`` -> ``new``) inside a bullet that opens with ``Cls``
+  followed by a colon: the class has the new attribute and lacks the old one.
 
 Skipped, because they cannot be resolved unambiguously from the text:
 
-- class-relative names (``Units.T``, ``Plasma.n``, ``plot_contours(growth_rate=)``);
-- signatures and parameter names (``f(x, k, y0, A)``, ``popt["y0"]``);
-- plot label keys (``("qpar", "", s)``), file paths and dependency pins;
+- mappings on classes outside ``_CLASSES``, and bullets with no class prefix
+  (the ``TrendFit`` sub-bullets, the label-key bullet);
+- anything holding parentheses, ``=`` or quotes: signatures and keywords
+  (``f(x, k, y0, A)``, ``plot_contours(growth_rate=)``), Series names
+  (``"RT"`` -> ``"R"``) and plot label keys (``("qpar", "", s)``);
+- file paths and dependency pins;
 - table cells reading "none (removed; ...)", which have no new path to check.
 """
 
@@ -37,10 +44,30 @@ _TICKED_PATH = re.compile(r"`(%s)" % _PATH)
 _ARROW = re.compile(r"`(%s)`\s*->\s*`(%s)`" % (_PATH, _PATH))
 _TABLE_ROW = re.compile(r"^\s*\|\s*`(%s)`\s*\|(.*)\|\s*$" % _PATH, re.MULTILINE)
 
+# Classes whose attribute renames the changelog states relative to the class.
+_CLASSES = {
+    "Units": "solarwindpy.core.units_constants.Units",
+    "Plasma": "solarwindpy.core.plasma.Plasma",
+    "Ion": "solarwindpy.core.ions.Ion",
+    "Vector": "solarwindpy.core.vector.Vector",
+    "BField": "solarwindpy.core.vector.BField",
+    "Tensor": "solarwindpy.core.tensor.Tensor",
+    "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
+    "AlfvenicTurbulence": "solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence",
+    "StabilityCondition": "solarwindpy.instabilities.verscharen2016.StabilityCondition",
+    "FitFunction": "solarwindpy.fitfunctions.core.FitFunction",
+}
+_NAME = r"[A-Za-z_][\w.]*"
+_CLASS_ARROW = re.compile(
+    r"(?:`(%s)` and )?`(%s)`\s*->\s*`(%s)`" % (_NAME, _NAME, _NAME)
+)
+_BULLET_CLASS = re.compile(r"^-\s+`(\w+)`:")
+
 # Lower bounds on how many names each check covers, so a parser regression
 # that matches nothing cannot pass silently.
 _MIN_TABLE_ROWS = 60
 _MIN_ADDED_PATHS = 8
+_MIN_CLASS_RENAMES = 40
 
 
 def _unreleased():
@@ -108,6 +135,68 @@ def test_prose_mappings_name_live_targets():
     for old, new in _ARROW.findall(_unreleased()):
         assert not _resolves(old), "%s still resolves" % old
         assert _resolves(new), "%s does not resolve" % new
+
+
+def _bullets(section):
+    """Each bullet of ``section`` as one line, its continuation lines joined."""
+    bullets = []
+    for line in section.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            bullets.append(stripped)
+        elif stripped and bullets and not stripped.startswith("|"):
+            bullets[-1] += " " + stripped
+    return bullets
+
+
+def _split(name, default):
+    """``(class, attribute)`` for ``Cls.attr`` or a bare ``attr`` under ``default``."""
+    head, _, tail = name.partition(".")
+    if tail and head in _CLASSES:
+        return head, tail
+    if not tail and default:
+        return default, name
+    return None, None
+
+
+def _class_renames():
+    """``(class, old, new)`` for every class-relative rename the section states."""
+    renames = []
+    for bullet in _bullets(_unreleased()):
+        match = _BULLET_CLASS.match(bullet)
+        default = match.group(1) if match and match.group(1) in _CLASSES else None
+        for first, old, new in _CLASS_ARROW.findall(bullet):
+            for left in filter(None, (first, old)):
+                cls, attr = _split(left, default)
+                if cls is None:
+                    continue
+                new_cls, new_attr = _split(new, cls)
+                if new_cls != cls:
+                    continue
+                renames.append((cls, attr, new_attr))
+    return renames
+
+
+def test_class_renames_are_found():
+    """The class-relative renames parse into at least the expected number.
+
+    ON FAILURE: the code is wrong if the bullets' layout changed; update the
+    patterns. The changelog is wrong if renames were dropped by mistake.
+    """
+    assert len(_class_renames()) >= _MIN_CLASS_RENAMES
+
+
+@pytest.mark.parametrize("cls,old,new", _class_renames(), ids=lambda v: str(v))
+def test_class_rename_is_the_final_state(cls, old, new):
+    """The class has the new attribute and no longer has the old one.
+
+    ON FAILURE: the changelog is wrong; state the rename as 0.3.0 name -> final
+    name.
+    """
+    target = importlib.import_module(_CLASSES[cls].rsplit(".", 1)[0])
+    target = getattr(target, _CLASSES[cls].rsplit(".", 1)[1])
+    assert hasattr(target, new), "%s.%s does not exist" % (cls, new)
+    assert not hasattr(target, old), "%s.%s still exists" % (cls, old)
 
 
 def test_added_paths_resolve():
