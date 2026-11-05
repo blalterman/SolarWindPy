@@ -22,8 +22,6 @@ from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
-_NEW = pytest.mark.xfail(strict=True, reason="get_plotted_data does not exist yet")
-
 XEDGES = np.array([0.0, 1.0, 2.0, 3.0])
 YEDGES = np.array([0.0, 1.0, 2.0])
 
@@ -57,7 +55,6 @@ def _hist2d(z=None):
     return Hist2D(X, Y, z, nbins=[XEDGES, YEDGES])
 
 
-@_NEW
 @pytest.mark.parametrize("lower", [None, 2, 3])
 def test_hist2d_returns_the_rows_of_cells_meeting_clim(lower):
     """With ``clim`` lower bound n, the rows of cells holding at least n rows.
@@ -76,7 +73,6 @@ def test_hist2d_returns_the_rows_of_cells_meeting_clim(lower):
     assert got.loc[:, "y"].to_numpy() == exact(Y[expected].to_numpy())
 
 
-@_NEW
 def test_alim_acts_on_the_aggregated_value_of_the_given_fcn():
     """``alim`` on z means hides cell (0, 0) (mean 2); ``fcn="max"`` keeps it (max 3).
 
@@ -92,7 +88,6 @@ def test_alim_acts_on_the_aggregated_value_of_the_given_fcn():
     assert h.get_plotted_data().loc[:, "z"].tolist() == [4.0, 8.0, 9.0]
 
 
-@_NEW
 def test_a_log_axis_returns_the_callers_signed_values():
     """On a log x the rows hold the caller's x, negative ones included.
 
@@ -108,7 +103,6 @@ def test_a_log_axis_returns_the_callers_signed_values():
     assert got.loc[:, "x"].tolist() == [-10.0, 100.0]
 
 
-@_NEW
 def test_hist1d_returns_the_rows_of_bins_meeting_clim():
     """Hist1D of x: bins hold 3, 2 and 1 rows; clim 2 keeps labels 10 to 14.
 
@@ -127,7 +121,6 @@ def test_hist1d_returns_the_rows_of_bins_meeting_clim():
     assert got.loc[:, "x"].tolist() == X[expected].tolist()
 
 
-@_NEW
 def test_spiral_returns_as_many_rows_as_its_shown_cells_count():
     """A spiral's plotted rows number the counts of the cells ``agg`` shows.
 

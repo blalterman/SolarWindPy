@@ -131,7 +131,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         ----------
         only_plotted : bool
             If True, use only the measurements in bins that survive
-            aggregation (see ``get_plotted_data_boolean_series``). Otherwise,
+            aggregation (see ``get_plotted_data``). Otherwise,
             use every measurement inside the bins.
 
         Returns
@@ -149,9 +149,9 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
                 cdf.plot(x="x", y="position")
         """
         data = self.data
-        tk = self.cut.loc[:, "x"].notna()
+        tk = self.cut.loc[:, "x"].notna().to_numpy()
         if only_plotted:
-            tk = tk & self.get_plotted_data_boolean_series()
+            tk = tk & self._plotted_rows()
 
         x = data.loc[tk, "x"]
         # Stable sort, so tied x values keep their original label order.

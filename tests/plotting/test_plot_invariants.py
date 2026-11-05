@@ -277,6 +277,11 @@ def _select_plotted(b):
     return [Selection(_where(b.h.get_plotted_data_boolean_series()), None, True)]
 
 
+def _select_plotted_data(b):
+    rows = b.h.get_plotted_data()
+    return [Selection(rows.index, rows, True)]
+
+
 def _select_above_threshold(b):
     # The median bin count: some bins reach it, some do not.
     threshold = b.h.agg(fcn="count").dropna().median()
@@ -363,6 +368,7 @@ SELECTIONS = {
     "data": _select_data,
     "cut": _select_cut,
     "get_plotted_data_boolean_series": _select_plotted,
+    "get_plotted_data": _select_plotted_data,
     "get_subset_above_threshold": _select_above_threshold,
     "id_data_above_contour": _select_above_contour,
     "take_data_in_yrange_across_x": _select_in_yrange,

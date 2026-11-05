@@ -740,7 +740,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         x = source.take(axis, labels=False)
         keep = np.ones(x.size, dtype=bool)
         if only_plotted:
-            keep &= self.get_plotted_data_boolean_series().to_numpy(dtype=bool)
+            keep &= self._plotted_rows()
         if not project_counts and other != "z":
             keep &= self.binning.axis_codes()[other] >= 0
 

@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `solarwindpy.core.plasma.Plasma.info` returns a one-column table summarising a plasma: the
   spacecraft and its frame (or "none"), the first and last observation times, the number of
   observations, the species, and whether auxiliary data are attached.
+- `get_plotted_data(fcn=None)` on `Hist1D`, `Hist2D` and `SpiralPlot2D` returns the rows in the
+  cells the figure shows (cells whose `agg(fcn)` is not NaN after `clim`, `axnorm`, any cell
+  filter and `alim`), with the caller's x, y and z values on the caller's index. Pass the `fcn`
+  given to `make_plot`. Each plot computes its rows' cell codes once and reuses them in `agg`.
 
 ### Changed
 

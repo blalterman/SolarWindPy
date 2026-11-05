@@ -879,9 +879,25 @@ class BinnedPlot(Base):
         r"""The axis to aggregate into, e.g. the z variable in an (x, y, z) heatmap."""
         return self._source.columns[-1]
 
+    def _cell_codes(self):
+        r"""``binning.codes()``, computed once per binning and data, read-only.
+
+        The binning and the data are each set once, by the constructor, but
+        the cache is keyed on both objects, so replacing either recomputes.
+        """
+        binning = self.binning
+        source = self._source
+        cached = self.__dict__.get("_codes_cache")
+        if cached is None or cached[0] is not binning or cached[1] is not source:
+            codes = np.asarray(binning.codes())
+            codes.setflags(write=False)
+            cached = (binning, source, codes)
+            self._codes_cache = cached
+        return cached[2]
+
     def _grouped_by_cell(self):
         r"""The aggregated column on the rows in a cell, grouped by cell code."""
-        codes = self.binning.codes()
+        codes = self._cell_codes()
         # By position: the groups are keyed by `codes`, never by row label.
         target = self._source.take(self.agg_axes, labels=False)
         inside = codes >= 0
@@ -964,9 +980,55 @@ class BinnedPlot(Base):
         pd.Series
             On the index of ``data``.
         """
-        codes = self.binning.codes()
+        codes = self._cell_codes()
         keep = np.isin(codes, positions) & (codes >= 0)
         return pd.Series(keep, index=self._kept_index())
+
+    def _plotted_rows(self, fcn=None):
+        r"""Boolean array over the kept rows: True where the row's cell is shown.
+
+        A cell is shown where ``agg(fcn)`` is not NaN. Looked up by cell code,
+        with code -1 (no cell) mapped to the appended False.
+        """
+        shown = self.agg(fcn=fcn).notna().to_numpy()
+        return np.append(shown, False)[self._cell_codes()]
+
+    def _kept_source_frame(self):
+        r"""The caller's values on the kept rows, one column per ``data`` column.
+
+        No ``10**`` round trip: a logged axis holds the values as passed,
+        sign included.
+        """
+        source = self._source
+        return pd.DataFrame(
+            {k: source.take(k) for k in source.columns},
+            index=self._kept_index(),
+            copy=False,
+        )
+
+    def get_plotted_data(self, fcn=None):
+        r"""The rows in the cells the figure shows.
+
+        A cell is shown when ``agg(fcn)`` is not NaN there: after ``clim``,
+        ``axnorm``, any cell filter (a spiral mesh's ``cell_filter``) and, on
+        a ``ColorPlot``, ``alim``. ``alim`` acts on the aggregated value, so
+        pass the ``fcn`` you gave ``make_plot``; the default is the same as
+        ``make_plot``'s.
+
+        Parameters
+        ----------
+        fcn : str or callable, optional
+            The aggregation, as ``agg`` takes it.
+
+        Returns
+        -------
+        pd.DataFrame
+            One column per column of ``data`` (``x``, ``y`` and, on a 2-D
+            plot, ``z``), on the caller's index labels, in the caller's row
+            order. The values are the caller's: never logged, sign included,
+            whatever ``log`` says.
+        """
+        return self._kept_source_frame().loc[self._plotted_rows(fcn)]
 
     def get_plotted_data_boolean_series(self):
         """Return a boolean ``pd.Series`` identifying each plotted measurement.
@@ -1003,15 +1065,7 @@ class BinnedPlot(Base):
         agg = self.agg(fcn=fcn)
         tk = self._rows_in_cells(np.flatnonzero((agg >= threshold).to_numpy()))
 
-        # The source's values on the kept rows: no 10** round trip, so only
-        # what was stored logged differs from `data`, and it is not inverted.
-        source = self._source
-        subset = pd.DataFrame(
-            {k: source.take(k) for k in source.columns},
-            index=self._kept_index(),
-            copy=False,
-        )
-        subset = subset.loc[tk.to_numpy(dtype=bool)]
+        subset = self._kept_source_frame().loc[tk.to_numpy(dtype=bool)]
 
         return subset, tk
 
