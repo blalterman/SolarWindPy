@@ -34,6 +34,11 @@ _VERSION_IN_URL = re.compile(r"_v(\d+)\.csv$")
 # Freshness window: a cached catalog younger than this is used without
 # downloading (see solarwindpy.solar_activity.cache).
 _MAX_AGE = pd.Timedelta(days=30)
+# Warnings name the user's ICMECAT() call. ICMECAT's own warnings are raised in
+# methods _load_data calls, and __init__ calls _load_data directly, so they use
+# stacklevel=4 (method, _load_data, __init__, user); cache.fall_back sits one
+# frame deeper, under _after_failed_download. Moving _load_data changes both.
+_FALL_BACK_STACKLEVEL = 5
 
 # The eleven `sc_insitu` values actually present in HELIO4CAST ICMECAT v23.
 # ACE and Cassini were previously (and wrongly) included: both have zero
@@ -319,7 +324,7 @@ class ICMECAT:
         back to the cached ``url``.
         """
         if error.status != 404:
-            return cache.fall_back(url, error), url
+            return cache.fall_back(url, error, stacklevel=_FALL_BACK_STACKLEVEL), url
 
         for successor in _successor_urls(url):
             try:
@@ -327,7 +332,7 @@ class ICMECAT:
             except cache.DownloadError as exc:
                 if exc.status == 404:
                     continue
-                return cache.fall_back(url, exc), url
+                return cache.fall_back(url, exc, stacklevel=_FALL_BACK_STACKLEVEL), url
             found = _version_of(successor)
             warnings.warn(
                 f"ICMECAT {_version_of(url)} is no longer hosted at {url}; "
@@ -351,7 +356,7 @@ class ICMECAT:
                 ICMECATNotHostedWarning,
                 stacklevel=4,
             )
-        return cache.fall_back(url, error), url
+        return cache.fall_back(url, error, stacklevel=_FALL_BACK_STACKLEVEL), url
 
     def _warn_unknown_spacecraft(self) -> None:
         """Warn if the catalog names spacecraft outside ``SPACECRAFT_NAMES``."""

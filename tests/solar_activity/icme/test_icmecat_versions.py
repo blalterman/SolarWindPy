@@ -248,7 +248,6 @@ def test_a_missing_local_catalog_still_raises_without_probing(tmp_path, monkeypa
     assert fake.requested == []
 
 
-@pytest.mark.xfail(strict=True, reason="fall_back's stacklevel is tuned for fetch")
 @pytest.mark.parametrize(
     "served",
     [
