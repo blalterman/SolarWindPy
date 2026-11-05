@@ -266,7 +266,8 @@ def test_reading_a_loaders_age_writes_nothing(
 def test_a_first_run_on_a_clean_home_creates_the_cache(tmp_path, monkeypatch):
     """With no cache folder yet, the first fetch creates ``~/.cache/solarwindpy``.
 
-    Chosen input: HOME is an empty directory under ``tmp_path`` and
+    Chosen input: HOME (USERPROFILE on Windows) is an empty directory under
+    ``tmp_path`` and
     ``XDG_CACHE_HOME`` is unset, so astropy (8 or later) resolves the
     default location and must create every level of it.
 
@@ -285,6 +286,7 @@ def test_a_first_run_on_a_clean_home_creates_the_cache(tmp_path, monkeypatch):
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))  # Path.home() on Windows
     monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
     expected = home / ".cache" / "solarwindpy"
     assert get_cache_dir_path("solarwindpy", ensure_exists=False) == expected
