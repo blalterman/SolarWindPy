@@ -48,6 +48,7 @@ quantities, and visualizing results with scientific accuracy.
    tutorial/quickstart
    usage
    missing_data
+   citing
 
 .. toctree::
    :maxdepth: 4
@@ -56,7 +57,6 @@ quantities, and visualizing results with scientific accuracy.
    api_reference
 
 .. include:: ../../LICENSE
-.. include:: ../../CITATION.rst
 
 Indices and tables
 ==================
