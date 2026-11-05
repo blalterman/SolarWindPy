@@ -542,6 +542,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   raise KeyError. Spacecraft.distance2sun reads the radius from the registry and returns the
   same values.
 
+- PowerLaw, PowerLawPlusC and PowerLawOffCenter take the exponent before the amplitude, as
+  Exponential and ExponentialPlusC already
+
+- The TeX report of HingeSaturation, TwoLine, Saturation, HingeMin, HingeMax and HingeAtPoint
+  (TeX_info, whose TeX_popt labels the fitted values) writes xh, yh, x1, x2, m1 and m2 as x_h,
+  y_h, x_1, x_2, m_1 and m_2, as the model strings do, and Saturation's theta as \theta. popt,
+  psigma and the parameter names are unchanged.
+
 ### Changed
 
 - A plot that drops rows no longer copies the kept rows' labels to aggregate, find bin
