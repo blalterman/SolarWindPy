@@ -81,7 +81,6 @@ def pypi(monkeypatch):
     return responses, calls
 
 
-@pytest.mark.xfail(strict=True, reason="the PyPI JSON read lands next")
 def test_a_404_is_retried_with_backoff_until_the_release_is_listed(updater, pypi):
     """The CDN-style 404s right after an upload are waited out, not fatal.
 
@@ -94,7 +93,6 @@ def test_a_404_is_retried_with_backoff_until_the_release_is_listed(updater, pypi
     assert updater.slept == [15, 30]
 
 
-@pytest.mark.xfail(strict=True, reason="the PyPI JSON read lands next")
 def test_a_release_without_its_sdist_yet_is_retried(updater, pypi):
     """PyPI listing the wheel before the sdist is not yet ready.
 
@@ -110,7 +108,6 @@ def test_a_release_without_its_sdist_yet_is_retried(updater, pypi):
     assert updater.slept == [15, 30]
 
 
-@pytest.mark.xfail(strict=True, reason="the PyPI JSON read lands next")
 def test_the_wait_is_bounded(updater, pypi):
     """A release that never appears gives up after ``RELEASE_WAIT`` seconds.
 
@@ -124,7 +121,6 @@ def test_the_wait_is_bounded(updater, pypi):
     assert len(calls) == len(updater.slept) + 1
 
 
-@pytest.mark.xfail(strict=True, reason="the PyPI JSON read lands next")
 def test_the_sha256_is_read_from_the_json_without_downloading_the_sdist(updater, pypi):
     """Only the JSON API is requested; the digest is PyPI's, not recomputed.
 
@@ -136,7 +132,6 @@ def test_the_sha256_is_read_from_the_json_without_downloading_the_sdist(updater,
     assert calls == [JSON_URL]
 
 
-@pytest.mark.xfail(strict=True, reason="the PyPI JSON read lands next")
 def test_validation_waits_for_the_release_and_checks_its_version(updater, pypi):
     """``validate_pypi_release`` shares the retrying fetch and checks the version.
 

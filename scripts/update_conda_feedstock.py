@@ -2,8 +2,9 @@
 """Automate conda-forge feedstock updates for SolarWindPy releases.
 
 This script automates the process of updating the conda-forge feedstock
-after a new PyPI release. It handles version updates, SHA256 calculation,
-and creates GitHub issues for tracking.
+after a new PyPI release. It reads the sdist's SHA256 from PyPI's JSON API,
+waiting with backoff while the new release is not yet listed, and creates a
+GitHub issue for tracking.
 
 Usage:
     python scripts/update_conda_feedstock.py v0.1.5
@@ -12,11 +13,11 @@ Usage:
 """
 
 import argparse
-import hashlib
 import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -25,6 +26,13 @@ from packaging import version
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# How long to wait for PyPI to list a new release and its sdist, and the
+# backoff between attempts: the first wait, the factor, and the cap.
+RELEASE_WAIT = 600
+BACKOFF_START = 15
+BACKOFF_FACTOR = 2
+BACKOFF_MAX = 120
 
 
 class CondaFeedstockUpdater:
@@ -55,6 +63,8 @@ class CondaFeedstockUpdater:
         self.feedstock_repo = feedstock_repo
         self.fork_owner = fork_owner or self._get_github_username()
         self.project_root = Path(__file__).parent.parent
+        # Injectable so the tests need not wait out the backoff.
+        self._sleep = time.sleep
 
     def _get_github_username(self) -> str:
         """Get current GitHub username from git config or environment.
@@ -246,15 +256,72 @@ class CondaFeedstockUpdater:
             print(f"⚠️  GitHub release verification skipped: {e}")
             return True  # Permissive - don't block on errors
 
-    def validate_pypi_release(self, version_str: str, timeout: int = 10) -> bool:
+    def fetch_release_json(
+        self, version_str: str, max_wait: float = RELEASE_WAIT, timeout: int = 10
+    ) -> Optional[dict]:
+        """Return PyPI's JSON for the release, once it lists the sdist.
+
+        Right after an upload PyPI may not list the release, or may list it
+        before its sdist; both are retried with exponential backoff until
+        ``max_wait`` seconds of waiting have passed.
+
+        Parameters
+        ----------
+        version_str : str
+            Version to fetch
+        max_wait : float
+            Total seconds to wait between attempts before giving up
+        timeout : int
+            Request timeout in seconds
+
+        Returns
+        -------
+        dict or None
+            The release's JSON, or None if it never listed an sdist
+        """
+        url = f"https://pypi.org/pypi/{self.package_name}/{version_str}/json"
+        waited = 0.0
+        delay = BACKOFF_START
+        while True:
+            try:
+                response = requests.get(url, timeout=timeout)
+                if response.status_code == 200:
+                    data = response.json()
+                    if self._sdist_entry(data) is not None:
+                        return data
+                    reason = "no sdist listed yet"
+                else:
+                    reason = f"status {response.status_code}"
+            except (requests.RequestException, ValueError) as e:
+                reason = str(e)
+
+            if waited >= max_wait:
+                print(
+                    f"❌ PyPI has no sdist for {self.package_name} v{version_str} "
+                    f"after {waited:.0f}s ({reason})"
+                )
+                return None
+            pause = min(delay, max_wait - waited)
+            print(f"⏳ PyPI not ready ({reason}); retrying in {pause:.0f}s...")
+            self._sleep(pause)
+            waited += pause
+            delay = min(delay * BACKOFF_FACTOR, BACKOFF_MAX)
+
+    @staticmethod
+    def _sdist_entry(data: dict) -> Optional[dict]:
+        """Return the ``urls`` entry of the sdist in PyPI release JSON, if any."""
+        for entry in data.get("urls", []):
+            if entry.get("packagetype") == "sdist":
+                return entry
+        return None
+
+    def validate_pypi_release(self, version_str: str) -> bool:
         """Validate that the PyPI release exists and is not a pre-release.
 
         Parameters
         ----------
         version_str : str
             Version string to validate
-        timeout : int
-            Request timeout in seconds
 
         Returns
         -------
@@ -262,71 +329,56 @@ class CondaFeedstockUpdater:
             True if valid stable release exists
         """
         try:
-            # Parse version to check for pre-release
             v = version.parse(version_str)
-            if v.is_prerelease:
-                print(
-                    f"❌ Pre-release version {version_str} - skipping feedstock update"
-                )
-                return False
-
-            # Check PyPI availability
-            url = f"https://pypi.org/pypi/{self.package_name}/{version_str}/json"
-            response = requests.get(url, timeout=timeout)
-
-            if response.status_code != 200:
-                print(
-                    f"❌ PyPI version {version_str} not found (status: {response.status_code})"
-                )
-                return False
-
-            data = response.json()
-            pypi_version = data.get("info", {}).get("version")
-
-            if pypi_version != version_str:
-                print(
-                    f"❌ Version mismatch: requested {version_str}, PyPI has {pypi_version}"
-                )
-                return False
-
-            print(f"✅ Validated PyPI release: {self.package_name} v{version_str}")
-            return True
-
-        except Exception as e:
-            print(f"❌ Failed to validate PyPI release: {e}")
+        except version.InvalidVersion as e:
+            print(f"❌ Invalid version {version_str}: {e}")
+            return False
+        if v.is_prerelease:
+            print(f"❌ Pre-release version {version_str} - skipping feedstock update")
             return False
 
-    def calculate_sha256(self, version_str: str, timeout: int = 30) -> Optional[str]:
-        """Calculate SHA256 hash of the PyPI source distribution.
+        data = self.fetch_release_json(version_str)
+        if data is None:
+            return False
+
+        pypi_version = data.get("info", {}).get("version")
+        if pypi_version != version_str:
+            print(
+                f"❌ Version mismatch: requested {version_str}, PyPI has {pypi_version}"
+            )
+            return False
+
+        print(f"✅ Validated PyPI release: {self.package_name} v{version_str}")
+        return True
+
+    def get_sdist_sha256(self, version_str: str) -> Optional[str]:
+        """Return the SHA256 of the release's sdist, as PyPI's JSON API lists it.
+
+        Reading the digest PyPI computed at upload needs no download, so it
+        does not depend on the file CDN, which can serve a cached 404 for a
+        while after the upload.
 
         Parameters
         ----------
         version_str : str
-            Version to download and hash
-        timeout : int
-            Download timeout in seconds
+            Version whose sdist to look up
 
         Returns
         -------
         str or None
             SHA256 hash as hex string, or None if failed
         """
-        url = f"https://pypi.org/packages/source/{self.package_name[0]}/{self.package_name}/{self.package_name}-{version_str}.tar.gz"
-
-        try:
-            print(
-                f"Downloading {self.package_name} v{version_str} for SHA256 calculation..."
-            )
-            response = requests.get(url, timeout=timeout)
-            response.raise_for_status()
-
-            sha256_hash = hashlib.sha256(response.content).hexdigest()
-            print(f"✅ SHA256: {sha256_hash}")
-            return sha256_hash
-
-        except Exception as e:
-            print(f"❌ Failed to calculate SHA256: {e}")
+        data = self.fetch_release_json(version_str)
+        if data is None:
             return None
+        entry = self._sdist_entry(data)
+        sha256_hash = entry.get("digests", {}).get("sha256")
+        if not sha256_hash:
+            print(f"❌ PyPI lists no sha256 for {entry.get('url')}")
+            return None
+        print(f"✅ sdist: {entry.get('url')}")
+        print(f"✅ SHA256: {sha256_hash}")
+        return sha256_hash
 
     def update_meta_yaml(
         self, version_str: str, sha256_hash: str, meta_path: Path
@@ -484,7 +536,7 @@ python scripts/compare_feedstock_deps.py
 ### Update Checklist
 
 - [x] PyPI release validated
-- [x] SHA256 calculated from source distribution
+- [x] SHA256 read from PyPI's listing of the source distribution
 - [ ] **Dependencies reviewed** (see comparison above)
 - [ ] Autotick bot PR created (usually 2-6 hours)
 - [ ] If dependencies changed: manually update bot PR
@@ -684,8 +736,8 @@ This update was prepared using automated tooling from the SolarWindPy repository
             print("⚠️  Git provenance could not be verified (may be running in CI)")
             commit_sha = None  # Ensure it's None if verification failed
 
-        # Step 2: Calculate SHA256
-        sha256_hash = self.calculate_sha256(version_str)
+        # Step 2: Read the sdist's SHA256 from PyPI
+        sha256_hash = self.get_sdist_sha256(version_str)
         if not sha256_hash:
             return False
 
