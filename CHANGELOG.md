@@ -898,6 +898,27 @@ These change computed values; rerun any analysis that used them.
   axis), each axis scaled to its span, instead of in data units, where one axis dominated and
   the contours misplaced the outer levels.
 
+- After a successful fit, a `make_fit` call that raises an exception other than the recorded
+  fit failures (`FitFunctionError`, `RuntimeError`, `ValueError`) now leaves the fit unfitted,
+  with every result raising `NotFittedError`, instead of `results`, `popt`, `psigma`, `pcov`,
+  `rsq` and `chisq_dof` still reporting the earlier fit with status "ok". A `FitFunctionError`,
+  `RuntimeError` or `ValueError` raised while computing R² is now recorded as a failed fit, like
+  one raised by the optimizer.
+
+- `GaussianLn.set_TeX_report_normal_parameters` and the TeX annotation's mean and std no
+  longer silence an `AttributeError` raised inside `TeX_info` or `normal_parameters`; only
+  `NotFittedError` is taken to mean the fit has not run.
+
+- `SpiralPlot2D.plot_contours` raises a `ValueError` naming the problem when fewer than 3
+  cells hold finite values, or when their centers all share one x or one y, instead of failing
+  inside matplotlib's `Triangulation` with a length error about its x and y arrays or a
+  qhull `RuntimeError`.
+
+- When `ICMECAT` falls back to a cached catalog after a failed download, its
+  `StaleCacheWarning` now points at the user's `ICMECAT(...)` call instead of SolarWindPy's
+  `icmecat.py`. `cache.fall_back` takes a keyword `stacklevel`, defaulting to the depth that
+  attributes the warning to the caller of `cache.fetch`.
+
 ### Removed
 
 - `solarwindpy.plotting.select_data_from_figure` and its `SelectFromPlot2D` class. It
