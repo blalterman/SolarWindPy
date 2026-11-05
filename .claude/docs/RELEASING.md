@@ -198,8 +198,8 @@ print(f\"Classifiers: {', '.join([c for c in data['info']['classifiers'] if 'Pro
 **Expected Output**:
 ```
 Version: X.Y.Z
-Python: <4,>=3.11
-Classifiers: Python :: 3.11, Python :: 3.12, Python :: 3.13
+Python: <4,>=3.12
+Classifiers: Programming Language :: Python :: 3, Programming Language :: Python :: 3.12, Programming Language :: Python :: 3.13, Programming Language :: Python :: 3.14
 ```
 
 ### 8. Enhance GitHub Release Notes (Optional)
@@ -385,7 +385,7 @@ After PR merge (2-4 hours for package build):
 
 ```bash
 # Create test environment
-conda create -n test-solarwindpy-release python=3.11 -y
+conda create -n test-solarwindpy-release python=3.12 -y
 conda activate test-solarwindpy-release
 
 # Install from conda-forge
