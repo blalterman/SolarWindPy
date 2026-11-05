@@ -70,9 +70,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The temperature anisotropy `R` states it too, in place of `\perp/\parallel`.
 - Normalized labels say what the normalization is. `axnorm="t"` reads "Count / Max" (was
   "Total Norm Count"), `"c"` and `"r"` "Count / Column Max" and "Count / Row Max"; a
-  normalized quantity reads `n_p / \mathrm{Max}`. A density no longer claims `\#` units: its
-  units are 1 / (bin width or area in the axes' units), which a label does not know, so it
-  states none. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
+  normalized quantity reads `n_p / \mathrm{Max}`. A density's `Count` label no longer claims
+  `\#` units: it states the inverse of the bins it is per, from the plot's axis labels, e.g.
+  `(km s^-1)^-1 (cm^-3)^-1` for `"d"` on a 2-D plot, `dex^-1` for a log axis; an axis whose
+  label states no units contributes nothing. `"cd"` and `"rd"` read "Column Probability Density" and "Row Probability
   Density" (both were "1D Probability Density"), and `TeXlabel(..., axnorm="d")` reads
   "Density of n_p" (was "Density Norm n_p [#]"). A normalized ratio groups the ratio:
   `(n_a/n_p) / \mathrm{Max}`.

@@ -269,6 +269,7 @@ class Count(ArbitraryLabel):
         """
         super().__init__()
         self.set_axnorm(norm)
+        self.set_binned_axes({})
         self.set_description(description)
         self.build_label()
 
@@ -293,10 +294,18 @@ class Count(ArbitraryLabel):
 
     @property
     def units(self):
-        r"""TeX of the units: ``\#``, or empty for a density; see ``base.AXNORM``."""
+        r"""TeX of the units: ``\#``, or a density's from ``base.density_units``.
+
+        A density's units are those of the binned axes ``set_binned_axes``
+        gave; without them it states none.
+        """
         if self.axnorm is not None and base.AXNORM[self.axnorm].density:
-            return ""
+            return base.density_units(self.axnorm, self._binned_axes)
         return base._inU["dimless"]
+
+    def set_binned_axes(self, axes):
+        r"""Store the plot's binned axes, ``{axis: (label, log)}``, for density units."""
+        self._binned_axes = dict(axes)
 
     @property
     def path(self):

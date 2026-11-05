@@ -434,8 +434,9 @@ A plot labels its axes ``x``, ``y`` and ``z`` until ``set_labels`` sets them.
 A histogram's counts carry the special label
 :py:class:`~solarwindpy.plotting.labels.special.Count`, which follows the
 plot's ``axnorm``. A count divided by a maximum is a pure number, :math:`[\#]`;
-a density is per unit width or area of the bins, in the axes' units, so its
-label states no units:
+a density is per unit width or area of the bins, so its label states the
+inverse of the binned axes' units, :math:`\mathrm{dex}^{-1}` for a log axis. Here
+the axes are labelled by plain strings, which state no units:
 
 >>> from solarwindpy.plotting.hist2d import Hist2D
 >>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="t")

@@ -5,6 +5,7 @@ __all__ = [
     "AXNORM",
     "Base",
     "TeXlabel",
+    "density_units",
     "format_with_units",
     "publication_format",
     "set_publication_format",
@@ -30,7 +31,7 @@ _trans_species = quantities.SPECIES
 _trans_component = quantities.COMPONENTS
 _inU = quantities.UNIT_TEX
 
-_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name,symbol")
+_AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name,symbol,per")
 
 #: How a label names each ``axnorm`` key, keyed by the key: the one table of
 #: the keys ``Count`` and ``TeXlabel`` accept. A new key a binning accepts
@@ -39,14 +40,16 @@ _AxisNorm = namedtuple("_AxisNorm", "count,quantity,density,name,symbol")
 #: - ``count``: the words of a normalized ``Count``.
 #: - ``quantity``: the TeX of a normalized quantity, with ``%s`` for the
 #:   quantity's TeX.
-#: - ``density``: True for a density. Its units are 1 / (bin width or area in
-#:   the units of the binned axes, in decades on a log axis), which a label
-#:   does not know, so it states none. A count divided by a maximum is a pure
-#:   number and states ``\#``.
+#: - ``density``: True for a density. Its units are the inverse of the bin
+#:   measure it is taken over; see ``per``. A count divided by a maximum is a
+#:   pure number and states ``\#``.
 #: - ``name``: the plain-text name of a normalized ``Count`` in publication
 #:   format, its first line.
 #: - ``symbol``: the TeX symbol of a normalized ``Count`` in publication
 #:   format, its second line; a plain count is ``N``.
+#: - ``per``: the binned axes a density is per, as ``binning.normalize``
+#:   divides by their widths; empty for a normalization that is no density.
+#:   :func:`~solarwindpy.plotting.labels.base.density_units` reads it.
 AXNORM = MappingProxyType(
     {
         "c": _AxisNorm(
@@ -55,6 +58,7 @@ AXNORM = MappingProxyType(
             False,
             "Column-Normalized Count",
             r"N / N_{\max,\mathrm{col}}",
+            (),
         ),
         "r": _AxisNorm(
             "Count / Row Max",
@@ -62,6 +66,7 @@ AXNORM = MappingProxyType(
             False,
             "Row-Normalized Count",
             r"N / N_{\max,\mathrm{row}}",
+            (),
         ),
         "t": _AxisNorm(
             "Count / Max",
@@ -69,6 +74,7 @@ AXNORM = MappingProxyType(
             False,
             "Normalized Count",
             r"N / N_{\max}",
+            (),
         ),
         "d": _AxisNorm(
             "Probability Density",
@@ -76,6 +82,7 @@ AXNORM = MappingProxyType(
             True,
             "Probability Density",
             r"p",
+            ("x", "y"),
         ),
         "cd": _AxisNorm(
             "Column Probability Density",
@@ -83,6 +90,7 @@ AXNORM = MappingProxyType(
             True,
             "Column Probability Density",
             r"p_{\mathrm{col}}",
+            ("y",),
         ),
         "rd": _AxisNorm(
             "Row Probability Density",
@@ -90,6 +98,7 @@ AXNORM = MappingProxyType(
             True,
             "Row Probability Density",
             r"p_{\mathrm{row}}",
+            ("x",),
         ),
     }
 )
@@ -125,6 +134,46 @@ def set_publication_format(on):
     """
     global _publication_format
     _publication_format = bool(on)
+
+
+def density_units(axnorm, axes):
+    r"""Return the TeX units of the ``axnorm`` density over the binned ``axes``.
+
+    A density is divided by the measure of the bins it is taken over (see
+    ``AXNORM[axnorm].per``), so its units are the inverse of each such axis's
+    units, joined by ``\,``: ``\left(u\right)^{-1}`` for a linear axis whose
+    label states units ``u``, and ``\mathrm{dex}^{-1}`` for a log axis, whose
+    bins are measured in ``log10``. An axis whose label states no units (a
+    plain string, no ``units``, ``???``) or is dimensionless contributes no
+    factor, so the result is empty when no axis does.
+
+    Parameters
+    ----------
+    axnorm : str or None
+        A key of ``AXNORM``, or None.
+    axes : dict
+        Each binned axis, ``"x"`` or ``"y"``, mapped to ``(label, log)``: its
+        label and whether it is on a log scale.
+
+    Returns
+    -------
+    str
+        The units, or ``""`` when ``axnorm`` is no density.
+    """
+    if axnorm is None or not AXNORM[axnorm].density:
+        return ""
+    factors = []
+    for axis in AXNORM[axnorm].per:
+        if axis not in axes:
+            continue
+        label, log = axes[axis]
+        if log:
+            factors.append(r"\mathrm{dex}^{-1}")
+            continue
+        units = getattr(label, "units", "")
+        if units and units not in ("???", _inU["dimless"]):
+            factors.append(r"\left(%s\right)^{-1}" % units)
+    return r" \, ".join(factors)
 
 
 def validate_axnorm(key):
