@@ -684,3 +684,16 @@ def test_frame_position_axes_stay_upper_case(labels_base, mcs, tex):
     ON FAILURE: the code is wrong.
     """
     assert labels_base.TeXlabel(mcs).tex == tex
+
+
+@pytest.mark.parametrize("m", ["T", "w", "beta", "p"])
+def test_scalar_component_renders_as_no_component(labels_base, m):
+    """The scalar column of a tensor quantity is the bare scalar: T_{p_1}.
+
+    A scalar has no component, as the ``mag`` of a vector is its bare symbol.
+
+    ON FAILURE: the code is wrong.
+    """
+    scalar = labels_base.TeXlabel((m, "scalar", "p1"))
+    assert scalar.tex == labels_base.TeXlabel((m, "", "p1")).tex
+    assert "scalar" not in scalar.tex

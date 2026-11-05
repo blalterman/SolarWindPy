@@ -209,7 +209,8 @@ COMPONENTS = MappingProxyType(
         "lat": r"\lambda",
         "lon": r"\phi",
         "R": r"\mathrm{R}",
-        "scalar": r"\mathrm{scalar}",
+        # A tensor quantity's scalar is its bare symbol, like a magnitude.
+        "scalar": r"",
         "theta": r"\theta",
         "phi": r"\phi",
         "per": r"\perp",

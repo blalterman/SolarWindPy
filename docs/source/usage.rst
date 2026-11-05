@@ -414,15 +414,12 @@ ${v}_{{x};{\alpha}} \; \left[\mathrm{km \; s^{-1}}\right]$
 A derived quantity uses its plasma method's name as ``M``. Methods such as
 :py:meth:`~solarwindpy.core.plasma.Plasma.T` and
 :py:meth:`~solarwindpy.core.plasma.Plasma.beta` return columns ``par``,
-``per`` and ``scalar``, and the label prints the component as given, so the
-scalar column's key gives a literal "scalar" subscript. For the scalar, leave
-the component empty:
+``per`` and ``scalar``. The scalar column's label is the bare symbol, the same
+as with the component left empty:
 
 >>> print(TeXlabel(("T", "par", "p1")))
 ${T}_{{\parallel};{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("T", "scalar", "p1")))
-${T}_{{\mathrm{scalar}};{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
->>> print(TeXlabel(("T", "", "p1")))
 ${T}_{{p_1}} \; \left[10^5 \, \mathrm{K}\right]$
 >>> print(TeXlabel(("beta", "", "p1")))
 ${\beta}_{{p_1}} \; \left[\mathrm{\#}\right]$
