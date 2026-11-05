@@ -22,14 +22,11 @@ E_INV = 0.36787944117144233  # e^-1
         # 2 e^-1
         (Exponential, ("x", "k", "A"), (1.0, 1.0, 2.0), 2 * E_INV),
         # 2 e^-1 + 0.5
-        pytest.param(
+        (
             ExponentialPlusC,
             ("x", "k", "y0", "A"),
             (1.0, 1.0, 0.5, 2.0),
             2 * E_INV + 0.5,
-            marks=pytest.mark.xfail(
-                strict=True, reason="amplitude A is not yet the last parameter"
-            ),
         ),
     ],
 )
@@ -201,7 +198,7 @@ def test_exponential_plus_c_constant_term():
     obj = ExponentialPlusC(x, np.ones_like(x))
 
     # 2 + 0.5 and 2/2 + 0.5
-    assert obj.function(x, k, A, y0) == exact([2.5, 1.5])
+    assert obj.function(x, k, y0, A) == exact([2.5, 1.5])
 
 
 def test_str_and_call_methods_regular():
@@ -287,10 +284,10 @@ def test_exponential_with_weights():
     [
         # Slow decay, k = 1e-6: e^{-kx} = 1 - kx to 2e-12.
         (Exponential, (1e-6, 1.0), [1.0, 1 - 1e-6, 1 - 2e-6]),
-        (ExponentialPlusC, (1e-6, 1.0, 0.5), [1.5, 1.5 - 1e-6, 1.5 - 2e-6]),
+        (ExponentialPlusC, (1e-6, 0.5, 1.0), [1.5, 1.5 - 1e-6, 1.5 - 2e-6]),
         # Fast decay, k = 100: e^-100 ~ 4e-44 vanishes beside O(1) terms.
         (Exponential, (100.0, 1.0), [1.0, 0.0, 0.0]),
-        (ExponentialPlusC, (100.0, 1.0, 0.5), [1.5, 0.5, 0.5]),
+        (ExponentialPlusC, (100.0, 0.5, 1.0), [1.5, 0.5, 0.5]),
     ],
 )
 def test_extreme_decay_rates_reach_their_limits(cls, params, expected):
@@ -343,7 +340,7 @@ class TestExponentialPlusCPhase6:
         obj = ExponentialPlusC(x, y)
         p0 = obj.p0
 
-        assert len(p0) == len(obj.argnames) == 3  # k, A, y0
+        assert len(p0) == len(obj.argnames) == 3  # k, y0, A
         assert np.all(np.isfinite(p0))
 
 

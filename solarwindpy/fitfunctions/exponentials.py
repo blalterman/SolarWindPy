@@ -55,16 +55,16 @@ class Exponential(FitFunction):
 class ExponentialPlusC(FitFunction):
     r"""Exponential decay plus a constant, :math:`f(x) = A e^{-k x} + y_0`.
 
-    Parameters are ``k`` (rate), ``A`` (amplitude) and ``y0`` (offset).
+    Parameters are ``k`` (rate), ``y0`` (offset) and ``A`` (amplitude).
     """
 
     _TeX_argnames = {"y0": "y_0"}
 
     @property
     def function(self):
-        r"""The model :math:`A e^{-k x} + y_0` as ``f(x, k, A, y0)``."""
+        r"""The model :math:`A e^{-k x} + y_0` as ``f(x, k, y0, A)``."""
 
-        def expc(x, k, A, y0):
+        def expc(x, k, y0, A):
             """Evaluate ``A * exp(-k * x) + y0``."""
             return (A * np.exp(-(k * x))) + y0
 
@@ -72,7 +72,7 @@ class ExponentialPlusC(FitFunction):
 
     @property
     def p0(self):
-        r"""Return initial guesses ``[k, A, y0]`` for the fit."""
+        r"""Return initial guesses ``[k, y0, A]`` for the fit."""
         self._require_sufficient_data()
 
         y = self.observations.used.y
@@ -81,7 +81,7 @@ class ExponentialPlusC(FitFunction):
         y0 = 0.0
         A = y.max()
 
-        p0 = [k, A, y0]
+        p0 = [k, y0, A]
         return p0
 
     @property

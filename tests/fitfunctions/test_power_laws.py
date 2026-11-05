@@ -24,11 +24,6 @@ from tests.tolerances import NOISE_FREE_REL, exact, noise_free
 from tests.fitfunctions._attempt import attempt_fit
 
 
-_AMPLITUDE_LAST = pytest.mark.xfail(
-    strict=True, reason="amplitude A is not yet the last parameter"
-)
-
-
 @pytest.mark.parametrize(
     "cls, expected_params, sample_args, expected_value",
     [
@@ -86,7 +81,7 @@ _EXPONENT = {
     "cls, amplitude",
     [
         (Exponential, "A"),
-        pytest.param(ExponentialPlusC, "A", marks=_AMPLITUDE_LAST),
+        (ExponentialPlusC, "A"),
         (PowerLaw, "A"),
         (PowerLawPlusC, "A"),
         (PowerLawOffCenter, "A"),
