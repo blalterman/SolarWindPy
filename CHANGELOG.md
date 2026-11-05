@@ -854,6 +854,12 @@ These change computed values; rerun any analysis that used them.
 
 ### Migration
 
+- Development checkouts: the package source moved from `solarwindpy/` to
+  `src/solarwindpy/`; `import solarwindpy` is unchanged, and installs from PyPI or
+  conda-forge need nothing. After pulling, in each checkout move anything untracked out
+  of the root `solarwindpy/` folder, delete what remains of it (a leftover folder makes
+  `import solarwindpy` find an empty namespace package), and reinstall with
+  `pip install -e ".[dev]"`.
 - Imports: replace every path in the table under Changed - BREAKING CHANGES with its new
   path; nothing is re-exported.
 - Fit functions: pass `p0`, bounds and `function` arguments by name, or reorder them so
