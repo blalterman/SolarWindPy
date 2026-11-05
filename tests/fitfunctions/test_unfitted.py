@@ -129,3 +129,87 @@ def test_an_unexpected_refit_error_leaves_no_result_from_the_earlier_fit(name):
     reads = {**READS, "error": lambda f: f.error}
     with pytest.raises(NotFittedError, match="call make_fit first"):
         reads[name](fit)
+
+
+class LeftHalfFitted(AssertionError):
+    """A read answered after make_fit should have left the fit without that result."""
+
+
+def _reads_that_answer(fit, names):
+    """The reads in ``names`` that return instead of raising NotFittedError."""
+    reads = {**READS, "error": lambda f: f.error}
+    answered = []
+    for name in names:
+        try:
+            reads[name](fit)
+        except NotFittedError:
+            continue
+        answered.append(name)
+    return answered
+
+
+def _refit_with_step_raising(step, exc):
+    """A Line fit once successfully, then refit with method ``step`` raising ``exc``.
+
+    Replacing a method of the fit itself is not a boundary fake: it is the
+    only way to make a step after the optimizer raise, which the brief for
+    this test asks for.
+    """
+    fit = _line()
+    fit.make_fit()
+
+    def fail(*args, **kwargs):
+        raise exc
+
+    setattr(fit, step, fail)
+    with pytest.raises(type(exc)):
+        fit.make_fit()
+    return fit
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=LeftHalfFitted,
+    reason="make_fit stores fit_bounds in the optimizer step and the outcome "
+    "before building TeX_info and the plotter, so a later exception leaves "
+    "some results readable; remove this marker when make_fit commits all or nothing",
+)
+@pytest.mark.parametrize("step", ["_calc_rsq", "build_TeX_info", "build_plotter"])
+def test_an_unexpected_error_after_the_optimizer_leaves_the_fit_unfitted(step):
+    """A refit raising after the optimizer ran leaves every result unread.
+
+    Chosen input: a TypeError, which make_fit does not record as a failed
+    fit, from each step after the optimizer. The refit must not leave a
+    status "ok" beside a missing TeX_info or plotter, nor bounds without a fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _refit_with_step_raising(step, TypeError(step))
+    answered = _reads_that_answer(fit, [*READS, "error"])
+    if answered:
+        raise LeftHalfFitted(answered)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=LeftHalfFitted,
+    reason="make_fit keeps fit_bounds after a recorded failure past the "
+    "optimizer and records no failure from building TeX_info or the plotter; "
+    "remove this marker when make_fit commits all or nothing",
+)
+@pytest.mark.parametrize("step", ["_calc_rsq", "build_TeX_info", "build_plotter"])
+def test_a_recorded_failure_after_the_optimizer_leaves_no_success_only_result(step):
+    """A refit failing with a recorded error after the optimizer is a failed fit.
+
+    Chosen input: a RuntimeError, one of the failures make_fit records, from
+    each step after the optimizer. The status names it, and every result only
+    a success produces raises.
+
+    ON FAILURE: the code is wrong.
+    """
+    fit = _refit_with_step_raising(step, RuntimeError(step))
+    if fit.results.loc[:, ("status", "")].item() != "RuntimeError":
+        raise LeftHalfFitted(["results"])
+    answered = _reads_that_answer(fit, SUCCESS_ONLY)
+    if answered:
+        raise LeftHalfFitted(answered)

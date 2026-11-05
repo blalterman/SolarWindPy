@@ -10,7 +10,7 @@ from matplotlib.container import ErrorbarContainer
 from scipy.optimize import OptimizeWarning
 
 from solarwindpy.fitfunctions import gaussians, trend_fits, lines
-from solarwindpy.fitfunctions.core import InsufficientDataError
+from solarwindpy.fitfunctions.core import InsufficientDataError, NotFittedError
 from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
 from tests.tolerances import exact, noise_free
@@ -108,6 +108,97 @@ def test_a_failed_bin_fit_is_recorded():
     assert list(tf.bin_fits.index) == list(ybins)
     bad = tf.bin_fits.loc[ybins[1]]
     assert isinstance(bad.error, InsufficientDataError)
+
+
+class LeftHalfFitted(AssertionError):
+    """A read answered after make_fit should have left the TrendFit unfitted."""
+
+
+class LineFailingToPlot(lines.Line):
+    """A Line whose plotter cannot be built once ``fail`` is set.
+
+    The TypeError is an error make_fit does not record.
+    """
+
+    fail = False
+
+    def build_plotter(self):
+        if self.fail:
+            raise TypeError("plotter")
+        return super().build_plotter()
+
+
+def _bin_fit_failing_to_plot(tf, monkeypatch):
+    """Make the second bin fit's plotter fail on the next make_fit.
+
+    Replacing a method of a SolarWindPy fit is not a boundary fake: it is the
+    only way to raise an unrecorded error after the optimizer ran.
+    """
+
+    def fail():
+        raise TypeError("plotter")
+
+    tf.bin_fits.iloc[1].build_plotter = fail
+
+
+def _trend_failing_to_plot(tf, monkeypatch):
+    """Make the trend's plotter fail on the next make_fit."""
+    monkeypatch.setattr(LineFailingToPlot, "fail", True)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=LeftHalfFitted,
+    reason="TrendFit.make_fit keeps the previous bin_results and trend until "
+    "it reaches the new ones, so an unexpected error leaves the old ones "
+    "beside refit bins; remove this marker when make_fit commits all or nothing",
+)
+@pytest.mark.parametrize(
+    "break_step",
+    [
+        pytest.param(_bin_fit_failing_to_plot, id="bin-fit"),
+        pytest.param(_trend_failing_to_plot, id="trend-fit"),
+    ],
+)
+def test_an_unexpected_refit_error_leaves_the_trend_fit_unfitted(
+    agged, monkeypatch, break_step
+):
+    """A refit raising an unrecorded error leaves no bin result, trend or bin fit.
+
+    Chosen input: a TypeError from building a plotter, after a first
+    successful make_fit, in the second bin fit or in the trend fit.
+
+    ON FAILURE: the code is wrong.
+    """
+    trend_fit = trend_fits.TrendFit(
+        agged, gaussians.Gaussian, LineFailingToPlot, y=MU, yerr=SIGMA
+    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=OptimizeWarning)
+        trend_fit.make_fit()
+    break_step(trend_fit, monkeypatch)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=OptimizeWarning)
+        with pytest.raises(TypeError, match="plotter"):
+            trend_fit.make_fit()
+
+    reads = {
+        "bin_results": lambda tf: tf.bin_results,
+        "trend": lambda tf: tf.trend,
+        **{
+            f"bin_fits[{i}].results": (lambda tf, i=i: tf.bin_fits.iloc[i].results)
+            for i in range(len(trend_fit.bin_fits))
+        },
+    }
+    answered = []
+    for name, read in reads.items():
+        try:
+            read(trend_fit)
+        except NotFittedError:
+            continue
+        answered.append(name)
+    if answered:
+        raise LeftHalfFitted(answered)
 
 
 def test_trend_success_and_failure(trend_fit, agged_empty):
