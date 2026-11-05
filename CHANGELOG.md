@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so one colorbar serves both. `connect_kwargs` styles the segments. A point that is not drawn
   (NaN, outside `mask` or `alim`, or <= 0 on a log axis) is skipped. Without a varying z, the
   points are joined in row order in the points' color.
+- The Usage guide's "Individual points" shows `Scatter` colored by z, with `connect=True` on
+  shuffled rows, and without z, each figure drawn by the block beside it.
 
 ### Changed - BREAKING CHANGES
 

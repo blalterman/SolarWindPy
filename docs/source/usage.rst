@@ -322,9 +322,13 @@ Gaussian filter, by design.
 Individual points
 ~~~~~~~~~~~~~~~~~
 
-:py:class:`~solarwindpy.plotting.scatter.Scatter` colors each point by ``z``,
-here the density of a few hundred points. Its ``logx`` and ``logy`` set only
-the axis scale; the data stay linear.
+``Scatter(x, y, z)`` draws one marker per point, colored by ``z`` through a
+colormap, beside a colorbar labelled with ``labels.z``; here ``z`` is the
+density of a few hundred points. Its ``logx`` and ``logy`` set only the axis
+scale; the data stay linear. ``make_plot`` returns
+``(ax, points, segments, cbar)``: the axes, the markers' ``PathCollection``,
+the segments joining the points (None here, see below) and the colorbar (None
+when ``cbar=False`` or ``z`` does not vary).
 
 .. plot::
 
@@ -346,7 +350,81 @@ the axis scale; the data stay linear.
        y=TeXlabel(("w", "", "p1")),
        z=TeXlabel(("n", "", "p1")),
    )
-   sc.make_plot(s=8)
+   ax, points, segments, cbar = sc.make_plot(s=8)
+
+``make_plot(connect=True)`` also joins the points with line segments in
+increasing ``z``. The sort is stable, so points with equal ``z`` keep the order
+of their rows, and the rows need not be sorted: below they are shuffled. Each
+segment is colored by the mean ``z`` of its two points, through the markers'
+colormap and norm, so the one colorbar reads both. With ``z`` the time of each
+point, as here, the segments trace the trajectory; with any other ``z`` they
+trace how ``(x, y)`` changes as ``z`` increases. A point that is not drawn (NaN
+or infinite, outside ``mask`` or ``alim``, or not positive on a log axis) is
+skipped, not a gap: the points either side of it in ``z`` are joined.
+``connect_kwargs`` styles the segments, which sit just below the markers.
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(1)
+   N = 120
+   epoch = pd.date_range("2020-01-01", periods=N, freq="3D")
+   days = pd.Series((epoch - epoch[0]).days, index=epoch, name="days")
+
+   # A slow drift through (v, n) with a solar-rotation wobble and noise.
+   phase = 2 * np.pi * days / 27
+   v = pd.Series(
+       400 + 1.2 * days.to_numpy() ** 0.8 + 60 * np.sin(phase) + rng.normal(0, 15, N),
+       index=epoch,
+       name="v",
+   )
+   n = pd.Series(
+       8 * np.exp(-days / 400) + 2 * np.cos(phase) + rng.normal(0, 0.4, N),
+       index=epoch,
+       name="n",
+   )
+
+   # Shuffle the rows: the points are joined in increasing z, not row order.
+   shuffled = rng.permutation(N)
+   v, n, days = v.iloc[shuffled], n.iloc[shuffled], days.iloc[shuffled]
+
+   sc = Scatter(v, n, days)
+   sc.set_labels(
+       x=TeXlabel(("v", "", "p1")),
+       y=TeXlabel(("n", "", "p1")),
+       z="Days from start",
+   )
+   ax, points, segments, cbar = sc.make_plot(
+       s=12, cmap="viridis", connect=True, connect_kwargs={"linewidth": 0.8, "alpha": 0.8}
+   )
+
+Without ``z``, ``Scatter(x, y)`` draws every point in one color and no
+colorbar, so ``cbar`` is None. ``connect=True`` then joins the points in the
+order of their rows, in the markers' color, skipping any point that is not
+drawn. Here the rows are in time order, so the segments trace the field's
+rotation:
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(2)
+   N = 80
+   epoch = pd.date_range("2020-01-01", periods=N, freq="15min")
+   angle = np.linspace(0, 1.5 * np.pi, N)
+   bx = pd.Series(5 * np.cos(angle) + rng.normal(0, 0.3, N), index=epoch, name="bx")
+   by = pd.Series(5 * np.sin(angle) + rng.normal(0, 0.3, N), index=epoch, name="by")
+
+   sc = Scatter(bx, by)
+   sc.set_labels(x=TeXlabel(("b", "x", "")), y=TeXlabel(("b", "y", "")))
+   ax, points, segments, cbar = sc.make_plot(s=12, connect=True)
 
 Bins
 ~~~~
