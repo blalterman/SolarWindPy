@@ -7,9 +7,12 @@ to paste one block into a fresh session and get that figure. ``conf.py`` sets
 ``plot_pre_code = ""``, so the docs build already runs each block without
 hidden setup; this module runs each block in a namespace of its own under the
 ``Agg`` backend, so the default suite catches a block that stops running
-without a docs build.
+without a docs build. A block that loads ``SIDC("m13")`` gets the committed
+snapshot from a private download cache, as in the docs build, never the
+network.
 """
 
+import importlib.util
 import re
 from pathlib import Path
 
@@ -18,6 +21,8 @@ import pytest
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
+
+from solarwindpy.solar_activity import cache  # noqa: E402
 
 DOCS = Path(__file__).resolve().parents[1] / "docs" / "source"
 
@@ -74,8 +79,30 @@ def test_every_plot_block_holds_its_code_inline():
     assert not named, named
 
 
+def _no_download(url, cache):
+    raise AssertionError(f"a plot block tried to download {url}")
+
+
+@pytest.fixture
+def ssn_snapshot(tmp_path, monkeypatch):
+    """Serve ``SIDC("m13")`` from the docs' snapshot, as ``conf.py`` does.
+
+    Both seed a private download cache with ``_ssn_snapshot.seed_ssn_snapshot``.
+    Any download raises, and a stale-cache fallback is an error, so a block
+    never reaches the network.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "_ssn_snapshot", DOCS / "_ssn_snapshot.py"
+    )
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    monkeypatch.setattr(cache, "_download_file", _no_download)
+    helper.seed_ssn_snapshot(tmp_path / "cache", monkeypatch.setenv)
+
+
+@pytest.mark.filterwarnings("error::solarwindpy.solar_activity.cache.StaleCacheWarning")
 @pytest.mark.parametrize("code", BLOCKS)
-def test_plot_block_runs_alone(code, request):
+def test_plot_block_runs_alone(code, request, ssn_snapshot):
     """A block runs with nothing defined beforehand and draws a figure."""
     assert code, f"{request.node.callspec.id}: the plot block is empty"
     try:

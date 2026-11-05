@@ -48,13 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   raises "Unable to calculate a PDF with non-count aggregation" for `d` with another `fcn`.
   `allowed_axnorm` adds `w` (1-D and `SpiralPlot2D`) and `w`, `wc`, `wr` (2-D); `Count` and
   `TeXlabel` accept them. Count plots and `t`/`c`/`r` of non-negative values are unchanged.
-
 - The `description=` keyword, `description` property and `set_description` of every
   plot label class is removed. A label's one optional first line is now its `name`, which the
   publication format prints above the symbol line; every label class takes `name=` and
   `publication_format=`. Migrate `description="text"` to `name="text",
   publication_format=True` (or `set_publication_format(True)` for every label). Unlike a
   description, the name is not printed in the default one-line format.
+- `Scatter.make_plot` returns `(ax, points, segments, cbar)`: the `LineCollection` of the
+  segments, or None without `connect=True`, sits before the colorbar. Unpack four values where
+  three were unpacked before.
 
 ### Added
 
@@ -87,6 +89,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "<Name> Ratio" or "<Name0> / <Name1>". A `Count` is its normalization's name over a symbol:
   "Count" over `N [#]`, "Normalized Count" over `N / N_max [#]`, "Probability Density" over
   `p`. Labels read the default when they render, so it also applies to plots already built.
+- `Scatter.make_plot(connect=True)` joins the drawn points with line segments in increasing
+  z, so with z the time of each point they trace its trajectory, and with another z how
+  (x, y) changes as z increases. Rows need not be sorted; equal z keep their row order. Each
+  segment is colored by the mean z of its two points through the points' colormap and norm,
+  so one colorbar serves both. `connect_kwargs` styles the segments. A point that is not drawn
+  (NaN, outside `mask` or `alim`, or <= 0 on a log axis) is skipped. Without a varying z, the
+  points are joined in row order in the points' color.
+- The Usage guide's "Individual points" shows `Scatter` colored by z, with `connect=True` on
+  shuffled rows, and without z, each figure drawn by the block beside it.
+- The Usage guide draws SILSO's 13-month smoothed sunspot number on a connected `Scatter`'s
+  time colorbar with `SIDC("m13").plot_on_colorbar`. The docs build and the plot-block test
+  read the series from a snapshot in `docs/source/_data` through a private download cache, so
+  neither needs the network.
 
 ### Changed
 

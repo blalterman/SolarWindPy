@@ -74,7 +74,7 @@ def test_spiral_and_scatter_of_signed_values_get_a_centred_scale():
     _, collection, _ = _spiral(SIGNED).make_plot(cbar=False)
     assert _centred(collection)
     assert collection.get_cmap().name == "RdBu_r"
-    _, points, _ = Scatter(X, Y, SIGNED).make_plot(cbar=False)
+    _, points, _, _ = Scatter(X, Y, SIGNED).make_plot(cbar=False)
     assert _centred(points)
     assert points.get_cmap().name == "RdBu_r"
 
