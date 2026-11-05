@@ -830,6 +830,14 @@ class AdaptiveMesh(Binning):
         r"""Number of mesh cells, e.g. ``"52 mesh cells"``, for a plot's ``repr``."""
         return f"{self._mesh.mesh.shape[0]} mesh cells"
 
+    def axis_extent(self, axis):
+        r"""``("mesh", lowest edge, highest edge)`` of the mesh along x or y."""
+        columns = {"x": (0, 1), "y": (2, 3)}.get(axis)
+        if columns is None:
+            return None
+        m = self._mesh.mesh
+        return "mesh", m[:, columns[0]].min(), m[:, columns[1]].max()
+
     def codes(self):
         r"""Cell of each kept row, -1 for a row outside the mesh."""
         bin_id = self._mesh.bin_id

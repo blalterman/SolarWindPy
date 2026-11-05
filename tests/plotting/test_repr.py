@@ -164,10 +164,7 @@ def test_hist1d_z_label_error_still_names_the_class():
 # Ranges: each axis line shows its bin range and the range of the data binned
 # ---------------------------------------------------------------------------
 
-_NO_RANGES = pytest.mark.xfail(strict=True, reason="the repr shows no ranges yet")
 
-
-@_NO_RANGES
 def test_hist2d_axes_show_bin_and_data_ranges_without_the_nan_rows():
     """Edges [0, 2, 4, 6] on both axes: 3 bins over [0, 6] each.
 
@@ -183,7 +180,6 @@ def test_hist2d_axes_show_bin_and_data_ranges_without_the_nan_rows():
     assert fields["z"] == "z  data [1, 6]"
 
 
-@_NO_RANGES
 def test_a_log_axis_shows_its_ranges_in_data_units():
     """log10 edges [0, 1, 2, 3] are bins over [1, 1000]; x spans 2 to 500.
 
@@ -196,7 +192,6 @@ def test_a_log_axis_shows_its_ranges_in_data_units():
     assert fields["x"] == "x  bins 3 [1, 1000]  data [2, 500]"
 
 
-@_NO_RANGES
 def test_numbers_are_shown_to_four_significant_figures():
     """x from 251.33 to 898.71 on edges 250 to 900 reads [251.3, 898.7].
 
@@ -218,7 +213,6 @@ def test_a_count_axis_has_no_data_range():
     assert fields["z"] == str(h.labels.z)
 
 
-@_NO_RANGES
 def test_spiral_axes_show_the_mesh_extent_and_data_ranges():
     """The mesh spans the initial edges, [0, 6] in x and [0, 4] in y.
 
@@ -232,7 +226,6 @@ def test_spiral_axes_show_the_mesh_extent_and_data_ranges():
     assert fields["y"] == "y  mesh [0, 4.04]  data [1, 3.5]"
 
 
-@_NO_RANGES
 def test_scatter_axes_show_data_ranges():
     """A scatter bins nothing: each axis shows its data range alone.
 
@@ -244,7 +237,6 @@ def test_scatter_axes_show_data_ranges():
     assert fields["z"] == "z  data [1, 6]"
 
 
-@_NO_RANGES
 @pytest.mark.parametrize("cls", [Hist1D, Hist2D, SpiralPlot2D, Scatter])
 def test_repr_of_an_unbuilt_plot_does_not_raise(cls):
     """A plot whose constructor never ran still has a one-line repr.

@@ -114,15 +114,18 @@ class Base(ABC):
     def __repr__(self):
         r"""A summary of what the plot holds, one ``key: value`` per line.
 
-        The class, then the x and y labels (and z when the plot has one), the
-        number of rows the plot keeps, the log flags, the fields
-        ``_repr_fields`` adds (binning, ``axnorm``, ``clim``, ``alim``), and
-        ``path``. ``print`` shows the same text.
+        The class, then one line per axis (x, y, and z when the plot has
+        one): its label, its bins (``_axis_extent``) and the range of the
+        data on it, then the number of rows the plot keeps, the log flags,
+        the fields ``_repr_fields`` adds (binning, ``axnorm``, ``clim``,
+        ``alim``), and ``path``. ``print`` shows the same text. A plot whose
+        constructor has not run shows its class and "(not built)".
         """
+        if "_labels" not in self.__dict__:
+            return f"{self.__class__.__name__} (not built)"
         labels = self._flat_labels()
-        fields = {k: labels[k] for k in ("x", "y")}
-        if self._has_z_label():
-            fields["z"] = labels["z"]
+        axes = ["x", "y", "z"] if self._has_z_label() else ["x", "y"]
+        fields = {k: self._axis_line(k, labels[k]) for k in axes}
         source = self.__dict__.get("_source")
         fields["observations"] = "none" if source is None else source.n_kept
         fields["log"] = ", ".join(f"{k}={v}" for k, v in self.log._asdict().items())
@@ -134,6 +137,42 @@ class Base(ABC):
     def _repr_fields(self):
         r"""Fields a subclass adds to ``repr`` before ``path``, as a dict; none here."""
         return {}
+
+    def _axis_extent(self, axis):
+        r"""``(prefix, lower, upper)`` of ``axis``'s bins on the binned scale, or None.
+
+        None here: the plot bins nothing. ``BinnedPlot`` asks its binning.
+        """
+        return None
+
+    def _axis_line(self, axis, label):
+        r"""One axis's ``repr`` line: label, bin range and data range.
+
+        Ranges are in data units: on a log axis the bins' edges and the binned
+        ``log10(abs())`` values are shown as 10 to that power, so the data
+        range is that of ``abs()``. Numbers have four significant figures.
+        The aggregated column shows no data range when the caller gave none
+        (a count).
+        """
+        parts = [label]
+        source = self.__dict__.get("_source")
+        logged = source is not None and source.is_logged(axis)
+
+        def fmt(v):
+            return f"{10.0**v if logged else v:.4g}"
+
+        extent = self._axis_extent(axis)
+        if extent is not None:
+            prefix, lower, upper = extent
+            parts.append(f"{prefix} [{fmt(lower)}, {fmt(upper)}]")
+        if source is not None and axis in source.columns:
+            coords = source.columns[:-1]
+            if axis in coords or source.has_value:
+                values = source.logged(axis, labels=False).to_numpy(dtype=float)
+                parts.append(
+                    f"data [{fmt(np.nanmin(values))}, {fmt(np.nanmax(values))}]"
+                )
+        return "  ".join(parts)
 
     @staticmethod
     def _format_limits(limits):
@@ -811,6 +850,11 @@ class BinnedPlot(Base):
     def binning(self):
         r"""The ``Binning`` that places each kept row in a cell."""
         return self._binning
+
+    def _axis_extent(self, axis):
+        r"""The binning's ``axis_extent``; None before the binning is built."""
+        binning = self.__dict__.get("_binning")
+        return None if binning is None else binning.axis_extent(axis)
 
     def _repr_fields(self):
         r"""Add the binning, ``axnorm`` and, when set, ``clim`` to ``repr``."""

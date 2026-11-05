@@ -57,8 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
   and a `Line` fit's `results`. It replaces the tutorial stub.
 - A summary `repr` for every plot (`Hist1D`, `Hist2D`, `SpiralPlot2D`, `Scatter`), shown by
-  Jupyter and `print`: the class, the x, y and z labels, the number of rows kept, the log flags,
-  the bins per axis (or mesh cells for `SpiralPlot2D`), `axnorm`, `clim` and `alim` when set,
+  Jupyter and `print`: the class; per axis its label, bin count and range (the mesh's extent on a
+  `SpiralPlot2D`) and the range of the data on it, in data units on a log axis, to four
+  significant figures (e.g. `x: v  bins 60 [250, 900]  data [251.3, 898.7]`); the number of rows
+  kept, the log flags, the bins per axis (or mesh cells), `axnorm`, `clim` and `alim` when set,
   and `path`. `str(plot)` is that summary, no longer just the class name.
 - `solarwindpy.core.plasma.Plasma.info` returns a one-column table summarising a plasma: the
   spacecraft and its frame (or "none"), the first and last observation times, the number of

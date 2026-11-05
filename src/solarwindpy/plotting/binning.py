@@ -60,6 +60,14 @@ class Binning(ABC):
         r"""One line naming how many cells there are, for a plot's ``repr``."""
         return f"{len(self.cells)} cells"
 
+    def axis_extent(self, axis):
+        r"""``(prefix, lower, upper)`` of the cells along ``axis``, for ``repr``.
+
+        On the binned scale (``log10`` on a log axis). None here, and for an
+        axis the binning does not bin.
+        """
+        return None
+
     def postfilter(self, agg):
         r"""Drop cells of ``agg``, indexed by cell code, that fail a quality filter.
 
@@ -600,6 +608,13 @@ class FixedGrid(Binning):
     def describe(self):
         r"""Bins per axis, e.g. ``"x: 4, y: 3"``, for a plot's ``repr``."""
         return ", ".join(f"{k}: {len(self.intervals[k])}" for k in self._axes)
+
+    def axis_extent(self, axis):
+        r"""``("bins n", first edge, last edge)`` of a binned axis, else None."""
+        if axis not in self._axes:
+            return None
+        edges = self.edges[axis]
+        return f"bins {len(edges) - 1}", edges[0], edges[-1]
 
     def cell_measure(self):
         r"""Each bin's width in 1-D, its area in 2-D, on the binned scale."""
