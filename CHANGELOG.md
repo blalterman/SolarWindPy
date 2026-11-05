@@ -9,13 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
-  `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
-  and a `Line` fit's `results`. It replaces the tutorial stub.
-- A "Make a Plot" section in the Usage guide: when to use `Hist1D`, `Hist2D`, `SpiralPlot2D`
-  and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
-  `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
-  runs each of those code blocks on its own.
 - `Scatter.make_plot(connect=True)` joins the drawn points with line segments in increasing
   z, so with z the time of each point they trace its trajectory, and with another z how
   (x, y) changes as z increases. Rows need not be sorted; equal z keep their row order. Each
@@ -29,6 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Scatter.make_plot` returns `(ax, points, segments, cbar)`: the `LineCollection` of the
   segments, or None without `connect=True`, sits before the colorbar. Unpack four values where
   three were unpacked before.
+
+## [0.4.1] - 2026-11-05
+
+### Added
+
+- A quickstart page that runs end to end on `solarwindpy.examples.load_plasma`: the
+  `M`/`C`/`S` columns, derived quantities with their units, an `"a+p1"` total, a `Hist2D`
+  and a `Line` fit's `results`. It replaces the tutorial stub.
+- A "Make a Plot" section in the Usage guide: when to use `Hist1D`, `Hist2D`, `SpiralPlot2D`
+  and `Scatter`, their bins, `axnorm` normalizations, contour smoothing, distribution edges and
+  `TeXlabel` labels, with figures drawn at build time by the code shown beside them. A test
+  runs each of those code blocks on its own.
+- The Usage guide shows how to share one `BinnedData` across several plots, with a
+  measurement of the time and memory it saves.
 
 ### Changed
 

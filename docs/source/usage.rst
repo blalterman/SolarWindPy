@@ -171,6 +171,18 @@ explains them.
    h1.set_labels(x=TeXlabel(("v", "", "p1")))
    h1.make_plot()
 
+Every plot also has a ``path``, built from its class, its labels and its axis
+scales, to file the figure under when you save it: join it to your figure
+directory and add an extension, as :doc:`tutorial/quickstart` does.
+
+>>> import pandas as pd
+>>> from solarwindpy.plotting.hist1d import Hist1D
+>>> from solarwindpy.plotting.labels.base import TeXlabel
+>>> h1 = Hist1D(pd.Series([380.0, 650.0], name="v"))
+>>> h1.set_labels(x=TeXlabel(("v", "", "p1")))
+>>> h1.path.as_posix()
+'Hist1D/v_p1/count/linX-linY'
+
 Two quantities
 ~~~~~~~~~~~~~~
 
@@ -206,7 +218,8 @@ edges of the occupied distribution
 Savitzky-Golay filter unless ``edges_kwargs=dict(smooth=False)``. The
 filter's default window is a tenth of the number of ``x`` bins, so with fewer
 than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
-``axnorm="t"``, explained in `Normalizations`_, scales the peak to 1:
+``axnorm="t"``, explained in `Normalizations`_, scales the peak to 1, and
+``use_contourf=True`` fills the contours:
 
 .. plot::
 
@@ -223,7 +236,36 @@ than 50 bins set ``window_length`` in ``edges_kwargs=dict(sg_kwargs=...)``. Here
 
    h2 = Hist2D(v, n, logy=True, nbins=50, axnorm="t")
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
-   h2.plot_contours(gaussian_filter_std=2, nan_aware_filter=True, plot_edges=True)
+   h2.plot_contours(
+       use_contourf=True, gaussian_filter_std=2, nan_aware_filter=True, plot_edges=True
+   )
+
+:py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_hist_with_contours` draws
+the histogram and its smoothed contours on the same axes, with one colorbar,
+the histogram's. Black contour lines (``contour_kwargs=dict(colors="k")``)
+stand out over the colored cells; the line style changes with the level:
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   from solarwindpy.plotting.hist2d import Hist2D
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(0)
+   N = 20_000
+   fast = rng.random(N) < 0.3
+   v = pd.Series(np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N)), name="v")
+   n = (8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N))).rename("n")
+
+   h2 = Hist2D(v, n, logy=True, nbins=50, axnorm="t")
+   h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
+   h2.plot_hist_with_contours(
+       use_contourf=False,
+       contour_kwargs=dict(colors="k"),
+       gaussian_filter_std=2,
+       nan_aware_filter=True,
+   )
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot` draws the
 histogram with its projections on the top and right margins. Each margin is a
@@ -334,6 +376,94 @@ Edges given as an array are used as given:
 >>> v = pd.Series(rng.normal(400, 50, 1000), name="v")
 >>> Hist1D(v, nbins=[250, 350, 450, 550]).intervals["x"]
 IntervalIndex([(250, 350], (350, 450], (450, 550]], dtype='interval[int64, right]')
+
+Share bins across plots
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Plots over the same columns and bins can share one
+:py:class:`~solarwindpy.plotting.binned.BinnedData`. It bins each column once,
+when it is built, and stores the bin of every row as a small integer code.
+Passed as ``nbins``, it gives a :py:class:`~solarwindpy.plotting.hist1d.Hist1D`
+or :py:class:`~solarwindpy.plotting.hist2d.Hist2D` its bins and codes, so the
+plot neither bins nor stores its own. A plot finds its columns by the names of
+its inputs, so build the ``BinnedData`` from a DataFrame whose columns carry
+those names, and pass that frame's columns. It takes explicit edges only: a
+count or a rule would give each plot edges that depend on the rows it keeps.
+``log`` names the columns binned in :math:`\log_{10}`, and the plots take
+their log axes from it. A plot's ``mask`` keeps a subset of the rows on the
+same bins:
+
+>>> import numpy as np
+>>> import pandas as pd
+>>> from solarwindpy.plotting.binned import BinnedData
+>>> from solarwindpy.plotting.hist2d import Hist2D
+>>> rng = np.random.default_rng(0)
+>>> N = 10_000
+>>> fast = rng.random(N) < 0.3
+>>> speed = np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N))
+>>> frame = pd.DataFrame(
+...     {
+...         "v": speed,
+...         "n": 8 * 10 ** (-0.0015 * (speed - 400) + rng.normal(0, 0.15, N)),
+...         "w": 0.1 * speed + rng.normal(0, 5, N),
+...     }
+... )
+>>> edges = {"v": np.linspace(0, 1000, 51), "n": np.linspace(-1, 2.5, 36)}
+>>> binned = BinnedData(frame, edges, log={"n": True})
+>>> binned.codes("v").dtype
+dtype('int8')
+>>> counts = Hist2D(frame["v"], frame["n"], nbins=binned)
+>>> mean_w = Hist2D(frame["v"], frame["n"], frame["w"], nbins=binned)
+>>> slow = Hist2D(frame["v"], frame["n"], nbins=binned, mask=frame["v"] < 500)
+>>> counts.agg().index.equals(mean_w.agg().index)
+True
+>>> int(counts.agg().sum()), int(slow.agg().sum())
+(10000, 6947)
+
+Sharing saves time and memory. On an Apple M3 (Python 3.12, pandas 3.1,
+NumPy 2.5), building and aggregating ten ``Hist2D`` of different ``z`` over
+one 70 by 50 grid of :math:`10^6` points took 0.28 s with a shared
+``BinnedData`` and 0.57 s when each plot binned its own columns, the median of
+three runs. Measured with :mod:`tracemalloc`, which counts Python and NumPy
+allocations, the ten plots and their aggregates kept 3 MB against 21 MB, and
+the build peaked at 60 MB against 79 MB.
+
+Two plots on one ``BinnedData``, the counts and the mean thermal speed in each
+cell:
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
+   from solarwindpy.plotting.binned import BinnedData
+   from solarwindpy.plotting.hist2d import Hist2D
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(0)
+   N = 20_000
+   fast = rng.random(N) < 0.3
+   v = np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N))
+   frame = pd.DataFrame(
+       {
+           "v": v,
+           "n": 8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N)),
+           "w": 0.1 * v + rng.normal(0, 5, N),
+       }
+   )
+   edges = {"v": np.linspace(150, 950, 51), "n": np.linspace(-0.2, 1.8, 41)}
+   binned = BinnedData(frame, edges, log={"n": True})
+
+   counts = Hist2D(frame["v"], frame["n"], nbins=binned)
+   mean_w = Hist2D(frame["v"], frame["n"], frame["w"], nbins=binned)
+   mean_w.set_labels(z=TeXlabel(("w", "", "p1")))
+
+   fig, axes = plt.subplots(1, 2, figsize=(9, 4), sharey=True)
+   for h2, ax in zip([counts, mean_w], axes):
+       h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
+       h2.make_plot(ax=ax)
+   axes[1].set_ylabel("")
+   fig.tight_layout()
 
 Normalizations
 ~~~~~~~~~~~~~~
@@ -471,19 +601,24 @@ an annotation with the fit function, its parameters and their uncertainties,
 and the reduced chi-squared of each kind. The bottom panel shows the residuals,
 observed minus fitted, against ``x``; the default ``resid_pct=True`` shows them
 in percent of the fit instead, which is large wherever the fit nears zero.
-The Gaussian is the seeded, noisy one whose results table
+The plotter labels its axes ``x`` and ``y`` until its ``set_labels`` sets
+them, as for the plots above; here the counts of a velocity component. The
+Gaussian is the seeded, noisy one whose results table
 :doc:`tutorial/quickstart` prints:
 
 .. plot::
 
    import numpy as np
    from solarwindpy.fitfunctions.gaussians import Gaussian
+   from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.plotting.labels.special import Count
 
    rng = np.random.default_rng(1)
    x = np.linspace(-5, 5, 41)
    y = 10.0 * np.exp(-0.5 * ((x - 0.5) / 1.2) ** 2) + rng.normal(0.0, 0.3, x.size)
    fit = Gaussian(x, y)
    fit.make_fit()
+   fit.plotter.set_labels(x=TeXlabel(("v", "x", "p1")), y=Count())
    fit.plotter.plot_raw_used_fit_resid(resid_kwargs=dict(resid_pct=False))
 
 Next Steps

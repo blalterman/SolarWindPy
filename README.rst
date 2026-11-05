@@ -110,12 +110,9 @@ Development
 
       pre-commit install
 
-   Each commit then runs ``ruff check``, ``ruff format`` and whitespace,
-   merge-conflict and large-file checks on staged Python files, ``doc8`` on
-   staged ``.rst``, ``.md`` and ``.py`` files, and the conventional-commit check
-   on the message. A commit that stages a ``.py`` file also runs the full test
-   suite with a coverage floor (``.claude/hooks/pre-commit-tests.sh``), and one
-   that stages a Python file under ``src/solarwindpy`` runs an import test.
+   Each commit then runs the hooks that ``.pre-commit-config.yaml`` lists, and
+   that file is the full list. Expect a commit that stages a ``.py`` file to
+   run the full test suite.
 
 5. Build the documentation and fail on warnings:
 

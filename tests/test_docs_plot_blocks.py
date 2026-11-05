@@ -27,11 +27,15 @@ if not DOCS.is_dir():
         allow_module_level=True,
     )
 
-_DIRECTIVE = re.compile(r"^(\s*)\.\. plot::\s*$")
+_DIRECTIVE = re.compile(r"^(\s*)\.\. plot::(.*)$")
 
 
 def _plot_blocks(path):
-    """Yield ``(line, code)`` for each inline ``.. plot::`` block in ``path``."""
+    """Yield ``(line, argument, code)`` for each ``.. plot::`` block in ``path``.
+
+    ``argument`` is the text after ``plot::``, empty for an inline block, and
+    ``code`` is the block's body without its options.
+    """
     lines = path.read_text().splitlines()
     for i, line in enumerate(lines):
         match = _DIRECTIVE.match(line)
@@ -46,15 +50,17 @@ def _plot_blocks(path):
         # Drop the directive's options, then the blank line after them.
         while body and (not body[0].strip() or body[0].strip().startswith(":")):
             body.pop(0)
-        width = min(len(b) - len(b.lstrip()) for b in body if b.strip())
-        yield i + 1, "\n".join(b[width:] for b in body).strip() + "\n"
+        width = min((len(b) - len(b.lstrip()) for b in body if b.strip()), default=0)
+        code = "\n".join(b[width:] for b in body).strip()
+        yield i + 1, match.group(2).strip(), code + "\n" if code else ""
 
 
-BLOCKS = [
-    pytest.param(code, id=f"{path.relative_to(DOCS)}:{line}")
+FOUND = [
+    (f"{path.relative_to(DOCS)}:{line}", argument, code)
     for path in sorted(DOCS.rglob("*.rst"))
-    for line, code in _plot_blocks(path)
+    for line, argument, code in _plot_blocks(path)
 ]
+BLOCKS = [pytest.param(code, id=where) for where, _, code in FOUND]
 
 
 def test_the_guide_has_plot_blocks():
@@ -62,9 +68,16 @@ def test_the_guide_has_plot_blocks():
     assert BLOCKS
 
 
+def test_every_plot_block_holds_its_code_inline():
+    """No block names a script: the code a reader copies is on the page."""
+    named = [f"{where}: plot:: {argument}" for where, argument, _ in FOUND if argument]
+    assert not named, named
+
+
 @pytest.mark.parametrize("code", BLOCKS)
-def test_plot_block_runs_alone(code):
+def test_plot_block_runs_alone(code, request):
     """A block runs with nothing defined beforehand and draws a figure."""
+    assert code, f"{request.node.callspec.id}: the plot block is empty"
     try:
         exec(compile(code, "<plot block>", "exec"), {"__name__": "__main__"})
         assert plt.get_fignums(), "the block drew no figure"
