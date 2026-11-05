@@ -60,11 +60,26 @@ def _plot_blocks(path):
         yield i + 1, match.group(2).strip(), code + "\n" if code else ""
 
 
-FOUND = [
-    (f"{path.relative_to(DOCS)}:{line}", argument, code)
-    for path in sorted(DOCS.rglob("*.rst"))
-    for line, argument, code in _plot_blocks(path)
-]
+def _found(root):
+    """``(where, argument, code)`` of every ``.. plot::`` block under ``root``."""
+    return [
+        (f"{path.relative_to(root)}:{line}", argument, code)
+        for path in sorted(root.rglob("*.rst"))
+        for line, argument, code in _plot_blocks(path)
+    ]
+
+
+def _named(found):
+    """The blocks that name a script instead of holding their code."""
+    return [f"{where}: plot:: {argument}" for where, argument, _ in found if argument]
+
+
+def _empty(found):
+    """The inline blocks with no code."""
+    return [where for where, argument, code in found if not argument and not code]
+
+
+FOUND = _found(DOCS)
 BLOCKS = [pytest.param(code, id=where) for where, _, code in FOUND]
 
 
@@ -75,8 +90,45 @@ def test_the_guide_has_plot_blocks():
 
 def test_every_plot_block_holds_its_code_inline():
     """No block names a script: the code a reader copies is on the page."""
-    named = [f"{where}: plot:: {argument}" for where, argument, _ in FOUND if argument]
+    named = _named(FOUND)
     assert not named, named
+
+
+def test_no_plot_block_is_empty():
+    """Every inline block holds code, so each figure has code beside it."""
+    empty = _empty(FOUND)
+    assert not empty, empty
+
+
+def test_the_guards_catch_an_empty_and_a_named_block(tmp_path):
+    """The collector and both guards fire on a page that breaks them.
+
+    A page with an empty inline block (options only), a block naming a
+    script, and one good block: the guards name exactly the two bad ones.
+
+    ON FAILURE: the code is wrong -- the collector misreads a block, so the
+    guards above can pass on a page that breaks them.
+    """
+    (tmp_path / "page.rst").write_text(
+        "Title\n"
+        "=====\n"
+        "\n"
+        ".. plot::\n"
+        "   :include-source: false\n"
+        "\n"
+        "Some text.\n"
+        "\n"
+        ".. plot:: figure.py\n"
+        "\n"
+        ".. plot::\n"
+        "\n"
+        "   import matplotlib.pyplot as plt\n"
+        "   plt.plot([0, 1])\n"
+    )
+    found = _found(tmp_path)
+    assert len(found) == 3
+    assert _empty(found) == ["page.rst:4"]
+    assert _named(found) == ["page.rst:9: plot:: figure.py"]
 
 
 def _no_download(url, cache):
