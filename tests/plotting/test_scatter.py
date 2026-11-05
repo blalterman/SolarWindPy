@@ -382,13 +382,20 @@ def test_scatter_figure_renders_to_png():
 
 
 # ---------------------------------------------------------------------------
-# edges: line segments joining consecutive points, in source row order. EZ is
-# chosen so each segment's mean z, (z[i] + z[i+1]) / 2, is distinct.
+# connect: line segments joining the drawn points in increasing z, row order
+# without a varying z. EZ is not sorted, so z order differs from row order:
+# rows by increasing z are 0, 1, 3, 4, 2, and each segment's mean z is
+# distinct.
 # ---------------------------------------------------------------------------
 
 EX = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
 EY = np.array([0.0, 1.0, 0.0, 1.0, 0.0])
 EZ = np.array([0.0, 2.0, 9.0, 6.0, 8.0])
+Z_ORDER = [(0, 1), (1, 3), (3, 4), (4, 2)]
+
+_CONNECT_PENDING = pytest.mark.xfail(
+    strict=True, reason="Scatter.make_plot(connect=True) is not implemented"
+)
 
 
 def _segments(x, y, pairs):
@@ -402,8 +409,13 @@ def _assert_segments(lc, x, y, pairs):
         np.testing.assert_array_equal(g, e)
 
 
-def test_make_plot_returns_ax_points_edges_then_cbar(ax):
-    """``(ax, points, edges, cbar)``; edges is None unless ``edges=True``.
+def _mean_z(z, pairs):
+    return [(z[i] + z[j]) / 2 for i, j in pairs]
+
+
+@_CONNECT_PENDING
+def test_make_plot_returns_ax_points_segments_then_cbar(ax):
+    """``(ax, points, segments, cbar)``; segments is None unless ``connect=True``.
 
     ON FAILURE: the code is wrong.
     """
@@ -415,30 +427,58 @@ def test_make_plot_returns_ax_points_edges_then_cbar(ax):
     assert isinstance(out[3], Colorbar)
     assert not any(isinstance(c, LineCollection) for c in ax.collections)
 
-    out = Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True)
+    out = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
     assert len(out) == 4
     assert isinstance(out[2], LineCollection)
     assert out[2] in ax.collections
 
 
-def test_edges_join_each_pair_of_consecutive_points(ax):
-    """n points in row order give n - 1 segments, point i to point i + 1.
+@_CONNECT_PENDING
+def test_connect_joins_the_points_in_increasing_z(ax):
+    """n drawn points give n - 1 segments, each to the point next in z.
 
     ON FAILURE: the code is wrong.
     """
-    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True)
-    _assert_segments(lc, EX, EY, [(0, 1), (1, 2), (2, 3), (3, 4)])
+    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, Z_ORDER)
 
 
-def test_edge_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(ax):
-    """Segment i is ``cmap(norm((z[i] + z[i+1]) / 2))``: one colorbar serves both.
+@_CONNECT_PENDING
+def test_connect_does_not_depend_on_row_order(ax):
+    """Shuffled rows, with shuffled labels, give the same segments in z order.
+
+    ON FAILURE: the code is wrong.
+    """
+    perm = np.array([3, 0, 4, 2, 1])
+    x, y, z = (pd.Series(v[perm], index=perm[::-1]) for v in (EX, EY, EZ))
+    _, _, lc, _ = Scatter(x, y, z).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, Z_ORDER)
+    np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, Z_ORDER))
+
+
+@_CONNECT_PENDING
+def test_points_with_equal_z_keep_their_row_order(ax):
+    """The sort on z is stable: tied points are joined in the order given.
+
+    ON FAILURE: the code is wrong.
+    """
+    z = np.array([1.0, 0.0, 1.0, 0.0, 2.0])
+    _, _, lc, _ = Scatter(EX, EY, z).make_plot(ax=ax, connect=True)
+    _assert_segments(lc, EX, EY, [(1, 3), (3, 0), (0, 2), (2, 4)])
+
+
+@_CONNECT_PENDING
+def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
+    ax,
+):
+    """A segment is ``cmap(norm((z_a + z_b) / 2))``: one colorbar serves both.
 
     ON FAILURE: the code is wrong.
     """
     _, points, lc, cbar = Scatter(EX, EY, EZ).make_plot(
-        ax=ax, edges=True, cmap="plasma"
+        ax=ax, connect=True, cmap="plasma"
     )
-    mean = (EZ[:-1] + EZ[1:]) / 2
+    mean = _mean_z(EZ, Z_ORDER)
     np.testing.assert_array_equal(lc.get_array(), mean)
     assert lc.norm is points.norm
     assert lc.get_cmap() is points.get_cmap()
@@ -449,119 +489,109 @@ def test_edge_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(ax)
     assert cbar.mappable is points
 
 
-def test_edges_follow_a_norm_the_caller_passes(ax):
-    """``vmin``/``vmax`` given to the points also set the edges' colours.
+@_CONNECT_PENDING
+def test_segments_follow_a_norm_the_caller_passes(ax):
+    """``vmin``/``vmax`` given to the points also set the segments' colours.
 
     ON FAILURE: the code is wrong.
     """
     _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(
-        ax=ax, edges=True, vmin=0.0, vmax=20.0
+        ax=ax, connect=True, vmin=0.0, vmax=20.0
     )
     assert lc.norm is points.norm
     assert (lc.norm.vmin, lc.norm.vmax) == (0.0, 20.0)
 
 
-def test_a_point_with_nan_breaks_the_chain(ax):
-    """A dropped NaN point removes both its segments; no segment bridges it.
+def _nan_y_at_3():
+    y = EY.copy()
+    y[3] = np.nan
+    return Scatter(EX, y, EZ), EX, y
 
+
+def _alim_hides_2():
+    sc = Scatter(EX, EY, EZ)
+    sc.set_alim(None, 8.0)
+    return sc, EX, EY
+
+
+def _mask_drops_1():
+    mask = pd.Series([True, False, True, True, True])
+    return Scatter(EX, EY, EZ, mask=mask), EX, EY
+
+
+def _log_x_drops_3():
+    x = EX + 1.0
+    x[3] = -1.0
+    sc = Scatter(x, EY, EZ)
+    sc.set_log(x=True)
+    return sc, x, EY
+
+
+@_CONNECT_PENDING
+@pytest.mark.parametrize(
+    "build, pairs",
+    [
+        (_nan_y_at_3, [(0, 1), (1, 4), (4, 2)]),
+        (_alim_hides_2, [(0, 1), (1, 3), (3, 4)]),
+        (_mask_drops_1, [(0, 3), (3, 4), (4, 2)]),
+        (_log_x_drops_3, [(0, 1), (1, 4), (4, 2)]),
+    ],
+    ids=["nan", "alim", "mask", "log-nonpositive"],
+)
+def test_a_point_not_drawn_is_skipped_not_a_gap(ax, build, pairs):
+    """A point that is not drawn is left out: its z neighbours are joined.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc, x, y = build()
+    _, _, lc, _ = sc.make_plot(ax=ax, connect=True)
+    _assert_segments(lc, x, y, pairs)
+    np.testing.assert_array_equal(lc.get_array(), _mean_z(EZ, pairs))
+
+
+@_CONNECT_PENDING
+@pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
+def test_without_varying_z_points_are_joined_in_row_order_in_one_colour(ax, z):
+    """With no z, or a constant one, segments follow the rows, in the points' colour.
+
+    A point that is not drawn (here a NaN y) is skipped there too.
     ON FAILURE: the code is wrong.
     """
     y = EY.copy()
     y[2] = np.nan
-    _, _, lc, _ = Scatter(EX, y, EZ).make_plot(ax=ax, edges=True)
-    _assert_segments(lc, EX, y, [(0, 1), (3, 4)])
-    np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])
-
-
-def test_a_point_outside_alim_breaks_the_chain(ax):
-    """A point ``alim`` hides drops both its segments, as a NaN point does.
-
-    EZ[2] = 9 is the only z above 8, so two segments go, not one.
-    ON FAILURE: the code is wrong.
-    """
-    sc = Scatter(EX, EY, EZ)
-    sc.set_alim(None, 8.0)
-    _, _, lc, _ = sc.make_plot(ax=ax, edges=True)
-    _assert_segments(lc, EX, EY, [(0, 1), (3, 4)])
-    np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])
-
-
-def test_a_masked_point_breaks_the_chain(ax):
-    """A point ``mask`` excludes drops both its segments.
-
-    ON FAILURE: the code is wrong.
-    """
-    mask = pd.Series([True, True, True, False, True])
-    _, _, lc, _ = Scatter(EX, EY, EZ, mask=mask).make_plot(ax=ax, edges=True)
-    _assert_segments(lc, EX, EY, [(0, 1), (1, 2)])
-
-
-def test_consecutive_is_row_position_not_label(ax):
-    """Rows are joined in the order given, even with repeated or unsorted labels.
-
-    ON FAILURE: the code is wrong.
-    """
-    index = [3, 3, 1, 0, 2]
-    x, y, z = (pd.Series(v, index=index) for v in (EX, EY, EZ))
-    _, _, lc, _ = Scatter(x, y, z).make_plot(ax=ax, edges=True)
-    _assert_segments(lc, EX, EY, [(0, 1), (1, 2), (2, 3), (3, 4)])
-
-
-@pytest.mark.parametrize("z", [None, pd.Series(7.0, index=range(EX.size))])
-def test_edges_without_varying_z_have_one_colour(ax, z):
-    """With no z, or a constant one, every segment has the points' colour.
-
-    ON FAILURE: the code is wrong.
-    """
-    _, points, lc, cbar = Scatter(EX, EY, z).make_plot(ax=ax, edges=True)
+    _, points, lc, cbar = Scatter(EX, y, z).make_plot(ax=ax, connect=True)
     assert cbar is None
     assert lc.get_array() is None
-    _assert_segments(lc, EX, EY, [(0, 1), (1, 2), (2, 3), (3, 4)])
+    _assert_segments(lc, EX, y, [(0, 1), (1, 3), (3, 4)])
     colors = lc.get_edgecolor()
     assert len(colors) == 1
     np.testing.assert_array_equal(colors[0], points.get_facecolor()[0])
 
 
-def test_edges_sit_below_the_points_and_take_edge_kwargs(ax):
-    """Edges default to beneath the markers; ``edge_kwargs`` styles them.
+@_CONNECT_PENDING
+def test_segments_sit_below_the_points_and_take_connect_kwargs(ax):
+    """Segments default to beneath the markers; ``connect_kwargs`` styles them.
 
     ON FAILURE: the code is wrong.
     """
-    _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True)
+    _, points, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
     assert lc.get_zorder() < points.get_zorder()
 
     kwargs = {"linewidth": 3.0, "alpha": 0.4, "zorder": 5}
-    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True, edge_kwargs=kwargs)
+    _, _, lc, _ = Scatter(EX, EY, EZ).make_plot(
+        ax=ax, connect=True, connect_kwargs=kwargs
+    )
     assert kwargs == {"linewidth": 3.0, "alpha": 0.4, "zorder": 5}
     np.testing.assert_array_equal(lc.get_linewidth(), [3.0])
     assert (lc.get_alpha(), lc.get_zorder()) == (0.4, 5)
 
 
-def test_edges_do_not_change_the_axis_limits(ax):
-    """The view fits the points with or without edges.
+@_CONNECT_PENDING
+def test_segments_do_not_change_the_axis_limits(ax):
+    """The view fits the points with or without segments.
 
     ON FAILURE: the code is wrong.
     """
-    Scatter(EX, EY, EZ).make_plot(ax=ax, edges=True)
+    Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
     assert ax.get_xlim() == (EX.min(), EX.max())
     assert ax.get_ylim() == (EY.min(), EY.max())
-
-
-@pytest.mark.parametrize("axis", ["x", "y"])
-def test_a_point_a_log_axis_cannot_show_breaks_the_chain(ax, axis):
-    """A nonpositive value on a log axis is not drawn, so it breaks the chain.
-
-    ``Scatter`` keeps such rows and matplotlib drops them from a log axis;
-    the edges must not run to them. ``set_log`` after construction counts.
-    ON FAILURE: the code is wrong.
-    """
-    x, y = EX + 1.0, EY + 1.0
-    if axis == "x":
-        x[2] = -1.0
-    else:
-        y[2] = 0.0
-    sc = Scatter(x, y, EZ)
-    sc.set_log(**{axis: True})
-    _, _, lc, _ = sc.make_plot(ax=ax, edges=True)
-    _assert_segments(lc, x, y, [(0, 1), (3, 4)])
-    np.testing.assert_array_equal(lc.get_array(), [1.0, 7.0])
