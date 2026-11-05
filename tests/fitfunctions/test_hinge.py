@@ -2435,9 +2435,6 @@ def test_hingeatpoint_psigma_values_are_positive(noisy_hingeatpoint_data):
             [1.0, 1.0],
             [433.0, 4.19, 302.0, 0.0010],
             id="one-distinct-x",
-            marks=pytest.mark.xfail(
-                strict=True, reason="reference start moves to the paper fit"
-            ),
         ),
         # Positive control: rising slope 1 through (1, 2) and (2, 3), so
         # x1 = h - yh / m1 = 5 - 10 / 1 = -5; the flat plateau gives m2 = 0.

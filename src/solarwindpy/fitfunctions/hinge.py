@@ -108,17 +108,20 @@ class Hinge(FitFunction):
     -----
     When the data give no estimate, the all-ones default start is a singular
     point of these models (the two lines' intercepts coincide), so ``p0``
-    logs a warning and returns the package author's reference hinge instead,
-    translated to the class's parameters: the hinge
-    :math:`(x_h, y_h) = (433, 4.12)`, the rising line's x-intercept
-    :math:`x_1 = 250`, its slope :math:`m_1 = y_h / (x_h - x_1) = 4.12 / 183`,
-    a small non-zero plateau slope :math:`m_2 = 0.01\,m_1`, and the plateau
-    line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -17867`, which puts that
-    line through the hinge.
+    logs a warning and returns the reference hinge instead, translated to the
+    class's parameters. The reference hinge is the package author's fit of
+    the Wind:SWE helium abundance against solar wind speed,
+    https://doi.org/10.3847/2041-8213/adb48e: the saturation point
+    :math:`(x_h, y_h) = (433, 4.19)` (uncertainties 4 and 0.05), the rising
+    line's x-intercept, the vanishing speed, :math:`x_1 = 302` (uncertainty
+    4), and the fast-wind slope :math:`m_2 = 0.0010` (uncertainty 0.0002).
+    The rising line's slope :math:`m_1 = y_h / (x_h - x_1) = 4.19 / 131` and
+    the plateau line's x-intercept :math:`x_2 = x_h - y_h / m_2 = -3757`,
+    which puts that line through the hinge, follow from them.
 
     The same reference hinge is a useful explicit start for solar wind speed
     trends: ``HingeAtPoint(v, y, guess_xh=433)`` splits at 433 km/s, and
-    ``make_fit(p0=...)`` starts from the full hinge when :math:`y_h = 4.12`
+    ``make_fit(p0=...)`` starts from the full hinge when :math:`y_h = 4.19`
     matters too. It is a usage note: it is not ``guess_xh``'s default.
 
     Examples
@@ -138,15 +141,16 @@ class Hinge(FitFunction):
     estimate, so ``p0`` logs a warning and returns the reference hinge:
 
     >>> [f"{v:.4g}" for v in TwoLine(x, y, guess_xh=20.0).p0]
-    ['250', '-1.787e+04', '0.02251', '0.0002251']
+    ['302', '-3757', '0.03198', '0.001']
     """
 
-    # The author's reference hinge, described in the class Notes.
+    # The reference hinge, described and cited in the class Notes: the
+    # paper's four fitted values, and the two parameters derived from them.
     _XH = 433.0
-    _YH = 4.12
-    _X1 = 250.0
+    _YH = 4.19
+    _X1 = 302.0
+    _M2 = 0.0010
     _M1 = _YH / (_XH - _X1)
-    _M2 = 0.01 * _M1
     _X2 = _XH - _YH / _M2
 
     #: TeX of every hinge parameter, as the model strings write it.
@@ -202,10 +206,6 @@ class Hinge(FitFunction):
         ------
         ~solarwindpy.fitfunctions.core.InsufficientDataError
             If fewer observations are used than the model has parameters.
-        NotImplementedError
-            If the data give no estimate and the class has no reference start
-            yet (:class:`HingeMax`); no warning is logged first. Pass ``p0=``
-            to :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
         """
         self._require_sufficient_data()
         estimate = self._estimate()
@@ -215,14 +215,12 @@ class Hinge(FitFunction):
             if not np.isfinite(value)
         }
         if bad:
-            # A class with no reference start raises here, before the warning.
-            start = self._reference_start()
             self.logger.warning(
                 f"The data gave no estimate. Undefined estimates {bad}; "
                 f"the {type(self).__name__} class description states when an "
                 "estimate is undefined."
             )
-            return start
+            return self._reference_start()
         return estimate
 
     @abstractmethod
@@ -989,12 +987,10 @@ class HingeMax(HingeMin):
     Notes
     -----
     ``p0`` estimates ``[m1, x1, x2, xh]`` as :class:`HingeMin` does, and an
-    estimate is undefined in the same cases. HingeMax has no reference start
-    yet: its shape differs from the reference hinge of :class:`Hinge` that
-    the other hinge classes start from when the data give no estimate, and
-    the author has not chosen one. In that case ``p0`` raises
-    ``NotImplementedError`` without logging a warning; pass ``p0=`` to
-    :meth:`~solarwindpy.fitfunctions.core.FitFunction.make_fit`.
+    estimate is undefined in the same cases. Its reference start is
+    HingeMin's, the reference hinge of :class:`Hinge` as
+    ``[m1, x1, x2, xh]``: combined with the maximum, the same two lines give
+    a convex start that hinges at the same point.
 
     Examples
     --------
@@ -1009,11 +1005,6 @@ class HingeMax(HingeMin):
     """
 
     _combine = staticmethod(np.maximum)
-
-    def _reference_start(self):
-        raise NotImplementedError(
-            "HingeMax has no reference start defined yet; pass p0= to make_fit."
-        )
 
     @property
     def TeX_function(self) -> str:

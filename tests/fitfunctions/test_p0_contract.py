@@ -401,7 +401,6 @@ def test_impossible_estimate_gives_none_and_fits_from_the_feasible_default(
         assert fit.popt == explicit.popt
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, caplog):
     """A hinge input with no estimate: ``p0`` is the author's point, with a warning.
@@ -429,7 +428,6 @@ def test_hinge_without_estimate_returns_the_reference_start(cls, x, y, kwargs, c
     assert "initial guess is not finite" not in str(got), got
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_hinge_without_estimate_checks_before_dividing(cls, x, y, kwargs):
     """An undefined hinge estimate comes from a check, not a numpy warning.
@@ -495,7 +493,6 @@ def test_the_hinge_cases_cover_every_hinge_class():
     assert covered == _concrete_hinge_classes() == six, covered
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
     cls, x, y, kwargs
@@ -512,7 +509,6 @@ def test_each_hinge_class_is_a_hinge_and_returns_its_translated_reference(
     assert fit.p0 == exact(HINGE_START[cls]), fit.p0
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize("cls, x, y, kwargs", HINGE_IMPOSSIBLE)
 def test_each_reference_start_passes_through_the_paper_saturation_point(
     cls, x, y, kwargs
@@ -537,24 +533,7 @@ def _notes(doc):
     return " ".join(rest.split("\n\n", 1)[0].split())
 
 
-@pytest.mark.parametrize(
-    "cls",
-    [
-        pytest.param(
-            cls,
-            marks=(
-                [
-                    pytest.mark.xfail(
-                        strict=True, reason="HingeMax gains a reference start"
-                    )
-                ]
-                if cls is HingeMax
-                else []
-            ),
-        )
-        for cls in sorted(_concrete_hinge_classes(), key=str)
-    ],
-)
+@pytest.mark.parametrize("cls", sorted(_concrete_hinge_classes(), key=str))
 def test_each_hinge_class_describes_its_estimate_and_inherits_p0(cls):
     """A hinge class's Notes describe its estimate; its ``p0`` is ``Hinge.p0``.
 
@@ -594,7 +573,6 @@ def _reference_hinge_in_hinge_notes():
     return found
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 def test_the_hinge_notes_state_the_stored_reference_hinge():
     """The numbers in ``Hinge``'s Notes are the stored reference hinge.
 
@@ -619,7 +597,6 @@ def test_the_hinge_notes_state_the_stored_reference_hinge():
     assert x2 == exact(Hinge._X2), found
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 def test_the_reference_hinge_is_the_paper_fit():
     """``Hinge`` stores the fit of doi:10.3847/2041-8213/adb48e.
 
@@ -709,7 +686,6 @@ HX = np.array([0.0, 1, 2, 3, 4, 5])
 HY = np.array([0.0, 1, 2, 2, 1, 0])
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize(
     "cls, kwarg", [(HingeMin, "guess_xh"), (HingeAtPoint, "guess_xh")]
 )
@@ -834,7 +810,6 @@ def test_a_point_at_the_hinge_belongs_to_the_documented_side(
     assert cls(x, y, **kwargs).p0 == exact(expected)
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 @pytest.mark.parametrize(
     "cls, kwargs",
     [
@@ -872,7 +847,6 @@ def test_a_repeated_point_on_twoline_lower_side_is_skipped():
     assert TwoLine(x, y, guess_xh=1.5).p0 == exact([0.0, 5.0, 1.0, -1.0])
 
 
-@pytest.mark.xfail(strict=True, reason="reference start moves to the paper fit")
 def test_opposite_vertical_steps_at_the_median_give_no_estimate_quietly():
     """Slopes -inf and +inf at the middle make TwoLine's lower slope undefined.
 
