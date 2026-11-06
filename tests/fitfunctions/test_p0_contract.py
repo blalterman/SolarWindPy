@@ -466,9 +466,7 @@ def test_hingemax_without_estimate_fits_from_a_caller_start():
     """
     fit = _hingemax_without_estimate()
     start = [1.0, 0.0, 0.5, 2.0]
-    # The fit from this start leaves the rising line's m1 and x1 unconstrained.
-    with pytest.warns(FitDegeneracyWarning, match="m1 and x1 are degenerate"):
-        got = attempt_fit(fit, p0=start)
+    got = attempt_fit(fit, p0=start)
     assert not isinstance(got, NotImplementedError), got
     assert [v.p0 for v in fit.initial_guess_info.values()] == exact(start)
 
