@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-05
+
 ### Changed
 
 - Dependency floors raised to the oldest versions that install together on Python 3.12 and pass
