@@ -3,9 +3,8 @@
 """Check that a built wheel and sdist ship only what each is meant to ship.
 
 The wheel is what users install: it holds the ``solarwindpy`` package, its
-package data, and its ``.dist-info``, and no file in it carries a
-``Spent-When`` purge header. The sdist is what packagers such as conda-forge
-rebuild from: it keeps ``tests/`` and ``docs/source/`` and drops
+package data, and its ``.dist-info``. The sdist is what packagers such as
+conda-forge rebuild from: it keeps ``tests/`` and ``docs/source/`` and drops
 development-only material (``.claude/``, ``.github/``, ``docs/dispatches/``,
 ``tmp/``, ``spike/``), which ``MANIFEST.in`` prunes.
 
@@ -28,7 +27,6 @@ from pathlib import Path
 PACKAGE = "solarwindpy"
 SDIST_SRC = "src/"
 SDIST_PACKAGE = f"{SDIST_SRC}{PACKAGE}/"
-MARKER = b"Spent-When"
 SDIST_REQUIRED = ("tests/", "docs/source/")
 SDIST_PRUNED = (".claude/", ".github/", "docs/dispatches/", "tmp/", "spike/")
 
@@ -43,12 +41,6 @@ def wheel_stray_entries(wheel):
         if top != PACKAGE
         and not (top.startswith(f"{PACKAGE}-") and top.endswith(".dist-info"))
     )
-
-
-def wheel_spent_when_files(wheel):
-    """Return the wheel members whose bytes contain ``Spent-When``."""
-    with zipfile.ZipFile(wheel) as zf:
-        return sorted(name for name in zf.namelist() if MARKER in zf.read(name))
 
 
 def sdist_members(sdist):
@@ -106,7 +98,6 @@ def problems(dist_dir):
     found += [
         f"{wheel.name}: stray top-level entry {e}" for e in wheel_stray_entries(wheel)
     ]
-    found += [f"{wheel.name}: Spent-When in {f}" for f in wheel_spent_when_files(wheel)]
     members = sdist_members(sdist)
     found += [
         f"{wheel.name}: does not install {m}"

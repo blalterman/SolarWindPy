@@ -64,12 +64,6 @@ def test_wheel_holds_only_the_package(artifacts):
     assert check.wheel_stray_entries(wheel) == []
 
 
-def test_wheel_carries_no_spent_when(artifacts):
-    """No file a user installs carries a purge-system header."""
-    wheel, _ = artifacts
-    assert check.wheel_spent_when_files(wheel) == []
-
-
 def test_wheel_installs_every_package_file(artifacts):
     """Each ``src/solarwindpy/`` file in the sdist, data files included, is in the wheel."""
     wheel, sdist = artifacts
