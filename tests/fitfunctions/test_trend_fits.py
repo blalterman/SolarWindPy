@@ -689,3 +689,58 @@ def test_keywords_reach_the_bin_and_trend_fit_functions():
     with pytest.raises(InsufficientDataError):
         stopped.make_fit(bin_fit_kwargs=dict(max_nfev=1))
     assert (stopped.bin_results.loc[:, ("status", "")] != "ok").sum() == 5
+
+
+def _plain_string_label_warnings(call):
+    """The ``PlainStringLabelWarning`` instances ``call()`` issues."""
+    from solarwindpy.plotting.labels import base as labels_base
+
+    category = labels_base.PlainStringLabelWarning
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        call()
+    return [w for w in record if issubclass(w.category, category)]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="PlainStringLabelWarning does not exist yet in "
+    "solarwindpy.plotting.labels.base; remove this marker when the warning lands",
+)
+def test_set_shared_labels_warns_once_for_plain_strings_however_many_bins(trend5):
+    """Plain str shared labels warn once, though five bin fits receive them.
+
+    Chosen input: ``trend5`` has five successful bin fits, so a warning per
+    receiving plotter would be six.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert len(trend5.bin_fits) == 5  # the fixture's five bins
+    issued = _plain_string_label_warnings(
+        lambda: trend5.set_shared_labels(x="time", y="density", z="counts")
+    )
+    assert len(issued) == 1
+    assert issued[0].filename == __file__
+    first_ff = trend5.bin_fits.iloc[0]
+    assert (first_ff.plotter.labels.x, first_ff.plotter.labels.y) == (
+        "density",
+        "counts",
+    )
+
+
+def test_set_shared_labels_with_label_objects_issues_no_warning(trend5):
+    """Label objects shared across the trend and its bin fits warn nothing.
+
+    Guard: no warning of any kind, before and after the plain-string warning.
+
+    ON FAILURE: the code is wrong.
+    """
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        trend5.set_shared_labels(
+            x=TeXlabel(("v", "", "p1")),
+            y=TeXlabel(("n", "", "p1")),
+            z=TeXlabel(("w", "", "p1")),
+        )
+    assert [str(w.message) for w in record] == []

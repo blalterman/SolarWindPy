@@ -160,6 +160,46 @@ def covariance_from_a_fit_with_no_degree_of_freedom(tmp_path, monkeypatch):
     return OptimizeWarning
 
 
+def plain_string_label_on_a_plot(tmp_path, monkeypatch):
+    """A Hist2D labelled with a plain str: PlainStringLabelWarning, one call deep."""
+    from solarwindpy.plotting.hist2d import Hist2D
+    from solarwindpy.plotting.labels import base as labels_base
+
+    x = pd.Series([0.5, 1.5, 1.5], name="x")
+    Hist2D(x, x.rename("y"), nbins=[[0.0, 1.0, 2.0]] * 2).set_labels(x="Speed")
+    return labels_base.PlainStringLabelWarning
+
+
+def plain_string_label_through_a_trend_fit(tmp_path, monkeypatch):
+    """Plain str labels shared through a TrendFit, two calls deep."""
+    from solarwindpy.fitfunctions.gaussians import Gaussian
+    from solarwindpy.fitfunctions.trend_fits import TrendFit
+    from solarwindpy.plotting.labels import base as labels_base
+
+    xbins = pd.interval_range(0, 10, periods=10)
+    x = xbins.mid.values
+    columns = pd.interval_range(0, 3, periods=3)
+    agged = pd.DataFrame(
+        {
+            c: 10.0 * np.exp(-0.5 * ((x - mu) / 1.2) ** 2)
+            for c, mu in zip(columns, [4.0, 5.0, 6.5])
+        },
+        index=xbins,
+    )
+    tf = TrendFit(agged, Gaussian, Line, y=("mu", "value"), yerr=("sigma", "value"))
+    tf.make_fit()
+    tf.set_shared_labels(x="time", y="density", z="counts")
+    return labels_base.PlainStringLabelWarning
+
+
+_NO_LABEL_WARNING_YET = pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="PlainStringLabelWarning does not exist yet in "
+    "solarwindpy.plotting.labels.base; remove this marker when the warning lands",
+)
+
+
 @pytest.mark.parametrize(
     "trigger",
     [
@@ -170,6 +210,16 @@ def covariance_from_a_fit_with_no_degree_of_freedom(tmp_path, monkeypatch):
         pytest.param(
             covariance_from_a_fit_with_no_degree_of_freedom,
             id="fitfunction-covariance",
+        ),
+        pytest.param(
+            plain_string_label_on_a_plot,
+            id="plot-plain-string-label",
+            marks=_NO_LABEL_WARNING_YET,
+        ),
+        pytest.param(
+            plain_string_label_through_a_trend_fit,
+            id="trend-fit-plain-string-label",
+            marks=_NO_LABEL_WARNING_YET,
         ),
     ],
 )
