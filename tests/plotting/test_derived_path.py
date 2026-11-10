@@ -29,6 +29,12 @@ from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from solarwindpy.solar_activity.plots import IndicatorPlot  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
 
 RNG = np.random.default_rng(7)
 N = 400

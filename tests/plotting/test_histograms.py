@@ -15,6 +15,13 @@ from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
 # Bins chosen by the test, so every count below is an input rather than a
 # recorded output. The edges are exact at the 5 decimal places at which
 # `FixedGrid` stores interval endpoints.

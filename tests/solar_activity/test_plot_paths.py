@@ -23,6 +23,12 @@ import pytest  # noqa: E402
 
 from solarwindpy.solar_activity.plots import IndicatorPlot, SSNPlot  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
 
 class LinePlot(IndicatorPlot):
     """The generic indicator plotter, with its base axis format."""

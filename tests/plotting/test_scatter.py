@@ -28,6 +28,13 @@ from matplotlib.colorbar import Colorbar  # noqa: E402
 from solarwindpy.plotting.base import AxesLabels, ClipAxes, LogAxes  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
 # ---------------------------------------------------------------------------
 # Chosen input: index, x, y, z. Row 1 lacks y and row 3 lacks z; both hold
 # values outside the kept extent (x = 9, y = 99) so keeping either shows up in

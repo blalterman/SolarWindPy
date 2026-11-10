@@ -36,6 +36,12 @@ from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels.special import Count  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
 
 @pytest.fixture
 def hist2d_instance():

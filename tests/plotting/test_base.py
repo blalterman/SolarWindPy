@@ -36,6 +36,13 @@ from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
 # ---------------------------------------------------------------------------
 # Chosen input: index, x, y, z. Row 11 has NaN x, row 13 NaN y, row 14 NaN z,
 # so each column's NaN is dropped separately. The dropped rows hold values

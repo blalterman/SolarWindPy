@@ -19,6 +19,13 @@ from solarwindpy.fitfunctions.plots import AxesLabels
 from solarwindpy.plotting.labels.base import TeXlabel
 from tests.tolerances import exact, noise_free
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
 # The trend's y and yerr: each column's Gaussian centroid and width.
 MU = ("mu", "value")
 SIGMA = ("sigma", "value")

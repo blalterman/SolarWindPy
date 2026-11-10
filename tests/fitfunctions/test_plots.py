@@ -28,6 +28,13 @@ from solarwindpy.fitfunctions.plots import FFPlot, AxesLabels, LogAxes
 from solarwindpy.fitfunctions.tex_info import TeXinfo
 from tests.tolerances import exact
 
+# Tests here pass plain str labels on purpose, to exercise that path; they opt
+# out of PlainStringLabelWarning the deliberate way its message describes.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
 #: Model at raw x = 0..5. At the used x = 1, 2, 3 the observations are
 #: y = 3, 5, 7, so the simple residuals (observation - model) are -1, 1, -7
 #: and the percent residuals 100 * (-1/4, 1/4, -7/14) = -25, 25, -50.
