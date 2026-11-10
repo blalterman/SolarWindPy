@@ -370,6 +370,7 @@ skipped, not a gap: the points either side of it in ``z`` are joined.
    import pandas as pd
    from solarwindpy.plotting.scatter import Scatter
    from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.plotting.labels.special import ManualLabel
 
    rng = np.random.default_rng(1)
    N = 120
@@ -397,7 +398,7 @@ skipped, not a gap: the points either side of it in ``z`` are joined.
    sc.set_labels(
        x=TeXlabel(("v", "", "p1")),
        y=TeXlabel(("n", "", "p1")),
-       z="Days from start",
+       z=ManualLabel("Days from start", r"\mathrm{d}"),
    )
    ax, points, segments, cbar = sc.make_plot(
        s=12, cmap="viridis", connect=True, connect_kwargs={"linewidth": 0.8, "alpha": 0.8}
