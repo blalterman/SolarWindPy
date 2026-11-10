@@ -1078,6 +1078,69 @@ class Plasma(base.Base):
         r"""Magnetic field data."""
         return self._bfield
 
+    # The one home for how a species quantity combines over a "+" total. The
+    # author's rule: "+" means "combine in physically viable way". Densities,
+    # mass densities, pressures and temperatures have meaningful totals; a
+    # total thermal speed does not, so it is refused. "strict_sum" sums the
+    # species present by default and is strict when the caller passes
+    # skipna=False (docs page `missing_data`).
+    _SPECIES_COMBINE = {
+        "n": "strict_sum",
+        "rho": "sum",
+        "w": "refuse",
+        "pth": "sum",
+        "T": "sum",
+    }
+
+    def _gather(self, key, *species, **kwargs):
+        r"""Gather Ion quantity ``key`` for ``species`` and combine a total.
+
+        Several species give one column (or one column per component) per
+        species on level ``"S"``. One species string, which may contain "+",
+        is combined by the rule for ``key`` in :attr:`_SPECIES_COMBINE`.
+
+        Parameters
+        ----------
+        key : str
+            The Ion attribute, a key of :attr:`_SPECIES_COMBINE`.
+        species : str
+            As in the public method.
+        kwargs
+            Passed to the "strict_sum" reduction (``skipna``).
+        """
+        rule = self._SPECIES_COMBINE[key]
+        if rule == "refuse" and np.any(["+" in s for s in species]):
+            # Only `w` is refused, so the message names the thermal speed.
+            raise NotImplementedError(
+                "The result of a total species thermal speed is physically ambiguous"
+            )
+
+        slist = self._chk_species(*species)
+        gathered = {}
+        for s in slist:
+            value = getattr(self.ions.loc[s], key)
+            if not isinstance(value, (pd.Series, pd.DataFrame)):
+                # A Tensor (`w`) holds its frame in `data`.
+                value = value.data
+            gathered[s] = value
+        out = pd.concat(gathered, axis=1, names=["S"], sort=True)
+        if "C" in out.columns.names:
+            out = out.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+
+        if len(species) == 1:
+            if rule == "strict_sum":
+                # Not `_species_total`: `skipna=False` asks for a strict total
+                # (docs page `missing_data`). min_count=1: a total with no
+                # species present is NaN, not 0.
+                out = out.sum(axis=1, min_count=1, **kwargs)
+            else:
+                # A refused rule reaches here only for one species without
+                # "+", whose total is that species alone.
+                out = self._species_total(out)
+            if isinstance(out, pd.Series):
+                out.name = species[0]
+        return out
+
     def n(self, *species, skipna=True):
         r"""Get the plasma number densities.
 
@@ -1098,19 +1161,7 @@ class Plasma(base.Base):
         n: pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        slist = self._chk_species(*species)
-
-        n = {s: self.ions.loc[s].n for s in slist}
-        n = pd.concat(n, axis=1, names=["S"], sort=True)
-
-        if len(species) == 1:
-            # Not `_species_total`: `skipna=False` asks for a strict total
-            # (docs page `missing_data`). min_count=1: a total with no
-            # species present is NaN, not 0.
-            n = n.sum(axis=1, skipna=skipna, min_count=1)
-            n.name = species[0]
-
-        return n
+        return self._gather("n", *species, skipna=skipna)
 
     def rho(self, *species):
         r"""Get the plasma mass densities.
@@ -1128,15 +1179,7 @@ class Plasma(base.Base):
         rho: pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        slist = self._chk_species(*species)
-
-        rho = {s: self.ions.loc[s].rho for s in slist}
-        rho = pd.concat(rho, axis=1, names=["S"], sort=True)
-
-        if len(species) == 1:
-            rho = self._species_total(rho)
-            rho.name = species[0]
-        return rho
+        return self._gather("rho", *species)
 
     def w(self, *species):
         r"""Get the thermal speed.
@@ -1152,20 +1195,7 @@ class Plasma(base.Base):
         w: pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        if np.any(["+" in s for s in species]):
-            raise NotImplementedError(
-                "The result of a total species thermal speed is physically ambiguous"
-            )
-
-        slist = self._chk_species(*species)
-        w = {s: self.ions.loc[s].w.data for s in slist}
-        w = pd.concat(w, axis=1, names=["S"], sort=True)
-        w = w.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
-
-        if len(species) == 1:
-            w = self._species_total(w)
-
-        return w
+        return self._gather("w", *species)
 
     def pth(self, *species):
         r"""Get the thermal pressure.
@@ -1189,18 +1219,7 @@ class Plasma(base.Base):
         pressure then, and a species sum adds the species present, NaN only
         where none is: see :doc:`/missing_data`.
         """
-        slist = self._chk_species(*species)
-        include_dynamic = False
-        if include_dynamic:
-            raise NotImplementedError
-
-        pth = {s: self.ions.loc[s].pth for s in slist}
-        pth = pd.concat(pth, axis=1, names=["S"], sort=True)
-        pth = pth.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
-
-        if len(species) == 1:
-            pth = self._species_total(pth)
-        return pth
+        return self._gather("pth", *species)
 
     def T(self, *species):
         r"""Get the thermal temperature.
@@ -1224,14 +1243,7 @@ class Plasma(base.Base):
         temperature then, and a species sum adds the species present, NaN only
         where none is: see :doc:`/missing_data`.
         """
-        slist = self._chk_species(*species)
-        temp = {s: self.ions.loc[s].T for s in slist}
-        temp = pd.concat(temp, axis=1, names=["S"], sort=True)
-        temp = temp.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
-
-        if len(species) == 1:
-            temp = self._species_total(temp)
-        return temp
+        return self._gather("T", *species)
 
     def beta(self, *species):
         r"""Get perpendicular, parallel, and scalar plasma beta.

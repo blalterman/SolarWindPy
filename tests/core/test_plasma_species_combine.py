@@ -35,11 +35,6 @@ RULING = {
 SUMMED = sorted(k for k, rule in RULING.items() if rule != "refuse")
 REFUSED = sorted(k for k, rule in RULING.items() if rule == "refuse")
 
-_NO_HELPER = (
-    "Plasma has no _gather helper or _SPECIES_COMBINE mapping yet; "
-    "remove this marker when the species gather refactor lands"
-)
-
 
 @pytest.fixture(scope="module")
 def masked():
@@ -64,7 +59,6 @@ def _assert_same(got, expected):
 # Architecture: one home for the combining rule.
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_HELPER)
 def test_the_combine_mapping_is_the_authors_ruling():
     r"""``Plasma._SPECIES_COMBINE`` holds exactly the author's ruling.
 
@@ -77,7 +71,6 @@ def test_the_combine_mapping_is_the_authors_ruling():
     assert Plasma._SPECIES_COMBINE == RULING
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_HELPER)
 @pytest.mark.parametrize("key", sorted(RULING))
 def test_each_ruled_quantity_delegates_to_the_one_gather(key):
     r"""Plasma method ``key`` calls ``_gather(key, ...)`` and gathers nothing itself.
@@ -94,7 +87,6 @@ def test_each_ruled_quantity_delegates_to_the_one_gather(key):
         assert copied not in src
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=_NO_HELPER)
 def test_every_gathered_quantity_has_a_combine_rule():
     r"""Every ``_gather("<key>"`` call in Plasma names a key of the mapping.
 
@@ -177,12 +169,18 @@ def test_the_strict_density_total_is_nan_where_any_species_is_missing(masked):
 def test_several_species_give_one_column_set_per_species_on_level_S(masked, key):
     r"""``key("a", "p1")`` has an "S" level whose parts equal ``key("a")``, ``key("p1")``.
 
+    A quantity with components keeps the package's level order, component
+    before species, with columns sorted.
+
     ON FAILURE: the code is wrong; callers select species with
     ``xs(..., level="S")``.
     """
     method = getattr(masked, key)
     several = method("a", "p1")
-    assert "S" in several.columns.names
+    assert several.columns.names[-1] == "S"
+    if several.columns.nlevels > 1:
+        assert list(several.columns.names) == ["C", "S"]
+        assert several.columns.is_monotonic_increasing
     assert set(several.columns.get_level_values("S")) == {"a", "p1"}
     for s in ("a", "p1"):
         _assert_same(_per_species(several, s), method(s))
