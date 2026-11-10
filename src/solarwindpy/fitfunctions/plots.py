@@ -18,6 +18,7 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 
 from ..plotting.base import AxesLabels, LogAxes
+from ..plotting.labels.base import _warn_if_plain
 
 # The single source of FFPlot's default styles. Each plot method merges the
 # caller's normalised Line2D keywords over its entry, so a caller's keyword
@@ -727,20 +728,32 @@ class FFPlot(object):
         r"""Set or update x, y, or z labels.
 
         Any label not specified in kwargs is propagated from `self.labels.<x, y, or z>`.
+        Labels are label objects, as for a plot's
+        :meth:`~solarwindpy.plotting.base.Base.set_labels`: a
+        :class:`~solarwindpy.plotting.labels.base.TeXlabel` for a quantity in
+        the registry, a :class:`~solarwindpy.plotting.labels.special.ManualLabel`
+        for anything else, or a special label such as
+        :class:`~solarwindpy.plotting.labels.special.Count`. A plain ``str`` is
+        drawn as given and warns
+        :class:`~solarwindpy.plotting.labels.base.PlainStringLabelWarning` once
+        per call.
 
         Parameters
         ----------
         **kwargs
             Any of ``x``, ``y`` and ``z``: the new label for that axis, a
-            str or a label object such as
-            :class:`~solarwindpy.plotting.labels.base.TeXlabel`.
+            label object, a str, or None.
 
         Raises
         ------
         KeyError
             If any other keyword is passed.
         """
+        self._set_labels(**kwargs)
+        _warn_if_plain(kwargs)
 
+    def _set_labels(self, **kwargs):
+        r"""Store the labels as ``set_labels`` does, without its plain-str warning."""
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
         z = kwargs.pop("z", self.labels.z)

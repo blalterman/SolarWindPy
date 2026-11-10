@@ -405,17 +405,49 @@ class Base(ABC):
     def set_labels(self, **kwargs):
         r"""Set or update the x, y, or z labels.
 
-        Any label not passed keeps its current value in ``self.labels``.
+        Any label not passed keeps its current value in ``self.labels``. A
+        label is a label object from :mod:`solarwindpy.plotting.labels`:
+        :class:`~solarwindpy.plotting.labels.base.TeXlabel` for a quantity in
+        the registry, keyed like the plasma's columns, e.g.
+        ``TeXlabel(("n", "", "p1"))``;
+        :class:`~solarwindpy.plotting.labels.special.ManualLabel` for anything
+        else, e.g. ``ManualLabel("Flux Ratio", "dimless")``, whose units read
+        :math:`[\#]`; or a special label such as
+        :class:`~solarwindpy.plotting.labels.special.Count`.
+        :func:`solarwindpy.plotting.labels.available` lists them. The label
+        gives the axis its text and units and the plot's ``path`` its parts.
+
+        A plain ``str`` is drawn as given and warns
+        :class:`~solarwindpy.plotting.labels.base.PlainStringLabelWarning`,
+        once per call; filter that warning to keep a plain string on purpose.
+        None, ``""`` and ``"None"`` do not warn: None and ``"None"`` leave the
+        axis unlabelled, ``""`` draws a blank label.
+
+        On a binned plot a :class:`~solarwindpy.plotting.labels.special.Count`
+        label of the aggregated axis is rebuilt after the labels are set, so it
+        follows ``axnorm`` and a density's units follow the binned axes'
+        labels.
 
         Parameters
         ----------
-        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
+        **kwargs : label object, str or None
             New axis labels under the keywords ``x``, ``y`` and ``z``.
 
         Raises
         ------
         KeyError
             If any other keyword is passed.
+        ValueError
+            If a z label is passed to a plot without one, a ``Hist1D``.
+        """
+        self._set_labels(**kwargs)
+        labels.base._warn_if_plain(kwargs)
+
+    def _set_labels(self, **kwargs):
+        r"""Store the labels as ``set_labels`` does, without its plain-str warning.
+
+        The package's own placeholders and its propagation of labels already
+        set come through here; subclasses extend this, not ``set_labels``.
         """
         x = kwargs.pop("x", self.labels.x)
         y = kwargs.pop("y", self.labels.y)
@@ -878,6 +910,8 @@ class ColorPlot(_AggregateLimits):
                 "You must pass `ax` or `cax`. We don't want to rely on `plt.gca()`."
             )
 
+        if "label" in kwargs:
+            labels.base._warn_if_plain({"cbar_kwargs['label']": kwargs["label"]})
         label = kwargs.pop("label", self.labels.z)
         cbar = fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
 
@@ -994,18 +1028,13 @@ class BinnedPlot(_AggregateLimits):
             label.build_label()
         return label
 
-    def set_labels(self, **kwargs):
-        r"""Set axis labels; a ``Count`` label of the aggregated axis follows ``axnorm``.
+    def _set_labels(self, **kwargs):
+        r"""Store the labels; a ``Count`` label of the aggregated axis follows ``axnorm``.
 
         The ``Count`` is updated after the labels are set, so a density's
         units follow new labels of the binned axes. See ``Base.set_labels``.
-
-        Parameters
-        ----------
-        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
-            New axis labels under the keywords ``x``, ``y`` and ``z``.
         """
-        super().set_labels(**kwargs)
+        super()._set_labels(**kwargs)
         self._count_with_axnorm(getattr(self.labels, self.agg_axes))
 
     @property

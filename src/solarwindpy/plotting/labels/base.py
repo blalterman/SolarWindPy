@@ -4,6 +4,7 @@ r"""Tools for creating physical quantity plot labels."""
 __all__ = [
     "AXNORM",
     "Base",
+    "PlainStringLabelWarning",
     "TeXlabel",
     "density_units",
     "format_with_units",
@@ -21,6 +22,7 @@ from collections import namedtuple
 from types import MappingProxyType
 
 from ...core import quantities
+from ...tools import _warn
 
 _MCS = namedtuple("_MCS", "m,c,s")
 
@@ -369,6 +371,65 @@ def format_with_units(tex, units, *, new_line=False):
     sep = "$\n$" if new_line else r"\;"
     left, right = r"\left[", r"\right]"
     return f"${tex} {sep} {left}{units}{right}$"
+
+
+class PlainStringLabelWarning(UserWarning):
+    r"""Warned when a plot is given a plain ``str`` axis label.
+
+    A plot draws a ``str`` label as given, but the string states no units and
+    names no quantity in the plot's ``path``. A label object builds both:
+    :class:`TeXlabel` from the ``(M, C, S)`` key of a quantity in the registry,
+    :mod:`solarwindpy.core.quantities`, and
+    :class:`~solarwindpy.plotting.labels.special.ManualLabel` from TeX and a
+    unit for any other quantity. :func:`solarwindpy.plotting.labels.available`
+    lists the keys ``TeXlabel`` knows and the special labels, such as
+    :class:`~solarwindpy.plotting.labels.special.Count`. A dimensionless
+    quantity takes the unit key ``"dimless"`` and states its units as
+    :math:`[\#]`.
+
+    ``set_labels`` of every plot, ``TrendFit.set_shared_labels``, and a
+    colorbar ``label`` in ``cbar_kwargs`` warn it once per call, attributed to
+    the caller's line. ``None``, ``""`` and ``"None"`` do not warn: they mean
+    no label or a blank one. A plain string chosen on purpose stays allowed:
+    filter the warning with :mod:`warnings`,
+    ``warnings.filterwarnings("ignore", category=PlainStringLabelWarning)``.
+    """
+
+
+#: Strings that mean no label (``"None"``, which a plot reads as unset) or a
+#: deliberately blank one (``""``); they do not warn.
+_NOT_A_LABEL = ("", "None")
+
+_PLAIN_STRING_MESSAGE = (
+    "Plain str label {given}. Give a label object instead, so the axis states "
+    "its units: TeXlabel((M, C, S)) from solarwindpy.plotting.labels.base for a "
+    'quantity in the registry, e.g. TeXlabel(("n", "", "p1")); ManualLabel(tex, '
+    "unit) from solarwindpy.plotting.labels.special for anything else, e.g. "
+    'ManualLabel("Flux Ratio", "dimless"). A dimensionless quantity takes the '
+    'unit "dimless", drawn [#]. solarwindpy.plotting.labels.available() lists '
+    "every key TeXlabel knows and the special labels (Count, DateTime, ...). "
+    "To keep a plain str on purpose: "
+    'warnings.filterwarnings("ignore", category=PlainStringLabelWarning).'
+)
+
+
+def _warn_if_plain(given):
+    r"""Warn :class:`PlainStringLabelWarning` once if ``given`` holds a plain str.
+
+    The one check of every label entry point. A value in ``_NOT_A_LABEL`` and
+    any non-``str`` value pass; the warning names each plain label.
+
+    Parameters
+    ----------
+    given : Mapping
+        Each label by the keyword it was given under, e.g. ``{"x": "Speed"}``.
+    """
+    plain = {
+        k: v for k, v in given.items() if isinstance(v, str) and v not in _NOT_A_LABEL
+    }
+    if plain:
+        listing = ", ".join(f"{k}={v!r}" for k, v in plain.items())
+        _warn(_PLAIN_STRING_MESSAGE.format(given=listing), PlainStringLabelWarning)
 
 
 class Base(ABC):

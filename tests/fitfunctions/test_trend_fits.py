@@ -702,12 +702,6 @@ def _plain_string_label_warnings(call):
     return [w for w in record if issubclass(w.category, category)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="PlainStringLabelWarning does not exist yet in "
-    "solarwindpy.plotting.labels.base; remove this marker when the warning lands",
-)
 def test_set_shared_labels_warns_once_for_plain_strings_however_many_bins(trend5):
     """Plain str shared labels warn once, though five bin fits receive them.
 

@@ -192,14 +192,6 @@ def plain_string_label_through_a_trend_fit(tmp_path, monkeypatch):
     return labels_base.PlainStringLabelWarning
 
 
-_NO_LABEL_WARNING_YET = pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="PlainStringLabelWarning does not exist yet in "
-    "solarwindpy.plotting.labels.base; remove this marker when the warning lands",
-)
-
-
 @pytest.mark.parametrize(
     "trigger",
     [
@@ -214,12 +206,10 @@ _NO_LABEL_WARNING_YET = pytest.mark.xfail(
         pytest.param(
             plain_string_label_on_a_plot,
             id="plot-plain-string-label",
-            marks=_NO_LABEL_WARNING_YET,
         ),
         pytest.param(
             plain_string_label_through_a_trend_fit,
             id="trend-fit-plain-string-label",
-            marks=_NO_LABEL_WARNING_YET,
         ),
     ],
 )

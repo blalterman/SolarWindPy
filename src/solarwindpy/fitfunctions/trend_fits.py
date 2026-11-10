@@ -613,7 +613,10 @@ class TrendFit(object):
         ----------
         **kwargs
             Any of ``x``, ``y`` and ``z``, passed to the trend plotter's
-            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.set_labels`.
+            :py:meth:`~solarwindpy.fitfunctions.plots.FFPlot.set_labels`. A
+            plain ``str`` warns
+            :class:`~solarwindpy.plotting.labels.base.PlainStringLabelWarning`
+            once, however many bin fits receive it.
         x:
             The trend's x-label: the bin fits' legend label.
         y:
@@ -627,5 +630,6 @@ class TrendFit(object):
 
         y = tf.plotter.labels.y
         z = tf.plotter.labels.z
+        # The trend's set_labels checked them once; each bin fit only stores them.
         for ff in self._ok_bins():
-            ff.plotter.set_labels(x=y, y=z)
+            ff.plotter._set_labels(x=y, y=z)

@@ -39,13 +39,6 @@ from solarwindpy.plotting.labels.special import Count, ManualLabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 
-TARGET = pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="PlainStringLabelWarning does not exist yet in "
-    "solarwindpy.plotting.labels.base; remove this marker when the warning lands",
-)
-
 # A 2 x 2 grid whose cells hold 1, 2, 3 and 6 points: chosen so every cell is
 # occupied and the counts differ.
 EDGES = np.array([0.0, 1.0, 2.0])
@@ -117,7 +110,6 @@ def test_a_label_object_none_or_blank_label_sets_with_no_warning(build, label):
     assert plot.labels.x is label
 
 
-@TARGET
 @pytest.mark.parametrize("build", PLOTS.values(), ids=PLOTS.keys())
 def test_plain_string_labels_warn_once_naming_the_structured_labels(build):
     """Two plain str labels in one call warn once; the label is still set.
@@ -150,7 +142,6 @@ def test_plain_string_labels_warn_once_naming_the_structured_labels(build):
     assert (plot.labels.x, plot.labels.y) == ("Normalized Flux", "Speed")
 
 
-@TARGET
 def test_the_warning_is_a_user_warning_naming_the_callers_line():
     """It is a ``UserWarning`` attributed to this file, not the package.
 
@@ -164,7 +155,6 @@ def test_the_warning_is_a_user_warning_naming_the_callers_line():
     assert issued.filename == __file__
 
 
-@TARGET
 def test_a_filter_on_the_category_keeps_a_deliberate_plain_string_quiet():
     """Ignoring the category silences it, and the label is set as given.
 
@@ -180,7 +170,6 @@ def test_a_filter_on_the_category_keeps_a_deliberate_plain_string_quiet():
     assert plot.labels.x == "Normalized Flux"
 
 
-@TARGET
 def test_a_plain_string_colorbar_label_warns_and_is_drawn():
     """``cbar_kwargs={"label": str}`` warns once and labels the colorbar.
 
@@ -201,7 +190,6 @@ def test_a_plain_string_colorbar_label_warns_and_is_drawn():
         plt.close("all")
 
 
-@TARGET
 def test_the_packages_own_plotting_paths_issue_no_plain_string_label_warning():
     """Building, labelling and drawing every plot the package offers stays quiet.
 

@@ -151,9 +151,12 @@ fresh Python session and it draws the figure shown under it.
 One quantity
 ~~~~~~~~~~~~
 
-``make_plot`` draws the histogram. ``set_labels`` takes a
-:py:class:`~solarwindpy.plotting.labels.base.TeXlabel` per axis; `Labels`_
-explains them.
+``make_plot`` draws the histogram. ``set_labels`` takes a label object per
+axis: a :py:class:`~solarwindpy.plotting.labels.base.TeXlabel` built from the
+same ``(M, C, S)`` key as the plasma's column, or a
+:py:class:`~solarwindpy.plotting.labels.special.ManualLabel` for a quantity
+the registry does not know. The label gives the axis its symbol and units and
+the plot's ``path`` its parts. `Labels`_ explains them.
 
 .. plot::
 
@@ -415,6 +418,7 @@ the cycle's phase, not its amplitude.
    import pandas as pd
    from solarwindpy.plotting.scatter import Scatter
    from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.plotting.labels.datetime import DateTime
    from solarwindpy.solar_activity.sunspot_number.sidc import SIDC
 
    rng = np.random.default_rng(3)
@@ -433,7 +437,7 @@ the cycle's phase, not its amplitude.
    t = pd.Series(mdates.date2num(epoch), index=epoch, name="t")
 
    sc = Scatter(v, b, t)
-   sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("b", "", "")), z="Year")
+   sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("b", "", "")), z=DateTime("Year"))
    ax, points, segments, cbar = sc.make_plot(
        s=14, cmap="viridis", connect=True, cbar_kwargs={"aspect": 8}
    )
@@ -826,13 +830,45 @@ A dimensionless quantity, such as :math:`\beta`, has the units
 >>> print(TeXlabel(("n", "", "a"), ("n", "", "p1")))
 $n_{\alpha}/n_{p_1} \; \left[\#\right]$
 
+A quantity the registry does not know, such as a normalized flux of your own,
+takes a :py:class:`~solarwindpy.plotting.labels.special.ManualLabel`: its TeX
+and its units, either a key of the registry's units table or raw TeX. A
+dimensionless one takes the key ``"dimless"``, which states :math:`[\#]`:
+
+>>> from solarwindpy.plotting.labels.special import ManualLabel
+>>> print(ManualLabel("Normalized Flux", "dimless"))
+$\mathrm{Normalized \; Flux} \; \left[\#\right]$
+>>> print(ManualLabel("Wave Frequency", "Hz"))
+$\mathrm{Wave \; Frequency} \; \left[\mathrm{Hz}\right]$
+
+``set_labels`` also accepts a plain string and draws it as given. A string
+states no units and names no quantity, so it warns
+:py:class:`~solarwindpy.plotting.labels.base.PlainStringLabelWarning`, once
+per call, naming the label objects to use instead. ``None``, ``""`` and
+``"None"`` do not warn. To keep a plain string on purpose, filter the warning
+with :py:mod:`warnings`:
+
+>>> import warnings
+>>> from solarwindpy.plotting.labels.base import PlainStringLabelWarning
+>>> h1 = Hist1D(pd.Series([380.0, 650.0], name="v"))
+>>> with warnings.catch_warnings(record=True) as caught:
+...     warnings.simplefilter("always")
+...     h1.set_labels(x="Speed")
+>>> [w.category.__name__ for w in caught]
+['PlainStringLabelWarning']
+>>> with warnings.catch_warnings():
+...     warnings.filterwarnings("ignore", category=PlainStringLabelWarning)
+...     h1.set_labels(x="Speed")
+>>> h1.labels.x
+'Speed'
+
 A plot labels its axes ``x``, ``y`` and ``z`` until ``set_labels`` sets them.
 A histogram's counts carry the special label
 :py:class:`~solarwindpy.plotting.labels.special.Count`, which follows the
 plot's ``axnorm``. A count divided by a maximum is a pure number, :math:`[\#]`;
 a density is per unit width or area of the bins, so its label states the
 inverse of the binned axes' units, :math:`\mathrm{dex}^{-1}` for a log axis. Here
-the axes are labelled by plain strings, which state no units:
+the axes keep their placeholder labels, which state no units:
 
 >>> from solarwindpy.plotting.hist2d import Hist2D
 >>> h2 = Hist2D(v, (2 * v).rename("y"), axnorm="t")

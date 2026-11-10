@@ -118,7 +118,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         )
         self.set_clim(None, None)
         self.set_axnorm(axnorm)
-        self.set_labels(x="x", y=labels.special.Count() if y is None else "y")
+        self._set_labels(x="x", y=labels.special.Count() if y is None else "y")
 
     _clipped_axes = ("x",)
     _grid_axes = ("x",)
@@ -195,23 +195,15 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
 
         return cdf
 
-    def set_labels(self, **kwargs):
-        r"""Set the x or y label; see ``BinnedPlot.set_labels``.
+    def _set_labels(self, **kwargs):
+        r"""Store the x or y label; a z label raises ``ValueError``, a ``Hist1D`` has none.
 
-        Parameters
-        ----------
-        **kwargs : str or solarwindpy.plotting.labels.base.TeXlabel
-            New axis labels under the keywords ``x`` and ``y``.
-
-        Raises
-        ------
-        ValueError
-            If a z label is passed: a ``Hist1D`` has none.
+        See ``Base.set_labels``.
         """
         if "z" in kwargs:
             raise ValueError(f"{self.__class__.__name__} doesn't have a z-label")
 
-        super(Hist1D, self).set_labels(**kwargs)
+        super(Hist1D, self)._set_labels(**kwargs)
 
     def make_plot(
         self,

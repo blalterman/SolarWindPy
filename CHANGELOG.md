@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `solarwindpy.plotting.labels.base.PlainStringLabelWarning`: a plain `str` axis label given to
+  `set_labels` of any plot or fit plotter, to `TrendFit.set_shared_labels`, or as a colorbar
+  `label` in `cbar_kwargs` warns once per call, naming the label objects to use instead
+  (`TeXlabel` for a quantity in the registry, `ManualLabel` for anything else, the `"dimless"`
+  units key drawn `[#]`, `labels.available()`). The string is still drawn as given; filter the
+  warning to keep one on purpose. `None`, `""` and `"None"` do not warn. The usage guide's
+  Labels section now covers `ManualLabel` and the warning.
+
 ## [0.5.1] - 2026-11-05
 
 ### Changed

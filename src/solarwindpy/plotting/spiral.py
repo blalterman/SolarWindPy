@@ -1046,7 +1046,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         )
         self.set_clim(None, None)
         self.set_axnorm(axnorm)
-        self.set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
+        self._set_labels(x="x", y="y", z=labels.special.Count() if z is None else "z")
 
     # ``_set_data`` stores ``log10(abs())`` of each axis flagged in ``self.log``.
     _log_data = True
