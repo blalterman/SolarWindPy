@@ -83,7 +83,10 @@ def check_setuptools_scm() -> Tuple[bool, str]:
             )
         return True, f"Version detected: {version}"
     except ImportError:
-        return False, "setuptools_scm not installed. Run: pip install setuptools_scm"
+        return (
+            False,
+            "setuptools_scm not installed. Rebuild the env from solarwindpy.yml, which lists setuptools-scm",
+        )
     except Exception as e:
         return False, f"Version detection failed: {e}"
 
@@ -167,7 +170,10 @@ def check_build_system() -> Tuple[bool, str]:
     """Check if package can be built."""
     code, stdout, stderr = run_command(["python", "-m", "build", "--help"])
     if code != 0:
-        return False, "Build system not available. Run: pip install build"
+        return (
+            False,
+            "Build system not available. Rebuild the env from solarwindpy.yml, which lists python-build",
+        )
 
     return True, "Build system available"
 

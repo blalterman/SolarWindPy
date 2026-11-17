@@ -165,6 +165,8 @@ dev = [
     # Development tools
     "import-linter>=2.6",  # lint-imports; 2.6 adds the acyclic_siblings contract
     "pre-commit>=3.5",  # Git hook framework
+    "build>=1.2",  # python -m build: the release procedure builds the wheel and sdist
+    "setuptools_scm>=8",  # reads the version from git tags for the release checks
     # Test-quality review tools
     "griffe>=2.3",  # API inventory
     "mutmut>=3.8",  # mutation testing

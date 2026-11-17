@@ -74,6 +74,7 @@ dependencies:
 - pyparsing
 - pytest
 - pytest-cov
+- python-build
 - python-dateutil
 - pytokens
 - pytz
@@ -84,6 +85,7 @@ dependencies:
 - ruff
 - roman-numerals-py
 - scipy
+- setuptools-scm
 - six
 - snowballstemmer
 - sphinx
