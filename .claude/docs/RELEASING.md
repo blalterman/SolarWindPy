@@ -129,7 +129,25 @@ git push origin master
 
 ## Release Execution
 
-### 5. Create Version Tag
+### 5. Dry-Run the Publish Workflow
+
+The CI workflow runs the Windows suite only on pull requests
+(`continuous-integration.yml`), so a commit pushed straight to master has not run on Windows.
+The publish workflow's `platform-matrix` (Linux, macOS and Windows, each Python version) is the
+first Windows run such a release gets. Run it as a dry run before tagging; a dry run builds the
+package and uploads nothing:
+
+```bash
+gh workflow run publish.yml --ref master -f target=testpypi -f dry_run=true
+RUN_ID=$(gh run list --workflow publish.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID" --exit-status   # non-zero exit when any job fails
+gh run view "$RUN_ID" --json jobs -q '.jobs[] | "\(.name): \(.conclusion)"'
+```
+
+Tag only when every `platform-matrix` job and `build-and-publish` report `success`.
+`update-conda-feedstock` reports `skipped` on a manual run.
+
+### 6. Create Version Tag
 
 ```bash
 # Preview version bump (dry run)
@@ -149,13 +167,16 @@ New version: v0.2.0
 
 **Tag Naming**: Tags must follow `vX.Y.Z` format (with 'v' prefix). See [MAINTENANCE.md](./MAINTENANCE.md#git-tag-management) for tag management guidelines.
 
-### 6. Monitor GitHub Actions Workflow
+### 7. Monitor GitHub Actions Workflow
 
 The tag push automatically triggers `.github/workflows/publish.yml`:
 
 ```bash
-# Watch workflow in real-time
-gh run watch
+# Watch workflow in real-time; a non-zero exit means a job failed
+gh run watch <run-id> --exit-status
+
+# Each job's result
+gh run view <run-id> --json jobs -q '.jobs[] | "\(.name): \(.conclusion)"'
 
 # Alternative: View in browser
 gh run list --limit 1
@@ -183,7 +204,7 @@ gh run list --limit 1
 
 ## Post-Release Validation
 
-### 7. Verify PyPI Publication
+### 8. Verify PyPI Publication
 
 ```bash
 # Check PyPI metadata
@@ -202,7 +223,7 @@ Python: <4,>=3.12
 Classifiers: Programming Language :: Python :: 3, Programming Language :: Python :: 3.12, Programming Language :: Python :: 3.13, Programming Language :: Python :: 3.14
 ```
 
-### 8. Enhance GitHub Release Notes (Optional)
+### 9. Enhance GitHub Release Notes (Optional)
 
 For breaking changes, add migration guidance to GitHub Release:
 
@@ -242,7 +263,7 @@ pip install --upgrade solarwindpy
 https://solarwindpy.readthedocs.io/en/vX.Y.Z/
 ```
 
-### 9. Monitor Automated Systems
+### 10. Monitor Automated Systems
 
 **ReadTheDocs** (5-10 minutes):
 - Builds triggered automatically by tag push
@@ -307,7 +328,7 @@ The tracking issue created during release **automatically includes a dependency 
 
 **Related Scripts**: See [MAINTENANCE.md](./MAINTENANCE.md#conda-feedstock-automation) for `update_conda_feedstock.py` and `wait_for_pypi.py` usage.
 
-### 10. Monitor Conda-forge Bot PR
+### 11. Monitor Conda-forge Bot PR
 
 The workflow creates a tracking issue (e.g., #403) with automation status.
 
@@ -379,7 +400,7 @@ gh pr checks <PR_NUMBER> --repo conda-forge/solarwindpy-feedstock --watch
    - Update tracking issue with PR link and merge status
    - Close any related feedstock issues resolved by update
 
-### 11. Verify Conda Package Availability
+### 12. Verify Conda Package Availability
 
 After PR merge (2-4 hours for package build):
 
@@ -543,6 +564,7 @@ Use this checklist for each release:
 - [ ] Working directory clean (no untracked files)
 
 ### Release
+- [ ] Dry-run publish passed every job (`gh workflow run publish.yml --ref master -f target=testpypi -f dry_run=true`)
 - [ ] Version tag created (`python scripts/bump_version.py [major|minor|patch]`)
 - [ ] Tag pushed to remote (`git push origin vX.Y.Z`)
 - [ ] GitHub Actions workflow completed successfully
