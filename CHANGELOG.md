@@ -95,6 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The planned updates listed in the `solarwindpy.core.plasma` module docstring moved to GitHub
   issues #538 to #540, and Scatter's open log-axis question to #541.
 - The usage guide gives each example in the plot sections its own heading.
+- The package reads its bundled data files (the example plasma and the reference abundances)
+  as UTF-8 on every platform, not in the platform's default encoding.
 
 ## [0.5.1] - 2026-11-05
 
