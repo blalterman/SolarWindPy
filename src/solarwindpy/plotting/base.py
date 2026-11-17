@@ -430,7 +430,7 @@ class Base(ABC):
 
         Parameters
         ----------
-        **kwargs : label object, str or None
+        **kwargs : solarwindpy.plotting.labels.base.Base, str or None
             New axis labels under the keywords ``x``, ``y`` and ``z``.
 
         Raises
