@@ -20,6 +20,8 @@ import inspect
 import pkgutil
 import re
 
+import pytest
+
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -251,6 +253,26 @@ def test_every_public_function_returning_a_value_has_a_returns_section():
         and not _RETURNS.search(inspect.getdoc(obj) or "")
     ]
     assert not missing, missing
+
+
+@pytest.mark.xfail(strict=True, reason="49 property docstrings carry a Returns section")
+def test_no_public_property_has_a_returns_section():
+    """No public property's docstring has a Returns section.
+
+    numpydoc documents a property as an attribute, so a Returns section renders
+    as a stray field list with an unlinked type. The signature already shows
+    the return annotation.
+
+    ON FAILURE: the code is wrong; fold each listed property's Returns section
+    into its summary or body, keeping the type in the prose when the property
+    has no return annotation.
+    """
+    listed = [
+        name
+        for name, obj, _ in _public_objects()
+        if isinstance(obj, property) and _RETURNS.search(inspect.getdoc(obj) or "")
+    ]
+    assert not listed, listed
 
 
 def test_every_entry_point_has_an_examples_section():
