@@ -12,6 +12,7 @@ one-tailed ``"l"`` and ``"u"`` are tested here.
 """
 
 import io
+from pathlib import Path
 import warnings
 
 import numpy as np
@@ -24,9 +25,15 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.collections import LineCollection, PathCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
-from matplotlib.colors import LogNorm, Normalize  # noqa: E402
+from matplotlib.colors import LogNorm, Normalize, to_rgb  # noqa: E402
 
-from solarwindpy.plotting.base import AxesLabels, ClipAxes, LogAxes  # noqa: E402
+from solarwindpy.plotting import base, scales  # noqa: E402
+from solarwindpy.plotting.base import ClipAxes, LogAxes  # noqa: E402
+from solarwindpy.plotting.labels.base import (  # noqa: E402
+    PlainStringLabelWarning,
+    TeXlabel,
+)
+from solarwindpy.plotting.labels.special import ManualLabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
@@ -70,14 +77,29 @@ def ax():
     plt.close("all")
 
 
+XFAIL_F = pytest.mark.xfail(
+    strict=True,
+    raises=(AttributeError, KeyError),
+    reason="SizeScale, AlphaScale, ScatterLabels and make_plot's size_scale, "
+    "alpha_scale and draw_order are not in the package yet (AttributeError; "
+    "set_labels(size=) raises KeyError 'Unexpected kwarg'); remove this marker "
+    "when Stage F lands",
+)
+
+
+@XFAIL_F
 def test_new_scatter_has_linear_axes_and_default_labels():
-    """Defaults: linear axes, labels x and y, z labelled only when z is given.
+    """Defaults: linear axes, labels x and y; z, size, alpha labelled only when given.
 
     ON FAILURE: the code is wrong.
     """
+    labels = base.ScatterLabels
     assert Scatter(X, Y).log == LogAxes(False, False)
-    assert Scatter(X, Y).labels == AxesLabels("x", "y", None)
-    assert Scatter(X, Y, Z).labels == AxesLabels("x", "y", "z")
+    assert Scatter(X, Y).labels == labels("x", "y", None, None, None)
+    assert Scatter(X, Y, Z).labels == labels("x", "y", "z", None, None)
+    assert Scatter(X, Y, size=Z, alpha=Z).labels == labels(
+        "x", "y", None, "size", "alpha"
+    )
     assert Scatter(X, Y).clip == ClipAxes(x=False, y=False, z=False)
 
 
@@ -662,69 +684,81 @@ def test_connect_refuses_two_colour_keys(ax):
 
 
 # ---------------------------------------------------------------------------
-# size and alpha variables: a norm maps each value to f in [0, 1] (clipped),
-# then ``lo + f * (hi - lo)`` gives the marker area (pt^2) or alpha, with
-# (lo, hi) = ``size_range`` or ``alpha_range``. Expected values are hand
-# computed from the chosen inputs on each line.
+# size and alpha variables: a SizeScale or AlphaScale maps each drawn value to
+# f = norm(value), clipped to [0, 1], then ``lo + f * (hi - lo)`` gives the
+# marker area (pt^2) or alpha, with (lo, hi) the scale's ``range``. Expected
+# values are hand computed from the chosen inputs on each line.
 # ---------------------------------------------------------------------------
 
 SX = np.array([0.0, 1.0, 2.0])
 SY = np.array([5.0, 6.0, 7.0])
 
 
-def test_size_maps_linearly_onto_size_range(ax):
+@XFAIL_F
+def test_size_maps_linearly_onto_the_size_scales_range(ax):
     """size 1, 2, 3 autoscale to f = 0, 1/2, 1, so areas 10, 20, 30 on (10, 30).
 
     ON FAILURE: the code is wrong.
     """
     _, points, _, _ = Scatter(SX, SY, size=[1.0, 2.0, 3.0]).make_plot(
-        ax=ax, size_range=(10, 30)
+        ax=ax, size_scale=scales.SizeScale(range=(10, 30))
     )
     assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
 
 
+@XFAIL_F
 @pytest.mark.parametrize(
-    "alpha_range, expected",
+    "ends, expected",
     [
         ((0.2, 1.0), [0.2, 0.6, 1.0]),  # 0.2 + (0, 1/2, 1) * 0.8
         ((1.0, 0.2), [1.0, 0.6, 0.2]),  # reversed: 1 + (0, 1/2, 1) * -0.8
     ],
 )
-def test_alpha_maps_linearly_onto_alpha_range_and_a_reversed_range_inverts(
-    ax, alpha_range, expected
+def test_alpha_maps_linearly_onto_the_alpha_scales_range_and_a_reversed_range_inverts(
+    ax, ends, expected
 ):
     """alpha 0, 5, 10 autoscale to f = 0, 1/2, 1; a reversed range fades high values.
 
     ON FAILURE: the code is wrong.
     """
     _, points, _, _ = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
-        ax=ax, alpha_range=alpha_range
+        ax=ax, alpha_scale=scales.AlphaScale(range=ends)
     )
     assert points.get_alpha().tolist() == exact(expected)
 
 
-def test_a_passed_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
+@XFAIL_F
+def test_a_scales_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     """LogNorm puts 1, 10, 100 at f = 0, 1/2, 1; it masks 0, so that point is not drawn.
+
+    The undrawn point's alpha, 100, does not enter the alpha norm either: the
+    drawn alphas 0, 5, 10 autoscale to 0.2, 0.6, 1 on (0.2, 1).
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1.0, 2.0, 3.0])
     y = np.array([4.0, 5.0, 6.0, 7.0])
-    _, points, _, _ = Scatter(x, y, size=[0.0, 1.0, 10.0, 100.0]).make_plot(
-        ax=ax, size_norm=LogNorm(), size_range=(10, 30)
+    sc = Scatter(x, y, size=[0.0, 1.0, 10.0, 100.0], alpha=[100.0, 0.0, 5.0, 10.0])
+    _, points, _, _ = sc.make_plot(
+        ax=ax,
+        size_scale=scales.SizeScale(norm=LogNorm(), range=(10, 30)),
+        alpha_scale=scales.AlphaScale(range=(0.2, 1.0)),
     )
     assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
+    assert points.get_alpha().tolist() == exact([0.2, 0.6, 1.0])
     np.testing.assert_array_equal(points.get_offsets(), np.c_[x[1:], y[1:]])
 
 
+@XFAIL_F
 def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
     """With vmin 1 and vmax 3, -5 lands on 10 and 50 on 30, as 1 and 3 do.
 
     ON FAILURE: the code is wrong.
     """
     x = np.arange(5.0)
+    scale = scales.SizeScale(norm=Normalize(vmin=1, vmax=3), range=(10, 30))
     _, points, _, _ = Scatter(x, x, size=[-5.0, 1.0, 2.0, 3.0, 50.0]).make_plot(
-        ax=ax, size_norm=Normalize(vmin=1, vmax=3), size_range=(10, 30)
+        ax=ax, size_scale=scale
     )
     assert points.get_sizes().tolist() == exact([10.0, 10.0, 20.0, 30.0, 30.0])
 
@@ -744,51 +778,223 @@ def test_default_ranges_put_the_extreme_drawn_values_at_9_144_and_0p15_1(ax):
 def test_size_aligns_by_label_and_a_nan_drops_its_point(ax):
     """size is aligned to x and y by label; the row whose size is NaN is not drawn.
 
-    size labelled 2, 1, 0 holds 3, NaN, 1: row 0 is smallest, row 2 largest.
+    size labelled 2, 1, 0 holds 3, NaN, 1: row 0 is smallest (9 pt^2), row 2
+    largest (144 pt^2).
     ON FAILURE: the code is wrong.
     """
     size = pd.Series([3.0, np.nan, 1.0], index=[2, 1, 0])
     sc = Scatter(pd.Series(SX), pd.Series(SY), size=size)
-    _, points, _, _ = sc.make_plot(ax=ax, size_range=(10, 30))
+    _, points, _, _ = sc.make_plot(ax=ax)
     np.testing.assert_array_equal(points.get_offsets(), np.c_[SX[[0, 2]], SY[[0, 2]]])
-    assert points.get_sizes().tolist() == exact([10.0, 30.0])
+    assert points.get_sizes().tolist() == exact([9.0, 144.0])
     assert "size" in sc.data.columns
     assert "alpha" not in sc.data.columns
 
 
-def test_connect_with_an_alpha_variable_draws_opaque_segments_in_the_points_colour(
-    ax,
-):
-    """Segments take the points' colour at alpha 1, not the first point's alpha.
+@XFAIL_F
+def test_size_key_marker_areas_are_the_areas_points_get_at_its_values(ax):
+    """Key entries at 1, 10, 100 have the areas the points of size 1, 10, 100 get.
+
+    LogNorm over 1 to 100 on (10, 30) gives 10, 20, 30 pt^2. The key is an
+    opaque Legend on ``ax``, labelled with the values, and takes ``key_kwargs``.
 
     ON FAILURE: the code is wrong.
     """
-    _, points, lc, _ = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
-        ax=ax, connect=True
+    scale = scales.SizeScale(
+        norm=LogNorm(), range=(10, 30), key=[1, 10, 100], key_kwargs={"frameon": False}
     )
-    expected = points.get_facecolor()[0].copy()
-    expected[3] = 1.0
-    np.testing.assert_array_equal(lc.get_edgecolor(), [expected])
+    _, points, _, guides = Scatter(SX, SY, size=[1.0, 10.0, 100.0]).make_plot(
+        ax=ax, size_scale=scale
+    )
+    key = guides.size
+    areas = [h.get_markersize() ** 2 for h in key.legend_handles]
+    assert areas == exact(points.get_sizes().tolist())
+    assert areas == exact([10.0, 20.0, 30.0])
+    assert [t.get_text() for t in key.get_texts()] == ["1", "10", "100"]
+    assert [h.get_alpha() for h in key.legend_handles] == [1, 1, 1]
+    assert ax.get_legend() is key
+    assert key.get_frame_on() is False
+
+
+@XFAIL_F
+@pytest.mark.parametrize(
+    "norm, size, expected",
+    [
+        # 1.5 to 40 holds one decade, 10, so the 1-2-5 steps within it.
+        (LogNorm, [1.5, 40.0], [2.0, 5.0, 10.0, 20.0]),
+        # MaxNLocator(4) over 0 to 1 steps by 0.25.
+        (Normalize, [0.0, 1.0], [0.0, 0.25, 0.5, 0.75, 1.0]),
+    ],
+    ids=["LogNorm", "Normalize"],
+)
+def test_automatic_size_key_steps_through_the_norms_limits(ax, norm, size, expected):
+    """``key=True`` picks round values between the norm's autoscaled vmin and vmax.
+
+    ON FAILURE: the code is wrong, unless the author changes the documented rule.
+    """
+    scale = scales.SizeScale(norm=norm())
+    _, _, _, guides = Scatter(SX[:2], SY[:2], size=size).make_plot(
+        ax=ax, size_scale=scale
+    )
+    assert [float(t.get_text()) for t in guides.size.get_texts()] == exact(expected)
+
+
+@XFAIL_F
+@pytest.mark.parametrize("z", [None, [1.0, 2.0, 3.0]], ids=["no-z", "z"])
+def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
+    """The alpha bar reads the scale's norm through one colour whose alpha runs lo to hi.
+
+    The colour is black when z colours the points, else the points' own.
+
+    ON FAILURE: the code is wrong.
+    """
+    scale = scales.AlphaScale(norm=Normalize(0, 10), range=(0.3, 0.9))
+    sc = Scatter(SX, SY, z, alpha=[0.0, 5.0, 10.0])
+    _, points, _, guides = sc.make_plot(ax=ax, alpha_scale=scale)
+    bar = guides.alpha
+    assert bar.norm is scale.norm
+    low, high = bar.cmap(0.0), bar.cmap(1.0)
+    assert (low[3], high[3]) == exact((0.3, 0.9))
+    rgb = (0.0, 0.0, 0.0) if z else to_rgb(points.get_facecolor()[0])
+    assert low[:3] == high[:3] == exact(rgb)
+    assert (guides.color is None) == (z is None)
+
+
+@XFAIL_F
+def test_draw_order_sorts_the_drawn_points_by_marker_value_not_the_segments():
+    """draw_order sorts by area or opacity; segments keep row order.
+
+    alpha 1, 2, 3 on the reversed range (1, 0.15) gives opacities 1, 0.575,
+    0.15, so ascending opacity draws rows 2, 1, 0: the order of the marker
+    value, not of the data. size 3, 1, 2 ascending draws rows 1, 2, 0.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0])
+    faint_last = scales.AlphaScale(range=(1, 0.15))
+    cases = [
+        ({"alpha": [1.0, 2.0, 3.0]}, {"draw_order": "alpha"}, [2, 1, 0]),
+        (
+            {"alpha": [1.0, 2.0, 3.0]},
+            {"draw_order": "alpha", "draw_ascending": False},
+            [0, 1, 2],
+        ),
+        ({"size": [3.0, 1.0, 2.0]}, {"draw_order": "size", "connect": True}, [1, 2, 0]),
+        ({"size": [3.0, 1.0, 2.0]}, {}, [0, 1, 2]),
+    ]
+    for variables, order, rows in cases:
+        _, axis = plt.subplots()
+        scale = {"alpha_scale": faint_last} if "alpha" in variables else {}
+        _, points, segments, _ = Scatter(x, SY, **variables).make_plot(
+            ax=axis, **scale, **order
+        )
+        np.testing.assert_array_equal(points.get_offsets(), np.c_[x[rows], SY[rows]])
+        if segments is not None:
+            _assert_segments(segments, x, SY, [(0, 1), (1, 2)])
+    plt.close("all")
+
+
+@XFAIL_F
+def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path(ax):
+    """``set_labels(size=, alpha=)`` titles the key and labels the bar; ``path`` gains both.
+
+    ON FAILURE: the code is wrong.
+    """
+    n = TeXlabel(("n", "", "p1"))
+    spread = ManualLabel(r"\delta w / w", "dimless")
+    sc = Scatter(SX, SY, size=[1.0, 2.0, 3.0], alpha=[1.0, 2.0, 3.0])
+    sc.set_labels(size=n, alpha=spread)
+    _, _, _, guides = sc.make_plot(ax=ax)
+    assert guides.size.get_title().get_text() == str(n)
+    assert guides.alpha.ax.get_ylabel() == str(spread)
+    assert sc.path == Path("Scatter", "x", "y", n.path, spread.path, "linX-linY")
+    with pytest.warns(PlainStringLabelWarning, match="size='n'"):
+        sc.set_labels(size="n")
+    unlabelled = Scatter(SX, SY, size=[1.0, 2.0, 3.0], alpha=[1.0, 2.0, 3.0])
+    assert unlabelled.path == Path("Scatter", "x", "y", "size", "alpha", "linX-linY")
 
 
 @pytest.mark.parametrize(
-    "variables, plot_kwargs, match",
+    "variables, plot_kwargs, error, match",
     [
-        ({"size": [1.0, 2.0, 3.0]}, {"s": 20.0}, r"s= .*size variable"),
-        ({"alpha": [1.0, 2.0, 3.0]}, {"alpha": 0.5}, r"alpha= .*alpha variable"),
-        ({}, {"size_norm": Normalize()}, r"size_norm .*without a size variable"),
-        ({}, {"size_range": (1, 2)}, r"size_range .*without a size variable"),
-        ({}, {"alpha_norm": Normalize()}, r"alpha_norm .*without an alpha variable"),
-        ({}, {"alpha_range": (0, 1)}, r"alpha_range .*without an alpha variable"),
+        ({"size": [1.0, 2.0, 3.0]}, {"s": 20.0}, TypeError, r"s= .*size variable"),
+        (
+            {"alpha": [1.0, 2.0, 3.0]},
+            {"alpha": 0.5},
+            TypeError,
+            r"alpha= .*alpha variable",
+        ),
+        pytest.param(
+            {},
+            {"size_scale": "SizeScale"},
+            TypeError,
+            r"size_scale .*without a size variable",
+            marks=XFAIL_F,
+        ),
+        pytest.param(
+            {},
+            {"alpha_scale": "AlphaScale"},
+            TypeError,
+            r"alpha_scale .*without an alpha variable",
+            marks=XFAIL_F,
+        ),
+        pytest.param(
+            {"size": [1.0, 2.0, 3.0]},
+            {"size_scale": "AlphaScale"},
+            TypeError,
+            r"size_scale must be a SizeScale",
+            marks=XFAIL_F,
+        ),
+        pytest.param(
+            {"alpha": [1.0, 2.0, 3.0]},
+            {"connect": True},
+            TypeError,
+            r"connect=True .*alpha variable",
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="the interim Scatter joins points with an alpha variable; "
+                "DID NOT RAISE; remove this marker when Stage F lands",
+            ),
+        ),
+        pytest.param(
+            {},
+            {"draw_order": "alpha"},
+            TypeError,
+            r"draw_order='alpha' .*without an alpha variable",
+            marks=XFAIL_F,
+        ),
+        pytest.param(
+            {"size": [1.0, 2.0, 3.0]},
+            {"draw_order": "area"},
+            ValueError,
+            r"draw_order must be None, 'size' or 'alpha'",
+            marks=XFAIL_F,
+        ),
     ],
-    ids=["s", "alpha", "size_norm", "size_range", "alpha_norm", "alpha_range"],
+    ids=[
+        "s",
+        "alpha",
+        "orphan-size_scale",
+        "orphan-alpha_scale",
+        "wrong-scale",
+        "connect-alpha",
+        "orphan-draw_order",
+        "unknown-draw_order",
+    ],
 )
-def test_conflicting_or_orphaned_size_and_alpha_keywords_raise_type_error(
-    ax, variables, plot_kwargs, match
+def test_conflicting_or_orphaned_size_and_alpha_settings_raise(
+    ax, variables, plot_kwargs, error, match
 ):
-    """``s=``/``alpha=`` beside their variable, or a norm or range without one, raise.
+    """``s=``/``alpha=`` beside their variable, a scale or draw_order without one, raise.
+
+    Also ``connect=True`` with an alpha variable, a scale of the other
+    channel, and a draw_order naming no channel.
 
     ON FAILURE: the code is wrong.
     """
-    with pytest.raises(TypeError, match=match):
-        Scatter(SX, SY, **variables).make_plot(ax=ax, **plot_kwargs)
+    kwargs = {
+        k: getattr(scales, v)() if k.endswith("_scale") else v
+        for k, v in plot_kwargs.items()
+    }
+    with pytest.raises(error, match=match):
+        Scatter(SX, SY, **variables).make_plot(ax=ax, **kwargs)
