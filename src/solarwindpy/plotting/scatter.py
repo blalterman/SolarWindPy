@@ -31,7 +31,8 @@ class Scatter(base.ColorPlot):
     into the log axis with ``abs()``, while a ``Scatter`` leaves them for
     matplotlib to drop from its log axis.
 
-    This difference is documented for now and needs to be revisited.
+    Whether a ``Scatter`` should match the binned plots is open:
+    https://github.com/blalterman/SolarWindPy/issues/541.
 
     Examples
     --------
