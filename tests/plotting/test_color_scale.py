@@ -141,14 +141,14 @@ COLOR_PLOTS = {
 @pytest.mark.parametrize(
     "settings, message",
     [
-        ({"norm": "log"}, "norm must be"),
+        ({"norm": 3}, "norm must be"),
         ({"cbar": 1}, "cbar must be"),
         ({"cbar_kwargs": [("shrink", 0.5)]}, "cbar_kwargs must be"),
     ],
     ids=["norm", "cbar", "cbar_kwargs"],
 )
 def test_color_scale_rejects_invalid_settings_when_built(settings, message):
-    """A norm that is not a Normalize, a non-bool cbar, or non-mapping kwargs raise.
+    """A norm neither a Normalize nor a scale name, a non-bool cbar, or non-mapping kwargs raise.
 
     ON FAILURE: the code is wrong.
     """
@@ -214,3 +214,37 @@ def test_color_scale_str_shows_the_limits_a_plot_set():
     text = str(scale)
     assert "norm: Normalize(vmin=2, vmax=9)" in text
     assert "cmap: viridis" in text
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason="Stage E's ColorScale refuses a str norm (scales.py ColorScale.__init__); "
+    "'norm must be a matplotlib.colors.Normalize or None, not str'; remove this "
+    "marker when a scale name converts through matplotlib",
+)
+@pytest.mark.parametrize("plot", COLOR_PLOTS.values(), ids=COLOR_PLOTS.keys())
+def test_norm_given_as_a_scale_name_is_matplotlibs_norm_for_that_scale(plot):
+    """``norm="log"`` colours with a ``LogNorm``, as matplotlib's scatter and pcolormesh do.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, mappable, *_ = plot(POSITIVE).make_plot(cbar=False, norm="log")
+    assert isinstance(mappable.norm, LogNorm)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason="Stage E's ColorScale refuses a str norm (scales.py ColorScale.__init__); "
+    "'norm must be a matplotlib.colors.Normalize or None, not str'; remove this "
+    "marker when a scale name converts through matplotlib",
+)
+def test_color_scale_holds_the_norm_a_scale_name_names_and_refuses_an_unknown_one():
+    """``ColorScale(norm="log").norm`` is a ``LogNorm``; an unknown name is matplotlib's ValueError.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert isinstance(ColorScale(norm="log").norm, LogNorm)
+    with pytest.raises(ValueError, match="'lgo'"):
+        ColorScale(norm="lgo")
