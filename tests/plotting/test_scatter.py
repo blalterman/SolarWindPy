@@ -846,31 +846,70 @@ def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
     assert (guides.color is None) == (z is None)
 
 
-@pytest.mark.parametrize("layout", [None, "constrained"])
-@pytest.mark.parametrize("z", [None, [1.0, 2.0, 3.0]], ids=["no-z", "z"])
-def test_alpha_bar_lies_horizontal_above_the_axes_clear_of_the_axes_and_the_z_colorbar(
-    layout, z
-):
-    """The alpha bar is horizontal above the axes; no guide overlaps another or the axes.
+def _sides(guide, axis, renderer):
+    """The sides of ``axis`` that ``guide``'s axes lie wholly beyond, from their extents."""
+    g = guide.get_window_extent(renderer)
+    a = axis.get_window_extent(renderer)
+    beyond = {
+        "top": g.y0 >= a.y1,
+        "bottom": g.y1 <= a.y0,
+        "right": g.x0 >= a.x1,
+        "left": g.x1 <= a.x0,
+    }
+    return [side for side, out in beyond.items() if out]
 
-    Each box holds its ticks and label: the axes', the alpha bar's and,
-    when z colours the points, the z colorbar's. With and without a layout
-    engine.
+
+_BAR_ON_TOP = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the alpha bar defaults to the top whether or not a z colorbar is "
+    "drawn; remove this marker when it defaults to the right without one",
+)
+
+
+@pytest.mark.parametrize("layout", [None, "constrained"])
+@pytest.mark.parametrize(
+    "z, plot_kwargs, side, orientation",
+    [
+        pytest.param(None, {}, "right", "vertical", id="no-z", marks=_BAR_ON_TOP),
+        pytest.param(
+            [2.0, 2.0, 2.0], {}, "right", "vertical", id="constant-z", marks=_BAR_ON_TOP
+        ),
+        pytest.param(
+            [1.0, 2.0, 3.0],
+            {"cbar": False},
+            "right",
+            "vertical",
+            id="cbar-off",
+            marks=_BAR_ON_TOP,
+        ),
+        pytest.param([1.0, 2.0, 3.0], {}, "top", "horizontal", id="z"),
+    ],
+)
+def test_alpha_bar_lies_above_the_axes_with_a_z_colorbar_else_on_their_right_overlapping_nothing(
+    layout, z, plot_kwargs, side, orientation
+):
+    """With a z colorbar the alpha bar lies horizontally above the axes; else upright on the right.
+
+    Without a z colorbar (no z, a constant z, or ``cbar=False``) the bar
+    takes the z colorbar's place. Each box holds its ticks and label: the
+    axes', the alpha bar's and, when drawn, the z colorbar's; none overlaps
+    another. With and without a layout engine.
 
     ON FAILURE: the code is wrong.
     """
     fig, axis = plt.subplots(figsize=(7, 4), layout=layout)
     sc = Scatter(SX, SY, z, alpha=[0.0, 5.0, 10.0])
     sc.set_labels(z=ManualLabel("Speed", "km/s"), alpha=ManualLabel("Spread", "km/s"))
-    _, _, _, guides = sc.make_plot(ax=axis)
+    _, _, _, guides = sc.make_plot(ax=axis, **plot_kwargs)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     bar = guides.alpha
-    assert bar.orientation == "horizontal"
-    assert bar.ax.get_window_extent(renderer).y0 >= axis.get_window_extent(renderer).y1
+    assert (bar.orientation, _sides(bar.ax, axis, renderer)) == (orientation, [side])
     boxes = {"axes": axis, "alpha bar": bar.ax}
-    if z is not None:
+    if guides.color is not None:
         boxes["z colorbar"] = guides.color.ax
+    assert ("z colorbar" in boxes) == (side == "top")
     boxes = {k: v.get_tightbbox(renderer) for k, v in boxes.items()}
     for a, b in itertools.combinations(boxes, 2):
         assert not boxes[a].overlaps(boxes[b]), (a, b)
@@ -878,34 +917,54 @@ def test_alpha_bar_lies_horizontal_above_the_axes_clear_of_the_axes_and_the_z_co
 
 
 @pytest.mark.parametrize(
-    "cbar_kwargs, orientation",
+    "z, cbar_kwargs, side, orientation",
     [
-        ({"location": "right"}, "vertical"),
-        ({"orientation": "vertical"}, "vertical"),
-        ({"location": "bottom"}, "horizontal"),
+        # With a z colorbar the bar would lie on top, horizontal.
+        ([1.0, 2.0, 3.0], {"location": "right"}, "right", "vertical"),
+        ([1.0, 2.0, 3.0], {"orientation": "vertical"}, "right", "vertical"),
+        ([1.0, 2.0, 3.0], {"location": "bottom"}, "bottom", "horizontal"),
+        # Without one it would stand on the right, vertical.
+        (None, {"location": "top"}, "top", "horizontal"),
+        (None, {"orientation": "horizontal"}, "bottom", "horizontal"),
+        (None, {"location": "left"}, "left", "vertical"),
     ],
-    ids=["location", "orientation", "bottom"],
+    ids=["z-right", "z-vertical", "z-bottom", "top", "horizontal", "left"],
 )
-def test_alpha_bars_cbar_kwargs_override_its_placement(ax, cbar_kwargs, orientation):
+def test_alpha_bars_cbar_kwargs_override_its_placement(
+    ax, z, cbar_kwargs, side, orientation
+):
     """A ``location`` or ``orientation`` in the scale's ``cbar_kwargs`` places the bar.
+
+    Each case places it away from that plot's default, with and without a
+    z colorbar. ``orientation`` alone puts a horizontal bar at the bottom
+    and a vertical one on the right, as matplotlib does.
 
     ON FAILURE: the code is wrong.
     """
     scale = scales.AlphaScale(cbar_kwargs=cbar_kwargs)
-    _, _, _, guides = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
+    _, _, _, guides = Scatter(SX, SY, z, alpha=[0.0, 5.0, 10.0]).make_plot(
         ax=ax, alpha_scale=scale
     )
-    assert guides.alpha.orientation == orientation
+    ax.figure.canvas.draw()
+    renderer = ax.figure.canvas.get_renderer()
+    bar = guides.alpha
+    assert (bar.orientation, _sides(bar.ax, ax, renderer)) == (orientation, [side])
 
 
 #: The draw order of each case's rows. alpha 2, 3, 1 gives opacities 0.575,
 #: 1, 0.15 on the default range (0.15, 1), and 0.575, 0.15, 1 on the
 #: reversed range (1, 0.15): ascending opacity draws rows 2, 0, 1 and 1, 0,
 #: 2, descending the reverse, so row order and each sort differ. size 3, 1, 2
-#: ascending draws rows 1, 2, 0.
+#: ascending draws rows 1, 2, 0, descending 0, 2, 1.
 _ALPHA = {"alpha": [2.0, 3.0, 1.0]}
 _SIZE = {"size": [3.0, 1.0, 2.0]}
 _REVERSED = {"alpha_scale": "reversed"}
+_LARGEST_ON_TOP = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="draw_order='size' defaults to ascending, the largest on top; remove "
+    "this marker when it draws the smallest on top",
+)
 
 
 @pytest.mark.parametrize(
@@ -923,7 +982,15 @@ _REVERSED = {"alpha_scale": "reversed"}
             id="alpha-ascending",
         ),
         pytest.param(_SIZE, {}, [0, 1, 2], id="default-size"),
-        pytest.param(_SIZE, {"draw_order": "size"}, [1, 2, 0], id="size"),
+        pytest.param(
+            _SIZE, {"draw_order": "size"}, [0, 2, 1], id="size", marks=_LARGEST_ON_TOP
+        ),
+        pytest.param(
+            _SIZE,
+            {"draw_order": "size", "draw_ascending": True},
+            [1, 2, 0],
+            id="size-ascending",
+        ),
         pytest.param(
             _SIZE,
             {"draw_order": "size", "draw_ascending": False},
@@ -932,7 +999,11 @@ _REVERSED = {"alpha_scale": "reversed"}
         ),
         pytest.param({**_SIZE, **_ALPHA}, {}, [1, 0, 2], id="default-both"),
         pytest.param(
-            {**_SIZE, **_ALPHA}, {"draw_order": "size"}, [1, 2, 0], id="size-both"
+            {**_SIZE, **_ALPHA},
+            {"draw_order": "size"},
+            [0, 2, 1],
+            id="size-both",
+            marks=_LARGEST_ON_TOP,
         ),
     ],
 )
@@ -942,8 +1013,9 @@ def test_draw_order_sorts_the_drawn_points_by_marker_value(
     """``"auto"``, the default, draws the faintest last with alpha, else row order.
 
     ``None`` keeps row order; ``"size"`` and ``"alpha"`` sort by marker area
-    or opacity, not by the data, and ``draw_ascending=None`` sorts opacity
-    descending and area ascending. See ``_ALPHA`` for each case's rows.
+    or opacity, not by the data. ``draw_ascending`` unset sorts both
+    descending, so the faintest or smallest points are on top; True sorts
+    them ascending. See ``_ALPHA`` for each case's rows.
 
     ON FAILURE: the code is wrong.
     """
@@ -964,7 +1036,7 @@ def test_draw_order_leaves_the_segments_in_row_order(ax):
     """
     x = np.array([0.0, 1.0, 2.0])
     _, points, segments, _ = Scatter(x, SY, **_SIZE).make_plot(
-        ax=ax, draw_order="size", connect=True
+        ax=ax, draw_order="size", draw_ascending=True, connect=True
     )
     np.testing.assert_array_equal(
         points.get_offsets(), np.c_[x[[1, 2, 0]], SY[[1, 2, 0]]]
