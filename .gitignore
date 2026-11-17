@@ -127,3 +127,6 @@ staged-recipes*/
 *-feedstock-old/
 
 # Version bump to v0.1.4
+
+# Claude Code agent worktrees (registered git worktrees, local only)
+.claude/worktrees/
