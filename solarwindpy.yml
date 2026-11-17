@@ -22,7 +22,7 @@ channels:
 - conda-forge
 dependencies:
 - alabaster
-- astropy
+- astropy-base
 - astropy-iers-data
 - babel
 - python-blosc2
