@@ -151,9 +151,6 @@ fresh Python session and it draws the figure shown under it.
 One quantity
 ~~~~~~~~~~~~
 
-A histogram
-^^^^^^^^^^^
-
 ``make_plot`` draws the histogram. ``set_labels`` takes a label object per
 axis: a :py:class:`~solarwindpy.plotting.labels.base.TeXlabel` built from the
 same ``(M, C, S)`` key as the plasma's column, or a
@@ -178,7 +175,7 @@ the plot's ``path`` its parts. `Labels`_ explains them.
    h1.make_plot()
 
 The save path
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 Every plot also has a ``path``, built from its class, its labels and its axis
 scales, to file the figure under when you save it: join it to your figure
