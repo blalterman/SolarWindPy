@@ -321,7 +321,7 @@ class DependencyAnalyzer:
         """Save detailed text report of the analysis."""
         report = self.generate_report()
 
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write("SolarWindPy Import Dependency Analysis Report\n")
             f.write("=" * 50 + "\n\n")
 

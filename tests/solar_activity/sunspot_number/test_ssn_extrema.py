@@ -56,7 +56,7 @@ def read_csv_with_stdlib(path):
         The 0-based line index of the header row, the header fields, and the
         non-blank data rows below it, all as raw strings.
     """
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         lines = f.read().splitlines()
 
     header_index = next(

@@ -2443,7 +2443,10 @@ class TestAxnormKeys:
                 raise SystemExit(f"{type(hist).__name__} accepted {key!r}")
             """)
         result = subprocess.run(
-            [sys.executable, "-O", "-c", script], capture_output=True, text=True
+            [sys.executable, "-O", "-c", script],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
         )
         assert result.returncode == 0, result.stderr + result.stdout
 

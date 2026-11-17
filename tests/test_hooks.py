@@ -50,13 +50,14 @@ def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess:
         capture_output=True,
         text=True,
         check=True,
+        encoding="utf-8",
     )
 
 
 def _make_mock_git_repo(path: Path) -> Path:
     """Initialise a git repository at ``path`` with one commit of ``README.md``."""
     _git("init", "-q", cwd=path)
-    (path / "README.md").write_text("# Test")
+    (path / "README.md").write_text("# Test", encoding="utf-8")
     _git("add", "README.md", cwd=path)
     _git("commit", "-q", "-m", "Initial commit", cwd=path)
     return path
@@ -102,7 +103,7 @@ def test_mock_git_repo_leaves_the_callers_repository_untouched(
 
 def _settings() -> dict:
     """The parsed contents of ``.claude/settings.json``."""
-    return json.loads(SETTINGS.read_text())
+    return json.loads(SETTINGS.read_text(encoding="utf-8"))
 
 
 def test_settings_file_exists() -> None:

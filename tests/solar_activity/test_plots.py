@@ -52,7 +52,7 @@ def sidc_from_silso(tmp_path, monkeypatch, ssn):
     """
     remote = tmp_path / "remote"
     remote.mkdir()
-    (remote / "snmstotcsv.php").write_text(silso_m13(ssn))
+    (remote / "snmstotcsv.php").write_text(silso_m13(ssn), encoding="utf-8")
 
     base = remote.as_uri() + "/"
     monkeypatch.setattr(SIDC_ID, "_url_base", property(lambda self: base))

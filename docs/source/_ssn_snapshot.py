@@ -44,7 +44,9 @@ def seed_ssn_snapshot(root, setenv):
     root = Path(root)
     (root / PKGNAME).mkdir(parents=True, exist_ok=True)
     setenv("XDG_CACHE_HOME", str(root))
-    lines = SNAPSHOT.read_text().splitlines(keepends=True)
+    lines = SNAPSHOT.read_text(encoding="utf-8").splitlines(keepends=True)
     data = root / "snmstotcsv.csv"
-    data.write_text("".join(line for line in lines if not line.startswith("#")))
+    data.write_text(
+        "".join(line for line in lines if not line.startswith("#")), encoding="utf-8"
+    )
     return Path(import_file_to_cache(URL, str(data), pkgname=PKGNAME))

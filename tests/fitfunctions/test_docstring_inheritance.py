@@ -149,7 +149,11 @@ def test_import_order_that_disables_inheritance_warns():
         "import docstring_inheritance; import solarwindpy"
     )
     result = subprocess.run(
-        [sys.executable, "-c", code], env=env, capture_output=True, text=True
+        [sys.executable, "-c", code],
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
     )
     assert result.returncode == 0, result.stderr
     assert "docstring inheritance is off" in result.stderr

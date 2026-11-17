@@ -217,7 +217,7 @@ def find_line_index(path, prefix: str) -> Optional[int]:
 
     Returns ``None`` if no such line exists.
     """
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for i, line in enumerate(f):
             if line.startswith(prefix):
                 return i

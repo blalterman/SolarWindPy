@@ -263,6 +263,7 @@ def test_the_commit_sha_is_the_tagged_commit_not_the_tag_object(tmp_path, monkey
             capture_output=True,
             text=True,
             check=True,
+            encoding="utf-8",
         ).stdout.strip()
 
     git("init", "-q", "-b", "master")

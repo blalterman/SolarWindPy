@@ -76,7 +76,7 @@ def isolated_cache(tmp_path, monkeypatch):
 def seed(url, text, tmp_path, age_days):
     """Cache ``text`` as ``url``'s download, ``age_days`` old."""
     source = tmp_path / f"seed-{abs(hash(url))}.csv"
-    source.write_text(text)
+    source.write_text(text, encoding="utf-8")
     path = Path(import_file_to_cache(url, str(source), pkgname="solarwindpy"))
     then = time.time() - age_days * 86400.0
     os.utime(path, (then, then))
@@ -94,7 +94,7 @@ def host(monkeypatch, tmp_path, served):
         if isinstance(outcome, BaseException):
             raise outcome
         source = tmp_path / f"served-{abs(hash(url))}.csv"
-        source.write_text(outcome)
+        source.write_text(outcome, encoding="utf-8")
         return import_file_to_cache(url, str(source), pkgname="solarwindpy")
 
     monkeypatch.setattr(cache, "_download_file", download)
@@ -147,7 +147,7 @@ def icmecat_version_from_a_404(tmp_path, monkeypatch):
 def icmecat_unknown_spacecraft(tmp_path, monkeypatch):
     """A local catalog naming a spacecraft outside SPACECRAFT_NAMES: ICMECATSpacecraftWarning."""
     path = tmp_path / "icmecat.csv"
-    path.write_text(CATALOG_CSV.replace("Wind", "Voyager"))
+    path.write_text(CATALOG_CSV.replace("Wind", "Voyager"), encoding="utf-8")
     monkeypatch.setattr(icmecat, "ICMECAT_URL", str(path))
     icmecat.ICMECAT()
     return icmecat.ICMECATSpacecraftWarning

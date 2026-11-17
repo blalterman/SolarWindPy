@@ -73,10 +73,16 @@ def test_snapshot_names_its_source_and_caches_only_the_data(seeded):
     """
     helper, path = seeded
     header = [
-        line for line in helper.SNAPSHOT.read_text().splitlines() if line[:1] == "#"
+        line
+        for line in helper.SNAPSHOT.read_text(encoding="utf-8").splitlines()
+        if line[:1] == "#"
     ]
     assert any(helper.URL in line for line in header)
-    assert not [line for line in path.read_text().splitlines() if line[:1] == "#"]
+    assert not [
+        line
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line[:1] == "#"
+    ]
 
 
 def test_snapshot_parses_through_sidc_and_covers_1994_to_2026(seeded):

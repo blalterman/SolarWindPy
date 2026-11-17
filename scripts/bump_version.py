@@ -46,6 +46,7 @@ def run_command(cmd: List[str], capture_output: bool = True) -> Tuple[int, str, 
             capture_output=capture_output,
             text=True,
             cwd=Path(__file__).parent.parent,
+            encoding="utf-8",
         )
         return result.returncode, result.stdout.strip(), result.stderr.strip()
     except FileNotFoundError:

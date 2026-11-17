@@ -36,7 +36,7 @@ def serve(tmp_path, text):
     remote = tmp_path / "remote"
     remote.mkdir(exist_ok=True)
     source = remote / "series.csv"
-    source.write_text(text)
+    source.write_text(text, encoding="utf-8")
     return source, source.as_uri()
 
 
@@ -75,7 +75,7 @@ def test_a_fresh_entry_is_returned_without_downloading(tmp_path):
         warnings.simplefilter("error")
         path = cache.fetch(url, max_age=pd.Timedelta(days=1))
 
-    assert path.read_text() == "first\n"
+    assert path.read_text(encoding="utf-8") == "first\n"
 
 
 def test_a_stale_entry_is_downloaded_again(tmp_path):
@@ -91,11 +91,11 @@ def test_a_stale_entry_is_downloaded_again(tmp_path):
 
     source, url = serve(tmp_path, "first\n")
     backdate(cache.fetch(url, max_age=pd.Timedelta(days=1)), 2)
-    source.write_text("second\n")
+    source.write_text("second\n", encoding="utf-8")
 
     path = cache.fetch(url, max_age=pd.Timedelta(days=1))
 
-    assert path.read_text() == "second\n"
+    assert path.read_text(encoding="utf-8") == "second\n"
 
 
 def test_a_failed_refresh_returns_the_cached_copy_and_warns_its_age(tmp_path):
@@ -115,7 +115,7 @@ def test_a_failed_refresh_returns_the_cached_copy_and_warns_its_age(tmp_path):
     with pytest.warns(cache.StaleCacheWarning, match=r"3\.0 days old"):
         path = cache.fetch(url, max_age=pd.Timedelta(days=1))
 
-    assert path.read_text() == "first\n"
+    assert path.read_text(encoding="utf-8") == "first\n"
 
 
 def test_the_stale_cache_warning_from_fetch_points_at_its_caller(tmp_path):
@@ -192,7 +192,7 @@ def test_a_local_path_is_read_in_place_and_not_cached(tmp_path):
     from solarwindpy.solar_activity import cache
 
     local = tmp_path / "local.csv"
-    local.write_text("first\n")
+    local.write_text("first\n", encoding="utf-8")
 
     assert cache.fetch(str(local), max_age=pd.Timedelta(days=1)) == local
     assert cache.cache_contents().empty
@@ -213,13 +213,13 @@ def test_a_refresh_leaves_exactly_one_entry_for_its_url(tmp_path, isolated_cache
     path = cache.fetch(url, max_age=pd.Timedelta(days=1))
     for text in ("second\n", "third\n"):
         backdate(path, 2)
-        source.write_text(text)
+        source.write_text(text, encoding="utf-8")
         path = cache.fetch(url, max_age=pd.Timedelta(days=1))
 
     assert cache.cache_contents().index.tolist() == [url]
     entries = list((isolated_cache / "solarwindpy").rglob("contents"))
     assert entries == [path]
-    assert path.read_text() == "third\n"
+    assert path.read_text(encoding="utf-8") == "third\n"
 
 
 class DownloadAttempted(AssertionError):
@@ -400,7 +400,7 @@ def test_fall_back_returns_the_cached_copy_and_warns_its_age(seed_cache):
     with pytest.warns(cache.StaleCacheWarning, match=r"3\.0 days old"):
         path = cache.fall_back(url, OSError("unreachable"))
 
-    assert path.read_text() == "old\n"
+    assert path.read_text(encoding="utf-8") == "old\n"
 
 
 def test_fall_back_with_nothing_cached_raises_with_the_status(http_server):

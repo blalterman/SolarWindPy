@@ -73,7 +73,7 @@ class FakeHost:
                 url, outcome, "status", email.message.Message(), None
             )
         source = self.sources / f"{len(self.requested)}.csv"
-        source.write_text(outcome)
+        source.write_text(outcome, encoding="utf-8")
         return import_file_to_cache(url, str(source), pkgname="solarwindpy")
 
 
@@ -93,7 +93,7 @@ def host(tmp_path, monkeypatch):
 def seed_v23(tmp_path, frame=CATALOG, age_days=40):
     """Cache ``frame`` as v23's download, ``age_days`` old (stale against 30 days)."""
     source = tmp_path / "seed.csv"
-    source.write_text(catalog_text(frame))
+    source.write_text(catalog_text(frame), encoding="utf-8")
     path = Path(import_file_to_cache(V23, str(source), pkgname="solarwindpy"))
     then = time.time() - age_days * 86400
     os.utime(path, (then, then))

@@ -242,7 +242,8 @@ def test_insufficient_data_check_survives_python_O(tmp_path):
         "except InsufficientDataError:\n"
         "    print('raised')\n"
         "else:\n"
-        "    print('no error')\n"
+        "    print('no error')\n",
+        encoding="utf-8",
     )
     root = Path(solarwindpy.__file__).resolve().parents[1]
     # Inherit the environment: Windows needs SYSTEMROOT to start a process and
@@ -253,6 +254,7 @@ def test_insufficient_data_check_survives_python_O(tmp_path):
         capture_output=True,
         text=True,
         env=env,
+        encoding="utf-8",
     )
     assert out.returncode == 0, out.stderr
     assert out.stdout.strip() == "raised", out.stdout + out.stderr

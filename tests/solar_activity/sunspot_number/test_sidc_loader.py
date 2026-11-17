@@ -63,7 +63,10 @@ def make_loader():
 
 def write_silso(path, rows):
     """Write ``rows`` in SILSO's semicolon-separated, headerless wire format."""
-    path.write_text("\n".join(";".join(str(field) for field in row) for row in rows))
+    path.write_text(
+        "\n".join(";".join(str(field) for field in row) for row in rows),
+        encoding="utf-8",
+    )
     return path
 
 

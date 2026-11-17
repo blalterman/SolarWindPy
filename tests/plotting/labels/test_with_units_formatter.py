@@ -29,7 +29,7 @@ def test_no_label_module_writes_the_closing_bracket_itself():
     hits = [
         f"{path.name}:{n}"
         for path in sorted(root.glob("*.py"))
-        for n, line in enumerate(path.read_text().splitlines(), start=1)
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1)
         if _CLOSING.search(line)
     ]
     assert hits == []

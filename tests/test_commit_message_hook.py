@@ -22,7 +22,7 @@ def _check(tmp_path, message):
     if BASH is None:
         pytest.skip("bash is not on PATH")
     msg = tmp_path / "COMMIT_EDITMSG"
-    msg.write_text(message)
+    msg.write_text(message, encoding="utf-8")
     return subprocess.run([BASH, str(SCRIPT), str(msg)], capture_output=True).returncode
 
 

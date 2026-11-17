@@ -81,7 +81,7 @@ def test_the_due_date_is_six_years_after_the_latest_extremum():
     """
     lines = [
         line
-        for line in SSN_EXTREMA_CSV.read_text().splitlines()
+        for line in SSN_EXTREMA_CSV.read_text(encoding="utf-8").splitlines()
         if line.strip() and not line.startswith("#")
     ]
     _, minimum, maximum = lines[-1].split(",")
@@ -126,7 +126,10 @@ def test_a_new_extremum_row_moves_the_due_date(tmp_path):
     ON FAILURE: the code is wrong.
     """
     updated = tmp_path / "ssn_extrema.csv"
-    updated.write_text(SSN_EXTREMA_CSV.read_text().rstrip("\n") + "\n26,2031-01-01,\n")
+    updated.write_text(
+        SSN_EXTREMA_CSV.read_text(encoding="utf-8").rstrip("\n") + "\n26,2031-01-01,\n",
+        encoding="utf-8",
+    )
 
     assert reminder_due(updated) == pd.Timestamp("2037-01-01")
     overdue = reminder_due() + pd.Timedelta(days=1)

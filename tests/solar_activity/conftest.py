@@ -51,7 +51,7 @@ def seed_cache(tmp_path, isolated_cache):
 
     def _seed(url, text, age_days=0.0):
         source = sources / f"{next(counter)}.txt"
-        source.write_text(text)
+        source.write_text(text, encoding="utf-8")
         path = Path(import_file_to_cache(url, str(source), pkgname="solarwindpy"))
         if age_days:
             then = time.time() - age_days * ONE_DAY

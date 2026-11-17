@@ -50,6 +50,7 @@ def artifacts(tmp_path_factory):
         ],
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     if result.returncode != 0:
         pytest.fail(f"python -m build failed:\n{result.stdout}\n{result.stderr}")

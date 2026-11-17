@@ -334,7 +334,7 @@ class DynamicImportTester:
         self, results: Dict, output_file: str = "dynamic_import_test_report.txt"
     ):
         """Save detailed test report."""
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write("SolarWindPy Dynamic Import Test Report\n")
             f.write("=" * 50 + "\n\n")
 

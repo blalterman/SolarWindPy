@@ -24,6 +24,7 @@ def _tracked_package_modules():
             capture_output=True,
             text=True,
             check=True,
+            encoding="utf-8",
         ).stdout
     except (OSError, subprocess.CalledProcessError):
         pytest.skip("not a git checkout")

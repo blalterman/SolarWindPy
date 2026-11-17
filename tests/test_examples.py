@@ -58,6 +58,7 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
         env={**os.environ, "PYTHONPATH": str(installed)},
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     assert result.returncode == 0, result.stderr
     module_file, summary = result.stdout.splitlines()

@@ -153,7 +153,9 @@ SILSO_M13 = Path(__file__).parent / "silso_m13.csv"
 
 def silso_rows():
     """The local file's rows, split by hand rather than by pandas."""
-    return [line.split(";") for line in SILSO_M13.read_text().splitlines()]
+    return [
+        line.split(";") for line in SILSO_M13.read_text(encoding="utf-8").splitlines()
+    ]
 
 
 def test_stale_cache_downloads_the_silso_series_and_loads_it(

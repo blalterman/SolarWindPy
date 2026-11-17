@@ -41,7 +41,7 @@ def _plot_blocks(path):
     ``argument`` is the text after ``plot::``, empty for an inline block, and
     ``code`` is the block's body without its options.
     """
-    lines = path.read_text().splitlines()
+    lines = path.read_text(encoding="utf-8").splitlines()
     for i, line in enumerate(lines):
         match = _DIRECTIVE.match(line)
         if match is None:
@@ -123,7 +123,8 @@ def test_the_guards_catch_an_empty_and_a_named_block(tmp_path):
         ".. plot::\n"
         "\n"
         "   import matplotlib.pyplot as plt\n"
-        "   plt.plot([0, 1])\n"
+        "   plt.plot([0, 1])\n",
+        encoding="utf-8",
     )
     found = _found(tmp_path)
     assert len(found) == 3

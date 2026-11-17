@@ -79,7 +79,7 @@ def _autosummary_entries():
     """``(dotted name, recursive)`` for each autosummary entry in the API page."""
     entries = []
     in_block = recursive = False
-    for line in API_REFERENCE.read_text().splitlines():
+    for line in API_REFERENCE.read_text(encoding="utf-8").splitlines():
         if line.startswith(".. autosummary::"):
             in_block, recursive = True, False
             continue
@@ -283,7 +283,7 @@ def test_every_public_object_is_documented_on_the_api_reference():
     named in the assertion, extend this test to model it.
     """
     conf = set()
-    for node in ast.parse((DOCS_SOURCE / "conf.py").read_text()).body:
+    for node in ast.parse((DOCS_SOURCE / "conf.py").read_text(encoding="utf-8")).body:
         if isinstance(node, ast.FunctionDef):
             conf.add(node.name)
         elif isinstance(node, ast.Assign):
@@ -347,7 +347,11 @@ def test_importing_solarwindpy_alone_draws_no_docstring_inheritance_warning():
     env = {k: v for k, v in os.environ.items() if k != "DOCSTRING_INHERITANCE_ENABLE"}
     code = "import warnings; warnings.simplefilter('always'); import solarwindpy"
     result = subprocess.run(
-        [sys.executable, "-c", code], env=env, capture_output=True, text=True
+        [sys.executable, "-c", code],
+        env=env,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
     )
     assert result.returncode == 0, result.stderr
     assert "docstring inheritance is off" not in result.stderr

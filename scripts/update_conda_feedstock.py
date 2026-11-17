@@ -91,6 +91,7 @@ class CondaFeedstockUpdater:
                 capture_output=True,
                 text=True,
                 check=True,
+                encoding="utf-8",
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
@@ -129,6 +130,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 check=False,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
 
             if not result.stdout.strip():
@@ -143,6 +145,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 check=True,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
             commit_sha = result.stdout.strip()
 
@@ -155,6 +158,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 check=False,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
 
             if result.returncode == 0:
@@ -184,6 +188,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 check=False,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
             if result.returncode == 0 and result.stdout.strip():
                 tag_message = result.stdout.strip()
@@ -225,6 +230,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 check=True,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
 
             release_data = json.loads(result.stdout)
@@ -418,7 +424,7 @@ class CondaFeedstockUpdater:
                 return False
 
             # Read current meta.yaml
-            content = meta_path.read_text()
+            content = meta_path.read_text(encoding="utf-8")
 
             # Update version and SHA256
             # Handle Jinja2 template format
@@ -435,7 +441,7 @@ class CondaFeedstockUpdater:
 
             # Write updated content
             updated_content = "\n".join(updated_lines)
-            meta_path.write_text(updated_content)
+            meta_path.write_text(updated_content, encoding="utf-8")
 
             print(f"✅ Updated {meta_path} with version {version_str}")
             return True
@@ -459,6 +465,7 @@ class CondaFeedstockUpdater:
                 text=True,
                 timeout=15,
                 cwd=self.project_root,
+                encoding="utf-8",
             )
 
             if result.returncode == 0:
@@ -666,7 +673,12 @@ When bot PR appears (usually 2-6 hours):
             ]
 
             result = subprocess.run(
-                cmd, capture_output=True, text=True, check=True, cwd=self.project_root
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=self.project_root,
+                encoding="utf-8",
             )
 
             issue_url = result.stdout.strip()

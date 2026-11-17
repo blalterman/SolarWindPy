@@ -57,7 +57,7 @@ def test_assert_status_raises_on_mismatch():
 
 def test_assert_columns_present_raises_on_missing_column(tmp_path):
     csv_path = tmp_path / "wrong_columns.csv"
-    csv_path.write_text("a,b\n1,2\n")
+    csv_path.write_text("a,b\n1,2\n", encoding="utf-8")
     df = pd.read_csv(csv_path)
     with pytest.raises(AssertionError):
         assert_columns_present(df, ["a", "b", "c"])
@@ -70,7 +70,7 @@ def test_assert_set_equal_raises_on_mismatch():
 
 def test_assert_skiprows_parses_raises_on_wrong_header(tmp_path):
     csv_path = tmp_path / "wrong_header.csv"
-    csv_path.write_text("x,y\n1,2\n3,4\n")
+    csv_path.write_text("x,y\n1,2\n3,4\n", encoding="utf-8")
     with pytest.raises(AssertionError):
         assert_skiprows_parses(csv_path, 0, ["Min", "Max"])
 
@@ -87,11 +87,12 @@ def _write_declaring_repo(root, rtd_python):
     (root / "pyproject.toml").write_text(
         "[project]\n"
         'requires-python = ">=3.11,<4"\n'
-        'classifiers = ["Programming Language :: Python :: 3.11"]\n'
+        'classifiers = ["Programming Language :: Python :: 3.11"]\n',
+        encoding="utf-8",
     )
-    (root / "tox.ini").write_text("[tox]\nenvlist = py311\n")
+    (root / "tox.ini").write_text("[tox]\nenvlist = py311\n", encoding="utf-8")
     (root / ".readthedocs.yaml").write_text(
-        f'version: 2\nbuild:\n  tools:\n    python: "{rtd_python}"\n'
+        f'version: 2\nbuild:\n  tools:\n    python: "{rtd_python}"\n', encoding="utf-8"
     )
 
 

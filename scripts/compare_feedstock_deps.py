@@ -20,7 +20,7 @@ from typing import Optional
 
 def extract_pyproject_deps(pyproject_path: Path = Path("pyproject.toml")) -> list[str]:
     """Extract dependencies from pyproject.toml using simple regex."""
-    content = pyproject_path.read_text()
+    content = pyproject_path.read_text(encoding="utf-8")
 
     # Find dependencies = [ ... ] section
     deps_match = re.search(
