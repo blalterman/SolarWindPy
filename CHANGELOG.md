@@ -17,13 +17,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   warning to keep one on purpose. `None`, `""` and `"None"` do not warn. The usage guide's
   Labels section now covers `ManualLabel` and the warning.
 - `solarwindpy.plotting.scatter.Scatter` takes per-point `size` and `alpha` variables, aligned
-  by label like `z`; a NaN or infinite value drops the point. `make_plot` maps each through a
-  `matplotlib.colors.Normalize` (`size_norm`, `alpha_norm`; any norm, used as given, default
-  scaled to the drawn points), clipped to [0, 1], onto `size_range` in pt² (default `(9, 144)`)
-  or `alpha_range` (default `(0.15, 1.0)`). A reversed range inverts the mapping; a value the
-  norm masks, such as one <= 0 under `LogNorm`, is not drawn. `s=` or `alpha=` beside its
-  variable, or a norm or range without one, raises `TypeError`. The two new parameters follow
+  by label like `z`; a NaN or infinite value drops the point. The two new parameters follow
   `z`, so `logx`, `logy`, `clip` and `mask` move two places: pass them by keyword.
+- `solarwindpy.plotting.scales.SizeScale(norm=None, range=(9, 144), key=True, key_kwargs=None)`
+  and `AlphaScale(norm=None, range=(0.15, 1.0), cbar=True, cbar_kwargs=None)` map a `Scatter`'s
+  size and alpha variables onto marker area (pt²) and opacity, passed as
+  `make_plot(size_scale=..., alpha_scale=...)`; a variable without a scale gets the default
+  one. The norm (any `matplotlib.colors.Normalize`, used as given, or a matplotlib scale name;
+  default `Normalize()`) maps the drawn values to [0, 1], clipped, and the range maps [0, 1]
+  to `lo + f * (hi - lo)`. A reversed range inverts the mapping; a value the norm masks, such
+  as one <= 0 under `LogNorm`, is not drawn. Unset norm limits are filled in place from the
+  first plot, so a scale shared across panels draws them alike; `print(scale)` shows the
+  limits used. Both are checked when built. The size key, a `matplotlib.legend.Legend` of
+  opaque grey markers at chosen sizes (`key=True` picks round values from the norm's
+  limits), and the alpha bar, a colorbar of one colour ramping in alpha over the range, are
+  drawn from the same norm and range as the points and returned as `guides.size` and
+  `guides.alpha`. `Scatter.set_labels(size=..., alpha=...)` titles them, and the plot's
+  `path` gains their parts. `s=` or `alpha=` beside its variable, a scale without its
+  variable, or `connect=True` with an alpha variable raises `TypeError`.
+- `Scatter.make_plot(draw_order=None, draw_ascending=True)`: `"size"` or `"alpha"` draws the
+  points sorted by marker area or opacity, low to high, so the highest is on top;
+  `draw_ascending=False` reverses it (`draw_order="alpha", draw_ascending=False` puts the
+  faintest points on top). The segments of `connect` keep their order.
 
 ### Changed - BREAKING CHANGES
 
@@ -33,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `BetaRPlot.make_plot` return `(ax, mesh, guides)`, and `SpiralPlot2D.make_plot` returns
   `(ax, collection, guides)`; `plot_contours`, `plot_hist_with_contours` and
   `make_joint_h2_h1_plot` end with `guides` the same way. `guides.color` is the colorbar, None
-  where the old slot was None; `size` and `alpha` are None. The draw methods that draw no guide
+  where the old slot was None; `size` and `alpha` are a `Scatter`'s size key and alpha bar
+  (see Added), None elsewhere. The draw methods that draw no guide
   (`Hist1D.make_plot`, `StabilityContours.plot_contours`, `IndicatorPlot.make_plot`,
   `SIDC.plot_on_colorbar`) return `Guides()`, every field None, where they returned None. Each
   tuple keeps its length. To migrate, read the colorbar from the last item:
@@ -53,6 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and an unknown name raises matplotlib's `ValueError`; and `norm=None` or
   `cmap=None` passed explicitly now takes the plot's default (a `CenteredNorm` about 0 and
   `RdBu_r` for values of both signs) instead of matplotlib's.
+- `Scatter.labels` is a `solarwindpy.plotting.base.ScatterLabels` record `(x, y, z, size,
+  alpha)` instead of an `AxesLabels` `(x, y, z)`; read the labels by name, as `labels.x`.
 - `BetaRPlot` colours values of one sign with `Greens_r` in every draw method, not only
   `make_plot`, and values of both signs with `RdBu_r`, as the other colour plots do.
 

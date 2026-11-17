@@ -77,17 +77,6 @@ def ax():
     plt.close("all")
 
 
-XFAIL_F = pytest.mark.xfail(
-    strict=True,
-    raises=(AttributeError, KeyError),
-    reason="SizeScale, AlphaScale, ScatterLabels and make_plot's size_scale, "
-    "alpha_scale and draw_order are not in the package yet (AttributeError; "
-    "set_labels(size=) raises KeyError 'Unexpected kwarg'); remove this marker "
-    "when Stage F lands",
-)
-
-
-@XFAIL_F
 def test_new_scatter_has_linear_axes_and_default_labels():
     """Defaults: linear axes, labels x and y; z, size, alpha labelled only when given.
 
@@ -694,7 +683,6 @@ SX = np.array([0.0, 1.0, 2.0])
 SY = np.array([5.0, 6.0, 7.0])
 
 
-@XFAIL_F
 def test_size_maps_linearly_onto_the_size_scales_range(ax):
     """size 1, 2, 3 autoscale to f = 0, 1/2, 1, so areas 10, 20, 30 on (10, 30).
 
@@ -706,7 +694,6 @@ def test_size_maps_linearly_onto_the_size_scales_range(ax):
     assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
 
 
-@XFAIL_F
 @pytest.mark.parametrize(
     "ends, expected",
     [
@@ -727,7 +714,6 @@ def test_alpha_maps_linearly_onto_the_alpha_scales_range_and_a_reversed_range_in
     assert points.get_alpha().tolist() == exact(expected)
 
 
-@XFAIL_F
 def test_a_scales_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     """LogNorm puts 1, 10, 100 at f = 0, 1/2, 1; it masks 0, so that point is not drawn.
 
@@ -749,7 +735,6 @@ def test_a_scales_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     np.testing.assert_array_equal(points.get_offsets(), np.c_[x[1:], y[1:]])
 
 
-@XFAIL_F
 def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
     """With vmin 1 and vmax 3, -5 lands on 10 and 50 on 30, as 1 and 3 do.
 
@@ -791,7 +776,6 @@ def test_size_aligns_by_label_and_a_nan_drops_its_point(ax):
     assert "alpha" not in sc.data.columns
 
 
-@XFAIL_F
 def test_size_key_marker_areas_are_the_areas_points_get_at_its_values(ax):
     """Key entries at 1, 10, 100 have the areas the points of size 1, 10, 100 get.
 
@@ -816,7 +800,6 @@ def test_size_key_marker_areas_are_the_areas_points_get_at_its_values(ax):
     assert key.get_frame_on() is False
 
 
-@XFAIL_F
 @pytest.mark.parametrize(
     "norm, size, expected",
     [
@@ -839,7 +822,6 @@ def test_automatic_size_key_steps_through_the_norms_limits(ax, norm, size, expec
     assert [float(t.get_text()) for t in guides.size.get_texts()] == exact(expected)
 
 
-@XFAIL_F
 @pytest.mark.parametrize("z", [None, [1.0, 2.0, 3.0]], ids=["no-z", "z"])
 def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
     """The alpha bar reads the scale's norm through one colour whose alpha runs lo to hi.
@@ -860,7 +842,27 @@ def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
     assert (guides.color is None) == (z is None)
 
 
-@XFAIL_F
+@pytest.mark.parametrize("layout", [None, "constrained"])
+def test_alpha_bar_and_z_colorbar_clear_each_others_ticks_and_labels(layout):
+    """With both bars, neither bar overlaps the other's ticks and label.
+
+    A wide figure, where the z colorbar's box is much wider than its bar;
+    with and without a layout engine.
+
+    ON FAILURE: the code is wrong.
+    """
+    fig, axis = plt.subplots(figsize=(7, 4), layout=layout)
+    sc = Scatter(SX, SY, [1.0, 2.0, 3.0], alpha=[0.0, 5.0, 10.0])
+    sc.set_labels(z=ManualLabel("Speed", "km/s"))
+    _, _, _, guides = sc.make_plot(ax=axis)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    alpha, z = guides.alpha.ax, guides.color.ax
+    assert not alpha.get_window_extent(renderer).overlaps(z.get_tightbbox(renderer))
+    assert not z.get_window_extent(renderer).overlaps(alpha.get_tightbbox(renderer))
+    plt.close(fig)
+
+
 def test_draw_order_sorts_the_drawn_points_by_marker_value_not_the_segments():
     """draw_order sorts by area or opacity; segments keep row order.
 
@@ -894,7 +896,6 @@ def test_draw_order_sorts_the_drawn_points_by_marker_value_not_the_segments():
     plt.close("all")
 
 
-@XFAIL_F
 def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path(ax):
     """``set_labels(size=, alpha=)`` titles the key and labels the bar; ``path`` gains both.
 
@@ -929,46 +930,36 @@ def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path
             {"size_scale": "SizeScale"},
             TypeError,
             r"size_scale .*without a size variable",
-            marks=XFAIL_F,
         ),
         pytest.param(
             {},
             {"alpha_scale": "AlphaScale"},
             TypeError,
             r"alpha_scale .*without an alpha variable",
-            marks=XFAIL_F,
         ),
         pytest.param(
             {"size": [1.0, 2.0, 3.0]},
             {"size_scale": "AlphaScale"},
             TypeError,
             r"size_scale must be a SizeScale",
-            marks=XFAIL_F,
         ),
         pytest.param(
             {"alpha": [1.0, 2.0, 3.0]},
             {"connect": True},
             TypeError,
             r"connect=True .*alpha variable",
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="the interim Scatter joins points with an alpha variable; "
-                "DID NOT RAISE; remove this marker when Stage F lands",
-            ),
         ),
         pytest.param(
             {},
             {"draw_order": "alpha"},
             TypeError,
             r"draw_order='alpha' .*without an alpha variable",
-            marks=XFAIL_F,
         ),
         pytest.param(
             {"size": [1.0, 2.0, 3.0]},
             {"draw_order": "area"},
             ValueError,
             r"draw_order must be None, 'size' or 'alpha'",
-            marks=XFAIL_F,
         ),
     ],
     ids=[

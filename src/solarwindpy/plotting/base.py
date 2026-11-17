@@ -12,6 +12,7 @@ __all__ = [
     "LogAxes",
     "ClipAxes",
     "AxesLabels",
+    "ScatterLabels",
     "RangeLimits",
     "Guides",
     "Base",
@@ -42,6 +43,11 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 #: ``ClipAxes(False, False)`` is a non-empty tuple, so it is truthy.
 ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
+#: A ``Scatter``'s labels: its axes', and those of its size and alpha
+#: variables, which title the size key and the alpha bar.
+ScatterLabels = namedtuple(
+    "ScatterLabels", "x,y,z,size,alpha", defaults=(None, None, None)
+)
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 #: The guides a draw method drew, the last item it returns: the colorbar of
 #: the colour (``matplotlib.colorbar.Colorbar``), the key of the marker size
@@ -120,18 +126,18 @@ class Base(ABC):
     def __repr__(self):
         r"""A summary of what the plot holds, one ``key: value`` per line.
 
-        The class, then one line per axis (x, y, and z when the plot has
-        one): its label, its bins (``_axis_extent``) and the range of the
-        data on it, then the number of rows the plot keeps, the log flags,
-        the fields ``_repr_fields`` adds (binning, ``axnorm``, ``clim``,
-        ``alim``), and ``path``. ``print`` shows the same text. A plot whose
+        The class, then one line per axis (x, y, then each further label
+        that is set: z, and a ``Scatter``'s size and alpha): its label, its
+        bins (``_axis_extent``) and the range of the data on it, then the
+        number of rows the plot keeps, the log flags, the fields
+        ``_repr_fields`` adds (binning, ``axnorm``, ``clim``, ``alim``), and
+        ``path``. ``print`` shows the same text. A plot whose
         constructor has not run shows its class and "(not built)".
         """
         if "_labels" not in self.__dict__:
             return f"{self.__class__.__name__} (not built)"
         labels = self._flat_labels()
-        axes = ["x", "y", "z"] if self._has_z_label() else ["x", "y"]
-        fields = {k: self._axis_line(k, labels[k]) for k in axes}
+        fields = {k: self._axis_line(k, labels[k]) for k in self._labelled_axes()}
         source = self.__dict__.get("_source")
         fields["observations"] = "none" if source is None else source.n_kept
         fields["log"] = ", ".join(f"{k}={v}" for k, v in self.log._asdict().items())
@@ -188,13 +194,21 @@ class Base(ABC):
         return f"lower={limits.lower}, upper={limits.upper}"
 
     def _flat_labels(self):
-        r"""Each axis's label as one line of text, keyed ``x``, ``y`` and ``z``."""
+        r"""Each label as one line of text, keyed by its field (``x``, ``y``, ``z``, ...)."""
         return {k: str(v).replace("\n", " ") for k, v in self.labels._asdict().items()}
 
-    def _has_z_label(self):
-        r"""True when ``labels.z`` is set: neither None nor the string ``"None"``."""
-        z = self.labels.z
-        return not (z is None or (isinstance(z, str) and z == "None"))
+    def _labelled_axes(self):
+        r"""``x``, ``y``, then each further label field that is set, in order.
+
+        A label is set when it is neither None nor the string ``"None"``.
+        """
+        labels = self.labels._asdict()
+        further = [
+            k
+            for k, v in list(labels.items())[2:]
+            if not (v is None or (isinstance(v, str) and v == "None"))
+        ]
+        return ["x", "y", *further]
 
     @property
     def logger(self):
@@ -290,14 +304,15 @@ class Base(ABC):
     def path(self):
         r"""Save path describing the plot as it is now.
 
-        Derived on every read, never stored: ``class / x / y [/ z] / scale``.
-        Each axis contributes its label's ``path``, or the label string with
-        spaces as hyphens; a label that is neither falls back to the axis
-        name. The z part is present only when ``labels.z`` is not None. The
-        scale tag is ``linX`` or ``logX``, then ``linY`` or ``logY``, joined
-        by ``-``. When the last part ends in ``norm`` (a normalized ``Count``
-        label, e.g. ``count/Cnorm``), the scale tag goes before it, so the
-        last part reads the x, y and z scaling in order
+        Derived on every read, never stored: ``class / x / y [/ z] / scale``,
+        and on a ``Scatter`` ``class / x / y [/ z] [/ size] [/ alpha] /
+        scale``. Each axis contributes its label's ``path``, or the label
+        string with spaces as hyphens; a label that is neither falls back to
+        the axis name. The parts after y are present only when their label
+        is not None. The scale tag is ``linX`` or ``logX``, then ``linY`` or
+        ``logY``, joined by ``-``. When the last part ends in ``norm`` (a
+        normalized ``Count`` label, e.g. ``count/Cnorm``), the scale tag goes
+        before it, so the last part reads the x, y and z scaling in order
         (``.../count/linX-linY-Cnorm``).
 
         Returns
@@ -306,10 +321,8 @@ class Base(ABC):
             Relative path; join it to a directory to save under, e.g.
             ``Path("figs") / plot.path``.
         """
-        labels = self.labels
-        parts = [self._path_part(labels.x, "x"), self._path_part(labels.y, "y")]
-        if self._has_z_label():
-            parts.append(self._path_part(labels.z, "z"))
+        labels = self.labels._asdict()
+        parts = [self._path_part(labels[k], k) for k in self._labelled_axes()]
         path = Path(self.__class__.__name__, *parts)
 
         scale = "{}X-{}Y".format(
@@ -437,7 +450,9 @@ class Base(ABC):
         Parameters
         ----------
         **kwargs : solarwindpy.plotting.labels.base.Base, str or None
-            New axis labels under the keywords ``x``, ``y`` and ``z``.
+            New axis labels under the keywords ``x``, ``y`` and ``z``. A
+            :class:`~solarwindpy.plotting.scatter.Scatter` also takes
+            ``size`` and ``alpha``, the titles of its size key and alpha bar.
 
         Raises
         ------
@@ -926,21 +941,27 @@ class ColorPlot(_AggregateLimits):
         r"""Colorbar kwargs a plot sets unless the caller does; none here."""
         return {}
 
-    def _make_cbar(self, mappable, scale, ax):
+    def _make_cbar(self, mappable, scale, ax, channel="z", **defaults):
         r"""Draw the colorbar of ``mappable`` as ``scale`` sets, or return None.
 
         Parameters
         ----------
         mappable : matplotlib.cm.ScalarMappable
             The coloured artist the colorbar reads.
-        scale : ColorScale
+        scale : ColorScale or AlphaScale
             No colorbar is drawn unless ``scale.cbar``. ``scale.cbar_kwargs``
             is passed to ``Figure.colorbar``, after the plot's
-            ``_default_cbar_kwargs`` and with ``label`` defaulting to
-            ``labels.z``.
+            ``_default_cbar_kwargs`` and with ``label`` defaulting to the
+            label ``channel`` names.
         ax : matplotlib.axes.Axes
             The plot's axes: the colorbar is drawn beside it unless
             ``scale.cbar_kwargs`` names ``ax`` or ``cax``.
+        channel : str, default "z"
+            The field of ``labels`` that labels the colorbar, such as
+            ``"alpha"`` for a ``Scatter``'s alpha bar.
+        **defaults
+            Colorbar kwargs this colorbar sets unless ``scale.cbar_kwargs``
+            does, over the plot's ``_default_cbar_kwargs``.
 
         Returns
         -------
@@ -954,6 +975,7 @@ class ColorPlot(_AggregateLimits):
         if not scale.cbar:
             return None
         kwargs = self._default_cbar_kwargs()
+        kwargs.update(defaults)
         kwargs.update(self._prepare_cbar_kwargs(scale.cbar_kwargs, ax))
         ax = kwargs.pop("ax", None)
         cax = kwargs.pop("cax", None)
@@ -977,7 +999,7 @@ class ColorPlot(_AggregateLimits):
 
         if "label" in kwargs:
             labels.base._warn_if_plain({"cbar_kwargs['label']": kwargs["label"]})
-        label = kwargs.pop("label", self.labels.z)
+        label = kwargs.pop("label", getattr(self.labels, channel))
         return fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
 
 

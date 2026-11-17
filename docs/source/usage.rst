@@ -484,22 +484,36 @@ rotation:
 
 ``Scatter(x, y, size=..., alpha=...)`` sets each marker's area and opacity
 from a value per point, aligned by label like ``z``; a point whose size or
-alpha is NaN or infinite is not drawn. ``make_plot`` maps each value in two
-steps. First a norm, ``size_norm`` or ``alpha_norm``, maps the values to
-[0, 1]. Its ``vmin`` and ``vmax`` are in the data's units: they are the values
-that land at 0 and 1, and a value beyond them stays at that end. Any
-matplotlib ``Normalize`` works, such as ``LogNorm`` for a quantity that spans
-decades; a value the norm cannot place, such as one not positive under
-``LogNorm``, is not drawn. Without a norm, the drawn values are scaled
-linearly from the smallest to the largest. Then a range, ``size_range`` or
-``alpha_range``, maps [0, 1] to the marker's area in pt² or to its alpha. The
-defaults are 9 to 144 pt², half to twice matplotlib's default marker, and 0.15
-to 1, so the faintest point stays visible; a range you pass is used as given.
-Reversing a range inverts it. Below, the size is the density on a ``LogNorm``,
-and the alpha is each fit's relative uncertainty in ``w`` from 0.02 to 0.08
-with ``alpha_range=(1, 0.15)``, so the least certain fits fade.
-``points.legend_elements("sizes", ...)`` draws a key of densities, given the
-inverse of the size mapping; ``alpha=1`` keeps the key opaque.
+alpha is NaN or infinite is not drawn. ``make_plot`` maps each value through
+a scale: a :py:class:`~solarwindpy.plotting.scales.SizeScale` passed as
+``size_scale`` and an :py:class:`~solarwindpy.plotting.scales.AlphaScale`
+passed as ``alpha_scale``, or the default scale of each when you pass none.
+A scale maps in two steps. First its ``norm`` maps the values to [0, 1]. The
+norm works in the data's units: its ``vmin`` and ``vmax`` are the values that
+land at 0 and 1, and a value beyond them stays at that end. Any matplotlib
+``Normalize`` works, such as ``LogNorm`` for a quantity that spans decades,
+and so does a scale name such as ``"log"``; a value the norm cannot place,
+such as one not positive under ``LogNorm``, is not drawn. Without a norm, the
+drawn values are scaled linearly from the smallest to the largest. Then its
+``range`` maps [0, 1] to the marker's area in pt² or to its alpha, as a
+colormap maps [0, 1] to a color. The defaults are 9 to 144 pt², half to twice
+matplotlib's default marker, and 0.15 to 1, so the faintest point stays
+visible; a range you pass is used as given. Reversing a range inverts it.
+
+Each scale also draws a guide from its own norm and range, so the guide
+reads the points exactly. The size key is a legend of opaque gray markers at
+chosen sizes: ``key=True`` picks round values between the norm's limits, and
+a list gives your own; ``key_kwargs`` goes to ``ax.legend``. The alpha bar is
+a colorbar of one color whose opacity runs over the range, with its ticks in
+the variable's units; ``cbar_kwargs`` goes to the colorbar.
+``set_labels(size=..., alpha=...)`` titles them, as ``z`` labels the
+colorbar, and adds them to the plot's ``path``. ``make_plot`` returns them in
+``guides``: ``guides.size`` is the key and ``guides.alpha`` the bar, each
+None when not drawn.
+
+Below, the size is the density on a ``LogNorm`` with a key at 2, 5, 10 and 20
+cm⁻³, and the alpha is each fit's relative uncertainty in ``w`` from 0.02 to
+0.08 with ``range=(1, 0.15)``, so the least certain fits fade.
 
 .. plot::
 
@@ -507,7 +521,9 @@ inverse of the size mapping; ``alpha=1`` keeps the key opaque.
    import pandas as pd
    from matplotlib.colors import LogNorm, Normalize
    from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.scales import AlphaScale, SizeScale
    from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.plotting.labels.special import ManualLabel
 
    rng = np.random.default_rng(4)
    N = 150
@@ -519,27 +535,96 @@ inverse of the size mapping; ``alpha=1`` keeps the key opaque.
    dw = pd.Series(0.03 * np.sqrt(8 / n) * rng.lognormal(0, 0.5, N), name="dw")
 
    sc = Scatter(v, w, size=n, alpha=dw)
-   sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("w", "", "p1")))
-   size_norm = LogNorm()
-   size_range = (9, 144)
+   sc.set_labels(
+       x=TeXlabel(("v", "", "p1")),
+       y=TeXlabel(("w", "", "p1")),
+       size=TeXlabel(("n", "", "p1")),
+       alpha=ManualLabel(r"\delta w/w", "dimless", path="dw-w"),
+   )
    ax, points, segments, guides = sc.make_plot(
-       size_norm=size_norm,
-       size_range=size_range,
-       alpha_norm=Normalize(vmin=0.02, vmax=0.08),
-       alpha_range=(1, 0.15),
+       size_scale=SizeScale(
+           norm=LogNorm(), key=[2, 5, 10, 20], key_kwargs={"loc": "upper left"}
+       ),
+       alpha_scale=AlphaScale(norm=Normalize(0.02, 0.08), range=(1, 0.15)),
        edgecolors="w",
        linewidths=0.5,
    )
 
-   # A key of densities: the inverse of area = lo + size_norm(n) * (hi - lo).
-   lo, hi = size_range
-   handles, key = points.legend_elements(
-       "sizes",
-       num=[2, 5, 10, 20],
-       func=lambda area: size_norm.inverse((area - lo) / (hi - lo)),
-       alpha=1,
+A scale is shared the way a
+:py:class:`~solarwindpy.plotting.binned.BinnedData` is: pass the same one to
+several plots and they draw on one mapping, so equal values get equal markers
+in every panel. The scale uses its norm as is, and matplotlib fills a norm's
+unset ``vmin`` or ``vmax`` in place from the first plot drawn with it, so
+later panels keep the first panel's limits; set them to choose your own.
+``print(scale)`` shows the norm with the limits in use, the range with its
+units, and the guide's settings:
+
+>>> from matplotlib.colors import LogNorm
+>>> from solarwindpy.plotting.scales import SizeScale
+>>> print(SizeScale(norm=LogNorm(vmin=1, vmax=30), key=[2, 5, 10, 20]))
+SizeScale
+  norm: LogNorm(vmin=1, vmax=30)
+  range: (9, 144) pt² area
+  key: (2, 5, 10, 20)
+  key_kwargs: {}
+
+All five variables fit on one plot: position in ``x`` and ``y``, ``z`` in
+color with its colorbar, ``size`` with its key and ``alpha`` with its bar.
+``draw_order`` chooses which points are drawn on top. By default they are
+drawn in row order; ``"size"`` or ``"alpha"`` sorts them by their marker's
+area or opacity, from low to high so the largest or most opaque end up on
+top, and ``draw_ascending=False`` reverses that. Below,
+``draw_order="alpha", draw_ascending=False`` draws the faintest points last,
+so the uncertain fits lie over the certain ones without hiding them. Here
+``z`` is the helium abundance, higher in the fast wind. The figure uses
+constrained layout, which sets the two bars side by side clear of each
+other's labels; without a layout engine the alpha bar is drawn outside the
+colorbar.
+
+.. plot::
+
+   import matplotlib.pyplot as plt
+   import numpy as np
+   import pandas as pd
+   from matplotlib.colors import LogNorm, Normalize
+   from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.scales import AlphaScale, SizeScale
+   from solarwindpy.plotting.labels.base import TeXlabel
+   from solarwindpy.plotting.labels.special import ManualLabel
+
+   rng = np.random.default_rng(5)
+   N = 250
+   fast = rng.random(N) < 0.35
+   v = pd.Series(np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N)), name="v")
+   n = (8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N))).rename("n")
+   w = pd.Series(0.1 * v + rng.normal(0, 5, N), name="w")
+   # Helium abundance n_a / n_p: near 2 % in slow wind, near 4.5 % in fast.
+   ratio = pd.Series(
+       np.clip(0.02 + 0.025 * (v - 350) / 300 + rng.normal(0, 0.006, N), 0.005, None),
+       name="ratio",
    )
-   ax.legend(handles, key, title=str(TeXlabel(("n", "", "p1"))), loc="upper left")
+   # Each fit's relative uncertainty in w, larger where the density is low.
+   dw = pd.Series(0.03 * np.sqrt(8 / n) * rng.lognormal(0, 0.5, N), name="dw")
+
+   sc = Scatter(v, w, ratio, size=n, alpha=dw)
+   sc.set_labels(
+       x=TeXlabel(("v", "", "p1")),
+       y=TeXlabel(("w", "", "p1")),
+       z=TeXlabel(("n", "", "a"), ("n", "", "p1")),
+       size=TeXlabel(("n", "", "p1")),
+       alpha=ManualLabel(r"\delta w/w", "dimless", path="dw-w"),
+   )
+   fig, ax = plt.subplots(figsize=(6.5, 4), layout="constrained")
+   ax, points, segments, guides = sc.make_plot(
+       ax=ax,
+       cmap="viridis",
+       size_scale=SizeScale(norm=LogNorm(), key_kwargs={"loc": "upper left"}),
+       alpha_scale=AlphaScale(norm=Normalize(0.02, 0.08), range=(1, 0.15)),
+       draw_order="alpha",
+       draw_ascending=False,
+       edgecolors="w",
+       linewidths=0.5,
+   )
 
 Bins
 ~~~~

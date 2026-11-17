@@ -15,16 +15,7 @@ from matplotlib.colors import LogNorm, Normalize
 
 from solarwindpy.plotting import scales
 
-XFAIL_F1 = pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="SizeScale and AlphaScale are not in solarwindpy.plotting.scales yet; "
-    "\"module 'solarwindpy.plotting.scales' has no attribute 'SizeScale'\"; "
-    "remove this marker when they land",
-)
 
-
-@XFAIL_F1
 @pytest.mark.parametrize(
     "name, settings, error, match",
     [
@@ -68,7 +59,6 @@ def test_marker_scales_reject_invalid_settings_when_built(name, settings, error,
         cls(**settings)
 
 
-@XFAIL_F1
 def test_marker_scales_hold_reversed_ranges_scale_name_norms_and_key_values():
     """A reversed range is kept as given; a scale name becomes matplotlib's norm.
 
@@ -81,7 +71,6 @@ def test_marker_scales_hold_reversed_ranges_scale_name_norms_and_key_values():
     assert scales.SizeScale(key=None).key is False
 
 
-@XFAIL_F1
 def test_marker_scale_str_shows_norm_limits_range_with_units_and_guide():
     """``print(scale)`` lists the norm with its limits, the range with its units, the guide.
 

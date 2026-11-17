@@ -175,6 +175,8 @@ numpydoc_xref_aliases = {
     "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
     "BinnedData": "solarwindpy.plotting.binned.BinnedData",
     "ColorScale": "solarwindpy.plotting.scales.ColorScale",
+    "SizeScale": "solarwindpy.plotting.scales.SizeScale",
+    "AlphaScale": "solarwindpy.plotting.scales.AlphaScale",
     "Guides": "solarwindpy.plotting.base.Guides",
 }
 
