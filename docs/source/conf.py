@@ -238,6 +238,11 @@ nitpick_ignore = [
     # Private base of core.vector.Vector and core.tensor.Tensor, named on
     # their show-inheritance line for the same reason.
     ("py:class", "solarwindpy.core.base._ComponentFrame"),
+    # Private bases of plotting.scales.SizeScale and AlphaScale (the range and
+    # its mapping) and of ColorScale and AlphaScale (the colorbar settings),
+    # named on their show-inheritance line for the same reason.
+    ("py:class", "solarwindpy.plotting.scales._MarkerScale"),
+    ("py:class", "solarwindpy.plotting.scales._BarScale"),
     # Private types that public signatures take or return. Their docstrings
     # name the real type; private names are not documented, so the name
     # cannot link.
