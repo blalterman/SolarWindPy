@@ -151,6 +151,9 @@ fresh Python session and it draws the figure shown under it.
 One quantity
 ~~~~~~~~~~~~
 
+A histogram
+^^^^^^^^^^^
+
 ``make_plot`` draws the histogram. ``set_labels`` takes a label object per
 axis: a :py:class:`~solarwindpy.plotting.labels.base.TeXlabel` built from the
 same ``(M, C, S)`` key as the plasma's column, or a
@@ -174,6 +177,9 @@ the plot's ``path`` its parts. `Labels`_ explains them.
    h1.set_labels(x=TeXlabel(("v", "", "p1")))
    h1.make_plot()
 
+The save path
+^^^^^^^^^^^^^
+
 Every plot also has a ``path``, built from its class, its labels and its axis
 scales, to file the figure under when you save it: join it to your figure
 directory and add an extension, as :doc:`tutorial/quickstart` does.
@@ -188,6 +194,9 @@ directory and add an extension, as :doc:`tutorial/quickstart` does.
 
 Two quantities
 ~~~~~~~~~~~~~~
+
+Counts in each cell
+^^^^^^^^^^^^^^^^^^^
 
 Density spans a decade, so ``logy=True`` bins it in :math:`\log_{10}` and
 draws a log axis. ``make_plot`` colors each cell by its count:
@@ -208,6 +217,9 @@ draws a log axis. ``make_plot`` colors each cell by its count:
    h2 = Hist2D(v, n, logy=True, nbins=50)
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
    h2.make_plot()
+
+Contours
+^^^^^^^^
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_contours` draws the same
 histogram as contours. ``gaussian_filter_std`` smooths the values with a
@@ -242,6 +254,9 @@ its cubic polynomial when there are few bins; set ``window_length`` in
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
    h2.plot_contours(use_contourf=True, gaussian_filter_std=2, plot_edges=True)
 
+Contours over the histogram
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.plot_hist_with_contours` draws
 the histogram and its smoothed contours on the same axes, with one colorbar,
 the histogram's. Black contour lines (``contour_kwargs=dict(colors="k")``)
@@ -267,6 +282,9 @@ stand out over the colored cells; the line style changes with the level:
        contour_kwargs=dict(colors="k"),
        gaussian_filter_std=2,
    )
+
+Projections on the margins
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.make_joint_h2_h1_plot` draws the
 histogram with its projections on the top and right margins. Each margin is a
@@ -323,6 +341,9 @@ Gaussian filter, by design.
 Individual points
 ~~~~~~~~~~~~~~~~~
 
+Colour by ``z``
+^^^^^^^^^^^^^^^
+
 ``Scatter(x, y, z)`` draws one marker per point, colored by ``z`` through a
 colormap, beside a colorbar labelled with ``labels.z``; here ``z`` is the
 density of a few hundred points. Its ``logx`` and ``logy`` set only the axis
@@ -357,6 +378,9 @@ passed to several plots draws them on the same colours.
        z=TeXlabel(("n", "", "p1")),
    )
    ax, points, segments, guides = sc.make_plot(s=8)
+
+Joining the points
+^^^^^^^^^^^^^^^^^^
 
 ``make_plot(connect=True)`` also joins the points with line segments in
 increasing ``z``. The sort is stable, so points with equal ``z`` keep the order
@@ -409,6 +433,9 @@ skipped, not a gap: the points either side of it in ``z`` are joined.
        s=12, cmap="viridis", connect=True, connect_kwargs={"linewidth": 0.8, "alpha": 0.8}
    )
 
+The solar cycle on the colorbar
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Over decades, the colorbar can carry the solar cycle. With ``z`` the time of
 each point in matplotlib's date units, ``SIDC("m13").plot_on_colorbar`` draws
 the 13-month smoothed sunspot number along the colorbar, so each segment's
@@ -458,6 +485,9 @@ the cycle's phase, not its amplitude.
    cbar.ax.xaxis.set_minor_locator(mdates.ticker.NullLocator())
    cbar.ax.set_title("SSN", fontsize="medium")
 
+Without ``z``
+^^^^^^^^^^^^^
+
 Without ``z``, ``Scatter(x, y)`` draws every point in one color and no
 colorbar, so ``guides.color`` is None. ``connect=True`` then joins the points in the
 order of their rows, in the markers' color, skipping any point that is not
@@ -481,6 +511,9 @@ rotation:
    sc = Scatter(bx, by)
    sc.set_labels(x=TeXlabel(("b", "x", "")), y=TeXlabel(("b", "y", "")))
    ax, points, segments, guides = sc.make_plot(s=12, connect=True)
+
+Size and opacity
+^^^^^^^^^^^^^^^^
 
 ``Scatter(x, y, size=..., alpha=...)`` sets each marker's area and opacity
 from a value per point, aligned by label like ``z``; a point whose size or
@@ -574,6 +607,9 @@ SizeScale
   range: (9, 144) pt² area
   key: (2, 5, 10, 20)
   key_kwargs: {}
+
+Five variables
+^^^^^^^^^^^^^^
 
 All five variables fit on one plot: position in ``x`` and ``y``, ``z`` in
 color with its colorbar, ``size`` with its key and ``alpha`` with its bar.
