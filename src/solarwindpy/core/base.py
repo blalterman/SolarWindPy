@@ -81,46 +81,22 @@ class Core(ABC):
 
     @property
     def logger(self) -> logging.Logger:
-        """Logger instance for this object.
-
-        Returns
-        -------
-        logging.Logger
-            Logger instance.
-        """
+        """Logger instance for this object."""
         return self._logger
 
     @property
     def units(self) -> units_constants.Units:
-        """Units conversion factors.
-
-        Returns
-        -------
-        units_constants.Units
-            Units conversion instance.
-        """
+        """Units conversion factors."""
         return self._units
 
     @property
     def constants(self) -> units_constants.Constants:
-        """Physical constants.
-
-        Returns
-        -------
-        units_constants.Constants
-            Physical constants instance.
-        """
+        """Physical constants."""
         return self._constants
 
     @property
     def data(self) -> pd.DataFrame:
-        """Underlying DataFrame containing the data.
-
-        Returns
-        -------
-        pd.DataFrame
-            Data with MultiIndex columns.
-        """
+        """Underlying DataFrame containing the data, with MultiIndex columns."""
         return self._data
 
     def _init_logger(self) -> None:

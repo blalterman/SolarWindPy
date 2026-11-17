@@ -315,11 +315,8 @@ class Base(ABC):
         before it, so the last part reads the x, y and z scaling in order
         (``.../count/linX-linY-Cnorm``).
 
-        Returns
-        -------
-        pathlib.Path
-            Relative path; join it to a directory to save under, e.g.
-            ``Path("figs") / plot.path``.
+        A relative pathlib.Path; join it to a directory to save under, e.g.
+        ``Path("figs") / plot.path``.
         """
         labels = self.labels._asdict()
         parts = [self._path_part(labels[k], k) for k in self._labelled_axes()]

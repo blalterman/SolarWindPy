@@ -296,12 +296,9 @@ class GaussianLn(FitFunction):
 
             \mathrm{std}(X) = \sqrt{\exp[2\mu + \sigma^2] (\exp[\sigma^2] - 1)}
 
-        Returns
-        -------
-        dict
-            ``mean`` and ``std``, from the fitted ``mu`` and ``sigma``. They
-            are not named ``mu`` and ``sigma``, which are the fitted
-            parameters of :math:`\ln X`.
+        A dict of ``mean`` and ``std``, from the fitted ``mu`` and ``sigma``.
+        They are not named ``mu`` and ``sigma``, which are the fitted parameters
+        of :math:`\ln X`.
         """
         mu = self.popt["mu"]
         sigma = self.popt["sigma"]

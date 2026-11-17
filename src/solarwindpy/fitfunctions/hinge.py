@@ -194,13 +194,10 @@ class Hinge(FitFunction):
         class description (its Notes) states how the class estimates, when an
         estimate is undefined, and what its reference start is.
 
-        Returns
-        -------
-        list of float
-            One finite guess per parameter, in :attr:`argnames` order. When
-            the data give no estimate (an estimate is NaN or infinite),
-            ``p0`` logs a warning naming the undefined estimates and returns
-            the class's reference start instead. It never returns None.
+        The guess is a list of floats, one finite guess per parameter, in
+        :attr:`argnames` order. When the data give no estimate (an estimate is
+        NaN or infinite), ``p0`` logs a warning naming the undefined estimates
+        and returns the class's reference start instead. It never returns None.
 
         Raises
         ------
@@ -295,10 +292,7 @@ class HingeSaturation(Hinge):
     def function(self):
         r"""The hinge saturation function.
 
-        Returns
-        -------
-        callable
-            Function with signature ``f(x, xh, yh, x1, m2)``.
+        A callable with signature ``f(x, xh, yh, x1, m2)``.
         """
 
         def hinge_saturation(x, xh, yh, x1, m2):
@@ -375,10 +369,7 @@ class HingeSaturation(Hinge):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [
@@ -452,10 +443,7 @@ class TwoLine(Hinge):
     def function(self):
         r"""The two-line minimum function.
 
-        Returns
-        -------
-        callable
-            Function with signature ``f(x, x1, x2, m1, m2)``.
+        A callable with signature ``f(x, x1, x2, m1, m2)``.
         """
 
         def twoline(x, x1, x2, m1, m2):
@@ -556,10 +544,7 @@ class TwoLine(Hinge):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [
@@ -638,10 +623,7 @@ class Saturation(Hinge):
     def function(self):
         r"""The saturation function.
 
-        Returns
-        -------
-        callable
-            Function with signature ``f(x, x1, xh, yh, theta)``.
+        A callable with signature ``f(x, x1, xh, yh, theta)``.
         """
 
         def saturation(x, x1, xh, yh, theta):
@@ -761,10 +743,7 @@ class Saturation(Hinge):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [
@@ -847,10 +826,7 @@ class HingeMin(Hinge):
     def function(self):
         r"""The hinge function.
 
-        Returns
-        -------
-        callable
-            Function with signature ``f(x, m1, x1, x2, xh)``.
+        A callable with signature ``f(x, m1, x1, x2, xh)``.
         """
         combine = self._combine
 
@@ -945,10 +921,7 @@ class HingeMin(Hinge):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [
@@ -1010,10 +983,7 @@ class HingeMax(HingeMin):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [
@@ -1080,10 +1050,7 @@ class HingeAtPoint(Hinge):
     def function(self):
         r"""The hinge-at-point function.
 
-        Returns
-        -------
-        callable
-            Function with signature ``f(x, xh, yh, m1, m2)``.
+        A callable with signature ``f(x, xh, yh, m1, m2)``.
         """
 
         def hinge_at_point(x, xh, yh, m1, m2):
@@ -1166,10 +1133,7 @@ class HingeAtPoint(Hinge):
     def TeX_function(self) -> str:
         r"""LaTeX representation of the model.
 
-        Returns
-        -------
-        str
-            Multi-line LaTeX string describing the piecewise function.
+        A multi-line LaTeX string describing the piecewise function.
         """
         tex = "\n".join(
             [

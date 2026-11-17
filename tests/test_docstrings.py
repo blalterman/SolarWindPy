@@ -20,8 +20,6 @@ import inspect
 import pkgutil
 import re
 
-import pytest
-
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -255,7 +253,6 @@ def test_every_public_function_returning_a_value_has_a_returns_section():
     assert not missing, missing
 
 
-@pytest.mark.xfail(strict=True, reason="49 property docstrings carry a Returns section")
 def test_no_public_property_has_a_returns_section():
     """No public property's docstring has a Returns section.
 

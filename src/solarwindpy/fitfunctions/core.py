@@ -408,19 +408,16 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         This docstring states the contract every subclass's ``p0`` follows.
 
-        Returns
-        -------
-        list of float or None
-            One finite guess per parameter, in :attr:`argnames` order. When
-            the data make a guess impossible (an empty region, an undefined
-            slope, a zero total weight, and so on), ``p0`` returns ``None``
-            rather than a guess holding NaN or infinity, and :meth:`make_fit`
-            starts from the feasible start for the bounds (ones when
-            unbounded, as :func:`scipy.optimize.curve_fit` does). A class
-            whose model is singular at that start instead documents a
-            reference start of its own, and its ``p0`` returns that start,
-            logging a warning that the data gave no estimate; the hinge
-            classes in :mod:`~solarwindpy.fitfunctions.hinge` do this.
+        The guess is a list of floats, one finite guess per parameter, in
+        :attr:`argnames` order. When the data make a guess impossible (an empty
+        region, an undefined slope, a zero total weight, and so on), ``p0``
+        returns ``None`` rather than a guess holding NaN or infinity, and
+        :meth:`make_fit` starts from the feasible start for the bounds (ones
+        when unbounded, as :func:`scipy.optimize.curve_fit` does). A class whose
+        model is singular at that start instead documents a reference start of
+        its own, and its ``p0`` returns that start, logging a warning that the
+        data gave no estimate; the hinge classes in
+        :mod:`~solarwindpy.fitfunctions.hinge` do this.
 
         Raises
         ------
@@ -482,10 +479,8 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
     def chisq_dof(self):
         r"""Chisq per degree of freedom :math:`\chi^2_\nu`, as in :attr:`results`.
 
-        Returns
-        -------
-        solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom
-            ``(linear, robust)``. NaN after a failed fit.
+        A ``solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom``,
+        ``(linear, robust)``. NaN after a failed fit.
 
         Raises
         ------
@@ -519,10 +514,7 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         ``make_fit`` adjusted it, or the feasible default when :attr:`p0` is
         None.
 
-        Returns
-        -------
-        dict
-            ``{name: _InitialGuessInfo(p0, bounds)}``.
+        A dict, ``{name: _InitialGuessInfo(p0, bounds)}``.
 
         Raises
         ------
@@ -574,22 +566,18 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         Every fit exposes its results in this form, so two fits, functions or
         setups compare with :func:`pandas.concat`.
 
-        Returns
-        -------
-        pandas.DataFrame
-            One row. The columns are a MultiIndex with levels ``P`` (the
-            parameter or quality name) and ``K`` (the kind), named in the
-            manner of the plasma data's ``M``, ``C``, ``S`` (measurement,
-            component, species) levels: ``(name,
-            "value")`` and ``(name, "uncertainty")`` for each parameter in
-            :attr:`argnames` order, then ``("chisq_dof", "linear")``,
-            ``("chisq_dof", "robust")``, ``("rsq", "")``, ``("nobs", "")``,
-            ``("dof", "")`` and ``("status", "")``. ``status`` is ``"ok"``
-            after a successful fit; after a failed one it is the exception's
-            class name, the values and quality numbers are NaN, and the
-            exception is :attr:`error`. A copy, so editing it changes nothing.
-            ``make_fit`` stores the outcome without building the table; the
-            first read builds it and later reads copy it.
+        A pandas.DataFrame of one row. The columns are a MultiIndex with levels
+        ``P`` (the parameter or quality name) and ``K`` (the kind), named in the
+        manner of the plasma data's ``M``, ``C``, ``S`` (measurement, component,
+        species) levels: ``(name, "value")`` and ``(name, "uncertainty")`` for
+        each parameter in :attr:`argnames` order, then
+        ``("chisq_dof", "linear")``, ``("chisq_dof", "robust")``,
+        ``("rsq", "")``, ``("nobs", "")``, ``("dof", "")`` and
+        ``("status", "")``. ``status`` is ``"ok"`` after a successful fit; after
+        a failed one it is the exception's class name, the values and quality
+        numbers are NaN, and the exception is :attr:`error`. A copy, so editing
+        it changes nothing. ``make_fit`` stores the outcome without building the
+        table; the first read builds it and later reads copy it.
 
         Raises
         ------
@@ -668,13 +656,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         the pairs this property returns right after the fit. A pair whose
         correlation is undefined because a variance is zero is not listed.
 
-        Returns
-        -------
-        list of tuple
-            ``[(name_i, name_j, correlation), ...]`` in :attr:`argnames`
-            order, with ``correlation`` NaN for a non-finite covariance; an
-            empty list when the fit is constrained. A one-parameter model
-            with a non-finite variance is listed as ``(name, name, nan)``.
+        The pairs are a list of tuples, ``[(name_i, name_j, correlation), ...]``
+        in :attr:`argnames` order, with ``correlation`` NaN for a non-finite
+        covariance; an empty list when the fit is constrained. A one-parameter
+        model with a non-finite variance is listed as ``(name, name, nan)``.
 
         Raises
         ------
@@ -710,13 +695,10 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
 
         Source: <en.wikipedia.org/wiki/Coefficient_of_determination#Definitions>
 
-        Returns
-        -------
-        float
-            ``1 - SS_res / SS_tot``. When the used ``y`` have no spread (a single
-            point, or constant data), ``SS_tot = 0`` and R² is undefined, so
-            ``nan`` is returned without a divide-by-zero warning. NaN after a
-            failed fit.
+        A float, ``1 - SS_res / SS_tot``. When the used ``y`` have no spread (a
+        single point, or constant data), ``SS_tot = 0`` and R² is undefined, so
+        ``nan`` is returned without a divide-by-zero warning. NaN after a failed
+        fit.
         """
         return float(self._fitted("_outcome").rsq)
 
@@ -1333,10 +1315,8 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
     def results_columns(self):
         r"""The columns of :attr:`results`, available before a fit.
 
-        Returns
-        -------
-        pandas.MultiIndex
-            Levels ``P`` and ``K``, as :attr:`results` describes.
+        A pandas.MultiIndex with levels ``P`` and ``K``, as :attr:`results`
+        describes.
         """
         columns = [(name, kind) for name in self.argnames for kind in _KINDS]
         columns += list(_QUALITY_COLUMNS)

@@ -232,10 +232,7 @@ class Plasma(base.Base):
     def epoch(self):
         """Time index of the plasma data.
 
-        Returns
-        -------
-        pandas.DatetimeIndex
-            Datetime index containing measurement timestamps.
+        A pandas.DatetimeIndex containing measurement timestamps.
 
         Examples
         --------

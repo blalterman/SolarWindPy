@@ -101,11 +101,8 @@ class Spacecraft(base.Base):
     def pos(self):
         """Position vector of the spacecraft.
 
-        Returns
-        -------
-        vector.Vector
-            Position vector with x, y, z components, built from the
-            spacecraft's already-checked columns, so it skips the time checks.
+        A vector.Vector with x, y, z components, built from the spacecraft's
+        already-checked columns, so it skips the time checks.
         """
         pos = self._select(self.data.xs("pos", axis=1, level="M"), ["x", "y", "z"], "C")
         return vector.Vector(pos, _time_checked=self.data.index)
@@ -115,12 +112,8 @@ class Spacecraft(base.Base):
         r"""TeX of the position unit, read from the registry entry of the frame.
 
         The ``pos`` registry entry states no unit because the unit depends on
-        the frame: Earth radii in GSE, solar radii in HCI.
-
-        Returns
-        -------
-        str
-            ``QUANTITIES[frame.lower()].units``.
+        the frame: Earth radii in GSE, solar radii in HCI. The value is the str
+        ``QUANTITIES[frame.lower()].units``.
 
         Examples
         --------
@@ -137,11 +130,8 @@ class Spacecraft(base.Base):
     def v(self):
         """Velocity vector of the spacecraft.
 
-        Returns
-        -------
-        vector.Vector
-            Velocity vector with x, y, z components, built from the
-            spacecraft's already-checked columns, so it skips the time checks.
+        A vector.Vector with x, y, z components, built from the spacecraft's
+        already-checked columns, so it skips the time checks.
 
         Raises
         ------

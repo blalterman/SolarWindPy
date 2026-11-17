@@ -92,26 +92,14 @@ class Vector(base._ComponentFrame):
 
     @property
     def mag(self) -> pd.Series:
-        """Calculate the magnitude of the vector.
-
-        Returns
-        -------
-        pd.Series
-            Vector magnitude.
-        """
+        """Calculate the magnitude of the vector."""
         mag = self._component_reduce(self.cartesian.pow(2)).pow(0.5)
         mag.name = "mag"
         return mag
 
     @property
     def rho(self) -> pd.Series:
-        """Magnitude of the vector in the xy-plane.
-
-        Returns
-        -------
-        pd.Series
-            XY-plane magnitude.
-        """
+        """Magnitude of the vector in the xy-plane."""
         rho = self._select(self.data, ["x", "y"], "C")
         rho = self._component_reduce(rho.pow(2)).pow(0.5)
         rho.name = "rho"
@@ -121,10 +109,7 @@ class Vector(base._ComponentFrame):
     def colat(self) -> pd.Series:
         """Colatitude of the vector, the angle from the +z axis.
 
-        Returns
-        -------
-        pd.Series
-            Colatitude in degrees, in [0, 180]: 0 on +z, 90 in the xy-plane.
+        Colatitude in degrees, in [0, 180]: 0 on +z, 90 in the xy-plane.
 
         Notes
         -----
@@ -138,10 +123,8 @@ class Vector(base._ComponentFrame):
     def lat(self):
         """Latitude of the vector, the angle above the xy-plane.
 
-        Returns
-        -------
-        pd.Series
-            Latitude in degrees, in [-90, 90]: 90 on +z, 0 in the xy-plane.
+        A pd.Series of latitude in degrees, in [-90, 90]: 90 on +z, 0 in the
+        xy-plane.
 
         Notes
         -----
@@ -153,37 +136,22 @@ class Vector(base._ComponentFrame):
 
     @property
     def lon(self) -> pd.Series:
-        """Longitude of the vector.
-
-        Returns
-        -------
-        pd.Series
-            Longitude in degrees.
-        """
+        """Longitude of the vector, in degrees."""
         lon = np.rad2deg(np.arctan2(self("y"), self("x")))
         lon.name = "lon"
         return lon
 
     @property
     def cartesian(self) -> pd.DataFrame:
-        """Cartesian coordinates of the vector.
-
-        Returns
-        -------
-        pd.DataFrame
-            Columns ``x``, ``y`` and ``z``.
-        """
+        """Cartesian coordinates of the vector, in columns ``x``, ``y`` and ``z``."""
         return self._select(self.data, ["x", "y", "z"], "C")
 
     @property
     def uv(self) -> "Vector":
         """Cartesian unit vector.
 
-        Returns
-        -------
-        Vector
-            Normalised vector, derived row by row from this vector's
-            already-checked data, so it skips the time checks.
+        The normalised vector is derived row by row from this vector's
+        already-checked data, so it skips the time checks.
         """
         uv = self.cartesian.divide(self.mag, axis=0)
         uv.name = "uv"
@@ -259,11 +227,6 @@ class BField(Vector):
     @property
     def pb(self) -> pd.Series:
         r"""Calculate the magnetic pressure or energy density.
-
-        Returns
-        -------
-        pd.Series
-            Magnetic pressure.
 
         Notes
         -----

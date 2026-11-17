@@ -99,10 +99,7 @@ class Tensor(base._ComponentFrame):
     def mag(self) -> pd.Series:
         r"""Scalar magnitude of a thermal-speed tensor.
 
-        Returns
-        -------
-        pd.Series
-            Scalar thermal speed, in the units of the stored components.
+        It is the scalar thermal speed, in the units of the stored components.
 
         Notes
         -----

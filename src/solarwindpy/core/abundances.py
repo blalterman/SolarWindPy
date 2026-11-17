@@ -62,11 +62,8 @@ class ReferenceAbundances:
 
         where N_X is the number density of species X.
 
-        Returns
-        -------
-        pd.DataFrame
-            MultiIndex DataFrame with index (Z, Symbol) and columns
-            (CI_chondrites, Photosphere) × (Ab, Uncert).
+        The abundances are a pd.DataFrame with MultiIndex index (Z, Symbol) and
+        columns (CI_chondrites, Photosphere) × (Ab, Uncert).
         """
         return self._data
 

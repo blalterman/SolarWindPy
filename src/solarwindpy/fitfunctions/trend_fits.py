@@ -184,13 +184,10 @@ class TrendFit(object):
     def bin_results(self):
         r"""Every bin fit's :attr:`~solarwindpy.fitfunctions.core.FitFunction.results`, one row per column.
 
-        Returns
-        -------
-        pandas.DataFrame
-            Indexed by ``agged``'s columns, with the bin fits' ``(P, K)``
-            columns plus ``("in_trend", "")``, True for each bin the trend fit
-            used. A bin whose fit failed keeps its row: NaN values and the
-            exception's class name as its status.
+        A pandas.DataFrame indexed by ``agged``'s columns, with the bin fits'
+        ``(P, K)`` columns plus ``("in_trend", "")``, True for each bin the trend
+        fit used. A bin whose fit failed keeps its row: NaN values and the
+        exception's class name as its status.
 
         Raises
         ------

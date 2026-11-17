@@ -71,12 +71,8 @@ class Line(FitFunction):
 
         If the slope cannot be estimated (non-finite or repeated ``x``),
         return ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean
-        no initial guess.
-
-        Returns
-        -------
-        p0 : list or None
-            The initial guesses as [m, b].
+        no initial guess. Otherwise return the initial guesses as a list,
+        [m, b].
         """
         estimate = _median_slope_intercept(self)
         if estimate is None:
@@ -94,10 +90,7 @@ class Line(FitFunction):
     def x_intercept(self):
         """Calculate the x-intercept of the fitted line.
 
-        Returns
-        -------
-        float
-            The x value where the line crosses y=0.
+        The float x value where the line crosses y=0.
         """
         return -self.popt["b"] / self.popt["m"]
 
@@ -131,13 +124,9 @@ class LineXintercept(FitFunction):
         If the slope cannot be estimated (non-finite or repeated ``x``), or
         the estimated slope is zero (a flat line has no x-intercept), return
         ``None``, which :func:`scipy.optimize.curve_fit` also takes to mean no
-        initial guess. Neither case emits a divide-by-zero warning.
-
-        Returns
-        -------
-        p0 : list or None
-            The initial guesses as [m, x0], where ``x0 = -b / m`` is the
-            x-intercept of the estimated line.
+        initial guess. Neither case emits a divide-by-zero warning. Otherwise
+        return the initial guesses as a list, [m, x0], where ``x0 = -b / m`` is
+        the x-intercept of the estimated line.
         """
         estimate = _median_slope_intercept(self)
         if estimate is None:
@@ -161,9 +150,6 @@ class LineXintercept(FitFunction):
     def y_intercept(self):
         """Calculate the y-intercept of the fitted line.
 
-        Returns
-        -------
-        float
-            The y value where the line crosses x=0.
+        The float y value where the line crosses x=0.
         """
         return -self.popt["x0"] * self.popt["m"]

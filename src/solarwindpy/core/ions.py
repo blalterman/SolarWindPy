@@ -200,13 +200,7 @@ class Ion(base.Base):
 
     @property
     def R(self) -> pd.Series:
-        """Calculate temperature anisotropy R_T = p_⟂/p_∥.
-
-        Returns
-        -------
-        pd.Series
-            Temperature anisotropy.
-        """
+        """Calculate temperature anisotropy R_T = p_⟂/p_∥."""
         exp = pd.Series({"par": -1, "per": 1})
         pth = self._select(self.pth, ["par", "per"], "C")
         ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
@@ -215,13 +209,7 @@ class Ion(base.Base):
 
     @property
     def T(self) -> pd.DataFrame:
-        """Calculate temperature T = (m / (2 * k_B)) * w^2.
-
-        Returns
-        -------
-        pd.DataFrame
-            Temperature of the ion.
-        """
+        """Calculate temperature T = (m / (2 * k_B)) * w^2."""
         m = self.constants.m.loc[self.species]
         w = self.w.data * self.units.w
         coeff = 0.5 * m / (self.constants.kb.J * self.units.T)
@@ -231,13 +219,7 @@ class Ion(base.Base):
 
     @property
     def pth(self) -> pd.DataFrame:
-        """Calculate thermal pressure p_th = 0.5 * ρ * w^2.
-
-        Returns
-        -------
-        pd.DataFrame
-            Thermal pressure.
-        """
+        """Calculate thermal pressure p_th = 0.5 * ρ * w^2."""
         rho = self.rho * self.units.rho
         w = self.w.data.multiply(self.units.w)
         pth = (0.5 / self.units.pth) * w.pow(2).multiply(rho, axis=0)
@@ -246,13 +228,7 @@ class Ion(base.Base):
 
     @property
     def cs(self) -> pd.DataFrame:
-        """Calculate the species' sound speed.
-
-        Returns
-        -------
-        pd.DataFrame
-            Sound speed of the ion species.
-        """
+        """Calculate the species' sound speed."""
         pth = self.pth * self.units.pth
         rho = self.rho * self.units.rho
         gamma = self.constants.polytropic_index["scalar"]
@@ -262,17 +238,12 @@ class Ion(base.Base):
 
     @property
     def Wk(self):
-        r"""Calculate the kinetic energy flux.
+        r"""Calculate the kinetic energy flux, a pd.Series.
 
         The kinetic energy flux is calculated as:
 
         .. math::
             W_k = \frac{1}{2} \rho v^3
-
-        Returns
-        -------
-        pd.Series
-            Kinetic energy flux.
         """
         rho = self.rho * self.units.rho
         v = self.v.mag * self.units.v
