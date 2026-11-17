@@ -51,18 +51,18 @@ class Scatter(base.ColorPlot):
     >>> y = pd.Series([4.0, 5.0, 6.0])
     >>> z = pd.Series([7.0, 8.0, 9.0])
     >>> s = Scatter(x, y, z)
-    >>> ax, collection, segments, cbar = s.make_plot()
+    >>> ax, collection, segments, guides = s.make_plot()
     >>> collection.get_offsets().tolist()
     [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
     >>> collection.get_array().tolist()
     [7.0, 8.0, 9.0]
-    >>> segments is None, cbar is None
-    (True, False)
+    >>> segments is None, guides.color.mappable is collection
+    (True, True)
 
     A ``size`` variable sets each marker's area, here on 10 to 30 pt²:
 
     >>> s = Scatter(x, y, size=pd.Series([1.0, 2.0, 3.0]))
-    >>> ax, collection, segments, cbar = s.make_plot(size_range=(10, 30))
+    >>> ax, collection, segments, guides = s.make_plot(size_range=(10, 30))
     >>> collection.get_sizes().tolist()
     [10.0, 20.0, 30.0]
     >>> plt.close("all")
@@ -130,7 +130,7 @@ class Scatter(base.ColorPlot):
     def make_plot(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         connect=False,
         connect_kwargs=None,
@@ -138,6 +138,8 @@ class Scatter(base.ColorPlot):
         size_range=_SIZE_RANGE,
         alpha_norm=None,
         alpha_range=_ALPHA_RANGE,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
@@ -146,10 +148,11 @@ class Scatter(base.ColorPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
-        cbar: bool
-            If True, create color bar with `labels.z`.
+        cbar: bool, None
+            If True, create color bar with `labels.z`. None, the default,
+            means True.
         cbar_kwargs: dict, None
-            If not None, kwargs passed to `self._make_cbar`.
+            If not None, kwargs passed to the colorbar; see ``ColorScale``.
         connect: bool
             If True, join the drawn points with line segments in increasing
             z (see Notes).
@@ -183,6 +186,11 @@ class Scatter(base.ColorPlot):
             marker stays visible; a lower end the caller gives is used as
             given. A reversed pair, such as ``(1, 0.15)``, fades large
             values. Only with an alpha variable.
+        color_scale: ColorScale, None
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         kwargs:
             Passed to `ax.scatter`, except ``s`` with a size variable and
             ``alpha`` with an alpha variable.
@@ -194,8 +202,9 @@ class Scatter(base.ColorPlot):
             The points.
         segments: mpl.collections.LineCollection or None
             The segments joining the points if `connect` is True, else None.
-        cbar: mpl.colorbar.Colorbar or None
-            The colorbar if `cbar` is True and z varies, else None.
+        guides: Guides
+            ``color`` is the colorbar if `cbar` is True and z varies, else
+            None; ``size`` and ``alpha`` are None.
 
         Raises
         ------
@@ -203,7 +212,8 @@ class Scatter(base.ColorPlot):
             If ``s`` is given with a size variable or ``alpha`` with an
             alpha variable, or if ``size_norm`` or ``size_range`` is given
             without a size variable, or ``alpha_norm`` or ``alpha_range``
-            without an alpha variable.
+            without an alpha variable; or if ``color_scale`` is given with
+            ``norm``, ``cmap``, ``cbar`` or ``cbar_kwargs``.
 
         Notes
         -----
@@ -238,6 +248,7 @@ class Scatter(base.ColorPlot):
         alpha variable sets each point's alpha. The segments do not set the
         axis limits.
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
         markers = self._marker_variables(
             kwargs,
             size=(size_norm, size_range, _SIZE_RANGE),
@@ -271,8 +282,8 @@ class Scatter(base.ColorPlot):
 
         if data.loc[:, "z"].unique().size > 1:
             zkey = "z"
-            kwargs["norm"], kwargs["cmap"] = self._color_scale(
-                kwargs, data.loc[:, "z"].to_numpy()
+            kwargs["norm"], kwargs["cmap"] = self._norm_and_cmap(
+                scale, data.loc[:, "z"].to_numpy()
             )
         else:
             zkey = None
@@ -283,15 +294,11 @@ class Scatter(base.ColorPlot):
         if connect:
             segments = self._connect(ax, collection, data, zkey, connect_kwargs)
 
-        if cbar and zkey is not None:
-            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-            cbar = self._make_cbar(collection, **cbar_kwargs)
-        else:
-            cbar = None
+        cbar = None if zkey is None else self._make_cbar(collection, scale, ax)
 
         self._format_axis(ax, collection, data)
 
-        return ax, collection, segments, cbar
+        return ax, collection, segments, base.Guides(color=cbar)
 
     def _marker_variables(self, kwargs, **variables):
         r"""Check the size and alpha keywords; return those of the variables given.

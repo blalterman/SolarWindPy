@@ -247,12 +247,12 @@ class TestPlotHistWithContours:
         """
         known_hist.set_axnorm("t")
         _, supplied = plt.subplots()
-        ax, _, qset, cbar = known_hist.plot_hist_with_contours(
+        ax, _, qset, guides = known_hist.plot_hist_with_contours(
             ax=supplied, levels=[0.3, 0.6]
         )
         assert ax is supplied
-        assert cbar.mappable is _quadmesh(ax)
-        assert cbar.ax.get_ylabel() == str(known_hist.labels.z)
+        assert guides.color.mappable is _quadmesh(ax)
+        assert guides.color.ax.get_ylabel() == str(known_hist.labels.z)
         assert qset in ax.collections
         np.testing.assert_array_equal(qset.levels, [0.3, 0.6])
         assert len(ax.texts) == 0
@@ -279,7 +279,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong, or the author changed the "t" defaults
         in `_get_contour_levels`.
         """
-        ax, _, qset, cbar = hist2d_instance.plot_hist_with_contours()
+        ax, _, qset, guides = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t", default levels are [0.01, 0.1, 0.3, 0.7, 0.99]
         expected_levels = [0.01, 0.1, 0.3, 0.7, 0.99]
         np.testing.assert_allclose(
@@ -294,10 +294,10 @@ class TestPlotHistWithContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, _, qset, cbar = hist2d_instance.plot_hist_with_contours()
+        ax, _, qset, guides = hist2d_instance.plot_hist_with_contours()
         # For axnorm="t" (total normalized), values should be in [0, 1]
-        assert cbar.vmin >= 0, "Colorbar vmin should be >= 0"
-        assert cbar.vmax <= 1, "Colorbar vmax should be <= 1"
+        assert guides.color.vmin >= 0, "Colorbar vmin should be >= 0"
+        assert guides.color.vmax <= 1, "Colorbar vmax should be <= 1"
         plt.close("all")
 
     def test_gaussian_filter_changes_contour_data(self, hist2d_instance):
@@ -338,7 +338,7 @@ class TestPlotHistWithContours:
         ON FAILURE: the code is wrong.
         """
         known_hist.set_axnorm("t")
-        ax, _, qset, cbar = known_hist.plot_hist_with_contours()
+        ax, _, qset, guides = known_hist.plot_hist_with_contours()
         values = np.ma.filled(_quadmesh(ax).get_array().astype(float), np.nan)
         expected = _expected_grid(known_counts) / known_counts.max()
         assert np.asarray(values.reshape(expected.shape)) == exact(
@@ -413,18 +413,18 @@ class TestPlotContours:
         plt.close("all")
 
     def test_cbar_true_returns_the_colorbar_of_the_contours(self, hist2d_instance):
-        """With cbar=True the second value is a colorbar of the drawn contours.
+        """With cbar=True ``guides.color`` is a colorbar of the drawn contours.
 
         It colours ``qset``, the contour set on ``ax``, and carries
         ``labels.z``, as the ``cbar`` parameter documents.
 
         ON FAILURE: the code is wrong.
         """
-        ax, qset, mappable = hist2d_instance.plot_contours(cbar=True)
-        assert isinstance(mappable, matplotlib.colorbar.Colorbar)
-        assert mappable.mappable is qset
+        ax, qset, guides = hist2d_instance.plot_contours(cbar=True)
+        assert isinstance(guides.color, matplotlib.colorbar.Colorbar)
+        assert guides.color.mappable is qset
         assert qset in ax.collections
-        assert mappable.ax.get_ylabel() == str(hist2d_instance.labels.z)
+        assert guides.color.ax.get_ylabel() == str(hist2d_instance.labels.z)
         plt.close("all")
 
     def test_cbar_false_returns_the_contour_set_itself(self, hist2d_instance):
@@ -432,8 +432,8 @@ class TestPlotContours:
 
         ON FAILURE: the code is wrong.
         """
-        ax, qset, cbar = hist2d_instance.plot_contours(cbar=False)
-        assert cbar is None
+        ax, qset, guides = hist2d_instance.plot_contours(cbar=False)
+        assert guides.color is None
         assert qset in ax.collections
         plt.close("all")
 
@@ -847,16 +847,16 @@ class TestMakePlot:
     def test_returns_colorbar_of_the_mesh_when_requested(self, known_hist):
         """`cbar=True` returns the Colorbar of the drawn mesh, labelled `labels.z`.
 
-        The documented return is the colorbar; the `cbar` parameter documents
-        its label.
+        The documented return is ``guides``, whose ``color`` is the colorbar;
+        the `cbar` parameter documents its label.
 
         ON FAILURE: the code is wrong, or the documented return contract
         changed.
         """
-        ax, _, returned = known_hist.make_plot(cbar=True)
-        assert isinstance(returned, matplotlib.colorbar.Colorbar)
-        assert returned.mappable is _quadmesh(ax)
-        assert returned.ax.get_ylabel() == str(known_hist.labels.z)
+        ax, _, guides = known_hist.make_plot(cbar=True)
+        assert isinstance(guides.color, matplotlib.colorbar.Colorbar)
+        assert guides.color.mappable is _quadmesh(ax)
+        assert guides.color.ax.get_ylabel() == str(known_hist.labels.z)
         plt.close("all")
 
     def test_returns_the_drawn_mesh_when_no_colorbar(self, known_hist):
@@ -2348,7 +2348,7 @@ class TestJointPlot:
         ON FAILURE: the code is wrong -- the marginals would not describe the
         heatmap they flank.
         """
-        hax, xax, yax, cbar = known_hist.make_joint_h2_h1_plot(project_counts=True)
+        hax, xax, yax, guides = known_hist.make_joint_h2_h1_plot(project_counts=True)
 
         np.testing.assert_allclose(
             np.asarray(xax.lines[0].get_ydata(), float), known_counts.sum(axis=0)
@@ -2365,10 +2365,10 @@ class TestJointPlot:
         ON FAILURE: the code is wrong -- the marginals would be drawn against a
         different scale than the grid beside them.
         """
-        hax, xax, yax, cbar = known_hist.make_joint_h2_h1_plot()
+        hax, xax, yax, guides = known_hist.make_joint_h2_h1_plot()
         assert hax.get_xlim() == xax.get_xlim()
         assert hax.get_ylim() == yax.get_ylim()
-        assert isinstance(cbar, matplotlib.colorbar.Colorbar)
+        assert isinstance(guides.color, matplotlib.colorbar.Colorbar)
         plt.close("all")
 
 

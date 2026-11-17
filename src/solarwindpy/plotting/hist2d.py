@@ -17,6 +17,7 @@ from scipy.signal import savgol_filter
 
 from . import base
 from . import labels
+from .scales import ColorScale
 from .tools import nan_gaussian_filter
 
 from .hist1d import Hist1D
@@ -96,7 +97,9 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     [1.0, 1.0, 2.0, 1.0, nan, 1.0]
     >>> int(counts.sum())
     6
-    >>> ax, mesh, cbar = h.make_plot()
+    >>> ax, mesh, guides = h.make_plot()
+    >>> guides.color.mappable is mesh
+    True
     >>> plt.close("all")
     """
 
@@ -139,12 +142,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         return x, y
 
-    def _make_cbar(self, mappable, **kwargs):
-        ticks = kwargs.pop(
-            "ticks",
-            mpl.ticker.MultipleLocator(0.1) if self.axnorm in ("c", "r") else None,
-        )
-        return super()._make_cbar(mappable, ticks=ticks, **kwargs)
+    def _default_cbar_kwargs(self):
+        r"""Ticks every 0.1 on the colorbar of a row or column norm."""
+        if self.axnorm in ("c", "r"):
+            return {"ticks": mpl.ticker.MultipleLocator(0.1)}
+        return {}
 
     def _prep_agg_for_plot(self, fcn=None, use_edges=True, mask_invalid=True):
         """Prepare aggregated data and coordinates for plotting.
@@ -207,10 +209,12 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     def make_plot(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         fcn=None,
         alpha_fcn=None,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         r"""Make a 2D plot on `ax` using `ax.pcolormesh`.
@@ -219,22 +223,28 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
-        cbar: bool
-            If True, create color bar with `labels.z`.
+        cbar: bool, None
+            If True, create color bar with `labels.z`. None, the default,
+            means True.
         cbar_kwargs: dict, None
-            If not None, kwargs passed to `self._make_cbar`.
+            If not None, kwargs passed to the colorbar; see ``ColorScale``.
         fcn: FunctionType, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         alpha_fcn: None, str
             If not None, the function used to aggregate the data for setting alpha
             value; see ``ColorPlot._apply_alpha_fcn``. Ignored, with a warning,
             when the plot counts points.
+        color_scale: ColorScale, None
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         kwargs:
             Passed to `ax.pcolormesh`. For values of both signs, `norm`
             defaults to a `CenteredNorm` about 0 and `cmap` to "RdBu_r";
             otherwise `norm` defaults to ten colour bands on [0, 1] for row or
             column normalized data and to a `LogNorm` for densities ("d",
-            "cd", "rd"). See ``ColorPlot._color_scale``.
+            "cd", "rd"). See ``ColorPlot._norm_and_cmap``.
 
         Returns
         -------
@@ -242,9 +252,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             Axes upon which plot was made.
         mesh: mpl.collections.QuadMesh
             The histogram's cells.
-        cbar: colorbar.Colorbar or None
-            The colorbar if `cbar` is True, else None.
+        guides: Guides
+            ``color`` is the colorbar if `cbar` is True, else None; ``size``
+            and ``alpha`` are None.
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.edges["x"]
         y = self.edges["y"]
@@ -255,17 +267,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         x, y = self._maybe_convert_to_log_scale(x, y)
 
         C = np.ma.masked_invalid(agg.values)
-        norm, cmap = self._color_scale(kwargs, C)
+        norm, cmap = self._norm_and_cmap(scale, C)
         XX, YY = np.meshgrid(x, y)
         pc = ax.pcolormesh(XX, YY, C, norm=norm, cmap=cmap, **kwargs)
 
-        if cbar:
-            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
-            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(pc, **cbar_kwargs)
-        else:
-            cbar = None
+        cbar = self._make_cbar(pc, scale, ax)
 
         self._format_axis(ax)
 
@@ -274,12 +280,12 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             pc, alpha_fcn, lambda fcn: self.agg(fcn=fcn).unstack("x").to_numpy().ravel()
         )
 
-        return ax, pc, cbar
+        return ax, pc, base.Guides(color=cbar)
 
     def plot_hist_with_contours(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         fcn=None,
         # Contour-specific parameters
@@ -288,6 +294,8 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         contour_kwargs=None,
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         """Make a 2D pcolormesh plot with contour overlay.
@@ -299,10 +307,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         ----------
         ax : mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
-        cbar : bool
-            If True, create color bar with `labels.z`.
+        cbar : bool, None
+            If True, create color bar with `labels.z`. None, the default,
+            means True.
         cbar_kwargs : dict, None
-            If not None, kwargs passed to `self._make_cbar`.
+            If not None, kwargs passed to the colorbar; see ``ColorScale``.
         fcn : FunctionType, None
             Aggregation function. If None, automatically select.
         levels : array-like, int, None
@@ -317,6 +326,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             skips empty bins.
         gaussian_filter_kwargs : dict, None
             Kwargs passed to the Gaussian filter.
+        color_scale : ColorScale, None
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         kwargs :
             Passed to `ax.pcolormesh`. `norm` defaults as in `make_plot` and
             is shared by the mesh and the contours.
@@ -328,9 +342,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             The pcolormesh background.
         qset : QuadContourSet
             The contour set from the overlay.
-        cbar : colorbar.Colorbar or None
-            The colorbar of the mesh if `cbar` is True, else None.
+        guides : Guides
+            ``color`` is the colorbar of the mesh if `cbar` is True, else
+            None; ``size`` and ``alpha`` are None.
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -341,7 +357,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         C_edges, x_edges, y_edges = self._prep_agg_for_plot(fcn=fcn, use_edges=True)
 
         # norm and cmap are shared between pcolormesh and contour.
-        norm, cmap = self._color_scale(kwargs, C_edges)
+        norm, cmap = self._norm_and_cmap(scale, C_edges)
 
         XX_edges, YY_edges = np.meshgrid(x_edges, y_edges)
         pc = ax.pcolormesh(XX_edges, YY_edges, C_edges, norm=norm, cmap=cmap, **kwargs)
@@ -382,16 +398,12 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         )
 
         # --- 3. Colorbar ---
-        if cbar:
-            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-            cbar = self._make_cbar(pc, **cbar_kwargs)
-        else:
-            cbar = None
+        cbar = self._make_cbar(pc, scale, ax)
 
         # --- 4. Format axis ---
         self._format_axis(ax)
 
-        return ax, pc, qset, cbar
+        return ax, pc, qset, base.Guides(color=cbar)
 
     def get_border(self):
         r"""Get the top and bottom edges of the plot.
@@ -564,17 +576,10 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
 
         return levels
 
-    def _verify_contour_passthrough_kwargs(self, ax, edges_kwargs, cbar_kwargs):
-        if edges_kwargs is None:
-            edges_kwargs = dict()
-        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
-        return edges_kwargs, cbar_kwargs
-
     def plot_contours(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         fcn=None,
         plot_edges=False,
@@ -583,6 +588,8 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         gaussian_filter_std=0,
         gaussian_filter_kwargs=None,
         levels=None,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         """Make a contour plot on `ax` using `ax.contour`.
@@ -591,10 +598,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         ----------
         ax: mpl.axes.Axes, None
             If None, create an `Axes` instance from `plt.subplots`.
-        cbar: bool
-            If True, create color bar with `labels.z`.
+        cbar: bool, None
+            If True, create color bar with `labels.z`. None, the default,
+            means True.
         cbar_kwargs: dict, None
-            If not None, kwargs passed to `self._make_cbar`.
+            If not None, kwargs passed to the colorbar; see ``ColorScale``.
         fcn: FunctionType, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         plot_edges: bool
@@ -614,6 +622,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         levels: array-like, int, None
             Contour levels. If None, the default for the ``axnorm``, or
             matplotlib's choice when there is none.
+        color_scale: ColorScale, None
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         kwargs:
             Passed to :meth:`matplotlib.axes.Axes.contour` or
             :meth:`matplotlib.axes.Axes.contourf`. For values of both signs,
@@ -627,17 +640,18 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         -------
         ax : mpl.axes.Axes
         qset : QuadContourSet
-        cbar : colorbar.Colorbar or None
-            The colorbar if `cbar` is True, else None.
+        guides : Guides
+            ``color`` is the colorbar if `cbar` is True, else None; ``size``
+            and ``alpha`` are None.
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         if ax is None:
             fig, ax = plt.subplots()
 
-        edges_kwargs, cbar_kwargs = self._verify_contour_passthrough_kwargs(
-            ax, edges_kwargs, cbar_kwargs
-        )
+        if edges_kwargs is None:
+            edges_kwargs = dict()
 
         agg = self.agg(fcn=fcn).unstack("x")
         x = self.intervals["x"].mid
@@ -652,7 +666,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
             C = self._gaussian_filter(C, gaussian_filter_std, gaussian_filter_kwargs)
 
         C = np.ma.masked_invalid(C)
-        norm, cmap = self._color_scale(kwargs, C)
+        norm, cmap = self._norm_and_cmap(scale, C)
 
         assert XX.shape == C.shape
         assert YY.shape == C.shape
@@ -676,15 +690,11 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         if plot_edges:
             etop, ebottom = self.plot_edges(ax, **edges_kwargs)
 
-        if cbar:
-            # Pass `norm` to `self._make_cbar` so that we can choose the ticks to use.
-            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-        else:
-            cbar = None
+        cbar = self._make_cbar(qset, scale, ax)
 
         self._format_axis(ax)
 
-        return ax, qset, cbar
+        return ax, qset, base.Guides(color=cbar)
 
     def _on_source_index(self, values):
         r"""``values``, given on the kept rows, on every row of the source.
@@ -798,16 +808,19 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         fig_axes : None
             Accepted and ignored.
         **kwargs
-            ``figsize``, ``height_ratios``, ``width_ratios``, ``hspace``,
-            ``wspace`` and ``cbar_kwargs`` lay out the figure; the rest is
-            passed to ``make_plot``.
+            ``figsize``, ``height_ratios``, ``width_ratios``, ``hspace`` and
+            ``wspace`` lay out the figure; the rest is passed to
+            ``make_plot``. The colorbar is drawn horizontally in the bottom
+            row unless ``cbar_kwargs``, or the ``cbar_kwargs`` of a
+            ``color_scale``, sets ``cax`` or ``orientation``.
 
         Returns
         -------
         hax, xax, yax : Axes
             The 2D histogram axis and the x and y projection axes.
-        cbar : Colorbar
-            The colorbar of the 2D histogram.
+        guides : Guides
+            ``color`` is the colorbar of the 2D histogram, or None with
+            ``cbar=False``.
         """
         figsize = kwargs.pop("figsize", (5, 6))
         height_ratios = kwargs.pop("height_ratios", [0.25, 1, 0.2, 0.1])
@@ -830,14 +843,15 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         yax = fig.add_subplot(gs[1, 1], sharey=hax)
         cax = fig.add_subplot(gs[3, 0])
 
-        cbar_kwargs = self._prepare_cbar_kwargs(kwargs.pop("cbar_kwargs", None))
-        cax = cbar_kwargs.pop("cax", cax)
-        orientation = cbar_kwargs.pop("orientation", "horizontal")
-        _, _, cbar = self.make_plot(
-            ax=hax,
-            cbar_kwargs=dict(cax=cax, orientation=orientation, **cbar_kwargs),
-            **kwargs,
+        scale = self._color_scale(
+            kwargs,
+            kwargs.pop("color_scale", None),
+            kwargs.pop("cbar", None),
+            kwargs.pop("cbar_kwargs", None),
         )
+        cbar_kwargs = {"cax": cax, "orientation": "horizontal", **scale.cbar_kwargs}
+        scale = ColorScale(scale.norm, scale.cmap, scale.cbar, cbar_kwargs)
+        _, _, guides = self.make_plot(ax=hax, color_scale=scale, **kwargs)
 
         if kwargs_1d is None:
             kwargs_1d = dict()
@@ -870,7 +884,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
                 )
             )
 
-        return hax, xax, yax, cbar
+        return hax, xax, yax, guides
 
     def id_data_above_contour(self, level):
         r"""Gets data above the `level`.

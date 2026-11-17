@@ -963,7 +963,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
     >>> counts = splot.agg()
     >>> counts.size, int(counts.min()), int(counts.max()), int(counts.sum())
     (16, 4, 4, 64)
-    >>> ax, collection, cbar = splot.make_plot()
+    >>> ax, collection, guides = splot.make_plot()
     >>> plt.close("all")
     """
 
@@ -1069,10 +1069,12 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
     def make_plot(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         fcn=None,
         alpha_fcn=None,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         r"""Draw each mesh cell as a rectangle colored by its aggregated z-value.
@@ -1084,16 +1086,21 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         ----------
         ax : Axes, optional
             If None, create one.
-        cbar : bool
-            If True, draw a colorbar.
+        cbar : bool, optional
+            If True, draw a colorbar. None, the default, means True.
         cbar_kwargs : dict, optional
-            Passed to the colorbar.
+            Passed to the colorbar; see ``ColorScale``.
         fcn : str, optional
             Aggregation function passed to ``agg``.
         alpha_fcn : str, optional
             If given, cells are made more transparent the larger this
             aggregation of z is; see ``ColorPlot._apply_alpha_fcn``. Ignored,
             with a warning, when the plot counts points.
+        color_scale : ColorScale, optional
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         **kwargs
             Only ``cmap`` and ``norm`` are accepted.
 
@@ -1102,14 +1109,19 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         ax : Axes
         collection : matplotlib.collections.PolyCollection
             The mesh cells.
-        cbar : Colorbar or None
-            The colorbar if ``cbar``, otherwise None.
+        guides : Guides
+            ``color`` is the colorbar if ``cbar``, otherwise None; ``size``
+            and ``alpha`` are None.
 
         Raises
         ------
         ValueError
             If any other keyword is passed.
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
+        if len(kwargs):
+            raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
+
         if ax is None:
             fig, ax = plt.subplots()
 
@@ -1154,9 +1166,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
 
         collection.set_array(C)
 
-        norm, cmap = self._color_scale(kwargs, C)
-        if len(kwargs):
-            raise ValueError(f"Unexpected kwargs {kwargs.keys()}")
+        norm, cmap = self._norm_and_cmap(scale, C)
 
         collection.set_alpha(None)
         collection.set_cmap(cmap)
@@ -1174,12 +1184,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             ymesh[:, 1].max(),
         )
 
-        if cbar:
-            cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
-            cbar = self._make_cbar(collection, norm=norm, **cbar_kwargs)
-        else:
-            cbar = None
+        cbar = self._make_cbar(collection, scale, ax)
 
         self._format_axis(ax)
 
@@ -1188,7 +1193,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             collection, alpha_fcn, lambda fcn: self.agg(fcn=fcn).to_numpy()
         )
 
-        return ax, collection, cbar
+        return ax, collection, base.Guides(color=cbar)
 
     @staticmethod
     def _scaled_centers(x, y):
@@ -1206,11 +1211,13 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
     def plot_contours(
         self,
         ax=None,
-        cbar=True,
+        cbar=None,
         cbar_kwargs=None,
         fcn=None,
         use_contourf=False,
         levels=None,
+        *,
+        color_scale=None,
         **kwargs,
     ):
         r"""Contour the occupied cells' values, triangulated between their centers.
@@ -1230,16 +1237,21 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         ----------
         ax : mpl.axes.Axes, None
             If None, create an Axes instance from ``plt.subplots``.
-        cbar : bool
-            If True, create a colorbar. Default is True.
+        cbar : bool, None
+            If True, create a colorbar. None, the default, means True.
         cbar_kwargs : dict, None
-            Keyword arguments passed to ``self._make_cbar``.
+            Keyword arguments passed to the colorbar; see ``ColorScale``.
         fcn : callable, None
             Aggregation function. If None, automatically select in :py:meth:`agg`.
         use_contourf : bool
             If True, use filled contours. Default is False.
         levels : array-like, int, None
             Contour levels. If None, matplotlib's choice.
+        color_scale : ColorScale, optional
+            The colour settings as one object (see
+            :class:`~solarwindpy.plotting.scales.ColorScale`), in place of
+            ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs``; given with any of
+            them, raises ``TypeError``.
         **kwargs
             Passed to :meth:`matplotlib.axes.Axes.tricontour` or
             :meth:`matplotlib.axes.Axes.tricontourf`. ``cmap``, ``norm`` and
@@ -1254,16 +1266,17 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             The axes containing the plot.
         qset : TriContourSet
             The contour set object.
-        cbar : Colorbar or None
-            The colorbar if ``cbar=True``, else None.
+        guides : Guides
+            ``color`` is the colorbar if ``cbar=True``, else None; ``size``
+            and ``alpha`` are None.
 
         Raises
         ------
         ValueError
             If fewer than 3 cells hold finite values, or their centers all
             lie on one line in plot coordinates, so no triangle can be drawn
-            between them. Or if ``cbar=True`` and the contour set has fewer
-            than 2 levels.
+            between them. Or if a colorbar is drawn and the contour set has
+            fewer than 2 levels.
 
         Examples
         --------
@@ -1275,13 +1288,14 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         >>> y = pd.Series(rng.uniform(1, 100, 500))
         >>> z = pd.Series(np.sin(x / 10) * np.cos(y / 10))
         >>> splot = SpiralPlot2D(x, y, z, initial_bins=5, min_per_bin=10)
-        >>> ax, qset, cbar = splot.plot_contours(levels=[-0.5, 0.0, 0.5])
+        >>> ax, qset, guides = splot.plot_contours(levels=[-0.5, 0.0, 0.5])
         """
+        scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
         linestyles = kwargs.pop("linestyles", list(self._contour_linestyles))
 
         # Get aggregated data and mesh cell centers
         C = self.agg(fcn=fcn).values
-        norm, cmap = self._color_scale(kwargs, C)
+        norm, cmap = self._norm_and_cmap(scale, C)
 
         # Cell centers in plot coordinates: log10 on a log axis, as the mesh.
         tk_finite = np.isfinite(C)
@@ -1312,8 +1326,6 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         if ax is None:
             fig, ax = plt.subplots()
 
-        cbar_kwargs = self._prepare_cbar_kwargs(cbar_kwargs, ax)
-
         triangles = Triangulation(*scaled.T).triangles
         if self.log.x:
             x = 10.0**x
@@ -1329,17 +1341,14 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         qset = contour_fcn(*args, linestyles=linestyles, cmap=cmap, norm=norm, **kwargs)
 
         # Add colorbar
-        if cbar:
-            if len(qset.levels) < 2:
-                # Matplotlib's colorbar fails with a bare IndexError here.
-                raise ValueError(
-                    f"A colorbar needs at least 2 contour levels, got "
-                    f"{list(qset.levels)}. Pass more levels or cbar=False."
-                )
-            cbar = self._make_cbar(qset, norm=norm, **cbar_kwargs)
-        else:
-            cbar = None
+        if scale.cbar and len(qset.levels) < 2:
+            # Matplotlib's colorbar fails with a bare IndexError here.
+            raise ValueError(
+                f"A colorbar needs at least 2 contour levels, got "
+                f"{list(qset.levels)}. Pass more levels or cbar=False."
+            )
+        cbar = self._make_cbar(qset, scale, ax)
 
         self._format_axis(ax)
 
-        return ax, qset, cbar
+        return ax, qset, base.Guides(color=cbar)

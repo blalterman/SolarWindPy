@@ -13,6 +13,7 @@ __all__ = [
     "ClipAxes",
     "AxesLabels",
     "RangeLimits",
+    "Guides",
     "Base",
     "ColorPlot",
     "BinnedPlot",
@@ -33,6 +34,7 @@ from abc import ABC, abstractmethod
 from . import labels
 from .binned import BinnedData, _PlotSource, _clip_kind, _clip_to_quantiles
 from .binning import FixedGrid
+from .scales import ColorScale
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 #: Clip setting per axis: False, True, or a clip string (see ``Base.clip_data``).
@@ -41,6 +43,10 @@ LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
 ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
+#: The guides a draw method drew, the last item it returns: the colorbar of
+#: the colour (``matplotlib.colorbar.Colorbar``), the key of the marker size
+#: and the bar of the alpha, each None when not drawn.
+Guides = namedtuple("Guides", "color,size,alpha", defaults=(None, None, None))
 
 
 def _within(values, lower, upper, bins):
@@ -763,21 +769,74 @@ class ColorPlot(_AggregateLimits):
 
     #: Default colormap for values of both signs.
     _diverging_cmap = "RdBu_r"
+    #: Default colormap for values of one sign; None is matplotlib's.
+    _default_cmap = None
 
-    def _color_scale(self, kwargs, values):
-        r"""Pop ``norm`` and ``cmap`` from ``kwargs``, defaulting them by ``values``.
+    @staticmethod
+    def _color_scale(kwargs, color_scale, cbar, cbar_kwargs):
+        r"""Pop ``norm`` and ``cmap`` from ``kwargs``; return the ``ColorScale`` to draw with.
 
-        The one place every colour plot chooses its colour scale. A ``norm``
-        or ``cmap`` in ``kwargs`` is used as given, None included. Otherwise,
-        when the finite ``values`` hold both signs, the default is a
-        :class:`~matplotlib.colors.CenteredNorm` about 0 and the diverging
-        colormap ``_diverging_cmap``; values of one sign get
-        ``_default_norm`` and matplotlib's colormap.
+        The one place a colour plot's draw method reads its colour settings:
+        either the plain keywords, built into a ``ColorScale``, or the
+        ``color_scale`` the caller passed. A plain keyword counts as given
+        when ``norm`` or ``cmap`` is in ``kwargs`` (None included), or
+        ``cbar`` or ``cbar_kwargs`` is not None. The draw methods default
+        ``cbar`` to None rather than True for this reason: None means
+        "not given", which draws a colorbar, so an explicit ``cbar=True``
+        is told apart from the default and refused beside a scale.
 
         Parameters
         ----------
         kwargs : dict
             The caller's keywords; ``norm`` and ``cmap`` are removed.
+        color_scale : ColorScale or None
+            The caller's scale.
+        cbar : bool or None
+            The caller's ``cbar``; None if not given.
+        cbar_kwargs : Mapping or None
+            The caller's ``cbar_kwargs``; None if not given.
+
+        Returns
+        -------
+        ColorScale
+
+        Raises
+        ------
+        TypeError
+            If ``color_scale`` is neither None nor a ``ColorScale``, or is
+            given with a plain keyword; or if a plain keyword is invalid
+            (see ``ColorScale``).
+        """
+        plain = {k: kwargs.pop(k) for k in ("norm", "cmap") if k in kwargs}
+        given = {"cbar": cbar, "cbar_kwargs": cbar_kwargs}
+        plain.update({k: v for k, v in given.items() if v is not None})
+        if color_scale is None:
+            return ColorScale(**plain)
+        if not isinstance(color_scale, ColorScale):
+            raise TypeError(
+                "color_scale must be a ColorScale or None, "
+                f"not {type(color_scale).__name__}"
+            )
+        if plain:
+            raise TypeError(
+                f"Got color_scale and {', '.join(plain)}: give the colour "
+                "settings once, on the ColorScale or as keywords."
+            )
+        return color_scale
+
+    def _norm_and_cmap(self, scale, values):
+        r"""The norm and colormap ``scale`` draws ``values`` with, defaults filled in.
+
+        The one place every colour plot chooses its default colour scale. A
+        ``norm`` or ``cmap`` set on ``scale`` is used as given. Otherwise,
+        when the finite ``values`` hold both signs, the default is a
+        :class:`~matplotlib.colors.CenteredNorm` about 0 and the diverging
+        colormap ``_diverging_cmap``; values of one sign get
+        ``_default_norm`` and ``_default_cmap``.
+
+        Parameters
+        ----------
+        scale : ColorScale
         values : array-like
             The values to colour, NaN or masked where none.
 
@@ -788,15 +847,12 @@ class ColorPlot(_AggregateLimits):
         v = np.ma.filled(np.ma.asarray(values, dtype=float), np.nan)
         v = v[np.isfinite(v)]
         signed = bool((v < 0).any() and (v > 0).any())
-        axnorm = getattr(self, "axnorm", None)
-        if "norm" in kwargs:
-            norm = kwargs.pop("norm")
-        else:
-            norm = self._default_norm(axnorm, signed)
-        if "cmap" in kwargs:
-            cmap = kwargs.pop("cmap")
-        else:
-            cmap = self._diverging_cmap if signed else None
+        norm = scale.norm
+        if norm is None:
+            norm = self._default_norm(getattr(self, "axnorm", None), signed)
+        cmap = scale.cmap
+        if cmap is None:
+            cmap = self._diverging_cmap if signed else self._default_cmap
         return norm, cmap
 
     @staticmethod
@@ -850,8 +906,8 @@ class ColorPlot(_AggregateLimits):
 
         Parameters
         ----------
-        cbar_kwargs : Mapping or None
-            The caller's colorbar kwargs. None is treated as empty.
+        cbar_kwargs : Mapping
+            The colorbar kwargs of a ``ColorScale``.
         ax : matplotlib.axes.Axes, optional
             If given, and ``cbar_kwargs`` names neither ``ax`` nor ``cax``,
             the colorbar is placed beside this axes.
@@ -860,42 +916,45 @@ class ColorPlot(_AggregateLimits):
         -------
         dict
             A new dict holding ``cbar_kwargs`` and, if added, ``ax``.
-
-        Raises
-        ------
-        TypeError
-            If ``cbar_kwargs`` is neither None nor a mapping.
         """
-        if cbar_kwargs is None:
-            cbar_kwargs = {}
-        if not isinstance(cbar_kwargs, Mapping):
-            raise TypeError(
-                "cbar_kwargs must be a mapping or None, "
-                f"not {type(cbar_kwargs).__name__}"
-            )
-
         prepared = dict(cbar_kwargs)
         if ax is not None and "cax" not in prepared and "ax" not in prepared:
             prepared["ax"] = ax
         return prepared
 
-    def _make_cbar(self, mappable, **kwargs):
-        """Make a colorbar on `ax` using `mappable`.
+    def _default_cbar_kwargs(self):
+        r"""Colorbar kwargs a plot sets unless the caller does; none here."""
+        return {}
+
+    def _make_cbar(self, mappable, scale, ax):
+        r"""Draw the colorbar of ``mappable`` as ``scale`` sets, or return None.
 
         Parameters
         ----------
-        mappable:
-            See `figure.colorbar` kwarg of same name.
-        ax: mpl.axis.Axis
-            See `figure.colorbar` kwarg of same name.
-        norm: mpl.colors.Normalize instance
-            The normalization used in the plot. Passed here to determine
-            y-ticks.
-        kwargs:
-            Passed to `fig.colorbar`. If `{self.__class__.__name__}` is
-            row or column normalized, `ticks` defaults to
-            :py:class:`mpl.ticker.MultipleLocator(0.1)`.
+        mappable : matplotlib.cm.ScalarMappable
+            The coloured artist the colorbar reads.
+        scale : ColorScale
+            No colorbar is drawn unless ``scale.cbar``. ``scale.cbar_kwargs``
+            is passed to ``Figure.colorbar``, after the plot's
+            ``_default_cbar_kwargs`` and with ``label`` defaulting to
+            ``labels.z``.
+        ax : matplotlib.axes.Axes
+            The plot's axes: the colorbar is drawn beside it unless
+            ``scale.cbar_kwargs`` names ``ax`` or ``cax``.
+
+        Returns
+        -------
+        matplotlib.colorbar.Colorbar or None
+
+        Raises
+        ------
+        ValueError
+            If ``scale.cbar_kwargs`` names both ``ax`` and ``cax``.
         """
+        if not scale.cbar:
+            return None
+        kwargs = self._default_cbar_kwargs()
+        kwargs.update(self._prepare_cbar_kwargs(scale.cbar_kwargs, ax))
         ax = kwargs.pop("ax", None)
         cax = kwargs.pop("cax", None)
         if ax is not None and cax is not None:
@@ -919,9 +978,7 @@ class ColorPlot(_AggregateLimits):
         if "label" in kwargs:
             labels.base._warn_if_plain({"cbar_kwargs['label']": kwargs["label"]})
         label = kwargs.pop("label", self.labels.z)
-        cbar = fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
-
-        return cbar
+        return fig.colorbar(mappable, label=label, ax=ax, cax=cax, **kwargs)
 
 
 class BinnedPlot(_AggregateLimits):

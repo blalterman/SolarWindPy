@@ -2,12 +2,13 @@
 # Supersedes: none
 """Every plot's draw method returns its handles in one fixed order.
 
-The order is the axis first, then the primary artists, then the colorbar,
-which is None when there is none: ``(ax, artists..., cbar_or_None)``. A
-contour method returns its contour set as the last artist, just before the
-colorbar. A method's tuple has the same length whether or not a colorbar
-is drawn, whether a Scatter has z or connects its points, and whether a
-Hist1D draws its uncertainty window. Each position keeps its type too,
+The order is the axis first, then the primary artists, then ``guides``, a
+``Guides`` record of the guides drawn: ``(ax, artists..., guides)``. Its
+``color`` is the colorbar, which is None when there is none, and its other
+fields are None until a plot draws those guides. A contour method returns its
+contour set as the last artist, just before ``guides``. A method's tuple has
+the same length whether or not a colorbar is drawn, whether a Scatter has z
+or connects its points, and whether a Hist1D draws its uncertainty window. Each position keeps its type too,
 with one exception: Hist1D's line slot holds the ``ErrorbarContainer``
 without the window and the central ``Line2D`` with it, so the error-bar
 handles stay reachable.
@@ -36,6 +37,7 @@ from matplotlib.contour import ContourSet  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
 from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.plotting.base import Guides  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
@@ -70,7 +72,7 @@ def _close():
     plt.close("all")
 
 
-# (id, build, method, kwargs, artist types). The colorbar slot is checked
+# (id, build, method, kwargs, artist types). The guides slot is checked
 # separately, so the artist types are the positions between ax and it.
 COLOR_CASES = [
     ("Hist2D.make_plot", lambda: Hist2D(X, Y), "make_plot", {}, (QuadMesh,)),
@@ -131,10 +133,13 @@ COLOR_CASES = [
     "build, method, kwargs, artists",
     [pytest.param(*c[1:], id=c[0]) for c in COLOR_CASES],
 )
-def test_color_plot_returns_ax_then_artists_then_cbar_or_none(
+def test_color_plot_returns_ax_then_artists_then_guides(
     build, method, kwargs, artists, cbar
 ):
-    """``(ax, artists..., cbar)``; the last slot is None when no colorbar is drawn.
+    """``(ax, artists..., guides)``; ``guides.color`` is None when no colorbar is drawn.
+
+    The colorbar drawn reads the first artist, and the plot fills no other
+    guide.
 
     ON FAILURE: the code is wrong.
     """
@@ -144,11 +149,18 @@ def test_color_plot_returns_ax_then_artists_then_cbar_or_none(
     assert isinstance(out[0], Axes)
     for got, kind in zip(out[1:-1], artists):
         assert isinstance(got, kind)
-    assert isinstance(out[-1], Colorbar if cbar else NONE)
+    guides = out[-1]
+    assert isinstance(guides, Guides)
+    assert isinstance(guides.color, Colorbar if cbar else NONE)
+    if cbar:
+        assert guides.color.mappable is out[1]
+    assert (guides.size, guides.alpha) == (None, None)
 
 
 def test_scatter_without_z_returns_its_collection_and_no_colorbar():
-    """A Scatter without z keeps the same shape: points, segments or None, then None.
+    """A Scatter without z keeps the same shape: points, segments or None, then guides.
+
+    No guide is drawn, so every field of ``guides`` is None.
 
     ON FAILURE: the code is wrong.
     """
@@ -157,7 +169,7 @@ def test_scatter_without_z_returns_its_collection_and_no_colorbar():
     assert isinstance(out[0], Axes)
     assert isinstance(out[1], PathCollection)
     assert out[2] is None
-    assert out[3] is None
+    assert out[3] == Guides()
 
 
 @pytest.mark.parametrize(
@@ -168,10 +180,10 @@ def test_scatter_without_z_returns_its_collection_and_no_colorbar():
     ],
     ids=["errorbar", "window"],
 )
-def test_hist1d_returns_ax_line_band_then_none(kwargs, line, band):
-    """``(ax, line, band, None)``: the band is None without ``plot_window``.
+def test_hist1d_returns_ax_line_band_then_guides(kwargs, line, band):
+    """``(ax, line, band, guides)``: the band is None without ``plot_window``.
 
-    Hist1D draws no colorbar, so its colorbar slot is always None.
+    Hist1D draws no guide, so every field of ``guides`` is always None.
 
     ON FAILURE: the code is wrong.
     """
@@ -182,11 +194,11 @@ def test_hist1d_returns_ax_line_band_then_none(kwargs, line, band):
     assert isinstance(out[0], Axes)
     assert isinstance(out[1], line)
     assert isinstance(out[2], band)
-    assert out[3] is None
+    assert out[3] == Guides()
 
 
-def test_indicator_plot_returns_ax_line_then_none():
-    """``(ax, line, None)``: an indicator plot draws no colorbar.
+def test_indicator_plot_returns_ax_line_then_guides():
+    """``(ax, line, guides)``: an indicator plot draws no guide.
 
     ON FAILURE: the code is wrong.
     """
@@ -195,4 +207,4 @@ def test_indicator_plot_returns_ax_line_then_none():
     assert len(out) == 3
     assert isinstance(out[0], Axes)
     assert isinstance(out[1], Line2D)
-    assert out[2] is None
+    assert out[2] == Guides()

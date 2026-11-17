@@ -209,7 +209,7 @@ counts the points in each bin. Axis labels name the quantities, and the plot's
 :py:meth:`~solarwindpy.plotting.hist2d.Hist2D.make_plot` draws the histogram:
 
 >>> import matplotlib.pyplot as plt
->>> ax, mesh, cbar = h.make_plot()
+>>> ax, mesh, guides = h.make_plot()
 >>> ax.get_xlabel()
 '$n_{p_1} \\; \\left[\\mathrm{cm}^{-3}\\right]$'
 

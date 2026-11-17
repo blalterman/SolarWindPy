@@ -37,6 +37,7 @@ from pathlib import Path
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from solarwindpy.plotting.base import Guides  # noqa: E402
 from solarwindpy.solar_activity.base import ActivityIndicator  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 from solarwindpy.solar_activity.sunspot_number.sidc import (  # noqa: E402
@@ -1004,11 +1005,11 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
 
 @pytest.mark.parametrize("vertical", [True, False])
 def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
-    """``plot_on_colorbar`` returns ``(cax, underlay, overlay, None)``.
+    """``plot_on_colorbar`` returns ``(cax, underlay, overlay, guides)``.
 
     The underlay is the solid white line and the overlay the dashed black
-    line drawn over it, both on ``cax``. The colorbar slot is None because
-    the method receives only the colour bar's axes.
+    line drawn over it, both on ``cax``. Every field of ``guides`` is None
+    because the method receives only the colour bar's axes.
 
     ON FAILURE: the code is wrong.
     """
@@ -1021,9 +1022,9 @@ def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical)
             vertical_cbar=vertical,
         )
         assert isinstance(ret, tuple) and len(ret) == 4
-        cax, underlay, overlay, cbar = ret
+        cax, underlay, overlay, guides = ret
         assert cax is axes
-        assert cbar is None
+        assert guides == Guides()
         assert isinstance(underlay, matplotlib.lines.Line2D)
         assert isinstance(overlay, matplotlib.lines.Line2D)
         assert list(axes.lines) == [underlay, overlay]

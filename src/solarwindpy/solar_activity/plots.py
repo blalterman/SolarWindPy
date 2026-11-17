@@ -95,9 +95,10 @@ class IndicatorPlot(base.Base):
         ax : matplotlib.axes.Axes
         line : matplotlib.lines.Line2D
             The indicator's line.
-        cbar : None
-            An indicator plot draws no colorbar; the slot keeps the return
-            order ``(ax, artists..., cbar)`` shared by every plot.
+        guides : Guides
+            Every field None: an indicator plot draws no guide. The slot
+            keeps the return order ``(ax, artists..., guides)`` shared by
+            every plot.
         """
         if ax is None:
             fig, ax = subplots()
@@ -108,7 +109,7 @@ class IndicatorPlot(base.Base):
 
         self._format_axis(ax)
 
-        return ax, line, None
+        return ax, line, base.Guides()
 
 
 class SSNPlot(IndicatorPlot):

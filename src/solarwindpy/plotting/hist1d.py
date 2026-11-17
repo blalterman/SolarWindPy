@@ -45,8 +45,8 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
     >>> means = Hist1D(x, y, nbins=[0.5, 1.5, 2.5, 3.5])
     >>> means.agg().tolist()
     [10.0, 30.0, 40.0]
-    >>> ax, line, band, cbar = means.make_plot()
-    >>> band is None, cbar is None
+    >>> ax, line, band, guides = means.make_plot()
+    >>> band is None, guides.color is None
     (True, True)
     >>> plt.close("all")
     """
@@ -258,9 +258,9 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             The error bars, or with ``plot_window`` the central line.
         band: mpl.collections.PolyCollection or None
             The uncertainty window with ``plot_window``, else None.
-        cbar: None
-            A Hist1D draws no colorbar; the slot keeps the return order
-            ``(ax, artists..., cbar)`` shared by every plot.
+        guides: Guides
+            Every field None: a Hist1D draws no guide. The slot keeps the
+            return order ``(ax, artists..., guides)`` shared by every plot.
         """
         agg = self.agg(fcn=fcn)
         x = agg.index.mid
@@ -358,4 +358,4 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
 
         self._format_axis(ax, transpose_axes=transpose_axes)
 
-        return ax, line, band, None
+        return ax, line, band, base.Guides()

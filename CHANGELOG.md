@@ -25,6 +25,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   variable, or a norm or range without one, raises `TypeError`. The two new parameters follow
   `z`, so `logx`, `logy`, `clip` and `mask` move two places: pass them by keyword.
 
+### Changed - BREAKING CHANGES
+
+- Every plot's draw method returns its guides last, as a `solarwindpy.plotting.base.Guides`
+  record `(color, size, alpha)` of the guides it drew, in place of the bare colorbar.
+  `Scatter.make_plot` returns `(ax, points, segments, guides)`, `Hist2D.make_plot` and
+  `BetaRPlot.make_plot` return `(ax, mesh, guides)`, and `SpiralPlot2D.make_plot` returns
+  `(ax, collection, guides)`; `plot_contours`, `plot_hist_with_contours` and
+  `make_joint_h2_h1_plot` end with `guides` the same way. `guides.color` is the colorbar, None
+  where the old slot was None; `size` and `alpha` are None. The draw methods that draw no guide
+  (`Hist1D.make_plot`, `StabilityContours.plot_contours`, `IndicatorPlot.make_plot`,
+  `SIDC.plot_on_colorbar`) return `Guides()`, every field None, where they returned None. Each
+  tuple keeps its length. To migrate, read the colorbar from the last item:
+  `ax, mesh, cbar = h.make_plot()` becomes `ax, mesh, guides = h.make_plot()` with
+  `cbar = guides.color`.
+- `solarwindpy.plotting.scales.ColorScale(norm=None, cmap=None, cbar=True, cbar_kwargs=None)`
+  holds a plot's colour settings as one object, checked when built; `print(scale)` shows its
+  norm's class and current `vmin` and `vmax`. Pass it as `color_scale=` to `make_plot`,
+  `plot_contours` or `plot_hist_with_contours` of `Hist2D`, `SpiralPlot2D` and `Scatter`. The
+  norm is used as is, so one scale passed to several plots colours them alike; matplotlib fills
+  unset limits from the first plot drawn. Given with `norm`, `cmap`, `cbar` or `cbar_kwargs`,
+  it raises `TypeError`. The plain keywords still work and are built into a `ColorScale`, so
+  they follow its rules: `cbar` defaults to None, meaning True, so that an explicit `cbar=True`
+  beside a scale is refused; a `norm` that is not a `matplotlib.colors.Normalize` (such as the
+  string `"log"`), or a `cbar` that is not a bool, raises `TypeError`; and `norm=None` or
+  `cmap=None` passed explicitly now takes the plot's default (a `CenteredNorm` about 0 and
+  `RdBu_r` for values of both signs) instead of matplotlib's.
+- `BetaRPlot` colours values of one sign with `Greens_r` in every draw method, not only
+  `make_plot`, and values of both signs with `RdBu_r`, as the other colour plots do.
+
 ## [0.5.1] - 2026-11-05
 
 ### Changed

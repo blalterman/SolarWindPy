@@ -29,6 +29,7 @@ from matplotlib.colors import to_hex  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
 from solarwindpy.instabilities import verscharen2016 as v16  # noqa: E402
+from solarwindpy.plotting.base import Guides  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
 # Verscharen et al. (2016), doi:10.3847/0004-637X/831/2/128, Table 1.
@@ -348,11 +349,11 @@ def test_plot_contours_draws_every_published_threshold_on_log_axes():
 
 
 def test_plot_contours_returns_ax_lines_and_no_colorbar():
-    """``plot_contours`` returns ``(ax, lines, None)``, the shared plot order.
+    """``plot_contours`` returns ``(ax, lines, guides)``, the shared plot order.
 
     ``lines`` maps each drawn ``(growth_rate, instability)`` to its Line2D,
-    every one of which is on the axes. The colorbar slot is None because
-    the contours are lines, not a mappable.
+    every one of which is on the axes. Every field of ``guides`` is None
+    because the contours are lines, not a mappable.
 
     ON FAILURE: the code is wrong.
     """
@@ -361,9 +362,9 @@ def test_plot_contours_returns_ax_lines_and_no_colorbar():
     try:
         ret = sc.plot_contours(ax)
         assert isinstance(ret, tuple) and len(ret) == 3
-        out_ax, lines, cbar = ret
+        out_ax, lines, guides = ret
         assert out_ax is ax
-        assert cbar is None
+        assert guides == Guides()
         assert isinstance(lines, dict)
         assert sorted(lines) == sorted((g, k) for g, k in ROWS)
         for line in lines.values():
@@ -384,11 +385,11 @@ def test_plot_contours_returns_only_the_curves_it_draws():
     sc = v16.StabilityContours(FINITE_BETA)
     fig, ax = plt.subplots()
     try:
-        out_ax, lines, cbar = sc.plot_contours(
+        out_ax, lines, guides = sc.plot_contours(
             ax, growth_rate=-3, tk_kind=["MM", "AIC"]
         )
         assert out_ax is ax
-        assert cbar is None
+        assert guides == Guides()
         assert sorted(lines) == [(-3, "AIC"), (-3, "MM")]
         assert [line for line in ax.lines] == list(lines.values())
     finally:

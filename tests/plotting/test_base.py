@@ -454,11 +454,11 @@ def test_scatter_colorbar_maps_the_plotted_collection_labelled_z(ax):
     """
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, _, _, cbar = plot.make_plot(ax, cbar_kwargs={"ax": ax})
-    assert isinstance(cbar, Colorbar)
-    assert cbar.mappable is ax.collections[0]
-    assert cbar.ax.get_ylabel() == "T"
-    assert cbar.ax.figure is ax.figure
+    _, _, _, guides = plot.make_plot(ax, cbar_kwargs={"ax": ax})
+    assert isinstance(guides.color, Colorbar)
+    assert guides.color.mappable is ax.collections[0]
+    assert guides.color.ax.get_ylabel() == "T"
+    assert guides.color.ax.figure is ax.figure
 
 
 def test_scatter_colorbar_draws_into_a_given_cax_with_a_given_label(ax):
@@ -469,8 +469,8 @@ def test_scatter_colorbar_draws_into_a_given_cax_with_a_given_label(ax):
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
     plot = Scatter(X, Y, Z)
     plot.set_labels(z="T")
-    _, _, _, cbar = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
-    assert cbar.ax is cax
+    _, _, _, guides = plot.make_plot(ax, cbar_kwargs={"cax": cax, "label": "custom"})
+    assert guides.color.ax is cax
     assert cax.get_ylabel() == "custom"
 
 
@@ -479,8 +479,8 @@ def test_scatter_colorbar_accepts_a_list_of_axes(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, _, cbar = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
-    assert cbar.ax.figure is ax.figure
+    _, _, _, guides = Scatter(X, Y, Z).make_plot(ax, cbar_kwargs={"ax": [ax]})
+    assert guides.color.ax.figure is ax.figure
     assert len(ax.figure.axes) == 2
 
 
@@ -548,22 +548,26 @@ def _spiral():
 
 # Each entry draws one colorbar on ``ax`` and returns it.
 CBAR_PLOTS = {
-    "Scatter.make_plot": lambda ax, kw: Scatter(X, Y, Z).make_plot(
-        ax=ax, cbar_kwargs=kw
-    )[-1],
-    "Hist2D.make_plot": lambda ax, kw: _hist2d().make_plot(ax=ax, cbar_kwargs=kw)[-1],
-    "Hist2D.plot_hist_with_contours": lambda ax, kw: _hist2d().plot_hist_with_contours(
-        ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[-1],
-    "Hist2D.plot_contours": lambda ax, kw: _hist2d().plot_contours(
-        ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[-1],
-    "SpiralPlot2D.make_plot": lambda ax, kw: _spiral().make_plot(ax=ax, cbar_kwargs=kw)[
-        -1
-    ],
-    "SpiralPlot2D.plot_contours": lambda ax, kw: _spiral().plot_contours(
-        ax=ax, cbar_kwargs=kw, levels=LEVELS
-    )[-1],
+    "Scatter.make_plot": lambda ax, kw: (
+        Scatter(X, Y, Z).make_plot(ax=ax, cbar_kwargs=kw)[-1].color
+    ),
+    "Hist2D.make_plot": lambda ax, kw: (
+        _hist2d().make_plot(ax=ax, cbar_kwargs=kw)[-1].color
+    ),
+    "Hist2D.plot_hist_with_contours": lambda ax, kw: (
+        _hist2d()
+        .plot_hist_with_contours(ax=ax, cbar_kwargs=kw, levels=LEVELS)[-1]
+        .color
+    ),
+    "Hist2D.plot_contours": lambda ax, kw: (
+        _hist2d().plot_contours(ax=ax, cbar_kwargs=kw, levels=LEVELS)[-1].color
+    ),
+    "SpiralPlot2D.make_plot": lambda ax, kw: (
+        _spiral().make_plot(ax=ax, cbar_kwargs=kw)[-1].color
+    ),
+    "SpiralPlot2D.plot_contours": lambda ax, kw: (
+        _spiral().plot_contours(ax=ax, cbar_kwargs=kw, levels=LEVELS)[-1].color
+    ),
 }
 
 
@@ -594,8 +598,8 @@ def test_joint_plot_leaves_the_callers_cbar_kwargs_unchanged():
     """
     kwargs = {"orientation": "horizontal", "label": "custom"}
     try:
-        _, _, _, cbar = _hist2d().make_joint_h2_h1_plot(cbar_kwargs=kwargs)
-        assert cbar.ax.get_xlabel() == "custom"  # the label the caller passed
+        _, _, _, guides = _hist2d().make_joint_h2_h1_plot(cbar_kwargs=kwargs)
+        assert guides.color.ax.get_xlabel() == "custom"  # the label the caller passed
     finally:
         plt.close("all")
     if kwargs != {"orientation": "horizontal", "label": "custom"}:  # as built above

@@ -327,9 +327,14 @@ Individual points
 colormap, beside a colorbar labelled with ``labels.z``; here ``z`` is the
 density of a few hundred points. Its ``logx`` and ``logy`` set only the axis
 scale; the data stay linear. ``make_plot`` returns
-``(ax, points, segments, cbar)``: the axes, the markers' ``PathCollection``,
-the segments joining the points (None here, see below) and the colorbar (None
-when ``cbar=False`` or ``z`` does not vary).
+``(ax, points, segments, guides)``: the axes, the markers' ``PathCollection``,
+the segments joining the points (None here, see below) and the guides drawn,
+a :py:class:`~solarwindpy.plotting.base.Guides` record whose ``color`` is the
+colorbar (None when ``cbar=False`` or ``z`` does not vary). Every plot returns
+its guides last. ``norm``, ``cmap``, ``cbar`` and ``cbar_kwargs`` set the
+colours; a :py:class:`~solarwindpy.plotting.scales.ColorScale` holds the same
+settings as one object, passed as ``make_plot(color_scale=...)``, and one scale
+passed to several plots draws them on the same colours.
 
 .. plot::
 
@@ -351,7 +356,7 @@ when ``cbar=False`` or ``z`` does not vary).
        y=TeXlabel(("w", "", "p1")),
        z=TeXlabel(("n", "", "p1")),
    )
-   ax, points, segments, cbar = sc.make_plot(s=8)
+   ax, points, segments, guides = sc.make_plot(s=8)
 
 ``make_plot(connect=True)`` also joins the points with line segments in
 increasing ``z``. The sort is stable, so points with equal ``z`` keep the order
@@ -400,7 +405,7 @@ skipped, not a gap: the points either side of it in ``z`` are joined.
        y=TeXlabel(("n", "", "p1")),
        z=ManualLabel("Days from start", r"\mathrm{d}"),
    )
-   ax, points, segments, cbar = sc.make_plot(
+   ax, points, segments, guides = sc.make_plot(
        s=12, cmap="viridis", connect=True, connect_kwargs={"linewidth": 0.8, "alpha": 0.8}
    )
 
@@ -439,9 +444,10 @@ the cycle's phase, not its amplitude.
 
    sc = Scatter(v, b, t)
    sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("b", "", "")), z=DateTime("Year"))
-   ax, points, segments, cbar = sc.make_plot(
+   ax, points, segments, guides = sc.make_plot(
        s=14, cmap="viridis", connect=True, cbar_kwargs={"aspect": 8}
    )
+   cbar = guides.color
    cbar.ax.yaxis.set_major_locator(mdates.YearLocator(4))
    cbar.ax.yaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
@@ -453,7 +459,7 @@ the cycle's phase, not its amplitude.
    cbar.ax.set_title("SSN", fontsize="medium")
 
 Without ``z``, ``Scatter(x, y)`` draws every point in one color and no
-colorbar, so ``cbar`` is None. ``connect=True`` then joins the points in the
+colorbar, so ``guides.color`` is None. ``connect=True`` then joins the points in the
 order of their rows, in the markers' color, skipping any point that is not
 drawn. Here the rows are in time order, so the segments trace the field's
 rotation:
@@ -474,7 +480,7 @@ rotation:
 
    sc = Scatter(bx, by)
    sc.set_labels(x=TeXlabel(("b", "x", "")), y=TeXlabel(("b", "y", "")))
-   ax, points, segments, cbar = sc.make_plot(s=12, connect=True)
+   ax, points, segments, guides = sc.make_plot(s=12, connect=True)
 
 ``Scatter(x, y, size=..., alpha=...)`` sets each marker's area and opacity
 from a value per point, aligned by label like ``z``; a point whose size or
@@ -516,7 +522,7 @@ inverse of the size mapping; ``alpha=1`` keeps the key opaque.
    sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("w", "", "p1")))
    size_norm = LogNorm()
    size_range = (9, 144)
-   ax, points, segments, cbar = sc.make_plot(
+   ax, points, segments, guides = sc.make_plot(
        size_norm=size_norm,
        size_range=size_range,
        alpha_norm=Normalize(vmin=0.02, vmax=0.08),

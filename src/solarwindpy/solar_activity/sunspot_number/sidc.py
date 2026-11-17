@@ -15,6 +15,7 @@ import matplotlib as mpl
 from pathlib import Path
 from collections import namedtuple
 
+from ...plotting.base import Guides
 from ..base import (
     ActivityIndicator,
     DataLoader,
@@ -624,11 +625,11 @@ class SIDC(ActivityIndicator):
             The solid white line drawn under the overlay.
         overlay : matplotlib.lines.Line2D
             The dash-dotted black sunspot-number line.
-        cbar : None
-            The method receives only the colour bar's axes, not the
-            :class:`matplotlib.colorbar.Colorbar`, so the slot is always None;
-            it keeps the return order ``(ax, artists..., cbar)`` shared by
-            every plot.
+        guides : Guides
+            Every field None: the method receives only the colour bar's
+            axes, not the :class:`matplotlib.colorbar.Colorbar`, and draws no
+            guide of its own. The slot keeps the return order
+            ``(ax, artists..., guides)`` shared by every plot.
         """
         # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
         ssn = self.data.loc[t0:t1, "ssn"]
@@ -679,7 +680,7 @@ class SIDC(ActivityIndicator):
             cax.xaxis.set_ticks_position("top")
             cax.xaxis.set_label_position("top")
 
-        return cax, underlay, overlay, None
+        return cax, underlay, overlay, Guides()
 
 
 class SSNExtrema(IndicatorExtrema):

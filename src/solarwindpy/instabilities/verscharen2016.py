@@ -29,6 +29,8 @@ import matplotlib as mpl
 
 from collections import namedtuple
 
+from ..plotting.base import Guides
+
 _inst_type_idx = pd.Index(["AIC", "FMW", "MM", "OFI"], name="Instability")
 _param_idx = pd.Index(["a", "b", "c"], name="Fit Parameter")
 
@@ -462,7 +464,7 @@ class StabilityContours(object):
     >>> contours.contours.loc[-3, "AIC"].round(3)
     array([1.436, 1.267, 1.163])
     >>> fig, ax = plt.subplots()
-    >>> ax, lines, cbar = contours.plot_contours(ax, growth_rate=-3)
+    >>> ax, lines, guides = contours.plot_contours(ax, growth_rate=-3)
     >>> sorted(lines)
     [(-3, 'AIC'), (-3, 'FMW'), (-3, 'MM'), (-3, 'OFI')]
     >>> plt.close("all")
@@ -548,10 +550,10 @@ class StabilityContours(object):
             Maps each drawn ``(growth_rate, instability)`` pair, e.g.
             ``(-3, "MM")``, to its :class:`matplotlib.lines.Line2D`, in
             drawing order. Only the curves drawn are keys.
-        cbar : None
-            The contours are lines, not a mappable, so no colorbar is drawn;
-            the slot keeps the return order ``(ax, artists..., cbar)``
-            shared by every plot.
+        guides : Guides
+            Every field None: the contours are lines, not a mappable, so no
+            colorbar is drawn. The slot keeps the return order
+            ``(ax, artists..., guides)`` shared by every plot.
         """
         assert isinstance(ax, mpl.axes.Axes)
 
@@ -622,7 +624,7 @@ class StabilityContours(object):
                 ncol=2,
             )
 
-        return ax, lines, None
+        return ax, lines, Guides()
 
     @staticmethod
     def _add_table_legend(ax, images):

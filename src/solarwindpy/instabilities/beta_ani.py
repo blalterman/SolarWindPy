@@ -11,6 +11,10 @@ from ..plotting.labels.base import TeXlabel
 class BetaRPlot(Hist2D):
     """Generate a beta--anisotropy histogram.
 
+    Its colour plots default to the colormap ``Greens_r`` for values of one
+    sign; a ``cmap`` passed to a draw method, or set on its ``color_scale``,
+    replaces it.
+
     Parameters
     ----------
     beta : pandas.Series
@@ -33,11 +37,13 @@ class BetaRPlot(Hist2D):
     >>> beta = pd.Series(10.0 ** rng.uniform(-1, 1, 500), name="beta")
     >>> R = pd.Series(10.0 ** rng.uniform(-0.5, 0.5, 500), name="R")
     >>> br = BetaRPlot(beta, R, "p")
-    >>> ax, mesh, cbar = br.make_plot()
+    >>> ax, mesh, guides = br.make_plot()
     >>> ax.get_xscale(), ax.get_yscale()
     ('log', 'log')
     >>> plt.close("all")
     """
+
+    _default_cmap = "Greens_r"
 
     def __init__(self, beta, R, species, **kwargs):
         """Instantiate the histogram plot.
@@ -73,23 +79,3 @@ class BetaRPlot(Hist2D):
             y=TeXlabel(("R", "P" if "+" in species else "T", species)),
         )
         self.set_clim(5, None)
-
-    def make_plot(self, **kwargs):
-        """Plot the histogram.
-
-        Parameters
-        ----------
-        **kwargs
-            Additional options forwarded to ``Hist2D.make_plot``.
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-            Axis containing the plot.
-        matplotlib.collections.QuadMesh
-            The histogram's cells.
-        matplotlib.colorbar.Colorbar or None
-            Colorbar associated with the plot, or None with ``cbar=False``.
-        """
-        cmap = kwargs.pop("cmap", "Greens_r")
-        return super(BetaRPlot, self).make_plot(cmap=cmap, **kwargs)

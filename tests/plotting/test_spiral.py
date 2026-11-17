@@ -784,10 +784,10 @@ class TestMakePlot:
         """
         splot = _plot(2)
         _, ax = plt.subplots()
-        _, _, cbar = splot.make_plot(ax=ax)
-        assert isinstance(cbar, Colorbar)
-        assert isinstance(cbar.mappable, PolyCollection)
-        assert cbar.mappable in ax.collections
+        _, _, guides = splot.make_plot(ax=ax)
+        assert isinstance(guides.color, Colorbar)
+        assert isinstance(guides.color.mappable, PolyCollection)
+        assert guides.color.mappable in ax.collections
 
     def test_unexpected_keyword_is_rejected(self):
         """Keywords other than cmap and norm raise ValueError.
@@ -901,15 +901,15 @@ class TestPlotContours:
         _assert_same_segments(qset, ax.tricontourf(tri, z, self.LEVELS))
 
     def test_colorbar_and_contour_set_are_returned(self):
-        """``cbar=True`` returns a Colorbar of the contour set; ``cbar=False`` None.
+        """``guides.color`` is the contour set's Colorbar with ``cbar=True``, else None.
 
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        ax, qset, cbar = self._contour(splot, cbar=True)
-        assert isinstance(cbar, Colorbar) and cbar.mappable is qset
-        _, qset, cbar = self._contour(splot, cbar=False)
-        assert cbar is None
+        ax, qset, guides = self._contour(splot, cbar=True)
+        assert isinstance(guides.color, Colorbar) and guides.color.mappable is qset
+        _, qset, guides = self._contour(splot, cbar=False)
+        assert guides.color is None
 
     @pytest.mark.parametrize(
         "keyword", ["label_levels", "clabel_kwargs", "skip_max_clbl"]
@@ -1364,8 +1364,8 @@ class TestPlotContoursCalls:
         ON FAILURE: the code is wrong.
         """
         splot = _plot(1)
-        ax, qset, cbar = splot.plot_contours()
-        assert isinstance(cbar, Colorbar) and cbar.mappable is qset
+        ax, qset, guides = splot.plot_contours()
+        assert isinstance(guides.color, Colorbar) and guides.color.mappable is qset
         assert qset.axes is ax and not qset.filled
         x, y, z = _occupied_centers(splot)
         _, ref_ax = plt.subplots()
@@ -1388,7 +1388,7 @@ class TestPlotContoursCalls:
         norm = matplotlib.colors.Normalize(0.0, 10.0)
         linestyles = ["--", ":", "-."]
         _, ax = plt.subplots()
-        got_ax, qset, cbar = splot.plot_contours(
+        got_ax, qset, guides = splot.plot_contours(
             ax=ax,
             fcn="max",
             levels=levels,
@@ -1401,7 +1401,9 @@ class TestPlotContoursCalls:
         assert list(qset.levels) == levels
         assert qset.get_cmap().name == "magma" and qset.norm is norm
         assert list(qset.linestyles) == linestyles
-        assert cbar.mappable is qset and cbar.ax.get_ylabel() == "chosen"
+        assert (
+            guides.color.mappable is qset and guides.color.ax.get_ylabel() == "chosen"
+        )
 
         x, y, z = _occupied_centers(splot, fcn=max)
         assert 5.0 in z.tolist()
@@ -1419,8 +1421,8 @@ class TestPlotContoursCalls:
         splot = _plot(1)
         with pytest.raises(ValueError, match="at least 2 contour levels"):
             splot.plot_contours(levels=[3.0])
-        _, qset, cbar = splot.plot_contours(levels=[3.0], cbar=False)
-        assert cbar is None and list(qset.levels) == [3.0]
+        _, qset, guides = splot.plot_contours(levels=[3.0], cbar=False)
+        assert guides.color is None and list(qset.levels) == [3.0]
 
 
 # ---------------------------------------------------------------------------
@@ -1644,10 +1646,10 @@ class TestMakePlotOptions:
         ON FAILURE: the code is wrong.
         """
         fig, ax = plt.subplots()
-        _, _, cbar = _plot(2).make_plot(ax=ax)
+        _, _, guides = _plot(2).make_plot(ax=ax)
         fig.canvas.draw()
         rgba = np.asarray(fig.canvas.buffer_rgba())
-        coll = cbar.mappable
+        coll = guides.color.mappable
         height = rgba.shape[0]
         for point, mean in [((4.7, 3.3), 9.0), ((1.3, 0.3), 1.0), ((4.7, 1.3), 3.0)]:
             px, py = ax.transData.transform(point)

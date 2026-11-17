@@ -29,6 +29,7 @@ from matplotlib.colors import (  # noqa: E402
 )
 
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
+from solarwindpy.plotting.scales import ColorScale  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 
@@ -129,13 +130,6 @@ def test_a_callers_norm_and_cmap_win(build):
 # ColorScale: the colour settings as one object.
 # ---------------------------------------------------------------------------
 
-XFAIL_SCALES = pytest.mark.xfail(
-    strict=True,
-    raises=(ImportError, TypeError),
-    reason="solarwindpy.plotting.scales.ColorScale and make_plot(color_scale=) "
-    "do not exist yet; remove this marker when Stage E lands",
-)
-
 # One plotter per colour plot, built to colour the z it is given.
 COLOR_PLOTS = {
     "Hist2D": lambda z: _hist2d(z),
@@ -144,7 +138,6 @@ COLOR_PLOTS = {
 }
 
 
-@XFAIL_SCALES
 @pytest.mark.parametrize(
     "settings, message",
     [
@@ -159,13 +152,10 @@ def test_color_scale_rejects_invalid_settings_when_built(settings, message):
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.plotting.scales import ColorScale
-
     with pytest.raises(TypeError, match=message):
         ColorScale(**settings)
 
 
-@XFAIL_SCALES
 @pytest.mark.parametrize(
     "z, settings",
     [(SIGNED, lambda: {}), (POSITIVE, lambda: {"norm": LogNorm(), "cmap": "viridis"})],
@@ -181,8 +171,6 @@ def test_color_scale_draws_what_its_plain_keywords_draw(plot, z, settings):
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.plotting.scales import ColorScale
-
     plain = plot(z).make_plot(cbar=False, **settings())[1]
     scaled = plot(z).make_plot(color_scale=ColorScale(cbar=False, **settings()))[1]
     assert type(scaled.norm) is type(plain.norm)
@@ -193,7 +181,6 @@ def test_color_scale_draws_what_its_plain_keywords_draw(plot, z, settings):
     )
 
 
-@XFAIL_SCALES
 @pytest.mark.parametrize(
     "keyword",
     [{"norm": Normalize()}, {"cmap": "viridis"}, {"cbar": True}, {"cbar_kwargs": {}}],
@@ -208,14 +195,11 @@ def test_color_scale_with_a_plain_colour_keyword_raises_type_error(plot, keyword
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.plotting.scales import ColorScale
-
     (name,) = keyword
     with pytest.raises(TypeError, match=f"color_scale.*{name}"):
         plot(POSITIVE).make_plot(color_scale=ColorScale(), **keyword)
 
 
-@XFAIL_SCALES
 def test_color_scale_str_shows_the_limits_a_plot_set():
     """``print(scale)`` shows the vmin and vmax matplotlib filled in from the data.
 
@@ -223,8 +207,6 @@ def test_color_scale_str_shows_the_limits_a_plot_set():
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.plotting.scales import ColorScale
-
     scale = ColorScale(norm=Normalize(), cmap="viridis")
     assert "norm: Normalize(vmin=None, vmax=None)" in str(scale)
     z = pd.Series([2.0, 5.0, 9.0])

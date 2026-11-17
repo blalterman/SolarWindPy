@@ -98,13 +98,13 @@ def test_varying_z_colours_points_and_draws_a_labelled_colorbar(ax):
     """
     sc = Scatter(X, Y, Z)
     sc.set_labels(x="Vx", y="Np", z="T")
-    ret_ax, _, _, cbar = sc.make_plot(ax=ax)
+    ret_ax, _, _, guides = sc.make_plot(ax=ax)
     coll = ax.collections[0]
     np.testing.assert_array_equal(coll.get_array(), _col(KEPT, 3))
     assert ret_ax is ax
-    assert isinstance(cbar, Colorbar)
-    assert cbar.mappable is coll
-    assert cbar.ax.get_ylabel() == "T"
+    assert isinstance(guides.color, Colorbar)
+    assert guides.color.mappable is coll
+    assert guides.color.ax.get_ylabel() == "T"
     assert (ax.get_xlabel(), ax.get_ylabel()) == ("Vx", "Np")
 
 
@@ -116,10 +116,10 @@ def test_two_valued_z_is_colour_mapped_with_a_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     z = pd.Series([0.5, 0.5, 0.9, 0.9, 0.5, 0.9])
-    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, guides = Scatter(X, Y, z).make_plot(ax=ax)
     kept_z = z.drop(1).to_numpy()  # row 1 has NaN y (ROWS)
     np.testing.assert_array_equal(ax.collections[0].get_array(), kept_z)
-    assert isinstance(cbar, Colorbar)
+    assert isinstance(guides.color, Colorbar)
 
 
 @pytest.mark.parametrize("z", [None, pd.Series(7.0, index=X.index)])
@@ -128,9 +128,9 @@ def test_absent_or_constant_z_gives_uncoloured_points_and_no_colorbar(ax, z):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, _, cbar = Scatter(X, Y, z).make_plot(ax=ax)
+    _, _, _, guides = Scatter(X, Y, z).make_plot(ax=ax)
     assert ax.collections[0].get_array() is None
-    assert cbar is None
+    assert guides.color is None
     assert ax.figure.axes == [ax]
 
 
@@ -139,9 +139,9 @@ def test_cbar_false_colours_points_but_draws_no_colorbar(ax):
 
     ON FAILURE: the code is wrong.
     """
-    _, _, _, cbar = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
+    _, _, _, guides = Scatter(X, Y, Z).make_plot(ax=ax, cbar=False)
     np.testing.assert_array_equal(ax.collections[0].get_array(), _col(KEPT, 3))
-    assert cbar is None
+    assert guides.color is None
     assert ax.figure.axes == [ax]
 
 
@@ -178,10 +178,10 @@ def test_cbar_kwargs_reach_the_colorbar(ax):
     ON FAILURE: the code is wrong.
     """
     cax = ax.figure.add_axes((0.9, 0.1, 0.03, 0.8))
-    _, _, _, cbar = Scatter(X, Y, Z).make_plot(
+    _, _, _, guides = Scatter(X, Y, Z).make_plot(
         ax=ax, cbar_kwargs={"cax": cax, "label": "custom"}
     )
-    assert cbar.ax is cax
+    assert guides.color.ax is cax
     assert cax.get_ylabel() == "custom"
 
 
@@ -254,8 +254,8 @@ def test_reused_cbar_kwargs_put_each_colorbar_beside_its_own_axes():
         # that warning from pre-empting the assertion under ``-W error``.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            _, _, _, cbar2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
-        if cbar2.ax.figure is not ax2.figure:
+            _, _, _, guides2 = Scatter(X, Y, Z).make_plot(ax=ax2, cbar_kwargs=kwargs)
+        if guides2.color.ax.figure is not ax2.figure:
             raise CbarKwargsMutated("second colorbar drawn in the first plot's figure")
     finally:
         plt.close("all")
@@ -299,13 +299,13 @@ def test_value_alim_draws_only_points_with_z_inside_the_limits(ax, lower, upper)
     z = ALIM_Z[:-1]
     sc = Scatter(ALIM_X[:-1], ALIM_Y[:-1], z)
     sc.set_alim(lower, upper)
-    _, _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, guides = sc.make_plot(ax=ax)
     keep = np.ones(z.size, dtype=bool)
     if lower is not None:
         keep &= z >= lower
     if upper is not None:
         keep &= z <= upper
-    _assert_drawn(ax, cbar, keep)
+    _assert_drawn(ax, guides.color, keep)
 
 
 def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
@@ -317,11 +317,11 @@ def test_quantile_alim_thresholds_are_quantiles_of_the_finite_plotted_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.2, 0.8, kind="quantile")
-    _, _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, guides = sc.make_plot(ax=ax)
     lo, hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], [0.2, 0.8])
     keep = (ALIM_Z >= lo) & (ALIM_Z <= hi)
     assert 2 < keep.sum() < ALIM_Z.size - 2
-    _assert_drawn(ax, cbar, keep)
+    _assert_drawn(ax, guides.color, keep)
 
 
 def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
@@ -333,9 +333,9 @@ def test_quantile_alim_of_zero_is_the_smallest_finite_z(ax):
     """
     sc = Scatter(ALIM_X, ALIM_Y, ALIM_Z)
     sc.set_alim(0.0, 0.5, kind="quantile")
-    _, _, _, cbar = sc.make_plot(ax=ax)
+    _, _, _, guides = sc.make_plot(ax=ax)
     hi = np.quantile(ALIM_Z[np.isfinite(ALIM_Z)], 0.5)
-    _assert_drawn(ax, cbar, ALIM_Z <= hi)
+    _assert_drawn(ax, guides.color, ALIM_Z <= hi)
 
 
 def test_quantile_alim_with_one_finite_z_still_masks_the_infinite_ones(ax):
@@ -418,8 +418,8 @@ def _mean_z(z, pairs):
     return [(z[i] + z[j]) / 2 for i, j in pairs]
 
 
-def test_make_plot_returns_ax_points_segments_then_cbar(ax):
-    """``(ax, points, segments, cbar)``; segments is None unless ``connect=True``.
+def test_make_plot_returns_ax_points_segments_then_guides(ax):
+    """``(ax, points, segments, guides)``; segments is None unless ``connect=True``.
 
     ON FAILURE: the code is wrong.
     """
@@ -428,7 +428,7 @@ def test_make_plot_returns_ax_points_segments_then_cbar(ax):
     assert out[0] is ax
     assert isinstance(out[1], PathCollection)
     assert out[2] is None
-    assert isinstance(out[3], Colorbar)
+    assert isinstance(out[3].color, Colorbar)
     assert not any(isinstance(c, LineCollection) for c in ax.collections)
 
     out = Scatter(EX, EY, EZ).make_plot(ax=ax, connect=True)
@@ -475,7 +475,7 @@ def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
 
     ON FAILURE: the code is wrong.
     """
-    _, points, lc, cbar = Scatter(EX, EY, EZ).make_plot(
+    _, points, lc, guides = Scatter(EX, EY, EZ).make_plot(
         ax=ax, connect=True, cmap="plasma"
     )
     mean = _mean_z(EZ, Z_ORDER)
@@ -486,7 +486,7 @@ def test_segment_colour_is_the_mean_endpoint_z_through_the_points_cmap_and_norm(
     lc.update_scalarmappable()
     expected = points.get_cmap()(points.norm(mean))
     np.testing.assert_allclose(lc.get_edgecolor(), expected)
-    assert cbar.mappable is points
+    assert guides.color.mappable is points
 
 
 def test_segments_follow_a_norm_the_caller_passes(ax):
@@ -556,8 +556,8 @@ def test_without_varying_z_points_are_joined_in_row_order_in_one_colour(ax, z):
     """
     y = EY.copy()
     y[2] = np.nan
-    _, points, lc, cbar = Scatter(EX, y, z).make_plot(ax=ax, connect=True)
-    assert cbar is None
+    _, points, lc, guides = Scatter(EX, y, z).make_plot(ax=ax, connect=True)
+    assert guides.color is None
     assert lc.get_array() is None
     _assert_segments(lc, EX, y, [(0, 1), (1, 3), (3, 4)])
     colors = lc.get_edgecolor()

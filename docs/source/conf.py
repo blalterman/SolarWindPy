@@ -174,6 +174,8 @@ numpydoc_xref_aliases = {
     "Ion": "solarwindpy.core.ions.Ion",
     "Spacecraft": "solarwindpy.core.spacecraft.Spacecraft",
     "BinnedData": "solarwindpy.plotting.binned.BinnedData",
+    "ColorScale": "solarwindpy.plotting.scales.ColorScale",
+    "Guides": "solarwindpy.plotting.base.Guides",
 }
 
 # Words of numpydoc type-spec grammar ("array-like, optional", "list of str",
