@@ -476,6 +476,65 @@ rotation:
    sc.set_labels(x=TeXlabel(("b", "x", "")), y=TeXlabel(("b", "y", "")))
    ax, points, segments, cbar = sc.make_plot(s=12, connect=True)
 
+``Scatter(x, y, size=..., alpha=...)`` sets each marker's area and opacity
+from a value per point, aligned by label like ``z``; a point whose size or
+alpha is NaN or infinite is not drawn. ``make_plot`` maps each value in two
+steps. First a norm, ``size_norm`` or ``alpha_norm``, maps the values to
+[0, 1]. Its ``vmin`` and ``vmax`` are in the data's units: they are the values
+that land at 0 and 1, and a value beyond them stays at that end. Any
+matplotlib ``Normalize`` works, such as ``LogNorm`` for a quantity that spans
+decades; a value the norm cannot place, such as one not positive under
+``LogNorm``, is not drawn. Without a norm, the drawn values are scaled
+linearly from the smallest to the largest. Then a range, ``size_range`` or
+``alpha_range``, maps [0, 1] to the marker's area in pt² or to its alpha. The
+defaults are 9 to 144 pt², half to twice matplotlib's default marker, and 0.15
+to 1, so the faintest point stays visible; a range you pass is used as given.
+Reversing a range inverts it. Below, the size is the density on a ``LogNorm``,
+and the alpha is each fit's relative uncertainty in ``w`` from 0.02 to 0.08
+with ``alpha_range=(1, 0.15)``, so the least certain fits fade.
+``points.legend_elements("sizes", ...)`` draws a key of densities, given the
+inverse of the size mapping; ``alpha=1`` keeps the key opaque.
+
+.. plot::
+
+   import numpy as np
+   import pandas as pd
+   from matplotlib.colors import LogNorm, Normalize
+   from solarwindpy.plotting.scatter import Scatter
+   from solarwindpy.plotting.labels.base import TeXlabel
+
+   rng = np.random.default_rng(4)
+   N = 150
+   fast = rng.random(N) < 0.3
+   v = pd.Series(np.where(fast, rng.normal(650, 60, N), rng.normal(380, 50, N)), name="v")
+   n = (8 * 10 ** (-0.0015 * (v - 400) + rng.normal(0, 0.15, N))).rename("n")
+   w = pd.Series(0.1 * v + rng.normal(0, 5, N), name="w")
+   # Each fit's relative uncertainty in w, larger where the density is low.
+   dw = pd.Series(0.03 * np.sqrt(8 / n) * rng.lognormal(0, 0.5, N), name="dw")
+
+   sc = Scatter(v, w, size=n, alpha=dw)
+   sc.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("w", "", "p1")))
+   size_norm = LogNorm()
+   size_range = (9, 144)
+   ax, points, segments, cbar = sc.make_plot(
+       size_norm=size_norm,
+       size_range=size_range,
+       alpha_norm=Normalize(vmin=0.02, vmax=0.08),
+       alpha_range=(1, 0.15),
+       edgecolors="w",
+       linewidths=0.5,
+   )
+
+   # A key of densities: the inverse of area = lo + size_norm(n) * (hi - lo).
+   lo, hi = size_range
+   handles, key = points.legend_elements(
+       "sizes",
+       num=[2, 5, 10, 20],
+       func=lambda area: size_norm.inverse((area - lo) / (hi - lo)),
+       alpha=1,
+   )
+   ax.legend(handles, key, title=str(TeXlabel(("n", "", "p1"))), loc="upper left")
+
 Bins
 ~~~~
 
