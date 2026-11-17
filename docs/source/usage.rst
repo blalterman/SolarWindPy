@@ -174,21 +174,6 @@ the plot's ``path`` its parts. `Labels`_ explains them.
    h1.set_labels(x=TeXlabel(("v", "", "p1")))
    h1.make_plot()
 
-The save path
-~~~~~~~~~~~~~
-
-Every plot also has a ``path``, built from its class, its labels and its axis
-scales, to file the figure under when you save it: join it to your figure
-directory and add an extension, as :doc:`tutorial/quickstart` does.
-
->>> import pandas as pd
->>> from solarwindpy.plotting.hist1d import Hist1D
->>> from solarwindpy.plotting.labels.base import TeXlabel
->>> h1 = Hist1D(pd.Series([380.0, 650.0], name="v"))
->>> h1.set_labels(x=TeXlabel(("v", "", "p1")))
->>> h1.path.as_posix()
-'Hist1D/v_p1/count/linX-linY'
-
 Two quantities
 ~~~~~~~~~~~~~~
 
@@ -1079,6 +1064,21 @@ $\mathrm{Column \, Probability \, Density}$
 
 ``solarwindpy.plotting.labels.available()`` prints every measurement,
 component and species ``TeXlabel`` knows, and the special labels.
+
+The save path
+~~~~~~~~~~~~~
+
+Every plot also has a ``path``, built from its class, its labels and its axis
+scales, to file the figure under when you save it: join it to your figure
+directory and add an extension, as :doc:`tutorial/quickstart` does.
+
+>>> import pandas as pd
+>>> from solarwindpy.plotting.hist1d import Hist1D
+>>> from solarwindpy.plotting.labels.base import TeXlabel
+>>> h1 = Hist1D(pd.Series([380.0, 650.0], name="v"))
+>>> h1.set_labels(x=TeXlabel(("v", "", "p1")))
+>>> h1.path.as_posix()
+'Hist1D/v_p1/count/linX-linY'
 
 Publication format
 ~~~~~~~~~~~~~~~~~~
