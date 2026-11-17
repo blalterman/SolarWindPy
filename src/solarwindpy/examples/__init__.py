@@ -33,9 +33,9 @@ def _read_example(name):
     pandas.DataFrame
         float64 values, columns sorted, index named ``epoch``.
     """
-    with _DATA.joinpath("example_epoch.csv").open() as f:
+    with _DATA.joinpath("example_epoch.csv").open(encoding="utf-8") as f:
         epoch = pd.read_csv(f)["epoch"].map(pd.to_datetime)
-    with _DATA.joinpath(f"example_{name}.csv").open() as f:
+    with _DATA.joinpath(f"example_{name}.csv").open(encoding="utf-8") as f:
         data = pd.read_csv(f)
     data.columns = pd.MultiIndex.from_tuples(
         [tuple(c.split("|")) for c in data.columns], names=["M", "C", "S"]

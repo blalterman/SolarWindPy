@@ -232,7 +232,7 @@ class SIDCLoader(DataLoader):
     ... )
     >>> with tempfile.TemporaryDirectory() as d:
     ...     path = Path(d) / "monthly.csv"
-    ...     _ = path.write_text(rows)
+    ...     _ = path.write_text(rows, encoding="utf-8")
     ...     loader = SIDCLoader("m", str(path))
     ...     loader.load_data()
     >>> loader.data.index.strftime("%Y-%m").tolist()

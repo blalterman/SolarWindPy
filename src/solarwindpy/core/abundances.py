@@ -71,7 +71,7 @@ class ReferenceAbundances:
         """Load the Asplund et al. (2021) Table 2 CSV shipped with the package."""
         data_file = resources.files(__package__).joinpath("data", "asplund2021.csv")
 
-        with data_file.open() as f:
+        with data_file.open(encoding="utf-8") as f:
             data = pd.read_csv(f, skiprows=4, header=[0, 1], index_col=[0, 1])
 
         # Extract the Comment column before float conversion. It parses as
