@@ -195,8 +195,8 @@ directory and add an extension, as :doc:`tutorial/quickstart` does.
 Two quantities
 ~~~~~~~~~~~~~~
 
-Counts in each cell
-^^^^^^^^^^^^^^^^^^^
+2D Histograms
+^^^^^^^^^^^^^
 
 Density spans a decade, so ``logy=True`` bins it in :math:`\log_{10}` and
 draws a log axis. ``make_plot`` colors each cell by its count:
@@ -311,8 +311,8 @@ margins differently.
    h2.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
    h2.make_joint_h2_h1_plot()
 
-An adaptive mesh
-~~~~~~~~~~~~~~~~
+Adaptive Mesh
+~~~~~~~~~~~~~
 
 :py:class:`~solarwindpy.plotting.spiral.SpiralPlot2D` takes the same data. Its
 cells are small in the two cores and large in the sparse region between them,
@@ -338,8 +338,8 @@ Gaussian filter, by design.
    sp.set_labels(x=TeXlabel(("v", "", "p1")), y=TeXlabel(("n", "", "p1")))
    sp.make_plot()
 
-Individual points
-~~~~~~~~~~~~~~~~~
+Scatter Plots
+~~~~~~~~~~~~~
 
 Colour by ``z``
 ^^^^^^^^^^^^^^^
@@ -707,7 +707,7 @@ Edges given as an array are used as given:
 IntervalIndex([(250, 350], (350, 450], (450, 550]], dtype='interval[int64, right]')
 
 Share bins across plots
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Plots over the same columns and bins can share one
 :py:class:`~solarwindpy.plotting.binned.BinnedData`. It bins each column once,
