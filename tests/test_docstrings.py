@@ -20,6 +20,8 @@ import inspect
 import pkgutil
 import re
 
+import pytest
+
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -263,3 +265,59 @@ def test_every_entry_point_has_an_examples_section():
         if not _EXAMPLES.search(inspect.getdoc(obj) or ""):
             missing.append(qualname)
     assert not missing, missing
+
+
+_REFERENCES = re.compile(_SECTION.format("References"), re.M)
+# A reference entry written as plain text, ``[1] Author ...``, not ``.. [1]``.
+_PLAIN_REFERENCE = re.compile(r"^\s*\[\d+\]")
+
+
+def _public_docstrings():
+    """``(qualified name, docstring)`` for every public module and object."""
+    for module in _public_modules():
+        yield module.__name__, inspect.getdoc(module) or ""
+    for name, obj, _ in _public_objects():
+        yield name, inspect.getdoc(obj) or ""
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="alfvenic_turbulence.py writes Alfv\\'en in 5 docstrings; remove this "
+    "marker when they read Alfvén",
+)
+def test_no_public_docstring_escapes_an_apostrophe():
+    r"""No public docstring holds a backslash before an apostrophe.
+
+    reST reads ``\'`` as an escaped apostrophe, so ``Alfv\'en`` renders as
+    "Alfv'en". The modules count, since autosummary renders their docstrings.
+
+    ON FAILURE: the code is wrong; write the accented letter (``é``) in each
+    listed docstring.
+    """
+    escaped = [name for name, doc in _public_docstrings() if "\\'" in doc]
+    assert not escaped, escaped
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="the alfvenic_turbulence module and Plasma.nuc list references as "
+    "plain [n] lines; remove this marker when they are .. [n] entries",
+)
+def test_numbered_references_are_numpydoc_footnotes():
+    """Every numbered entry under References is written ``.. [n]``.
+
+    A plain ``[n] Author ...`` line renders as text, so the ``[n]`` that cites
+    it is not a link. The modules count, since autosummary renders their
+    docstrings.
+
+    ON FAILURE: the code is wrong; write each listed docstring's entries as
+    ``.. [n]`` and cite them as ``[n]_``.
+    """
+    plain = []
+    for name, doc in _public_docstrings():
+        body = _section(doc, _REFERENCES)
+        if body is not None and any(
+            _PLAIN_REFERENCE.match(line) for line in body.splitlines()
+        ):
+            plain.append(name)
+    assert not plain, plain
