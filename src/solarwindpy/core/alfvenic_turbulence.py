@@ -3,22 +3,22 @@
 
 Notes
 -----
-The implementation follows the formalism outlined in Bruno & Carbone [1].
-Lloyd Woodham <https://orcid.org/0000-0003-2845-4250> helped me define these
-calculations at the 2018 AGU Fall Meeting and understand [1]. Please cite [3]
-if using this module.
+The implementation follows the formalism outlined in Bruno & Carbone [1]_.
+`Lloyd Woodham <https://orcid.org/0000-0003-2845-4250>`__ helped me define
+these calculations at the 2018 AGU Fall Meeting and understand [1]_. Please
+cite [3]_ if using this module.
 
 References
 ----------
-[1] Bruno, R., & Carbone, V. (2013). *Living Reviews in Solar Physics*,
-10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2
+.. [1] Bruno, R., & Carbone, V. (2013). *Living Reviews in Solar Physics*,
+   10(1), 1–208. https://doi.org/10.12942/lrsp-2013-2
 
-[2] Telloni, D., & Bruno, R. (2016). *Monthly Notices of the Royal
+.. [3] Woodham, L. D., Wicks, R. T., Verscharen, D., & Owen, C. J. (2018).
+   *Astrophys. J.*, 856, 49. https://doi.org/10.3847/1538-4357/aab03d
+
+Telloni, D., & Bruno, R. (2016). *Monthly Notices of the Royal
 Astronomical Society: Letters*, 463(1), L79–L83.
 https://doi.org/10.1093/mnrasl/slw135
-
-[3] Woodham, L. D., Wicks, R. T., Verscharen, D., & Owen, C. J. (2018).
-*Astrophys. J.*, 856, 49.
 """
 
 __all__ = [
@@ -41,7 +41,7 @@ AlfvenicTurbAveraging = namedtuple("AlfvenicTurbAveraging", "window,min_periods"
 
 
 class AlfvenicTurbulence(base.Core):
-    r"""Alfv\'enic turbulence diagnostics using Elsasser variables.
+    r"""Alfvénic turbulence diagnostics using Elsasser variables.
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ class AlfvenicTurbulence(base.Core):
     rho : :class:`pandas.Series`
         Mass density used for normalising ``bfield``.
     species : str
-        Species string used when converting to Alfv\'en units. At most one
+        Species string used when converting to Alfvén units. At most one
         ``,``; the ``+``-joined species on either side are sorted.
     raffaella_version : bool, optional
         If True, ``velocity`` and ``bfield`` must be GSE vectors, which are
@@ -144,20 +144,17 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def data(self):
-        r"""Mean-subtracted quantities used to calculated Elsasser variables."""
+        r"""Mean-subtracted quantities used to calculate Elsasser variables."""
         return self._data
 
     @property
     def averaging_info(self):
-        r"""Averaging window and minimum number of measurements / average used.
-
-        In calculating background component in :math:`\delta B` and :math:`\delta v`.
-        """
+        r"""Averaging window and minimum number of measurements per average used in calculating the background component in :math:`\delta B` and :math:`\delta v`."""
         return self._averaging_info
 
     @property
     def measurements(self):
-        r"""Measurements used to calcualte mean-subtracted `data`."""
+        r"""Measurements used to calculate mean-subtracted `data`."""
         return self._measurements
 
     @property
@@ -223,9 +220,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def eb(self):
-        r"""Energy contained in magnetic field fluctuations
-
-        :math:`E_b = \frac{1}{2}b^2`."""
+        r"""Energy contained in magnetic field fluctuations :math:`E_b = \frac{1}{2}b^2`."""
         eb = 0.5 * self._component_reduce(self.b.pow(2))
         eb.name = "eb"
         return eb
@@ -273,7 +268,7 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def rA(self):
-        r"""Alfv\'en ratio :math:`E_v/E_b`."""
+        r"""Alfvén ratio :math:`E_v/E_b`."""
         rA = self.ev.divide(self.eb, axis=0)
         rA.name = "rA"
         return rA
@@ -297,7 +292,7 @@ class AlfvenicTurbulence(base.Core):
     ):
         r"""Set the measurements and their fluctuations about a rolling mean.
 
-        ``b_in`` is converted to Alfv\'en units with ``rho`` before
+        ``b_in`` is converted to Alfvén units with ``rho`` before
         averaging. The measurements are stored in :attr:`measurements`; the
         fluctuations, measurements minus their rolling mean, in :attr:`data`.
         A warning is logged when ``v_in``, ``b_in`` and ``rho`` do not share
@@ -310,7 +305,7 @@ class AlfvenicTurbulence(base.Core):
         b_in : pd.DataFrame
             Magnetic field in the same basis as ``v_in``, indexed by time.
         rho : pd.Series
-            Mass density used to convert ``b_in`` to Alfv\'en units.
+            Mass density used to convert ``b_in`` to Alfvén units.
         species : str
             Species string, stored as :attr:`species`. At most one ``,``.
         raffaella_version : bool, optional

@@ -1745,7 +1745,7 @@ species: {}
         return lnlambda
 
     def nuc(self, sa, sb, both_species=True):
-        r"""Calculate the momentum collision rate following [1].
+        r"""Calculate the momentum collision rate following [1]_.
 
         Parameters
         ----------
@@ -1772,10 +1772,10 @@ species: {}
 
         References
         ----------
-        [1] Hernández, R., & Marsch, E. (1985). Collisional time scales for
-            temperature and velocity exchange between drifting Maxwellians.
-            Journal of Geophysical Research, 90(A11), 11062.
-            <https://doi.org/10.1029/JA090iA11p11062>.
+        .. [1] Hernández, R., & Marsch, E. (1985). Collisional time scales for
+           temperature and velocity exchange between drifting Maxwellians.
+           Journal of Geophysical Research, 90(A11), 11062.
+           <https://doi.org/10.1029/JA090iA11p11062>.
         """
         from scipy.special import erf
 

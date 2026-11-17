@@ -20,8 +20,6 @@ import inspect
 import pkgutil
 import re
 
-import pytest
-
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -280,11 +278,6 @@ def _public_docstrings():
         yield name, inspect.getdoc(obj) or ""
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="alfvenic_turbulence.py writes Alfv\\'en in 5 docstrings; remove this "
-    "marker when they read Alfvén",
-)
 def test_no_public_docstring_escapes_an_apostrophe():
     r"""No public docstring holds a backslash before an apostrophe.
 
@@ -298,11 +291,6 @@ def test_no_public_docstring_escapes_an_apostrophe():
     assert not escaped, escaped
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="the alfvenic_turbulence module and Plasma.nuc list references as "
-    "plain [n] lines; remove this marker when they are .. [n] entries",
-)
 def test_numbered_references_are_numpydoc_footnotes():
     """Every numbered entry under References is written ``.. [n]``.
 
