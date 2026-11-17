@@ -12,6 +12,7 @@ one-tailed ``"l"`` and ``"u"`` are tested here.
 """
 
 import io
+import itertools
 from pathlib import Path
 import warnings
 
@@ -706,10 +707,11 @@ def test_alpha_maps_linearly_onto_the_alpha_scales_range_and_a_reversed_range_in
 ):
     """alpha 0, 5, 10 autoscale to f = 0, 1/2, 1; a reversed range fades high values.
 
+    ``draw_order=None`` keeps the points in row order.
     ON FAILURE: the code is wrong.
     """
     _, points, _, _ = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
-        ax=ax, alpha_scale=scales.AlphaScale(range=ends)
+        ax=ax, alpha_scale=scales.AlphaScale(range=ends), draw_order=None
     )
     assert points.get_alpha().tolist() == exact(expected)
 
@@ -718,7 +720,8 @@ def test_a_scales_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     """LogNorm puts 1, 10, 100 at f = 0, 1/2, 1; it masks 0, so that point is not drawn.
 
     The undrawn point's alpha, 100, does not enter the alpha norm either: the
-    drawn alphas 0, 5, 10 autoscale to 0.2, 0.6, 1 on (0.2, 1).
+    drawn alphas 0, 5, 10 autoscale to 0.2, 0.6, 1 on (0.2, 1), in row order
+    under ``draw_order=None``.
 
     ON FAILURE: the code is wrong.
     """
@@ -729,6 +732,7 @@ def test_a_scales_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
         ax=ax,
         size_scale=scales.SizeScale(norm=LogNorm(), range=(10, 30)),
         alpha_scale=scales.AlphaScale(range=(0.2, 1.0)),
+        draw_order=None,
     )
     assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
     assert points.get_alpha().tolist() == exact([0.2, 0.6, 1.0])
@@ -751,11 +755,12 @@ def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
 def test_default_ranges_put_the_extreme_drawn_values_at_9_144_and_0p15_1(ax):
     """Defaults: area 9 to 144 pt^2 (marker 3 to 12 pt), alpha 0.15 to 1.
 
-    The midpoint gives (9 + 144) / 2 = 76.5 and (0.15 + 1) / 2 = 0.575.
+    The midpoint gives (9 + 144) / 2 = 76.5 and (0.15 + 1) / 2 = 0.575;
+    ``draw_order=None`` keeps them in row order.
     ON FAILURE: the code is wrong, unless the author changes the defaults.
     """
     v = [1.0, 2.0, 3.0]
-    _, points, _, _ = Scatter(SX, SY, size=v, alpha=v).make_plot(ax=ax)
+    _, points, _, _ = Scatter(SX, SY, size=v, alpha=v).make_plot(ax=ax, draw_order=None)
     assert points.get_sizes().tolist() == exact([9.0, 76.5, 144.0])
     assert points.get_alpha().tolist() == exact([0.15, 0.575, 1.0])
 
@@ -780,7 +785,7 @@ def test_size_key_marker_areas_are_the_areas_points_get_at_its_values(ax):
     """Key entries at 1, 10, 100 have the areas the points of size 1, 10, 100 get.
 
     LogNorm over 1 to 100 on (10, 30) gives 10, 20, 30 pt^2. The key is an
-    opaque Legend on ``ax``, labelled with the values, and takes ``key_kwargs``.
+    opaque Legend, labelled with the values, and takes ``key_kwargs``.
 
     ON FAILURE: the code is wrong.
     """
@@ -796,7 +801,6 @@ def test_size_key_marker_areas_are_the_areas_points_get_at_its_values(ax):
     assert areas == exact([10.0, 20.0, 30.0])
     assert [t.get_text() for t in key.get_texts()] == ["1", "10", "100"]
     assert [h.get_alpha() for h in key.legend_handles] == [1, 1, 1]
-    assert ax.get_legend() is key
     assert key.get_frame_on() is False
 
 
@@ -842,58 +846,192 @@ def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
     assert (guides.color is None) == (z is None)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the alpha bar is vertical, on the right; remove this marker when "
+    "the alpha bar defaults to location='top'",
+)
 @pytest.mark.parametrize("layout", [None, "constrained"])
-def test_alpha_bar_and_z_colorbar_clear_each_others_ticks_and_labels(layout):
-    """With both bars, neither bar overlaps the other's ticks and label.
+@pytest.mark.parametrize("z", [None, [1.0, 2.0, 3.0]], ids=["no-z", "z"])
+def test_alpha_bar_lies_horizontal_above_the_axes_clear_of_the_axes_and_the_z_colorbar(
+    layout, z
+):
+    """The alpha bar is horizontal above the axes; no guide overlaps another or the axes.
 
-    A wide figure, where the z colorbar's box is much wider than its bar;
-    with and without a layout engine.
+    Each box holds its ticks and label: the axes', the alpha bar's and,
+    when z colours the points, the z colorbar's. With and without a layout
+    engine.
 
     ON FAILURE: the code is wrong.
     """
     fig, axis = plt.subplots(figsize=(7, 4), layout=layout)
-    sc = Scatter(SX, SY, [1.0, 2.0, 3.0], alpha=[0.0, 5.0, 10.0])
-    sc.set_labels(z=ManualLabel("Speed", "km/s"))
+    sc = Scatter(SX, SY, z, alpha=[0.0, 5.0, 10.0])
+    sc.set_labels(z=ManualLabel("Speed", "km/s"), alpha=ManualLabel("Spread", "km/s"))
     _, _, _, guides = sc.make_plot(ax=axis)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
-    alpha, z = guides.alpha.ax, guides.color.ax
-    assert not alpha.get_window_extent(renderer).overlaps(z.get_tightbbox(renderer))
-    assert not z.get_window_extent(renderer).overlaps(alpha.get_tightbbox(renderer))
+    bar = guides.alpha
+    assert bar.orientation == "horizontal"
+    assert bar.ax.get_window_extent(renderer).y0 >= axis.get_window_extent(renderer).y1
+    boxes = {"axes": axis, "alpha bar": bar.ax}
+    if z is not None:
+        boxes["z colorbar"] = guides.color.ax
+    boxes = {k: v.get_tightbbox(renderer) for k, v in boxes.items()}
+    for a, b in itertools.combinations(boxes, 2):
+        assert not boxes[a].overlaps(boxes[b]), (a, b)
     plt.close(fig)
 
 
-def test_draw_order_sorts_the_drawn_points_by_marker_value_not_the_segments():
-    """draw_order sorts by area or opacity; segments keep row order.
+@pytest.mark.parametrize(
+    "cbar_kwargs, orientation",
+    [
+        ({"location": "right"}, "vertical"),
+        ({"orientation": "vertical"}, "vertical"),
+        ({"location": "bottom"}, "horizontal"),
+    ],
+    ids=["location", "orientation", "bottom"],
+)
+def test_alpha_bars_cbar_kwargs_override_its_placement(ax, cbar_kwargs, orientation):
+    """A ``location`` or ``orientation`` in the scale's ``cbar_kwargs`` places the bar.
 
-    alpha 1, 2, 3 on the reversed range (1, 0.15) gives opacities 1, 0.575,
-    0.15, so ascending opacity draws rows 2, 1, 0: the order of the marker
-    value, not of the data. size 3, 1, 2 ascending draws rows 1, 2, 0.
+    ON FAILURE: the code is wrong.
+    """
+    scale = scales.AlphaScale(cbar_kwargs=cbar_kwargs)
+    _, _, _, guides = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
+        ax=ax, alpha_scale=scale
+    )
+    assert guides.alpha.orientation == orientation
+
+
+#: The draw order of each case's rows. alpha 2, 3, 1 gives opacities 0.575,
+#: 1, 0.15 on the default range (0.15, 1), and 0.575, 0.15, 1 on the
+#: reversed range (1, 0.15): ascending opacity draws rows 2, 0, 1 and 1, 0,
+#: 2, descending the reverse, so row order and each sort differ. size 3, 1, 2
+#: ascending draws rows 1, 2, 0.
+_ALPHA = {"alpha": [2.0, 3.0, 1.0]}
+_SIZE = {"size": [3.0, 1.0, 2.0]}
+_REVERSED = {"alpha_scale": "reversed"}
+_NOT_YET = pytest.mark.xfail(
+    strict=True,
+    raises=(AssertionError, ValueError),
+    reason="draw_order defaults to None and draw_ascending to True; remove this "
+    "marker when draw_order='auto' puts the faintest points on top",
+)
+
+
+@pytest.mark.parametrize(
+    "variables, plot_kwargs, rows",
+    [
+        pytest.param(_ALPHA, {}, [1, 0, 2], marks=_NOT_YET, id="default-alpha"),
+        pytest.param(
+            _ALPHA, {"draw_order": "auto"}, [1, 0, 2], marks=_NOT_YET, id="auto"
+        ),
+        pytest.param(
+            _ALPHA, _REVERSED, [2, 0, 1], marks=_NOT_YET, id="default-reversed-range"
+        ),
+        pytest.param(_ALPHA, {"draw_order": None}, [0, 1, 2], id="None"),
+        pytest.param(
+            _ALPHA, {"draw_order": "alpha"}, [1, 0, 2], marks=_NOT_YET, id="alpha"
+        ),
+        pytest.param(
+            _ALPHA,
+            {"draw_order": "alpha", "draw_ascending": True},
+            [2, 0, 1],
+            id="alpha-ascending",
+        ),
+        pytest.param(_SIZE, {}, [0, 1, 2], id="default-size"),
+        pytest.param(_SIZE, {"draw_order": "size"}, [1, 2, 0], id="size"),
+        pytest.param(
+            _SIZE,
+            {"draw_order": "size", "draw_ascending": False},
+            [0, 2, 1],
+            id="size-descending",
+        ),
+        pytest.param(
+            {**_SIZE, **_ALPHA}, {}, [1, 0, 2], marks=_NOT_YET, id="default-both"
+        ),
+        pytest.param(
+            {**_SIZE, **_ALPHA}, {"draw_order": "size"}, [1, 2, 0], id="size-both"
+        ),
+    ],
+)
+def test_draw_order_sorts_the_drawn_points_by_marker_value(
+    variables, plot_kwargs, rows
+):
+    """``"auto"``, the default, draws the faintest last with alpha, else row order.
+
+    ``None`` keeps row order; ``"size"`` and ``"alpha"`` sort by marker area
+    or opacity, not by the data, and ``draw_ascending=None`` sorts opacity
+    descending and area ascending. See ``_ALPHA`` for each case's rows.
 
     ON FAILURE: the code is wrong.
     """
     x = np.array([0.0, 1.0, 2.0])
-    faint_last = scales.AlphaScale(range=(1, 0.15))
-    cases = [
-        ({"alpha": [1.0, 2.0, 3.0]}, {"draw_order": "alpha"}, [2, 1, 0]),
-        (
-            {"alpha": [1.0, 2.0, 3.0]},
-            {"draw_order": "alpha", "draw_ascending": False},
-            [0, 1, 2],
-        ),
-        ({"size": [3.0, 1.0, 2.0]}, {"draw_order": "size", "connect": True}, [1, 2, 0]),
-        ({"size": [3.0, 1.0, 2.0]}, {}, [0, 1, 2]),
-    ]
-    for variables, order, rows in cases:
-        _, axis = plt.subplots()
-        scale = {"alpha_scale": faint_last} if "alpha" in variables else {}
-        _, points, segments, _ = Scatter(x, SY, **variables).make_plot(
-            ax=axis, **scale, **order
-        )
-        np.testing.assert_array_equal(points.get_offsets(), np.c_[x[rows], SY[rows]])
-        if segments is not None:
-            _assert_segments(segments, x, SY, [(0, 1), (1, 2)])
+    kwargs = dict(plot_kwargs)
+    if kwargs.pop("alpha_scale", None):
+        kwargs["alpha_scale"] = scales.AlphaScale(range=(1, 0.15))
+    _, axis = plt.subplots()
+    _, points, _, _ = Scatter(x, SY, **variables).make_plot(ax=axis, **kwargs)
+    np.testing.assert_array_equal(points.get_offsets(), np.c_[x[rows], SY[rows]])
     plt.close("all")
+
+
+def test_draw_order_leaves_the_segments_in_row_order(ax):
+    """Points sorted by size; the segments of ``connect`` still join rows 0-1, 1-2.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0])
+    _, points, segments, _ = Scatter(x, SY, **_SIZE).make_plot(
+        ax=ax, draw_order="size", connect=True
+    )
+    np.testing.assert_array_equal(
+        points.get_offsets(), np.c_[x[[1, 2, 0]], SY[[1, 2, 0]]]
+    )
+    _assert_segments(segments, x, SY, [(0, 1), (1, 2)])
+
+
+_KEY_TAKES_THE_SLOT = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the size key is drawn with ax.legend, so it takes the axes' one legend "
+    "slot; remove this marker when it is added with ax.add_artist",
+)
+
+
+@_KEY_TAKES_THE_SLOT
+def test_size_key_leaves_a_legend_already_on_the_axes_in_place(ax):
+    """A legend on ``ax`` before ``make_plot`` stays its legend; the key is another artist.
+
+    ON FAILURE: the code is wrong.
+    """
+    ax.plot(SX, SY, label="fit")
+    legend = ax.legend()
+    _, _, _, guides = Scatter(SX, SY, size=[1.0, 2.0, 3.0]).make_plot(ax=ax)
+    assert ax.get_legend() is legend
+    assert guides.size is not legend
+    assert guides.size in ax.artists
+
+
+@_KEY_TAKES_THE_SLOT
+def test_a_later_legend_on_the_axes_leaves_the_size_key_on_them(ax):
+    """``ax.legend()`` after ``make_plot`` adds a legend of its own entries; the key stays.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, _, _, guides = Scatter(SX, SY, size=[1.0, 2.0, 3.0]).make_plot(ax=ax)
+    ax.plot(SX, SY, label="fit")
+    legend = ax.legend()
+    assert [t.get_text() for t in legend.get_texts()] == ["fit"]
+    assert guides.size in ax.artists
+    assert [t.get_text() for t in guides.size.get_texts()] == [
+        "1",
+        "1.5",
+        "2",
+        "2.5",
+        "3",
+    ]
 
 
 def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path(ax):
@@ -907,7 +1045,7 @@ def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path
     sc.set_labels(size=n, alpha=spread)
     _, _, _, guides = sc.make_plot(ax=ax)
     assert guides.size.get_title().get_text() == str(n)
-    assert guides.alpha.ax.get_ylabel() == str(spread)
+    assert guides.alpha.long_axis.get_label_text() == str(spread)
     assert sc.path == Path("Scatter", "x", "y", n.path, spread.path, "linX-linY")
     with pytest.warns(PlainStringLabelWarning, match="size='n'"):
         sc.set_labels(size="n")
@@ -959,7 +1097,13 @@ def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path
             {"size": [1.0, 2.0, 3.0]},
             {"draw_order": "area"},
             ValueError,
-            r"draw_order must be None, 'size' or 'alpha'",
+            r"draw_order must be 'auto', None, 'size' or 'alpha'",
+            marks=pytest.mark.xfail(
+                strict=True,
+                raises=AssertionError,
+                reason="the message lists None, 'size' and 'alpha'; remove this "
+                "marker when draw_order accepts 'auto'",
+            ),
         ),
     ],
     ids=[
