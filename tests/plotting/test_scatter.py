@@ -24,9 +24,11 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.collections import LineCollection, PathCollection  # noqa: E402
 from matplotlib.colorbar import Colorbar  # noqa: E402
+from matplotlib.colors import LogNorm, Normalize  # noqa: E402
 
 from solarwindpy.plotting.base import AxesLabels, ClipAxes, LogAxes  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
+from tests.tolerances import exact  # noqa: E402
 
 # Tests here pass plain str labels on purpose, to exercise that path; they opt
 # out of PlainStringLabelWarning the deliberate way its message describes.
@@ -657,3 +659,148 @@ def test_connect_refuses_two_colour_keys(ax):
         Scatter(EX, EY).make_plot(
             ax=ax, connect=True, connect_kwargs={"color": "red", "ec": "blue"}
         )
+
+
+# ---------------------------------------------------------------------------
+# size and alpha variables: a norm maps each value to f in [0, 1] (clipped),
+# then ``lo + f * (hi - lo)`` gives the marker area (pt^2) or alpha, with
+# (lo, hi) = ``size_range`` or ``alpha_range``. Expected values are hand
+# computed from the chosen inputs on each line.
+# ---------------------------------------------------------------------------
+
+SX = np.array([0.0, 1.0, 2.0])
+SY = np.array([5.0, 6.0, 7.0])
+
+_SIZE_ALPHA_PENDING = pytest.mark.xfail(
+    strict=True, reason="Scatter size and alpha variables not implemented yet"
+)
+
+
+@_SIZE_ALPHA_PENDING
+def test_size_maps_linearly_onto_size_range(ax):
+    """size 1, 2, 3 autoscale to f = 0, 1/2, 1, so areas 10, 20, 30 on (10, 30).
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, _, _ = Scatter(SX, SY, size=[1.0, 2.0, 3.0]).make_plot(
+        ax=ax, size_range=(10, 30)
+    )
+    assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
+
+
+@_SIZE_ALPHA_PENDING
+@pytest.mark.parametrize(
+    "alpha_range, expected",
+    [
+        ((0.2, 1.0), [0.2, 0.6, 1.0]),  # 0.2 + (0, 1/2, 1) * 0.8
+        ((1.0, 0.2), [1.0, 0.6, 0.2]),  # reversed: 1 + (0, 1/2, 1) * -0.8
+    ],
+)
+def test_alpha_maps_linearly_onto_alpha_range_and_a_reversed_range_inverts(
+    ax, alpha_range, expected
+):
+    """alpha 0, 5, 10 autoscale to f = 0, 1/2, 1; a reversed range fades high values.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, _, _ = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
+        ax=ax, alpha_range=alpha_range
+    )
+    assert points.get_alpha().tolist() == exact(expected)
+
+
+@_SIZE_ALPHA_PENDING
+def test_a_passed_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
+    """LogNorm puts 1, 10, 100 at f = 0, 1/2, 1; it masks 0, so that point is not drawn.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.array([0.0, 1.0, 2.0, 3.0])
+    y = np.array([4.0, 5.0, 6.0, 7.0])
+    _, points, _, _ = Scatter(x, y, size=[0.0, 1.0, 10.0, 100.0]).make_plot(
+        ax=ax, size_norm=LogNorm(), size_range=(10, 30)
+    )
+    assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
+    np.testing.assert_array_equal(points.get_offsets(), np.c_[x[1:], y[1:]])
+
+
+@_SIZE_ALPHA_PENDING
+def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
+    """With vmin 1 and vmax 3, -5 lands on 10 and 50 on 30, as 1 and 3 do.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    _, points, _, _ = Scatter(x, x, size=[-5.0, 1.0, 2.0, 3.0, 50.0]).make_plot(
+        ax=ax, size_norm=Normalize(vmin=1, vmax=3), size_range=(10, 30)
+    )
+    assert points.get_sizes().tolist() == exact([10.0, 10.0, 20.0, 30.0, 30.0])
+
+
+@_SIZE_ALPHA_PENDING
+def test_default_ranges_put_the_extreme_drawn_values_at_9_144_and_0p15_1(ax):
+    """Defaults: area 9 to 144 pt^2 (marker 3 to 12 pt), alpha 0.15 to 1.
+
+    The midpoint gives (9 + 144) / 2 = 76.5 and (0.15 + 1) / 2 = 0.575.
+    ON FAILURE: the code is wrong, unless the author changes the defaults.
+    """
+    v = [1.0, 2.0, 3.0]
+    _, points, _, _ = Scatter(SX, SY, size=v, alpha=v).make_plot(ax=ax)
+    assert points.get_sizes().tolist() == exact([9.0, 76.5, 144.0])
+    assert points.get_alpha().tolist() == exact([0.15, 0.575, 1.0])
+
+
+@_SIZE_ALPHA_PENDING
+def test_size_aligns_by_label_and_a_nan_drops_its_point(ax):
+    """size is aligned to x and y by label; the row whose size is NaN is not drawn.
+
+    size labelled 2, 1, 0 holds 3, NaN, 1: row 0 is smallest, row 2 largest.
+    ON FAILURE: the code is wrong.
+    """
+    size = pd.Series([3.0, np.nan, 1.0], index=[2, 1, 0])
+    sc = Scatter(pd.Series(SX), pd.Series(SY), size=size)
+    _, points, _, _ = sc.make_plot(ax=ax, size_range=(10, 30))
+    np.testing.assert_array_equal(points.get_offsets(), np.c_[SX[[0, 2]], SY[[0, 2]]])
+    assert points.get_sizes().tolist() == exact([10.0, 30.0])
+    assert "size" in sc.data.columns
+    assert "alpha" not in sc.data.columns
+
+
+@_SIZE_ALPHA_PENDING
+def test_connect_with_an_alpha_variable_draws_opaque_segments_in_the_points_colour(
+    ax,
+):
+    """Segments take the points' colour at alpha 1, not the first point's alpha.
+
+    ON FAILURE: the code is wrong.
+    """
+    _, points, lc, _ = Scatter(SX, SY, alpha=[0.0, 5.0, 10.0]).make_plot(
+        ax=ax, connect=True
+    )
+    expected = points.get_facecolor()[0].copy()
+    expected[3] = 1.0
+    np.testing.assert_array_equal(lc.get_edgecolor(), [expected])
+
+
+@_SIZE_ALPHA_PENDING
+@pytest.mark.parametrize(
+    "variables, plot_kwargs, match",
+    [
+        ({"size": [1.0, 2.0, 3.0]}, {"s": 20.0}, r"s= .*size variable"),
+        ({"alpha": [1.0, 2.0, 3.0]}, {"alpha": 0.5}, r"alpha= .*alpha variable"),
+        ({}, {"size_norm": Normalize()}, r"size_norm .*without a size variable"),
+        ({}, {"size_range": (1, 2)}, r"size_range .*without a size variable"),
+        ({}, {"alpha_norm": Normalize()}, r"alpha_norm .*without an alpha variable"),
+        ({}, {"alpha_range": (0, 1)}, r"alpha_range .*without an alpha variable"),
+    ],
+    ids=["s", "alpha", "size_norm", "size_range", "alpha_norm", "alpha_range"],
+)
+def test_conflicting_or_orphaned_size_and_alpha_keywords_raise_type_error(
+    ax, variables, plot_kwargs, match
+):
+    """``s=``/``alpha=`` beside their variable, or a norm or range without one, raise.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match=match):
+        Scatter(SX, SY, **variables).make_plot(ax=ax, **plot_kwargs)
