@@ -241,3 +241,14 @@ h1, h2, h3, h4, h5, h6,
     font-weight: 700;
     font-size: 130%;
 }
+
+/* ===== API entries =====
+ * Counters sphinx_rtd_theme's `dl[class]:not(...) .property {display: inline-block}`,
+ * meant for the "property" label in a signature, which also matches each nested
+ * <dl class="py property"> entry and lays properties out side by side. The
+ * selector repeats the theme's prefix so it outranks it; the label keeps its style.
+ */
+html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) dl.py.property {
+    display: block;
+    padding-right: 0;
+}
