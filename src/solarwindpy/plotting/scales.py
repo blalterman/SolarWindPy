@@ -15,6 +15,29 @@ from collections.abc import Mapping
 from types import MappingProxyType
 
 import matplotlib as mpl
+from matplotlib.cm import ScalarMappable
+
+
+def _checked_norm(norm):
+    r"""``norm`` as a ``Normalize`` or None, a scale name converted by matplotlib.
+
+    Raises
+    ------
+    TypeError
+        If ``norm`` is neither None, a ``Normalize`` nor a str.
+    ValueError
+        If ``norm`` is a str that names no matplotlib scale.
+    """
+    if isinstance(norm, str):
+        # matplotlib's own conversion of a scale name, as its plotting
+        # functions do it; it raises ValueError for an unknown name.
+        norm = ScalarMappable(norm=norm).norm
+    if norm is not None and not isinstance(norm, mpl.colors.Normalize):
+        raise TypeError(
+            "norm must be a matplotlib.colors.Normalize, a matplotlib scale "
+            f"name or None, not {type(norm).__name__}"
+        )
+    return norm
 
 
 class ColorScale:
@@ -28,10 +51,14 @@ class ColorScale:
 
     Parameters
     ----------
-    norm : matplotlib.colors.Normalize, optional
+    norm : matplotlib.colors.Normalize or str, optional
         Maps z to [0, 1]: any ``Normalize``, such as ``LogNorm`` or
         ``CenteredNorm``, used as given. Its ``vmin`` and ``vmax`` are in the
-        units of z. None means the plot's default: a ``CenteredNorm`` about 0
+        units of z. A str names a matplotlib scale, such as ``"log"``,
+        ``"symlog"`` or ``"linear"``, and becomes that scale's norm as
+        matplotlib's own plotting functions convert it
+        (``matplotlib.cm.ScalarMappable(norm=name).norm``); ``"log"`` gives a
+        ``LogNorm``. None means the plot's default: a ``CenteredNorm`` about 0
         when the values hold both signs, otherwise the default of the plot's
         ``axnorm`` (see ``ColorPlot._default_norm``).
     cmap : str or matplotlib.colors.Colormap, optional
@@ -48,8 +75,11 @@ class ColorScale:
     Raises
     ------
     TypeError
-        If ``norm`` is neither None nor a ``Normalize``, ``cbar`` is not a
-        bool, or ``cbar_kwargs`` is neither None nor a mapping.
+        If ``norm`` is neither None, a ``Normalize`` nor a str, ``cbar`` is
+        not a bool, or ``cbar_kwargs`` is neither None nor a mapping.
+    ValueError
+        If ``norm`` is a str that names no matplotlib scale (matplotlib's
+        error).
 
     Notes
     -----
@@ -90,11 +120,7 @@ class ColorScale:
     """
 
     def __init__(self, norm=None, cmap=None, cbar=True, cbar_kwargs=None):
-        if norm is not None and not isinstance(norm, mpl.colors.Normalize):
-            raise TypeError(
-                "norm must be a matplotlib.colors.Normalize or None, "
-                f"not {type(norm).__name__}"
-            )
+        norm = _checked_norm(norm)
         if not isinstance(cbar, bool):
             raise TypeError(f"cbar must be True or False, not {type(cbar).__name__}")
         if cbar_kwargs is None:

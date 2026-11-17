@@ -47,8 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unset limits from the first plot drawn. Given with `norm`, `cmap`, `cbar` or `cbar_kwargs`,
   it raises `TypeError`. The plain keywords still work and are built into a `ColorScale`, so
   they follow its rules: `cbar` defaults to None, meaning True, so that an explicit `cbar=True`
-  beside a scale is refused; a `norm` that is not a `matplotlib.colors.Normalize` (such as the
-  string `"log"`), or a `cbar` that is not a bool, raises `TypeError`; and `norm=None` or
+  beside a scale is refused; a `norm` that is neither a `matplotlib.colors.Normalize` nor a
+  matplotlib scale name, or a `cbar` that is not a bool, raises `TypeError`; a scale name such
+  as `"log"` becomes that scale's norm as matplotlib converts it (`"log"` gives a `LogNorm`),
+  and an unknown name raises matplotlib's `ValueError`; and `norm=None` or
   `cmap=None` passed explicitly now takes the plot's default (a `CenteredNorm` about 0 and
   `RdBu_r` for values of both signs) instead of matplotlib's.
 - `BetaRPlot` colours values of one sign with `Greens_r` in every draw method, not only

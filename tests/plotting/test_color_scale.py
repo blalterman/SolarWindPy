@@ -216,13 +216,6 @@ def test_color_scale_str_shows_the_limits_a_plot_set():
     assert "cmap: viridis" in text
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="Stage E's ColorScale refuses a str norm (scales.py ColorScale.__init__); "
-    "'norm must be a matplotlib.colors.Normalize or None, not str'; remove this "
-    "marker when a scale name converts through matplotlib",
-)
 @pytest.mark.parametrize("plot", COLOR_PLOTS.values(), ids=COLOR_PLOTS.keys())
 def test_norm_given_as_a_scale_name_is_matplotlibs_norm_for_that_scale(plot):
     """``norm="log"`` colours with a ``LogNorm``, as matplotlib's scatter and pcolormesh do.
@@ -233,13 +226,6 @@ def test_norm_given_as_a_scale_name_is_matplotlibs_norm_for_that_scale(plot):
     assert isinstance(mappable.norm, LogNorm)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=TypeError,
-    reason="Stage E's ColorScale refuses a str norm (scales.py ColorScale.__init__); "
-    "'norm must be a matplotlib.colors.Normalize or None, not str'; remove this "
-    "marker when a scale name converts through matplotlib",
-)
 def test_color_scale_holds_the_norm_a_scale_name_names_and_refuses_an_unknown_one():
     """``ColorScale(norm="log").norm`` is a ``LogNorm``; an unknown name is matplotlib's ValueError.
 
