@@ -294,7 +294,9 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
                 "progress",
             ],
         ),
-        pytest.param(Scatter, ["x", "y", "z", "logx", "logy", "clip", "mask"]),
+        pytest.param(
+            Scatter, ["x", "y", "z", "size", "alpha", "logx", "logy", "clip", "mask"]
+        ),
     ],
     ids=lambda v: v.__name__ if isinstance(v, type) else "",
 )

@@ -287,8 +287,8 @@ def _usable(values, log):
 class _PlotSource:
     r"""A plot's input columns and the rows it keeps.
 
-    A row is kept only where no coordinate and not the value is NaN or
-    +/-inf (how="any"), each logged coordinate is finite after
+    A row is kept only where no coordinate, no extra column and not the value
+    is NaN or +/-inf (how="any"), each logged coordinate is finite after
     ``log10(abs())`` (so not 0), ``mask`` keeps it, and ``within`` keeps it.
 
     Parameters
@@ -302,6 +302,11 @@ class _PlotSource:
     value : pd.Series, array-like, or None
         That column's values, aligned by label to the coordinates. None means
         every row has the value 1, which is generated on access, not stored.
+    extra : dict of str to pd.Series or array-like, optional
+        Further per-point columns, e.g. a ``Scatter``'s marker size, aligned
+        by label to the coordinates as ``value`` is and held after them. A
+        row is kept only where each is neither NaN nor +/-inf. They are not
+        logged or binned.
     log : dict of str to bool, optional
         Columns that ``materialize`` returns as ``log10(abs())``.
     owner : str
@@ -337,6 +342,7 @@ class _PlotSource:
         value_name,
         value=None,
         *,
+        extra=None,
         log=None,
         owner,
         mask=None,
@@ -344,6 +350,16 @@ class _PlotSource:
     ):
         frame = _combine({k: _numeric_if_object(v) for k, v in dict(coords).items()})
         index = frame.index
+        if extra:
+            frame = _combine(
+                {
+                    **{k: frame.loc[:, k] for k in frame.columns},
+                    **{
+                        k: _numeric_if_object(_align(v, index, k))
+                        for k, v in extra.items()
+                    },
+                }
+            )
         if value is not None:
             value = _numeric_if_object(_align(value, index, value_name))
         selected = _mask_rows(mask, index)
@@ -388,7 +404,7 @@ class _PlotSource:
 
     @property
     def columns(self):
-        r"""Column names: the coordinates, then the value column."""
+        r"""Column names: the coordinates, any extra columns, then the value column."""
         return tuple(self._frame.columns) + (self._value_name,)
 
     @property

@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   units key drawn `[#]`, `labels.available()`). The string is still drawn as given; filter the
   warning to keep one on purpose. `None`, `""` and `"None"` do not warn. The usage guide's
   Labels section now covers `ManualLabel` and the warning.
+- `solarwindpy.plotting.scatter.Scatter` takes per-point `size` and `alpha` variables, aligned
+  by label like `z`; a NaN or infinite value drops the point. `make_plot` maps each through a
+  `matplotlib.colors.Normalize` (`size_norm`, `alpha_norm`; any norm, used as given, default
+  scaled to the drawn points), clipped to [0, 1], onto `size_range` in pt² (default `(9, 144)`)
+  or `alpha_range` (default `(0.15, 1.0)`). A reversed range inverts the mapping; a value the
+  norm masks, such as one <= 0 under `LogNorm`, is not drawn. `s=` or `alpha=` beside its
+  variable, or a norm or range without one, raises `TypeError`. The two new parameters follow
+  `z`, so `logx`, `logy`, `clip` and `mask` move two places: pass them by keyword.
 
 ## [0.5.1] - 2026-11-05
 

@@ -671,12 +671,7 @@ def test_connect_refuses_two_colour_keys(ax):
 SX = np.array([0.0, 1.0, 2.0])
 SY = np.array([5.0, 6.0, 7.0])
 
-_SIZE_ALPHA_PENDING = pytest.mark.xfail(
-    strict=True, reason="Scatter size and alpha variables not implemented yet"
-)
 
-
-@_SIZE_ALPHA_PENDING
 def test_size_maps_linearly_onto_size_range(ax):
     """size 1, 2, 3 autoscale to f = 0, 1/2, 1, so areas 10, 20, 30 on (10, 30).
 
@@ -688,7 +683,6 @@ def test_size_maps_linearly_onto_size_range(ax):
     assert points.get_sizes().tolist() == exact([10.0, 20.0, 30.0])
 
 
-@_SIZE_ALPHA_PENDING
 @pytest.mark.parametrize(
     "alpha_range, expected",
     [
@@ -709,7 +703,6 @@ def test_alpha_maps_linearly_onto_alpha_range_and_a_reversed_range_inverts(
     assert points.get_alpha().tolist() == exact(expected)
 
 
-@_SIZE_ALPHA_PENDING
 def test_a_passed_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     """LogNorm puts 1, 10, 100 at f = 0, 1/2, 1; it masks 0, so that point is not drawn.
 
@@ -724,7 +717,6 @@ def test_a_passed_norm_is_used_and_a_value_it_masks_is_not_drawn(ax):
     np.testing.assert_array_equal(points.get_offsets(), np.c_[x[1:], y[1:]])
 
 
-@_SIZE_ALPHA_PENDING
 def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
     """With vmin 1 and vmax 3, -5 lands on 10 and 50 on 30, as 1 and 3 do.
 
@@ -737,7 +729,6 @@ def test_values_outside_the_norms_limits_saturate_at_the_range_ends(ax):
     assert points.get_sizes().tolist() == exact([10.0, 10.0, 20.0, 30.0, 30.0])
 
 
-@_SIZE_ALPHA_PENDING
 def test_default_ranges_put_the_extreme_drawn_values_at_9_144_and_0p15_1(ax):
     """Defaults: area 9 to 144 pt^2 (marker 3 to 12 pt), alpha 0.15 to 1.
 
@@ -750,7 +741,6 @@ def test_default_ranges_put_the_extreme_drawn_values_at_9_144_and_0p15_1(ax):
     assert points.get_alpha().tolist() == exact([0.15, 0.575, 1.0])
 
 
-@_SIZE_ALPHA_PENDING
 def test_size_aligns_by_label_and_a_nan_drops_its_point(ax):
     """size is aligned to x and y by label; the row whose size is NaN is not drawn.
 
@@ -766,7 +756,6 @@ def test_size_aligns_by_label_and_a_nan_drops_its_point(ax):
     assert "alpha" not in sc.data.columns
 
 
-@_SIZE_ALPHA_PENDING
 def test_connect_with_an_alpha_variable_draws_opaque_segments_in_the_points_colour(
     ax,
 ):
@@ -782,7 +771,6 @@ def test_connect_with_an_alpha_variable_draws_opaque_segments_in_the_points_colo
     np.testing.assert_array_equal(lc.get_edgecolor(), [expected])
 
 
-@_SIZE_ALPHA_PENDING
 @pytest.mark.parametrize(
     "variables, plot_kwargs, match",
     [

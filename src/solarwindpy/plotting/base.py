@@ -656,7 +656,7 @@ class ColorPlot(_AggregateLimits):
     # True where ``_set_data`` stores x and y as ``log10(abs())`` per ``self.log``.
     _log_data = False
 
-    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None):
+    def _set_data(self, x, y, z=None, clip=None, mask=None, within=None, extra=None):
         r"""Store x, y and z as the plot's source, keeping rows without NaN or inf.
 
         Called only by the constructor.
@@ -680,6 +680,11 @@ class ColorPlot(_AggregateLimits):
         within : BinnedData, optional
             The shared ``BinnedData`` passed as ``nbins``: rows its own mask
             excludes are not kept either.
+        extra : dict of str to pd.Series or array-like, optional
+            Further per-point columns, such as a ``Scatter``'s ``size`` and
+            ``alpha``, held in ``data`` under their keys. Each is aligned
+            like z, and a row is kept only where each is neither NaN nor
+            +/-inf.
 
         Raises
         ------
@@ -698,6 +703,7 @@ class ColorPlot(_AggregateLimits):
             {"x": x, "y": y},
             "z",
             z,
+            extra=extra,
             log=log,
             owner=self.__class__.__name__,
             mask=mask,
