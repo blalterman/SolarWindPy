@@ -169,7 +169,7 @@ class Scatter(base.ColorPlot):
         size_scale=None,
         alpha_scale=None,
         draw_order="auto",
-        draw_ascending=None,
+        draw_ascending=False,
         **kwargs,
     ):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
@@ -218,12 +218,11 @@ class Scatter(base.ColorPlot):
             so the faintest points are drawn on top of the opaque ones that
             would hide them, and None without one. The segments of
             ``connect`` are unaffected.
-        draw_ascending: bool, None
-            If True, draw from the lowest marker value to the highest, so
-            the largest or most opaque points are on top; if False, the
-            reverse. None, the default, means False for ``"alpha"``, the
-            faintest on top, and True for ``"size"``, the largest on top.
-            Ignored when the points are drawn in row order.
+        draw_ascending: bool
+            If False, the default, draw from the highest marker value to the
+            lowest, so the smallest or faintest points are on top, where the
+            larger or more opaque ones would otherwise hide them; if True,
+            the reverse. Ignored when the points are drawn in row order.
         kwargs:
             Passed to `ax.scatter`, except ``s`` with a size variable and
             ``alpha`` with an alpha variable.
@@ -273,13 +272,15 @@ class Scatter(base.ColorPlot):
         The size key and the alpha bar are drawn from the scales that drew
         the points, so they read the points exactly: the key's markers have
         the areas points of those sizes get, and the bar's alpha at each
-        value is the opacity a point of that value gets. The alpha bar lies
-        horizontally above the axes, and the z colorbar stands on their
-        right; a ``location``, ``orientation`` or ``cax`` in the alpha
-        scale's ``cbar_kwargs`` places the bar instead. When z colours the
-        points the alpha bar is black; else it is the points' colour. Their
-        titles are ``labels.size`` and ``labels.alpha``. The z colorbar
-        stays opaque whatever the points' alpha.
+        value is the opacity a point of that value gets. When a z colorbar
+        is drawn, it stands on the right of the axes and the alpha bar lies
+        horizontally above them; without one (no z, a constant z, or
+        ``cbar=False``) the alpha bar stands upright on the right, in the
+        colorbar's place. A ``location``, ``orientation`` or ``cax`` in the
+        alpha scale's ``cbar_kwargs`` places the bar instead. When z colours
+        the points the alpha bar is black; else it is the points' colour.
+        Their titles are ``labels.size`` and ``labels.alpha``. The z
+        colorbar stays opaque whatever the points' alpha.
 
         With ``connect=True`` each drawn point is joined to the drawn point
         next in increasing z, a stable sort, so points with equal z keep the
@@ -342,7 +343,7 @@ class Scatter(base.ColorPlot):
         guides = base.Guides(
             color=cbar,
             size=self._size_key(ax, collection, markers.get("size")),
-            alpha=self._alpha_bar(ax, collection, markers.get("alpha"), zkey),
+            alpha=self._alpha_bar(ax, collection, markers.get("alpha"), zkey, cbar),
         )
 
         self._format_axis(ax, collection, data)
@@ -364,7 +365,7 @@ class Scatter(base.ColorPlot):
             The caller's ``connect``.
         draw_order : str or None
             The caller's ``draw_order``.
-        draw_ascending : bool or None
+        draw_ascending : bool
             The caller's ``draw_ascending``.
 
         Returns
@@ -374,8 +375,8 @@ class Scatter(base.ColorPlot):
             scale, the default scale when none was given.
         order : tuple or None
             ``(column, ascending)`` to sort the points by that column's
-            marker value, or None for row order; ``"auto"`` and a None
-            ``draw_ascending`` resolved as ``make_plot`` describes.
+            marker value, or None for row order; ``"auto"`` resolved as
+            ``make_plot`` describes.
 
         Raises
         ------
@@ -430,8 +431,6 @@ class Scatter(base.ColorPlot):
                 f"make_plot got draw_order={draw_order!r} without {article} "
                 f"{draw_order} variable; pass {draw_order} to Scatter."
             )
-        if draw_ascending is None:
-            draw_ascending = draw_order != "alpha"
         return markers, (draw_order, draw_ascending)
 
     @staticmethod
@@ -512,15 +511,16 @@ class Scatter(base.ColorPlot):
         key.set_clip_on(False)
         return key
 
-    def _alpha_bar(self, ax, points, scale, zkey):
-        r"""Draw the alpha bar ``scale`` sets above ``ax``, or return None.
+    def _alpha_bar(self, ax, points, scale, zkey, zbar):
+        r"""Draw the alpha bar ``scale`` sets beside ``ax``, or return None.
 
         The bar is a colorbar on ``scale.norm`` of one colour, black when
         ``zkey`` is set, else the points' colour, whose alpha runs from
-        ``scale.range[0]`` to ``scale.range[1]``. It lies horizontally
-        above ``ax``, clear of a z colorbar on the right, unless
-        ``scale.cbar_kwargs`` sets ``location``, ``orientation`` or
-        ``cax``, which place it as matplotlib does.
+        ``scale.range[0]`` to ``scale.range[1]``. With a z colorbar
+        ``zbar``, it lies horizontally above ``ax``, clear of ``zbar`` on
+        the right; without one, it stands on the right, where matplotlib
+        puts a colorbar. A ``location``, ``orientation`` or ``cax`` in
+        ``scale.cbar_kwargs`` places it as matplotlib does instead.
 
         Returns
         -------
@@ -536,7 +536,8 @@ class Scatter(base.ColorPlot):
         )
         mappable = ScalarMappable(norm=scale.norm, cmap=cmap)
         defaults = {}
-        if not {"location", "orientation", "cax"} & set(scale.cbar_kwargs):
+        placed = {"location", "orientation", "cax"} & set(scale.cbar_kwargs)
+        if zbar is not None and not placed:
             defaults["location"] = "top"
         return self._make_cbar(mappable, scale, ax, channel="alpha", **defaults)
 

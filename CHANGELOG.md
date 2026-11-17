@@ -34,17 +34,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   drawn from the same norm and range as the points and returned as `guides.size` and
   `guides.alpha`. The key is added to the axes with `ax.add_artist`, so a legend already on
   them stays and a later `ax.legend()` is drawn beside it. The alpha bar lies horizontally
-  above the axes (`location="top"`), clear of a z colorbar on the right; a `location`,
-  `orientation` or `cax` in its `cbar_kwargs` places it instead. `Scatter.set_labels(size=..., alpha=...)` titles them, and the plot's
+  above the axes (`location="top"`) when a z colorbar stands on their right, and stands on
+  the right itself, in the colorbar's place, when none is drawn (no z, a constant z, or
+  `cbar=False`); a `location`, `orientation` or `cax` in its `cbar_kwargs` places it
+  instead. `Scatter.set_labels(size=..., alpha=...)` titles them, and the plot's
   `path` gains their parts. `s=` or `alpha=` beside its variable, a scale without its
   variable, or `connect=True` with an alpha variable raises `TypeError`.
-- `Scatter.make_plot(draw_order="auto", draw_ascending=None)`: `"size"` or `"alpha"` draws the
-  points sorted by marker area or opacity; `draw_ascending=True` draws low to high, so the
-  highest is on top, and False the reverse. Unset, it is False for `"alpha"`, the faintest
-  on top, and True for `"size"`, the largest on top. `"auto"`, the default, is `"alpha"`
-  with an alpha variable, so faint points are drawn over the opaque ones that would hide
-  them, and row order without one; `None` asks for row order. The segments of `connect`
-  keep their order.
+- `Scatter.make_plot(draw_order="auto", draw_ascending=False)`: `"size"` or `"alpha"` draws
+  the points sorted by marker area or opacity, by default from high to low, so the smallest
+  or faintest are on top; `draw_ascending=True` draws low to high. `"auto"`, the default,
+  is `"alpha"` with an alpha variable, so faint points are drawn over the opaque ones that
+  would hide them, and row order without one; `None` asks for row order. The segments of
+  `connect` keep their order.
 
 ### Changed - BREAKING CHANGES
 

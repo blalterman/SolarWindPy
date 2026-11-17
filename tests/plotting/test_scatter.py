@@ -859,29 +859,18 @@ def _sides(guide, axis, renderer):
     return [side for side, out in beyond.items() if out]
 
 
-_BAR_ON_TOP = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the alpha bar defaults to the top whether or not a z colorbar is "
-    "drawn; remove this marker when it defaults to the right without one",
-)
-
-
 @pytest.mark.parametrize("layout", [None, "constrained"])
 @pytest.mark.parametrize(
     "z, plot_kwargs, side, orientation",
     [
-        pytest.param(None, {}, "right", "vertical", id="no-z", marks=_BAR_ON_TOP),
-        pytest.param(
-            [2.0, 2.0, 2.0], {}, "right", "vertical", id="constant-z", marks=_BAR_ON_TOP
-        ),
+        pytest.param(None, {}, "right", "vertical", id="no-z"),
+        pytest.param([2.0, 2.0, 2.0], {}, "right", "vertical", id="constant-z"),
         pytest.param(
             [1.0, 2.0, 3.0],
             {"cbar": False},
             "right",
             "vertical",
             id="cbar-off",
-            marks=_BAR_ON_TOP,
         ),
         pytest.param([1.0, 2.0, 3.0], {}, "top", "horizontal", id="z"),
     ],
@@ -959,12 +948,6 @@ def test_alpha_bars_cbar_kwargs_override_its_placement(
 _ALPHA = {"alpha": [2.0, 3.0, 1.0]}
 _SIZE = {"size": [3.0, 1.0, 2.0]}
 _REVERSED = {"alpha_scale": "reversed"}
-_LARGEST_ON_TOP = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="draw_order='size' defaults to ascending, the largest on top; remove "
-    "this marker when it draws the smallest on top",
-)
 
 
 @pytest.mark.parametrize(
@@ -982,9 +965,7 @@ _LARGEST_ON_TOP = pytest.mark.xfail(
             id="alpha-ascending",
         ),
         pytest.param(_SIZE, {}, [0, 1, 2], id="default-size"),
-        pytest.param(
-            _SIZE, {"draw_order": "size"}, [0, 2, 1], id="size", marks=_LARGEST_ON_TOP
-        ),
+        pytest.param(_SIZE, {"draw_order": "size"}, [0, 2, 1], id="size"),
         pytest.param(
             _SIZE,
             {"draw_order": "size", "draw_ascending": True},
@@ -1003,7 +984,6 @@ _LARGEST_ON_TOP = pytest.mark.xfail(
             {"draw_order": "size"},
             [0, 2, 1],
             id="size-both",
-            marks=_LARGEST_ON_TOP,
         ),
     ],
 )

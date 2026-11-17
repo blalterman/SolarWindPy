@@ -504,9 +504,10 @@ class AlphaScale(_MarkerScale, _BarScale):
         ``labels.alpha``.
     cbar_kwargs : Mapping, optional
         Passed to :meth:`matplotlib.figure.Figure.colorbar`, as for
-        ``ColorScale``. The bar lies horizontally above the plot's axes
-        unless these set ``location``, ``orientation`` or ``cax``. Copied
-        when the scale is built.
+        ``ColorScale``. Unless these set ``location``, ``orientation`` or
+        ``cax``, the bar lies horizontally above the plot's axes when a z
+        colorbar is drawn, and stands on their right, in the colorbar's
+        place, when none is. Copied when the scale is built.
 
     Raises
     ------
