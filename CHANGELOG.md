@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-17
+
 ### Added
 
 - `solarwindpy.plotting.labels.base.PlainStringLabelWarning`: a plain `str` axis label given to
@@ -80,6 +82,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   alpha)` instead of an `AxesLabels` `(x, y, z)`; read the labels by name, as `labels.x`.
 - `BetaRPlot` colours values of one sign with `Greens_r` in every draw method, not only
   `make_plot`, and values of both signs with `RdBu_r`, as the other colour plots do.
+
+### Fixed
+
+- The API reference renders the `AlfvenicTurbulence` docstrings cleanly: "Alfvén" no longer
+  prints as "Alfv'en", the module's references are linked citations with a DOI for Woodham et
+  al. (2018), and the ORCID is a link. `Plasma.nuc` cites its reference the same way.
+- Property entries in the API reference stack one under another instead of flowing side by
+  side, and properties no longer carry a `Returns` block; the type shows in the signature.
+- The docs build passes with warnings as errors again: `set_labels` names a type the build can
+  link.
+- The planned updates listed in the `solarwindpy.core.plasma` module docstring moved to GitHub
+  issues #538 to #540, and Scatter's open log-axis question to #541.
+- The usage guide gives each example in the plot sections its own heading.
 
 ## [0.5.1] - 2026-11-05
 
