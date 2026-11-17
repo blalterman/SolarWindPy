@@ -11,8 +11,8 @@ from matplotlib import cbook
 from matplotlib import pyplot as plt
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import LineCollection
+from matplotlib.legend import Legend
 from matplotlib.lines import Line2D
-from matplotlib.transforms import Bbox
 
 from ..tools import _warn
 from . import base, labels, scales
@@ -168,8 +168,8 @@ class Scatter(base.ColorPlot):
         color_scale=None,
         size_scale=None,
         alpha_scale=None,
-        draw_order=None,
-        draw_ascending=True,
+        draw_order="auto",
+        draw_ascending=None,
         **kwargs,
     ):
         r"""Make a scatter plot on `ax` using `ax.scatter`.
@@ -208,18 +208,22 @@ class Scatter(base.ColorPlot):
             How the alpha variable becomes opacity, and its bar (see
             :class:`~solarwindpy.plotting.scales.AlphaScale`). None means
             ``AlphaScale()``. Only with an alpha variable.
-        draw_order: {None, "size", "alpha"}
-            None draws the points in row order. ``"size"`` or ``"alpha"``
-            draws them sorted by their marker area or opacity, so the point
-            drawn last is on top. The sort is by the marker value, not the
-            data: under a reversed range the largest values are drawn
-            first when ascending. Ties keep row order. The segments of
+        draw_order: {"auto", None, "size", "alpha"}
+            Which points are drawn last, so on top. ``"size"`` or
+            ``"alpha"`` draws the points sorted by their marker area or
+            opacity. The sort is by the marker value, not the data: under a
+            reversed range the largest values are drawn first when
+            ascending. Ties keep row order. None draws them in row order.
+            ``"auto"``, the default, is ``"alpha"`` with an alpha variable,
+            so the faintest points are drawn on top of the opaque ones that
+            would hide them, and None without one. The segments of
             ``connect`` are unaffected.
-        draw_ascending: bool
+        draw_ascending: bool, None
             If True, draw from the lowest marker value to the highest, so
             the largest or most opaque points are on top; if False, the
-            reverse: ``draw_order="alpha", draw_ascending=False`` puts the
-            faintest points on top.
+            reverse. None, the default, means False for ``"alpha"``, the
+            faintest on top, and True for ``"size"``, the largest on top.
+            Ignored when the points are drawn in row order.
         kwargs:
             Passed to `ax.scatter`, except ``s`` with a size variable and
             ``alpha`` with an alpha variable.
@@ -233,11 +237,10 @@ class Scatter(base.ColorPlot):
             The segments joining the points if `connect` is True, else None.
         guides: Guides
             ``color`` is the colorbar if `cbar` is True and z varies;
-            ``size`` is the size key, a ``matplotlib.legend.Legend`` on
-            ``ax`` (which replaces any legend ``ax`` had; a later
-            ``ax.legend()`` replaces it in turn, so re-add it with
-            ``ax.add_artist``); ``alpha`` is the alpha bar, a colorbar. Each
-            is None when not drawn.
+            ``size`` is the size key, a ``matplotlib.legend.Legend`` added
+            to ``ax`` as an extra artist, so a legend ``ax`` has, or one a
+            later ``ax.legend()`` draws, is drawn beside it; ``alpha`` is
+            the alpha bar, a colorbar. Each is None when not drawn.
 
         Raises
         ------
@@ -249,7 +252,8 @@ class Scatter(base.ColorPlot):
             an alpha variable; or if ``color_scale`` is given with ``norm``,
             ``cmap``, ``cbar`` or ``cbar_kwargs``.
         ValueError
-            If ``draw_order`` is not None, ``"size"`` or ``"alpha"``.
+            If ``draw_order`` is not ``"auto"``, None, ``"size"`` or
+            ``"alpha"``.
 
         Notes
         -----
@@ -269,11 +273,13 @@ class Scatter(base.ColorPlot):
         The size key and the alpha bar are drawn from the scales that drew
         the points, so they read the points exactly: the key's markers have
         the areas points of those sizes get, and the bar's alpha at each
-        value is the opacity a point of that value gets. When z colours the
-        points the alpha bar is black and sits beside the z colorbar; else
-        it is the points' colour. Their titles are ``labels.size`` and
-        ``labels.alpha``. The z colorbar stays opaque whatever the points'
-        alpha.
+        value is the opacity a point of that value gets. The alpha bar lies
+        horizontally above the axes, and the z colorbar stands on their
+        right; a ``location``, ``orientation`` or ``cax`` in the alpha
+        scale's ``cbar_kwargs`` places the bar instead. When z colours the
+        points the alpha bar is black; else it is the points' colour. Their
+        titles are ``labels.size`` and ``labels.alpha``. The z colorbar
+        stays opaque whatever the points' alpha.
 
         With ``connect=True`` each drawn point is joined to the drawn point
         next in increasing z, a stable sort, so points with equal z keep the
@@ -293,8 +299,8 @@ class Scatter(base.ColorPlot):
         the axis limits.
         """
         scale = self._color_scale(kwargs, color_scale, cbar, cbar_kwargs)
-        markers = self._marker_scales(
-            kwargs, size_scale, alpha_scale, connect, draw_order
+        markers, order = self._marker_scales(
+            kwargs, size_scale, alpha_scale, connect, draw_order, draw_ascending
         )
 
         if ax is None:
@@ -318,11 +324,12 @@ class Scatter(base.ColorPlot):
 
         # The draw order sorts the points only; segments keep row order.
         drawn = data
-        if draw_order is not None:
-            value = mapped[_MARKERS[draw_order][1]]
-            order = np.argsort(value if draw_ascending else -value, kind="stable")
-            drawn = data.iloc[order]
-            mapped = {k: v[order] for k, v in mapped.items()}
+        if order is not None:
+            channel, ascending = order
+            value = mapped[_MARKERS[channel][1]]
+            rank = np.argsort(value if ascending else -value, kind="stable")
+            drawn = data.iloc[rank]
+            mapped = {k: v[rank] for k, v in mapped.items()}
         kwargs.update(mapped)
 
         collection = ax.scatter(x="x", y="y", c=zkey, data=drawn, **kwargs)
@@ -332,21 +339,20 @@ class Scatter(base.ColorPlot):
             segments = self._connect(ax, collection, data, zkey, connect_kwargs)
 
         cbar = None if zkey is None else self._make_cbar(collection, scale, ax)
-        placed = cbar is not None and not {"ax", "cax"} & set(scale.cbar_kwargs)
         guides = base.Guides(
             color=cbar,
             size=self._size_key(ax, collection, markers.get("size")),
-            alpha=self._alpha_bar(
-                ax, collection, markers.get("alpha"), zkey, cbar if placed else None
-            ),
+            alpha=self._alpha_bar(ax, collection, markers.get("alpha"), zkey),
         )
 
         self._format_axis(ax, collection, data)
 
         return ax, collection, segments, guides
 
-    def _marker_scales(self, kwargs, size_scale, alpha_scale, connect, draw_order):
-        r"""Check the size and alpha settings; return the scale of each variable held.
+    def _marker_scales(
+        self, kwargs, size_scale, alpha_scale, connect, draw_order, draw_ascending
+    ):
+        r"""Check the size and alpha settings; return each variable's scale and the draw order.
 
         Parameters
         ----------
@@ -358,12 +364,18 @@ class Scatter(base.ColorPlot):
             The caller's ``connect``.
         draw_order : str or None
             The caller's ``draw_order``.
+        draw_ascending : bool or None
+            The caller's ``draw_ascending``.
 
         Returns
         -------
-        dict
+        markers : dict
             For each variable the plot holds, its column name mapped to its
             scale, the default scale when none was given.
+        order : tuple or None
+            ``(column, ascending)`` to sort the points by that column's
+            marker value, or None for row order; ``"auto"`` and a None
+            ``draw_ascending`` resolved as ``make_plot`` describes.
 
         Raises
         ------
@@ -403,18 +415,24 @@ class Scatter(base.ColorPlot):
                 "variable; segments between points of different alpha are "
                 "not drawn. Build the Scatter without alpha to connect it."
             )
-        if draw_order is not None:
-            if draw_order not in _MARKERS:
-                raise ValueError(
-                    f"draw_order must be None, 'size' or 'alpha', not {draw_order!r}"
-                )
-            if draw_order not in markers:
-                article = "an" if draw_order == "alpha" else "a"
-                raise TypeError(
-                    f"make_plot got draw_order={draw_order!r} without {article} "
-                    f"{draw_order} variable; pass {draw_order} to Scatter."
-                )
-        return markers
+        if draw_order not in ("auto", None, *_MARKERS):
+            raise ValueError(
+                "draw_order must be 'auto', None, 'size' or 'alpha', "
+                f"not {draw_order!r}"
+            )
+        if draw_order == "auto":
+            draw_order = "alpha" if "alpha" in markers else None
+        if draw_order is None:
+            return markers, None
+        if draw_order not in markers:
+            article = "an" if draw_order == "alpha" else "a"
+            raise TypeError(
+                f"make_plot got draw_order={draw_order!r} without {article} "
+                f"{draw_order} variable; pass {draw_order} to Scatter."
+            )
+        if draw_ascending is None:
+            draw_ascending = draw_order != "alpha"
+        return markers, (draw_order, draw_ascending)
 
     @staticmethod
     def _map_markers(data, markers):
@@ -451,11 +469,13 @@ class Scatter(base.ColorPlot):
         return data, {_MARKERS[col][1]: np.ma.getdata(v) for col, v in values.items()}
 
     def _size_key(self, ax, points, scale):
-        r"""Draw the legend of marker areas ``scale`` sets on ``ax``, or return None.
+        r"""Add the legend of marker areas ``scale`` sets to ``ax``, or return None.
 
         Each entry is a marker of the points' shape whose area is the one
         ``scale`` gives a point of that size, opaque and grey, labelled
-        with the size. A key value the norm masks is left out.
+        with the size. A key value the norm masks is left out. The key is
+        added with ``ax.add_artist``, not as ``ax``'s legend, so it leaves
+        that legend to the caller.
 
         Returns
         -------
@@ -486,20 +506,21 @@ class Scatter(base.ColorPlot):
             labels.base._warn_if_plain({"key_kwargs['title']": kwargs["title"]})
         title = self.labels.size
         kwargs.setdefault("title", None if title is None else str(title))
-        return ax.legend(handles, texts, **kwargs)
+        key = ax.add_artist(Legend(ax, handles, texts, **kwargs))
+        # add_artist clips an artist to the axes, which takes it out of the
+        # layout; ax.legend() leaves its legend unclipped, so this does too.
+        key.set_clip_on(False)
+        return key
 
-    def _alpha_bar(self, ax, points, scale, zkey, beside=None):
-        r"""Draw the alpha bar ``scale`` sets beside ``ax``, or return None.
+    def _alpha_bar(self, ax, points, scale, zkey):
+        r"""Draw the alpha bar ``scale`` sets above ``ax``, or return None.
 
         The bar is a colorbar on ``scale.norm`` of one colour, black when
         ``zkey`` is set, else the points' colour, whose alpha runs from
-        ``scale.range[0]`` to ``scale.range[1]``. Given ``beside``, the z
-        colorbar drawn beside ``ax``, and unless ``scale.cbar_kwargs`` names
-        ``ax`` or ``cax``, the two bars stand side by side clear of each
-        other's labels: a figure's layout engine, such as constrained layout,
-        places them itself; without one, the bar is drawn outside the z
-        colorbar, ``_pad_beyond`` setting the gap unless
-        ``scale.cbar_kwargs`` sets ``pad``.
+        ``scale.range[0]`` to ``scale.range[1]``. It lies horizontally
+        above ``ax``, clear of a z colorbar on the right, unless
+        ``scale.cbar_kwargs`` sets ``location``, ``orientation`` or
+        ``cax``, which place it as matplotlib does.
 
         Returns
         -------
@@ -515,47 +536,9 @@ class Scatter(base.ColorPlot):
         )
         mappable = ScalarMappable(norm=scale.norm, cmap=cmap)
         defaults = {}
-        if (
-            beside is not None
-            and ax.figure.get_layout_engine() is None
-            and not {"ax", "cax"} & set(scale.cbar_kwargs)
-        ):
-            defaults["pad"] = self._pad_beyond(ax, beside)
-            ax = [ax, beside.ax]
+        if not {"location", "orientation", "cax"} & set(scale.cbar_kwargs):
+            defaults["location"] = "top"
         return self._make_cbar(mappable, scale, ax, channel="alpha", **defaults)
-
-    @staticmethod
-    def _pad_beyond(ax, cbar):
-        r"""The ``pad`` that draws a colorbar on ``[ax, cbar.ax]`` clear of ``cbar``'s labels.
-
-        Without a layout engine, ``Figure.colorbar`` given the parents
-        ``[ax, cbar.ax]`` squeezes them into the first ``1 - fraction - pad``
-        of their joint width, anchors each at its right (``panchor``, by
-        default ``(1.0, 0.5)`` on the right) and puts the new bar after a gap
-        of ``pad``. ``cbar``'s bar therefore ends where the gap starts, and
-        its ticks and label, which keep their size, reach into it. The pad
-        returned is their width plus matplotlib's default gap, 0.05, both as
-        fractions of the joint width.
-
-        Parameters
-        ----------
-        ax : matplotlib.axes.Axes
-            The plot's axes.
-        cbar : matplotlib.colorbar.Colorbar
-            The colorbar drawn beside ``ax``.
-
-        Returns
-        -------
-        float
-        """
-        cbar.ax.apply_aspect()
-        bar = cbar.ax.get_position()
-        joint = Bbox.union(
-            [ax.get_position(original=True), cbar.ax.get_position(original=True)]
-        )
-        to_figure = ax.figure.transFigure.inverted()
-        labels = cbar.ax.get_tightbbox().transformed(to_figure).x1 - bar.x1
-        return labels / joint.width + 0.05
 
     def _connect(self, ax, collection, data, zkey, connect_kwargs):
         r"""Add segments joining the drawn points to `ax`; see `make_plot`.

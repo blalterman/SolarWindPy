@@ -32,13 +32,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   opaque grey markers at chosen sizes (`key=True` picks round values from the norm's
   limits), and the alpha bar, a colorbar of one colour ramping in alpha over the range, are
   drawn from the same norm and range as the points and returned as `guides.size` and
-  `guides.alpha`. `Scatter.set_labels(size=..., alpha=...)` titles them, and the plot's
+  `guides.alpha`. The key is added to the axes with `ax.add_artist`, so a legend already on
+  them stays and a later `ax.legend()` is drawn beside it. The alpha bar lies horizontally
+  above the axes (`location="top"`), clear of a z colorbar on the right; a `location`,
+  `orientation` or `cax` in its `cbar_kwargs` places it instead. `Scatter.set_labels(size=..., alpha=...)` titles them, and the plot's
   `path` gains their parts. `s=` or `alpha=` beside its variable, a scale without its
   variable, or `connect=True` with an alpha variable raises `TypeError`.
-- `Scatter.make_plot(draw_order=None, draw_ascending=True)`: `"size"` or `"alpha"` draws the
-  points sorted by marker area or opacity, low to high, so the highest is on top;
-  `draw_ascending=False` reverses it (`draw_order="alpha", draw_ascending=False` puts the
-  faintest points on top). The segments of `connect` keep their order.
+- `Scatter.make_plot(draw_order="auto", draw_ascending=None)`: `"size"` or `"alpha"` draws the
+  points sorted by marker area or opacity; `draw_ascending=True` draws low to high, so the
+  highest is on top, and False the reverse. Unset, it is False for `"alpha"`, the faintest
+  on top, and True for `"size"`, the largest on top. `"auto"`, the default, is `"alpha"`
+  with an alpha variable, so faint points are drawn over the opaque ones that would hide
+  them, and row order without one; `None` asks for row order. The segments of `connect`
+  keep their order.
 
 ### Changed - BREAKING CHANGES
 

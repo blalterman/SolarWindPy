@@ -329,8 +329,8 @@ class SizeScale(_MarkerScale):
         chooses them from the norm's ``vmin`` and ``vmax`` (see Notes);
         False or None draws no key.
     key_kwargs : Mapping, optional
-        Passed to :meth:`matplotlib.axes.Axes.legend`, e.g. ``loc``,
-        ``ncols`` or ``title``. Copied when the scale is built.
+        Passed to :class:`matplotlib.legend.Legend`, e.g. ``loc``, ``ncols``
+        or ``title``. Copied when the scale is built.
 
     Raises
     ------
@@ -367,7 +367,9 @@ class SizeScale(_MarkerScale):
     under any other norm, they are the values of
     :class:`~matplotlib.ticker.MaxNLocator` with four bins. The key's markers
     are opaque and grey, whatever the points' colour and alpha. Its title is
-    the plot's ``labels.size``.
+    the plot's ``labels.size``. The key is added to the axes as an extra
+    artist, not as their legend, so it is drawn beside any legend the axes
+    have or later get from ``ax.legend()``.
 
     Examples
     --------
@@ -437,7 +439,7 @@ class SizeScale(_MarkerScale):
 
     @property
     def key_kwargs(self):
-        r"""Read-only mapping passed to ``ax.legend``."""
+        r"""Read-only mapping passed to ``matplotlib.legend.Legend``."""
         return self._key_kwargs
 
     def _fields(self):
@@ -502,7 +504,9 @@ class AlphaScale(_MarkerScale, _BarScale):
         ``labels.alpha``.
     cbar_kwargs : Mapping, optional
         Passed to :meth:`matplotlib.figure.Figure.colorbar`, as for
-        ``ColorScale``. Copied when the scale is built.
+        ``ColorScale``. The bar lies horizontally above the plot's axes
+        unless these set ``location``, ``orientation`` or ``cax``. Copied
+        when the scale is built.
 
     Raises
     ------

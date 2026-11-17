@@ -503,9 +503,13 @@ visible; a range you pass is used as given. Reversing a range inverts it.
 Each scale also draws a guide from its own norm and range, so the guide
 reads the points exactly. The size key is a legend of opaque gray markers at
 chosen sizes: ``key=True`` picks round values between the norm's limits, and
-a list gives your own; ``key_kwargs`` goes to ``ax.legend``. The alpha bar is
-a colorbar of one color whose opacity runs over the range, with its ticks in
-the variable's units; ``cbar_kwargs`` goes to the colorbar.
+a list gives your own; ``key_kwargs`` goes to matplotlib's ``Legend``. The
+key is added to the axes beside their own legend, so a legend already on the
+axes stays, and a later ``ax.legend()`` draws its own entries next to the
+key. The alpha bar is a colorbar of one color whose opacity runs over the
+range, with its ticks in the variable's units. It lies horizontally above the
+axes; ``cbar_kwargs`` goes to the colorbar, and a ``location`` there moves
+it.
 ``set_labels(size=..., alpha=...)`` titles them, as ``z`` labels the
 colorbar, and adds them to the plot's ``path``. ``make_plot`` returns them in
 ``guides``: ``guides.size`` is the key and ``guides.alpha`` the bar, each
@@ -513,7 +517,9 @@ None when not drawn.
 
 Below, the size is the density on a ``LogNorm`` with a key at 2, 5, 10 and 20
 cm⁻³, and the alpha is each fit's relative uncertainty in ``w`` from 0.02 to
-0.08 with ``range=(1, 0.15)``, so the least certain fits fade.
+0.08 with ``range=(1, 0.15)``, so the least certain fits fade. Faint points
+are drawn on top, so the opaque ones do not hide them (see ``draw_order``
+below).
 
 .. plot::
 
@@ -543,7 +549,7 @@ cm⁻³, and the alpha is each fit's relative uncertainty in ``w`` from 0.02 to
    )
    ax, points, segments, guides = sc.make_plot(
        size_scale=SizeScale(
-           norm=LogNorm(), key=[2, 5, 10, 20], key_kwargs={"loc": "upper left"}
+           norm=LogNorm(), key=[2, 5, 10, 20], key_kwargs={"loc": "lower right"}
        ),
        alpha_scale=AlphaScale(norm=Normalize(0.02, 0.08), range=(1, 0.15)),
        edgecolors="w",
@@ -570,16 +576,16 @@ SizeScale
 
 All five variables fit on one plot: position in ``x`` and ``y``, ``z`` in
 color with its colorbar, ``size`` with its key and ``alpha`` with its bar.
-``draw_order`` chooses which points are drawn on top. By default they are
-drawn in row order; ``"size"`` or ``"alpha"`` sorts them by their marker's
-area or opacity, from low to high so the largest or most opaque end up on
-top, and ``draw_ascending=False`` reverses that. Below,
-``draw_order="alpha", draw_ascending=False`` draws the faintest points last,
-so the uncertain fits lie over the certain ones without hiding them. Here
-``z`` is the helium abundance, higher in the fast wind. The figure uses
-constrained layout, which sets the two bars side by side clear of each
-other's labels; without a layout engine the alpha bar is drawn outside the
-colorbar.
+``draw_order`` chooses which points are drawn on top. ``"size"`` or
+``"alpha"`` sorts them by their marker's area or opacity: by default the
+largest area or the faintest opacity ends up on top, and ``draw_ascending``
+sets the direction yourself, ``True`` from low to high. The default,
+``"auto"``, is ``"alpha"`` when there is an alpha variable, so the faintest
+points are drawn last and lie over the opaque ones without being hidden,
+and the order of the rows otherwise; ``draw_order=None`` asks for row order
+in either case. Below, the uncertain fits are drawn over the certain ones.
+Here ``z`` is the helium abundance, higher in the fast wind; its colorbar
+stands on the right of the axes and the alpha bar lies above them.
 
 .. plot::
 
@@ -618,10 +624,8 @@ colorbar.
    ax, points, segments, guides = sc.make_plot(
        ax=ax,
        cmap="viridis",
-       size_scale=SizeScale(norm=LogNorm(), key_kwargs={"loc": "upper left"}),
+       size_scale=SizeScale(norm=LogNorm(), key_kwargs={"loc": "lower right"}),
        alpha_scale=AlphaScale(norm=Normalize(0.02, 0.08), range=(1, 0.15)),
-       draw_order="alpha",
-       draw_ascending=False,
        edgecolors="w",
        linewidths=0.5,
    )

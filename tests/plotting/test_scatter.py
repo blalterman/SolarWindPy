@@ -846,12 +846,6 @@ def test_alpha_bar_ramps_one_colour_over_the_range_on_the_scales_norm(ax, z):
     assert (guides.color is None) == (z is None)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the alpha bar is vertical, on the right; remove this marker when "
-    "the alpha bar defaults to location='top'",
-)
 @pytest.mark.parametrize("layout", [None, "constrained"])
 @pytest.mark.parametrize("z", [None, [1.0, 2.0, 3.0]], ids=["no-z", "z"])
 def test_alpha_bar_lies_horizontal_above_the_axes_clear_of_the_axes_and_the_z_colorbar(
@@ -912,28 +906,16 @@ def test_alpha_bars_cbar_kwargs_override_its_placement(ax, cbar_kwargs, orientat
 _ALPHA = {"alpha": [2.0, 3.0, 1.0]}
 _SIZE = {"size": [3.0, 1.0, 2.0]}
 _REVERSED = {"alpha_scale": "reversed"}
-_NOT_YET = pytest.mark.xfail(
-    strict=True,
-    raises=(AssertionError, ValueError),
-    reason="draw_order defaults to None and draw_ascending to True; remove this "
-    "marker when draw_order='auto' puts the faintest points on top",
-)
 
 
 @pytest.mark.parametrize(
     "variables, plot_kwargs, rows",
     [
-        pytest.param(_ALPHA, {}, [1, 0, 2], marks=_NOT_YET, id="default-alpha"),
-        pytest.param(
-            _ALPHA, {"draw_order": "auto"}, [1, 0, 2], marks=_NOT_YET, id="auto"
-        ),
-        pytest.param(
-            _ALPHA, _REVERSED, [2, 0, 1], marks=_NOT_YET, id="default-reversed-range"
-        ),
+        pytest.param(_ALPHA, {}, [1, 0, 2], id="default-alpha"),
+        pytest.param(_ALPHA, {"draw_order": "auto"}, [1, 0, 2], id="auto"),
+        pytest.param(_ALPHA, _REVERSED, [2, 0, 1], id="default-reversed-range"),
         pytest.param(_ALPHA, {"draw_order": None}, [0, 1, 2], id="None"),
-        pytest.param(
-            _ALPHA, {"draw_order": "alpha"}, [1, 0, 2], marks=_NOT_YET, id="alpha"
-        ),
+        pytest.param(_ALPHA, {"draw_order": "alpha"}, [1, 0, 2], id="alpha"),
         pytest.param(
             _ALPHA,
             {"draw_order": "alpha", "draw_ascending": True},
@@ -948,9 +930,7 @@ _NOT_YET = pytest.mark.xfail(
             [0, 2, 1],
             id="size-descending",
         ),
-        pytest.param(
-            {**_SIZE, **_ALPHA}, {}, [1, 0, 2], marks=_NOT_YET, id="default-both"
-        ),
+        pytest.param({**_SIZE, **_ALPHA}, {}, [1, 0, 2], id="default-both"),
         pytest.param(
             {**_SIZE, **_ALPHA}, {"draw_order": "size"}, [1, 2, 0], id="size-both"
         ),
@@ -992,15 +972,6 @@ def test_draw_order_leaves_the_segments_in_row_order(ax):
     _assert_segments(segments, x, SY, [(0, 1), (1, 2)])
 
 
-_KEY_TAKES_THE_SLOT = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the size key is drawn with ax.legend, so it takes the axes' one legend "
-    "slot; remove this marker when it is added with ax.add_artist",
-)
-
-
-@_KEY_TAKES_THE_SLOT
 def test_size_key_leaves_a_legend_already_on_the_axes_in_place(ax):
     """A legend on ``ax`` before ``make_plot`` stays its legend; the key is another artist.
 
@@ -1014,16 +985,16 @@ def test_size_key_leaves_a_legend_already_on_the_axes_in_place(ax):
     assert guides.size in ax.artists
 
 
-@_KEY_TAKES_THE_SLOT
 def test_a_later_legend_on_the_axes_leaves_the_size_key_on_them(ax):
-    """``ax.legend()`` after ``make_plot`` adds a legend of its own entries; the key stays.
+    """``ax.legend()`` after ``make_plot`` becomes the axes' legend; the key stays.
 
     ON FAILURE: the code is wrong.
     """
     _, _, _, guides = Scatter(SX, SY, size=[1.0, 2.0, 3.0]).make_plot(ax=ax)
     ax.plot(SX, SY, label="fit")
     legend = ax.legend()
-    assert [t.get_text() for t in legend.get_texts()] == ["fit"]
+    assert ax.get_legend() is legend
+    assert legend is not guides.size
     assert guides.size in ax.artists
     assert [t.get_text() for t in guides.size.get_texts()] == [
         "1",
@@ -1098,12 +1069,6 @@ def test_size_and_alpha_labels_title_the_key_and_the_alpha_bar_and_join_the_path
             {"draw_order": "area"},
             ValueError,
             r"draw_order must be 'auto', None, 'size' or 'alpha'",
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason="the message lists None, 'size' and 'alpha'; remove this "
-                "marker when draw_order accepts 'auto'",
-            ),
         ),
     ],
     ids=[
