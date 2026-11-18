@@ -21,8 +21,10 @@ from the version they cite. The science moves forward more easily, more coherent
   context needed to interpret them, such as solar activity indicators and event catalogs. The
   conclusions drawn from that analysis belong to the researcher who draws them.
 - **One data model for every mission.** Measurements live in pandas DataFrames whose columns are
-  a three-level index of measurement, component, and species, with SI units inside and NaN for
-  missing data, so data from any spacecraft runs through the same tools.
+  a three-level index of measurement, component, and species. Values are stored in display units
+  (km/s, cm⁻³, nT, and so on), each quantity's unit is defined once, calculations convert to SI
+  and back through those definitions, and NaN marks missing data. Data from any spacecraft runs
+  through the same tools.
 - **Defined once, layered.** Each physical quantity, unit, and convention is defined once, each
   name predicts what it holds, and each layer builds only on the layers beneath it.
 - **Physics carries its reasoning.** Each implemented result cites its source, and docstrings
