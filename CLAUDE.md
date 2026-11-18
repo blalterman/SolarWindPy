@@ -1,5 +1,9 @@
 # SolarWindPy
 
+Every choice in this repository derives from its governance, imported here:
+
+@GOVERNANCE.md
+
 In-situ solar wind plasma analysis. The author owns the physics and the public API.
 
 ## Environment
