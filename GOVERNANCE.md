@@ -59,7 +59,8 @@ from the version they cite. The science moves forward more easily, more coherent
 - Public docstrings meet PyHC standard 8, and every example in the documentation runs as a
   doctest.
 - On master, the test suite, the documentation build with warnings as errors, and the
-  import-layering check pass on Linux, macOS, and Windows for every supported Python version.
+  import-layering check pass on Linux for every commit, and on Linux, macOS, and Windows for
+  every supported Python version on a weekly schedule and before every release.
 - Every release installs from PyPI and conda-forge and carries a Zenodo DOI under the concept
   DOI, and `CITATION.cff` names the current release.
 - Dependency floors sit inside the PHEP 3 window apart from the exceptions `CONTRIBUTING.md`
