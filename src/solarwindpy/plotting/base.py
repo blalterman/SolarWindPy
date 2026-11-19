@@ -243,7 +243,7 @@ class Base(_WithLogger, ABC):
 
         Parameters
         ----------
-        clip : clip setting, Mapping or ClipAxes
+        clip : bool, str, tuple, None, Mapping or ClipAxes
             A clip setting (``Base.clip_data``), a pair included, applies to
             every axis in ``_clipped_axes``. A mapping
             gives an axis its own setting; unnamed axes are None. A
@@ -684,7 +684,7 @@ class ColorPlot(_AggregateLimits):
             Coordinates of each point.
         z : pd.Series, optional
             Value at each point. If None, every point gets ``z = 1``.
-        clip : clip setting, Mapping or None, optional
+        clip : bool, str, tuple, Mapping or None, optional
             Stored as ``self.clip``, a ``ClipAxes``, None as False. A clip
             setting (``Base.clip_data``: True, ``"l"``, ``"u"`` or a pair
             ``(lower, upper)``) applies to every axis in ``_clipped_axes``; a

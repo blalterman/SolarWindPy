@@ -849,7 +849,7 @@ class BinnedData:
         right-closed bins, ``(a, b]``. Integer or string bin rules are refused.
     log : dict of str to bool, optional
         Columns binned as ``log10(abs())``. Unlisted columns are linear.
-    clip : dict of str to clip setting, optional
+    clip : dict of str to bool, str or tuple, optional
         Each column's clip setting, as ``Base.clip_data`` takes it: True clips
         to the 0.05th and 99.95th percentiles (over the finite values of the
         rows ``mask`` keeps, after ``log``) before binning, ``"l"`` or ``"u"``

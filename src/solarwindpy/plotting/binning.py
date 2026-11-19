@@ -305,7 +305,7 @@ class FixedGrid(Binning):
             Each binned axis's input name, e.g. ``{"x": x.name}``.
         log : dict of str to bool or None
             ``logx``, ``logy`` per axis, as given.
-        clip : dict of str to clip setting or None
+        clip : dict of str to bool, str, tuple or None
             Each axis's clip setting, as given (see ``Base._clip_by_axis``). A
             setting equals the ``BinnedData``'s when it clips at the same
             quantiles.
