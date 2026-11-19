@@ -745,3 +745,14 @@ def test_set_shared_labels_with_label_objects_issues_no_warning(trend5):
             z=TeXlabel(("w", "", "p1")),
         )
     assert [str(w.message) for w in record] == []
+
+
+def test_logx_true_make_fit(agged):
+    """Ensure ``logx`` propagates to the trend function."""
+    trend_fit = trend_fits.TrendFit(
+        agged, gaussians.Gaussian, lines.Line, y=MU, yerr=SIGMA, logx=True
+    )
+    assert trend_fit.logx is True
+    with _two_point_trend():
+        trend_fit.make_fit()
+    assert isinstance(trend_fit.trend, lines.Line)
