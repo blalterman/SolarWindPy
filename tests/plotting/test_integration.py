@@ -35,7 +35,7 @@ from solarwindpy.plotting.labels import (  # noqa: E402
     elemental_abundance,
     special,
 )
-from solarwindpy.plotting.labels import datetime as dt_labels  # noqa: E402
+from solarwindpy.plotting.labels import epochs  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 
 
@@ -203,11 +203,11 @@ _STRUCTURED_LABELS = {
     "ElementalAbundance-pct": lambda: elemental_abundance.ElementalAbundance(
         "Fe", "O", pct_unit=True, photospheric=False
     ),
-    "Timedelta": lambda: dt_labels.Timedelta("30min"),
-    "Frequency": lambda: dt_labels.Frequency("1h"),
-    "DateTime": lambda: dt_labels.DateTime("year"),
-    "Epoch": lambda: dt_labels.Epoch("hour", "day"),
-    "January1st": lambda: dt_labels.January1st(),
+    "Timedelta": lambda: epochs.Timedelta("30min"),
+    "Frequency": lambda: epochs.Frequency("1h"),
+    "DateTime": lambda: epochs.DateTime("year"),
+    "Epoch": lambda: epochs.Epoch("hour", "day"),
+    "January1st": lambda: epochs.January1st(),
 }
 
 

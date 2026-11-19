@@ -944,14 +944,6 @@ class TestComparisonLabelStrings:
         label = labels_special.ComparisonLabel(a, b, "subtract")
         assert label.path == Path("subtract-n-p-b-c")
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=ModuleNotFoundError,
-        reason="DateTime is still defined in the module ruling Q9 renames to "
-        "solarwindpy.plotting.labels.epochs; No module named "
-        "'solarwindpy.plotting.labels.epochs'; remove this marker when the "
-        "rename lands",
-    )
     def test_label_without_units_gives_unknown_units(self, n_a):
         """If either label has no units, the comparison's units are ``???``.
 
@@ -1050,7 +1042,7 @@ class TestXcorrStrings:
 
 def _all_label_factories():
     """One factory per public label class; each passes its keywords to the class."""
-    from solarwindpy.plotting.labels import composition, datetime
+    from solarwindpy.plotting.labels import composition, epochs
     from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 
     n = labels_base.TeXlabel(_N_P1)
@@ -1071,11 +1063,11 @@ def _all_label_factories():
             n, n, "subtract", **kw
         ),
         "Xcorr": lambda **kw: labels_special.Xcorr(n, n, "pearson", **kw),
-        "Timedelta": lambda **kw: datetime.Timedelta("1h", **kw),
-        "DateTime": lambda **kw: datetime.DateTime("Year", **kw),
-        "Epoch": lambda **kw: datetime.Epoch("hour", "day", **kw),
-        "Frequency": lambda **kw: datetime.Frequency("1h", **kw),
-        "January1st": lambda **kw: datetime.January1st(**kw),
+        "Timedelta": lambda **kw: epochs.Timedelta("1h", **kw),
+        "DateTime": lambda **kw: epochs.DateTime("Year", **kw),
+        "Epoch": lambda **kw: epochs.Epoch("hour", "day", **kw),
+        "Frequency": lambda **kw: epochs.Frequency("1h", **kw),
+        "January1st": lambda **kw: epochs.January1st(**kw),
         "Ion": lambda **kw: composition.Ion("O", 6, **kw),
         "ChargeStateRatio": lambda **kw: composition.ChargeStateRatio(
             ("O", 7), ("O", 6), **kw

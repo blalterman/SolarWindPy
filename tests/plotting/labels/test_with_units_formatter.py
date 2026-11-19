@@ -103,8 +103,8 @@ def test_every_label_class_sizes_its_unit_brackets(make):
 
     ON FAILURE: the code is wrong.
     """
-    from solarwindpy.plotting.labels import datetime, special
+    from solarwindpy.plotting.labels import epochs, special
 
-    label = str(make(special, datetime))
+    label = str(make(special, epochs))
     assert r" \; \left[" in label
     assert label.endswith(r"\right]$")

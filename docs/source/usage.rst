@@ -433,7 +433,7 @@ the cycle's phase, not its amplitude.
    import pandas as pd
    from solarwindpy.plotting.scatter import Scatter
    from solarwindpy.plotting.labels.base import TeXlabel
-   from solarwindpy.plotting.labels.datetime import DateTime
+   from solarwindpy.plotting.labels.epochs import DateTime
    from solarwindpy.solar_activity.sunspot_number.sidc import SIDC
 
    rng = np.random.default_rng(3)

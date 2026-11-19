@@ -6,8 +6,8 @@ __all__ = [
     "base",
     "chemistry",
     "composition",
-    "datetime",
     "elemental_abundance",
+    "epochs",
     "special",
 ]
 
@@ -18,8 +18,8 @@ from ...core import quantities as _quantities
 from . import base
 from . import chemistry
 from . import composition
-from . import datetime
 from . import elemental_abundance
+from . import epochs
 from . import special
 
 
@@ -80,7 +80,7 @@ def available():
     c = sorted(base._trans_component.keys())
     s = sorted(base._trans_species.keys())
     a = []
-    for case in (special, composition, elemental_abundance, datetime):
+    for case in (special, composition, elemental_abundance, epochs):
         for x in dir(case):
             x = getattr(case, x)
             if (

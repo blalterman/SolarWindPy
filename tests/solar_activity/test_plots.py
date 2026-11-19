@@ -186,7 +186,7 @@ def test_axes_are_labelled_with_time_and_the_indicator(sidc):
     fig, ax = plt.subplots()
     SSNPlot(sidc).make_plot(ax)
 
-    assert ax.get_xlabel() == str(labels.datetime.DateTime("Year"))
+    assert ax.get_xlabel() == str(labels.epochs.DateTime("Year"))
     assert ax.get_ylabel() == str(labels.special.SSN("m13"))
 
 

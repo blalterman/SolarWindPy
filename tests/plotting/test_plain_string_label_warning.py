@@ -34,7 +34,7 @@ from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels import base as labels_base  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
-from solarwindpy.plotting.labels.datetime import DateTime  # noqa: E402
+from solarwindpy.plotting.labels.epochs import DateTime  # noqa: E402
 from solarwindpy.plotting.labels.special import Count, ManualLabel  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
