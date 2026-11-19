@@ -108,9 +108,8 @@ class DailyLoader(DataLoader):
     def max_age(self):
         return pd.Timedelta(days=1)
 
-    @staticmethod
-    def convert_nans(data):
-        return data
+    def convert_nans(self, data):
+        data.replace(-1, np.nan, inplace=True)
 
     def read_data(self, path):
         return pd.read_csv(path, index_col=0)
