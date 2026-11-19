@@ -38,6 +38,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `solarwindpy/core/data/`, and `solarwindpy.examples.load_plasma` reads them from there. The
   example spacecraft data labels its columns `pos`, `v` and `carr`, the labels
   `solarwindpy.core.spacecraft.Spacecraft` reads, instead of `pos_HCI`, `v_HCI` and `Carr`.
+- Input checks raise a named exception with a message, under `python -O` too, instead of a
+  bare `AssertionError`:
+  - `solarwindpy.core.plasma.Plasma.set_sc` raises `TypeError` for anything other than a
+    `Spacecraft` or None, or for spacecraft data not on a `DatetimeIndex`;
+  - `solarwindpy.core.plasma.Plasma.set_aux` raises `TypeError` for anything other than a
+    `DataFrame` or None, or for data not on a `DatetimeIndex`;
+  - `solarwindpy.core.spacecraft.Spacecraft` raises `TypeError` for data not on a
+    `DatetimeIndex`, and `ValueError` when a measurement does not hold exactly one column per
+    component (`pos` and `v`: x, y, z; `carr`: lat, lon);
+  - `solarwindpy.fitfunctions.core.FitFunction` raises `InvalidParameterError` when `xoutside`
+    or `youtside` is not `(lower, upper)` with lower < upper, or when `yerr_min` or `yerr_max`
+    is given without `yerr`;
+  - `solarwindpy.fitfunctions.plots.FFPlot.set_observations` raises `ValueError` when `y_fit`
+    and the observations differ in shape;
+  - `solarwindpy.instabilities.verscharen2016.StabilityCondition` raises `ValueError` when
+    `beta` and `R` differ in shape, `solarwindpy.instabilities.verscharen2016.StabilityContours`
+    raises `TypeError` for a `beta` that is not a `numpy.ndarray`, and its `plot_contours`
+    raises `TypeError` for an `ax` that is not a `matplotlib.axes.Axes`.
+- **Breaking:** `solarwindpy.instabilities.verscharen2016.beta_ani_inst` is
+  `beta_ani_inst(beta, a, b, c)`: the coefficients have no `None` defaults, so leaving one out
+  raises a `TypeError` naming it.
+- `solarwindpy.core.ions.Ion` raises `ValueError` for misnamed column levels with the message
+  "Ion data columns must have levels named ...", and for a species containing `+` with the
+  message `solarwindpy.core.plasma.Plasma` gives.
 
 ### Removed
 
