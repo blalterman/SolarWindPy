@@ -228,27 +228,42 @@ nitpick_ignore = [
     # no Sphinx inventory: its documentation site returns 404 for objects.inv.
     # 3.x defines the class in its private ``_internal`` module.
     ("py:class", "docstring_inheritance._internal.NumpyDocstringInheritanceInitMeta"),
-    # Private mixin base of plotting.hist1d.Hist1D and hist2d.Hist2D.
-    # Private names are not documented, so the show-inheritance line cannot
-    # link it.
-    ("py:class", "solarwindpy.plotting.base._OnFixedGrid"),
-    # Private base holding ``alim`` for plotting.base.ColorPlot and BinnedPlot,
-    # named on their show-inheritance line for the same reason.
-    ("py:class", "solarwindpy.plotting.base._AggregateLimits"),
-    # Private base of core.vector.Vector and core.tensor.Tensor, named on
-    # their show-inheritance line for the same reason.
-    ("py:class", "solarwindpy.core.base._ComponentFrame"),
-    # Private bases of plotting.scales.SizeScale and AlphaScale (the range and
-    # its mapping) and of ColorScale and AlphaScale (the colorbar settings),
-    # named on their show-inheritance line for the same reason.
-    ("py:class", "solarwindpy.plotting.scales._MarkerScale"),
-    ("py:class", "solarwindpy.plotting.scales._BarScale"),
     # Private types that public signatures take or return. Their docstrings
     # name the real type; private names are not documented, so the name
     # cannot link.
     ("py:obj", "solarwindpy.plotting.binned._PlotSource"),
     ("py:obj", "solarwindpy.fitfunctions.core._ChisqPerDegreeOfFreedom"),
 ]
+
+
+# -- Show-inheritance lines name public classes only ---------------------------
+
+
+def _public_bases(cls):
+    """Return ``cls`` if it is public, else the public classes it builds on.
+
+    A private class is not documented, so a show-inheritance line naming it
+    links nowhere. Its own bases stand in for it, followed up to the first
+    public class on each path.
+    """
+    if not cls.__name__.startswith("_"):
+        return [cls]
+    return [public for base in cls.__bases__ for public in _public_bases(base)]
+
+
+def _show_public_bases(app, name, obj, options, bases):
+    """Replace each private base on a show-inheritance line by its public bases."""
+    public = []
+    for base in bases:
+        expanded = _public_bases(base) if isinstance(base, type) else [base]
+        public.extend(b for b in expanded if b not in public)
+    if len(public) > 1 and object in public:
+        public.remove(object)
+    bases[:] = public
+
+
+def setup(app):
+    app.connect("autodoc-process-bases", _show_public_bases)
 
 # -- HTML output configuration -----------------------------------------------
 
