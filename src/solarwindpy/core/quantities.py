@@ -321,6 +321,11 @@ COMPONENTS = MappingProxyType(
 )
 
 
+#: The elements, by symbol, that species labels know; composition labels use
+#: every one but H.
+_ELEMENTS = ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S")
+
+
 def _species_tex():
     """Return the TeX of every species: ions, then elements and isotopes."""
     tex = {
@@ -337,7 +342,7 @@ def _species_tex():
         "he": r"\mathrm{He}",
         "dv": r"\Delta v",  # Because we want pdv in species
     }
-    for s in ("C", "Fe", "He", "H", "Mg", "Ne", "N", "O", "Si", "S"):
+    for s in _ELEMENTS:
         tex[s] = r"\mathrm{%s}" % s
     for mass, s in (
         (3, "He"),

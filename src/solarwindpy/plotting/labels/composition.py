@@ -3,9 +3,12 @@ r"""Labels for heavy ion charge states and charge-state ratios."""
 __all__ = ["Ion", "ChargeStateRatio"]
 
 from pathlib import Path
+
+from ...core.quantities import _ELEMENTS
 from . import base
 
-known_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
+#: The heavy-ion elements composition labels know: the core's elements but H.
+known_species = tuple(s for s in _ELEMENTS if s != "H")
 
 
 class Ion(base.Base):
