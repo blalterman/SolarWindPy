@@ -11,6 +11,7 @@ __all__ = [
     "ICMECAT",
 ]
 
+import copy
 import re
 import pandas as pd
 import numpy as np
@@ -59,19 +60,6 @@ SPACECRAFT_NAMES = frozenset(
 _DATETIME_COLUMNS = ["icme_start_time", "mo_start_time", "mo_end_time"]
 
 
-RULES_OF_THE_ROAD = """\
-See https://helioforecast.space/icmecat for the most up-to-date rules of
-the road. As of January 2026, they are:
-
-    If this catalog is used for results that are published in peer-reviewed
-    international journals, please contact chris.moestl@outlook.com for
-    possible co-authorship.
-
-    Cite the catalog with: Möstl et al. (2020)
-    DOI: 10.6084/m9.figshare.6356420
-"""
-
-
 class ICMECATDownloadError(cache.DownloadError):
     """Raised when the ICMECAT catalog cannot be downloaded and none is cached."""
 
@@ -117,8 +105,9 @@ def _successor_urls(url):
 class ICMECAT(_WithLogger):
     """Access the HELIO4CAST Interplanetary Coronal Mass Ejection Catalog.
 
-    See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog's
-    citation and co-authorship terms.
+    Follow the ICMECAT rules of the road at the HELIO4CAST site
+    (https://helioforecast.space/icmecat) when publishing results that use
+    the catalog.
 
     The downloaded catalog is kept in SolarWindPy's download cache
     (:mod:`solarwindpy.solar_activity.cache`, by default
@@ -208,7 +197,7 @@ class ICMECAT(_WithLogger):
     def __init__(self, spacecraft: Optional[str] = None):
         self._spacecraft = spacecraft
         self._data: Optional[pd.DataFrame] = None
-        self._intervals: Optional[pd.DataFrame] = None
+        self._estimated_intervals: Optional[pd.DataFrame] = None
 
         self._load_data()
 
@@ -248,12 +237,14 @@ class ICMECAT(_WithLogger):
         :meth:`contains` and :meth:`get_events_in_range` do not use the
         estimates; they use :attr:`strict_intervals`.
         """
-        return self._intervals
+        return self._estimated_intervals
 
     @property
     def strict_intervals(self) -> pd.DataFrame:
         """Events with a recorded ``mo_end_time`` only, no estimated ends."""
-        return self._intervals[self._intervals["mo_end_time"].notna()].copy()
+        return self._estimated_intervals[
+            self._estimated_intervals["mo_end_time"].notna()
+        ].copy()
 
     def __len__(self) -> int:
         """Number of ICME events."""
@@ -356,24 +347,28 @@ class ICMECAT(_WithLogger):
     # Filtering
     # -------------------------------------------------------------------------
 
-    def _filter_by_spacecraft(self, spacecraft: str) -> None:
-        """Filter data to specified spacecraft (case-insensitive)."""
-        # Build case-insensitive mapping
+    def _catalog_spelling(self, spacecraft: str) -> str:
+        """The catalog's spelling of ``spacecraft``, matched case-insensitively.
+
+        When no ``sc_insitu`` value matches, logs a warning naming the
+        available spacecraft and returns ``spacecraft`` as given, which
+        selects no events.
+        """
         available = self._data["sc_insitu"].unique()
         name_map = {name.lower(): name for name in available}
-
-        # Find matching spacecraft name (case-insensitive)
-        spacecraft_lower = spacecraft.lower()
-        if spacecraft_lower in name_map:
-            actual_name = name_map[spacecraft_lower]
-        else:
+        actual_name = name_map.get(spacecraft.lower())
+        if actual_name is None:
             self.logger.warning(
                 "Spacecraft '%s' not found. Available: %s",
                 spacecraft,
                 sorted(available),
             )
-            actual_name = spacecraft  # Will result in empty filter
+            return spacecraft
+        return actual_name
 
+    def _filter_by_spacecraft(self, spacecraft: str) -> None:
+        """Keep only the events of ``spacecraft``, matched case-insensitively."""
+        actual_name = self._catalog_spelling(spacecraft)
         self._data = self._data[self._data["sc_insitu"] == actual_name].copy()
         self._spacecraft = spacecraft  # Keep user's original spelling for display
         self.logger.info("Filtered to %s: %d events", actual_name, len(self._data))
@@ -391,20 +386,10 @@ class ICMECAT(_WithLogger):
         ICMECAT
             New instance with filtered data (does not re-download).
         """
-        # Build case-insensitive mapping
-        available = self._data["sc_insitu"].unique()
-        name_map = {name.lower(): name for name in available}
-
-        # Find matching spacecraft name (case-insensitive)
-        spacecraft_lower = spacecraft.lower()
-        actual_name = name_map.get(spacecraft_lower, spacecraft)
-
-        # Create new instance without re-downloading
-        new = object.__new__(ICMECAT)
-        new._spacecraft = spacecraft  # Keep user's original spelling for display
-        new._version = self._version
-        new._data = self._data[self._data["sc_insitu"] == actual_name].copy()
-        new._intervals = None
+        # A shallow copy shares the loaded catalog without downloading it
+        # again; filtering then replaces the copy's data, never this one's.
+        new = copy.copy(self)
+        new._filter_by_spacecraft(spacecraft)
         new._prepare_intervals()
         return new
 
@@ -430,7 +415,7 @@ class ICMECAT(_WithLogger):
 
         if len(result) == 0:
             result["interval_end"] = pd.Series(dtype="datetime64[ns]")
-            self._intervals = result
+            self._estimated_intervals = result
             return
 
         # Compute interval_end with fallbacks
@@ -452,7 +437,7 @@ class ICMECAT(_WithLogger):
         interval_end.loc[mask_still_missing] = fallback
 
         result["interval_end"] = interval_end
-        self._intervals = result
+        self._estimated_intervals = result
 
     # -------------------------------------------------------------------------
     # Query Methods
@@ -508,7 +493,7 @@ class ICMECAT(_WithLogger):
         if len(times) == 0:
             return pd.Series([], dtype=bool)
 
-        if len(self._intervals) == 0:
+        if len(self._estimated_intervals) == 0:
             return pd.Series(False, index=times.index)
 
         # Use strict intervals (valid mo_end_time only)
@@ -554,7 +539,7 @@ class ICMECAT(_WithLogger):
             - duration_*: Duration statistics in hours
             - spacecraft: If filtered (optional)
         """
-        intervals = self._intervals
+        intervals = self._estimated_intervals
 
         if len(intervals) == 0:
             stats = {
