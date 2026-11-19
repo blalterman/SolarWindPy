@@ -944,12 +944,20 @@ class TestComparisonLabelStrings:
         label = labels_special.ComparisonLabel(a, b, "subtract")
         assert label.path == Path("subtract-n-p-b-c")
 
+    @pytest.mark.xfail(
+        strict=True,
+        raises=ModuleNotFoundError,
+        reason="DateTime is still defined in the module ruling Q9 renames to "
+        "solarwindpy.plotting.labels.epochs; No module named "
+        "'solarwindpy.plotting.labels.epochs'; remove this marker when the "
+        "rename lands",
+    )
     def test_label_without_units_gives_unknown_units(self, n_a):
         """If either label has no units, the comparison's units are ``???``.
 
         ON FAILURE: the code is wrong.
         """
-        from solarwindpy.plotting.labels.datetime import DateTime
+        from solarwindpy.plotting.labels.epochs import DateTime
 
         label = labels_special.ComparisonLabel(n_a, DateTime("Year"), "subtract")
         assert label.units == "???"
