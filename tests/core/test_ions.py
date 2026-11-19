@@ -266,3 +266,23 @@ def test_ion_data_with_wrong_level_names_raises_value_error_naming_the_levels(na
         data = data.xs("p1", axis=1, level="S")
     with pytest.raises(ValueError, match="Ion data columns must have levels named"):
         ions.Ion(data.rename_axis(columns=names), "p1")
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Ion._set_species refuses '+' with its own message, 'Species with '+' "
+    "are not supported'; expected \"Ion.species can't contain '+': p1+a\"; remove "
+    "this marker when Ion._set_species goes through _clean_species_for_setting",
+)
+def test_an_ion_species_joined_by_plus_raises_value_error_naming_it():
+    r"""An Ion species containing ``+`` raises ValueError naming it, as a Plasma's does.
+
+    Combined species are formed in method calls, never stored; one check and
+    one message refuse them for every object that stores a species.
+
+    ON FAILURE: the code is wrong.
+    """
+    data = swp.examples.load_plasma().data
+    with pytest.raises(ValueError, match=r"^Ion\.species can't contain '\+': p1\+a$"):
+        ions.Ion(data, "p1+a")
