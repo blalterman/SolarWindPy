@@ -121,14 +121,6 @@ def test_an_unknown_label_raises_naming_the_level_and_its_labels():
         v("par")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Ion.set_data passes pandas' bare KeyError('zz') through since "
-    "Core._select was deleted; expected message \"Unknown species 'zz'. "
-    'Available: [...]"; remove this marker when Ion names the available '
-    "species again",
-)
 def test_an_ion_of_an_absent_species_raises_naming_the_species_present(plasma_data):
     r"""An Ion of species ``zz``, absent from the data, raises KeyError listing p1.
 

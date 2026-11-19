@@ -137,6 +137,9 @@ class Ion(base.Base):
 
         Raises
         ------
+        KeyError
+            If the data hold no species :attr:`species`; the message names
+            the species they hold.
         ValueError
             If the data column names are unrecognized, or the time index holds
             missing timestamps (``NaT``).
@@ -146,7 +149,13 @@ class Ion(base.Base):
 
         if data.columns.names == ["M", "C", "S"]:
             data = data.sort_index(axis=1)
-            data = data.xs(self.species, axis=1, level="S")
+            try:
+                data = data.xs(self.species, axis=1, level="S")
+            except KeyError:
+                available = self._level_labels(data.columns, "S").tolist()
+                raise KeyError(
+                    f"Unknown species {self.species!r}. Available: {available}"
+                ) from None
         elif data.columns.names != ["M", "C"]:
             raise ValueError(f"Unrecognized data column names: {data.columns.names}")
 
