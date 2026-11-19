@@ -1242,11 +1242,6 @@ class Plasma(base.Base):
 
             :math:`\beta = \frac{2 p_{th}}{\rho} \frac{\mu_0 \rho}{B^2} = \frac{2 \mu_0 p_{th}}{B^2}`.
         """
-        slist = self._chk_species(*species)  # noqa: F841
-        include_dynamic = False
-        if include_dynamic:
-            raise NotImplementedError
-
         pth = self.pth(*species)
         bsq = self.b.mag.pow(2)
         beta = pth.divide(bsq, axis=0)
@@ -1274,13 +1269,6 @@ class Plasma(base.Base):
             See Parameters for more info.
         """
         pth = self.pth(*species).loc[:, ["par", "per"]]
-
-        include_dynamic = False
-        if include_dynamic:
-            raise NotImplementedError
-            pdv = self.pdv(*species)
-            pth.loc[:, "par"] = pth.loc[:, "par"].add(pdv, axis=0)
-
         exp = pd.Series({"par": -1, "per": 1})
 
         ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
