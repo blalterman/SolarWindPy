@@ -265,6 +265,13 @@ class FitFunction(_WithLogger, ABC, metaclass=FitFunctionMeta):
         yerr_max selection then uses yerr/(y*ln(10)), the
         uncertainty of log10(y).
 
+    Raises
+    ------
+    ~solarwindpy.fitfunctions.core.InvalidParameterError
+        If xobs, yobs and yerr differ in shape; if yerr_min or
+        yerr_max is given without yerr; or if xoutside or youtside
+        is not ``(lower, upper)`` with lower < upper.
+
     See Also
     --------
     make_fit : Execute the fitting procedure
@@ -331,8 +338,12 @@ class FitFunction(_WithLogger, ABC, metaclass=FitFunctionMeta):
         self._forget_fit()
 
         if yerr is None:
-            assert yerr_min is None
-            assert yerr_max is None
+            for name, limit in (("yerr_min", yerr_min), ("yerr_max", yerr_max)):
+                if limit is not None:
+                    raise InvalidParameterError(
+                        f"{name} needs yerr: it selects observations by their "
+                        "uncertainty, and no yerr was given"
+                    )
 
         self.set_fit_obs(
             xobs,
@@ -869,7 +880,12 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
             return np.full_like(x, True, dtype=bool)
 
         lower, upper = outside
-        assert lower < upper
+        if not lower < upper:
+            # `axis` is "xobs" or "yobs"; the keyword is "xoutside" or "youtside".
+            raise InvalidParameterError(
+                f"{axis[0]}outside must be (lower, upper) with lower < upper, "
+                f"not {tuple(outside)}"
+            )
         mask = x <= lower
         mask |= x >= upper  # In-place OR instead of creating separate u_mask
         return mask

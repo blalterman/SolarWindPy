@@ -231,13 +231,6 @@ def test_axes_namedtuples_are_the_plotting_base_ones(name):
     assert getattr(plots, name) is getattr(base, name)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="FFPlot.set_observations checks shapes with bare asserts; expected "
-    "ValueError 'y_fit must have one value per raw observation'; remove this "
-    "marker when the asserts become ValueError",
-)
 @pytest.mark.parametrize("extra", [1, -1])
 def test_set_observations_refuses_a_y_fit_of_another_length(extra):
     """A model longer or shorter than the raw observations raises ValueError.

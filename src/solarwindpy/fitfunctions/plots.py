@@ -235,14 +235,24 @@ class FFPlot(object):
 
         Raises
         ------
-        AssertionError
+        ValueError
             If ``y_fit`` and ``observations.raw.x`` differ in shape, or
             ``y_fit`` masked by ``observations.tk_observed`` and
             ``observations.used.x`` differ in shape.
         """
 
-        assert y_fit.shape == observations.raw.x.shape
-        assert y_fit[observations.tk_observed].shape == observations.used.x.shape
+        if y_fit.shape != observations.raw.x.shape:
+            raise ValueError(
+                "y_fit must have one value per raw observation: "
+                f"y_fit {y_fit.shape}, observations.raw.x {observations.raw.x.shape}"
+            )
+        used = y_fit[observations.tk_observed]
+        if used.shape != observations.used.x.shape:
+            raise ValueError(
+                "observations.tk_observed must select one y_fit value per used "
+                f"observation: {used.shape} selected, observations.used.x "
+                f"{observations.used.x.shape}"
+            )
         self._observations = observations
         self._y_fit = y_fit
 
