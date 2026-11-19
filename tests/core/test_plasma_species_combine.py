@@ -4,8 +4,11 @@
 
 The author's ruling (2026-11-10): "+" means "combine in physically viable
 way". Number density, mass density, thermal pressure and temperature add over
-species; a total thermal speed is refused. ``RULING`` restates that ruling
-here so the expected values come from outside the code.
+species; a total thermal speed is refused. The kinetic energy flux adds over
+species too: its species sum is a partial sum per the author
+(``test_Wk_species_sum_is_a_partial_sum_over_species``), routed through the
+same mapping by the coherence-cleanup dispatch (S15). ``RULING`` restates
+these rules here so the expected values come from outside the code.
 
 The behaviour tests run on the example plasma with species masked as in
 ``tests/core/test_missing_data.py``: p1 is missing at row 0, a at row 1 and
@@ -23,14 +26,15 @@ import pytest
 from solarwindpy.core.plasma import Plasma
 from tests.core.test_missing_data import _species_masked_plasma
 
-# The author's ruling, 2026-11-10. "strict_sum": a sum over the species present
-# that the caller can make strict with skipna=False.
+# The author's ruling, 2026-11-10, with Wk added by S15. "strict_sum": a sum
+# over the species present that the caller can make strict with skipna=False.
 RULING = {
     "n": "strict_sum",
     "rho": "sum",
     "w": "refuse",
     "pth": "sum",
     "T": "sum",
+    "Wk": "sum",
 }
 SUMMED = sorted(k for k, rule in RULING.items() if rule != "refuse")
 REFUSED = sorted(k for k, rule in RULING.items() if rule == "refuse")

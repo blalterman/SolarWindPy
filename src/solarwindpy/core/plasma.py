@@ -1038,16 +1038,17 @@ class Plasma(base.Base):
 
     # The one home for how a species quantity combines over a "+" total. The
     # author's rule: "+" means "combine in physically viable way". Densities,
-    # mass densities, pressures and temperatures have meaningful totals; a
-    # total thermal speed does not, so it is refused. "strict_sum" sums the
-    # species present by default and is strict when the caller passes
-    # skipna=False (docs page `missing_data`).
+    # mass densities, pressures, temperatures and kinetic energy fluxes have
+    # meaningful totals; a total thermal speed does not, so it is refused.
+    # "strict_sum" sums the species present by default and is strict when the
+    # caller passes skipna=False (docs page `missing_data`).
     _SPECIES_COMBINE = {
         "n": "strict_sum",
         "rho": "sum",
         "w": "refuse",
         "pth": "sum",
         "T": "sum",
+        "Wk": "sum",
     }
 
     def _gather(self, key, *species, **kwargs):
@@ -1768,9 +1769,7 @@ species: {}
         lnlambda = self.lnlambda(sa, sb) * units.lnlambda
         nb = self.ions.loc[sb].n * units.n
 
-        w = pd.concat(
-            {s: self.ions.loc[s].w("par") for s in [sa, sb]}, axis=1, sort=True
-        )
+        w = self._gather("w", sa, sb).xs("par", axis=1, level="C")
         # Not `_species_total`: W_ab needs both species' thermal speeds, so it
         # is strict over species (docs page `missing_data`).
         wab = w.pow(2.0).sum(axis=1, skipna=False).pipe(np.sqrt) * units.w
@@ -2212,13 +2211,4 @@ species: {}
             the species present in each row; a row with no species present is
             NaN.
         """
-        slist = self._chk_species(*species)
-
-        w = {s: self.ions.loc[s].Wk for s in slist}
-        w = pd.concat(w, axis=1, names=["S"], sort=True)
-
-        if len(species) == 1:
-            w = self._species_total(w)
-            w.name = species[0]
-
-        return w
+        return self._gather("Wk", *species)
