@@ -41,7 +41,6 @@ testpaths = ["tests"]
 strict_markers = true
 markers = [
     "drift: asserts an external fact still holds; requires network; opt-in",
-    "integration: downloads real data over the network",
     "slow: takes more than a few seconds",
 ]
 

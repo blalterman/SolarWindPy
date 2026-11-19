@@ -17,14 +17,14 @@ def pytest_addoption(parser):
         action="store_true",
         default=False,
         help=(
-            "Run tests marked drift, integration, or slow. Also honoured via "
-            "the SWP_RUN_DRIFT=1 environment variable."
+            "Run tests marked drift or slow. Also honoured via the "
+            "SWP_RUN_DRIFT=1 environment variable."
         ),
     )
 
 
 def pytest_collection_modifyitems(config, items):
-    """Skip drift/integration/slow tests unless explicitly opted into.
+    """Skip drift and slow tests unless explicitly opted into.
 
     The gate lives here (rather than in an ``addopts`` marker expression) so
     it holds under any pytest invocation, including one supplying its own
@@ -37,11 +37,27 @@ def pytest_collection_modifyitems(config, items):
     if run_drift:
         return
 
-    gated = {"drift", "integration", "slow"}
+    gated = {"drift", "slow"}
     skip_marker = pytest.mark.skip(
-        reason="drift/integration/slow tests are opt-in: pass --run-drift or "
-        "set SWP_RUN_DRIFT=1"
+        reason="drift/slow tests are opt-in: pass --run-drift or set SWP_RUN_DRIFT=1"
     )
     for item in items:
         if gated.intersection(mark.name for mark in item.iter_markers()):
             item.add_marker(skip_marker)
+
+
+@pytest.fixture
+def isolated_cache(tmp_path, monkeypatch):
+    """Point the download cache at an empty directory under ``tmp_path``.
+
+    The cache is a filesystem boundary under the user's home directory; astropy
+    resolves it on every call from ``XDG_CACHE_HOME``, so a test using this
+    fixture neither reads nor writes the user's ``~/.cache/solarwindpy``.
+    Returns the directory that plays the role of ``~/.cache``. astropy ignores
+    an ``XDG_CACHE_HOME`` that does not exist, and releases before 8 honour it
+    only when ``<XDG_CACHE_HOME>/solarwindpy`` exists too, so both are created.
+    """
+    root = tmp_path / "xdg-cache"
+    (root / "solarwindpy").mkdir(parents=True)
+    monkeypatch.setenv("XDG_CACHE_HOME", str(root))
+    return root

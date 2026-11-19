@@ -67,16 +67,16 @@ CATALOG = pd.DataFrame(
 
 
 @pytest.fixture(autouse=True)
-def _no_network(request, tmp_path, monkeypatch):
-    """Point ``ICMECAT_URL`` at a missing local file unless the test is ``integration``.
+def _no_network(tmp_path, monkeypatch):
+    """Point ``ICMECAT_URL`` at a missing local file for every test here.
 
     A unit test that forgets ``serve_catalog`` then fails with
     ``ICMECATDownloadError`` instead of silently reaching helioforecast.space.
+    The live checks run from ``tests/drift/test_drift_icmecat.py``.
     """
-    if request.node.get_closest_marker("integration") is None:
-        monkeypatch.setattr(
-            icmecat, "ICMECAT_URL", str(tmp_path / "no-network-in-unit-tests.csv")
-        )
+    monkeypatch.setattr(
+        icmecat, "ICMECAT_URL", str(tmp_path / "no-network-in-unit-tests.csv")
+    )
 
 
 @pytest.fixture
