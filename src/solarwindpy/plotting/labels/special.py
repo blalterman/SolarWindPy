@@ -429,52 +429,25 @@ class Power(ArbitraryLabel):
         return Path("power")
 
 
-class Probability(ArbitraryLabel):
-    """Probability that a quantity meets a comparison criterion."""
+class _OtherLabelComparison:
+    r"""Label of the samples of another label that meet a comparison criterion.
 
-    def __init__(
-        self, other_label, comparison=None, name=None, publication_format=None
-    ):
-        """Instantiate the label.
+    The shared scaffolding of :class:`Probability` and :class:`CountOther`, a
+    mixin placed before :class:`ArbitraryLabel` so that
+    :func:`~solarwindpy.plotting.labels.available` lists only the two labels.
+    Each subclass sets the TeX function name ``_tex_prefix``, the save-path
+    prefix ``_path_prefix`` and the units ``_units``; the label is
+    ``<_tex_prefix>(<other label> <comparison>)``.
+    """
 
-        Parameters
-        ----------
-        other_label : solarwindpy.plotting.labels.base.Base
-            Label of the quantity being compared.
-        comparison : str, optional
-            Comparison criterion, e.g. ``"> 5"``. None means no comparison.
-        name : str or None, optional
-            The first line in publication format; None for the label's default.
-        publication_format : bool or None, optional
-            If True, the name heads the label; None follows the module default.
-        """
-        super().__init__()
-        self.set_other_label(other_label)
-        self.set_comparison(comparison)
-        self.set_name(name)
-        self.set_publication_format(publication_format)
-        self.build_label()
+    _tex_prefix = None
+    _path_prefix = None
 
     def __str__(self):
         result = base.format_with_units(
             self.tex, self.units, new_line=self.new_line_for_units
         )
         return self._format_with_name(result)
-
-    @property
-    def tex(self):
-        r"""TeX of the label, set by ``build_label``."""
-        return self._tex
-
-    @property
-    def units(self):
-        r"""TeX of the units."""
-        return r"\%"
-
-    @property
-    def path(self):
-        r"""Save path, set by ``build_label``."""
-        return self._path
 
     @property
     def other_label(self):
@@ -515,7 +488,7 @@ class Probability(ArbitraryLabel):
 
     def _build_tex(self):
         other = self.other_label
-        tex = r"\mathrm{Prob.}(%s %s)" % (other.tex, self.comparison)
+        tex = r"%s(%s %s)" % (self._tex_prefix, other.tex, self.comparison)
 
         self._tex = tex.replace(" ", r" \, ")
 
@@ -526,7 +499,7 @@ class Probability(ArbitraryLabel):
 
         comp = _comparison_path(self.comparison)
 
-        path = Path(f"prob-{other}-{comp}")
+        path = Path(f"{self._path_prefix}-{other}-{comp}")
 
         self._path = path
 
@@ -536,8 +509,43 @@ class Probability(ArbitraryLabel):
         self._build_path()
 
 
-class CountOther(ArbitraryLabel):
+class Probability(_OtherLabelComparison, ArbitraryLabel):
+    """Probability that a quantity meets a comparison criterion."""
+
+    _tex_prefix = r"\mathrm{Prob.}"
+    _path_prefix = "prob"
+    _units = r"\%"
+
+    def __init__(
+        self, other_label, comparison=None, name=None, publication_format=None
+    ):
+        """Instantiate the label.
+
+        Parameters
+        ----------
+        other_label : solarwindpy.plotting.labels.base.Base
+            Label of the quantity being compared.
+        comparison : str, optional
+            Comparison criterion, e.g. ``"> 5"``. None means no comparison.
+        name : str or None, optional
+            The first line in publication format; None for the label's default.
+        publication_format : bool or None, optional
+            If True, the name heads the label; None follows the module default.
+        """
+        super().__init__()
+        self.set_other_label(other_label)
+        self.set_comparison(comparison)
+        self.set_name(name)
+        self.set_publication_format(publication_format)
+        self.build_label()
+
+
+class CountOther(_OtherLabelComparison, ArbitraryLabel):
     """Count of samples of another label fulfilling a comparison."""
+
+    _tex_prefix = r"\mathrm{Count.}"
+    _path_prefix = "cnt"
+    _units = base._inU["dimless"]
 
     def __init__(
         self,
@@ -570,86 +578,6 @@ class CountOther(ArbitraryLabel):
         self.set_publication_format(publication_format)
 
         self.build_label()
-
-    def __str__(self):
-        result = base.format_with_units(
-            self.tex, self.units, new_line=self.new_line_for_units
-        )
-        return self._format_with_name(result)
-
-    @property
-    def tex(self):
-        r"""TeX of the label, set by ``build_label``."""
-        return self._tex
-
-    @property
-    def units(self):
-        r"""TeX of the units."""
-        return base._inU["dimless"]
-
-    @property
-    def path(self):
-        r"""Save path, set by ``build_label``."""
-        return self._path
-
-    @property
-    def other_label(self):
-        r"""Label of the quantity being compared."""
-        return self._other_label
-
-    @property
-    def comparison(self):
-        r"""Comparison string, e.g. ``"> 5"``; empty if none."""
-        return self._comparison
-
-    def set_other_label(self, other):
-        r"""Store the label of the quantity being compared.
-
-        Parameters
-        ----------
-        other : solarwindpy.plotting.labels.base.Base
-            Label of the quantity being compared.
-
-        Raises
-        ------
-        TypeError
-            If ``other`` is not a label object.
-        """
-        self._other_label = _check_label(other, "other_label")
-
-    def set_comparison(self, new):
-        r"""Store the comparison as a string; None becomes ``""``.
-
-        Parameters
-        ----------
-        new : str or None
-            Comparison criterion, e.g. ``"> 5"``.
-        """
-        if new is None:
-            new = ""
-        self._comparison = str(new)
-
-    def _build_tex(self):
-        other = self.other_label
-        tex = r"\mathrm{Count.}(%s %s)" % (other.tex, self.comparison)
-
-        self._tex = tex.replace(" ", r" \, ")
-
-    def _build_path(self):
-        other = self.other_label
-        other = str(other.path)
-        other = other.replace(" ", "-")
-
-        comp = _comparison_path(self.comparison)
-
-        path = Path(f"cnt-{other}-{comp}")
-
-        self._path = path
-
-    def build_label(self):
-        r"""Rebuild ``tex`` and ``path`` from the other label and comparison."""
-        self._build_tex()
-        self._build_path()
 
 
 class MathFcn(ArbitraryLabel):
