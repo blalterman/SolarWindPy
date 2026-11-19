@@ -113,7 +113,7 @@ _instability_tests = namedtuple("InstabilityTests", "AIC,MM,FMW,OFI")(
 )
 
 
-def beta_ani_inst(beta, a=None, b=None, c=None):
+def beta_ani_inst(beta, a, b, c):
     r"""Return the anisotropy threshold for a given beta.
 
     Implements Eq. (5) of :cite:`Verscharen2016a`:
@@ -359,11 +359,14 @@ class StabilityCondition(object):
 
         Raises
         ------
-        AssertionError
+        ValueError
             If ``beta`` and ``R`` differ in shape.
         """
 
-        assert beta.shape == R.shape
+        if beta.shape != R.shape:
+            raise ValueError(
+                f"beta and R must have the same shape, not {beta.shape} and {R.shape}"
+            )
         data = pd.concat({"beta": beta, "R": R}, axis=1)
         self._data = data
 
@@ -481,10 +484,11 @@ class StabilityContours(object):
 
         Raises
         ------
-        AssertionError
+        TypeError
             If ``new`` is not a :class:`numpy.ndarray`.
         """
-        assert isinstance(new, np.ndarray)
+        if not isinstance(new, np.ndarray):
+            raise TypeError(f"beta must be a numpy.ndarray, not {type(new).__name__}")
         self._beta = new
 
     def _calc_instability_contours(self):
@@ -547,7 +551,10 @@ class StabilityContours(object):
             colorbar is drawn. The slot keeps the return order
             ``(ax, artists..., guides)`` shared by every plot.
         """
-        assert isinstance(ax, mpl.axes.Axes)
+        if not isinstance(ax, mpl.axes.Axes):
+            raise TypeError(
+                f"ax must be a matplotlib.axes.Axes, not {type(ax).__name__}"
+            )
 
         images_for_table_legend = pd.DataFrame(
             index=self.contours.index, columns=self.contours.columns
