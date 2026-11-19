@@ -54,9 +54,8 @@ class CacheLoader(DataLoader):
     def max_age(self):
         return pd.Timedelta(days=1)
 
-    @staticmethod
-    def convert_nans(data):
-        return data.replace(-1, np.nan)
+    def convert_nans(self, data):
+        data.replace(-1, np.nan, inplace=True)
 
     def read_data(self, path):
         data = pd.read_csv(path, index_col=0, header=0)
@@ -83,7 +82,7 @@ class Indicator(ActivityIndicator):
     def set_extrema(self):
         pass
 
-    def run_normalization(self):
+    def run_normalization(self, norm_by="max"):
         pass
 
 

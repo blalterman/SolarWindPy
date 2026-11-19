@@ -448,8 +448,6 @@ class SIDC(ActivityIndicator):
 
         return normed
 
-    run_normalization.__doc__ = ActivityIndicator.run_normalization.__doc__
-
 
 class SSNExtrema(IndicatorExtrema):
     r"""Solar-cycle sunspot-number extrema tabulated in ``ssn_extrema.csv``.

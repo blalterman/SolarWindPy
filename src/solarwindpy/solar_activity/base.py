@@ -13,7 +13,7 @@ import urllib
 import numpy as np
 import pandas as pd
 
-from abc import ABC, abstractmethod, abstractproperty, abstractstaticmethod
+from abc import ABC, abstractmethod
 from collections import namedtuple
 
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -45,12 +45,14 @@ class ID(Base):
         """
         self.set_key(key)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _url_base(self):
         r"""Base URL that each key's URL fragment is joined to."""
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _trans_url(self):
         r"""Map from key to URL fragment."""
         pass
@@ -130,14 +132,18 @@ class DataLoader(Base):
         """
         pass
 
-    @abstractstaticmethod
-    def convert_nans(data):
-        r"""Replace the source's missing-value sentinel with NaN.
+    @abstractmethod
+    def convert_nans(self, data):
+        r"""Replace the source's missing-value sentinel with NaN, in place.
 
         Parameters
         ----------
         data : pandas.DataFrame
-            Data read from the source.
+            Data read from the source; modified in place.
+
+        Returns
+        -------
+        None
         """
         pass
 
@@ -369,7 +375,8 @@ class ActivityIndicator(Base):
         self._interpolated = interpolated
         return interpolated
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def normalized(self):
         r"""The indicator normalized within each solar cycle."""
         pass
@@ -380,13 +387,13 @@ class ActivityIndicator(Base):
         pass
 
     @abstractmethod
-    def run_normalization(self):
+    def run_normalization(self, norm_by="max"):
         r"""Normalize the indicator within each solar cycle.
 
         Parameters
         ----------
-        norm_by : {"max", "zscore", "feature-scale"}
-            Normalization algorithm to apply.
+        norm_by : {"max", "zscore", "feature-scale"}, optional
+            Normalization algorithm to apply. Defaults to ``"max"``.
 
         Returns
         -------
