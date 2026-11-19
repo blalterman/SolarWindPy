@@ -1469,3 +1469,264 @@ If the dispatch was abandoned without execution: skip steps 1, 1a and 2, and opt
 `## Abandoned (YYYY-MM-DD)` with a one-line reason. An abandoned unit's plan keeps its
 `NOT-YET`, which is the correct reading — the work stopped rather than finished, and no marker
 claims otherwise.
+
+---
+
+## Empirical Findings (2026-11-19 trial run)
+
+### End-state metrics
+
+- Packages: 10 planned (I, C, F, H, A, B, D, E-plot, E-core, G), 10 merged, in the dispatch's
+  wave order. Commits on master from `fbbb6d4f` to `fde54000`: 107, of which 8 are the
+  orchestrator's CHANGELOG commits and 2 its docs-hook commits (`3de65314`, `a73366a8`).
+- No commit count was predicted, so no stability classification applies.
+- Full suite: 6912 passed, 16 skipped at `fde54000` (the dispatch measured none; G's relation
+  6940 − 1 − 12 + 1 = 6928 collected holds).
+- Drift collection: 17 → 25 (predicted +8; landed +8).
+- Coverage floor: 96% (measured TOTAL 98.20%; predicted 96 from 98).
+- AC count errors in the dispatch text, each with the property holding: F-1 expects 9 files
+  (8 hold the helper and its 7 users; the 8 sites sit in 7 files); H-1's control command
+  (`git ls-tree ... --` reads 0; without `--` it reads 6); H-5 greps `3.15` in tox.ini (tox
+  names the env `py315`, count 1); D-2's dash-pattern row targets sidc.py (the pattern moved
+  with `plot_on_colorbar` to plots.py, count 1 there); E-3b greps a `quantile([` literal (the
+  one clip call takes a variable: 1 `quantile(` call, control 2); E-3c counts traceback lines
+  (`^ValueError` counts 1); G-6 counts test functions (collected cases: −12 + 1, not −10).
+
+### Governing Property
+
+served -- every second copy the dispatch named is gone with its control at `d0b51fa4` showing
+it was present (I-1, C-1, B-1 to B-6, D-1, D-2, E-3, E-6, E-7 below), `lint-imports` reports
+`Contracts: 2 kept, 0 broken.` with `tools` declared below `core` (C-3, plant caught), and both
+changed physical results cite their verified sources (`10.1098/rspa.1956.0116` in
+`core/ions.py` and `core/units_constants.py`; `10.1051/0004-6361:20054262` in
+`core/alfvenic_turbulence.py` and `core/units_constants.py`).
+
+### Acceptance Criteria
+
+| AC | Status | Evidence |
+|---|---|---|
+| I-1 `_select` gone | PASS | no output, exit 1; control at `d0b51fa4` → 7 |
+| I-2 no `beta_ani` | PASS | no output, exit 1; control → 12 |
+| I-3 no `labels.datetime` | PASS | no output, exit 1; control → 10 |
+| I-4 renamed modules import | PASS | `ok` |
+| C-1 one logger helper | PASS | `def logger` only in `tools/__init__.py` (control 6); `_init_logger` no output, exit 1 (control 7) |
+| C-2 no handler or root logger | PASS | no output, exit 1; control → 6 |
+| C-3 tools below core | PASS | `"core \| tools"` count 0 (control 1); `Contracts: 2 kept, 0 broken.`; planted `from ..core import base` in tools broke the contract |
+| C-4 own-module loggers | PASS | `11 passed, 21 deselected` |
+| C-5 swap_protons silent | PASS | 0 lines (4 at `d0b51fa4`) |
+| C-6 stale claims gone | PASS | no output, exit 1; control → 2 |
+| F-1 tracked scans | PASS | `rglob` no output, exit 1 (control 6); `_tracked` files 8 (control 2; AC text says 9, see metrics) |
+| F-2 no inert option | PASS | no output, exit 1 (control 6); `1052 passed` under `-W error::pandas.errors.Pandas4Warning` |
+| H-1 retired files | PASS | `.claude` 6 (control 20); six files 0 (control 6 without `--`); `get_version()` → `0.6.1.dev40+g39db7cbd3` |
+| H-2 no retired tooling named | PASS | settings count 0 (control 12); DEVELOPMENT/MAINTENANCE/test-runner no output (control 29); templates no output |
+| H-3 hook gates, one floor | PASS | block names 0 (control 10); floor `96`; `≥9x%` no output; plant: floor 99 failed at 98.20% |
+| H-4 one package-data home | PASS | csv 0, pip-tools 0, examples/data 3, `pos_HCI` 0; `9 passed` |
+| H-5 env spec and versions | PASS | `- nodefaults`, `- python>=3.12,<3.16`; `python=3.12` 0; `py315` 1 in tox.ini, `3.15` 1 each in publish.yml and pyproject.toml; `5 passed` |
+| H-6 weekly matrix, layering on master | PASS | `cron: '0 6 * * 1'`; `lint-imports` 1 in ci-master.yml |
+| A-1 core asserts internal | PASS | 3 lines: abundances.py:142, plasma.py:1511, plasma.py:1929 (control 14) |
+| A-2 level names one home | PASS | 0 (control 10); `_require_level_names` only in `core/base.py` |
+| A-3 named errors under `-O` | PASS | `TypeError: Spacecraft must be a Spacecraft or None, not str`; `InvalidParameterError: xoutside must be (lower, upper) with lower < upper, not (3, 1)` |
+| A-4 fitfunctions/instabilities asserts | PASS | 3 after B merged (control 12); signature `(beta, a, b, c)` |
+| B-1 one sound-speed formula, CGL | PASS | one line `core/base.py:218` (control 2); `{'par': 12.25, 'per': 7.0, 'scalar': 7.42}`; CGL DOI matched Crossref |
+| B-2 combined fluid unchanged | PASS | `True` |
+| B-3 constants and coefficient | PASS | `2.865e-6` no output, exit 1 (control 1); Thompson DOI 3 lines; `units.b / (` 1; `should be 5/3` no output |
+| B-4 fitfunction formulas | PASS | log-normal only in `tools/__init__.py` (control 2); `arg = -0.5` 1 (control 3) |
+| B-5 labels | PASS | `set_new_line_for_units` 1 (control 4); `set_comparison` 1; `known_species = ("` no output; `('C', 'Fe', 'He', 'Mg', 'Ne', 'N', 'O', 'Si', 'S')` |
+| B-6 verscharen2016 tables | PASS | both greps no output (controls 2, 2); `('AIC', 'FMW', 'MM', 'OFI') ['AIC', 'FMW', 'MM', 'OFI']` |
+| D-1 dead copies gone | PASS | `1 0 0 0` (controls 2, -, -, 2) |
+| D-2 one home per fact | PASS | `5 1 1`; dash pattern 1 in plots.py (0 in sidc.py, see metrics); `def plot_on_colorbar` 0 in sidc.py; matplotlib imported only by `solar_activity/plots.py` |
+| D-3 removals and contracts | PASS | band names no output (control 25); abstract* no output; `__doc__ =` 0; `True True` |
+| D-4 ICMECAT | PASS | `RULES_OF_THE_ROAD` no output (control 3); HELIO4CAST sentence 2; `1 0 0 0` |
+| E-1 residuals TODO | PASS | no output, exit 1 (control 1) |
+| E-2 style helpers | PASS | one line, `plotting/__init__.py:14` (control 3) |
+| E-3 one clip rule | PASS | old cuts no output, exit 1 (control 40); one clip `quantile(` call (control 2); `(0.6, 0.9)` → 1 `^ValueError` |
+| E-4 FFPlot vocabulary | PASS | `True`; `Unexpected kwarg` 1 (control 2) |
+| E-5 keyword-only settings | PASS | `[['self', 'x', 'y'], ['self', 'x', 'y', 'z'], ['self', 'x', 'y', 'z', 'size', 'alpha'], ['self', 'x', 'y', 'z']]` |
+| E-6 Plasma helpers | PASS | `0 0 0 1 1 1` (controls 2, 4, 2, 4, 2, 2) |
+| E-7 comments predict content | PASS | 0 (control 7); `corresponding entry` 0 (control 1) |
+| G-1 core and examples mirror modules | PASS | imports grep 0 (control 8); five paths exist; `test_quantities.py` untracked |
+| G-2 fitfunctions tests | PASS | 3 removed files; walk in `tests/fitfunctions/_scan.py` only (control 3 files) |
+| G-3 plotting test names | PASS | root defects file gone; old-name grep 0 (control 9) |
+| G-4 one placement rule | PASS | `test_init.py` 14 lines (control 155); smoke file gone; debug grep no output (control 11) |
+| G-5 live checks in drift | PASS | `pytest.mark.integration` 0 (control 2); `"integration` 0 (control 1); drift `25 tests collected` (17 before) |
+| G-6 collected count | PASS | `6928 tests collected` = 6940 − 1 − 12 + 1 |
+| W-1 full suite | PASS | `6912 passed, 16 skipped` at `fde54000` |
+| W-2 layers | PASS | `Contracts: 2 kept, 0 broken.` |
+| W-3 strict docs | PASS | `sphinx-build -W --keep-going -n -E` exit 0, `build succeeded` |
+| W-4 doctests | PASS | `66 passed, 1 skipped` |
+| W-5 CHANGELOG | PASS | `4 passed, 2 skipped`; 26 matching lines (≥ 11) |
+| W-6 shared config | PASS | `git config core.bare` → `false` after every commit in every worktree |
+| W-7 dry-run publish | PASS | run 44502237489 at `1be6988c` (wave 1) and run 44535084225 at `fde54000` (final tree): all 12 `platform-matrix` jobs and `build-and-publish` `success`, `update-conda-feedstock` `skipped`; one Ubuntu job in each run timed out in the apt step before any test and passed on rerun of the failed job |
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| O1 call form of `plot_on_colorbar` | RESOLVED -- module function `solar_activity.plots.plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar=True)`, author's answer re-traced (`12e5c3ac` rebased) |
+| O2 long clip strings | RESOLVED -- removed (`"lower"`, `"upper"`, `"both"`), author's answer against the recommendation, re-traced to one name per concept and ruling 28 |
+| `SIDC.ssn_scale_top` home (raised by the O1 trace) | RESOLVED -- moved to `solar_activity.plots.ssn_scale_top` by the author's ruling, carried in package D |
+| Duplicate `test_seams` tests (package I) | RESOLVED -- deleted by the author's ruling |
+| `Scatter(x, y, None, True)` stores `True` as every size (ruling 11 keeps `size` positional) | DEFERRED -- to the author: a type check on `size` is new scope |
+| `ReferenceAbundances` raises `ValueError` for a wrong key type, where ruling 16 names `TypeError` | DEFERRED -- to the author: a public behaviour change two guard tests pin |
+| `SIDC.calculate_extrema_kind` docstring "ssn < cycle mean" (F157) | DEFERRED -- unchanged by the dispatch's instruction; physics question for the author |
+| Pre-commit hook id `solarwindpy-physics` now runs only the coverage gate | DEFERRED -- its name no longer predicts its content; outside the dispatch |
+| RELEASING.md § 5 says a master commit first runs on Windows at the release dry run | DEFERRED -- partly stale since the weekly schedule; the dispatch held § 5 unchanged |
+| `publish.yml` "Install system dependencies (Linux)" timed out at its 5-minute cap twice on 2026-11-19 (run 44502237489 Ubuntu 3.14, run 44535084225 Ubuntu 3.15: mirror stall, `security.ubuntu.com` connection failed), no test run in either | DEFERRED -- to the author: each passed on rerun; whether the step needs apt at all or a retry is a workflow change outside the dispatch |
+
+### Deviations from plan
+
+- An earlier orchestrator session launched wave 1 and its agents were stopped by the author
+  13 seconds before this run began. This run relaunched wave 1 fresh and removed the stopped
+  run's four worktrees after wave 1 merged, by the author's OK. That run's O1 and O2 answers
+  were reused, not re-asked.
+- Agent worktrees branch from `origin/HEAD`, not local master, so every package started
+  behind master without the dispatch file; each fast-forwarded before editing. Later prompts
+  said so.
+- The author asked mid-wave that every unsettled choice run through the decision method; the
+  running agents were sent the method and its traces moved into commit messages from then on.
+  Several asks went to the author that the method assigns to Claude (doc wording, the docs
+  hook commit, the push-memory question). Teaches: a question to the author carries its trace,
+  an answer is re-traced before it becomes content, and a permission refusal of a subagent is
+  evidence about that agent's assignment, not a reason to ask.
+- Package C's mixin failed the strict docs build on show-inheritance lines. The orchestrator
+  replaced the five per-class private-base `nitpick_ignore` entries with one
+  `autodoc-process-bases` hook on master (`a73366a8`), after revising the documented-objects
+  guard to admit page-preserving hooks (`3de65314`), which the test's own docstring directs.
+- Package I kept the "Available: [...]" unknown-species message by re-raising in `Ion`
+  (ruling Q23 read with the dispatch's Purpose and the sibling `Vector` message), instead of
+  pandas' bare `KeyError`.
+- Package H's spacecraft relabel needed label edits in `tests/core/test_plasma.py` and
+  `test_spacecraft.py`, outside its files; it committed them on its branch after the
+  orchestrator traced that no region overlapped F's edit.
+- Package A's docs fix (`391f78f9`) and package B's Ion.cs fix were folded at merge on
+  rebuilt branches (`cleanup/a`, `cleanup/b`) so every master commit passes. For B this needed
+  the author to reset local master, because the permission check refused `git reset --hard`.
+  Teaches: a clean rebase can still break meaning (A and B each added `import pytest`, the
+  rebase joined them, B's later commit removed the one line); check collection and lint at
+  every intermediate commit, not only the head.
+- Package D took added scope by ruling (`ssn_scale_top` move) and one follow-up in
+  `tests/test_warning_attribution.py`. Package E-core extended the `RULING` constant in
+  `tests/core/test_plasma_species_combine.py` with `"Wk": "sum"`, as S15 requires. Package G
+  added a root `isolated_cache`, made it the one copy, wrote the root-test placement rule into
+  TEST_PATTERNS § "Structure and layering", and corrected six docstrings.
+- The docs command in § Verification gained `-E`: stale autosummary stubs and Sphinx's cached
+  environment from earlier local builds held the removed module names. The eight stale stubs
+  were deleted from the git-ignored `docs/source/_autosummary/`.
+- The first dry run's Ubuntu 3.14 job timed out in the apt step (mirror stall, no test ran);
+  the failed job was rerun on the same commit and passed. A second dry run ran on the final
+  tree by the author's choice.
+- Teaches: every "found none" needs its control run, not assumed. Two of this run's own
+  per-commit checks were blind until a broken input was fed through them (a grep for the old
+  ruff output format; zsh passing several paths as one word).
+
+### Commits
+
+- `3de65314` test: let conf.py connect hooks that leave the generated pages unchanged
+- `a73366a8` docs(conf): show public bases on show-inheritance lines
+- `e73b5fdc` test(instabilities): name BetaRPlot at instabilities.plots in the entry-point check
+- `9d854c17` refactor(instabilities)!: rename instabilities.beta_ani to instabilities.plots
+- `de3e2b88` test(plotting): import DateTime from labels.epochs in the unknown-units check
+- `9b138bc7` refactor(plotting)!: rename plotting.labels.datetime to plotting.labels.epochs
+- `ac03a78f` test(core): reach column selection through public callers in test_seams
+- `b8d34d8f` refactor(core): select columns with native pandas and delete Core._select
+- `dc173b62` test(core): pin that an Ion of an absent species names the species present
+- `ffa45818` fix(core): name the species present when an Ion's species is absent
+- `b818149f` test(core): delete three test_seams tests that duplicate existing ones
+- `777a1184` docs(changelog): I rename instabilities.beta_ani and plotting.labels.datetime
+- `a5f81b1a` build(imports): layer tools below core
+- `36e85e2d` docs(tools): drop the "not yet organized" claim from the module docstring
+- `2d98d7f0` test: pin loggers named for each class's own module as strict xfails
+- `3be435a3` refactor!: one stateless logger mixin names each logger for its class's own module
+- `ac1a1222` docs(changelog): C name each logger for its class's own module
+- `8e0e7e07` test(core): drop the inert mode.chained_assignment option (S3, F172)
+- `3315f731` test: scan git-tracked files through one helper (S2, F195)
+- `051eb331` build: declare ssn_extrema.csv in package-data and drop the pip-tools block
+- `30ec97f3` feat: declare Python 3.15 support
+- `99639b92` test(versions): read solarwindpy.yml's python bound as a version site
+- `68bd091b` build(env): bound Python and drop the defaults channel in solarwindpy.yml
+- `2d6dfe21` ci(publish): run the platform matrix weekly on master
+- `e28060a8` ci(master): check import layering on every master push
+- `24c59975` refactor(examples): ship the example CSVs in the examples package
+- `faea0404` chore(claude): retire the unused .claude tooling files
+- `5e87a674` chore(hooks): make every block of the commit hook gate, floor at 96%
+- `aa9f438c` chore(hooks): retire test-runner.sh and its allow rules
+- `67a05fcd` docs(releasing): retire DEVELOPMENT.md and MAINTENANCE.md
+- `27e62e52` chore: remove the unreferenced development files
+- `39db7cbd` refactor(examples): label the example spacecraft with Spacecraft's labels
+- `1be6988c` docs(changelog): H Python 3.15, example data home, setup.py removal
+- `48e18922` test(core): pin named errors for misnamed ion levels and wrong attach types
+- `b45da42d` refactor(core): give the column level names one home in core.base
+- `b1c46667` fix(core): raise named errors for spacecraft and auxiliary input checks
+- `819bcefd` test(core): pin the Ion refusal of a species joined by plus
+- `4b1e72c3` refactor(core): refuse a plus-joined species in one place
+- `70df4bee` test(fitfunctions): pin named errors for fit inputs and plotted shapes
+- `98184217` fix(fitfunctions): raise named errors for fit inputs and plotted shapes
+- `049db6f5` test(instabilities): pin named errors and required Eq. 5 coefficients
+- `13638537` fix(instabilities): raise named errors and require the Eq. 5 coefficients
+- `e29ee220` docs(changelog): A named errors for caller input, beta_ani_inst signature
+- `ffbae79c` test(core): pin Ion.cs to the CGL indices, xfail until the code follows
+- `41b5d88b` fix(core): Ion.cs par and per use the CGL indices through one sound-speed formula
+- `5374f259` refactor(core): one Alfven-unit coefficient for Plasma.ca and AlfvenicTurbulence
+- `0e2436e5` test(core): pin the solar-rotation speed to 2 pi / 25.38 d, xfail until the code follows
+- `92820fdb` fix(core): solar rotation rate is 2 pi over the 25.38 d Carrington period
+- `800393a9` refactor(fitfunctions): GaussianLn.normal_parameters reads tools.normal_parameters
+- `a37cb2b2` refactor(fitfunctions): one Gaussian kernel for the three Gaussian fit functions
+- `c8d82ea2` refactor(plotting): one new_line_for_units option on the label Base
+- `0bd5d5d3` refactor(plotting): Probability and CountOther share one comparison parent
+- `934d074b` test(plotting): known composition species are the core elements minus H
+- `a34b8835` refactor(plotting): composition species come from the core element table
+- `ec97e3ef` test(instabilities): an unknown growth_rate raises ValueError, xfail until the check does
+- `4e8180d9` refactor(instabilities): key the verscharen2016 tables once
+- `89ee6eb9` docs(changelog): B CGL sound speed, Carrington rotation rate, label options
+- `9f360666` refactor(solar_activity)!: remove SIDC.cut_spec_by_ssn_band and its band properties
+- `71714502` test(solar_activity): land package D's target tests as strict xfails
+- `df512e16` fix(solar_activity): name the cause of cut_spec_by_interval's ValueError; drop dead copies
+- `266c368d` refactor(solar_activity): give each SILSO series fact one home in sidc.py
+- `5848a142` refactor(solar_activity)!: move plot_on_colorbar to solar_activity.plots as a module function
+- `9c118ab5` refactor(solar_activity)!: move SIDC.ssn_scale_top to solar_activity.plots
+- `ff51155e` refactor(solar_activity)!: make the base contracts predict their subclasses
+- `a8d2a74e` refactor(solar_activity)!: give ICMECAT one spacecraft lookup and link its rules of the road
+- `4cebaa4d` test: make DailyLoader.convert_nans follow the in-place DataLoader contract
+- `4e293a13` docs(changelog): D colorbar and scale-top moves, removals, base contracts
+- `d03674e7` docs(fitfunctions): drop the stale TODO note from FitFunction.residuals (S9, F95)
+- `a0568efb` refactor(plotting): delete the unused style helpers in plotting.tools (S21, F115)
+- `f87faf53` test(plotting): pin the 0.05%/99.95% default cuts and the clip pair as strict xfails
+- `d22b1dd7` feat(plotting)!: one clip rule with 0.05%/99.95% default cuts and a (lower, upper) pair
+- `c59cd752` test(plotting): pin the refusal of the long clip strings as strict xfails
+- `f564a129` docs(plotting): spell the clip parameter types as types the docs build resolves
+- `81197c1d` refactor(plotting)!: remove the long clip strings "lower", "upper" and "both"
+- `4431f2c7` test(plotting): pin FFPlot.set_log to Base.set_log's signature as a strict xfail
+- `e50dbcb8` refactor(fitfunctions): FFPlot sets log and labels as the plots do (S28, F100)
+- `d2d032e5` test(plotting): pin keyword-only plot settings after the data variables as a strict xfail
+- `f3acb0aa` refactor(plotting)!: take every plot setting by keyword after the data variables (Q11, F125)
+- `5d90553d` docs(changelog): E-plot clip rule, keyword-only constructors, FFPlot.set_log
+- `b6c74124` test(core): a rejected Plasma.save modifier writes no file (xfail)
+- `08b0375f` fix(core): Plasma.save checks every modifier before writing
+- `0a9f4074` refactor(core): Plasma.Wk and Plasma.nuc gather through _gather
+- `d7197a3b` refactor(core): delete the dead include_dynamic blocks in beta and R
+- `f93d66b9` refactor(core): Plasma's HDF5 key defaults live once
+- `95c2652c` refactor(core): one helper reads the species labels of a data frame
+- `33e0b597` refactor(core): one key-to-level method serves get_element and get_comment
+- `123abf2b` docs(core): comments and docstrings state what holds
+- `069d7a7c` refactor(core): name the latitude cosine cos_lat in AlfvenicTurbulence
+- `e4dbee9d` docs(changelog): E-core Plasma.save checks modifiers before writing
+- `37f7e511` test(core): move the shared core fixtures into tests/core/_fixtures.py
+- `fbeca1f4` test(core): split test_quantities into test_vector and test_tensor
+- `c43bd145` test(core): name and place the remaining core tests by module
+- `c21267b3` test(examples): move the example tests to tests/examples
+- `78e1c508` test(fitfunctions): move the fit-function root tests into tests/fitfunctions
+- `93f5591c` test(fitfunctions): one module scan for the fit-function tests
+- `78b50bda` test(fitfunctions): fold test_trend_fit_properties into test_trend_fits
+- `948c4df7` test(plotting): move the root plotting defect tests beside their modules
+- `e82784bd` test(plotting): name the plotting test files for what they test
+- `443855bf` test(plotting): split test_histograms into test_hist1d and test_hist2d
+- `90491e38` test(plotting): fold test_hist1d_defects into test_hist1d
+- `01b76ef1` test(solar_activity): one placement rule for solar_activity and root tests
+- `167e5a64` test(drift): run the live ICMECAT checks from tests/drift
+- `0674779c` test(plotting): merge the two plot data-path files into test_data_path
+- `26e4ed66` test(core): declare test_vector.py's Spent-When
+- `8e97d614` test: one isolated_cache fixture for the suite
+- `8ec7ff59` docs(tests): state where a test file lives in TEST_PATTERNS.md
+- `fde54000` docs(tests): say how solar_activity tests get the isolated cache
+
+## Spent-Mark: executed, findings recorded
