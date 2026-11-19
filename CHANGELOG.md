@@ -81,11 +81,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `solarwindpy.core.ions.Ion` raises `ValueError` for misnamed column levels with the message
   "Ion data columns must have levels named ...", and for a species containing `+` with the
   message `solarwindpy.core.plasma.Plasma` gives.
+- **Breaking:** `SIDC.plot_on_colorbar(cax, t0, t1, vertical_cbar=True)` is the module function
+  `solarwindpy.solar_activity.plots.plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar=True)`,
+  taking the `SIDC` instance first and returning `(cax, underlay, overlay, guides)` as before;
+  `solarwindpy.solar_activity.sunspot_number.sidc` no longer imports matplotlib. No alias.
+- **Breaking:** `SIDC.ssn_scale_top(ssn)` is the module function
+  `solarwindpy.solar_activity.plots.ssn_scale_top(ssn)`, with the same rule: the peak rounded
+  up to the next 100, never below 100. No alias.
+- `solarwindpy.solar_activity.base.DataLoader.convert_nans` is an abstract instance method,
+  `convert_nans(self, data)`, that replaces the source's missing-value sentinel in place and
+  returns None, as `SIDCLoader.convert_nans` does.
+- `solarwindpy.solar_activity.base.ActivityIndicator.run_normalization` declares
+  `norm_by="max"`, as `SIDC.run_normalization` does.
+- `solarwindpy.solar_activity.icme.icmecat.ICMECAT.filter` logs the same warning as
+  `ICMECAT(spacecraft=...)` when the spacecraft is not in the catalog.
 
 ### Removed
 
+- **Breaking:** `SIDC.cut_spec_by_ssn_band`, `SIDC.spec_by_ssn_band` and
+  `SIDC.ssn_band_intervals`.
+- **Breaking:** `solarwindpy.solar_activity.icme.icmecat.RULES_OF_THE_ROAD`. The `ICMECAT` class
+  and `icme` package docstrings say to follow the ICMECAT rules of the road at the HELIO4CAST
+  site (https://helioforecast.space/icmecat).
 - `setup.py`. The build reads its version from git tags through `pyproject.toml`
   (`[tool.setuptools_scm]`), as before.
+
+### Fixed
+
+- `solarwindpy.solar_activity.base.IndicatorExtrema.cut_spec_by_interval` raises `ValueError`
+  saying the cycle intervals overlap or are out of order, instead of a bare `ValueError`.
 
 ## [0.6.0] - 2026-11-17
 
