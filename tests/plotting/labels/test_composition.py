@@ -2,6 +2,7 @@ import logging
 import pytest
 from pathlib import Path
 
+from solarwindpy.core.quantities import SPECIES
 from solarwindpy.plotting.labels import composition
 from solarwindpy.plotting.labels.base import Base
 
@@ -125,9 +126,17 @@ class TestIon:
         assert str(ion_j.path) == expected_path
 
     def test_known_species_list(self):
-        """Test the known species list."""
-        expected_species = ("C", "Fe", "He", "Mg", "Ne", "N", "O", "Si", "S")
-        assert composition.known_species == expected_species
+        r"""Known species are the core's elements, in the core's order, minus H.
+
+        The core's elements are the entries of
+        :data:`solarwindpy.core.quantities.SPECIES` whose TeX is the element
+        symbol in roman type, ``\mathrm{<key>}``. Composition labels cover
+        the heavy ions, so hydrogen is excluded.
+
+        ON FAILURE: the code is wrong.
+        """
+        elements = tuple(k for k, tex in SPECIES.items() if tex == r"\mathrm{%s}" % k)
+        assert composition.known_species == tuple(s for s in elements if s != "H")
 
     def test_all_known_species_no_warning(self, caplog):
         """Test that all known species don't trigger warnings."""
@@ -281,12 +290,6 @@ class TestCompositionModule:
     def test_module_all(self):
         """Test module __all__ exports."""
         assert composition.__all__ == ["Ion", "ChargeStateRatio"]
-
-    def test_module_attributes(self):
-        """Test module has expected attributes."""
-        assert hasattr(composition, "Ion")
-        assert hasattr(composition, "ChargeStateRatio")
-        assert hasattr(composition, "known_species")
 
     def test_known_species_completeness(self):
         """Test that known_species covers common solar wind ions."""
