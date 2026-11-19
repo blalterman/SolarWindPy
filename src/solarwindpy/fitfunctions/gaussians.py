@@ -15,6 +15,7 @@ __all__ = [
 
 import numpy as np
 
+from ..tools import normal_parameters
 from .core import FitFunction, NotFittedError
 
 
@@ -288,27 +289,16 @@ class GaussianLn(FitFunction):
 
         The fit models :math:`\ln X \sim \mathcal{N}(\mu, \sigma^2)`, with
         the natural logarithm. This returns the mean and the standard
-        deviation of :math:`X` itself, not of :math:`\ln X`:
+        deviation of :math:`X` itself, not of :math:`\ln X`, from the fitted
+        ``mu`` and ``sigma`` through
+        :func:`~solarwindpy.tools.normal_parameters`, which holds the formula
+        and its source.
 
-        .. math::
-
-            \mathrm{mean}(X) = \exp[\mu + \sigma^2/2]
-
-            \mathrm{std}(X) = \sqrt{\exp[2\mu + \sigma^2] (\exp[\sigma^2] - 1)}
-
-        A dict of ``mean`` and ``std``, from the fitted ``mu`` and ``sigma``.
-        They are not named ``mu`` and ``sigma``, which are the fitted parameters
-        of :math:`\ln X`.
+        A dict of ``mean`` and ``std``. They are not named ``mu`` and
+        ``sigma``, which are the fitted parameters of :math:`\ln X`.
         """
-        mu = self.popt["mu"]
-        sigma = self.popt["sigma"]
-
-        mean = np.exp(mu + ((sigma**2.0) / 2.0))
-        std = np.exp(sigma**2.0 + 2.0 * mu)
-        std *= np.exp(sigma**2.0) - 1.0
-        std = np.sqrt(std)
-
-        return dict(mean=mean, std=std)
+        normal = normal_parameters(self.popt["mu"], self.popt["sigma"])
+        return dict(mean=normal["mu"], std=normal["sigma"])
 
     @property
     def TeX_report_normal_parameters(self):
