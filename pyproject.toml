@@ -192,5 +192,6 @@ analysis = [
 [tool.setuptools.package-data]
 solarwindpy = [
   "core/data/*.csv",
+  "examples/data/*.csv",
   "solar_activity/sunspot_number/ssn_extrema.csv",
 ]

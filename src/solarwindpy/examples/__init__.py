@@ -13,11 +13,11 @@ import pandas as pd
 
 __all__ = ["load_plasma"]
 
-_DATA = resources.files("solarwindpy.core").joinpath("data")
+_DATA = resources.files("solarwindpy.examples").joinpath("data")
 
 
 def _read_example(name):
-    """Read ``core/data/example_<name>.csv`` as an ``(M, C, S)`` frame.
+    """Read ``examples/data/example_<name>.csv`` as an ``(M, C, S)`` frame.
 
     Each CSV header is ``M|C|S``, for example ``v|x|p1`` or ``b|x|`` for a
     quantity without a species. Rows are indexed by the times in

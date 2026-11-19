@@ -3,7 +3,7 @@
 """The example ``Plasma`` that docstring examples load, and Plasma's input logging.
 
 Expected values are the example CSVs' own bytes (the chosen input):
-``src/solarwindpy/core/data/example_{epoch,plasma,spacecraft}.csv``.
+``src/solarwindpy/examples/data/example_{epoch,plasma,spacecraft}.csv``.
 """
 
 import logging
@@ -39,7 +39,7 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
     reads from ``tests/`` or any path outside the package, found relative to
     the package file or the working directory, fails here. A wheel ships
     the CSVs through the ``[tool.setuptools.package-data]`` glob
-    ``core/data/*.csv`` in pyproject.toml; this test does not build one.
+    ``examples/data/*.csv`` in pyproject.toml; this test does not build one.
 
     ON FAILURE: the code is wrong; the loader must read its CSVs from the
     package (``importlib.resources``), not from a path outside it.
