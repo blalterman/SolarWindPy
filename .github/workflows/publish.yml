@@ -115,7 +115,18 @@ jobs:
             echo "Ensure tag version matches setuptools_scm configuration"
             exit 1
           fi
-          
+
+          # A release tag must name the release CITATION.cff cites;
+          # tests/test_citation.py ties CITATION.cff to CHANGELOG.md in the release commit.
+          if [[ "$TAG" != *rc* ]]; then
+            CFF_VERSION=$(python -c "import pathlib, re; print(re.search(r'^version: \"(.+)\"$', pathlib.Path('CITATION.cff').read_text(encoding='utf-8'), re.M).group(1))")
+            if [ "$CFF_VERSION" != "$EXPECTED_VERSION" ]; then
+              echo "Error: CITATION.cff names version $CFF_VERSION; the tag is $EXPECTED_VERSION"
+              echo "Set CITATION.cff's version and date-released in the release commit"
+              exit 1
+            fi
+          fi
+
           echo "✅ Publishing version $TAG (verified: $DETECTED_VERSION)"
       
       - name: Validate dependencies resolve

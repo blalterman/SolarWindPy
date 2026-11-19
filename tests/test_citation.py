@@ -10,7 +10,6 @@ this repository" button. These tests keep the three in step.
 import re
 from pathlib import Path
 
-import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,12 +60,6 @@ RELEASE_HEADING = re.compile(
 )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=KeyError,
-    reason="CITATION.cff has no version or date-released; remove this marker when "
-    "it names the current release",
-)
 def test_citation_cff_names_the_newest_changelog_release():
     """``CITATION.cff``'s version and date are the newest release in ``CHANGELOG.md``.
 

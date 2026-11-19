@@ -97,10 +97,15 @@ Add new version section between `[Unreleased]` and previous version following [K
   - Enables Python 3.11+ performance improvements (10-60% faster in many workloads)
 ```
 
+In the same commit, set `version` and `date-released` in `CITATION.cff` to the new heading's
+version and date. `tests/test_citation.py` fails until they match, so the commit hook refuses a
+release commit that leaves the citation behind, and the publish workflow refuses a release tag
+that differs from `CITATION.cff`'s version.
+
 ### 3. Commit CHANGELOG Updates
 
 ```bash
-git add CHANGELOG.md
+git add CHANGELOG.md CITATION.cff
 git commit -m "docs(changelog): prepare vX.Y.Z release notes"
 git push origin master
 ```
@@ -571,6 +576,7 @@ Use this checklist for each release:
 - [ ] Production code linting clean (`ruff check src/solarwindpy/`)
 - [ ] Coverage at or above the pre-commit hook's floor (`.claude/hooks/pre-commit-tests.sh`)
 - [ ] CHANGELOG.md updated with version section
+- [ ] CITATION.cff `version` and `date-released` match it
 - [ ] CHANGELOG committed and pushed
 - [ ] Working directory clean (no untracked files)
 
