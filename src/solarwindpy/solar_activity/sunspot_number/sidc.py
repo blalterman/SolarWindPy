@@ -297,16 +297,11 @@ class SIDCLoader(DataLoader):
             dt = csv.loc[:, ["year", "month", "day"]]
             ts = pd.to_datetime(dt)
 
-        elif key in ("y",):
+        else:  # "y", the only key with no layout above: a decimal year
             import astropy.time
 
             dt = astropy.time.Time(csv.loc[:, "year"], format="decimalyear")
             ts = pd.DatetimeIndex(dt.datetime)
-
-        else:
-            raise NotImplementedError(
-                f"Please specify how to build {key} datetime column"
-            )
 
         if key.startswith("h"):
             std = csv.loc[:, ["total_std", "north_std", "south_std"]]

@@ -570,7 +570,10 @@ class IndicatorExtrema(Base):
         # A cycle with no maximum yet has no falling edge (NaT); drop it.
         ii = pd.IntervalIndex(intervals.stack().dropna()).sort_values()
         if not (ii.is_unique and ii.is_monotonic_increasing):
-            raise ValueError
+            raise ValueError(
+                "The cycle intervals to cut by overlap or are out of order; "
+                "check the extrema table and `tk_cycles`."
+            )
 
         cut = pd.cut(epoch, ii)
         cut.name = "Cycle_Interval"
@@ -593,7 +596,6 @@ class IndicatorExtrema(Base):
         pandas.DataFrame
             ``Min`` and ``Max`` intervals for each cycle.
         """
-        dt = pd.to_timedelta(dt)
         extrema = self.data.stack()
 
         dt = pd.to_timedelta(dt)

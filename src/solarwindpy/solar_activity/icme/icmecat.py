@@ -525,7 +525,8 @@ class ICMECAT(_WithLogger):
         sorted_starts = starts[sort_idx]
         sorted_ends = ends[sort_idx]
 
-        # Vectorized containment check
+        # One observation at a time: it is inside an ICME when an interval
+        # that starts at or before it ends at or after it.
         mask = np.zeros(len(obs), dtype=bool)
         for i, t in enumerate(obs):
             # Find intervals that start before or at this time
