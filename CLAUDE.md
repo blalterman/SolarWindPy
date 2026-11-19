@@ -15,8 +15,7 @@ Every choice in this repository derives from its governance, imported here:
 - The editable install maps `solarwindpy` to one checkout's `src/`. `pytest` (and so the commit
   hook) puts this checkout's `src/` first through `pythonpath` in `pyproject.toml`, but `python -c`
   and `lint-imports` do not: in another worktree, prefix those with `PYTHONPATH=$PWD/src`.
-- Rebuild the env: `solarwindpy.yml` leaves the Python version to CI, so pin it in a copy
-  (`python=3.12`) and run `conda env create -f <copy>`, then
+- Rebuild the env: `conda env create -f solarwindpy.yml`, then
   `conda run -n solarwindpy pip install -e ".[dev]"`. Plain `pip install -e .` leaves out
   import-linter and pre-commit.
 - Install the git hooks once per clone:

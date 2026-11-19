@@ -9,8 +9,9 @@
 # packages (PyTables is `pytables` here, `tables` on PyPI) plus test and
 # documentation tools. pyyaml is a test-time dependency.
 #
-# No Python version is listed, so conda picks one; pyproject.toml's
-# requires-python names the supported range. No workflow reads this file.
+# The python bound admits the versions pyproject.toml's classifiers list;
+# tests/test_declared_versions.py holds the two together. nodefaults keeps
+# the solve on conda-forge alone. No workflow reads this file.
 #
 # For local use:
 #   conda env create -f solarwindpy.yml
@@ -20,7 +21,9 @@
 name: solarwindpy
 channels:
 - conda-forge
+- nodefaults
 dependencies:
+- python>=3.12,<3.16
 - alabaster
 - astropy-base
 - astropy-iers-data

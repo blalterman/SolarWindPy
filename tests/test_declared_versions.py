@@ -180,13 +180,6 @@ def test_lowest_classifier_is_requires_python_floor():
     assert min(classifiers) == _floor(_requires_python())
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=LookupError,
-    reason="solarwindpy.yml lists no python bound, so conda picks any Python; "
-    "expected 'expected one python bound in solarwindpy.yml, got []'; "
-    "remove this marker when the yml gains python>=3.12,<3.16",
-)
 def test_env_spec_admits_exactly_the_classifier_pythons():
     """The conda env spec admits exactly the Python minors the classifiers list.
 
