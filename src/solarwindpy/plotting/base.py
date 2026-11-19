@@ -396,9 +396,8 @@ class Base(_WithLogger, ABC):
             for no clip, or a number read as :meth:`pandas.Series.quantile`
             reads it, with 0 <= lower < 0.5 < upper <= 1, so ``(0.01, True)``
             clips at 1% and 99.95%. ``"l"`` and ``"u"``, in any case, are
-            ``(True, False)`` and ``(False, True)``; ``"lower"``, ``"upper"``
-            and ``"both"`` are ``"l"``, ``"u"`` and True. Any other value is
-            read by its truth.
+            ``(True, False)`` and ``(False, True)``. Any other value is read
+            by its truth.
 
         Returns
         -------

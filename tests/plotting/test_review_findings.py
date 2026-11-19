@@ -2,10 +2,11 @@
 # Supersedes: none
 """Contract tests for four rulings on the plot data path.
 
-- ``clip`` accepts True/False and the strings ``"l"``, ``"lower"``, ``"u"``,
-  ``"upper"`` and ``"both"`` in any case. Any other string raises
-  ``ValueError`` naming them, when the plot or ``BinnedData`` is built and
-  from ``Base.clip_data``.
+- ``clip`` accepts True/False, the strings ``"l"`` and ``"u"`` in any case,
+  and a pair ``(lower, upper)``. Any other string, the removed ``"lower"``,
+  ``"upper"`` and ``"both"`` included, raises ``ValueError`` naming the
+  accepted ones, when the plot or ``BinnedData`` is built and from
+  ``Base.clip_data``.
 - x, y and z are aligned by label. When their indexes differ and a column
   that has to be aligned repeats labels, alignment is ambiguous: the plot
   raises ``ValueError`` naming the column. Identical indexes, repeated labels
@@ -45,30 +46,14 @@ BOTH = np.r_[1.0045, np.arange(2.0, 10.0), 9.9955]
 ACCEPTED_FORMS = [
     ("l", LOWER),
     ("L", LOWER),
-    ("lower", LOWER),
-    ("Lower", LOWER),
-    ("LOWER", LOWER),
     ("u", UPPER),
     ("U", UPPER),
-    ("upper", UPPER),
-    ("Upper", UPPER),
-    ("both", BOTH),
-    ("Both", BOTH),
     (True, BOTH),
 ]
 # The long strings were removed: "l", "u" and True already name each case.
-REMOVED_NOT_YET = pytest.mark.xfail(
-    strict=True,
-    raises=pytest.fail.Exception,
-    reason="plotting.binned._CLIP_STRINGS still accepts 'lower', 'upper' and "
-    "'both'; expected ValueError naming 'l' and 'u'; remove this marker when "
-    "the long strings are removed",
-)
-REMOVED_STRINGS = [
-    pytest.param(s, marks=REMOVED_NOT_YET) for s in ("lower", "upper", "both")
-]
+REMOVED_STRINGS = ["lower", "upper", "both"]
 REJECTED_FORMS = ["", "foo", "lo", "lower ", "uppr", "b", *REMOVED_STRINGS]
-ACCEPTED_MESSAGE = "'l', 'lower', 'u', 'upper' or 'both'"
+ACCEPTED_MESSAGE = "'l' or 'u'"
 
 # A pair (lower, upper): True is that tail's default cut, False no clip, a
 # number the quantile itself. Over 1..10 the 1% quantile is 1 + 9 * 0.01 = 1.09.
@@ -228,14 +213,10 @@ class TestClipSetting:
         ON FAILURE: the code is wrong.
         """
         y = SERIES.rename("y")
-        assert Hist2D(SERIES, y, clip="Lower", nbins=3).clip == ClipAxes(
-            "Lower", "Lower", False
-        )
-        assert Scatter(SERIES, y, clip={"z": "both"}).clip == ClipAxes(
-            False, False, "both"
-        )
-        b = BinnedData(SERIES.to_frame(), {"x": [0, 5, 11]}, clip={"x": "UPPER"})
-        assert b.clip_of("x") == "UPPER"
+        assert Hist2D(SERIES, y, clip="L", nbins=3).clip == ClipAxes("L", "L", False)
+        assert Scatter(SERIES, y, clip={"z": "U"}).clip == ClipAxes(False, False, "U")
+        b = BinnedData(SERIES.to_frame(), {"x": [0, 5, 11]}, clip={"x": "u"})
+        assert b.clip_of("x") == "u"
 
 
 # Rows on four timestamps, the second one repeated.

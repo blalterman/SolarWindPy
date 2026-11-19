@@ -21,13 +21,7 @@ import pandas as pd
 _CLIP_DEFAULT = (0.0005, 0.9995)
 
 #: The clip strings, in lower case, and the (lower, upper) pair each stands for.
-_CLIP_STRINGS = {
-    "l": (True, False),
-    "lower": (True, False),
-    "u": (False, True),
-    "upper": (False, True),
-    "both": (True, True),
-}
+_CLIP_STRINGS = {"l": (True, False), "u": (False, True)}
 
 
 def _clip_cuts(clip):
@@ -41,8 +35,7 @@ def _clip_cuts(clip):
       (that tail's default cut), False (that tail is not clipped) or a number
       read as :meth:`pandas.Series.quantile` reads it, with
       0 <= lower < 0.5 < upper <= 1;
-    - ``"l"`` or ``"u"``, in any case: ``(True, False)`` or ``(False, True)``;
-      ``"lower"``, ``"upper"`` and ``"both"`` are ``"l"``, ``"u"`` and True.
+    - ``"l"`` or ``"u"``, in any case: ``(True, False)`` or ``(False, True)``.
 
     Any other value is read by its truth.
 
@@ -65,7 +58,7 @@ def _clip_cuts(clip):
         except KeyError:
             raise ValueError(
                 f"clip={clip!r} is not a clip setting: a clip string must be "
-                "'l', 'lower', 'u', 'upper' or 'both' (any case)."
+                "'l' or 'u' (any case)."
             ) from None
     elif not isinstance(clip, (tuple, list)):
         clip = (bool(clip), bool(clip))

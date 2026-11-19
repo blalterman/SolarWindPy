@@ -680,7 +680,7 @@ class TestClipData:
 
         ON FAILURE: the code is wrong.
         """
-        result = Base.clip_data(FRAME, "both")
+        result = Base.clip_data(FRAME, True)
         lo = np.quantile(FRAME, Q_LOWER, axis=0)
         hi = np.quantile(FRAME, Q_UPPER, axis=0)
         assert np.asarray(result) == exact(np.clip(FRAME, lo, hi))
@@ -727,18 +727,13 @@ class TestClipData:
         assert np.asarray(result) == exact(np.clip(FRAME, None, hi))
 
     def test_tail_selector_is_case_insensitive(self):
-        """``"L"``/``"Lower"`` act as ``"l"``, and ``"U"``/``"Upper"`` as ``"u"``.
+        """``"L"`` acts as ``"l"``, and ``"U"`` as ``"u"``.
 
         ON FAILURE: the code is wrong.
         """
         lower = SERIES.clip(lower=np.quantile(SERIES, Q_LOWER))
         upper = SERIES.clip(upper=np.quantile(SERIES, Q_UPPER))
-        for mode, expected in (
-            ("L", lower),
-            ("Lower", lower),
-            ("U", upper),
-            ("Upper", upper),
-        ):
+        for mode, expected in (("L", lower), ("U", upper)):
             assert np.asarray(Base.clip_data(SERIES, mode)) == exact(expected)
 
     def test_rejects_non_pandas_input_with_typeerror(self):
