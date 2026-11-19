@@ -38,6 +38,13 @@ Sources cited below:
 | D11 | Label names | **Each registry entry has a short title-case display name** (quantity only); `publication_format` is set per label, with a global default the label overrides | rulings page, 2026-11-05 |
 | D12 | Logging | **Each class logs under `solarwindpy.<module>.<Class>`; the library adds no handler or level** | waves rulings 12 and 13 |
 | D13 | `set_frame_name` | **Accepts only the spacecraft and frames it supports, and raises `NotImplementedError` naming them**, because frame transformations are not general | rulings page, 2026-11-04 |
+| D29 | Unused code | **Deleted, not fixed** | rulings page, 2026-11-04 |
+| D30 | Design and docstrings Claude wrote | **Treated as suspect and reconciled to the author's forms.** Where the author left parallel structures, Claude proposes a shared one after interviewing the author about intent | rulings page, 2026-11-04 |
+| D31 | Plot normalizations | **A count gives the count PDF; a `"sum"` of z gives each cell's share of total z per unit area (z < 0 raises); any other aggregation gives value × count PDF. `w`, `wc`, `wr` are the per-cell forms; `t`, `c`, `r` divide by the peak (max absolute value for signed data).** `allowed_axnorm` is the one list of keys | rulings page, 2026-11-05 |
+| D32 | Contours | **`SpiralPlot2D` gets no contour smoothing (its adaptive mesh is its smoothing); `Hist2D` keeps `gaussian_filter_std`.** Every contour method interpolates in plot coordinates, each axis scaled to its span | rulings page, 2026-11-04 |
+| D33 | Units and labels | **One quantity registry, `solarwindpy.core.quantities`**: display unit, SI factor and TeX symbol per canonical name, read by `core` to convert and by `plotting` to label | rulings page, 2026-11-04 |
+| D34 | Trend fits | **Two levels: a 1-D fit in each column of a 2-D histogram, then a fit to one parameter's trend across columns**, which selects x, y and yerr by name from the per-column results | rulings page, 2026-11-04 |
+| D35 | The data model's direction | **Seams first; pint-pandas is rejected** (it drops units on rolling, copies on `.xs` and fails `to_hdf`); xarray waits for O16 | rulings page, 2026-11-04 |
 
 ### Physics and data
 
@@ -63,6 +70,7 @@ Sources cited below:
 | D26 | Creating the conda env | **`solarwindpy.yml` is the one home: Python bound and channels** | waves ruling 18 |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
 | D28 | The next release | **Waits, to bundle the open items** below; which items form the bundle is open item O1 | the author, 2026-11-19 |
+| D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
 
