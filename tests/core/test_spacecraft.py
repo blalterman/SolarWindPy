@@ -134,9 +134,9 @@ class TestWind(SpacecraftTestBase, TestCase):
 class TestPSP(SpacecraftTestBase, TestCase):
     @classmethod
     def set_object_testing(cls):
-        p = cls.data.xs("pos_HCI", axis=1, level="M")
-        v = cls.data.xs("v_HCI", axis=1, level="M")
-        c = cls.data.xs("Carr", axis=1, level="M")
+        p = cls.data.xs("pos", axis=1, level="M")
+        v = cls.data.xs("v", axis=1, level="M")
+        c = cls.data.xs("carr", axis=1, level="M")
 
         data = pd.concat(
             {"v": v, "pos": p, "carr": c}, axis=1, names=["M"], sort=True

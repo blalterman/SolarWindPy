@@ -1112,9 +1112,9 @@ class PlasmaTestBase(ABC):
 
         PSP = pd.concat(
             {
-                "pos": sc_data.xs("pos_HCI", axis=1, level="M"),
-                "v": sc_data.xs("v_HCI", axis=1, level="M"),
-                "carr": sc_data.xs("Carr", axis=1, level="M"),
+                "pos": sc_data.xs("pos", axis=1, level="M"),
+                "v": sc_data.xs("v", axis=1, level="M"),
+                "carr": sc_data.xs("carr", axis=1, level="M"),
             },
             axis=1,
             names=["M"],
@@ -1202,9 +1202,9 @@ class PlasmaTestBase(ABC):
 
         PSP = pd.concat(
             {
-                "pos": sc_data.xs("pos_HCI", axis=1, level="M"),
-                "v": sc_data.xs("v_HCI", axis=1, level="M"),
-                "carr": sc_data.xs("Carr", axis=1, level="M"),
+                "pos": sc_data.xs("pos", axis=1, level="M"),
+                "v": sc_data.xs("v", axis=1, level="M"),
+                "carr": sc_data.xs("carr", axis=1, level="M"),
             },
             axis=1,
             names=["M"],

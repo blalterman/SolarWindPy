@@ -69,8 +69,8 @@ def test_load_plasma_finds_its_data_through_the_package(tmp_path):
 def test_load_plasma_holds_the_example_species_rows_and_spacecraft():
     """The example has species a, e, p1, p2, three rows, and the PSP trajectory.
 
-    Values are the example CSVs: ``n||p1`` is 1, 2, 3; ``pos_HCI|x|`` is
-    -42, -22, -34; ``v_HCI|y|`` is -80, -70, -90; ``Carr|lon|`` is -26, -36, -16.
+    Values are the example CSVs: ``n||p1`` is 1, 2, 3; ``pos|x|`` is
+    -42, -22, -34; ``v|y|`` is -80, -70, -90; ``carr|lon|`` is -26, -36, -16.
 
     ON FAILURE: the code is wrong, unless the author changed the example
     CSVs; then update the values here.

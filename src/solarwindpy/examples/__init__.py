@@ -84,16 +84,10 @@ def load_plasma():
     # (e.g. `b`), so only particle species (a, e, p1, p2) reach Plasma.
     species = sorted(s for s in data.columns.get_level_values("S").unique() if s)
 
+    # The CSV also holds a GSE trajectory (`gse`) that tests build a second
+    # spacecraft from; PSP takes the HCI position, velocity and Carrington
+    # columns, which already carry Spacecraft's labels.
     sc = _read_example("spacecraft").xs("", axis=1, level="S")
-    psp = pd.concat(
-        {
-            "pos": sc.xs("pos_HCI", axis=1, level="M"),
-            "v": sc.xs("v_HCI", axis=1, level="M"),
-            "carr": sc.xs("Carr", axis=1, level="M"),
-        },
-        axis=1,
-        names=["M"],
-    ).sort_index(axis=1)
-    spacecraft = Spacecraft(psp, "PSP", "HCI")
+    spacecraft = Spacecraft(sc.drop(columns="gse", level="M"), "PSP", "HCI")
 
     return Plasma(data, *species, sc=spacecraft)
