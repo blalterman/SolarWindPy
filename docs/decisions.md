@@ -28,7 +28,7 @@ Sources cited below:
 | D1 | Breaking changes before 1.0 | **Made outright, with no alias or deprecation shim**; each is listed in `CHANGELOG.md` | rulings page, 2026-11-04; waves ruling 28 |
 | D2 | One name per concept | **One canonical name, no aliases. A short name is canonical when it equals the data label** (attribute = Series `.name` = `M` label). A name uses the field's standard symbol where one exists, otherwise a plain word | rulings page, 2026-11-04 |
 | D3 | The position accessor | **`Spacecraft.pos`**, by D2: position is stored under the `M` label `pos`. This supersedes the earlier "the position vector is `r`" | the author, 2026-11-19 (`a429779b`, shipped in 0.6.0) |
-| D4 | Names reused across subpackages | **Judged by role, not string**: `Base` and `tools` stay, and `plotting.labels.composition.Ion` keeps its name. One name meaning different things among siblings is the defect | rulings page; waves ruling 8 |
+| D4 | Names reused across subpackages | **Judged by role, not string**: `Base` and `tools` stay, and `plotting.labels.composition.Ion` keeps its name. One name meaning different things among siblings is the defect. **`rho` stays in both its contexts**: on a vector it is the standard symbol for the xy-plane magnitude, distinct from `mag` (the x, y, z magnitude), and on a species it is mass density | rulings page; waves ruling 8; the author, 2026-11-19 (F74) |
 | D5 | Exception kinds | **`TypeError` for a wrong type, `ValueError` for a bad value, `InvalidParameterError` in fitfunctions.** Caller input is never checked with `assert` | waves ruling 16 |
 | D6 | Plot constructors | **Data variables positional, every setting keyword-only.** A data variable holds one value per point, so a scalar raises `TypeError`; a constant marker size or opacity goes to `make_plot` as `s` or `alpha` | waves ruling 11; the author, 2026-11-19 (`5a0573b7`) |
 | D7 | Plot returns and ownership | **Plot objects own their data and binned results; methods return `(ax, artists..., guides)`** in that order | rulings page, 2026-11-04 |
@@ -100,12 +100,10 @@ factor was wrong until then; analyses made earlier need checking.
 
 | # | item | who decides | recommendation |
 |---|---|---|---|
-| O1 | Which items the next release bundles (D28) | the author | O2 to O12 and O14, the review items; not the interview (O13), deferred (O15) or parked (O16) items |
-| O2 | F74: `Vector.rho` (xy-plane magnitude) shares a name with mass density `rho` | the author (public name) | rename by D2 against its sibling `mag`, for example `mag_xy` |
+| O1 | Which items the next release bundles (D28) | the author | O3 to O12 and O14, the review items; not the interview (O13), deferred (O15) or parked (O16) items |
 | O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O4 | F76: `AlfvenicTurbulence.v` and `.b` return DataFrames where siblings return a `Vector` or `BField` | the author (public return type) | return `Vector` and `BField`, as the siblings do |
+| O4 | F76: `AlfvenicTurbulence.v` and `.b` return DataFrames where siblings return a `Vector` or `BField` | the author (public return type) | `Vector` for both: δb is in Alfvén units (km/s), so a `BField`, whose `pb` assumes nT, would give a wrong magnetic pressure |
 | O5 | F112: whether `StabilityContours.set_beta` accepts a Series | the author (public input type) | |
-| O6 | F135: `normal_parameters` returns log-normal moments, so its name misleads | the author (public name) | |
 | O7 | F196: whether `solarwindpy.yml` keeps its 89-entry package list or only what conda must provide | the author (env policy) | |
 | O8 | F7: no allow rule for `code.claude.com` | the author (widens permissions) | |
 | O9 | F7: the `WebFetch(domain:docs.anthropic.com)` allow rule is dead | Claude (narrows permissions) | remove it |
