@@ -23,6 +23,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 
+from solarwindpy.fitfunctions.plots import FFPlot  # noqa: E402
 from solarwindpy.plotting import base  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
@@ -312,6 +313,33 @@ def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
 
     params = list(inspect.signature(cls.__init__).parameters)[1:]
     assert params == expected
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="fitfunctions.plots.FFPlot.set_log takes **kwargs and stores them as "
+    "given; expected Base.set_log's (x=None, y=None), None keeping an axis; "
+    "remove this marker when FFPlot.set_log matches Base.set_log",
+)
+def test_the_fit_plotter_sets_log_as_the_plots_do():
+    """``FFPlot.set_log`` is ``Base.set_log``'s: None keeps an axis, a value sets its truth.
+
+    A line fit to five chosen points gives a real ``FFPlot``.
+    ON FAILURE: the code is wrong.
+    """
+    import inspect
+
+    from solarwindpy.fitfunctions.lines import Line
+
+    assert inspect.signature(FFPlot.set_log) == inspect.signature(base.Base.set_log)
+    x = np.arange(5.0)
+    fit = Line(x, 2.0 * x + 1.0)
+    fit.make_fit()
+    plot = fit.plotter
+    plot.set_log(x=1)
+    plot.set_log(y=None)
+    assert plot.log == base.LogAxes(True, False)
 
 
 def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():
