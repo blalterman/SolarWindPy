@@ -9,7 +9,7 @@ come from numpy (``histogram_bin_edges``, ``histogram``, ``histogram2d``,
 
 Edges from an integer ``nbins`` follow ``numpy.histogram``: the outer edges
 enclose every sample and the bins are closed on the left, the last also on the
-right (``tests/plotting/test_hist2d_plotting.py``, ``test_edges_span_the_data``,
+right (``tests/plotting/test_hist2d.py``, ``test_edges_span_the_data``,
 ``test_auto_bins_retain_every_observation``). Explicit edges give right-closed
 bins, so tests here that count observations use explicit edges that bracket
 the data. An ``IntervalIndex`` keeps the side its bins close on.
