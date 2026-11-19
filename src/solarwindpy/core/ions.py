@@ -119,11 +119,10 @@ class Ion(base.Base):
         Raises
         ------
         ValueError
-            If the species contains a '+' character.
+            If the species contains a '+' character; a combined species is
+            formed in method calls, never stored.
         """
-        if "+" in species:
-            raise ValueError("Species with '+' are not supported")
-        self._species = species
+        (self._species,) = self._clean_species_for_setting(species)
 
     def set_data(self, data: pd.DataFrame) -> None:
         """Set the data for the ion.

@@ -268,13 +268,6 @@ def test_ion_data_with_wrong_level_names_raises_value_error_naming_the_levels(na
         ions.Ion(data.rename_axis(columns=names), "p1")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Ion._set_species refuses '+' with its own message, 'Species with '+' "
-    "are not supported'; expected \"Ion.species can't contain '+': p1+a\"; remove "
-    "this marker when Ion._set_species goes through _clean_species_for_setting",
-)
 def test_an_ion_species_joined_by_plus_raises_value_error_naming_it():
     r"""An Ion species containing ``+`` raises ValueError naming it, as a Plasma's does.
 

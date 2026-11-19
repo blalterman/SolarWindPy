@@ -583,11 +583,7 @@ class Plasma(base.Base):
         missing or reordered times, so the ions skip the time checks
         (see :class:`~solarwindpy.core.base.Base`).
         """
-        species = self.species
-        assert np.all(["+" not in s for s in species]), (
-            "Plasma.species can't contain '+'."
-        )
-        species = tuple(species)
+        species = tuple(self.species)
 
         ions_ = pd.Series(
             {s: ions.Ion(self.data, s, _time_checked=self.data.index) for s in species}
