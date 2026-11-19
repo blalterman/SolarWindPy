@@ -10,7 +10,9 @@ shape, in SILSO's layout, and then construct a real ``SIDC``: a real
 shipped ``ssn_extrema.csv``, and the real labelling code.
 
 Only boundaries are faked: the download cache (kept under ``tmp_path`` by the
-autouse ``isolated_cache`` fixture and seeded by ``seed_m13``), the socket
+root ``isolated_cache`` fixture, which the autouse wrapper in
+``tests/solar_activity/conftest.py`` gives every test here, and seeded by
+``seed_m13``), the socket
 layer (the autouse ``no_network`` fixture, which makes ``socket.getaddrinfo``
 and ``socket.socket.connect`` raise ``NetworkRefused``), and, in one test,
 ``SIDC_ID.url``, the SILSO download URL, redirected to a local file in SILSO's

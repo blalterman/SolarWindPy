@@ -3,9 +3,10 @@
 The indicator is a real ``SIDC`` monthly-smoothed sunspot series. Only the
 network is faked: SILSO's URL base is pointed at a local directory holding a
 file in SILSO's ``;``-separated format, and the download cache is kept under
-``tmp_path`` by the autouse ``isolated_cache`` fixture. The series is chosen
-so each value is known by hand: the SSN of month ``i`` after January 2000 is
-``50 + i``.
+``tmp_path``: ``tests/solar_activity/conftest.py`` has every test here use the
+root ``isolated_cache`` fixture (``tests/conftest.py``) through an autouse
+wrapper. The series is chosen so each value is known by hand: the SSN of
+month ``i`` after January 2000 is ``50 + i``.
 """
 
 from pathlib import Path

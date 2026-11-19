@@ -4,8 +4,10 @@ The classes under test are abstract, so each is exercised through the
 smallest concrete subclass that fills in its abstract hooks: those subclasses
 are real implementations, not stand-ins. The external boundaries are the
 network, stood in for by a CSV under ``tmp_path`` served through a ``file://``
-URL, and the download cache, which the autouse ``isolated_cache`` fixture keeps
-under ``tmp_path``. Expected values are chosen inputs or hand-computed dates.
+URL, and the download cache, kept under ``tmp_path`` by the root
+``isolated_cache`` fixture (``tests/conftest.py``), which the autouse wrapper in
+``tests/solar_activity/conftest.py`` gives every test here. Expected values are
+chosen inputs or hand-computed dates.
 """
 
 import logging

@@ -610,8 +610,9 @@ class TestICMECATDownloadAndCache:
     ``serve_catalog`` points ICMECAT_URL at a plain path, which is read in
     place and never cached. These tests serve the same file at its
     ``file://`` URL instead, so the catalog goes through the download cache
-    (kept under ``tmp_path`` by the autouse ``isolated_cache`` fixture), and
-    deleting the file makes the next download fail.
+    (kept under ``tmp_path`` by the root ``isolated_cache`` fixture, which the
+    autouse wrapper in ``tests/solar_activity/conftest.py`` gives every test
+    here), and deleting the file makes the next download fail.
     """
 
     @staticmethod

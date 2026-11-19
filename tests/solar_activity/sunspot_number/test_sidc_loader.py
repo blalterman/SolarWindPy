@@ -4,8 +4,9 @@
 ``SIDCLoader.read_data`` parses whatever file it is handed. The genuine
 external boundaries are the network and the download cache, so these tests
 hand the loader local files in SILSO's published wire format, seed the cache
-(kept under ``tmp_path`` by the autouse ``isolated_cache`` fixture) with them,
-and then let the real parsing and the real arithmetic run. Nothing patches
+(kept under ``tmp_path`` by the root ``isolated_cache`` fixture, which the
+autouse wrapper in ``tests/solar_activity/conftest.py`` gives every test here)
+with them, and then let the real parsing and the real arithmetic run. Nothing patches
 :func:`pandas.read_csv`, and nothing asserts that a method was called.
 
 The SILSO format is documented at <https://www.sidc.be/SILSO/infosnmtot> for

@@ -10,9 +10,10 @@ The network is the external boundary. Every "remote" file here is a real file
 under ``tmp_path`` served through a ``file://`` URL, so astropy's real download
 and cache code runs without opening a socket; deleting the served file makes
 the next download fail exactly as an unreachable server does. The cache itself
-lives under ``tmp_path`` through the autouse ``isolated_cache`` fixture, and an
-entry is aged by moving its file's modification time back, the clock the
-cache reads.
+lives under ``tmp_path`` through the root ``isolated_cache`` fixture
+(``tests/conftest.py``), which the autouse wrapper in
+``tests/solar_activity/conftest.py`` gives every test here, and an entry is
+aged by moving its file's modification time back, the clock the cache reads.
 """
 
 import http.server
