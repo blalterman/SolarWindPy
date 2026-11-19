@@ -52,7 +52,8 @@ ruff format src/solarwindpy/ tests/
 - ✅ All tests pass
 - ✅ No ruff check warnings in `src/solarwindpy/` (production code)
 - ⚠️ Test code warnings acceptable (tracked separately via GitHub Issues)
-- ✅ Coverage ≥95% (see [DEVELOPMENT.md](./DEVELOPMENT.md#testing-automated--testengineer-agent))
+- ✅ Coverage at or above the floor the pre-commit hook enforces (`--cov-fail-under` in
+  `.claude/hooks/pre-commit-tests.sh`)
 
 ### 2. Update CHANGELOG.md
 
@@ -558,7 +559,7 @@ Use this checklist for each release:
 ### Pre-Release
 - [ ] All tests passing locally (`pytest -v`)
 - [ ] Production code linting clean (`ruff check src/solarwindpy/`)
-- [ ] Coverage ≥95% ([DEVELOPMENT.md](./DEVELOPMENT.md#testing-automated--testengineer-agent))
+- [ ] Coverage at or above the pre-commit hook's floor (`.claude/hooks/pre-commit-tests.sh`)
 - [ ] CHANGELOG.md updated with version section
 - [ ] CHANGELOG committed and pushed
 - [ ] Working directory clean (no untracked files)

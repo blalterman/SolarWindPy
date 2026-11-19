@@ -27,62 +27,18 @@ echo "📁 Staged Python files:"
 echo "$staged_files" | sed 's/^/   /'
 
 # Run coverage analysis with required threshold.
-# 92 is a ratchet set two points under the measured baseline (94%), not a
+# 96 is a ratchet set two points under the measured baseline (98%, measured
+# with `pytest --cov=solarwindpy -q -p no:randomly` on 2026-11-19), not a
 # target: it blocks regressions without blocking every commit. Raise it as
 # coverage rises. A threshold above measured coverage never passes, so the hook
 # only teaches people to pass --no-verify, which skips ruff along with it.
-echo "📊 Running coverage analysis (≥92% required)..."
-if ! "$ENV" pytest --cov=solarwindpy --cov-fail-under=92 -q --tb=short; then
+echo "📊 Running coverage analysis (≥96% required)..."
+if ! "$ENV" pytest --cov=solarwindpy --cov-fail-under=96 -q --tb=short; then
     echo ""
-    echo "❌ Coverage below 92% threshold or tests failed"
+    echo "❌ Coverage below 96% threshold or tests failed"
     echo "💡 Fix failing tests and improve coverage before committing"
     echo "💡 Run 'pytest --cov=solarwindpy --cov-report=html' for detailed report"
     exit 1
-fi
-
-# Test files directly related to staged changes
-echo ""
-echo "🎯 Testing modules related to staged changes..."
-for file in $staged_files; do
-    # Convert file path to module path for testing
-    if [[ $file == src/solarwindpy/* ]]; then
-        module_path=${file#src/}
-        module_path=${module_path%.py}
-        module_path=${module_path//\//.}
-        test_path="tests/${file#src/solarwindpy/}"
-        test_path="tests/${test_path%.py}"
-        
-        # Check if corresponding test file exists
-        if [[ -f "${test_path}.py" ]] || [[ -d "$(dirname ${test_path})" ]]; then
-            echo "   Testing: $module_path"
-            if ! "$ENV" pytest "tests/${file#src/solarwindpy/}" -v --tb=short 2>/dev/null; then
-                echo "⚠️  Module-specific tests may need attention: $module_path"
-            fi
-        fi
-    fi
-done
-
-# Physics-specific validation for core modules
-physics_files=$(echo "$staged_files" | grep -E "(core|instabilities|fitfunctions)" || true)
-if [[ -n "$physics_files" ]]; then
-    echo ""
-    echo "🔬 Running physics validation for critical modules..."
-    echo "$physics_files" | sed 's/^/   /'
-    
-    # Run physics-specific tests
-    if ! "$ENV" pytest tests/core/ tests/instabilities/ tests/fitfunctions/ -k "physics or thermal or alfven or conservation" -q --tb=line 2>/dev/null; then
-        echo "⚠️  Physics validation tests may need attention"
-    fi
-fi
-
-# Performance tests for core changes
-core_files=$(echo "$staged_files" | grep "core/" || true)
-if [[ -n "$core_files" ]]; then
-    echo ""
-    echo "⏱️  Running performance tests for core changes..."
-    if ! timeout 30s "$ENV" pytest -m "slow or performance" tests/core/ -q --tb=line 2>/dev/null; then
-        echo "⚠️  Performance tests completed with timeout (expected for large datasets)"
-    fi
 fi
 
 echo ""
