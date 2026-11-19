@@ -19,6 +19,11 @@ on:
         required: false
         default: true
         type: boolean
+  # Weekly: platform-matrix runs the full suite on every OS and Python on master.
+  # Every upload, release and feedstock step is gated on a tag push or
+  # workflow_dispatch, so a scheduled run builds the package and uploads nothing.
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays 06:00 UTC
 
 jobs:
   # Release gate: the full suite on every declared Python, on Linux, macOS, and Windows.
