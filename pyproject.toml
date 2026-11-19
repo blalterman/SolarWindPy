@@ -189,9 +189,7 @@ analysis = [
 "Documentation" = "https://solarwindpy.readthedocs.io"
 
 [tool.setuptools.package-data]
-solarwindpy = ["core/data/*.csv"]
-
-[tool.pip-tools]
-# pip-compile configuration for lockfile generation
-generate-hashes = false  # Set to true for security-critical deployments
-allow-unsafe = true      # Allow pip, setuptools, wheel in lockfiles
+solarwindpy = [
+  "core/data/*.csv",
+  "solar_activity/sunspot_number/ssn_extrema.csv",
+]
