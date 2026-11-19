@@ -22,6 +22,10 @@ from . import units_constants
 
 # What each column level holds, for messages that name a level.
 _LEVEL_WORDS = {"M": "measurement", "C": "component", "S": "species"}
+# The column level names in their order, M then C then S: the one home of the
+# level names. A frame without species, such as a spacecraft's or an Ion's,
+# has the first two.
+_LEVEL_NAMES = tuple(_LEVEL_WORDS)
 
 
 class Core(_WithLogger, ABC):
@@ -320,6 +324,35 @@ class Core(_WithLogger, ABC):
                 f"{what} must be a pandas DataFrame, not {type(data).__name__}"
             )
 
+    @staticmethod
+    def _require_level_names(
+        columns: pd.Index, expected: Tuple[str, ...], what: str, any_order=False
+    ) -> None:
+        r"""Raise :class:`ValueError` unless ``columns``' levels are named ``expected``.
+
+        Parameters
+        ----------
+        columns : pd.Index
+            The columns to check.
+        expected : tuple of str
+            The required level names, ``_LEVEL_NAMES`` or its first two.
+        what : str
+            Names the checked frame in the error message.
+        any_order : bool, optional
+            Accept ``expected`` in any order.
+        """
+        # Compare as lists: pandas 3 makes a FrozenList both == and != a tuple.
+        names = list(columns.names)
+        want = list(expected)
+        if any_order:
+            names, want = sorted(names, key=str), sorted(want)
+        if names != want:
+            order = " in any order" if any_order else ""
+            raise ValueError(
+                f"{what} columns must have levels named {tuple(expected)}{order}, "
+                f"not {tuple(columns.names)}"
+            )
+
     def _put_in_time_order(
         self, data: pd.DataFrame, what: str, refusal: str | None = None
     ) -> pd.DataFrame:
@@ -461,8 +494,7 @@ class Base(Core):
         pd.MultiIndex
             MultiIndex created from tuples.
         """
-        names = ["M", "C", "S"]
-        return pd.MultiIndex.from_tuples(x, names=names)
+        return pd.MultiIndex.from_tuples(x, names=_LEVEL_NAMES)
 
     @abstractmethod
     def set_data(self, new: pd.DataFrame) -> None:

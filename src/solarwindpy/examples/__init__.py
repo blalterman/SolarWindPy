@@ -33,13 +33,14 @@ def _read_example(name):
     pandas.DataFrame
         float64 values, columns sorted, index named ``epoch``.
     """
+    # Imported here so the package namespace binds only its own objects.
+    from ..core.base import Base
+
     with _DATA.joinpath("example_epoch.csv").open(encoding="utf-8") as f:
         epoch = pd.read_csv(f)["epoch"].map(pd.to_datetime)
     with _DATA.joinpath(f"example_{name}.csv").open(encoding="utf-8") as f:
         data = pd.read_csv(f)
-    data.columns = pd.MultiIndex.from_tuples(
-        [tuple(c.split("|")) for c in data.columns], names=["M", "C", "S"]
-    )
+    data.columns = Base.mi_tuples([tuple(c.split("|")) for c in data.columns])
     data = data.astype(np.float64).sort_index(axis=1)
     data.index = epoch
     return data

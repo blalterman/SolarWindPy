@@ -158,7 +158,7 @@ def swap_protons(data, logger=None):
 
     new_protons = (
         pd.concat([p1, p2], axis=1, keys=["p1", "p2"], names=["S"])
-        .reorder_levels(["M", "C", "S"], axis=1)
+        .reorder_levels(data.columns.names, axis=1)
         .sort_index(axis=1)
     )
 

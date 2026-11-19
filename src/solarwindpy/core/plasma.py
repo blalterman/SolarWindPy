@@ -465,7 +465,7 @@ class Plasma(base.Base):
         """
 
         data = pd.read_hdf(fname, key=dkey)
-        data.columns.names = ["M", "C", "S"]
+        data.columns.names = base._LEVEL_NAMES
 
         if start is not None or stop is not None:
             data = data.loc[start:stop]
@@ -496,7 +496,7 @@ class Plasma(base.Base):
 
         if sckey:
             sc = pd.read_hdf(fname, key=sckey)
-            sc.columns.names = ("M", "C")
+            sc.columns.names = base._LEVEL_NAMES[:2]
 
             if (sc_name is None) or (sc_frame is None):
                 raise ValueError(
@@ -516,7 +516,7 @@ class Plasma(base.Base):
 
         if auxkey:
             aux = pd.read_hdf(fname, key=auxkey)
-            aux.columns.names = ("M", "C", "S")
+            aux.columns.names = base._LEVEL_NAMES
 
             if start is not None or stop is not None:
                 aux = aux.loc[index]
@@ -687,7 +687,9 @@ class Plasma(base.Base):
             # A Spacecraft sorts itself and refuses NaT when built, so its
             # times either equal the plasma's row for row or differ.
             self._require_plasma_index(new.data.index, "Spacecraft data")
-            self._require_level_names(new.data.columns, ("M", "C"), "Spacecraft data")
+            self._require_level_names(
+                new.data.columns, base._LEVEL_NAMES[:2], "Spacecraft data"
+            )
             # Don't test spacecraft data duplicating plasma data b/c labels will
             # overlap even though they represent different quantities because
             # spacecraft only has a 2-level MultiIndex.
@@ -748,7 +750,7 @@ class Plasma(base.Base):
         if new is not None:
             assert isinstance(new.index, pd.DatetimeIndex)
             order = self._plasma_order(new.index, "Auxiliary data", source)
-            self._require_level_names(new.columns, ("M", "C", "S"), "Auxiliary data")
+            self._require_level_names(new.columns, base._LEVEL_NAMES, "Auxiliary data")
             if new.columns.isin(self.data.columns).any():
                 raise ValueError("Auxiliary data should not duplicate plasma data")
             if order is not None:
@@ -761,33 +763,6 @@ class Plasma(base.Base):
         """Log at INFO that the optional input ``name`` was not passed."""
         if new is None:
             self.logger.info("No %s data passed to %s", name, self.__class__.__name__)
-
-    @staticmethod
-    def _require_level_names(columns, expected, what, any_order=False):
-        r"""Raise :class:`ValueError` unless ``columns``' levels are named ``expected``.
-
-        Parameters
-        ----------
-        columns : pd.MultiIndex
-            The columns to check.
-        expected : tuple of str
-            The required level names.
-        what : str
-            Names the checked frame in the error message.
-        any_order : bool, optional
-            Accept ``expected`` in any order.
-        """
-        # Compare as lists: pandas 3 makes a FrozenList both == and != a tuple.
-        names = list(columns.names)
-        want = list(expected)
-        if any_order:
-            names, want = sorted(names, key=str), sorted(want)
-        if names != want:
-            order = " in any order" if any_order else ""
-            raise ValueError(
-                f"{what} columns must have levels named {tuple(expected)}{order}, "
-                f"not {tuple(columns.names)}"
-            )
 
     def _require_plasma_index(self, index, what):
         r"""Raise :class:`ValueError` unless ``index`` equals the plasma data's.
@@ -938,9 +913,9 @@ class Plasma(base.Base):
         super(Plasma, self).set_data(new)
 
         self._require_level_names(
-            new.columns, ("M", "C", "S"), "Plasma data", any_order=True
+            new.columns, base._LEVEL_NAMES, "Plasma data", any_order=True
         )
-        new = new.reorder_levels(["M", "C", "S"], axis=1).sort_index(axis=1)
+        new = new.reorder_levels(base._LEVEL_NAMES, axis=1).sort_index(axis=1)
 
         # These are the only quantities we want in plasma.
         # TODO: move `theta_rms`, `mag_rms` and anything not common to
@@ -2049,7 +2024,11 @@ species: {}
 
         ne.name = ""
         electrons = pd.concat(
-            [ne, ve, we], axis=1, keys=["n", "v", "w"], names=["M", "C"], sort=True
+            [ne, ve, we],
+            axis=1,
+            keys=["n", "v", "w"],
+            names=base._LEVEL_NAMES[:2],
+            sort=True,
         )
         mask = ~ne.astype(bool)
         electrons = electrons.mask(mask, axis=0)
@@ -2059,7 +2038,7 @@ species: {}
         if inplace:
             cols = electrons.data.columns
             cols = [x + ("e",) for x in cols.values]
-            cols = pd.MultiIndex.from_tuples(cols, names=["M", "C", "S"])
+            cols = self.mi_tuples(cols)
             electrons.data.columns = cols
 
             data = self.data

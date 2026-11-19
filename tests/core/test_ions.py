@@ -249,13 +249,6 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     assert expected == printed(267.6, decimals=1)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Ion.set_data raises 'Unrecognized data column names' rather than naming "
-    "the levels it wants; expected message 'Ion data columns must have levels named'; "
-    "remove this marker when Ion.set_data calls Core._require_level_names",
-)
 @pytest.mark.parametrize(
     "names", [["M", "X"], ["M", "C", "X"]], ids=["two-levels", "three-levels"]
 )
