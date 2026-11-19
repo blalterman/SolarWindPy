@@ -21,21 +21,6 @@ from datetime import datetime
 from pathlib import Path
 from scipy.ndimage import gaussian_filter
 
-# Path to the solarwindpy style file
-_STYLE_PATH = Path(__file__).parent / "solarwindpy.mplstyle"
-
-
-def _use_style():
-    r"""Apply the SolarWindPy matplotlib style.
-
-    This sets publication-ready defaults including:
-    - 4x4 inch figure size
-    - 12pt base font size
-    - Spectral_r colormap
-    - 300 DPI PDF output
-    """
-    plt.style.use(_STYLE_PATH)
-
 
 def subplots(nrows=1, ncols=1, scale_width=1.0, scale_height=1.0, **kwargs):
     r"""Create a grid of subplots with a scaled figure size.
