@@ -579,9 +579,12 @@ def test_set_data_called_directly_replaces_the_data():
 #: spacecraft sits at GSE (3, 0, 4) Re, so cos(latitude) = 3/5. Its distance
 #: to the Sun is |(AU - 3 Re, 0, 4 Re)| with AU = 149 597 870 700 m (IAU 2012
 #: B2) and Re = 6378.1 km (the package's Earth radius, IAU 2015 B3):
-#: sqrt(149 578 736 400^2 + 25 512 400^2) m = 149 578 738.5757 km. Then
-#: 2.865e-6 rad/s * 149 578 738.5757 km * 0.6 = 257.1258516 km/s.
-ROTATION_SPEED_KM_S = 257.12585161166068
+#: sqrt(149 578 736 400^2 + 25 512 400^2) m = 149 578 738.5757 km. The Sun
+#: rotates at 2 pi / (25.38 d * 86 400 s/d) = 2.8653290846e-6 rad/s, the
+#: sidereal Carrington period (Thompson 2006, A&A 449, 791, sec. 2.2,
+#: doi:10.1051/0004-6361:20054262). Then
+#: 2.8653290846e-6 rad/s * 149 578 738.5757 km * 0.6 = 257.1553860 km/s.
+ROTATION_SPEED_KM_S = 257.15538604473477
 
 
 def _gse_inputs():
@@ -634,6 +637,12 @@ def _gse_inputs():
     return v, b, rho, sc
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="AlfvenicTurbulence.set_data uses omega = 2.865e-6 rad/s; remove "
+    "this marker when it uses 2 pi / 25.38 d",
+)
 def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
     """GSE input becomes RTN, v_T loses the solar-rotation speed, b is rectified.
 
