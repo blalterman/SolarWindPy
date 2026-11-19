@@ -468,6 +468,81 @@ def test_tk_kind_rejects_unknown_instability():
         sc.plot_contours(ax, tk_kind="XYZ")
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="StabilityContours.plot_contours checks ax with a bare assert; expected "
+    "TypeError 'ax must be a matplotlib.axes.Axes, not Figure'; remove this "
+    "marker when the assert becomes a named error",
+)
+def test_plot_contours_rejects_an_ax_that_is_not_axes():
+    """A Figure passed as ``ax`` raises TypeError naming its type.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    with pytest.raises(
+        TypeError, match=r"^ax must be a matplotlib\.axes\.Axes, not Figure$"
+    ):
+        sc.plot_contours(fig)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="StabilityContours.set_beta checks beta with a bare assert; expected "
+    "TypeError 'beta must be a numpy.ndarray, not list'; remove this marker "
+    "when the assert becomes a named error",
+)
+def test_stability_contours_reject_beta_that_is_not_an_array():
+    """Beta given as a list raises TypeError naming its type.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(TypeError, match=r"^beta must be a numpy\.ndarray, not list$"):
+        v16.StabilityContours([1.0, 2.0])
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="StabilityCondition.set_beta_ani checks shapes with a bare assert; "
+    "expected ValueError 'beta and R must have the same shape'; remove this "
+    "marker when the assert becomes a named error",
+)
+def test_stability_condition_rejects_beta_and_anisotropy_of_other_shapes():
+    """Three betas and two anisotropies raise ValueError naming both shapes.
+
+    ON FAILURE: the code is wrong.
+    """
+    beta = pd.Series([1.0, 1.0, 1.0])
+    R = pd.Series([1.0, 2.0])
+    with pytest.raises(
+        ValueError,
+        match=r"^beta and R must have the same shape, not \(3,\) and \(2,\)$",
+    ):
+        v16.StabilityCondition(-3, beta, R)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="beta_ani_inst defaults a, b and c to None, so a missing coefficient "
+    "fails in float(None); expected TypeError naming the missing arguments; "
+    "remove this marker when the signature is beta_ani_inst(beta, a, b, c)",
+)
+def test_beta_ani_inst_requires_every_coefficient():
+    """Equation 5 has no default coefficients: omitting them names all three.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(
+        TypeError, match=r"missing 3 required positional arguments: 'a', 'b', and 'c'"
+    ):
+        v16.beta_ani_inst(1.0)
+
+
 class LegendTableMismatch(AssertionError):
     """A table-legend handle sits in a row or column that does not describe it."""
 
