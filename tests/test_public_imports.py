@@ -267,6 +267,59 @@ def test_every_documented_name_is_documented_at_its_one_path(dotted):
         assert _is_defined_in(obj, leaf, parent_mod)
 
 
+# Sphinx events whose handlers edit a page autosummary already generated, never
+# which pages it generates. autodoc-process-bases rewrites a class's
+# show-inheritance line.
+_PAGE_PRESERVING_EVENTS = {"autodoc-process-bases"}
+
+
+def _connected_events(setup):
+    """Events a conf.py ``setup`` connects, or a marker for anything else.
+
+    Each statement must be ``app.connect("<event>", handler)`` or a docstring;
+    any other statement yields ``"<unmodeled statement>"``, so a ``setup`` that
+    does more than connect handlers stays outside the model.
+    """
+    events = set()
+    for stmt in setup.body:
+        call = stmt.value if isinstance(stmt, ast.Expr) else None
+        if isinstance(call, ast.Constant) and isinstance(call.value, str):
+            continue
+        if (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr == "connect"
+            and call.args
+            and isinstance(call.args[0], ast.Constant)
+        ):
+            events.add(call.args[0].value)
+        else:
+            events.add("<unmodeled statement>")
+    return events
+
+
+def test_conf_setup_model_refuses_page_changing_hooks():
+    """A ``setup`` passes the model only when it connects page-preserving events.
+
+    ON FAILURE: the code is wrong; ``_connected_events`` no longer separates a
+    hook that edits a generated page from one that can change which pages are
+    generated, so the documented-objects test could pass while the docs build
+    leaves an object out.
+    """
+
+    def events(src):
+        return _connected_events(ast.parse(src).body[0])
+
+    head = 'def setup(app):\n    "Doc."\n'
+    rewrites_bases = head + '    app.connect("autodoc-process-bases", f)\n'
+    skips_members = head + '    app.connect("autodoc-skip-member", f)\n'
+    adds_config = head + '    app.add_config_value("x", 1, "env")\n'
+
+    assert events(rewrites_bases) <= _PAGE_PRESERVING_EVENTS
+    assert not events(skips_members) <= _PAGE_PRESERVING_EVENTS
+    assert not events(adds_config) <= _PAGE_PRESERVING_EVENTS
+
+
 def test_every_public_object_is_documented_on_the_api_reference():
     """Every name in any ``__all__`` is on a page the docs build generates.
 
@@ -275,7 +328,9 @@ def test_every_public_object_is_documented_on_the_api_reference():
     recursion reaches every module whose path below that entry has no
     private component; and the module template lists the object (see
     ``_sphinx_lists``). conf.py must not change what autosummary generates:
-    no event hooks (``setup``), no mocked imports, no ``exclude_patterns``.
+    no mocked imports, no ``exclude_patterns``, and a ``setup`` that connects
+    only events in ``_PAGE_PRESERVING_EVENTS``, which change what a generated
+    page shows but not which pages are generated.
 
     ON FAILURE: the docs or the code are wrong; add the subpackage's
     recursive entry to api_reference.rst, give the attribute a ``#:`` doc
@@ -284,7 +339,11 @@ def test_every_public_object_is_documented_on_the_api_reference():
     """
     conf = set()
     for node in ast.parse((DOCS_SOURCE / "conf.py").read_text(encoding="utf-8")).body:
-        if isinstance(node, ast.FunctionDef):
+        if isinstance(node, ast.FunctionDef) and node.name == "setup":
+            if _connected_events(node) <= _PAGE_PRESERVING_EVENTS:
+                continue
+            conf.add(node.name)
+        elif isinstance(node, ast.FunctionDef):
             conf.add(node.name)
         elif isinstance(node, ast.Assign):
             conf.update(t.id for t in node.targets if isinstance(t, ast.Name))
