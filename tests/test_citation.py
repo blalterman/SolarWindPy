@@ -10,6 +10,7 @@ this repository" button. These tests keep the three in step.
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,3 +53,34 @@ def test_bibtex_doi_is_the_citation_cff_doi():
     match = re.search(r"doi\s*=\s*\{([^}]+)\}", entry)
     assert match is not None, entry
     assert match.group(1) == cff["doi"]
+
+
+# The newest release section of CHANGELOG.md: "## [X.Y.Z] - YYYY-MM-DD".
+RELEASE_HEADING = re.compile(
+    r"^## \[(\d+\.\d+\.\d+[^\]]*)\] - (\d{4}-\d{2}-\d{2})$", flags=re.MULTILINE
+)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=KeyError,
+    reason="CITATION.cff has no version or date-released; remove this marker when "
+    "it names the current release",
+)
+def test_citation_cff_names_the_newest_changelog_release():
+    """``CITATION.cff``'s version and date are the newest release in ``CHANGELOG.md``.
+
+    The release commit writes the version section of ``CHANGELOG.md``; this test
+    makes the same commit set ``version`` and ``date-released`` in
+    ``CITATION.cff``, so the citation names the current release (GOVERNANCE.md
+    § Objectives). The publish workflow refuses a tag that differs from it.
+
+    ON FAILURE: the code is wrong; set CITATION.cff's version and date-released
+    to the newest ``## [X.Y.Z] - YYYY-MM-DD`` heading in CHANGELOG.md.
+    """
+    cff = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    newest = RELEASE_HEADING.search(changelog)
+    assert newest is not None, "CHANGELOG.md has no release heading"
+    version, date = newest.groups()
+    assert (cff["version"], str(cff["date-released"])) == (version, date)
