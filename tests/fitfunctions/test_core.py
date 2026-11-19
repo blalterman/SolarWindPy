@@ -100,6 +100,45 @@ def test_xoutside_excludes_the_open_interval():
     assert np.array_equal(lf.observations.used.x, np.array([0.0, 1.0, 3.0, 4.0]))
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="FitFunction._build_outside_mask checks lower < upper with a bare assert; "
+    "expected InvalidParameterError '<x|y>outside must be (lower, upper) with "
+    "lower < upper'; remove this marker when the assert becomes a named error",
+)
+@pytest.mark.parametrize("keyword", ["xoutside", "youtside"])
+def test_an_inverted_outside_interval_raises_invalid_parameter_error(keyword):
+    """``(3, 1)`` as ``xoutside`` or ``youtside`` is refused, naming the keyword.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    with pytest.raises(
+        InvalidParameterError,
+        match=rf"^{keyword} must be \(lower, upper\) with lower < upper, not \(3, 1\)$",
+    ):
+        LinearFit(x, x, **{keyword: (3, 1)})
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="FitFunction.__init__ refuses yerr_min and yerr_max without yerr by bare "
+    "asserts; expected InvalidParameterError naming the keyword; remove this "
+    "marker when the asserts become a named error",
+)
+@pytest.mark.parametrize("keyword", ["yerr_min", "yerr_max"])
+def test_an_uncertainty_limit_without_yerr_raises_invalid_parameter_error(keyword):
+    """``yerr_min`` or ``yerr_max`` without ``yerr`` has nothing to select on.
+
+    ON FAILURE: the code is wrong.
+    """
+    x = np.arange(5.0)
+    with pytest.raises(InvalidParameterError, match=rf"^{keyword} needs yerr"):
+        LinearFit(x, x, **{keyword: 1.0})
+
+
 def test_set_fit_obs_combined_masks():
     x = np.array([0, 1, 2, 3, 4], dtype=float)
     y = np.array([10, 20, 30, 40, 50], dtype=float)
