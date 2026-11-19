@@ -127,16 +127,43 @@ class IonTestBase(ABC):
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.T)
 
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="Ion.cs applies gamma = 5/3 to par and per; remove this marker "
+        "when Ion.cs takes the CGL indices from polytropic_index",
+    )
     def test_cs(self):
-        m = self.mass
-        n = self.data.n * 1e6
-        w = self.data.w * 1e3
-        rho = n * m
-        pth = w.pow(2).multiply(0.5 * rho, axis=0)
-        gamma = 5.0 / 3.0
-        cs = (pth.divide(rho, axis=0) * gamma).pow(0.5) / 1e3
-        cs.name = "cs"
-        pdt.assert_frame_equal(cs, self.object_testing.cs)
+        """Par, per and scalar sound speeds use the CGL indices 3, 2 and 5/3.
+
+        cs_c = sqrt(gamma_c p_c / rho) per pressure component, with the
+        double-adiabatic indices gamma_par = 3 and gamma_per = 2 of Chew,
+        Goldberger & Low (1956), Proc. R. Soc. Lond. A 236, 112,
+        doi:10.1098/rspa.1956.0116, and the isotropic gamma = 5/3 for the
+        scalar. Recomputed from the raw n and w in SI, and, because
+        p = rho w^2 / 2, also by hand: cs_par = sqrt(3/2) w_par,
+        cs_per = w_per and cs = sqrt(5/6) w.
+
+        ON FAILURE: the code is wrong, unless the author rejects the CGL
+        indices for the par and per sound speeds.
+        """
+        rho = self.mass * self.data.n * 1e6  # [kg m^-3]
+        w = self.data.w * 1e3  # [m s^-1]
+        pth = w.pow(2).multiply(0.5 * rho, axis=0)  # [Pa]
+        gamma = {"par": 3.0, "per": 2.0, "scalar": 5.0 / 3.0}
+        cs = self.object_testing.cs
+        for c, g in gamma.items():
+            expected = (g * pth.loc[:, c] / rho).pow(0.5) / 1e3  # [km s^-1]
+            assert cs.loc[:, c].to_numpy() == exact(expected.to_numpy())
+
+        w_kms = self.data.w
+        by_hand = {
+            "par": np.sqrt(1.5) * w_kms.loc[:, "par"],
+            "per": w_kms.loc[:, "per"],
+            "scalar": np.sqrt(5.0 / 6.0) * w_kms.loc[:, "scalar"],
+        }
+        for c, expected in by_hand.items():
+            assert cs.loc[:, c].to_numpy() == exact(expected.to_numpy())
 
     def test_kinetic_energy_flux(self):
         """W_k = rho |v|^3 / 2, in uW m^-2, recomputed from the raw n and v.
