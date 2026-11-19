@@ -373,16 +373,6 @@ class SIDC(ActivityIndicator):
         self.calculate_extrema_kind()
         self.calculate_edge()
 
-    @property
-    def spec_by_ssn_band(self):
-        r"""SSN band holding each interpolated time; see :meth:`cut_spec_by_ssn_band`."""
-        return self._spec_by_ssn_band
-
-    @property
-    def ssn_band_intervals(self):
-        r"""Band intervals used by :meth:`cut_spec_by_ssn_band`."""
-        return self._ssn_band_intervals
-
     def load_data(self):
         r"""Load the series through a :class:`SIDCLoader`."""
         loader = SIDCLoader(self.id.key, self.id.url)
@@ -510,73 +500,6 @@ class SIDC(ActivityIndicator):
         return normed
 
     run_normalization.__doc__ = ActivityIndicator.run_normalization.__doc__
-
-    def cut_spec_by_ssn_band(self, key="ssn", dssn=2.0):
-        r"""Cut the sunspot number at each spectrum in intervals of width +/- dssn.
-
-        The bands are centred on ``0, 2 dssn, 4 dssn, ...`` below the maximum
-        of ``key`` in :attr:`data`, each spanning centre +/- ``dssn``. The
-        values cut are those of :attr:`interpolated`, i.e. the times of the
-        last :meth:`interpolate_data` call. The result is also stored as
-        :attr:`spec_by_ssn_band`, and the bands as :attr:`ssn_band_intervals`.
-
-        Parameters
-        ----------
-        key : str, optional
-            Column to cut, ``"ssn"`` (default) or the normalized ``"nssn"``.
-        dssn : float, optional
-            Half-width of each band, in the units of ``key``. Defaults to 2.
-
-        Returns
-        -------
-        pandas.Series
-            Band (a :class:`pandas.Interval`) holding each interpolated
-            value, named ``"<key>_band"``; NaN where no band holds it.
-
-        Raises
-        ------
-        ValueError
-            If ``key`` is ``"nssn"`` and ``dssn`` is not below 1.
-        KeyError
-            If :attr:`interpolated` has no ``key`` column, naming it.
-        """
-
-        dssn = float(dssn)
-        if (key == "nssn") and (dssn >= 1):
-            raise ValueError("Normalized SSN requires that dssn < 1")
-
-        data = self.data.loc[:, key]
-        mids = np.arange(0, data.max(), 2.0 * dssn)
-
-        # Neighbouring bands share one edge. Computed separately, mids + dssn
-        # can exceed the next mids - dssn by rounding, and pd.cut refuses
-        # overlapping bins.
-        breaks = np.append(mids - dssn, mids[-1:] + dssn)
-        intervals = pd.IntervalIndex.from_breaks(breaks, name="ssn_intervals")
-        try:
-            values = self.interpolated.loc[:, key]  # TODO: generalize this hack
-        except KeyError as e:
-            raise KeyError(
-                f"`interpolated` has no column {key!r}; interpolate it with "
-                f"interpolate_data(..., key={key!r}) first."
-            ) from e
-        if len(intervals):
-            cut = pd.cut(values, intervals)
-        else:
-            # No band centres below the maximum (e.g. an all-zero series): every
-            # label is NaN. pandas 3.1.0's pd.cut raises IndexError on empty bins.
-            cut = pd.Series(
-                pd.Categorical.from_codes(
-                    np.full(len(values), -1), categories=intervals, ordered=True
-                ),
-                index=values.index,
-                name=values.name,
-            )
-
-        cut.name = f"{key}_band"
-        self._spec_by_ssn_band = cut
-        self._ssn_band_intervals = intervals
-        return cut
 
     @staticmethod
     def ssn_scale_top(ssn):
