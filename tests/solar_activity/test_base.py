@@ -545,24 +545,36 @@ def test_extrema_keyword_arguments_reach_load_or_set_data():
     assert Extrema(table=table).data is table
 
 
-def test_loggers_sit_under_the_solarwindpy_logger():
-    """Each object's logger is a child of ``solarwindpy``, named for its class.
+_BASE_MODULE_LOGGERS = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Base._init_logger names the logger for solarwindpy.solar_activity.base; "
+    "expected <subclass module>.<class>; remove this marker when the one logger "
+    "mixin in solarwindpy.tools lands",
+)
 
-    Users configure the package's logging through ``logging.getLogger("solarwindpy")``.
+
+@_BASE_MODULE_LOGGERS
+def test_a_subclass_logs_under_its_own_module():
+    """A subclass's logger is named for the module that defines it, then its class.
+
+    ``Catalog`` and ``Extrema`` are defined in this test module, so their loggers
+    sit under it, as a user's subclass logs under the user's module.
 
     ON FAILURE: the code is wrong.
     """
-    assert Catalog("daily").logger.name == "solarwindpy.solar_activity.base.Catalog"
-    assert Extrema(extrema_table()).logger.name.startswith("solarwindpy.")
+    assert Catalog("daily").logger.name == f"{__name__}.Catalog"
+    assert Extrema(extrema_table()).logger.name == f"{__name__}.Extrema"
 
 
-def test_loader_logger_sits_under_the_solarwindpy_logger():
-    """A loader's logger is a child of ``solarwindpy``, named for its class.
+@_BASE_MODULE_LOGGERS
+def test_a_loader_subclass_logs_under_its_own_module():
+    """A loader subclass's logger is named for the module that defines it, then its class.
 
     ON FAILURE: the code is wrong.
     """
     loader = CacheLoader("daily", "unused")
-    assert loader.logger.name == "solarwindpy.solar_activity.base.CacheLoader"
+    assert loader.logger.name == f"{__name__}.CacheLoader"
 
 
 # ---------------------------------------------------------------------------

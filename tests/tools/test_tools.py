@@ -1,8 +1,9 @@
 # Spent-When: PERMANENT(solarwindpy stops shipping its tools package)
 # Supersedes: none
-"""Tests for ``solarwindpy.tools``: ``swap_protons`` and ``normal_parameters``.
+"""Tests for ``solarwindpy.tools``: ``swap_protons``, ``normal_parameters``, loggers.
 
-Expected values come from hand-built frames and ``scipy.stats.lognorm``.
+Expected values come from hand-built frames, ``scipy.stats.lognorm`` and the
+logger names the usage guide's Logging section states.
 """
 
 import logging
@@ -15,6 +16,12 @@ import pytest
 from scipy import stats
 
 import solarwindpy.tools as tools
+from solarwindpy.examples import load_plasma
+from solarwindpy.fitfunctions.gaussians import Gaussian
+from solarwindpy.plotting.hist1d import Hist1D
+from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
+from solarwindpy.plotting.labels.special import ManualLabel
+from solarwindpy.solar_activity.sunspot_number.sidc import SIDC_ID, SSNExtrema
 from solarwindpy.tools import normal_parameters, swap_protons
 from tests.tolerances import assert_within_error_bars, exact
 
@@ -233,6 +240,108 @@ class TestCoreDominatesCheck:
         zeros = new.iloc[[0]].copy()
         zeros.loc[:, [("n", "", "p1"), ("n", "", "p2")]] = 0.0
         tools._check_core_dominates(pd.concat([new, zeros], ignore_index=True))
+
+
+# ---------------------------------------------------------------------------
+# Logger names: each class logs under its own module
+# ---------------------------------------------------------------------------
+
+_BASE_MODULE_LOGGERS = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="each _init_logger names the logger for its base's module "
+    "(solarwindpy.core.base.Plasma); expected <own module>.<class>; remove this "
+    "marker when the one logger mixin in solarwindpy.tools lands",
+)
+
+
+def _gaussian():
+    x = np.linspace(-2.0, 2.0, 9)
+    return Gaussian(x, np.exp(-0.5 * x**2))
+
+
+# One concrete class per logging base, each defined outside its base's module,
+# so a logger named for the base's module fails. ICMECAT, whose class and base
+# share a module, is covered by tests/solar_activity/icme/test_icmecat.py.
+OWN_MODULE_LOGGERS = [
+    (load_plasma, "solarwindpy.core.plasma.Plasma"),
+    (lambda: load_plasma().p1, "solarwindpy.core.ions.Ion"),
+    (lambda: load_plasma().b, "solarwindpy.core.vector.BField"),
+    (_gaussian, "solarwindpy.fitfunctions.gaussians.Gaussian"),
+    (
+        lambda: Hist1D(pd.Series([1.0, 2.0], name="v")),
+        "solarwindpy.plotting.hist1d.Hist1D",
+    ),
+    (
+        lambda: ManualLabel("Flux", "dimless"),
+        "solarwindpy.plotting.labels.special.ManualLabel",
+    ),
+    (lambda: SIDC_ID("m"), "solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID"),
+    (SSNExtrema, "solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema"),
+]
+
+
+@_BASE_MODULE_LOGGERS
+@pytest.mark.parametrize(
+    "make, expected",
+    OWN_MODULE_LOGGERS,
+    ids=[name.rsplit(".", 1)[1] for _, name in OWN_MODULE_LOGGERS],
+)
+def test_every_package_class_logs_under_its_own_module(make, expected):
+    """An object's logger is named ``<the module defining its class>.<class>``.
+
+    The expected names are the usage guide's form written out by hand, so
+    ``logging.getLogger("solarwindpy.core.plasma")`` reaches a Plasma's records.
+    ON FAILURE: the code is wrong.
+    """
+    assert make().logger.name == expected
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="swap_protons with no logger logs on main.solarwindpy.tools with its own "
+    "StreamHandler and level; expected solarwindpy.tools with neither; remove this "
+    "marker when swap_protons uses logging.getLogger(__name__)",
+)
+def test_swap_protons_logs_on_solarwindpy_tools_with_no_handler(
+    protons, caplog, restore_logging
+):
+    """With no ``logger``, the statistics go to ``solarwindpy.tools`` and nowhere else.
+
+    That logger has no handler and no level of its own, so the caller's logging
+    configuration decides whether the statistics show.
+    ON FAILURE: the code is wrong.
+    """
+    caplog.set_level(logging.INFO)
+    swap_protons(protons)
+    assert [r.name for r in caplog.records] == ["solarwindpy.tools"]
+    package_logger = logging.getLogger("solarwindpy.tools")
+    assert package_logger.handlers == []
+    assert package_logger.level == logging.NOTSET
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="ElementalAbundance.set_species warns on the root logger; expected "
+    "solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance; remove "
+    "this marker when set_species logs through self.logger",
+)
+def test_unrecognized_element_warns_on_its_own_module_logger(caplog):
+    """An unknown element warns on the label's own logger, not on the root logger.
+
+    ``Xx`` is no element; ``Fe`` is, so exactly one warning is expected.
+    ON FAILURE: the code is wrong.
+    """
+    caplog.set_level(logging.WARNING)
+    ElementalAbundance("Xx", "Fe")
+    assert [(r.name, r.levelno) for r in caplog.records] == [
+        (
+            "solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance",
+            logging.WARNING,
+        )
+    ]
 
 
 # ---------------------------------------------------------------------------
