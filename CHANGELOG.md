@@ -95,6 +95,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `norm_by="max"`, as `SIDC.run_normalization` does.
 - `solarwindpy.solar_activity.icme.icmecat.ICMECAT.filter` logs the same warning as
   `ICMECAT(spacecraft=...)` when the spacecraft is not in the catalog.
+- **Breaking:** `clip=True`, `"l"` and `"u"` clip at the 0.05th and 99.95th percentiles instead
+  of the 0.01st and 99.99th, in `solarwindpy.plotting.base.Base.clip_data`, `Hist1D`, `Hist2D`,
+  `SpiralPlot2D`, `Scatter`, `BetaRPlot` and `solarwindpy.plotting.binned.BinnedData`. The
+  fallback for bins that do not fit in memory uses the same rule and cuts.
+- `clip` accepts a pair `(lower, upper)`. Each cut is `True` (the default cut), `False` (that
+  tail is not clipped) or a quantile as `pandas.Series.quantile` reads it, with
+  0 <= lower < 0.5 < upper <= 1. A pair outside those bounds raises `ValueError` when the plot
+  is built, and a cut of another type raises `TypeError`. `"l"` and `"u"` are shorthand for
+  `(True, False)` and `(False, True)`. The pair works inside the per-axis mapping.
+- **Breaking:** `Hist1D(x, y, *, ...)`, `Hist2D(x, y, z, *, ...)`, `SpiralPlot2D(x, y, z, *, ...)`
+  and `Scatter(x, y, z, size, alpha, *, ...)` take their data variables positionally and every
+  other parameter keyword-only. No parameter is renamed.
+- `solarwindpy.fitfunctions.plots.FFPlot.set_log(x=None, y=None)` matches
+  `solarwindpy.plotting.base.Base.set_log`: None keeps an axis's setting and any other value is
+  stored as a bool.
 
 ### Removed
 
@@ -103,6 +118,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking:** `solarwindpy.solar_activity.icme.icmecat.RULES_OF_THE_ROAD`. The `ICMECAT` class
   and `icme` package docstrings say to follow the ICMECAT rules of the road at the HELIO4CAST
   site (https://helioforecast.space/icmecat).
+- **Breaking:** the clip strings `"lower"`, `"upper"` and `"both"`. Use `"l"`, `"u"` or `True`;
+  the removed strings raise the `ValueError` any unknown clip string raises.
 - `setup.py`. The build reads its version from git tags through `pyproject.toml`
   (`[tool.setuptools_scm]`), as before.
 
@@ -110,6 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `solarwindpy.solar_activity.base.IndicatorExtrema.cut_spec_by_interval` raises `ValueError`
   saying the cycle intervals overlap or are out of order, instead of a bare `ValueError`.
+- The usage guide's clip sentence said `clip=True` drops the points beyond the cuts; it moves
+  them onto the cuts, and the sentence now says so.
 
 ## [0.6.0] - 2026-11-17
 
