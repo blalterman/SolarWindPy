@@ -1020,12 +1020,6 @@ yerr: {yerr.shape}, xobs: {xobs.shape}""")
 
         >>> # Percentage residuals
         >>> r_pct = ff.residuals(pct=True)
-
-        Notes
-        -----
-        Addresses TODO: "calculate with all values...including those
-        excluded by set_extrema" (though set_extrema doesn't exist -
-        constraints are passed in __init__).
         """
         if use_all:
             # Use all original observations
