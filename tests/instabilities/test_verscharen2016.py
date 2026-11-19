@@ -425,6 +425,26 @@ def test_growth_rate_draws_only_its_curves(growth_rate):
     ]
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="StabilityContours.plot_contours checks growth_rate with an assert; "
+    "remove this marker when it raises ValueError naming the allowed rates",
+)
+def test_unknown_growth_rate_raises_value_error():
+    """A growth rate outside Table 1 raises ValueError naming the allowed rates.
+
+    Table 1 of Verscharen et al. (2016) fits gamma / Omega_p = 10^-2, 10^-3
+    and 10^-4 only, so -1 has no contours.
+
+    ON FAILURE: the code is wrong.
+    """
+    sc = v16.StabilityContours(FINITE_BETA)
+    fig, ax = plt.subplots()
+    with pytest.raises(ValueError, match=r"growth_rate .*\[-2, -3, -4\]"):
+        sc.plot_contours(ax, growth_rate=-1)
+
+
 @pytest.mark.parametrize(
     "tk_kind,growth_rate,expected",
     [
