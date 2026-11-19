@@ -9,12 +9,11 @@ function never requires editing this file.
 """
 
 import importlib
-import inspect
-import pkgutil
 import re
 
 import solarwindpy.fitfunctions as ff
 from solarwindpy.fitfunctions.core import FitFunction
+from tests.fitfunctions._scan import fit_functions_found_by_scanning_modules
 
 
 class _FitDefinedOutsideThePackage(FitFunction):
@@ -33,27 +32,6 @@ class _FitDefinedOutsideThePackage(FitFunction):
         return r"f(x)=a x"
 
 
-def _fit_functions_found_by_scanning_modules():
-    """Concrete FitFunction classes defined in the package's module files.
-
-    This finds classes by importing every module under
-    ``solarwindpy.fitfunctions`` and reading what each defines, a different
-    route from the subclass-tree walk that ``available`` uses.
-    """
-    found = {}
-    for info in pkgutil.walk_packages(ff.__path__, ff.__name__ + "."):
-        module = importlib.import_module(info.name)
-        for name, obj in vars(module).items():
-            if (
-                inspect.isclass(obj)
-                and obj.__module__ == info.name
-                and issubclass(obj, FitFunction)
-                and not inspect.isabstract(obj)
-            ):
-                found[name] = obj
-    return found
-
-
 def _printed_rows(capsys):
     """Run ``available`` and map each listed name to its printed row."""
     ff.available()
@@ -67,7 +45,7 @@ def test_available_lists_exactly_the_fit_functions_defined_in_the_package(capsys
     ON FAILURE: the code is wrong; available() missed or invented a fit
     function relative to the classes the modules define.
     """
-    assert set(_printed_rows(capsys)) == set(_fit_functions_found_by_scanning_modules())
+    assert set(_printed_rows(capsys)) == set(fit_functions_found_by_scanning_modules())
 
 
 def test_each_row_shows_that_class_s_own_formula(capsys):
@@ -76,7 +54,7 @@ def test_each_row_shows_that_class_s_own_formula(capsys):
     ON FAILURE: the code is wrong; a row lost or mixed up its formula.
     """
     rows = _printed_rows(capsys)
-    for name, cls in _fit_functions_found_by_scanning_modules().items():
+    for name, cls in fit_functions_found_by_scanning_modules().items():
         for part in cls.TeX_function.fget(None).splitlines():
             assert part in rows[name], name
 
@@ -105,7 +83,7 @@ def test_each_row_names_the_module_the_class_is_imported_from(capsys):
         module = row.split()[1]
         imported = importlib.import_module(f"{ff.__name__}.{module}")
         assert (
-            getattr(imported, name) is _fit_functions_found_by_scanning_modules()[name]
+            getattr(imported, name) is fit_functions_found_by_scanning_modules()[name]
         ), row
 
 
