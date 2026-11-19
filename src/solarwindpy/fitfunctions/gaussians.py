@@ -19,6 +19,16 @@ from ..tools import normal_parameters
 from .core import FitFunction, NotFittedError
 
 
+def _gaussian(u, mu, sigma, A):
+    r"""The Gaussian kernel :math:`A \exp[-((u - \mu) / \sigma)^2 / 2]`.
+
+    The one home of the shape every fit function here evaluates, in ``x`` or
+    in :math:`\ln x`.
+    """
+    arg = -0.5 * (((u - mu) / sigma) ** 2.0)
+    return A * np.exp(arg)
+
+
 def _weighted_moments(fitfunction, x, y):
     r"""Mean and variance of ``x`` weighted by ``y``, or None.
 
@@ -93,8 +103,7 @@ class Gaussian(FitFunction):
 
         def gaussian(x, mu, sigma, A):
             """Evaluate ``A * exp(-0.5 * ((x - mu) / sigma)**2)``."""
-            arg = -0.5 * (((x - mu) / sigma) ** 2.0)
-            return A * np.exp(arg)
+            return _gaussian(x, mu, sigma, A)
 
         return gaussian
 
@@ -150,9 +159,7 @@ class GaussianNormalized(FitFunction):
 
         def gaussian_normalized(x, mu, sigma, n):
             """Evaluate a Gaussian of area ``n``, mean ``mu``, width ``sigma``."""
-            arg = -0.5 * (((x - mu) / sigma) ** 2.0)
-            A = n / (np.sqrt(2 * np.pi) * sigma)
-            return A * np.exp(arg)
+            return _gaussian(x, mu, sigma, n / (np.sqrt(2 * np.pi) * sigma))
 
         return gaussian_normalized
 
@@ -238,13 +245,7 @@ class GaussianLn(FitFunction):
 
         def gaussian_ln(x, mu, sigma, A):
             """Evaluate ``A * exp(-0.5 * ((ln(x) - mu) / sigma)**2)``."""
-            lnx = np.log(x)
-
-            coeff = A
-
-            arg = -0.5 * (((lnx - mu) / sigma) ** 2.0)
-
-            return coeff * np.exp(arg)
+            return _gaussian(np.log(x), mu, sigma, A)
 
         return gaussian_ln
 
