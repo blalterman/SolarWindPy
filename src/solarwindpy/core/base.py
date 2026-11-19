@@ -108,14 +108,14 @@ class Core(ABC):
     def _init_constants(self) -> None:
         self._constants = units_constants.Constants()
 
-    # --- Column access and reduction by level name -------------------------
+    # --- Column levels and reduction by level name --------------------------
     #
     # Columns are a MultiIndex with levels "M" (measurement), "C" (component)
     # and "S" (species), or one of those levels alone as a flat Index, as in a
-    # Vector's x, y and z. Every component and species selection, and every
-    # reduction over columns, in `core` goes through the methods below, which
-    # name the level they act on and never assume its position. Changing how
-    # columns are stored means rewriting these methods only.
+    # Vector's x, y and z. Selection uses native pandas: `.xs` for one label,
+    # `.loc` for several. Every reduction over columns in `core` goes through
+    # the methods below, which name the level they reduce and never assume its
+    # position.
 
     @staticmethod
     def _level_labels(columns: pd.Index, level: str) -> pd.Index:
@@ -146,55 +146,6 @@ class Core(ABC):
                 f"{list(columns.names)}"
             )
         return columns.unique(level=level)
-
-    @classmethod
-    def _select(cls, frame: pd.DataFrame, key, level: str):
-        r"""Columns of ``frame`` labelled ``key`` on the column level named ``level``.
-
-        The one accessor for component (``level="C"``) and species
-        (``level="S"``) selection in :mod:`solarwindpy.core`.
-
-        Parameters
-        ----------
-        frame : pd.DataFrame
-            Columns with a level named ``level``, or a flat Index named
-            ``level`` or unnamed.
-        key : str or list of str
-            One label, or a list of labels.
-        level : str
-            The level's name: ``"M"``, ``"C"`` or ``"S"``.
-
-        Returns
-        -------
-        pd.Series or pd.DataFrame
-            For one label, ``frame.xs(key, level=level)``: the level is
-            dropped and the result shares ``frame``'s data rather than
-            copying it. For a list, exactly those labels in the order given,
-            every other level kept, as ``.loc`` with a list selects them.
-
-        Raises
-        ------
-        KeyError
-            If a label is absent, naming the labels the level holds.
-        ValueError
-            If ``frame`` has no level ``level``.
-        """
-        columns = frame.columns
-        labels = cls._level_labels(columns, level)
-        many = isinstance(key, (list, tuple, pd.Index, np.ndarray))
-        keys = list(key) if many else [key]
-        absent = [k for k in keys if k not in labels]
-        if absent:
-            word = _LEVEL_WORDS.get(level, f"level {level!r} label")
-            raise KeyError(
-                f"Unknown {word} {absent[0]!r}. Available: {labels.tolist()}"
-            )
-        flat = columns.nlevels == 1
-        if many:
-            return (
-                frame.loc[:, keys] if flat else frame.reindex(columns=keys, level=level)
-            )
-        return frame.xs(key, axis=1) if flat else frame.xs(key, axis=1, level=level)
 
     @classmethod
     def _reduce_level(cls, frame: pd.DataFrame, level: str, how: str, **kwargs):
@@ -669,4 +620,10 @@ class _ComponentFrame(Base):
             If ``component`` is not a component of :attr:`data`; the message
             names the available components.
         """
-        return self._select(self.data, component, "C")
+        try:
+            return self.data.xs(component, axis=1)
+        except KeyError:
+            available = self._level_labels(self.data.columns, "C").tolist()
+            raise KeyError(
+                f"Unknown component {component!r}. Available: {available}"
+            ) from None

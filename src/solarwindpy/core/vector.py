@@ -100,7 +100,7 @@ class Vector(base._ComponentFrame):
     @property
     def rho(self) -> pd.Series:
         """Magnitude of the vector in the xy-plane."""
-        rho = self._select(self.data, ["x", "y"], "C")
+        rho = self.data.loc[:, ["x", "y"]]
         rho = self._component_reduce(rho.pow(2)).pow(0.5)
         rho.name = "rho"
         return rho
@@ -144,7 +144,7 @@ class Vector(base._ComponentFrame):
     @property
     def cartesian(self) -> pd.DataFrame:
         """Cartesian coordinates of the vector, in columns ``x``, ``y`` and ``z``."""
-        return self._select(self.data, ["x", "y", "z"], "C")
+        return self.data.loc[:, ["x", "y", "z"]]
 
     @property
     def uv(self) -> "Vector":

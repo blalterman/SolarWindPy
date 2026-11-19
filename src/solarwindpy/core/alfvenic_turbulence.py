@@ -376,12 +376,12 @@ unexpected.""")
             # Project along nominal Parker Spiral
             omega = 2.865e-6  # rad/s
             pos = sc.data.xs("pos", axis=1, level="M")
-            r_rtn = self._component_reduce(
-                self._select(pos, ["x", "y", "z"], "C").pow(2)
-            ).pipe(np.sqrt)
-            rho_rtn = self._component_reduce(
-                self._select(pos, ["x", "y"], "C").pow(2)
-            ).pipe(np.sqrt)
+            r_rtn = self._component_reduce(pos.loc[:, ["x", "y", "z"]].pow(2)).pipe(
+                np.sqrt
+            )
+            rho_rtn = self._component_reduce(pos.loc[:, ["x", "y"]].pow(2)).pipe(
+                np.sqrt
+            )
             cos_colat = rho_rtn.divide(r_rtn)
 
             r = sc.distance2sun * sc.units.distance2sun * 1e-3  # [km]
@@ -393,9 +393,7 @@ unexpected.""")
             data.loc[:, ("v", "y")] = vt
 
             vb = data.loc[:, "v"].multiply(data.loc[:, "b"], axis=1)
-            polarity = self._component_reduce(self._select(vb, ["x", "y"], "C")).pipe(
-                np.sign
-            )
+            polarity = self._component_reduce(vb.loc[:, ["x", "y"]]).pipe(np.sign)
 
         window = kwargs.pop("window", "15min")
         min_periods = kwargs.pop("min_periods", 5)

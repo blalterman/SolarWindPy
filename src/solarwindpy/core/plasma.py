@@ -963,7 +963,8 @@ class Plasma(base.Base):
         coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
 
         w = (
-            self._select(data.xs("w", axis=1, level="M"), ["par", "per"], "C")
+            data.xs("w", axis=1, level="M")
+            .loc[:, ["par", "per"]]
             .pow(2)
             .multiply(coeff, axis=1, level="C")
         )
@@ -997,7 +998,7 @@ class Plasma(base.Base):
             self.logger.info("no columns dropped from plasma")
 
         self._bfield = vector.BField(
-            self._select(data.b, "", "S"), _time_checked=data.index
+            data.b.xs("", axis=1, level="S"), _time_checked=data.index
         )
 
     def _mask_invalid_species(self, data):
@@ -1029,7 +1030,7 @@ class Plasma(base.Base):
         invalid = {
             # Not a component reduction: any missing moment or component
             # invalidates the species (docs page `missing_data`).
-            s: self._select(isna, s, "S").any(axis=1)
+            s: isna.xs(s, axis=1, level="S").any(axis=1)
             for s in sorted(isna.columns.unique(level="S"))
         }
         del isna
@@ -1287,7 +1288,7 @@ class Plasma(base.Base):
         ani : pd.Series or pd.DataFrame
             See Parameters for more info.
         """
-        pth = self._select(self.pth(*species), ["par", "per"], "C")
+        pth = self.pth(*species).loc[:, ["par", "per"]]
 
         include_dynamic = False
         if include_dynamic:
@@ -1520,7 +1521,7 @@ species: {}
         rho = self.rho(*species) * self.units.rho
         pth = self.pth(*species) * self.units.pth
 
-        pth = self._select(pth, "scalar", "C")
+        pth = pth.xs("scalar", axis=1)
 
         gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
         cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
@@ -1605,7 +1606,7 @@ species: {}
         # `missing_data`). Dynamic pressure, if ever included, would be
         # subtracted here with the species aligned.
         pth = self.pth(*species)
-        dp = self._select(pth, "per", "C").subtract(self._select(pth, "par", "C"))
+        dp = pth.xs("per", axis=1).subtract(pth.xs("par", axis=1))
 
         mu0 = self.constants.misc.mu0
         coeff = mu0 * self.units.pth / (self.units.b**2.0)
@@ -1701,8 +1702,8 @@ species: {}
         n0 = self.ions.loc[s0].n * units.n
         n1 = self.ions.loc[s1].n * units.n
 
-        T0 = self._select(self.ions.loc[s0].T, "scalar", "C")
-        T1 = self._select(self.ions.loc[s1].T, "scalar", "C")
+        T0 = self.ions.loc[s0].T.xs("scalar", axis=1)
+        T1 = self.ions.loc[s1].T.xs("scalar", axis=1)
         T0 = T0 * units.T * constants.kb.eV
         T1 = T1 * units.T * constants.kb.eV
 
@@ -1928,13 +1929,13 @@ species: {}
         n1 = self.ions.loc[core].n
         n2 = self.ions.loc[beam].n
 
-        w = self._select(self.w(beam, core), ["par", "per"], "C")
-        w1 = self._select(w, core, "S")
-        w2 = self._select(w, beam, "S")
-        w1_par = self._select(w1, "par", "C")
-        w1_per = self._select(w1, "per", "C")
-        w2_par = self._select(w2, "par", "C")
-        w2_per = self._select(w2, "per", "C")
+        w = self.w(beam, core).loc[:, ["par", "per"]]
+        w1 = w.xs(core, axis=1, level="S")
+        w2 = w.xs(beam, axis=1, level="S")
+        w1_par = w1.xs("par", axis=1)
+        w1_per = w1.xs("per", axis=1)
+        w2_par = w2.xs("par", axis=1)
+        w2_per = w2.xs("per", axis=1)
 
         dv = self.dv(beam, core, project_m2q=True).project(self.b)
         # skipna=False: where b is missing the projection is NaN, and the
@@ -2041,7 +2042,7 @@ species: {}
             ve = self._species_weighted_mean(vi, niqi)
 
         # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
-        wp = self._select(self.w(tkw), "scalar", "C")
+        wp = self.w(tkw).xs("scalar", axis=1)
         mpme = self.constants.m_in_mp["e"] ** -1
         we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
         # Isotropic electrons: the scalar thermal speed equals both components.
@@ -2122,7 +2123,7 @@ species: {}
         dv = {s: self.dv(s, scom).project(self.b).par for s in slist}
         dv = pd.concat(dv, axis=1, names=["S"], sort=True)
         dv.columns.name = "S"
-        w = self._select(self._select(self.data.w, "par", "C"), list(slist), "S")
+        w = self.data.w.xs("par", axis=1, level="C").loc[:, list(slist)]
 
         qa = dv.pow(3)
         qb = dv.multiply(w.pow(2), axis=1, level="S").multiply(3.0 / 2.0)

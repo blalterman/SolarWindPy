@@ -104,7 +104,7 @@ class Spacecraft(base.Base):
         A vector.Vector with x, y, z components, built from the spacecraft's
         already-checked columns, so it skips the time checks.
         """
-        pos = self._select(self.data.xs("pos", axis=1, level="M"), ["x", "y", "z"], "C")
+        pos = self.data.xs("pos", axis=1, level="M").loc[:, ["x", "y", "z"]]
         return vector.Vector(pos, _time_checked=self.data.index)
 
     @property
@@ -139,7 +139,7 @@ class Spacecraft(base.Base):
             If spacecraft velocity data is not available.
         """
         try:
-            v = self._select(self.data.xs("v", axis=1, level="M"), ["x", "y", "z"], "C")
+            v = self.data.xs("v", axis=1, level="M").loc[:, ["x", "y", "z"]]
             return vector.Vector(v, _time_checked=self.data.index)
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know it's velocity.")
@@ -149,7 +149,7 @@ class Spacecraft(base.Base):
         r"""Carrington latitude and longitude."""
         try:
             carr = self.data.xs("carr", axis=1, level="M")
-            return self._select(carr, ["lat", "lon"], "C")
+            return carr.loc[:, ["lat", "lon"]]
         except KeyError as e:  # noqa: F841
             raise KeyError("Spacecraft doesn't know its Carrington location.")
 
@@ -257,7 +257,7 @@ class Spacecraft(base.Base):
 
         p = data.xs("pos", axis=1, level="M")
 
-        p = self._select(p, ["x", "y", "z"], "C")
+        p = p.loc[:, ["x", "y", "z"]]
         assert p.shape[1] == 3
 
         target = {"pos": p}
@@ -265,7 +265,7 @@ class Spacecraft(base.Base):
         try:
             v = data.xs("v", axis=1, level="M")
             assert isinstance(v, pd.DataFrame)
-            v = self._select(v, ["x", "y", "z"], "C")
+            v = v.loc[:, ["x", "y", "z"]]
             assert v.shape[1] == 3
             target["v"] = v
         except KeyError:
@@ -274,7 +274,7 @@ class Spacecraft(base.Base):
         try:
             c = data.xs("carr", axis=1, level="M")
             assert isinstance(c, pd.DataFrame)
-            c = self._select(c, ["lat", "lon"], "C")
+            c = c.loc[:, ["lat", "lon"]]
             assert c.shape[1] == 2
             target["carr"] = c
         except KeyError:

@@ -146,7 +146,7 @@ class Ion(base.Base):
 
         if data.columns.names == ["M", "C", "S"]:
             data = data.sort_index(axis=1)
-            data = self._select(data, self.species, "S")
+            data = data.xs(self.species, axis=1, level="S")
         elif data.columns.names != ["M", "C"]:
             raise ValueError(f"Unrecognized data column names: {data.columns.names}")
 
@@ -202,7 +202,7 @@ class Ion(base.Base):
     def R(self) -> pd.Series:
         """Calculate temperature anisotropy R_T = p_⟂/p_∥."""
         exp = pd.Series({"par": -1, "per": 1})
-        pth = self._select(self.pth, ["par", "per"], "C")
+        pth = self.pth.loc[:, ["par", "per"]]
         ani = self._component_reduce(pth.pow(exp, axis=1, level="C"), "prod")
         ani.name = "R"
         return ani
