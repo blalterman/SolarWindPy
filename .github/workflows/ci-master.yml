@@ -39,6 +39,10 @@ jobs:
         run: |
           pytest --tb=short --disable-warnings tests/
       
+      - name: Check import layering
+        # The contracts are [tool.importlinter] in pyproject.toml.
+        run: lint-imports
+
       - name: Check code formatting
         # ruff runs at the version pinned in .pre-commit-config.yaml,
         # the one place that version is declared.
