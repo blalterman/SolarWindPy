@@ -3915,3 +3915,46 @@ def test_plasma_data_with_wrong_level_names_raises_value_error(third):
     data = swp.examples.load_plasma().data.rename_axis(columns=["M", "C", third])
     with pytest.raises(ValueError, match="levels named"):
         plasma.Plasma(data, "p1")
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Plasma.set_sc and Plasma._set_aux check their input with bare asserts; "
+    "expected TypeError naming the type received; remove this marker when the "
+    "asserts become named errors",
+)
+@pytest.mark.parametrize(
+    "setter, new, message",
+    [
+        ("set_sc", "PSP", r"^Spacecraft must be a Spacecraft or None, not str$"),
+        (
+            "set_aux",
+            [0, 1, 0],
+            r"^Auxiliary data must be a pandas DataFrame, not list$",
+        ),
+        (
+            "set_aux",
+            pd.DataFrame(
+                [[0], [1], [0]],
+                columns=pd.MultiIndex.from_tuples(
+                    [("quality", "", "")], names=["M", "C", "S"]
+                ),
+            ),
+            r"^Auxiliary data must be indexed by a pandas DatetimeIndex, "
+            "not RangeIndex$",
+        ),
+    ],
+    ids=["sc-not-a-spacecraft", "aux-not-a-dataframe", "aux-not-datetime-indexed"],
+)
+def test_attaching_the_wrong_type_raises_type_error_naming_it(setter, new, message):
+    r"""Attaching an object of the wrong type raises TypeError naming that type.
+
+    A spacecraft must be a Spacecraft, and auxiliary data a DataFrame on a
+    DatetimeIndex. The check is a raise, not an assert, so it holds under ``python -O``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+    with pytest.raises(TypeError, match=message):
+        getattr(p, setter)(new)

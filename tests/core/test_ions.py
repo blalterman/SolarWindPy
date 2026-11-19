@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 import pandas.testing as pdt
+import pytest
 
 from abc import ABC, abstractproperty
 from unittest import TestCase
@@ -12,6 +13,8 @@ from scipy import constants
 from scipy.constants import physical_constants
 
 from . import test_base as base
+
+import solarwindpy as swp
 
 from solarwindpy.core import vector
 from solarwindpy.core import tensor
@@ -244,3 +247,29 @@ def test_kinetic_energy_flux_of_a_hand_computed_proton_stream():
     assert ions.Ion(data, "p1").Wk.iloc[0] == exact(expected)
     # Guard the hand value in the docstring against the formula above.
     assert expected == printed(267.6, decimals=1)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Ion.set_data raises 'Unrecognized data column names' rather than naming "
+    "the levels it wants; expected message 'Ion data columns must have levels named'; "
+    "remove this marker when Ion.set_data calls Core._require_level_names",
+)
+@pytest.mark.parametrize(
+    "names", [["M", "X"], ["M", "C", "X"]], ids=["two-levels", "three-levels"]
+)
+def test_ion_data_with_wrong_level_names_raises_value_error_naming_the_levels(names):
+    r"""Ion columns must be levels named ("M", "C") or ("M", "C", "S"); others raise.
+
+    The example protons' two-level slice and the full three-level plasma frame,
+    each with its last level renamed "X", are refused with a ValueError naming
+    the levels an Ion wants, as Plasma, its spacecraft and auxiliary data are.
+
+    ON FAILURE: the code is wrong.
+    """
+    data = swp.examples.load_plasma().data
+    if len(names) == 2:
+        data = data.xs("p1", axis=1, level="S")
+    with pytest.raises(ValueError, match="Ion data columns must have levels named"):
+        ions.Ion(data.rename_axis(columns=names), "p1")
