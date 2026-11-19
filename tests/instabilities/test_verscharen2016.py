@@ -425,12 +425,6 @@ def test_growth_rate_draws_only_its_curves(growth_rate):
     ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="StabilityContours.plot_contours checks growth_rate with an assert; "
-    "remove this marker when it raises ValueError naming the allowed rates",
-)
 def test_unknown_growth_rate_raises_value_error():
     """A growth rate outside Table 1 raises ValueError naming the allowed rates.
 

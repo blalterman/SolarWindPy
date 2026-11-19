@@ -73,44 +73,54 @@ insta_params = pd.concat(
     names=["growth_rate"],
 ).stack("growth_rate", future_stack=True)
 
+#: Growth rates of Table 1, in display order: -2, -3, -4.
+_growth_rates = [
+    int(r) for r in sorted(insta_params.index.unique("growth_rate"), reverse=True)
+]
+
+#: Contour colour and marker of each instability.
+_instability_styles = pd.DataFrame(
+    {
+        "color": ["#ffcb05", "#00B2A9", "#00274c", "#D86018"],
+        "marker": ["X", "d", "o", "P"],
+    },
+    index=_inst_type_idx,
+)
+
+#: Contour linestyle of each growth rate.
+_growth_rate_linestyles = pd.Series(
+    {-4: "--", -3: ":", -2: "-."}, name="linestyle"
+).rename_axis("growth_rate")
+
+#: Default style of each (growth_rate, instability) contour.
 _plot_contour_kwargs = pd.DataFrame(
     [
-        ["#ffcb05", "--", "X"],
-        ["#00B2A9", "--", "d"],
-        ["#00274c", "--", "o"],
-        ["#D86018", "--", "P"],
-        ["#ffcb05", ":", "X"],
-        ["#00B2A9", ":", "d"],
-        ["#00274c", ":", "o"],
-        ["#D86018", ":", "P"],
-        ["#ffcb05", "-.", "X"],
-        ["#00B2A9", "-.", "d"],
-        ["#00274c", "-.", "o"],
-        ["#D86018", "-.", "P"],
+        [style.color, linestyle, style.marker]
+        for linestyle in _growth_rate_linestyles
+        for style in _instability_styles.itertuples()
     ],
-    index=pd.MultiIndex.from_tuples(
-        [
-            (-4, "AIC"),
-            (-4, "FMW"),
-            (-4, "MM"),
-            (-4, "OFI"),
-            (-3, "AIC"),
-            (-3, "FMW"),
-            (-3, "MM"),
-            (-3, "OFI"),
-            (-2, "AIC"),
-            (-2, "FMW"),
-            (-2, "MM"),
-            (-2, "OFI"),
-        ],
+    index=pd.MultiIndex.from_product(
+        [_growth_rate_linestyles.index, _inst_type_idx],
         names=["growth_rate", "Instability"],
     ),
     columns=["color", "linestyle", "marker"],
 )
 
-_instability_tests = namedtuple("InstabilityTests", "AIC,MM,FMW,OFI")(
-    np.greater, np.greater, np.less, np.less
+_instability_tests = namedtuple("InstabilityTests", "AIC,FMW,MM,OFI")(
+    np.greater, np.less, np.greater, np.less
 )
+
+#: Integer of each stability bin, by short name.
+_stability_bins = {"MM": 4, "AIC_MM": 3, "stable": 2, "FMW_OFI": 1, "OFI": 0}
+
+#: Colorbar label of each stability bin, by short name.
+_stability_labels = {
+    "MM": "MM",
+    "AIC_MM": "Between\nAIC &\nMM",
+    "stable": "Stable",
+    "FMW_OFI": "Between\nFMW &\nOFI",
+    "OFI": "OFI",
+}
 
 
 def beta_ani_inst(beta, a, b, c):
@@ -247,13 +257,7 @@ class StabilityCondition(object):
     def stability_map(self):
         """The map of ints to strings identifying the instabilities."""
 
-        return {
-            4: "MM",
-            3: "Between\nAIC &\nMM",
-            2: "Stable",
-            1: "Between\nFMW &\nOFI",
-            0: "OFI",
-        }
+        return {_stability_bins[k]: label for k, label in _stability_labels.items()}
 
     @property
     def stability_map_inverse(self):
@@ -412,18 +416,14 @@ class StabilityCondition(object):
 
         # Here, we use integer identifiers b/c they are more
         # computationally efficient to process.
-        map_inverse = self.stability_map_inverse
+        bins = _stability_bins
         stability_bin = pd.Series(
-            map_inverse["Stable"], index=unstable.index, name="Stability"
+            bins["stable"], index=unstable.index, name="Stability"
         )
-        stability_bin.mask(
-            between_AIC_MM, map_inverse["Between\nAIC &\nMM"], inplace=True
-        )
-        stability_bin.mask(unstable.MM, map_inverse["MM"], inplace=True)
-        stability_bin.mask(
-            between_FMW_OFI, map_inverse["Between\nFMW &\nOFI"], inplace=True
-        )
-        stability_bin.mask(unstable.OFI, map_inverse["OFI"], inplace=True)
+        stability_bin.mask(between_AIC_MM, bins["AIC_MM"], inplace=True)
+        stability_bin.mask(unstable.MM, bins["MM"], inplace=True)
+        stability_bin.mask(between_FMW_OFI, bins["FMW_OFI"], inplace=True)
+        stability_bin.mask(unstable.OFI, bins["OFI"], inplace=True)
 
         # ``is_unstable`` is boolean, so a row is stable exactly when none of
         # the masks above holds, and every row carries a stability_map key.
@@ -550,6 +550,16 @@ class StabilityContours(object):
             Every field None: the contours are lines, not a mappable, so no
             colorbar is drawn. The slot keeps the return order
             ``(ax, artists..., guides)`` shared by every plot.
+
+        Raises
+        ------
+        TypeError
+            If ``ax`` is not a :class:`matplotlib.axes.Axes`, or ``tk_kind``
+            holds an entry that is not a string.
+        ValueError
+            If ``growth_rate`` is not None or one of the Table 1 rates
+            (-2, -3, -4), naming them, or ``tk_kind`` names an unknown
+            instability.
         """
         if not isinstance(ax, mpl.axes.Axes):
             raise TypeError(
@@ -586,9 +596,11 @@ class StabilityContours(object):
 
         if growth_rate is not None:
             growth_rate = int(growth_rate)
-            assert growth_rate in [-2, -3, -4], (
-                "Unrecognized growth_rate: %s" % growth_rate
-            )
+            if growth_rate not in _growth_rates:
+                raise ValueError(
+                    f"growth_rate must be None or one of {_growth_rates}; "
+                    f"got {growth_rate}"
+                )
 
         for k, v in target_contours.items():
             rate, itype = k
@@ -652,8 +664,8 @@ class StabilityContours(object):
                 (0, 0), 1, 1, fill=False, edgecolor="none", linewidth=0
             )
 
-        types = ["AIC", "FMW", "MM", "OFI"]
-        rates = [-2, -3, -4]
+        types = list(_inst_type_idx)
+        rates = _growth_rates
 
         # Matplotlib fills multi-column legends column by column, so entries
         # are listed one table column at a time, top to bottom.
