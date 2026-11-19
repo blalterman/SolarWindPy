@@ -8,24 +8,19 @@ repos:
   hooks:
   - id: trailing-whitespace
     files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
-    exclude: \.claude/templates/.*\.py$
   - id: check-merge-conflict
     files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
-    exclude: \.claude/templates/.*\.py$
   - id: check-added-large-files
     args: [--maxkb=5000]
     files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
-    exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.17.3
   hooks:
   - id: ruff-check
     files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
-    exclude: \.claude/templates/.*\.py$
   - id: ruff-format
     files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
-    exclude: \.claude/templates/.*\.py$
 
 - repo: https://github.com/PyCQA/doc8
   rev: v1.1.1
@@ -37,8 +32,7 @@ repos:
     exclude: |
       (?x)^(
         docs/build/|
-        docs/_build/|
-        \.claude/templates/
+        docs/_build/
       )$
 
 - repo: local
