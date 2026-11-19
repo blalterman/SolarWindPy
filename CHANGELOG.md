@@ -15,6 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `solarwindpy.plotting.labels.epochs`, with no alias, so it no longer shares the standard
   library's `datetime` name. `Timedelta`, `DateTime`, `Epoch`, `Frequency` and `January1st`
   import from `solarwindpy.plotting.labels.epochs`.
+- Each object logs on a logger named for the module that defines its class, then the class:
+  `solarwindpy.core.plasma.Plasma`, `solarwindpy.fitfunctions.gaussians.Gaussian` and
+  `solarwindpy.plotting.hist1d.Hist1D`, which were `solarwindpy.core.base.Plasma`,
+  `solarwindpy.fitfunctions.core.Gaussian` and `solarwindpy.plotting.base.Hist1D`. A class you
+  derive from a SolarWindPy class logs under your own module. Configuration on
+  `logging.getLogger("solarwindpy")` still reaches every package logger.
+  `solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance` warns about an unknown
+  element on its own logger instead of the root logger, and
+  `solarwindpy.plotting.spiral.SpiralMesh` logs on its own class logger. The usage guide gains
+  a Logging section.
+- `solarwindpy.tools.swap_protons` called without `logger` logs its statistics at INFO on
+  `solarwindpy.tools`, which has no handler and no level of its own, so it no longer prints
+  them to stderr by default: configure `logging` to show them. The `logger=` parameter is
+  unchanged.
 
 ## [0.6.0] - 2026-11-17
 
