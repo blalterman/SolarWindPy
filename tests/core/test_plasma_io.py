@@ -175,7 +175,7 @@ def test_save_rejects_a_modifier_that_is_not_a_function(tmp_path, kwarg):
     `functools.partial` is callable and would work if called, so the error
     comes from the type check alone. The other two modifiers are valid
     functions, so a check that inspects the wrong parameter does not raise.
-    The message names the rejected type, not the parameter.
+    The message names the rejected type.
 
     ON FAILURE: the code is wrong.
     """
@@ -190,21 +190,8 @@ def test_save_rejects_a_modifier_that_is_not_a_function(tmp_path, kwarg):
         p.save(tmp_path / "plasma.h5", **modifiers)
 
 
-_WRITES_BEFORE_CHECK = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Plasma.save writes the data (and spacecraft) before checking this "
-    "modifier; remove this marker when save validates every modifier first",
-)
-
-
 @pytest.mark.parametrize(
-    "kwarg",
-    [
-        "data_modifier_fcn",
-        pytest.param("sc_modifier_fcn", marks=_WRITES_BEFORE_CHECK),
-        pytest.param("aux_modifier_fcn", marks=_WRITES_BEFORE_CHECK),
-    ],
+    "kwarg", ["data_modifier_fcn", "sc_modifier_fcn", "aux_modifier_fcn"]
 )
 def test_save_writes_no_file_when_it_rejects_a_modifier(tmp_path, kwarg):
     """A rejected modifier leaves no file behind, whichever modifier it is.

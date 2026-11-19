@@ -343,8 +343,23 @@ class Plasma(base.Base):
         aux_modifier_fcn: None, FunctionType
             A function to modify the auxiliary data saved. See
             `data_modifier_fcn` for syntax.
+
+        Raises
+        ------
+        TypeError
+            If a modifier is neither None nor a function. Every modifier is
+            checked before anything is written, so nothing is saved.
         """
         from types import FunctionType
+
+        modifiers = {
+            "data_modifier_fcn": data_modifier_fcn,
+            "sc_modifier_fcn": sc_modifier_fcn,
+            "aux_modifier_fcn": aux_modifier_fcn,
+        }
+        for name, fcn in modifiers.items():
+            if fcn is not None and not isinstance(fcn, FunctionType):
+                raise TypeError(f"`{name}` must be a function, not {type(fcn)}.")
 
         fname = str(fname)
         data = self.data
@@ -352,11 +367,6 @@ class Plasma(base.Base):
         aux = self.aux
 
         if data_modifier_fcn is not None:
-            if not isinstance(data_modifier_fcn, FunctionType):
-                msg = (
-                    "`modifier_fcn` must be a FunctionType. You passes '%s`."
-                ) % type(data_modifier_fcn)
-                raise TypeError(msg)
             data = data_modifier_fcn(data)
 
         # Recalculate "w_scalar" on load, so no need to save.
@@ -370,12 +380,9 @@ class Plasma(base.Base):
             data.shape,
         )
 
-        msg = "`modifier_fcn` must be a FunctionType. You passes '%s`."
         if sc is not None:
             sc = sc.data
             if sc_modifier_fcn is not None:
-                if not isinstance(sc_modifier_fcn, FunctionType):
-                    raise TypeError(msg % type(sc_modifier_fcn))
                 sc = sc_modifier_fcn(sc)
 
             sc.to_hdf(fname, key=sckey)
@@ -392,8 +399,6 @@ class Plasma(base.Base):
 
         if aux is not None:
             if aux_modifier_fcn is not None:
-                if not isinstance(aux_modifier_fcn, FunctionType):
-                    raise TypeError(msg % type(aux_modifier_fcn))
                 aux = aux_modifier_fcn(aux)
 
             aux.to_hdf(fname, key=auxkey)
