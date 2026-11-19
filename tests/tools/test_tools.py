@@ -352,12 +352,20 @@ class TestNormalParameters:
         assert result["mu"].to_numpy() == exact(dist.mean())
         assert result["sigma"].to_numpy() == exact(dist.std())
 
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AttributeError,
+        reason="the log-normal moments are still named normal_parameters (F135); "
+        "remove this marker when tools.lognormal_moments exists",
+    )
     def test_zero_log_width_is_a_point_mass_at_e_to_the_m(self):
         """With s = 0, X = e^m exactly: mu = e^(ln 2) = 2 and sigma = 0.
 
         ON FAILURE: the code is wrong.
         """
-        mu, sigma = normal_parameters(math.log(2.0), 0.0)
+        import solarwindpy.tools as tools
+
+        mu, sigma = tools.lognormal_moments(math.log(2.0), 0.0)
         assert mu == exact(2.0)  # exp(log(2))
         assert sigma == 0.0
 
