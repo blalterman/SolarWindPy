@@ -407,13 +407,18 @@ class TestCommentsColumn:
         """
         assert ref.get_comment(2) == "helioseismology"
 
-    def test_invalid_key_type_raises_valueerror_naming_the_type(self, ref):
-        """A float key raises ValueError naming ``float``.
+    @pytest.mark.xfail(
+        strict=True,
+        reason="_key_level raises ValueError; ruling 16 names TypeError for a wrong "
+        "type; remove this marker when it does",
+    )
+    def test_invalid_key_type_raises_typeerror_naming_the_type(self, ref):
+        """A float key raises TypeError naming ``float`` (ruling 16: wrong type).
 
         ON FAILURE: the code is wrong.
         """
         with pytest.raises(
-            ValueError, match=r"Unrecognized key type \(<class 'float'>\)"
+            TypeError, match=r"Unrecognized key type \(<class 'float'>\)"
         ):
             ref.get_comment(2.0)
 
@@ -502,13 +507,18 @@ class TestGetElement:
             obj="Default kind vs explicit Photosphere",
         )
 
-    def test_invalid_key_type_raises_valueerror(self, ref):
-        """A float key raises ValueError naming ``float``.
+    @pytest.mark.xfail(
+        strict=True,
+        reason="_key_level raises ValueError; ruling 16 names TypeError for a wrong "
+        "type; remove this marker when it does",
+    )
+    def test_invalid_key_type_raises_typeerror(self, ref):
+        """A float key raises TypeError naming ``float`` (ruling 16: wrong type).
 
         ON FAILURE: the code is wrong.
         """
         with pytest.raises(
-            ValueError, match=r"Unrecognized key type \(<class 'float'>\)"
+            TypeError, match=r"Unrecognized key type \(<class 'float'>\)"
         ):
             ref.get_element(3.14)
 
