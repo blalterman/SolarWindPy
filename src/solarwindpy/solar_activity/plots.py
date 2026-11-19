@@ -3,9 +3,11 @@
 __all__ = [
     "IndicatorPlot",
     "SSNPlot",
+    "plot_on_colorbar",
 ]
 
 from matplotlib import dates as mdates
+from matplotlib import ticker
 
 from abc import abstractmethod
 
@@ -133,7 +135,76 @@ class SSNPlot(IndicatorPlot):
 
         The top is the indicator's
         :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
-        of :attr:`plot_data`, the same scale ``SIDC.plot_on_colorbar`` uses.
+        of :attr:`plot_data`, the same scale :func:`plot_on_colorbar` uses.
         """
         super(SSNPlot, self)._format_axis(ax)
         ax.set_ylim(0, self.indicator.ssn_scale_top(self.plot_data))
+
+
+def plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar=True):
+    r"""Plot the sunspot number along a colour bar.
+
+    The sunspot numbers between ``t0`` and ``t1`` are scaled onto the colour
+    bar's value axis over ``[0, top]``, where ``top`` is the indicator's
+    :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
+    of the window, so the line always stays inside the scale. Major ticks are
+    labelled 0, ``top / 2`` and ``top``; minor ticks fall every 25.
+
+    Parameters
+    ----------
+    indicator : solarwindpy.solar_activity.sunspot_number.sidc.SIDC
+        Sunspot-number indicator whose ``ssn`` column is drawn.
+    cax : matplotlib.axes.Axes
+        The colour bar's axes.
+    t0, t1 : datetime-like
+        Start and end of the window plotted.
+    vertical_cbar : bool
+        If True, the colour bar is vertical: time runs along its y-axis
+        and the SSN scale along its x-axis. If False, the axes swap and the
+        time axis's ticks and label move to the top.
+
+    Returns
+    -------
+    cax : matplotlib.axes.Axes
+    underlay : matplotlib.lines.Line2D
+        The solid white line drawn under the overlay.
+    overlay : matplotlib.lines.Line2D
+        The dash-dotted black sunspot-number line.
+    guides : Guides
+        Every field None: the function receives only the colour bar's axes,
+        not the :class:`matplotlib.colorbar.Colorbar`, and draws no guide of
+        its own. The slot keeps the return order ``(ax, artists..., guides)``
+        shared by every plot.
+    """
+    ssn = indicator.data.loc[t0:t1, "ssn"]
+    time = mdates.date2num(ssn.index)
+
+    if vertical_cbar:
+        ssn_axis, time_axis = cax.xaxis, cax.yaxis
+    else:
+        ssn_axis, time_axis = cax.yaxis, cax.xaxis
+
+    v0, v1 = ssn_axis.get_view_interval()
+    top = indicator.ssn_scale_top(ssn)
+    scaled = ((ssn / top) * (v1 - v0)) + v0
+    points = (scaled, time) if vertical_cbar else (time, scaled)
+
+    (underlay,) = cax.plot(*points, ls="-", color="w", lw=1)
+    (overlay,) = cax.plot(*points, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1)
+
+    ssn_axis.set_label_text(r"$\mathrm{SSN} \; \left[\#\right]$")
+    v0, v1 = ssn_axis.get_view_interval()
+    ssn_axis.set_ticks([v0, 0.5 * (v0 + v1), v1])
+    # The top is a multiple of 100, so the middle label is an integer.
+    ssn_axis.set_ticklabels((0, top // 2, top))
+    ssn_axis.set_tick_params(rotation=25)
+    ssn_axis.set_minor_locator(ticker.MultipleLocator(25))
+
+    if vertical_cbar:
+        time_axis.set_tick_params(left=True)
+    else:
+        time_axis.set_tick_params(top=True)
+        time_axis.set_ticks_position("top")
+        time_axis.set_label_position("top")
+
+    return cax, underlay, overlay, base.Guides()

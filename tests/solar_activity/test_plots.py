@@ -270,7 +270,7 @@ def test_ssn_axis_of_a_quiet_series_tops_at_100(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("ssn", [ACTIVE_SSN, QUIET_SSN], ids=["active", "quiet"])
 def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
-    """SSNPlot and ``SIDC.plot_on_colorbar`` scale the same series to one top.
+    """SSNPlot and ``plot_on_colorbar`` scale the same series to one top.
 
     ``plot_on_colorbar`` labels its scale top as the last major tick.
 
@@ -282,7 +282,7 @@ def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
 
     cbar_fig, cax = plt.subplots()
     index = indicator.data.index
-    indicator.plot_on_colorbar(cax, index[0], index[-1], vertical_cbar=True)
+    plots.plot_on_colorbar(indicator, cax, index[0], index[-1], vertical_cbar=True)
     cbar_top = float(cax.xaxis.get_ticklabels()[-1].get_text())
 
     assert ax.get_ylim()[1] == cbar_top
@@ -355,14 +355,7 @@ def test_auto_path_is_built_from_class_labels_and_scales(sidc):
 # The sunspot number along a colour bar
 # ---------------------------------------------------------------------------
 
-MOVE_REASON = (
-    "plot_on_colorbar is a SIDC method; expected the module function "
-    "solar_activity.plots.plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar); "
-    "remove this marker when it moves"
-)
 
-
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
 @pytest.mark.parametrize("vertical", [True, False])
 def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
     """Both lines carry the window's sunspot numbers, scaled onto the bar.
@@ -388,7 +381,6 @@ def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
         assert np.asarray(ssn_coords) == exact(SSN[window] / 200.0)
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
 @pytest.mark.parametrize("vertical", [True, False])
 def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
     """``plot_on_colorbar`` returns ``(cax, underlay, overlay, guides)``.
@@ -421,7 +413,6 @@ def _value_axis_labels(axes):
     return [label.get_text() for label in axes.xaxis.get_ticklabels()]
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
 def test_plot_on_colorbar_handles_a_low_activity_window(tmp_path, monkeypatch):
     """A window that never exceeds SSN 50 plots on a 0-100 scale.
 
@@ -441,7 +432,6 @@ def test_plot_on_colorbar_handles_a_low_activity_window(tmp_path, monkeypatch):
     assert _value_axis_labels(cax) == ["0", "50", "100"]
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
 def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(tmp_path, monkeypatch):
     """A peak of 140 gets a scale top of 200, so the line stays inside the scale.
 

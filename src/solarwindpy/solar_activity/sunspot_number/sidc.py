@@ -10,12 +10,10 @@ __all__ = [
 
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
 
 from pathlib import Path
 from collections import namedtuple
 
-from ...plotting.base import Guides
 from ..base import (
     ActivityIndicator,
     DataLoader,
@@ -472,88 +470,6 @@ class SIDC(ActivityIndicator):
         """
         # Python's max keeps 100 when the peak is NaN (an empty series).
         return int(max(100, np.ceil(ssn.max() / 100.0) * 100))
-
-    def plot_on_colorbar(self, cax, t0, t1, vertical_cbar=True):
-        r"""Plot SSN on the color bar.
-
-        The sunspot numbers are scaled onto the colour bar's value axis over
-        ``[0, top]``, where ``top`` is :meth:`ssn_scale_top` of the window, so
-        the line always stays inside the scale. Major ticks are labelled 0, ``top / 2`` and ``top``;
-        minor ticks fall every 25.
-
-        Parameters
-        ----------
-        cax : matplotlib.axes.Axes
-            The colour bar's axes.
-        t0, t1 : datetime-like
-            Start and end of the window plotted.
-        vertical_cbar : bool
-            If True, the colour bar is vertical: time runs along its y-axis
-            and the SSN scale along its x-axis.
-
-        Returns
-        -------
-        cax : matplotlib.axes.Axes
-        underlay : matplotlib.lines.Line2D
-            The solid white line drawn under the overlay.
-        overlay : matplotlib.lines.Line2D
-            The dash-dotted black sunspot-number line.
-        guides : Guides
-            Every field None: the method receives only the colour bar's
-            axes, not the :class:`matplotlib.colorbar.Colorbar`, and draws no
-            guide of its own. The slot keeps the return order
-            ``(ax, artists..., guides)`` shared by every plot.
-        """
-        # TODO: Refactor and abstract to :pyclass:`ActivityIndicator`.
-        ssn = self.data.loc[t0:t1, "ssn"]
-
-        x = mpl.dates.date2num(ssn.index)
-        y = ssn
-
-        if vertical_cbar:
-            y0, y1 = cax.get_xlim()
-        else:
-            y0, y1 = cax.get_ylim()
-
-        dy = y1 - y0
-        s0, s1 = 0, self.ssn_scale_top(ssn)
-        y = ((y / s1) * dy) + y0
-
-        if vertical_cbar:
-            (underlay,) = cax.plot(y, x, ls="-", color="w", lw=1)
-            (overlay,) = cax.plot(
-                y, x, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
-            )
-            cax.set_xlabel(r"$\mathrm{SSN} \; \left[\#\right]$")
-            x0, x1 = cax.get_xlim()
-
-            # We force the maximum value to be even and minimum value to be
-            # odd, so the mid-point must be an even integer.
-            cax.xaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
-            cax.xaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
-            cax.xaxis.set_tick_params(rotation=25)
-            cax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
-            cax.yaxis.set_tick_params(left=True)
-
-        else:
-            (underlay,) = cax.plot(x, y, ls="-", color="w", lw=1)
-            (overlay,) = cax.plot(
-                x, y, ls=(0, (7, 3, 2, 3, 2, 3, 2, 3)), color="k", lw=1
-            )
-            cax.set_ylabel(r"$\mathrm{SSN} \; \left[\#\right]$")
-            x0, x1 = cax.get_ylim()
-
-            # We force the maximum value to be even and minimum value to be
-            # odd, so the mid-point must be an even integer.
-            cax.yaxis.set_ticks([x0, 0.5 * (x0 + x1), x1])
-            cax.yaxis.set_ticklabels((s0, int(0.5 * (s0 + s1)), s1))
-            cax.yaxis.set_tick_params(rotation=25)
-            cax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(25))
-            cax.xaxis.set_tick_params(top=True)
-            cax.xaxis.set_ticks_position("top")
-            cax.xaxis.set_label_position("top")
-
-        return cax, underlay, overlay, Guides()
 
 
 class SSNExtrema(IndicatorExtrema):

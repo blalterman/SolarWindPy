@@ -27,20 +27,15 @@ parsing of the other series keys.
 import inspect
 import socket
 
-import matplotlib
 import numpy as np
 import pandas as pd
 import pytest
 
 from pathlib import Path
 
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
-from solarwindpy.plotting.base import Guides  # noqa: E402
-from solarwindpy.solar_activity.base import ActivityIndicator  # noqa: E402
-from tests.tolerances import exact  # noqa: E402
-from solarwindpy.solar_activity.sunspot_number.sidc import (  # noqa: E402
+from solarwindpy.solar_activity.base import ActivityIndicator
+from tests.tolerances import exact
+from solarwindpy.solar_activity.sunspot_number.sidc import (
     SIDC,
     SIDC_ID,
     SIDCLoader,
@@ -794,157 +789,6 @@ def test_run_normalization_also_normalizes_the_interpolated_series(ramp_sidc, ex
     assert set(cycle_of) == {23, 24}
     nssn = ramp_sidc.interpolated.loc[:, "nssn"]
     assert nssn.to_numpy() == exact(expected.to_numpy())
-
-
-# ---------------------------------------------------------------------------
-# Plotting on a colour bar.
-# ---------------------------------------------------------------------------
-@pytest.mark.parametrize("vertical", [True, False])
-def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
-    """The colour-bar overlay draws exactly the sunspot numbers in the window.
-
-    Both lines (the white underlay and the dashed overlay) carry one point per
-    monthly measurement between t0 and t1. The time axis is the epochs
-    converted by matplotlib's date converter, and the value axis is checked as
-    a property rather than against the scaling arithmetic: the plotted
-    coordinates must be finite, must preserve the ordering of the sunspot
-    numbers they represent, and must be an affine image of them, so equal
-    sunspot numbers plot at equal positions and the overlay is readable
-    against the colour bar's own scale.
-
-    ON FAILURE: the sunspot overlay does not correspond to the interval it
-    annotates. The code is wrong.
-    """
-    t0 = pd.Timestamp("2000-01-01")
-    t1 = pd.Timestamp("2010-01-01")
-    window = sidc.data.loc[t0:t1, "ssn"]
-
-    figure, axes = plt.subplots()
-    try:
-        sidc.plot_on_colorbar(axes, t0, t1, vertical_cbar=vertical)
-
-        assert len(axes.lines) == 2
-        time_axis = 1 if vertical else 0
-        value_axis = 1 - time_axis
-
-        for line in axes.lines:
-            np.testing.assert_allclose(
-                line.get_data()[time_axis],
-                matplotlib.dates.date2num(window.index),
-            )
-
-            values = np.asarray(line.get_data()[value_axis], dtype=float)
-            assert np.isfinite(values).all()
-
-            # Affine in the sunspot number: the residual of a straight-line
-            # fit against ssn is zero, and the slope is positive.
-            slope, intercept = np.polyfit(window.values, values, 1)
-            assert slope > 0
-            # Coordinates span the unit interval of the fresh axes.
-            assert values == exact(slope * window.values + intercept, scale=1.0)
-    finally:
-        plt.close(figure)
-
-
-@pytest.mark.parametrize("vertical", [True, False])
-def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
-    """``plot_on_colorbar`` returns ``(cax, underlay, overlay, guides)``.
-
-    The underlay is the solid white line and the overlay the dashed black
-    line drawn over it, both on ``cax``. Every field of ``guides`` is None
-    because the method receives only the colour bar's axes.
-
-    ON FAILURE: the code is wrong.
-    """
-    figure, axes = plt.subplots()
-    try:
-        ret = sidc.plot_on_colorbar(
-            axes,
-            pd.Timestamp("2000-01-01"),
-            pd.Timestamp("2010-01-01"),
-            vertical_cbar=vertical,
-        )
-        assert isinstance(ret, tuple) and len(ret) == 4
-        cax, underlay, overlay, guides = ret
-        assert cax is axes
-        assert guides == Guides()
-        assert isinstance(underlay, matplotlib.lines.Line2D)
-        assert isinstance(overlay, matplotlib.lines.Line2D)
-        assert list(axes.lines) == [underlay, overlay]
-        assert underlay.get_linestyle() == "-"
-        assert matplotlib.colors.to_hex(underlay.get_color()) == "#ffffff"
-        assert matplotlib.colors.to_hex(overlay.get_color()) == "#000000"
-    finally:
-        plt.close(figure)
-
-
-def _value_axis_labels(axes):
-    """Return the colour bar's major tick labels on the SSN (x) axis."""
-    return [label.get_text() for label in axes.xaxis.get_ticklabels()]
-
-
-def test_plot_on_colorbar_handles_a_low_activity_window(seed_m13, seeded_index):
-    """A window that never exceeds SSN 50 plots finite coordinates on a 0-100 scale.
-
-    A plotted coordinate has to be finite to render at all. The scale top is
-    the peak rounded up to the next 100 and never below 100, so a flat SSN of
-    30 gives a top of 100 and ticks 0, 50, 100. On a fresh axes the x limits
-    are (0, 1), so SSN 30 plots at 30 / 100 = 0.3.
-
-    ON FAILURE: the code is wrong.
-    """
-    frame = pd.DataFrame(
-        {"ssn": np.full(len(seeded_index), 30.0), "std": 5.0, "n_obs": 25},
-        index=seeded_index,
-    )
-    seed_m13(frame)
-    indicator = SIDC("m13")
-
-    figure, axes = plt.subplots()
-    try:
-        indicator.plot_on_colorbar(
-            axes, seeded_index[0], seeded_index[-1], vertical_cbar=True
-        )
-        for line in axes.lines:
-            coords = np.asarray(line.get_data()[0], dtype=float)
-            assert np.isfinite(coords).all()
-            # Hand-computed: 30 / 100 of the fresh axes' unit span.
-            assert coords == exact(0.3)
-        # Hand-computed: top = 100, so ticks read 0, 100 / 2, 100.
-        assert _value_axis_labels(axes) == ["0", "50", "100"]
-    finally:
-        plt.close(figure)
-
-
-def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(seed_m13, seeded_index):
-    """A peak of 140 gets a scale top of 200, so the line stays inside the scale.
-
-    Rounding to the nearest 100 would give 100 and draw the peak beyond the
-    colour bar. Rounded up, the top is 200 and the ticks read 0, 100, 200. On
-    a fresh axes the x limits are (0, 1), so SSN 140 plots at 140 / 200 = 0.7
-    and SSN 20 at 20 / 200 = 0.1, both inside [0, 1].
-
-    ON FAILURE: the code is wrong.
-    """
-    ssn = np.full(len(seeded_index), 20.0)
-    ssn[len(ssn) // 2] = 140.0
-    frame = pd.DataFrame({"ssn": ssn, "std": 5.0, "n_obs": 25}, index=seeded_index)
-    seed_m13(frame)
-    indicator = SIDC("m13")
-
-    figure, axes = plt.subplots()
-    try:
-        indicator.plot_on_colorbar(
-            axes, seeded_index[0], seeded_index[-1], vertical_cbar=True
-        )
-        for line in axes.lines:
-            coords = np.asarray(line.get_data()[0], dtype=float)
-            # Hand-computed: 140 / 200 and 20 / 200 of the unit span.
-            assert coords.max() == exact(0.7)
-            assert coords.min() == exact(0.1)
-        assert _value_axis_labels(axes) == ["0", "100", "200"]
-    finally:
-        plt.close(figure)
 
 
 def test_sidc_run_normalization_documents_itself_with_the_base_docstring():

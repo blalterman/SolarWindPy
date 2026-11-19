@@ -419,8 +419,9 @@ The solar cycle on the colorbar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Over decades, the colorbar can carry the solar cycle. With ``z`` the time of
-each point in matplotlib's date units, ``SIDC("m13").plot_on_colorbar`` draws
-the 13-month smoothed sunspot number along the colorbar, so each segment's
+each point in matplotlib's date units,
+:func:`~solarwindpy.solar_activity.plots.plot_on_colorbar` given ``SIDC("m13")``
+draws the 13-month smoothed sunspot number along the colorbar, so each segment's
 color places it in the cycle. ``SIDC("m13")`` downloads the series from SILSO
 (https://www.sidc.be/SILSO/) and keeps it in SolarWindPy's download cache for
 a day. The sunspot number's own scale is left unlabelled here: the line shows
@@ -434,6 +435,7 @@ the cycle's phase, not its amplitude.
    from solarwindpy.plotting.scatter import Scatter
    from solarwindpy.plotting.labels.base import TeXlabel
    from solarwindpy.plotting.labels.epochs import DateTime
+   from solarwindpy.solar_activity.plots import plot_on_colorbar
    from solarwindpy.solar_activity.sunspot_number.sidc import SIDC
 
    rng = np.random.default_rng(3)
@@ -461,7 +463,7 @@ the cycle's phase, not its amplitude.
    cbar.ax.yaxis.set_major_formatter(mdates.DateFormatter("%Y"))
 
    # The 13-month smoothed sunspot number along the colorbar, downloaded from SILSO.
-   SIDC("m13").plot_on_colorbar(cbar.ax, epoch[0], epoch[-1])
+   plot_on_colorbar(SIDC("m13"), cbar.ax, epoch[0], epoch[-1])
    cbar.ax.set_xlabel("")
    cbar.ax.xaxis.set_major_locator(mdates.ticker.NullLocator())
    cbar.ax.xaxis.set_minor_locator(mdates.ticker.NullLocator())
