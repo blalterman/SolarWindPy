@@ -648,6 +648,25 @@ def test_cut_rejects_an_unknown_kind(extrema, kind):
         extrema.cut_spec_by_interval(EPOCHS, kind=kind)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="IndicatorExtrema.cut_spec_by_interval raises a bare ValueError; "
+    "expected message 'overlap or are out of order'; remove this marker when "
+    "the S18 message lands",
+)
+def test_cut_by_a_repeated_cycle_names_the_overlap(extrema):
+    """Cutting by intervals that overlap raises ValueError naming the cause.
+
+    Chosen input: ``tk_cycles=[1, 1]`` selects cycle 1's interval twice, so
+    the intervals to cut by overlap.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(ValueError, match="overlap or are out of order"):
+        extrema.cut_spec_by_interval(EPOCHS, kind="Cycle", tk_cycles=[1, 1])
+
+
 # ---------------------------------------------------------------------------
 # IndicatorExtrema: extrema bands
 # ---------------------------------------------------------------------------

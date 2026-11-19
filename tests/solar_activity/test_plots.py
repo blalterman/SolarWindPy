@@ -20,6 +20,8 @@ import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 
 from solarwindpy.plotting import labels  # noqa: E402
+from solarwindpy.plotting.base import Guides  # noqa: E402
+from solarwindpy.solar_activity import plots  # noqa: E402
 from solarwindpy.solar_activity.plots import IndicatorPlot, SSNPlot  # noqa: E402
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDC, SIDC_ID  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
@@ -286,6 +288,34 @@ def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
     assert ax.get_ylim()[1] == cbar_top
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="ssn_scale_top is SIDC's static method; expected the module function "
+    "solar_activity.plots.ssn_scale_top; remove this marker when it moves",
+)
+@pytest.mark.parametrize(
+    "ssn, top",
+    [
+        ([0.0, 30.0, 15.0], 100),  # ceil(30 / 100) * 100 = 100
+        ([0.0, 100.0, 50.0], 100),  # a peak on a multiple of 100 is the top
+        ([0.0, 140.0, 70.0], 200),  # ceil(140 / 100) * 100 = 200
+        ([0.0, 285.0, 140.0], 300),  # cycle 19's peak: ceil(2.85) * 100 = 300
+        ([0.0, 0.0], 100),  # the floor: never a zero-height scale
+        ([], 100),  # an empty series has no peak; the floor holds
+    ],
+    ids=["quiet", "on-a-hundred", "moderate", "active", "all-zero", "empty"],
+)
+def test_ssn_scale_top_rounds_the_peak_up_to_the_next_100(ssn, top):
+    """``ssn_scale_top`` is the peak rounded up to a multiple of 100, at least 100.
+
+    Each expected top is computed by hand from the series' peak.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert plots.ssn_scale_top(pd.Series(ssn, dtype=float)) == top
+
+
 @pytest.mark.parametrize("logx, logy", [(True, False), (False, True)])
 def test_log_flags_set_the_matching_axis_scale(sidc, logx, logy):
     """``set_log`` puts exactly the flagged axes on a log scale.
@@ -319,3 +349,117 @@ def test_auto_path_is_built_from_class_labels_and_scales(sidc):
 
     plot.set_log(y=True)
     assert plot.path == expected.with_name("linX-logY")
+
+
+# ---------------------------------------------------------------------------
+# The sunspot number along a colour bar
+# ---------------------------------------------------------------------------
+
+MOVE_REASON = (
+    "plot_on_colorbar is a SIDC method; expected the module function "
+    "solar_activity.plots.plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar); "
+    "remove this marker when it moves"
+)
+
+
+@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
+@pytest.mark.parametrize("vertical", [True, False])
+def test_plot_on_colorbar_draws_the_requested_span(sidc, vertical):
+    """Both lines carry the window's sunspot numbers, scaled onto the bar.
+
+    Chosen input: the window 2002-01 to 2008-01 holds months 24 to 96, so
+    SSN 74 to 146 and a scale top of 200. On a fresh axes the value axis
+    spans (0, 1), so each SSN plots at SSN / 200. The time coordinates are
+    the months in days since 1970, recomputed from the dates. A vertical bar
+    puts time on y and SSN on x; a horizontal bar swaps them.
+
+    ON FAILURE: the code is wrong.
+    """
+    window = slice(24, 97)
+    fig, cax = plt.subplots()
+    plots.plot_on_colorbar(sidc, cax, MONTHS[24], MONTHS[96], vertical_cbar=vertical)
+
+    assert len(cax.lines) == 2
+    for line in cax.lines:
+        ssn_coords, time_coords = line.get_data()
+        if not vertical:
+            ssn_coords, time_coords = time_coords, ssn_coords
+        assert np.asarray(time_coords) == exact(days_since_1970(MONTHS[window]))
+        assert np.asarray(ssn_coords) == exact(SSN[window] / 200.0)
+
+
+@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
+@pytest.mark.parametrize("vertical", [True, False])
+def test_plot_on_colorbar_returns_cax_both_lines_and_no_colorbar(sidc, vertical):
+    """``plot_on_colorbar`` returns ``(cax, underlay, overlay, guides)``.
+
+    The underlay is the solid white line and the overlay the dashed black
+    line drawn over it, both on ``cax``. Every field of ``guides`` is None
+    because the function receives only the colour bar's axes.
+
+    ON FAILURE: the code is wrong.
+    """
+    fig, axes = plt.subplots()
+    ret = plots.plot_on_colorbar(
+        sidc, axes, MONTHS[24], MONTHS[96], vertical_cbar=vertical
+    )
+
+    assert isinstance(ret, tuple) and len(ret) == 4
+    cax, underlay, overlay, guides = ret
+    assert cax is axes
+    assert guides == Guides()
+    assert isinstance(underlay, matplotlib.lines.Line2D)
+    assert isinstance(overlay, matplotlib.lines.Line2D)
+    assert list(axes.lines) == [underlay, overlay]
+    assert underlay.get_linestyle() == "-"
+    assert matplotlib.colors.to_hex(underlay.get_color()) == "#ffffff"
+    assert matplotlib.colors.to_hex(overlay.get_color()) == "#000000"
+
+
+def _value_axis_labels(axes):
+    """The colour bar's major tick labels on the SSN (x) axis of a vertical bar."""
+    return [label.get_text() for label in axes.xaxis.get_ticklabels()]
+
+
+@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
+def test_plot_on_colorbar_handles_a_low_activity_window(tmp_path, monkeypatch):
+    """A window that never exceeds SSN 50 plots on a 0-100 scale.
+
+    Chosen input: a flat SSN of 30. The scale top is the peak rounded up to
+    the next 100 and never below 100, so the top is 100 and the ticks read
+    0, 50, 100. On a fresh axes the x limits are (0, 1), so SSN 30 plots at
+    30 / 100 = 0.3.
+
+    ON FAILURE: the code is wrong.
+    """
+    indicator = sidc_from_silso(tmp_path, monkeypatch, np.full(MONTHS.size, 30.0))
+    fig, cax = plt.subplots()
+    plots.plot_on_colorbar(indicator, cax, MONTHS[0], MONTHS[-1], vertical_cbar=True)
+
+    for line in cax.lines:
+        assert np.asarray(line.get_data()[0], dtype=float) == exact(0.3)
+    assert _value_axis_labels(cax) == ["0", "50", "100"]
+
+
+@pytest.mark.xfail(strict=True, raises=AttributeError, reason=MOVE_REASON)
+def test_plot_on_colorbar_rounds_a_peak_of_140_up_to_200(tmp_path, monkeypatch):
+    """A peak of 140 gets a scale top of 200, so the line stays inside the scale.
+
+    Rounding to the nearest 100 would give 100 and draw the peak beyond the
+    colour bar. Rounded up, the top is 200 and the ticks read 0, 100, 200. On
+    a fresh axes the x limits are (0, 1), so SSN 140 plots at 140 / 200 = 0.7
+    and SSN 20 at 20 / 200 = 0.1, both inside [0, 1].
+
+    ON FAILURE: the code is wrong.
+    """
+    ssn = np.full(MONTHS.size, 20.0)
+    ssn[MONTHS.size // 2] = 140.0
+    indicator = sidc_from_silso(tmp_path, monkeypatch, ssn)
+    fig, cax = plt.subplots()
+    plots.plot_on_colorbar(indicator, cax, MONTHS[0], MONTHS[-1], vertical_cbar=True)
+
+    for line in cax.lines:
+        coords = np.asarray(line.get_data()[0], dtype=float)
+        assert coords.max() == exact(0.7)  # hand-computed: 140 / 200
+        assert coords.min() == exact(0.1)  # hand-computed: 20 / 200
+    assert _value_axis_labels(cax) == ["0", "100", "200"]
