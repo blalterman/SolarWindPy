@@ -305,12 +305,17 @@ class Plasma(base.Base):
         }
         return pd.DataFrame({"value": pd.Series(fields, dtype=object)})
 
+    # The HDF5 keys `save` writes and `load_from_file` reads by default.
+    _HDF_DKEY = "FC"
+    _HDF_SCKEY = "SC"
+    _HDF_AUXKEY = "FC_AUX"
+
     def save(
         self,
         fname,
-        dkey="FC",
-        sckey="SC",
-        auxkey="FC_AUX",
+        dkey=_HDF_DKEY,
+        sckey=_HDF_SCKEY,
+        auxkey=_HDF_AUXKEY,
         data_modifier_fcn=None,
         sc_modifier_fcn=None,
         aux_modifier_fcn=None,
@@ -323,11 +328,11 @@ class Plasma(base.Base):
             File name pointing to the save location.
             The typical use when creating a data file in `Create_Datafile.ipynb`
             is `fname("swe", "h5", strip_date=True)`.
-        dkey: str, "FC"
+        dkey: str
             The HDF5 file key at which to store the data.
-        sckey: str, "SC"
+        sckey: str
             The HDF5 file key at which to store the spacecraft data.
-        auxkey: str, "FC_AUX"
+        auxkey: str
             The HDF5 file key at which to store the auxiliary data.
         data_modifier_fcn: None, FunctionType
             A function to modify the data saved, e.g. if you don't want to save
@@ -418,9 +423,9 @@ class Plasma(base.Base):
         cls,
         fname,
         *species,
-        dkey="FC",
-        sckey="SC",
-        auxkey="FC_AUX",
+        dkey=_HDF_DKEY,
+        sckey=_HDF_SCKEY,
+        auxkey=_HDF_AUXKEY,
         sc_frame=None,
         sc_name=None,
         start=None,
@@ -436,12 +441,14 @@ class Plasma(base.Base):
         species: list-like of str
             The species to load. If none are passed, they are automatically
             selected from the data.
-        dkey: str, "FC"
+        dkey: str
             The key for getting data from HDF5 file.
-        sckey: str, "SC"
-            The key for getting spacecraft data from the HDF5 file.
-        auxkey: str, "FC_AUX"
-            key for getting auxiliary data from HDF5 file.
+        sckey: str or None
+            The key for getting spacecraft data from the HDF5 file. None
+            loads no spacecraft data.
+        auxkey: str or None
+            The key for getting auxiliary data from the HDF5 file. None loads
+            no auxiliary data.
         sc_frame : str, optional
             Coordinate frame of the spacecraft data, passed to
             :class:`~solarwindpy.core.spacecraft.Spacecraft`. Required when
