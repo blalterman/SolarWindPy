@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Python 3.15 is supported: it joins the classifiers, the tox envlist and the publish
+  workflow's Linux, macOS and Windows matrix.
+
 ### Changed
 
 - **Breaking:** `solarwindpy.instabilities.beta_ani` is renamed `solarwindpy.instabilities.plots`,
@@ -29,6 +34,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `solarwindpy.tools`, which has no handler and no level of its own, so it no longer prints
   them to stderr by default: configure `logging` to show them. The `logger=` parameter is
   unchanged.
+- The example data files ship in `solarwindpy/examples/data/` instead of
+  `solarwindpy/core/data/`, and `solarwindpy.examples.load_plasma` reads them from there. The
+  example spacecraft data labels its columns `pos`, `v` and `carr`, the labels
+  `solarwindpy.core.spacecraft.Spacecraft` reads, instead of `pos_HCI`, `v_HCI` and `Carr`.
+
+### Removed
+
+- `setup.py`. The build reads its version from git tags through `pyproject.toml`
+  (`[tool.setuptools_scm]`), as before.
 
 ## [0.6.0] - 2026-11-17
 
