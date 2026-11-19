@@ -217,6 +217,17 @@ class Core(_WithLogger, ABC):
         """
         return pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
 
+    def _alfven_coefficient(self):
+        r"""Factor turning :math:`B / \sqrt{\rho}` in display units into km/s.
+
+        :math:`B / \sqrt{\mu_0 \rho}` is a speed in SI; this factor carries
+        the display units of ``b`` and ``rho`` into SI and the result into
+        the display unit of a speed.
+        """
+        units = self.units
+        mu0 = self.constants.misc.mu0
+        return units.b / (np.sqrt(units.rho * mu0) * units.ca)
+
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:
         """Conform the species inputs to a standard form.

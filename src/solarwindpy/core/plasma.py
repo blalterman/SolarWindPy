@@ -1540,10 +1540,7 @@ species: {}
         rho = self.rho(*species)
         b = self.b.mag
 
-        units = self.units
-        mu0 = self.constants.misc.mu0
-        coeff = units.b / (np.sqrt(units.rho * mu0) * units.ca)
-        ca = rho.pow(-0.5).multiply(b, axis=0) * coeff
+        ca = rho.pow(-0.5).multiply(b, axis=0) * self._alfven_coefficient()
 
         if len(species) == 1:
             ca.name = species[0]

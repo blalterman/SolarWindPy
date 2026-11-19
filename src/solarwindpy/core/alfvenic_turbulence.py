@@ -349,10 +349,9 @@ unexpected.""")
         # we first define the magnetic field in Alfven units. Then we calculate
         # averages. Note that I took the other option in my test cases in
         # `TS-analysis` project. (20181120)
-        coef = self.units.b / (  # Convert b -> Alfven units.
-            np.sqrt(self.units.rho * self.constants.misc.mu0) * self.units.v
+        b_ca_units = b_in.divide(rho.pipe(np.sqrt), axis=0).multiply(
+            self._alfven_coefficient()
         )
-        b_ca_units = b_in.divide(rho.pipe(np.sqrt), axis=0).multiply(coef)
 
         # `sort=True` puts the union of unequal v and b indexes in time order,
         # which `rolling` requires.
