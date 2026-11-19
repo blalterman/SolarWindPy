@@ -256,6 +256,14 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
 # Constructor order: variables, then log axes, then axnorm (F125)
 # ---------------------------------------------------------------------------
 
+# The data variables each constructor takes positionally (ruling 11, Q11).
+VARIABLES = {
+    Hist1D: ["x", "y"],
+    Hist2D: ["x", "y", "z"],
+    SpiralPlot2D: ["x", "y", "z"],
+    Scatter: ["x", "y", "z", "size", "alpha"],
+}
+
 
 @pytest.mark.parametrize(
     "cls, expected",
@@ -301,18 +309,32 @@ def test_spiral_selects_the_rows_of_the_cells_it_plots():
     ],
     ids=lambda v: v.__name__ if isinstance(v, type) else "",
 )
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the plot constructors take their settings positionally too; "
+    "expected every parameter after the data variables KEYWORD_ONLY; remove "
+    "this marker when the constructors put * after the variables",
+)
 def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
     """Every plot constructor orders its parameters variables, log, axnorm, the rest.
 
-    The rest share one order: clip, the bins, mask, then any keyword-only
-    option of one class (Spiral's ``progress``).
+    The rest share one order: clip, the bins, mask, then any option of one
+    class (Spiral's ``progress``). The data variables are positional, and
+    every parameter after them is keyword-only.
 
     ON FAILURE: the code is wrong.
     """
     import inspect
 
-    params = list(inspect.signature(cls.__init__).parameters)[1:]
-    assert params == expected
+    params = list(inspect.signature(cls.__init__).parameters.values())[1:]
+    assert [p.name for p in params] == expected
+    n = len(VARIABLES[cls])
+    assert [p.name for p in params[:n]] == VARIABLES[cls]
+    assert [p.kind for p in params[:n]] == [inspect.Parameter.POSITIONAL_OR_KEYWORD] * n
+    assert [p.kind for p in params[n:]] == [inspect.Parameter.KEYWORD_ONLY] * (
+        len(params) - n
+    )
 
 
 def test_the_fit_plotter_sets_log_as_the_plots_do():
