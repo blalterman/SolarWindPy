@@ -148,6 +148,10 @@ Layering is a contract checked by import-linter (`lint-imports`), declared in
 
 The public import paths are one plain parametrized test that imports each promised name.
 
+A test file mirrors the module it tests under `tests/`: the tests of
+`src/solarwindpy/core/vector.py` live in `tests/core/test_vector.py`. A test file at the root
+of `tests/` imports more than one subpackage, imports no package code, or tests `docs/`.
+
 **Show it:** add a forbidden import (for example, `plotting` from `core`), watch
 `lint-imports` fail, then revert.
 
