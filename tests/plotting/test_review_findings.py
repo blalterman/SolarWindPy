@@ -56,7 +56,18 @@ ACCEPTED_FORMS = [
     ("Both", BOTH),
     (True, BOTH),
 ]
-REJECTED_FORMS = ["", "foo", "lo", "lower ", "uppr", "b"]
+# The long strings were removed: "l", "u" and True already name each case.
+REMOVED_NOT_YET = pytest.mark.xfail(
+    strict=True,
+    raises=pytest.fail.Exception,
+    reason="plotting.binned._CLIP_STRINGS still accepts 'lower', 'upper' and "
+    "'both'; expected ValueError naming 'l' and 'u'; remove this marker when "
+    "the long strings are removed",
+)
+REMOVED_STRINGS = [
+    pytest.param(s, marks=REMOVED_NOT_YET) for s in ("lower", "upper", "both")
+]
+REJECTED_FORMS = ["", "foo", "lo", "lower ", "uppr", "b", *REMOVED_STRINGS]
 ACCEPTED_MESSAGE = "'l', 'lower', 'u', 'upper' or 'both'"
 
 # A pair (lower, upper): True is that tail's default cut, False no clip, a
@@ -124,7 +135,7 @@ class TestClipSetting:
         with pytest.raises(ValueError, match=ACCEPTED_MESSAGE):
             Base.clip_data(SERIES, clip)
 
-    @pytest.mark.parametrize("clip", ["", "foo"])
+    @pytest.mark.parametrize("clip", ["", "foo", *REMOVED_STRINGS])
     @pytest.mark.parametrize(
         "build",
         [
