@@ -382,11 +382,11 @@ unexpected.""")
             rho_rtn = self._component_reduce(pos.loc[:, ["x", "y"]].pow(2)).pipe(
                 np.sqrt
             )
-            cos_colat = rho_rtn.divide(r_rtn)
+            cos_lat = rho_rtn.divide(r_rtn)
 
             r = sc.distance2sun * sc.units.distance2sun * 1e-3  # [km]
 
-            correction = r.multiply(cos_colat, axis=0).multiply(
+            correction = r.multiply(cos_lat, axis=0).multiply(
                 omega
             )  # [arc length speed] = [km/s]
             vt = data.loc[:, ("v", "y")].subtract(correction)
