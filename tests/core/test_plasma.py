@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Tests for the :class:`Plasma` container."""
 
+import logging
 import re
 import pandas as pd
 import numpy as np
@@ -3951,3 +3952,35 @@ def test_attaching_the_wrong_type_raises_type_error_naming_it(setter, new, messa
     p = swp.examples.load_plasma()
     with pytest.raises(TypeError, match=message):
         getattr(p, setter)(new)
+
+
+def test_plasma_no_longer_accepts_log_plasma_stats():
+    """The removed ``log_plasma_stats`` argument raises ``TypeError``.
+
+    ON FAILURE: the code is wrong; the plasma-statistics logging was removed
+    and the argument must not be accepted silently.
+    """
+    data = swp.examples.load_plasma().data
+    with pytest.raises(TypeError, match="log_plasma_stats"):
+        plasma.Plasma(data, "p1", log_plasma_stats=True)
+
+
+def test_plasma_logs_each_optional_input_not_passed(caplog):
+    """Plasma logs "No <input> data passed to Plasma" for each None input only.
+
+    ON FAILURE: the code is wrong; the INFO message for a missing optional
+    input was lost, or is logged for an input that was passed.
+    """
+    example = swp.examples.load_plasma()
+    flags = pd.DataFrame({("quality", "", ""): [0, 1, 0]}, index=example.epoch)
+    flags.columns.names = ["M", "C", "S"]
+
+    with caplog.at_level(logging.INFO, logger="solarwindpy"):
+        plasma.Plasma(example.data, "p1")
+    assert "No spacecraft data passed to Plasma" in caplog.messages
+    assert "No auxiliary data passed to Plasma" in caplog.messages
+
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="solarwindpy"):
+        plasma.Plasma(example.data, "p1", sc=example.sc, aux=flags)
+    assert not [m for m in caplog.messages if m.startswith("No ")]
