@@ -75,6 +75,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `beta` and `R` differ in shape, `solarwindpy.instabilities.verscharen2016.StabilityContours`
     raises `TypeError` for a `beta` that is not a `numpy.ndarray`, and its `plot_contours`
     raises `TypeError` for an `ax` that is not a `matplotlib.axes.Axes`.
+- `solarwindpy.core.abundances.ReferenceAbundances.get_element` and `get_comment` raise
+  `TypeError` instead of `ValueError` for a key that is neither an element symbol nor an
+  atomic number; the message is unchanged.
 - **Breaking:** `solarwindpy.instabilities.verscharen2016.beta_ani_inst` is
   `beta_ani_inst(beta, a, b, c)`: the coefficients have no `None` defaults, so leaving one out
   raises a `TypeError` naming it.

@@ -407,11 +407,6 @@ class TestCommentsColumn:
         """
         assert ref.get_comment(2) == "helioseismology"
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="_key_level raises ValueError; ruling 16 names TypeError for a wrong "
-        "type; remove this marker when it does",
-    )
     def test_invalid_key_type_raises_typeerror_naming_the_type(self, ref):
         """A float key raises TypeError naming ``float`` (ruling 16: wrong type).
 
@@ -507,11 +502,6 @@ class TestGetElement:
             obj="Default kind vs explicit Photosphere",
         )
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="_key_level raises ValueError; ruling 16 names TypeError for a wrong "
-        "type; remove this marker when it does",
-    )
     def test_invalid_key_type_raises_typeerror(self, ref):
         """A float key raises TypeError naming ``float`` (ruling 16: wrong type).
 

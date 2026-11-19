@@ -94,7 +94,7 @@ class ReferenceAbundances:
 
         Raises
         ------
-        ValueError
+        TypeError
             If key is not a string or integer.
         """
         if isinstance(key, str):
@@ -102,7 +102,7 @@ class ReferenceAbundances:
         elif isinstance(key, int):
             level = "Z"
         else:
-            raise ValueError(f"Unrecognized key type ({type(key)})")
+            raise TypeError(f"Unrecognized key type ({type(key)})")
         return level
 
     def get_element(self, key, kind="Photosphere"):
@@ -125,7 +125,7 @@ class ReferenceAbundances:
 
         Raises
         ------
-        ValueError
+        TypeError
             If key is not a string or integer.
         KeyError
             If element not found or invalid kind.
