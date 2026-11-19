@@ -52,3 +52,16 @@ def test_measurements_are_grouped_by_first_character(capsys):
         assert not line[0][0].isupper()
         firsts.append(line[0][0])
     assert firsts == sorted(set(firsts))
+
+
+def test_labels_star_import_brings_available():
+    """``from solarwindpy.plotting.labels import *`` succeeds and brings ``available``.
+
+    Every name in a module's ``__all__`` must exist; a missing one makes the
+    star import raise AttributeError.
+
+    ON FAILURE: the code is wrong; labels.__all__ names something undefined.
+    """
+    namespace = {}
+    exec("from solarwindpy.plotting.labels import *", namespace)
+    assert callable(namespace["available"])

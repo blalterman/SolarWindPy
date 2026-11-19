@@ -147,16 +147,3 @@ def test_available_ignores_subclasses_defined_elsewhere(capsys):
     solarwindpy.fitfunctions.
     """
     assert _FitDefinedOutsideThePackage.__name__ not in _printed_rows(capsys)
-
-
-def test_labels_star_import_brings_available():
-    """``from solarwindpy.plotting.labels import *`` succeeds and brings ``available``.
-
-    Every name in a module's ``__all__`` must exist; a missing one makes the
-    star import raise AttributeError.
-
-    ON FAILURE: the code is wrong; labels.__all__ names something undefined.
-    """
-    namespace = {}
-    exec("from solarwindpy.plotting.labels import *", namespace)
-    assert callable(namespace["available"])

@@ -71,6 +71,30 @@ def test_every_class_has_a_case():
         _build(name)
 
 
+def test_scan_finds_fit_functions():
+    """The module scan finds at least one fit function.
+
+    Guards the tests below against passing vacuously.
+
+    ON FAILURE: the scan no longer reaches the fit functions; fix the test.
+    """
+    assert CLASSES
+
+
+def test_every_fit_function_is_declared_public_in_its_module():
+    """Each fit function is listed in its defining module's ``__all__``.
+
+    ON FAILURE: the code is wrong; add the new fit function to the
+    ``__all__`` of the module that defines it.
+    """
+    missing = [
+        f"{cls.__module__}.{name}"
+        for name, cls in CLASSES.items()
+        if name not in importlib.import_module(cls.__module__).__all__
+    ]
+    assert not missing, missing
+
+
 def test_the_heaviside_step_models_and_exponential_cdf_are_removed():
     """The step-function modules and ``ExponentialCDF`` no longer exist.
 
