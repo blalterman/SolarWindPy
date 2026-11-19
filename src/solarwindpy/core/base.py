@@ -11,20 +11,20 @@ __all__ = [
     "Core",
     "Base",
 ]
-import logging
 from abc import ABC, abstractmethod
 from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
 
+from ..tools import _WithLogger
 from . import units_constants
 
 # What each column level holds, for messages that name a level.
 _LEVEL_WORDS = {"M": "measurement", "C": "component", "S": "species"}
 
 
-class Core(ABC):
+class Core(_WithLogger, ABC):
     """Base class for all :mod:`solarwindpy` objects.
 
     The class sets up logging, unit definitions, and physical constants. It
@@ -43,7 +43,6 @@ class Core(ABC):
     """
 
     def __init__(self) -> None:
-        self._init_logger()
         self._init_units()
         self._init_constants()
 
@@ -80,11 +79,6 @@ class Core(ABC):
         return self.data.equals(other.data)
 
     @property
-    def logger(self) -> logging.Logger:
-        """Logger instance for this object."""
-        return self._logger
-
-    @property
     def units(self) -> units_constants.Units:
         """Units conversion factors."""
         return self._units
@@ -98,9 +92,6 @@ class Core(ABC):
     def data(self) -> pd.DataFrame:
         """Underlying DataFrame containing the data, with MultiIndex columns."""
         return self._data
-
-    def _init_logger(self) -> None:
-        self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def _init_units(self) -> None:
         self._units = units_constants.Units()

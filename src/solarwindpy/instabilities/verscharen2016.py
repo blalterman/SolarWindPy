@@ -21,7 +21,6 @@ __all__ = [
     "StabilityContours",
 ]
 
-import logging
 
 import numpy as np
 import pandas as pd
@@ -211,7 +210,6 @@ class StabilityCondition(object):
         beta, R : pandas.Series
             Arrays of parallel beta and temperature anisotropy.
         """
-        self._init_logger()
         self.set_instability_parameters(growth_rate)
         self.set_beta_ani(beta, R)
         self.calculate_stability_criteria()
@@ -220,12 +218,6 @@ class StabilityCondition(object):
         """Return the class name."""
 
         return self.__class__.__name__
-
-    def _init_logger(self):
-        """Initialize a logger namespaced to the class."""
-
-        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
-        self._logger = logger
 
     @property
     def instability_parameters(self):

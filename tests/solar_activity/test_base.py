@@ -71,7 +71,6 @@ class Indicator(ActivityIndicator):
     """An indicator that fills in the abstract hooks and nothing else."""
 
     def __init__(self, loader=None):
-        self._init_logger()
         self._loader = loader
 
     def interpolate_data(self, target_index):
@@ -545,16 +544,6 @@ def test_extrema_keyword_arguments_reach_load_or_set_data():
     assert Extrema(table=table).data is table
 
 
-_BASE_MODULE_LOGGERS = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Base._init_logger names the logger for solarwindpy.solar_activity.base; "
-    "expected <subclass module>.<class>; remove this marker when the one logger "
-    "mixin in solarwindpy.tools lands",
-)
-
-
-@_BASE_MODULE_LOGGERS
 def test_a_subclass_logs_under_its_own_module():
     """A subclass's logger is named for the module that defines it, then its class.
 
@@ -567,7 +556,6 @@ def test_a_subclass_logs_under_its_own_module():
     assert Extrema(extrema_table()).logger.name == f"{__name__}.Extrema"
 
 
-@_BASE_MODULE_LOGGERS
 def test_a_loader_subclass_logs_under_its_own_module():
     """A loader subclass's logger is named for the module that defines it, then its class.
 

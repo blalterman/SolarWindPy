@@ -8,7 +8,6 @@ __all__ = [
     "IndicatorExtrema",
 ]
 
-import logging
 import urllib
 
 import numpy as np
@@ -19,25 +18,14 @@ from collections import namedtuple
 
 from scipy.interpolate import InterpolatedUnivariateSpline
 
+from ..tools import _WithLogger
 from . import cache
 
 _Loader_Dtypes_Columns = namedtuple("LoaderNamedTuple", ["dtypes", "columns"])
 
 
-class Base(ABC):
+class Base(_WithLogger, ABC):
     """Abstract base class providing a logger interface."""
-
-    @property
-    def logger(self):
-        """``logging.Logger`` attached to the instance."""
-        return self._logger
-
-    def _init_logger(self):
-        r"""Attach a logger named after the module and class."""
-        logger = logging.getLogger(
-            name="{}.{}".format(__name__, self.__class__.__name__)
-        )
-        self._logger = logger
 
     def __str__(self):
         r"""Return the class name."""
@@ -55,7 +43,6 @@ class ID(Base):
         key : str
             Key that maps to a URL fragment in the subclass's ``_trans_url``.
         """
-        self._init_logger()
         self.set_key(key)
 
     @abstractproperty
@@ -131,7 +118,6 @@ class DataLoader(Base):
         url : str
             Full download URL for the data source.
         """
-        self._init_logger()
         self.set_key(key)
         self.set_url(url)
 
@@ -433,7 +419,6 @@ class IndicatorExtrema(Base):
 
         Arguments are passed to :meth:`load_or_set_data`.
         """
-        self._init_logger()
         self.load_or_set_data(*args, **kwargs)
         self.calculate_intervals()
 

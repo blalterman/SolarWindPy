@@ -13,7 +13,6 @@ __all__ = [
     "validate_axnorm",
 ]
 
-import logging
 import re
 from abc import ABC
 from pathlib import Path
@@ -22,7 +21,7 @@ from collections import namedtuple
 from types import MappingProxyType
 
 from ...core import quantities
-from ...tools import _warn
+from ...tools import _warn, _WithLogger
 
 _MCS = namedtuple("_MCS", "m,c,s")
 
@@ -432,15 +431,11 @@ def _warn_if_plain(given):
         _warn(_PLAIN_STRING_MESSAGE.format(given=listing), PlainStringLabelWarning)
 
 
-class Base(ABC):
+class Base(_WithLogger, ABC):
     """Base class for all label objects."""
 
     _name = None
     _publication_format = None
-
-    def __init__(self):
-        """Initialize the logger."""
-        self._init_logger()
 
     def __str__(self):
         return self.with_units
@@ -460,16 +455,6 @@ class Base(ABC):
 
     def __hash__(self):
         return hash(str(self))
-
-    @property
-    def logger(self):
-        r"""Logger named ``<module>.<class name>``."""
-        return self._logger
-
-    def _init_logger(self, handlers=None):
-        """Create a logger at the INFO level."""
-        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
-        self._logger = logger
 
     @property
     def name(self):

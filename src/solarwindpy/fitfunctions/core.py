@@ -18,7 +18,6 @@ __all__ = [
     "FitFunction",
 ]
 
-import logging  # noqa: F401
 
 import numpy as np
 import pandas as pd
@@ -31,7 +30,7 @@ from docstring_inheritance import NumpyDocstringInheritanceInitMeta
 
 from scipy.optimize import least_squares, OptimizeWarning
 
-from ..tools import _warn
+from ..tools import _warn, _WithLogger
 from ._least_squares import (
     feasible_start,
     pseudo_inverse_covariance,
@@ -214,7 +213,7 @@ def _in_numpydoc_section_order(doc):
     return f"{head}\n\n{body}\n" if head else f"\n{body}\n"
 
 
-class FitFunction(ABC, metaclass=FitFunctionMeta):
+class FitFunction(_WithLogger, ABC, metaclass=FitFunctionMeta):
     r"""Fit a model to observed data: the base class of every fit function.
 
     A subclass defines the model (``function`` and ``TeX_function``) and its
@@ -328,7 +327,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         logy=False,
     ):
         # Documented in the class docstring (see FitFunctionMeta).
-        self._init_logger()
         self._set_argnames()
         self._forget_fit()
 
@@ -378,17 +376,6 @@ class FitFunction(ABC, metaclass=FitFunctionMeta):
         y = self.function(x, *popt_)
 
         return y
-
-    @property
-    def logger(self):
-        r"""The :class:`logging.Logger` named after this module and class."""
-        return self._logger
-
-    def _init_logger(self):
-        """Create a module-level logger for the instance."""
-
-        logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self._logger = logger
 
     @property
     @abstractmethod

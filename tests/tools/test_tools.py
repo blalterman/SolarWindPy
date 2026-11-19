@@ -19,6 +19,7 @@ import solarwindpy.tools as tools
 from solarwindpy.examples import load_plasma
 from solarwindpy.fitfunctions.gaussians import Gaussian
 from solarwindpy.plotting.hist1d import Hist1D
+from solarwindpy.plotting.spiral import SpiralMesh
 from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 from solarwindpy.plotting.labels.special import ManualLabel
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDC_ID, SSNExtrema
@@ -246,14 +247,6 @@ class TestCoreDominatesCheck:
 # Logger names: each class logs under its own module
 # ---------------------------------------------------------------------------
 
-_BASE_MODULE_LOGGERS = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="each _init_logger names the logger for its base's module "
-    "(solarwindpy.core.base.Plasma); expected <own module>.<class>; remove this "
-    "marker when the one logger mixin in solarwindpy.tools lands",
-)
-
 
 def _gaussian():
     x = np.linspace(-2.0, 2.0, 9)
@@ -273,6 +266,15 @@ OWN_MODULE_LOGGERS = [
         "solarwindpy.plotting.hist1d.Hist1D",
     ),
     (
+        lambda: SpiralMesh(
+            pd.Series([0.5]),
+            pd.Series([0.5]),
+            np.array([0.0, 1.0]),
+            np.array([0.0, 1.0]),
+        ),
+        "solarwindpy.plotting.spiral.SpiralMesh",
+    ),
+    (
         lambda: ManualLabel("Flux", "dimless"),
         "solarwindpy.plotting.labels.special.ManualLabel",
     ),
@@ -281,7 +283,6 @@ OWN_MODULE_LOGGERS = [
 ]
 
 
-@_BASE_MODULE_LOGGERS
 @pytest.mark.parametrize(
     "make, expected",
     OWN_MODULE_LOGGERS,
@@ -297,13 +298,6 @@ def test_every_package_class_logs_under_its_own_module(make, expected):
     assert make().logger.name == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="swap_protons with no logger logs on main.solarwindpy.tools with its own "
-    "StreamHandler and level; expected solarwindpy.tools with neither; remove this "
-    "marker when swap_protons uses logging.getLogger(__name__)",
-)
 def test_swap_protons_logs_on_solarwindpy_tools_with_no_handler(
     protons, caplog, restore_logging
 ):
@@ -321,13 +315,6 @@ def test_swap_protons_logs_on_solarwindpy_tools_with_no_handler(
     assert package_logger.level == logging.NOTSET
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="ElementalAbundance.set_species warns on the root logger; expected "
-    "solarwindpy.plotting.labels.elemental_abundance.ElementalAbundance; remove "
-    "this marker when set_species logs through self.logger",
-)
 def test_unrecognized_element_warns_on_its_own_module_logger(caplog):
     """An unknown element warns on the label's own logger, not on the root logger.
 

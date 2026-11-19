@@ -20,7 +20,6 @@ __all__ = [
     "BinnedPlot",
 ]
 
-import logging
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -32,6 +31,7 @@ from collections import namedtuple
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
 
+from ..tools import _WithLogger
 from . import labels
 from .binned import BinnedData, _PlotSource, _clip_kind, _clip_to_quantiles
 from .binning import FixedGrid
@@ -100,7 +100,7 @@ def _aggregation_kind(fcn):
     return "value"
 
 
-class Base(ABC):
+class Base(_WithLogger, ABC):
     r"""Abstract base for SolarWindPy plots.
 
     Holds the axis labels and the log-scale flags that every concrete plot
@@ -119,7 +119,6 @@ class Base(ABC):
     @abstractmethod
     def __init__(self):
         r"""Set default labels ``x`` and ``y`` and linear axes."""
-        self._init_logger()
         self._labels = AxesLabels(x="x", y="y")
         self._log = LogAxes(x=False)
 
@@ -209,15 +208,6 @@ class Base(ABC):
             if not (v is None or (isinstance(v, str) and v == "None"))
         ]
         return ["x", "y", *further]
-
-    @property
-    def logger(self):
-        r"""Logger named ``<module>.<class name>``."""
-        return self._logger
-
-    def _init_logger(self):
-        logger = logging.getLogger("{}.{}".format(__name__, self.__class__.__name__))
-        self._logger = logger
 
     @property
     def data(self):

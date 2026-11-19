@@ -63,6 +63,21 @@ def _warn(message, category=UserWarning):
     warnings.warn(message, category, skip_file_prefixes=(_PACKAGE_PREFIX,))
 
 
+class _WithLogger:
+    r"""An object whose logger is named for its class's own module and class.
+
+    Mixed into the base classes that log. The logger carries no handler and no
+    level, so the application's :mod:`logging` configuration decides what
+    shows; a warning reaches stderr through :data:`logging.lastResort` when
+    nothing is configured.
+    """
+
+    @property
+    def logger(self):
+        r"""The :class:`logging.Logger` named ``<module>.<class>`` for this object's class."""
+        return logging.getLogger(f"{type(self).__module__}.{type(self).__name__}")
+
+
 def _check_core_dominates(data):
     """Raise unless ``n_p2 / n_p1 <= 1`` on every row where the ratio is defined.
 
@@ -99,8 +114,8 @@ def swap_protons(data, logger=None):
         Data containing proton information. Proton species are stored in the
         ``S`` level of the column index.
     logger : logging.Logger, optional
-        Logger used to report indices of swapped protons. If ``None`` a simple
-        logger is created.
+        Logger that receives the swap statistics at INFO level. If ``None``,
+        the ``solarwindpy.tools`` logger, which has no handler of its own.
 
     Returns
     -------
@@ -157,14 +172,7 @@ def swap_protons(data, logger=None):
     _check_core_dominates(new_data)
 
     if logger is None:
-        logger = logging.getLogger("main.{}".format(__name__))
-        # The logger is module-global: add its handler once, not per call, or
-        # the Nth call prints its stats N times.
-        if not logger.handlers:
-            hdlr = logging.StreamHandler()
-            hdlr.setLevel(logging.INFO)
-            logger.addHandler(hdlr)
-        logger.setLevel(logging.DEBUG)
+        logger = logging.getLogger(__name__)
 
     assert isinstance(logger, logging.Logger)
     stats = pd.Series(

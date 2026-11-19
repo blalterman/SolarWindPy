@@ -367,7 +367,6 @@ class SIDC(ActivityIndicator):
     """
 
     def __init__(self, key):
-        self._init_logger()
         self.set_id(SIDC_ID(key))
         self.load_data()
         self.set_extrema()

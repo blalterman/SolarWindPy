@@ -1200,6 +1200,35 @@ annotation is this weighted fit's:
    fit.plotter.set_labels(x=TeXlabel(("v", "x", "p1")), y=Count())
    fit.plotter.plot_raw_used_fit_resid(resid_kwargs=dict(resid_pct=False))
 
+Logging
+-------
+
+SolarWindPy reports what it does through :py:mod:`logging`. An object logs on
+the logger named for the module that defines its class, then the class,
+``solarwindpy.<module>.<Class>``; a module-level function logs on
+``solarwindpy.<module>``:
+
+>>> plasma.logger.name
+'solarwindpy.core.plasma.Plasma'
+>>> fit.logger.name
+'solarwindpy.fitfunctions.gaussians.Gaussian'
+
+A class you derive from one of SolarWindPy's logs under your own module.
+
+SolarWindPy adds no handler and sets no level, so Python's defaults apply:
+warnings print to stderr, and information and debugging messages do not show.
+To show them, configure logging in your own code, either for every logger::
+
+   import logging
+   logging.basicConfig(level=logging.INFO)
+
+or for SolarWindPy alone, with a handler on its top-level logger::
+
+   import logging
+   logger = logging.getLogger("solarwindpy")
+   logger.addHandler(logging.StreamHandler())
+   logger.setLevel(logging.INFO)
+
 Next Steps
 ----------
 

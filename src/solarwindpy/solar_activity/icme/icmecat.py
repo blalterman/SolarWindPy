@@ -11,13 +11,12 @@ __all__ = [
     "ICMECAT",
 ]
 
-import logging
 import re
 import pandas as pd
 import numpy as np
 from typing import Optional
 
-from ...tools import _warn
+from ...tools import _warn, _WithLogger
 from .. import cache
 
 #: Download URL of the pinned HELIO4CAST ICMECAT release, v23.
@@ -115,7 +114,7 @@ def _successor_urls(url):
     ]
 
 
-class ICMECAT:
+class ICMECAT(_WithLogger):
     """Access the HELIO4CAST Interplanetary Coronal Mass Ejection Catalog.
 
     See the module-level ``RULES_OF_THE_ROAD`` constant for the catalog's
@@ -207,7 +206,6 @@ class ICMECAT:
     """
 
     def __init__(self, spacecraft: Optional[str] = None):
-        self._init_logger()
         self._spacecraft = spacecraft
         self._data: Optional[pd.DataFrame] = None
         self._intervals: Optional[pd.DataFrame] = None
@@ -218,15 +216,6 @@ class ICMECAT:
             self._filter_by_spacecraft(spacecraft)
 
         self._prepare_intervals()
-
-    def _init_logger(self):
-        """Initialize logger for this instance."""
-        self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
-    @property
-    def logger(self) -> logging.Logger:
-        """Logger instance."""
-        return self._logger
 
     @property
     def spacecraft(self) -> Optional[str]:
@@ -412,7 +401,6 @@ class ICMECAT:
 
         # Create new instance without re-downloading
         new = object.__new__(ICMECAT)
-        new._init_logger()
         new._spacecraft = spacecraft  # Keep user's original spelling for display
         new._version = self._version
         new._data = self._data[self._data["sc_insitu"] == actual_name].copy()

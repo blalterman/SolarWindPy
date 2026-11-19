@@ -200,7 +200,6 @@ class Plasma(base.Base):
               p1        7.00       26.00       28.00
         >>> plasma = Plasma(data, "a", "p1")
         """
-        self._init_logger()
         self._require_dataframe(data, "Plasma data")
         # Nothing is attached yet, so `set_data` sorts rather than refusing.
         self._sc = None

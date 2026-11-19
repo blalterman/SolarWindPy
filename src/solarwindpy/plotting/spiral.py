@@ -7,7 +7,6 @@ __all__ = [
     "SpiralPlot2D",
 ]
 
-import logging
 import sys
 
 import numpy as np
@@ -21,6 +20,7 @@ from numba import njit, prange
 from matplotlib import pyplot as plt
 from matplotlib.tri import Triangulation
 
+from ..tools import _WithLogger
 from . import base
 from . import labels
 from .binned import BinnedData, _clip_to_quantiles
@@ -137,7 +137,7 @@ def _calculate_bin_number_with_numba(mesh, x, y):
     return zbin, fill, bin_visited
 
 
-class SpiralMesh(object):
+class SpiralMesh(_WithLogger):
     r"""Adaptive rectangular mesh that splits crowded cells into quarters.
 
     Starting from the grid of initial edges, every cell holding more than
@@ -654,8 +654,7 @@ class SpiralMesh(object):
             value outside the mesh), the fill value, and the visit count of
             each cell.
         """
-        logger = logging.getLogger(__name__)
-        logger.debug(
+        self.logger.debug(
             f"Calculating {self.__class__.__name__} bin_number at {datetime.now()}"
         )
         mesh = self.mesh
@@ -675,10 +674,10 @@ class SpiralMesh(object):
             zbin, fill, bin_visited = _calculate_bin_number_with_numba(mesh, x, y)
         stop = datetime.now()
 
-        logger.debug(f"Elapsed time {stop - start}")
+        self.logger.debug(f"Elapsed time {stop - start}")
 
         if (zbin == fill).any():
-            logger.warning(
+            self.logger.warning(
                 f"""`zbin` contains {(zbin == fill).sum()} ({100 * (zbin == fill).mean():.1f}%) fill values that are outside of mesh.
 They will be replaced by NaNs and excluded from the aggregation.
 """
@@ -689,7 +688,7 @@ They will be replaced by NaNs and excluded from the aggregation.
         # `minlength=nbins` forces us to include empty bins at the end of the array.
         bin_frequency = np.bincount(zbin[~is_fill], minlength=nbins)
         n_empty = (bin_frequency == 0).sum()
-        logger.debug(f"""Largest bin population is {bin_frequency.max()}
+        self.logger.debug(f"""Largest bin population is {bin_frequency.max()}
 {n_empty} of {nbins} bins ({100 * n_empty / nbins:.1f}%) are empty
 """)
 

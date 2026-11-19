@@ -149,13 +149,6 @@ def test_base_and_an_incomplete_subclass_cannot_be_instantiated():
         NoMakePlot()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Base._init_logger names the logger for solarwindpy.plotting.base; "
-    "expected <subclass module>.LinePlot; remove this marker when the one logger "
-    "mixin in solarwindpy.tools lands",
-)
 def test_str_and_logger_name_the_concrete_class():
     """``str(plot)`` opens with the class name; the logger is named for its own module.
 

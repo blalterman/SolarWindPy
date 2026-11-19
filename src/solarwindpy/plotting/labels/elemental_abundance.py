@@ -2,7 +2,6 @@ r"""Labels for elemental abundance ratios."""
 
 __all__ = ["ElementalAbundance"]
 
-import logging
 from pathlib import Path
 from . import base
 
@@ -114,9 +113,9 @@ class ElementalAbundance(base.Base):
         reference_species = reference_species.title()
 
         if species not in known_species:
-            logging.getLogger().warning(f"Species ({species}) is not recognized")
+            self.logger.warning(f"Species ({species}) is not recognized")
         if reference_species not in known_species:
-            logging.getLogger().warning(
+            self.logger.warning(
                 f"Reference species ({reference_species}) is not recognized"
             )
 
