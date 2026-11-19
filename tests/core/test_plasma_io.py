@@ -190,6 +190,37 @@ def test_save_rejects_a_modifier_that_is_not_a_function(tmp_path, kwarg):
         p.save(tmp_path / "plasma.h5", **modifiers)
 
 
+_WRITES_BEFORE_CHECK = pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Plasma.save writes the data (and spacecraft) before checking this "
+    "modifier; remove this marker when save validates every modifier first",
+)
+
+
+@pytest.mark.parametrize(
+    "kwarg",
+    [
+        "data_modifier_fcn",
+        pytest.param("sc_modifier_fcn", marks=_WRITES_BEFORE_CHECK),
+        pytest.param("aux_modifier_fcn", marks=_WRITES_BEFORE_CHECK),
+    ],
+)
+def test_save_writes_no_file_when_it_rejects_a_modifier(tmp_path, kwarg):
+    """A rejected modifier leaves no file behind, whichever modifier it is.
+
+    The modifier is checked before anything is written, so a caller's error
+    never leaves a partly written HDF5 file at ``fname``.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = _example_plasma()
+    fname = tmp_path / "plasma.h5"
+    with pytest.raises(TypeError, match="partial"):
+        p.save(fname, **{kwarg: functools.partial(_identity)})
+    assert not fname.exists()
+
+
 @pytest.mark.parametrize(
     "sc_name, sc_frame, missing",
     [
