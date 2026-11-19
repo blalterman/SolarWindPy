@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 """Utility functions for manipulating solar wind data.
 
-This module contains helper functions that are not yet organized into
-their own submodules. The functions are primarily used for handling
-proton data and for the mean and standard deviation of a log-normal
-variable.
+The functions handle proton data and give the mean and standard deviation
+of a log-normal variable.
 
 Functions
 ---------
