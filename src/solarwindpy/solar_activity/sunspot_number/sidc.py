@@ -29,54 +29,15 @@ _d_dtypes_columns = _Loader_Dtypes_Columns(
     ["year", "month", "day", "year_fraction", "ssn", "std", "n_obs", "definitive"],
 )
 
+# year_fraction: the middle of the period, in years (a month's is ~ day 15).
 _m_dtypes_columns = _Loader_Dtypes_Columns(
     {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
     ["year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"],
 )
 
-_m13_dtypes_columns = _Loader_Dtypes_Columns(
-    {0: int, 1: int, 2: float, 3: float, 4: float, 5: int, 6: bool},
-    ("year", "month", "year_fraction", "ssn", "std", "n_obs", "definitive"),
-)
-
 _y_dtypes_columns = _Loader_Dtypes_Columns(
     {0: float, 1: float, 2: float, 3: int, 4: bool},
     ["year", "ssn", "std", "n_obs", "definitive"],
-)
-
-# Column 3: Date in fraction of year for the middle of the corresponding month (~ day 15)
-
-_hm13_dtypes_columns = _Loader_Dtypes_Columns(
-    {
-        0: int,
-        1: int,
-        2: float,
-        3: float,
-        4: float,
-        5: float,
-        6: float,
-        7: float,
-        8: float,
-        9: int,
-        10: int,
-        11: int,
-        12: bool,
-    },
-    (
-        "year",
-        "month",
-        "year_fraction",
-        "total_ssn",
-        "north_ssn",
-        "south_ssn",
-        "total_std",
-        "north_std",
-        "south_std",
-        "n_total",
-        "n_north",
-        "n_south",
-        "definitive",
-    ),
 )
 
 _hm_dtypes_columns = _Loader_Dtypes_Columns(
@@ -148,17 +109,20 @@ _hd_dtypes_columns = _Loader_Dtypes_Columns(
 )
 
 
-_Dtypes_Columns = namedtuple("Dtypes_Columns", "d,m,m13,y,hd,hm,hm13", defaults=(None,))
+# One row per SILSO series: its file under ``SIDC_ID._url_base``, its column
+# layout, and the date resolution ``SIDCLoader.read_data`` builds the time
+# index from. Each 13-month smoothed series is laid out as its monthly one.
+_Series = namedtuple("_Series", ["url", "layout", "dates"])
 
-_Dtypes_Columns = _Dtypes_Columns(
-    _d_dtypes_columns,
-    _m_dtypes_columns,
-    _m13_dtypes_columns,
-    _y_dtypes_columns,
-    _hd_dtypes_columns,
-    _hm_dtypes_columns,
-    _hm13_dtypes_columns,
-)
+_SERIES = {
+    "d": _Series("sndtotcsv.php", _d_dtypes_columns, "day"),
+    "m": _Series("snmtotcsv.php", _m_dtypes_columns, "month"),
+    "m13": _Series("snmstotcsv.php", _m_dtypes_columns, "month"),
+    "y": _Series("snytotcsv.php", _y_dtypes_columns, "decimal year"),
+    "hd": _Series("sndhemcsv.php", _hd_dtypes_columns, "day"),
+    "hm": _Series("snmhemcsv.php", _hm_dtypes_columns, "month"),
+    "hm13": _Series("snmshemcsv.php", _hm_dtypes_columns, "month"),
+}
 
 
 class SIDC_ID(ID):
@@ -192,16 +156,7 @@ class SIDC_ID(ID):
     @property
     def _trans_url(self):
         r"""Map from series key to file name under :attr:`_url_base`."""
-        trans_url = (
-            ("d", r"sndtotcsv.php"),
-            ("m", r"snmtotcsv.php"),
-            ("m13", r"snmstotcsv.php"),
-            ("y", r"snytotcsv.php"),
-            ("hd", r"sndhemcsv.php"),
-            ("hm", r"snmhemcsv.php"),
-            ("hm13", r"snmshemcsv.php"),
-        )
-        return dict(trans_url)
+        return {key: series.url for key, series in _SERIES.items()}
 
 
 class SIDCLoader(DataLoader):
@@ -279,25 +234,22 @@ class SIDCLoader(DataLoader):
         self.logger.info("Reading SIDC sunspot number\npath: %s", path)
 
         key = self.key
-        dtypes_columns = _Dtypes_Columns._asdict().get(key)
-        if dtypes_columns is None:
+        series = _SERIES.get(key)
+        if series is None:
             raise NotImplementedError(
                 f"""You have not yet used the SSN specified by your key ({key}). Please verify the column labels before continuing."""
             )
 
-        csv = pd.read_csv(path, sep=";", header=None, dtype=dtypes_columns.dtypes)
-        csv.columns = dtypes_columns.columns
+        csv = pd.read_csv(path, sep=";", header=None, dtype=series.layout.dtypes)
+        csv.columns = series.layout.columns
 
-        if key in ("m13", "m", "hm", "hm13"):
-            dt = csv.loc[:, ["year", "month"]]
-            dt.loc[:, "day"] = 1
-            ts = pd.to_datetime(dt)
+        if series.dates == "month":
+            ts = pd.to_datetime(csv.loc[:, ["year", "month"]].assign(day=1))
 
-        elif key in ("d", "hd"):
-            dt = csv.loc[:, ["year", "month", "day"]]
-            ts = pd.to_datetime(dt)
+        elif series.dates == "day":
+            ts = pd.to_datetime(csv.loc[:, ["year", "month", "day"]])
 
-        else:  # "y", the only key with no layout above: a decimal year
+        else:  # "decimal year"
             import astropy.time
 
             dt = astropy.time.Time(csv.loc[:, "year"], format="decimalyear")
@@ -333,12 +285,15 @@ class SIDCLoader(DataLoader):
 
         Downloads the series first if the cache is stale. Adds a ``cycle``
         column holding the number of the solar cycle, from
-        :class:`SSNExtrema`, that contains each time.
+        :class:`SSNExtrema`, that contains each time. The table is kept, and
+        :meth:`SIDC.set_extrema` reads it, so the labels and
+        :attr:`SIDC.extrema` come from one table.
         """
         super().load_data()
 
         extrema = SSNExtrema()
-        # Calculate Cycle to which each mesurement belongs
+        self._extrema = extrema
+        # The cycle to which each measurement belongs.
         data = self.data
         cut = pd.cut(data.index, pd.IntervalIndex(extrema.cycle_intervals.Cycle.values))
         cut = pd.Series(cut, index=data.index, name="cycle")
@@ -375,8 +330,8 @@ class SIDC(ActivityIndicator):
         self._loader = loader
 
     def set_extrema(self):
-        r"""Set :attr:`extrema` to the tabulated :class:`SSNExtrema`."""
-        self._extrema = SSNExtrema()
+        r"""Set :attr:`extrema` to the :class:`SSNExtrema` the loader labelled the cycles with."""
+        self._extrema = self.loader._extrema
 
     def interpolate_data(self, target_index, key="ssn"):
         r"""Interpolate one column onto ``target_index``.
@@ -397,6 +352,19 @@ class SIDC(ActivityIndicator):
             self.data.loc[:, key].dropna(how="any", axis=0), target_index
         )
 
+    def _cycles(self):
+        r"""Yield ``(k, ssn, before_max, after_max)`` for each cycle ``k`` in :attr:`data`.
+
+        ``ssn`` holds the cycle's sunspot numbers; ``before_max`` and
+        ``after_max`` are boolean masks over them, split at the cycle's
+        maximum in :attr:`extrema`.
+        """
+        extrema = self.extrema.data
+        for k, g in self.data.loc[:, ["cycle", "ssn"]].groupby("cycle"):
+            ssn = g.loc[:, "ssn"]
+            max_date = extrema.loc[k, "Max"]
+            yield k, ssn, ssn.index <= max_date, ssn.index > max_date
+
     def calculate_extrema_kind(self):
         r"""Determine whether an SSN observation belongs to a cycle Minimum or Maximum.
 
@@ -407,14 +375,9 @@ class SIDC(ActivityIndicator):
         belongs to. These can be easily stripped with string manipulations, but are
         difficult to calculate after the fact.
         """
-        extrema = self.extrema.data
         kind = pd.Series(np.nan, index=self.data.index, dtype=str)
-        for k, g in self.data.loc[:, ["cycle", "ssn"]].groupby("cycle"):
-            g = g.loc[:, "ssn"]
+        for k, g, before_max, after_max in self._cycles():
             mid = 0.5 * g.max()
-            max_date = extrema.loc[k, "Max"]
-            before_max = g.index <= max_date
-            after_max = g.index > max_date
 
             case = pd.Series(index=g.index, dtype=str)
             case.loc[g >= mid] = f"{k}-Max"
@@ -427,15 +390,8 @@ class SIDC(ActivityIndicator):
 
     def calculate_edge(self):
         r"""Determine whether an SSN observation belongs to a rising or falling edge."""
-        extrema = self.extrema.data
         kind = pd.Series(np.nan, index=self.data.index, dtype=str)
-
-        for k, g in self.data.loc[:, ["cycle", "ssn"]].groupby("cycle"):
-            g = g.loc[:, "ssn"]
-            max_date = extrema.loc[k, "Max"]
-            before_max = g.index <= max_date
-            after_max = g.index > max_date
-
+        for k, g, before_max, after_max in self._cycles():
             case = pd.Series(index=g.index, dtype=str)
             case.loc[before_max] = "Rise"
             case.loc[after_max] = "Fall"
