@@ -6,9 +6,8 @@ by z when z varies, with a colorbar labelled ``labels.z``. Expectations come
 from the hand-typed ``ROWS`` table; assertions read the real ``PathCollection``
 (offsets, colour array, sizes), ``Axes`` and ``Colorbar`` on the Agg backend.
 
-Clipping both tails (``clip=True``) is tested in
-``tests/test_source_plotting_defects.py``, beside the defect it fixed; the
-one-tailed ``"l"`` and ``"u"`` are tested here.
+Clipping both tails (``clip=True``) and the one-tailed ``"l"`` and ``"u"``
+are tested here.
 """
 
 import io
@@ -383,6 +382,55 @@ def test_one_tailed_clip_clips_only_that_tail(ax, clip):
         assert expected[0] == -1e6
     np.testing.assert_array_equal(
         np.asarray(ax.collections[0].get_offsets()), np.c_[expected, expected]
+    )
+
+
+# ``clip=True`` clips each column to its 0.05th and 99.95th percentiles
+# (``Base.clip_data`` docstring); both quantiles are recomputed here with numpy.
+Q_LOWER, Q_UPPER = 5e-4, 1 - 5e-4
+
+
+def test_scatter_with_clip_data_plots_points_clipped_to_percentiles(ax):
+    """``Scatter(..., clip=True).make_plot`` draws the clipped points.
+
+    Before the fix, ``make_plot`` raised ``AttributeError: 'Scatter' object has
+    no attribute 'clip_data'`` because only ``AggPlot`` defined ``clip_data``.
+    The input is 0..10000 with one far outlier on each end, so clipping moves
+    exactly those two points, onto numpy's 0.05th and 99.95th percentiles.
+
+    ON FAILURE: the code is wrong.
+    """
+    raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
+    x = pd.Series(raw)
+    y = pd.Series(2.0 * raw)
+
+    ax, _, _, guides = Scatter(x, y, clip=True).make_plot(ax=ax)
+
+    offsets = ax.collections[0].get_offsets()
+    expected_x = np.clip(raw, np.quantile(raw, Q_LOWER), np.quantile(raw, Q_UPPER))
+    expected_y = np.clip(
+        2.0 * raw, np.quantile(2.0 * raw, Q_LOWER), np.quantile(2.0 * raw, Q_UPPER)
+    )
+    # Clipping only replaces values; float64 in, float64 out, so exact.
+    np.testing.assert_array_equal(np.asarray(offsets[:, 0]), expected_x)
+    np.testing.assert_array_equal(np.asarray(offsets[:, 1]), expected_y)
+    assert np.asarray(offsets[:, 0]).min() > -1e6
+    assert np.asarray(offsets[:, 0]).max() < 1e6
+
+
+def test_scatter_without_clip_data_plots_raw_points(ax):
+    """With ``clip=False`` the outliers are drawn unchanged.
+
+    This separates the clipped test above from a scatter that never clips.
+
+    ON FAILURE: the fixture no longer separates clipped from unclipped data; fix the fixture.
+    """
+    raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
+    ax, _, _, guides = Scatter(pd.Series(raw), pd.Series(raw), clip=False).make_plot(
+        ax=ax
+    )
+    np.testing.assert_array_equal(
+        np.asarray(ax.collections[0].get_offsets()[:, 0]), raw
     )
 
 

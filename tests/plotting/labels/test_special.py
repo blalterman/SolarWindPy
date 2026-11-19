@@ -1104,3 +1104,23 @@ def test_description_keyword_is_removed(label):
     """
     with pytest.raises(TypeError):
         _all_label_factories()[label](description="Protons")
+
+
+@pytest.mark.parametrize(
+    "label_cls", [labels_special.Probability, labels_special.CountOther]
+)
+@pytest.mark.parametrize("tex_op, ascii_op", [(r"\lt", "<"), (r"\gt", ">")])
+def test_comparison_path_names_tex_and_ascii_operator_alike(
+    label_cls, tex_op, ascii_op
+):
+    r"""A TeX comparison operator names the same save path as its ASCII form.
+
+    Before the fix, ``_build_path`` mapped ``\lt`` to ``GT``, so "less than 5"
+    saved over "greater than 5".
+
+    ON FAILURE: the code is wrong.
+    """
+    other = labels_base.TeXlabel(("n", "", "p1"))
+    tex_form = label_cls(other, comparison=f"{tex_op} 5")
+    ascii_form = label_cls(other, comparison=f"{ascii_op} 5")
+    assert tex_form.path == ascii_form.path

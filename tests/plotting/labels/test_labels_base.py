@@ -1,3 +1,4 @@
+import operator
 from pathlib import Path
 import pytest
 import logging
@@ -746,3 +747,36 @@ def test_plots_and_labels_share_one_axnorm_check(labels_base):
         Hist1D(pd.Series([1.0, 2.0, 3.0], name="x"), axnorm="c")
     with pytest.raises(ValueError, match="expected one of: c, r, t, d"):
         labels_base.validate_axnorm("q")
+
+
+def test_label_less_equal_agrees_with_string_order():
+    """``a <= b`` on labels agrees with ``str(a) <= str(b)``, including ``a <= a``.
+
+    Labels compare by their string (``Base.__gt__`` and ``__eq__`` do). Before
+    the fix, ``__le__`` returned ``str(self) < str(other)``, so ``a <= a`` was False.
+
+    ON FAILURE: the code is wrong.
+    """
+    a = base.TeXlabel(("n", "", "a"))
+    b = base.TeXlabel(("v", "x", "p1"))
+    assert a <= a
+    assert (a <= b) == (str(a) <= str(b))
+    assert (b <= a) == (str(b) <= str(a))
+
+
+@pytest.mark.parametrize(
+    "op", [operator.lt, operator.le, operator.gt, operator.ge], ids=lambda f: f.__name__
+)
+def test_label_ordering_agrees_with_string_order(op):
+    """Every rich comparison on labels agrees with comparing their strings.
+
+    ``Base`` defines ``__gt__`` and ``__le__``; ``<`` and ``>=`` reach them by
+    Python's reflection. The expected value is the same operator applied to
+    ``str`` of each label (identity), over a pair and a label with itself.
+
+    ON FAILURE: the code is wrong.
+    """
+    a = base.TeXlabel(("n", "", "a"))
+    b = base.TeXlabel(("v", "x", "p1"))
+    for left, right in [(a, b), (b, a), (a, a)]:
+        assert op(left, right) == op(str(left), str(right))  # identity

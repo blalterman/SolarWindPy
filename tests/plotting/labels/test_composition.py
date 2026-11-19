@@ -346,3 +346,17 @@ class TestCompositionIntegration:
 
         paths = [str(cs1.path), str(cs2.path), str(cs3.path)]
         assert len(paths) == len(set(paths))  # All unique
+
+
+def test_ion_path_is_the_same_for_int_and_str_charge():
+    """``Ion("O", 6)`` and ``Ion("O", "6")`` name the same save path.
+
+    ``Ion`` documents ``charge : int or str``. Before the fix, ``path`` called
+    ``charge.replace`` and raised ``AttributeError`` for an int charge.
+
+    ON FAILURE: the code is wrong.
+    """
+    assert composition.Ion("O", 6).path == composition.Ion("O", "6").path
+    ratio_int = composition.ChargeStateRatio(("O", 7), ("O", 6))
+    ratio_str = composition.ChargeStateRatio(("O", "7"), ("O", "6"))
+    assert ratio_int.path == ratio_str.path
