@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `solarwindpy.instabilities.beta_ani` is renamed `solarwindpy.instabilities.plots`,
+  with no alias. Import `BetaRPlot` from `solarwindpy.instabilities.plots`.
+- **Breaking:** `solarwindpy.plotting.labels.datetime` is renamed
+  `solarwindpy.plotting.labels.epochs`, with no alias, so it no longer shares the standard
+  library's `datetime` name. `Timedelta`, `DateTime`, `Epoch`, `Frequency` and `January1st`
+  import from `solarwindpy.plotting.labels.epochs`.
+
 ## [0.6.0] - 2026-11-17
 
 ### Added
