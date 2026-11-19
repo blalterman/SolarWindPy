@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pytest
 
+from tests._tracked import tracked_files
+
 PLOTTING = Path(__file__).resolve().parent
 THIS_FILE = Path(__file__).resolve()
 
@@ -111,8 +113,8 @@ def data_file_uses(text):
 
 
 def plotting_test_files():
-    """Return every ``.py`` file under ``tests/plotting`` except this one."""
-    return [p for p in sorted(PLOTTING.rglob("*.py")) if p.resolve() != THIS_FILE]
+    """Return every tracked ``.py`` file under ``tests/plotting`` except this one."""
+    return [p for p in tracked_files("tests/plotting/*.py") if p != THIS_FILE]
 
 
 def test_scan_covers_plotting_subfolders():

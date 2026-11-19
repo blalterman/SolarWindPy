@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from tests._tracked import tracked_files
+
 SRC = Path(__file__).resolve().parents[1] / "src" / "solarwindpy"
 
 _ROLE = re.compile(r":math:`([^`]*)`")
@@ -137,7 +139,7 @@ def test_docstring_math_has_no_tex_mathjax_rejects():
     ``a_{b_c}`` or ``{a_b}_c``.
     """
     bad = []
-    for path in sorted(SRC.rglob("*.py")):
+    for path in tracked_files("src/solarwindpy/*.py"):
         for name, doc in _docstrings(path):
             for tex in _math(doc):
                 for p in problems(tex):

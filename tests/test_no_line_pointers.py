@@ -8,8 +8,9 @@ stale the moment the file above that line changes. Point at code as
 """
 
 import re
-import subprocess
 from pathlib import Path
+
+from tests._tracked import tracked_files
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCANNED_PATHS = ["src/solarwindpy", "tests", "docs/source", "README.rst", "CLAUDE.md"]
@@ -18,22 +19,10 @@ SCANNED_PATHS = ["src/solarwindpy", "tests", "docs/source", "README.rst", "CLAUD
 LINE_POINTER = re.compile(r"[A-Za-z_/]+\.py" + r":[0-9]+")
 
 
-def _tracked_files():
-    out = subprocess.run(
-        ["git", "ls-files", "-z", "--", *SCANNED_PATHS],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        check=True,
-    ).stdout
-    return [REPO_ROOT / p.decode() for p in out.split(b"\0") if p]
-
-
 def find_line_pointers():
     """Return ``path:line: match`` for every pointer in a tracked live file."""
     hits = []
-    for path in _tracked_files():
-        if not path.is_file():
-            continue
+    for path in tracked_files(*SCANNED_PATHS):
         raw = path.read_bytes()
         if b"\0" in raw:
             continue

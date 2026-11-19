@@ -7,28 +7,7 @@ modules installed with the package. The scan reads tracked files only
 (``git ls-files``), so untracked work in the tree cannot change the verdict.
 """
 
-import subprocess
-from pathlib import Path
-
-import pytest
-
-REPO = Path(__file__).resolve().parents[1]
-
-
-def _tracked_package_modules():
-    """Every tracked ``*.py`` file under ``src/solarwindpy/``."""
-    try:
-        out = subprocess.run(
-            ["git", "ls-files", "src/solarwindpy/*.py"],
-            cwd=REPO,
-            capture_output=True,
-            text=True,
-            check=True,
-            encoding="utf-8",
-        ).stdout
-    except (OSError, subprocess.CalledProcessError):
-        pytest.skip("not a git checkout")
-    return [REPO / line for line in out.splitlines()]
+from tests._tracked import REPO, tracked_files
 
 
 def test_no_shipped_module_opens_with_a_purge_header():
@@ -36,7 +15,7 @@ def test_no_shipped_module_opens_with_a_purge_header():
 
     ON FAILURE: the code is wrong; remove the header from the listed modules.
     """
-    modules = _tracked_package_modules()
+    modules = tracked_files("src/solarwindpy/*.py")
     assert modules, "git ls-files found no package module"
     flagged = []
     for path in modules:

@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from tests._tracked import tracked_files
 from tests.tolerances import (
     assert_within_error_bars,
     exact,
@@ -51,7 +52,7 @@ def test_no_test_file_writes_a_tolerance_keyword():
     """
     found = [
         f"{path.relative_to(TESTS.parent)}:{n}: {line}"
-        for path in sorted(TESTS.rglob("*.py"))
+        for path in tracked_files("tests/*.py")
         if path != HELPER
         for n, line in tolerance_keywords(path.read_text(encoding="utf-8"))
     ]
@@ -107,7 +108,7 @@ def test_no_test_file_calls_approx_without_a_tolerance():
     """
     found = [
         f"{path.relative_to(TESTS.parent)}:{n}: {line}"
-        for path in sorted(TESTS.rglob("*.py"))
+        for path in tracked_files("tests/*.py")
         if path != HELPER
         for n, line in bare_approx_calls(path.read_text(encoding="utf-8"))
     ]

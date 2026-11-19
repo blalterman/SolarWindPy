@@ -23,6 +23,7 @@ matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
 
 from solarwindpy.solar_activity import cache  # noqa: E402
+from tests._tracked import tracked_files  # noqa: E402
 
 DOCS = Path(__file__).resolve().parents[1] / "docs" / "source"
 
@@ -60,11 +61,14 @@ def _plot_blocks(path):
         yield i + 1, match.group(2).strip(), code + "\n" if code else ""
 
 
-def _found(root):
-    """``(where, argument, code)`` of every ``.. plot::`` block under ``root``."""
+def _found(root, paths):
+    """``(where, argument, code)`` of every ``.. plot::`` block in ``paths``.
+
+    ``where`` names the page relative to ``root``.
+    """
     return [
         (f"{path.relative_to(root)}:{line}", argument, code)
-        for path in sorted(root.rglob("*.rst"))
+        for path in paths
         for line, argument, code in _plot_blocks(path)
     ]
 
@@ -79,7 +83,7 @@ def _empty(found):
     return [where for where, argument, code in found if not argument and not code]
 
 
-FOUND = _found(DOCS)
+FOUND = _found(DOCS, tracked_files("docs/source/*.rst"))
 BLOCKS = [pytest.param(code, id=where) for where, _, code in FOUND]
 
 
@@ -126,7 +130,7 @@ def test_the_guards_catch_an_empty_and_a_named_block(tmp_path):
         "   plt.plot([0, 1])\n",
         encoding="utf-8",
     )
-    found = _found(tmp_path)
+    found = _found(tmp_path, [tmp_path / "page.rst"])
     assert len(found) == 3
     assert _empty(found) == ["page.rst:4"]
     assert _named(found) == ["page.rst:9: plot:: figure.py"]

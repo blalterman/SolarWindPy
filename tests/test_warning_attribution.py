@@ -37,6 +37,7 @@ from solarwindpy.fitfunctions.lines import Line
 from solarwindpy.solar_activity import cache
 from solarwindpy.solar_activity.base import DataLoader
 from solarwindpy.solar_activity.icme import icmecat
+from tests._tracked import REPO, tracked_files
 
 PACKAGE_DIR = Path(solarwindpy.__file__).resolve().parent
 # The helper's module and name; only the call inside its body may be direct.
@@ -291,12 +292,14 @@ def test_every_package_warning_goes_through_the_shared_helper():
     ON FAILURE: the code is wrong; issue the warning with
     ``solarwindpy.tools._warn``.
     """
+    helper = HELPER[0].relative_to(PACKAGE_DIR)
     bypasses = []
-    for path in sorted(PACKAGE_DIR.rglob("*.py")):
+    for path in tracked_files("src/solarwindpy/*.py"):
+        module = path.relative_to(REPO / "src" / "solarwindpy")
         tree = ast.parse(path.read_text(encoding="utf-8"))
-        allowed = _helper_lines(tree) if path == HELPER[0] else range(0)
+        allowed = _helper_lines(tree) if module == helper else range(0)
         bypasses += [
-            f"{path.relative_to(PACKAGE_DIR)}, line {line}"
+            f"{module}, line {line}"
             for line in _calls_to_warnings_warn(tree)
             if line not in allowed
         ]
