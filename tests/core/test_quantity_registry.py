@@ -399,9 +399,8 @@ def test_position_is_pos_with_the_symbol_r(plasma):
 
 # --- frame radii (o28) --------------------------------------------------------
 
-# IAU 2015 Resolution B3 nominal values, kept in one place beside the other
-# constant oracles.
-from tests.core.test_units_constants import (  # noqa: E402
+# IAU 2015 Resolution B3 nominal values, kept in one place for every core test.
+from tests.core._fixtures import (  # noqa: E402
     IAU_2015_EARTH_EQUATORIAL_RADIUS,
     IAU_2015_SOLAR_RADIUS,
 )

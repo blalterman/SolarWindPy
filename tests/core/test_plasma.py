@@ -14,7 +14,7 @@ from scipy import constants
 from scipy.constants import physical_constants
 from scipy.special import erf
 
-from . import test_base as base
+from . import _fixtures as fixtures
 
 import solarwindpy as swp
 from solarwindpy.core import vector
@@ -1100,7 +1100,7 @@ class PlasmaTestBase(ABC):
 
         ON FAILURE: the code is wrong.
         """
-        sc_data = base.SyntheticData().spacecraft_data
+        sc_data = fixtures.SyntheticData().spacecraft_data
 
         Wind = pd.concat(
             {"pos": sc_data.xs("gse", axis=1, level="M")},
@@ -1189,7 +1189,7 @@ class PlasmaTestBase(ABC):
         )
         vsw = vcom.pow(2.0).sum(axis=1).pipe(np.sqrt) * 1e3
 
-        sc_data = base.SyntheticData().spacecraft_data
+        sc_data = fixtures.SyntheticData().spacecraft_data
 
         Wind = pd.concat(
             {"pos": sc_data.xs("gse", axis=1, level="M")},
@@ -1619,7 +1619,7 @@ class PlasmaTestBase(ABC):
         ON FAILURE: the code is wrong.
         """
         ot = self.object_testing
-        data = base.SyntheticData().combined_data
+        data = fixtures.SyntheticData().combined_data
         drop = data.columns.isin(ot.data.columns)
         aux = data.loc[:, ~drop]
         ot.set_aux(aux)
@@ -1972,7 +1972,7 @@ class PlasmaTestBase(ABC):
 #####
 # Tests
 #####
-class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
+class TestPlasmaAlpha(fixtures.AlphaTest, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -1996,7 +1996,7 @@ class TestPlasmaAlpha(base.AlphaTest, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaP1(fixtures.P1Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -2020,7 +2020,7 @@ class TestPlasmaP1(base.P1Test, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaP2(fixtures.P2Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -2044,7 +2044,7 @@ class TestPlasmaP2(base.P2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaAlphaP1(fixtures.AlphaP1Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -2069,7 +2069,7 @@ class TestPlasmaAlphaP1(base.AlphaP1Test, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaAlphaP2(fixtures.AlphaP2Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -2094,7 +2094,7 @@ class TestPlasmaAlphaP2(base.AlphaP2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaP1P2(fixtures.P1P2Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 
@@ -2118,7 +2118,7 @@ class TestPlasmaP1P2(base.P1P2Test, PlasmaTestBase, base.SWEData):
                 self.object_testing.n(*s)
 
 
-class TestPlasmaAlphaP1P2(base.AlphaP1P2Test, PlasmaTestBase, base.SWEData):
+class TestPlasmaAlphaP1P2(fixtures.AlphaP1P2Test, PlasmaTestBase, fixtures.SWEData):
     def test_unheld_species_are_unavailable(self):
         r"""Species this plasma does not hold raise "Requested species unavailable".
 

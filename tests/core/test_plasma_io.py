@@ -10,7 +10,7 @@ import pytest
 import solarwindpy as swp
 from solarwindpy.core import plasma
 from tests.tolerances import exact
-from . import test_base
+from . import _fixtures as fixtures
 
 # The example plasma's spacecraft is Parker Solar Probe in the HCI frame.
 SC_NAME = "PSP"
@@ -53,7 +53,7 @@ def test_save_and_load(tmp_path):
 
     ON FAILURE: the code is wrong.
     """
-    data = test_base.SyntheticData().plasma_data
+    data = fixtures.SyntheticData().plasma_data
     plas = plasma.Plasma(data, "a", "p1")
     fname = tmp_path / "plasma.h5"
     plas.save(fname)

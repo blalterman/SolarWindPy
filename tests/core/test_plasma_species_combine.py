@@ -24,7 +24,7 @@ import pandas.testing as pdt
 import pytest
 
 from solarwindpy.core.plasma import Plasma
-from tests.core.test_missing_data import _species_masked_plasma
+from tests.core._fixtures import _species_masked_plasma
 
 # The author's ruling, 2026-11-10, with Wk added by S15. "strict_sum": a sum
 # over the species present that the caller can make strict with skipna=False.

@@ -10,7 +10,7 @@ from unittest import TestCase
 from abc import ABC, abstractproperty
 from scipy import constants
 
-from . import test_base as base
+from . import _fixtures as fixtures
 
 from solarwindpy.core import vector
 from solarwindpy.core import tensor
@@ -194,7 +194,7 @@ class VectorTestBase(QuantityTestBase):
         ON FAILURE: the code is wrong.
         """
         b = (
-            base.SyntheticData()
+            fixtures.SyntheticData()
             .plasma_data.xs("b", axis=1, level="M")
             .xs("", axis=1, level="S")
             .loc[:, ["x", "y", "z"]]
@@ -235,7 +235,7 @@ class VectorTestBase(QuantityTestBase):
         ON FAILURE: the code is wrong.
         """
         b = (
-            base.SyntheticData()
+            fixtures.SyntheticData()
             .plasma_data.xs("b", axis=1, level="M")
             .xs("", axis=1, level="S")
             .loc[:, ["x", "y", "z"]]
@@ -264,7 +264,7 @@ class VectorTestBase(QuantityTestBase):
             self.object_testing.cos_theta(b.data)
 
 
-class TestBField(VectorTestBase, base.SWEData):
+class TestBField(VectorTestBase, fixtures.SWEData):
     @classmethod
     def set_object_testing(cls):
         data = cls.data.b.xs("", axis=1, level="S")
@@ -297,15 +297,15 @@ class VelocityTestBase(VectorTestBase):
         pass
 
 
-class TestVelocityAlpha(base.AlphaTest, VelocityTestBase, base.SWEData):
+class TestVelocityAlpha(fixtures.AlphaTest, VelocityTestBase, fixtures.SWEData):
     pass
 
 
-class TestVelocityP1(base.P1Test, VelocityTestBase, base.SWEData):
+class TestVelocityP1(fixtures.P1Test, VelocityTestBase, fixtures.SWEData):
     pass
 
 
-class TestVelocityP2(base.P2Test, VelocityTestBase, base.SWEData):
+class TestVelocityP2(fixtures.P2Test, VelocityTestBase, fixtures.SWEData):
     pass
 
 
@@ -471,15 +471,15 @@ class ThermalSpeedTestBase(TensorTestBase):
         pass
 
 
-class TestThermalSpeedAlpha(base.AlphaTest, ThermalSpeedTestBase, base.SWEData):
+class TestThermalSpeedAlpha(fixtures.AlphaTest, ThermalSpeedTestBase, fixtures.SWEData):
     pass
 
 
-class TestThermalSpeedP1(base.P1Test, ThermalSpeedTestBase, base.SWEData):
+class TestThermalSpeedP1(fixtures.P1Test, ThermalSpeedTestBase, fixtures.SWEData):
     pass
 
 
-class TestThermalSpeedP2(base.P2Test, ThermalSpeedTestBase, base.SWEData):
+class TestThermalSpeedP2(fixtures.P2Test, ThermalSpeedTestBase, fixtures.SWEData):
     pass
 
 
@@ -515,7 +515,7 @@ class TestTensorMagnitude:
 
         ON FAILURE: the code is wrong.
         """
-        p = plasma.Plasma(base.SyntheticData().plasma_data, "p1", "a")
+        p = plasma.Plasma(fixtures.SyntheticData().plasma_data, "p1", "a")
         w = p.p1.w
         assert w.mag.to_numpy() == exact(w.data.loc[:, "scalar"].to_numpy())
         pdt.assert_index_equal(w.mag.index, w.data.index)
@@ -557,7 +557,7 @@ class TestQuantitySubclassEquality(TestCase):
     @classmethod
     def setUpClass(cls):
         r"""Override `setUpClass` so that it doesn't call `set_object_testing`."""
-        fixture = base.SyntheticData()
+        fixture = fixtures.SyntheticData()
         data = fixture.plasma_data
         cls.gse = fixture.spacecraft_data.gse
         coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0

@@ -15,7 +15,7 @@ from abc import ABC, abstractproperty
 from scipy import constants
 from scipy.constants import physical_constants
 
-from . import test_base as base
+from . import _fixtures as fixtures
 
 from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core.spacecraft import Spacecraft
@@ -333,38 +333,42 @@ class AlfvenicTrubulenceTestBase(ABC):
 #####
 # Tests
 #####
-class TestPlasmaAlpha(base.AlphaTest, AlfvenicTrubulenceTestBase, base.SWEData):
+class TestPlasmaAlpha(fixtures.AlphaTest, AlfvenicTrubulenceTestBase, fixtures.SWEData):
     pass
 
 
-class TestAlfvenicTrubulenceP1(base.P1Test, AlfvenicTrubulenceTestBase, base.SWEData):
+class TestAlfvenicTrubulenceP1(
+    fixtures.P1Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
+):
     pass
 
 
-class TestAlfvenicTrubulenceP2(base.P2Test, AlfvenicTrubulenceTestBase, base.SWEData):
+class TestAlfvenicTrubulenceP2(
+    fixtures.P2Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
+):
     pass
 
 
 class TestAlfvenicTrubulenceAlphaP1(
-    base.AlphaP1Test, AlfvenicTrubulenceTestBase, base.SWEData
+    fixtures.AlphaP1Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
 ):
     pass
 
 
 class TestAlfvenicTrubulenceAlphaP2(
-    base.AlphaP2Test, AlfvenicTrubulenceTestBase, base.SWEData
+    fixtures.AlphaP2Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
 ):
     pass
 
 
 class TestAlfvenicTrubulenceP1P2(
-    base.P1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
+    fixtures.P1P2Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
 ):
     pass
 
 
 class TestAlfvenicTrubulenceAlphaP1P2(
-    base.AlphaP1P2Test, AlfvenicTrubulenceTestBase, base.SWEData
+    fixtures.AlphaP1P2Test, AlfvenicTrubulenceTestBase, fixtures.SWEData
 ):
     pass
 

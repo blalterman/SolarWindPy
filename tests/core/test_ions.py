@@ -12,7 +12,7 @@ from unittest import TestCase
 from scipy import constants
 from scipy.constants import physical_constants
 
-from . import test_base as base
+from . import _fixtures as fixtures
 
 import solarwindpy as swp
 
@@ -171,15 +171,15 @@ class IonTestBase(ABC):
         pdt.assert_series_equal(wk, self.object_testing.Wk)
 
 
-class TestIonA(base.AlphaTest, IonTestBase, base.SWEData):
+class TestIonA(fixtures.AlphaTest, IonTestBase, fixtures.SWEData):
     pass
 
 
-class TestIonP1(base.P1Test, IonTestBase, base.SWEData):
+class TestIonP1(fixtures.P1Test, IonTestBase, fixtures.SWEData):
     pass
 
 
-class TestIonP2(base.P2Test, IonTestBase, base.SWEData):
+class TestIonP2(fixtures.P2Test, IonTestBase, fixtures.SWEData):
     pass
 
 
@@ -191,7 +191,7 @@ class TestIonSpecificsOptions(TestCase):
     @classmethod
     def setUpClass(cls):
         """Load the (M, C, S) plasma fixture; these tests build their own Ions."""
-        cls.data = base.SyntheticData().plasma_data
+        cls.data = fixtures.SyntheticData().plasma_data
 
     def test_init_with_species(self):
         """An Ion built from one species' (M, C) slice keeps that slice and name.

@@ -9,7 +9,7 @@ from scipy import constants
 from unittest import TestCase
 from abc import ABC, abstractclassmethod, abstractproperty
 
-from . import test_base as base
+from . import _fixtures as fixtures
 
 import solarwindpy as swp
 from solarwindpy.core import vector
@@ -20,7 +20,7 @@ from tests.tolerances import exact
 class SpacecraftTestBase(ABC):
     @classmethod
     def setUpClass(cls):
-        data = base.SyntheticData()
+        data = fixtures.SyntheticData()
         cls.data = data.spacecraft_data
         cls.set_object_testing()
 

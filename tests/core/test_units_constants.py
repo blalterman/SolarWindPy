@@ -23,6 +23,10 @@ from scipy import constants
 from scipy.constants import physical_constants
 
 from solarwindpy.core import units_constants as uc
+from tests.core._fixtures import (
+    IAU_2015_EARTH_EQUATORIAL_RADIUS,
+    IAU_2015_SOLAR_RADIUS,
+)
 from tests.tolerances import CODATA_JOINT_DECIMALS, exact, printed
 
 # Defining constants of the 2019 SI, exact by definition (BIPM SI Brochure, 9th
@@ -35,11 +39,6 @@ SI_NA = 6.02214076e23  # [mol^-1]
 
 # IAU 2012 Resolution B2: the astronomical unit is exactly 149 597 870 700 m.
 IAU_2012_AU = 149_597_870_700.0  # [m]
-
-# IAU 2015 Resolution B3 nominal values, Prsa et al. (2016), AJ 152, 41,
-# doi:10.3847/0004-6256/152/2/41.
-IAU_2015_SOLAR_RADIUS = 695.7e6  # [m]
-IAU_2015_EARTH_EQUATORIAL_RADIUS = 6.3781e6  # [m]
 
 
 # Species label -> CODATA particle name. The label's first letter names the particle

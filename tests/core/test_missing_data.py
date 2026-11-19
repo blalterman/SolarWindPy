@@ -21,19 +21,8 @@ from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core import quantities
 from solarwindpy.core.plasma import Plasma
 from solarwindpy.core.spacecraft import Spacecraft
+from tests.core._fixtures import _species_masked_plasma
 from tests.tolerances import exact
-
-
-def _species_masked_plasma():
-    r"""Example plasma with p1 missing at row 0, a at row 1, and both at row 2."""
-    base = swp.examples.load_plasma()
-    data = base.data.copy()
-    t = data.index
-    data.loc[t[0], ("w", "par", "p1")] = np.nan
-    data.loc[t[1], ("w", "per", "a")] = np.nan
-    data.loc[t[2], ("w", "par", "p1")] = np.nan
-    data.loc[t[2], ("w", "per", "a")] = np.nan
-    return Plasma(data, *base.species, sc=base.sc)
 
 
 def _position_masked_plasma():
