@@ -996,11 +996,12 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
             Normalization of the aggregated values: ``"t"`` divides by the
             largest magnitude, ``"d"`` gives a density over the cells' areas
             and ``"w"`` a weight per cell; see ``Binning.normalize``.
-        clip : bool, str, Mapping or None
-            If True, clip x and y to their 0.01st and 99.99th percentiles
+        clip : bool, str, tuple, Mapping or None
+            If True, clip x and y to their 0.05th and 99.95th percentiles
             (``Base.clip_data``) when placing points in the mesh; the
             initial bin edges are computed from the unclipped data. ``"l"`` or
-            ``"u"`` clips only the lower or upper tail; a mapping such as
+            ``"u"`` clips only the lower or upper tail, and a pair
+            ``(lower, upper)`` sets each tail's cut; a mapping such as
             ``{"y": "u"}`` sets each axis on its own. Clipping limits x and
             y only; z is aggregated unclipped. None means False. Stored as
             ``clip``, a ``ClipAxes``.

@@ -80,10 +80,11 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
             Normalisation applied to the histogram. ``"t"`` divides by the
             largest magnitude (peak equals 1), ``"d"`` yields a density and
             ``"w"`` a weight per bin; see ``FixedGrid.normalize``.
-        clip : bool, str, Mapping or None, optional
-            If True, clip x to its 0.01st and 99.99th percentiles before
-            binning; ``"l"`` or ``"u"`` clips only the lower or upper tail
-            (see ``Base.clip_data``). A mapping may name ``"x"`` only. None
+        clip : bool, str, tuple, Mapping or None, optional
+            If True, clip x to its 0.05th and 99.95th percentiles before
+            binning; ``"l"`` or ``"u"`` clips only the lower or upper tail,
+            and a pair ``(lower, upper)`` sets each tail's cut (see
+            ``Base.clip_data``). A mapping may name ``"x"`` only. None
             means False, or, with a ``BinnedData`` as ``nbins``, its setting
             for ``x``'s column. Stored as ``clip``, a ``ClipAxes``.
         nbins : int or array-like or BinnedData, optional

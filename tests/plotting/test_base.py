@@ -653,14 +653,16 @@ def test_cbar_kwargs_that_are_not_a_mapping_raise_type_error(plot):
 
 SERIES = pd.Series(np.arange(1.0, 11.0))
 FRAME = pd.DataFrame({"a": np.arange(1.0, 6.0), "b": np.arange(10.0, 60.0, 10.0)})
+# The default cuts of clip=True, from the Base.clip_data docstring.
+Q_LOWER, Q_UPPER = 5e-4, 1 - 5e-4
 
 
 class TestClipData:
-    """``clip_data`` clips to the 0.01st and 99.99th percentiles, or one of them.
+    """``clip_data`` clips to the 0.05th and 99.95th percentiles, or one of them.
 
     Thresholds come from numpy.quantile (linear interpolation), applied with
-    numpy.clip; for 1..10 they are 1 + 9 * 1e-4 = 1.0009 and 10 - 9 * 1e-4 =
-    9.9991 by hand.
+    numpy.clip; for 1..10 they are 1 + 9 * 0.0005 = 1.0045 and
+    10 - 9 * 0.0005 = 9.9955 by hand.
     """
 
     def test_series_both_tails_hand_computed(self):
@@ -669,7 +671,7 @@ class TestClipData:
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(SERIES, True)
-        expected = np.r_[1.0009, np.arange(2.0, 10.0), 9.9991]
+        expected = np.r_[1.0045, np.arange(2.0, 10.0), 9.9955]
         assert np.asarray(result) == exact(expected)
         assert isinstance(result, pd.Series)
 
@@ -679,31 +681,31 @@ class TestClipData:
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(FRAME, "both")
-        lo = np.quantile(FRAME, 1e-4, axis=0)
-        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
+        lo = np.quantile(FRAME, Q_LOWER, axis=0)
+        hi = np.quantile(FRAME, Q_UPPER, axis=0)
         assert np.asarray(result) == exact(np.clip(FRAME, lo, hi))
         assert list(result.columns) == ["a", "b"]
 
     def test_series_lower(self):
-        """``"l"`` raises only the low tail: 1 becomes 1.0009, 10 stays 10.
+        """``"l"`` raises only the low tail: 1 becomes 1.0045, 10 stays 10.
 
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(SERIES, "l")
-        expected = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
+        expected = SERIES.clip(lower=np.quantile(SERIES, Q_LOWER))
         assert np.asarray(result) == exact(expected)
-        assert result.iloc[0] == exact(1.0009)
+        assert result.iloc[0] == exact(1.0045)
         assert result.iloc[-1] == 10.0
 
     def test_series_upper(self):
-        """``"u"`` lowers only the high tail: 10 becomes 9.9991, 1 stays 1.
+        """``"u"`` lowers only the high tail: 10 becomes 9.9955, 1 stays 1.
 
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(SERIES, "u")
-        expected = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
+        expected = SERIES.clip(upper=np.quantile(SERIES, Q_UPPER))
         assert np.asarray(result) == exact(expected)
-        assert result.iloc[-1] == exact(9.9991)
+        assert result.iloc[-1] == exact(9.9955)
         assert result.iloc[0] == 1.0
 
     def test_dataframe_lower(self):
@@ -712,7 +714,7 @@ class TestClipData:
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(FRAME, "l")
-        lo = np.quantile(FRAME, 1e-4, axis=0)
+        lo = np.quantile(FRAME, Q_LOWER, axis=0)
         assert np.asarray(result) == exact(np.clip(FRAME, lo, None))
 
     def test_dataframe_upper(self):
@@ -721,7 +723,7 @@ class TestClipData:
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(FRAME, "u")
-        hi = np.quantile(FRAME, 1 - 1e-4, axis=0)
+        hi = np.quantile(FRAME, Q_UPPER, axis=0)
         assert np.asarray(result) == exact(np.clip(FRAME, None, hi))
 
     def test_tail_selector_is_case_insensitive(self):
@@ -729,8 +731,8 @@ class TestClipData:
 
         ON FAILURE: the code is wrong.
         """
-        lower = SERIES.clip(lower=np.quantile(SERIES, 1e-4))
-        upper = SERIES.clip(upper=np.quantile(SERIES, 1 - 1e-4))
+        lower = SERIES.clip(lower=np.quantile(SERIES, Q_LOWER))
+        upper = SERIES.clip(upper=np.quantile(SERIES, Q_UPPER))
         for mode, expected in (
             ("L", lower),
             ("Lower", lower),

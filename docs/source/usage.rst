@@ -675,9 +675,10 @@ or :py:class:`~solarwindpy.plotting.hist2d.Hist2D`:
 - in 2-D, a pair giving each axis its own specification.
 
 ``logx`` and ``logy`` bin :math:`\log_{10}|x|` instead of ``x``, so the bins
-are equal in ratio. ``clip=True`` drops the points outside the 0.01st and
-99.99th percentiles when the points are placed in bins (``"l"`` or ``"u"``
-clips one tail); the bin edges still come from all the data.
+are equal in ratio. ``clip=True`` moves the points beyond the 0.05th and
+99.95th percentiles onto those percentiles when the points are placed in bins
+(``"l"`` or ``"u"`` clips one tail, and a pair such as ``clip=(0.01, True)``
+sets each tail's cut); the bin edges still come from all the data.
 :py:class:`~solarwindpy.plotting.spiral.SpiralPlot2D` instead takes
 ``initial_bins`` and ``min_per_bin``.
 

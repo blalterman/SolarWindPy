@@ -112,10 +112,11 @@ class Scatter(base.ColorPlot):
             If True, draw that axis on a log scale. The data stay linear:
             ``clip`` and ``alim`` read the values as given. None means False;
             ``set_log`` can change them later.
-        clip: bool, str, Mapping or None
-            If True, ``make_plot`` clips x, y and z to their 0.01st and 99.99th
+        clip: bool, str, tuple, Mapping or None
+            If True, ``make_plot`` clips x, y and z to their 0.05th and 99.95th
             percentiles with ``Base.clip_data``; ``"l"`` or ``"u"`` clips only
-            the lower or upper tail. A mapping such as ``{"z": "u"}`` sets
+            the lower or upper tail, and a pair ``(lower, upper)`` sets each
+            tail's cut. A mapping such as ``{"z": "u"}`` sets
             each column on its own. None means False. Stored as ``clip``, a
             ``ClipAxes``.
         mask: pd.Series of bool, optional

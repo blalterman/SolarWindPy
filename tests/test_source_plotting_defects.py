@@ -21,9 +21,9 @@ from solarwindpy.plotting.labels.composition import ChargeStateRatio, Ion  # noq
 from solarwindpy.plotting.labels.special import CountOther, Probability  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 
-# ``clip=True`` clips each column to its 0.01st and 99.99th percentiles
+# ``clip=True`` clips each column to its 0.05th and 99.95th percentiles
 # (``Base.clip_data`` docstring); both quantiles are recomputed here with numpy.
-Q_LOWER, Q_UPPER = 1e-4, 1 - 1e-4
+Q_LOWER, Q_UPPER = 5e-4, 1 - 5e-4
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +38,7 @@ def test_scatter_with_clip_data_plots_points_clipped_to_percentiles():
     Before the fix, ``make_plot`` raised ``AttributeError: 'Scatter' object has
     no attribute 'clip_data'`` because only ``AggPlot`` defined ``clip_data``.
     The input is 0..10000 with one far outlier on each end, so clipping moves
-    exactly those two points, onto numpy's 0.01st and 99.99th percentiles.
+    exactly those two points, onto numpy's 0.05th and 99.95th percentiles.
 
     ON FAILURE: the code is wrong.
     """

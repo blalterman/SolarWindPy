@@ -266,10 +266,10 @@ class TestCut:
     def test_clip_data_moves_an_outlier_to_the_bin_of_its_clipped_value(
         self, clip, expected_right
     ):
-        """``clip=True`` bins the outlier at its 99.99th-percentile value.
+        """``clip=True`` bins the outlier at its 99.95th-percentile value.
 
-        x = 0..9 and 1000: numpy's linear quantile at 0.9999 sits at position
-        9.999, so 9 + 0.999 * 991 = 999.009, which is in (5, 999.5]; unclipped,
+        x = 0..9 and 1000: numpy's linear quantile at 0.9995 sits at position
+        9.995, so 9 + 0.995 * 991 = 995.045, which is in (5, 999.5]; unclipped,
         1000 is in (999.5, 1001]. The two parametrizations are the fixture
         check: they differ only in clipping.
         ON FAILURE: the code is wrong.
@@ -277,7 +277,7 @@ class TestCut:
         x = pd.Series(np.r_[np.arange(10.0), 1000.0])
         h = Hist1D(x, clip=clip, nbins=[-1.0, 5.0, 999.5, 1001.0])
         assert h.cut["x"].iloc[-1].right == expected_right
-        assert np.quantile(x, 0.9999) == exact(999.009)
+        assert np.quantile(x, 0.9995) == exact(995.045)
 
 
 # ---------------------------------------------------------------------------
@@ -725,15 +725,16 @@ class TestNbinsAndEdges:
     def test_out_of_memory_count_follows_clip_data(self, caplog):
         """With ``clip="u"`` the outliers clipped onto the top edge are counted.
 
-        The top 20 samples of the bulk are 1.0, so the 99.95th and 99.99th
-        percentiles are both 1.0 (numpy.quantile, asserted): clipping moves
+        The top 20 samples of the bulk are 1.0, so the 99.95th percentile,
+        the cut of both the fallback and ``"u"``, is 1.0 (numpy.quantile,
+        asserted): clipping moves
         the two 1e14 outliers onto the top edge, inside the last bin. The
         warning's count and the counted values add up to every value
         (identity), clipped or not.
         ON FAILURE: the code is wrong.
         """
         x = pd.Series(np.r_[np.arange(19980) * 0.00005, np.ones(20), 1e14, 1e14])
-        assert list(np.quantile(x, [0.9995, 0.9999])) == [1.0, 1.0]
+        assert np.quantile(x, 0.9995) == 1.0
 
         counted = {}
         for clip in (False, "u"):

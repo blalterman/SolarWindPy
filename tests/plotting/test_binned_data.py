@@ -122,10 +122,10 @@ class TestCodes:
         "clip, expected", [(False, 2), (True, 1)], ids=["unclipped", "clipped"]
     )
     def test_clip_bins_an_outlier_at_its_quantile(self, clip, expected):
-        """``clip`` bins 1000 at the 99.99th percentile, 999.009, in (5, 999.5].
+        """``clip`` bins 1000 at the 99.95th percentile, 995.045, in (5, 999.5].
 
-        x = 0..9 and 1000; numpy's linear quantile at 0.9999 is
-        9 + 0.999 * 991. The two parametrizations differ only in clipping.
+        x = 0..9 and 1000; numpy's linear quantile at 0.9995 is
+        9 + 0.995 * 991. The two parametrizations differ only in clipping.
         ON FAILURE: the code is wrong.
         """
         values = np.r_[np.arange(10.0), 1000.0]
@@ -656,8 +656,8 @@ class TestPassthrough:
 class TestClipAxes:
     """``clip`` is set per axis; a record of False fields clips nothing."""
 
-    # One low and one high outlier on each axis. Clipping to the 0.01st and
-    # 99.99th percentiles moves -1000 and 1000 to about -999.1 and 999.1, from
+    # One low and one high outlier on each axis. Clipping to the 0.05th and
+    # 99.95th percentiles moves -1000 and 1000 to about -995.5 and 995.5, from
     # an outer bin into the middle bin (-999.5, 999.5] (as in test_hist1d).
     OUTLIERS = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
     OUTLIER_EDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
@@ -708,7 +708,7 @@ class TestClipAxes:
         """Scatter(clip={"z": True}) clips the colours, not the positions.
 
         0..10000 with one far outlier on each end: z is clipped to numpy's
-        0.01st and 99.99th percentiles; x and y are drawn as given.
+        0.05th and 99.95th percentiles; x and y are drawn as given.
         ON FAILURE: the code is wrong.
         """
         raw = np.concatenate([[-1e6], np.arange(10001.0), [1e6]])
@@ -718,7 +718,7 @@ class TestClipAxes:
         offsets = np.asarray(collection.get_offsets())
         np.testing.assert_array_equal(offsets[:, 0], raw)
         np.testing.assert_array_equal(offsets[:, 1], raw)
-        expected_z = np.clip(raw, np.quantile(raw, 1e-4), np.quantile(raw, 1 - 1e-4))
+        expected_z = np.clip(raw, np.quantile(raw, 5e-4), np.quantile(raw, 1 - 5e-4))
         np.testing.assert_array_equal(np.asarray(collection.get_array()), expected_z)
 
     @pytest.mark.parametrize(
@@ -760,9 +760,9 @@ class TestClipAxes:
             build()
 
 
-# 0..9, 1000 and 5000. Over the first 11 values numpy's linear 99.99th
-# percentile is 9 + 0.999 * (1000 - 9) = 999.009, so 1000 is clipped into
-# (5, 999.5]. Over all 12 it is 1000 + 0.9989 * 4000 = 4995.6, and 1000 stays
+# 0..9, 1000 and 5000. Over the first 11 values numpy's linear 99.95th
+# percentile is 9 + 0.995 * (1000 - 9) = 995.045, so 1000 is clipped into
+# (5, 999.5]. Over all 12 it is 1000 + 0.9945 * 4000 = 4978.0, and 1000 stays
 # in (999.5, 1001].
 CLIPPED = pd.Series(np.r_[np.arange(10.0), 1000.0, 5000.0])
 CLIP_EDGES = np.array([-1.0, 5.0, 999.5, 1001.0])
@@ -773,14 +773,14 @@ class TestClipQuantiles:
     """Clip quantiles are taken over the kept rows, after log."""
 
     def test_binned_data_clips_to_quantiles_of_the_rows_its_mask_keeps(self):
-        """With 5000 masked out, 1000 is clipped to 999.009: code 1, not 2.
+        """With 5000 masked out, 1000 is clipped to 995.045: code 1, not 2.
 
         ON FAILURE: the code is wrong.
         """
         b = BinnedData(
             CLIPPED.to_frame("x"), {"x": CLIP_EDGES}, clip={"x": True}, mask=DROP_5000
         )
-        assert b.codes("x")[10] == 1  # hand: 999.009 in (5, 999.5]
+        assert b.codes("x")[10] == 1  # hand: 995.045 in (5, 999.5]
         assert b.codes("x")[11] == -1  # masked out
 
     @pytest.mark.parametrize(
@@ -802,15 +802,15 @@ class TestClipQuantiles:
         ON FAILURE: the code is wrong.
         """
         h = build()
-        assert h.cut.loc[10, "x"] == pd.Interval(5.0, 999.5)  # hand: 999.009
+        assert h.cut.loc[10, "x"] == pd.Interval(5.0, 999.5)  # hand: 995.045
         assert 11 not in h.cut.index  # the dropped row
 
     def test_clip_quantiles_are_taken_after_log(self):
-        """log10 of 1 .. 1e9 and 1e100 is 0..9 and 100; clipping in log space bins 1e100 at 99.909.
+        """log10 of 1 .. 1e9 and 1e100 is 0..9 and 100; clipping in log space bins 1e100 at 99.545.
 
-        By hand: numpy's linear 99.99th percentile of 0..9, 100 is
-        9 + 0.999 * 91 = 99.909, in (5, 99.95]. Clipping before log would give
-        log10(1e9 + 0.999 * (1e100 - 1e9)) = 99.99957, in (99.95, 101].
+        By hand: numpy's linear 99.95th percentile of 0..9, 100 is
+        9 + 0.995 * 91 = 99.545, in (5, 99.95]. Clipping before log would give
+        log10(1e9 + 0.995 * (1e100 - 1e9)) = 99.99782, in (99.95, 101].
 
         ON FAILURE: the code is wrong.
         """
@@ -821,7 +821,7 @@ class TestClipQuantiles:
             log={"x": True},
             clip={"x": True},
         )
-        assert b.codes("x")[-1] == 1  # hand: 99.909 in (5, 99.95]
+        assert b.codes("x")[-1] == 1  # hand: 99.545 in (5, 99.95]
 
 
 class TestRowsWithASharedBinnedData:

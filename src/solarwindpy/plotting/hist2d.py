@@ -40,11 +40,12 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
     axnorm : str, optional
         Normalization of the aggregated values; see ``FixedGrid.normalize``
         for the keys.
-    clip : bool, str, Mapping or None
-        If True, clip x and y to their 0.01st and 99.99th percentiles
+    clip : bool, str, tuple, Mapping or None
+        If True, clip x and y to their 0.05th and 99.95th percentiles
         (``Base.clip_data``) when assigning points to bins; the bin edges
         are computed from the unclipped data. ``"l"`` or ``"u"`` clips only
-        the lower or upper tail. A mapping such as ``{"y": "u"}`` sets each
+        the lower or upper tail, and a pair ``(lower, upper)`` sets each
+        tail's cut. A mapping such as ``{"y": "u"}`` sets each
         axis on its own. None means False, or, with a ``BinnedData`` as
         ``nbins``, its setting for that axis's column. Stored as ``clip``, a
         ``ClipAxes``.

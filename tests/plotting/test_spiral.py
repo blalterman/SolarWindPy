@@ -1300,10 +1300,10 @@ def test_top_edge_is_the_largest_value_plus_one_percent_of_its_size(values, top)
 # ---------------------------------------------------------------------------
 
 # 101 samples: one just inside [0,2), 99 at 3, one just inside [4,6). With
-# pandas' linear quantiles the 0.01% quantile sits at position
-# q * (n - 1) = 0.0001 * 100 = 0.01, between the two smallest samples:
-# 1.99 + 0.01 * (3 - 1.99) = 2.0001. The 99.99% quantile sits at 99.99:
-# 3 + 0.99 * (4.01 - 3) = 3.9999. Both fall in [2,4), so clipping moves each
+# pandas' linear quantiles the 0.05% quantile sits at position
+# q * (n - 1) = 0.0005 * 100 = 0.05, between the two smallest samples:
+# 1.99 + 0.05 * (3 - 1.99) = 2.0405. The 99.95% quantile sits at 99.95:
+# 3 + 0.95 * (4.01 - 3) = 3.9595. Both fall in [2,4), so clipping moves each
 # tail sample into the middle cell.
 CLIP_X = pd.Series([1.99] + [3.0] * 99 + [4.01])
 CLIP_Y = pd.Series([0.5] * 101)  # constant, so clipping leaves y alone
@@ -1323,7 +1323,7 @@ CLIP_EDGES = (np.array([0.0, 2.0, 4.0, 6.0]), np.array([0.0, 1.0]))
 def test_clip_data_moves_the_clipped_tails_into_the_cells_of_the_quantiles(
     clip, counts
 ):
-    """``clip`` clips x and y to their 0.01%/99.99% quantiles before meshing.
+    """``clip`` clips x and y to their 0.05%/99.95% quantiles before meshing.
 
     True clips both tails, "l" and "u" one each (worked next to ``CLIP_X``).
     ``min_per_bin=101`` keeps the three initial cells unsplit.

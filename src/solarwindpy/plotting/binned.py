@@ -11,56 +11,122 @@ This module imports nothing from :mod:`solarwindpy.plotting`.
 __all__ = ["BinnedData"]
 
 from collections.abc import Mapping
-from numbers import Integral
+from numbers import Integral, Real
 
 import numpy as np
 import pandas as pd
 
-#: The clip strings, in lower case, and the tail each one clips.
-_CLIP_STRINGS = {"l": "l", "lower": "l", "u": "u", "upper": "u", "both": True}
+#: The cuts ``clip=True`` clips at, read as ``quantile`` reads them: the
+#: 0.05th and 99.95th percentiles.
+_CLIP_DEFAULT = (0.0005, 0.9995)
+
+#: The clip strings, in lower case, and the (lower, upper) pair each stands for.
+_CLIP_STRINGS = {
+    "l": (True, False),
+    "lower": (True, False),
+    "u": (False, True),
+    "upper": (False, True),
+    "both": (True, True),
+}
 
 
-def _clip_kind(clip):
-    r"""What a clip setting clips: False, ``"l"``, ``"u"`` or True (both tails).
+def _clip_cuts(clip):
+    r"""The lower and upper quantile a clip setting clips at, None for no clip.
 
-    A string must be ``"l"``, ``"lower"``, ``"u"``, ``"upper"`` or ``"both"``,
-    in any case. Any other value is read by its truth: False (or None) clips
-    nothing, True both tails.
+    A clip setting is one of:
+
+    - True, both tails at the default cuts, the 0.05th and 99.95th percentiles
+      (0.0005 and 0.9995); False or None, neither tail;
+    - a pair ``(lower, upper)``, a tuple or a list, whose cuts are each True
+      (that tail's default cut), False (that tail is not clipped) or a number
+      read as :meth:`pandas.Series.quantile` reads it, with
+      0 <= lower < 0.5 < upper <= 1;
+    - ``"l"`` or ``"u"``, in any case: ``(True, False)`` or ``(False, True)``;
+      ``"lower"``, ``"upper"`` and ``"both"`` are ``"l"``, ``"u"`` and True.
+
+    Any other value is read by its truth.
+
+    Returns
+    -------
+    tuple of (float or None)
+        The lower and upper quantile; None where that tail is not clipped.
 
     Raises
     ------
+    TypeError
+        If a cut of a pair is neither a bool nor a real number.
     ValueError
-        If ``clip`` is any other string, the empty string included.
+        If ``clip`` is any other string, the empty string included, or a pair
+        holds other than two cuts or breaks 0 <= lower < 0.5 < upper <= 1.
     """
     if isinstance(clip, str):
         try:
-            return _CLIP_STRINGS[clip.lower()]
+            clip = _CLIP_STRINGS[clip.lower()]
         except KeyError:
             raise ValueError(
                 f"clip={clip!r} is not a clip setting: a clip string must be "
                 "'l', 'lower', 'u', 'upper' or 'both' (any case)."
             ) from None
-    return bool(clip)
+    elif not isinstance(clip, (tuple, list)):
+        clip = (bool(clip), bool(clip))
+
+    pair = (
+        f"clip={clip!r} is not a clip setting: a (lower, upper) pair holds two "
+        "cuts, each True (the default cut), False (no clip) or a quantile, with "
+        "0 <= lower < 0.5 < upper <= 1."
+    )
+    if len(clip) != 2:
+        raise ValueError(pair)
+    cuts = []
+    for cut, default in zip(clip, _CLIP_DEFAULT):
+        if isinstance(cut, (bool, np.bool_)):
+            cuts.append(default if cut else None)
+        elif isinstance(cut, Real):
+            cuts.append(float(cut))
+        else:
+            raise TypeError(f"{pair} Got a {type(cut).__name__} cut.")
+    lower, upper = cuts
+    if (lower is not None and not 0 <= lower < 0.5) or (
+        upper is not None and not 0.5 < upper <= 1
+    ):
+        raise ValueError(pair)
+    return lower, upper
+
+
+def _clip_setting(clip):
+    r"""A clip setting as a plot stores it: None as False, a list as a tuple.
+
+    Raises
+    ------
+    TypeError, ValueError
+        If ``clip`` is not a clip setting; see ``_clip_cuts``.
+    """
+    _clip_cuts(clip)
+    if clip is None:
+        return False
+    if isinstance(clip, list):
+        return tuple(clip)
+    return clip
 
 
 def _clip_to_quantiles(data, clip):
-    r"""Clip data to its 0.01st and 99.99th percentiles.
+    r"""Clip data to the quantiles its clip setting names.
 
-    The one clipping rule every plot shares; ``Base.clip_data`` delegates here.
-    The percentiles are computed over the finite values only: NaN and +/-inf
-    are left out, so an infinity cannot make a percentile infinite or NaN.
-    The infinities are then clipped like any other value beyond a
-    percentile: +inf to the upper one, -inf to the lower one, when that tail
-    is clipped. NaN stays NaN. A column with no finite value is unchanged.
+    The one clipping rule every plot shares; ``Base.clip_data`` delegates here,
+    and so does the bin rule's fallback when its edges do not fit in memory.
+    True clips at the default cuts, the 0.05th and 99.95th percentiles. The
+    quantiles are computed over the finite values only: NaN and +/-inf are
+    left out, so an infinity cannot make a quantile infinite or NaN. The
+    infinities are then clipped like any other value beyond a quantile: +inf
+    to the upper one, -inf to the lower one, when that tail is clipped. NaN
+    stays NaN. A column with no finite value is unchanged.
 
     Parameters
     ----------
     data : pd.Series or pd.DataFrame
         Data to clip. A DataFrame is clipped column by column.
-    clip : bool or str
-        ``"l"`` or ``"lower"`` clips the lower tail only, ``"u"`` or
-        ``"upper"`` the upper tail only, in any case; ``"both"`` and any
-        value that is not a string clip both tails.
+    clip : bool, str, tuple, list or None
+        A clip setting; see ``_clip_cuts``.
 
     Returns
     -------
@@ -70,11 +136,12 @@ def _clip_to_quantiles(data, clip):
     Raises
     ------
     TypeError
-        If ``data`` is neither a Series nor a DataFrame.
+        If ``data`` is neither a Series nor a DataFrame, or a cut of a pair is
+        neither a bool nor a number.
     ValueError
-        If ``clip`` is any other string.
+        If ``clip`` is not a clip setting; see ``_clip_cuts``.
     """
-    kind = _clip_kind(clip)
+    lower, upper = _clip_cuts(clip)
     if isinstance(data, pd.Series):
         ax = 0
     elif isinstance(data, pd.DataFrame):
@@ -82,19 +149,13 @@ def _clip_to_quantiles(data, clip):
     else:
         raise TypeError("Unexpected object %s" % type(data))
 
-    q0 = 0.0001
-    q1 = 0.9999
-    pct = data.replace([-np.inf, np.inf], np.nan).quantile([q0, q1])
-    lo = pct.loc[q0]
-    up = pct.loc[q1]
-
-    if kind == "l":
-        data = data.clip(lower=lo, axis=ax)
-    elif kind == "u":
-        data = data.clip(upper=up, axis=ax)
-    else:
-        data = data.clip(lo, up, axis=ax)
-    return data
+    cuts = [q for q in (lower, upper) if q is not None]
+    if not cuts:
+        return data
+    pct = data.replace([-np.inf, np.inf], np.nan).quantile(cuts)
+    lo = None if lower is None else pct.loc[lower]
+    up = None if upper is None else pct.loc[upper]
+    return data.clip(lo, up, axis=ax)
 
 
 def _edges_from_intervals(intervals):
@@ -788,11 +849,13 @@ class BinnedData:
         right-closed bins, ``(a, b]``. Integer or string bin rules are refused.
     log : dict of str to bool, optional
         Columns binned as ``log10(abs())``. Unlisted columns are linear.
-    clip : dict of str to bool or str, optional
-        Columns clipped to their 0.01st and 99.99th percentiles (over the
-        finite values of the rows ``mask`` keeps, after ``log``) before
-        binning; ``"l"`` or ``"u"`` clips one tail only. Unlisted columns are
-        not clipped. Clipping never places +/-inf in a bin.
+    clip : dict of str to clip setting, optional
+        Each column's clip setting, as ``Base.clip_data`` takes it: True clips
+        to the 0.05th and 99.95th percentiles (over the finite values of the
+        rows ``mask`` keeps, after ``log``) before binning, ``"l"`` or ``"u"``
+        one tail only, and a pair ``(lower, upper)`` sets each tail's cut.
+        Unlisted columns are not clipped. Clipping never places +/-inf in a
+        bin.
     mask : pd.Series of bool, optional
         Rows to bin, aligned by label to ``frame.index``. Rows it excludes get
         code -1, and a plot sharing this object does not keep them. A label of
@@ -806,12 +869,13 @@ class BinnedData:
     ------
     TypeError
         If a column's bins are an integer or string bin rule, ``bins`` is not a
-        mapping, or ``mask`` is not a boolean Series.
+        mapping, ``mask`` is not a boolean Series, or a cut of a ``clip`` pair
+        is neither a bool nor a number.
     KeyError
         If ``bins``, ``log`` or ``clip`` names a column ``frame`` lacks.
     ValueError
         If edges are not strictly increasing, intervals are not contiguous,
-        ``mask`` lacks a label or holds NaN, or a ``clip`` string is not one
+        ``mask`` lacks a label or holds NaN, or a ``clip`` setting is not one
         ``Base.clip_data`` accepts.
 
     Notes
@@ -894,9 +958,7 @@ class BinnedData:
                 view[k] = _numeric_if_object(view[k])
         log = {k: bool(v) for k, v in _per_column(log, columns, "log", False).items()}
         clip = _per_column(clip, columns, "clip", False)
-        clip = {k: False if v is None else v for k, v in clip.items()}
-        for v in clip.values():
-            _clip_kind(v)
+        clip = {k: _clip_setting(v) for k, v in clip.items()}
         keep = _mask_rows(mask, view.index)
 
         intervals = {}
@@ -1064,7 +1126,7 @@ class BinnedData:
         return self._log[col]
 
     def clip_of(self, col):
-        r"""The clip setting of ``col``: False, True, or a tail string.
+        r"""The clip setting of ``col``: False, True, a tail string or a pair.
 
         Parameters
         ----------
@@ -1073,8 +1135,9 @@ class BinnedData:
 
         Returns
         -------
-        bool or str
-            The clip setting ``col`` was binned with.
+        bool, str or tuple
+            The clip setting ``col`` was binned with; a pair given as a list
+            is held as a tuple.
 
         Raises
         ------

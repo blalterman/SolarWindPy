@@ -33,14 +33,15 @@ from abc import ABC, abstractmethod
 
 from ..tools import _WithLogger
 from . import labels
-from .binned import BinnedData, _PlotSource, _clip_kind, _clip_to_quantiles
+from .binned import BinnedData, _PlotSource, _clip_setting, _clip_to_quantiles
 from .binning import FixedGrid
 from .scales import ColorScale
 
 LogAxes = namedtuple("LogAxes", "x,y", defaults=(False,))
-#: Clip setting per axis: False, True, or a clip string (see ``Base.clip_data``).
-#: ``z`` is clipped by ``Scatter`` only. Test a field, never the record: a
-#: ``ClipAxes(False, False)`` is a non-empty tuple, so it is truthy.
+#: Clip setting per axis: False, True, a clip string or a (lower, upper) pair
+#: (see ``Base.clip_data``). ``z`` is clipped by ``Scatter`` only. Test a field,
+#: never the record: a ``ClipAxes(False, False)`` is a non-empty tuple, so it is
+#: truthy.
 ClipAxes = namedtuple("ClipAxes", "x,y,z", defaults=(False, False))
 AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 #: A ``Scatter``'s labels: its axes', and those of its size and alpha
@@ -229,9 +230,11 @@ class Base(_WithLogger, ABC):
 
     @property
     def clip(self):
-        r"""``ClipAxes`` of each axis's clip setting: False, True, or a clip string.
+        r"""``ClipAxes`` of each axis's clip setting (see ``Base.clip_data``).
 
-        Axes the plot does not clip are False.
+        Each field is False, True, a clip string or a ``(lower, upper)`` tuple,
+        as given; a pair given as a list is held as a tuple. Axes the plot does
+        not clip are False.
         """
         return self._clip
 
@@ -240,8 +243,9 @@ class Base(_WithLogger, ABC):
 
         Parameters
         ----------
-        clip : bool, str, None, Mapping or ClipAxes
-            A scalar applies to every axis in ``_clipped_axes``. A mapping
+        clip : clip setting, Mapping or ClipAxes
+            A clip setting (``Base.clip_data``), a pair included, applies to
+            every axis in ``_clipped_axes``. A mapping
             gives an axis its own setting; unnamed axes are None. A
             ``ClipAxes`` is read as a mapping of its fields, ignoring False
             fields for axes this plot does not clip.
@@ -269,16 +273,11 @@ class Base(_WithLogger, ABC):
 
         Raises
         ------
-        ValueError
-            If an axis's setting is a string other than those
-            ``Base.clip_data`` accepts.
+        TypeError, ValueError
+            If an axis's setting is not one ``Base.clip_data`` accepts.
         """
         by_axis = self._clip_by_axis(clip)
-        for v in by_axis.values():
-            _clip_kind(v)
-        self._clip = ClipAxes(
-            **{k: False if v is None else v for k, v in by_axis.items()}
-        )
+        self._clip = ClipAxes(**{k: _clip_setting(v) for k, v in by_axis.items()})
 
     @property
     def log(self):
@@ -376,23 +375,30 @@ class Base(_WithLogger, ABC):
 
     @staticmethod
     def clip_data(data, clip):
-        r"""Clip data to its 0.01st and 99.99th percentiles.
+        r"""Clip data to the quantiles ``clip`` names, by default 0.05% and 99.95%.
 
         The one clipping rule every plot shares: each axis's setting in a
-        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``. The
-        percentiles are computed over the finite values only; +/-inf is
-        clipped to them like any other value beyond a percentile, when that
-        tail is clipped, and NaN stays NaN. A column with no finite value is
+        plot's ``clip`` (a ``ClipAxes``) is handed here as ``clip``, and a
+        bin rule whose edges do not fit in memory clips with True. The
+        quantiles are computed over the finite values only; +/-inf is clipped
+        to them like any other value beyond a quantile, when that tail is
+        clipped, and NaN stays NaN. A column with no finite value is
         unchanged.
 
         Parameters
         ----------
         data : pd.Series or pd.DataFrame
             Data to clip. A DataFrame is clipped column by column.
-        clip : bool or str
-            ``"l"`` or ``"lower"`` clips the lower tail only, ``"u"`` or
-            ``"upper"`` the upper tail only, in any case; ``"both"`` and any
-            value that is not a string clip both tails.
+        clip : bool, str, tuple, list or None
+            True clips both tails at the default cuts, the 0.05th and 99.95th
+            percentiles; False or None clips nothing. A pair
+            ``(lower, upper)`` sets each tail: True for its default cut, False
+            for no clip, or a number read as :meth:`pandas.Series.quantile`
+            reads it, with 0 <= lower < 0.5 < upper <= 1, so ``(0.01, True)``
+            clips at 1% and 99.95%. ``"l"`` and ``"u"``, in any case, are
+            ``(True, False)`` and ``(False, True)``; ``"lower"``, ``"upper"``
+            and ``"both"`` are ``"l"``, ``"u"`` and True. Any other value is
+            read by its truth.
 
         Returns
         -------
@@ -402,9 +408,12 @@ class Base(_WithLogger, ABC):
         Raises
         ------
         TypeError
-            If ``data`` is neither a Series nor a DataFrame.
+            If ``data`` is neither a Series nor a DataFrame, or a cut of a
+            pair is neither a bool nor a number.
         ValueError
-            If ``clip`` is any other string, the empty string included.
+            If ``clip`` is any other string, the empty string included, or a
+            pair that holds other than two cuts or breaks
+            0 <= lower < 0.5 < upper <= 1.
         """
         return _clip_to_quantiles(data, clip)
 
@@ -675,12 +684,11 @@ class ColorPlot(_AggregateLimits):
             Coordinates of each point.
         z : pd.Series, optional
             Value at each point. If None, every point gets ``z = 1``.
-        clip : bool, str, Mapping or None, optional
-            Stored as ``self.clip``, a ``ClipAxes``, None as False. A scalar
-            applies to every axis in ``_clipped_axes``; a mapping such as
-            ``{"y": "u"}`` sets single axes. True clips both tails; ``"l"``
-            or ``"u"`` clips only the lower or upper tail (see
-            ``Base.clip_data``).
+        clip : clip setting, Mapping or None, optional
+            Stored as ``self.clip``, a ``ClipAxes``, None as False. A clip
+            setting (``Base.clip_data``: True, ``"l"``, ``"u"`` or a pair
+            ``(lower, upper)``) applies to every axis in ``_clipped_axes``; a
+            mapping such as ``{"y": "u"}`` sets single axes.
         mask : pd.Series of bool, optional
             Rows to keep, aligned by label to the index of x and y; a row is
             kept where it is True and x, y and z are neither NaN nor +/-inf,
@@ -697,12 +705,13 @@ class ColorPlot(_AggregateLimits):
         Raises
         ------
         TypeError
-            If ``mask`` is not a boolean ``pd.Series``.
+            If ``mask`` is not a boolean ``pd.Series``, or a cut of a ``clip``
+            pair is neither a bool nor a number.
         KeyError
             If ``clip`` names an axis the plot does not clip.
         ValueError
             If no row is left, or ``mask`` lacks a label or holds NaN; if
-            ``clip`` holds a string ``Base.clip_data`` does not accept; or if
+            ``clip`` holds a setting ``Base.clip_data`` does not accept; or if
             the plot's data is already set.
         """
         self._claim_data()

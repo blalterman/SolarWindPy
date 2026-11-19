@@ -228,51 +228,51 @@ def test_set_log_repeating_the_built_setting_is_allowed():
 def test_clip_quantiles_ignore_infinities_and_clip_them_to_the_finite_quantiles():
     """Quantiles come from the finite values; +/-inf is clipped to them.
 
-    The finite values are 0, 1, ..., 10000 (n = 10001), so the 0.01st and
-    99.99th percentiles sit at positions 1 and 9999: values 1 and 9999. NaN
+    The finite values are 0, 1, ..., 10000 (n = 10001), so the 0.05th and
+    99.95th percentiles sit at positions 5 and 9995: values 5 and 9995. NaN
     stays NaN.
 
     ON FAILURE: the code is wrong.
     """
     data = pd.Series(np.r_[np.arange(10001.0), INF, -INF, np.nan])
     clipped = Base.clip_data(data, True)
-    assert clipped.iloc[[0, 1, 9999, 10000]].to_numpy() == exact(
-        [1.0, 1.0, 9999.0, 9999.0]
+    assert clipped.iloc[[0, 5, 9995, 10000]].to_numpy() == exact(
+        [5.0, 5.0, 9995.0, 9995.0]
     )
-    assert clipped.iloc[[10001, 10002]].to_numpy() == exact([9999.0, 1.0])
+    assert clipped.iloc[[10001, 10002]].to_numpy() == exact([9995.0, 5.0])
     assert np.isnan(clipped.iloc[10003])
 
 
 def test_an_infinite_value_no_longer_makes_the_upper_quantile_nan():
-    """With 0, 1, 2, 3, 4 and +inf, the upper bound is 3.9996, not NaN.
+    """With 0, 1, 2, 3, 4 and +inf, the upper bound is 3.998, not NaN.
 
-    Over the finite values (n = 5) the 99.99th percentile is at position
-    0.9999 * 4 = 3.9996, between 3 and 4: 3.9996. Including +inf made it
+    Over the finite values (n = 5) the 99.95th percentile is at position
+    0.9995 * 4 = 3.998, between 3 and 4: 3.998. Including +inf made it
     NaN, so +inf was left unclipped.
 
     ON FAILURE: the code is wrong.
     """
     data = pd.Series([0.0, 1.0, 2.0, 3.0, 4.0, INF])
     clipped = Base.clip_data(data, "u")
-    assert clipped.to_numpy() == exact([0.0, 1.0, 2.0, 3.0, 3.9996, 3.9996])
+    assert clipped.to_numpy() == exact([0.0, 1.0, 2.0, 3.0, 3.998, 3.998])
 
 
 @pytest.mark.parametrize(
     "clip, expected",
-    [("l", [1.0, 9999.0, 1.0, INF]), ("u", [1.0, 9999.0, -INF, 9999.0])],
+    [("l", [5.0, 9995.0, 5.0, INF]), ("u", [5.0, 9995.0, -INF, 9995.0])],
 )
 def test_one_tail_clip_leaves_the_other_infinity(clip, expected):
     """``"l"`` clips -inf only, ``"u"`` clips +inf only.
 
     Columns of a DataFrame are clipped one by one; column ``b`` is ``a``
-    shifted by 1 (finite values 1 to 10001, quantiles 2 and 10000).
+    shifted by 1 (finite values 1 to 10001, quantiles 6 and 9996).
 
     ON FAILURE: the code is wrong.
     """
     a = np.r_[np.arange(10001.0), -INF, INF]
     frame = pd.DataFrame({"a": a, "b": a + 1.0})
     clipped = Base.clip_data(frame, clip)
-    picks = [1, 9999, 10001, 10002]
+    picks = [5, 9995, 10001, 10002]
     assert clipped.loc[picks, "a"].to_numpy() == exact(expected)
     shifted = [v + 1.0 for v in expected]
     assert clipped.loc[picks, "b"].to_numpy() == exact(shifted)

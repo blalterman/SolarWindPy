@@ -99,21 +99,9 @@ PAIR_BUILDER_IDS = [
     "Spiral",
     "BinnedData",
 ]
-PAIRS_NOT_YET = pytest.mark.xfail(
-    strict=True,
-    reason="clip takes no (lower, upper) pair in plotting.binned._clip_kind; "
-    "expected: each cut True, False or a quantile, 0 <= lower < 0.5 < upper "
-    "<= 1; remove this marker when the pair form lands",
-)
 
 
 class TestClipSetting:
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="the default cuts are 0.01%/99.99% in plotting.binned; expected "
-        "0.05%/99.95%; remove this marker when the default moves",
-    )
     @pytest.mark.parametrize(
         "clip, expected", ACCEPTED_FORMS, ids=[repr(c) for c, _ in ACCEPTED_FORMS]
     )
@@ -157,7 +145,6 @@ class TestClipSetting:
         with pytest.raises(ValueError, match=ACCEPTED_MESSAGE):
             build(clip)
 
-    @PAIRS_NOT_YET
     @pytest.mark.parametrize(
         "clip, expected", PAIR_FORMS, ids=[repr(c) for c, _ in PAIR_FORMS]
     )
@@ -169,7 +156,6 @@ class TestClipSetting:
         result = Base.clip_data(SERIES, clip)
         assert result.to_numpy() == exact(expected)
 
-    @PAIRS_NOT_YET
     @pytest.mark.parametrize(
         "pair, shorthand", [((True, False), "l"), ((False, True), "u")]
     )
@@ -184,7 +170,6 @@ class TestClipSetting:
             check_exact=True,
         )
 
-    @PAIRS_NOT_YET
     @pytest.mark.parametrize("clip", REJECTED_PAIRS, ids=repr)
     def test_clip_data_rejects_a_pair_outside_its_bounds(self, clip):
         """A pair needs 0 <= lower < 0.5 < upper <= 1, or it raises ValueError.
@@ -194,7 +179,6 @@ class TestClipSetting:
         with pytest.raises(ValueError, match=PAIR_MESSAGE):
             Base.clip_data(SERIES, clip)
 
-    @PAIRS_NOT_YET
     def test_clip_data_rejects_a_cut_of_another_type(self):
         """A cut that is neither a bool nor a number raises TypeError.
 
@@ -203,7 +187,6 @@ class TestClipSetting:
         with pytest.raises(TypeError, match=PAIR_MESSAGE):
             Base.clip_data(SERIES, ("l", True))
 
-    @PAIRS_NOT_YET
     @pytest.mark.parametrize("build", PAIR_BUILDERS, ids=PAIR_BUILDER_IDS)
     def test_constructors_reject_a_pair_outside_its_bounds(self, build):
         """A plot or BinnedData given clip=(0.6, 0.9) raises when built.
@@ -213,7 +196,6 @@ class TestClipSetting:
         with pytest.raises(ValueError, match=PAIR_MESSAGE):
             build((0.6, 0.9))
 
-    @PAIRS_NOT_YET
     def test_constructors_keep_a_pair_as_a_tuple(self):
         """A pair reads back from ``clip`` as a tuple, a list included.
 

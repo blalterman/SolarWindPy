@@ -573,9 +573,9 @@ class TestBinContract:
 class TestClipData:
     """``clip`` clips the tails it names when points are binned."""
 
-    # One low and one high x outlier. Clipping to the 0.01st percentile moves
-    # -1000 to about -999.1 and clipping to the 99.99th moves 1000 to about
-    # 999.1, each from an outer x-bin into the middle one (-999.5, 999.5].
+    # One low and one high x outlier. Clipping to the 0.05th percentile moves
+    # -1000 to about -995.5 and clipping to the 99.95th moves 1000 to about
+    # 995.5, each from an outer x-bin into the middle one (-999.5, 999.5].
     # y is constant, so clipping leaves it alone.
     X = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
     XEDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])
@@ -1739,7 +1739,7 @@ class TestProject1D:
     def test_projection_does_not_clip_an_outlier_into_another_bin(self):
         """An x outlier keeps its bin: the marginal equals the parent's columns.
 
-        Clipping to the 99.99th percentile would move x = 1000 to about 999.1,
+        Clipping to the 99.95th percentile would move x = 1000 to about 995.5,
         out of the last bin ``(999.5, 1000]`` and into ``(0.5, 999.5]``.
 
         ON FAILURE: the code is wrong.

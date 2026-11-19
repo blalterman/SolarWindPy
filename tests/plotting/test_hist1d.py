@@ -720,8 +720,8 @@ def test_a_clip_mapping_may_name_x_only(xy):
         Hist1D(x, clip={"y": "u"})
 
 
-# One low and one high outlier. Clipping to the 0.01st percentile moves -1000
-# to about -999.1 and clipping to the 99.99th moves 1000 to about 999.1, each
+# One low and one high outlier. Clipping to the 0.05th percentile moves -1000
+# to about -995.5 and clipping to the 99.95th moves 1000 to about 995.5, each
 # from an outer bin into the middle bin (-999.5, 999.5].
 CLIP_X = pd.Series([-1000.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1000.0])
 CLIP_EDGES = np.array([-1001.0, -999.5, 999.5, 1001.0])

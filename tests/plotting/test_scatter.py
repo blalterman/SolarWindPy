@@ -368,7 +368,7 @@ def test_one_tailed_clip_clips_only_that_tail(ax, clip):
     """``"l"`` clips only the low tail of each column, ``"u"`` only the high.
 
     The input is 0..10000 with one far outlier on each end. The clipped tail
-    is raised or lowered to numpy's 0.01st or 99.99th percentile; the other
+    is raised or lowered to numpy's 0.05th or 99.95th percentile; the other
     tail, outlier included, is drawn unchanged.
     ON FAILURE: the code is wrong.
     """
@@ -376,10 +376,10 @@ def test_one_tailed_clip_clips_only_that_tail(ax, clip):
     Scatter(pd.Series(raw), pd.Series(raw), clip=clip).make_plot(ax=ax)
     # Percentiles from the Base.clip_data docstring.
     if clip == "l":
-        expected = np.clip(raw, np.quantile(raw, 1e-4), None)
+        expected = np.clip(raw, np.quantile(raw, 5e-4), None)
         assert expected[-1] == 1e6
     else:
-        expected = np.clip(raw, None, np.quantile(raw, 1 - 1e-4))
+        expected = np.clip(raw, None, np.quantile(raw, 1 - 5e-4))
         assert expected[0] == -1e6
     np.testing.assert_array_equal(
         np.asarray(ax.collections[0].get_offsets()), np.c_[expected, expected]

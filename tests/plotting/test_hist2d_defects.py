@@ -88,7 +88,7 @@ def test_projected_counts_hold_the_row_the_parent_clipped_into_an_edge_bin():
 
     y = -1000 once and 0.5 ten times, on edges [-1000, 0, 1]: unclipped,
     -1000 sits on the open side of (-1000, 0] and is in no bin. The parent
-    clips y to its 0.01st percentile, -1000 + 0.001 * 1000.5 = -998.9995
+    clips y to its 0.05th percentile, -1000 + 0.005 * 1000.5 = -994.9975
     (linear interpolation over 11 values), inside (-1000, 0]. x = 0.5 six
     times (the outlier's row first), then 1.5 five times, on edges [0, 1, 2];
     x clips onto itself. Parent counts by hand: one row in y-bin (-1000, 0],

@@ -251,9 +251,10 @@ class FixedGrid(Binning):
         its bins. Other ``nbins`` give right-closed bins, ``(a, b]``.
 
         A bin rule that asks for more bins than fit in memory (e.g. ``"fd"`` on
-        data with an extreme outlier) is retried on the data clipped to its
-        0.05th and 99.95th percentiles. The values outside the resulting bins
-        are not counted, and a warning gives their number.
+        data with an extreme outlier) is retried on the data clipped as
+        ``clip=True`` clips it, to its 0.05th and 99.95th percentiles
+        (``Base.clip_data``). The values outside the resulting bins are not
+        counted, and a warning gives their number.
         """
         self._source = source
         self._axes = tuple(axes)
@@ -304,8 +305,10 @@ class FixedGrid(Binning):
             Each binned axis's input name, e.g. ``{"x": x.name}``.
         log : dict of str to bool or None
             ``logx``, ``logy`` per axis, as given.
-        clip : dict of str to bool, str or None
-            Each axis's clip setting, as given (see ``Base._clip_by_axis``).
+        clip : dict of str to clip setting or None
+            Each axis's clip setting, as given (see ``Base._clip_by_axis``). A
+            setting equals the ``BinnedData``'s when it clips at the same
+            quantiles.
         precision : int or None
             The plot's ``bin_precision``.
 
@@ -353,7 +356,7 @@ class FixedGrid(Binning):
             held = b.clip_of(col)
             given = clip.get(k)
             if given is not None and (
-                binned._clip_kind(given) != binned._clip_kind(held)
+                binned._clip_cuts(given) != binned._clip_cuts(held)
             ):
                 raise ValueError(
                     f"clip={given!r} for {k} conflicts with the BinnedData, which "
@@ -423,9 +426,9 @@ class FixedGrid(Binning):
                     # Edges given (``d`` is None) are only validated.
                     b = np.histogram_bin_edges(np.empty(0) if d is None else d, b)
                 except MemoryError:
-                    # Clip the extremely large values and extremely small outliers.
-                    lo, up = d.quantile([0.0005, 0.9995])
-                    b = np.histogram_bin_edges(d.clip(lo, up), b)
+                    # Clip the extreme outliers at the default cuts of `clip`.
+                    clipped = binned._clip_to_quantiles(d, True)
+                    b = np.histogram_bin_edges(clipped, b)
                     clipped_for_memory = True
 
             assert np.unique(b).size == b.size
