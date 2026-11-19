@@ -15,7 +15,7 @@ __all__ = [
 
 import numpy as np
 
-from ..tools import normal_parameters
+from ..tools import lognormal_moments
 from .core import FitFunction, NotFittedError
 
 
@@ -228,7 +228,7 @@ class GaussianLn(FitFunction):
 
     def __init__(self, xobs, yobs, **kwargs):
         super().__init__(xobs, yobs, **kwargs)
-        self.set_TeX_report_normal_parameters(False)
+        self.set_TeX_report_lognormal_moments(False)
 
     def _check_used_obs(self, used):
         r"""Raise ``ValueError`` if any used x is not positive: ln x is undefined."""
@@ -285,42 +285,42 @@ class GaussianLn(FitFunction):
         return TeX
 
     @property
-    def normal_parameters(self):
+    def lognormal_moments(self):
         r"""Linear-space mean and standard deviation of the log-normal variable.
 
         The fit models :math:`\ln X \sim \mathcal{N}(\mu, \sigma^2)`, with
         the natural logarithm. This returns the mean and the standard
         deviation of :math:`X` itself, not of :math:`\ln X`, from the fitted
         ``mu`` and ``sigma`` through
-        :func:`~solarwindpy.tools.normal_parameters`, which holds the formula
+        :func:`~solarwindpy.tools.lognormal_moments`, which holds the formula
         and its source.
 
         A dict of ``mean`` and ``std``. They are not named ``mu`` and
         ``sigma``, which are the fitted parameters of :math:`\ln X`.
         """
-        normal = normal_parameters(self.popt["mu"], self.popt["sigma"])
+        normal = lognormal_moments(self.popt["mu"], self.popt["sigma"])
         return dict(mean=normal["mu"], std=normal["sigma"])
 
     @property
-    def TeX_report_normal_parameters(self):
+    def TeX_report_lognormal_moments(self):
         r"""Whether the TeX info also reports the linear-space mean and std.
 
-        When True, the annotation lists :attr:`normal_parameters` after the
+        When True, the annotation lists :attr:`lognormal_moments` after the
         fitted ``mu``, ``sigma`` and ``A``, without an uncertainty: the
         propagation of the log-normal uncertainties is not implemented.
         """
         try:
-            return self._use_normal_parameters
+            return self._use_lognormal_moments
         except AttributeError:
             return False
 
-    def set_TeX_report_normal_parameters(self, new):
-        r"""Set :attr:`TeX_report_normal_parameters` to ``bool(new)``.
+    def set_TeX_report_lognormal_moments(self, new):
+        r"""Set :attr:`TeX_report_lognormal_moments` to ``bool(new)``.
 
         A TeX info already built by a fit is updated to match.
         """
         new = bool(new)
-        self._use_normal_parameters = new
+        self._use_lognormal_moments = new
         try:
             tex_info = self.TeX_info
         except NotFittedError:
@@ -330,13 +330,13 @@ class GaussianLn(FitFunction):
     def _TeX_extra_params(self):
         r"""The linear-space mean and std by their TeX, or None.
 
-        None unless :attr:`TeX_report_normal_parameters` and a fit has set
+        None unless :attr:`TeX_report_lognormal_moments` and a fit has set
         ``popt``.
         """
-        if not self.TeX_report_normal_parameters:
+        if not self.TeX_report_lognormal_moments:
             return None
         try:
-            normal = self.normal_parameters
+            normal = self.lognormal_moments
         except NotFittedError:
             return None
         return {

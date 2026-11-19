@@ -58,7 +58,7 @@ ENTRY_POINTS = [
     "solarwindpy.solar_activity.icme.icmecat.ICMECAT",
     "solarwindpy.solar_activity.sunspot_number.sidc.SIDCLoader",
     "solarwindpy.solar_activity.sunspot_number.sidc.SSNExtrema",
-    "solarwindpy.tools.normal_parameters",
+    "solarwindpy.tools.lognormal_moments",
     "solarwindpy.tools.swap_protons",
 ]
 

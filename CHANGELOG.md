@@ -75,6 +75,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `beta` and `R` differ in shape, `solarwindpy.instabilities.verscharen2016.StabilityContours`
     raises `TypeError` for a `beta` that is not a `numpy.ndarray`, and its `plot_contours`
     raises `TypeError` for an `ax` that is not a `matplotlib.axes.Axes`.
+- **Breaking:** `solarwindpy.tools.normal_parameters` is `solarwindpy.tools.lognormal_moments`,
+  and on `solarwindpy.fitfunctions.gaussians.GaussianLn` the property `normal_parameters`,
+  `TeX_report_normal_parameters` and `set_TeX_report_normal_parameters` are
+  `lognormal_moments`, `TeX_report_lognormal_moments` and `set_TeX_report_lognormal_moments`:
+  they return the mean and standard deviation of a log-normal variable, not of a normal
+  distribution. No alias.
 - `solarwindpy.core.abundances.ReferenceAbundances.get_element` and `get_comment` raise
   `TypeError` instead of `ValueError` for a key that is neither an element symbol nor an
   atomic number; the message is unchanged.

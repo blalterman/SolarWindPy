@@ -222,8 +222,8 @@ class TestGaussianLn:
         y = A * np.exp(-0.5 * ((lnx - m) / s) ** 2)
         return x, y, dict(mu=m, sigma=s, A=A)
 
-    def test_normal_parameters_calculation(self, lognormal_data):
-        """Test that normal_parameters gives the linear-space mean and std.
+    def test_lognormal_moments_calculation(self, lognormal_data):
+        """Test that lognormal_moments gives the linear-space mean and std.
 
         The conversion formulas, with mu and sigma fitted to ln x, are:
         - mean = exp(mu + sigma^2/2)
@@ -241,7 +241,7 @@ class TestGaussianLn:
         expected_mean = np.exp(m + (s**2) / 2)
         expected_std = np.sqrt(np.exp(s**2 + 2 * m) * (np.exp(s**2) - 1))
 
-        normal = obj.normal_parameters
+        normal = obj.lognormal_moments
         assert normal == {"mean": exact(expected_mean), "std": exact(expected_std)}
 
     @staticmethod
@@ -256,7 +256,7 @@ class TestGaussianLn:
                 return float(text.replace(" ", ""))
         return None
 
-    def test_tex_info_reports_normal_parameters_only_when_asked(self, lognormal_data):
+    def test_tex_info_reports_lognormal_moments_only_when_asked(self, lognormal_data):
         r"""The annotation lists the mean and std when the flag is on, and not when off.
 
         The data are noise-free with mu = 0.5 and sigma = 0.3, so the reported
@@ -276,31 +276,31 @@ class TestGaussianLn:
         assert sigma == printed(0.5292, decimals=4)
 
         obj = GaussianLn(x, y)
-        assert obj.TeX_report_normal_parameters is False
+        assert obj.TeX_report_lognormal_moments is False
         obj.make_fit()
         off = str(obj.TeX_info)
         assert self._reported(off, MEAN) is None
         assert self._reported(off, STD) is None
 
-        obj.set_TeX_report_normal_parameters(True)
-        assert obj.TeX_report_normal_parameters is True
+        obj.set_TeX_report_lognormal_moments(True)
+        assert obj.TeX_report_lognormal_moments is True
         on = str(obj.TeX_info)
         assert self._reported(on, MEAN) == printed(mu, decimals=3)
         assert self._reported(on, STD) == printed(sigma, decimals=4)
         for name in (r"\mu", r"\sigma", "A"):
             assert f"$ {name} = " in on
 
-        obj.set_TeX_report_normal_parameters(False)
+        obj.set_TeX_report_lognormal_moments(False)
         assert str(obj.TeX_info) == off
 
     def test_flag_set_before_the_fit_reaches_the_annotation(self, lognormal_data):
-        """``set_TeX_report_normal_parameters(True)`` before ``make_fit`` holds.
+        """``set_TeX_report_lognormal_moments(True)`` before ``make_fit`` holds.
 
         ON FAILURE: the code is wrong.
         """
         x, y, _ = lognormal_data
         obj = GaussianLn(x, y)
-        obj.set_TeX_report_normal_parameters(True)
+        obj.set_TeX_report_lognormal_moments(True)
         obj.make_fit()
         assert self._reported(str(obj.TeX_info), MEAN) is not None
 
@@ -320,24 +320,24 @@ class TestGaussianLn:
 
         x, y, _ = lognormal_data
         with pytest.raises(AttributeError, match="boom"):
-            Broken(x, y).set_TeX_report_normal_parameters(True)
+            Broken(x, y).set_TeX_report_lognormal_moments(True)
 
-    def test_a_bug_computing_normal_parameters_is_not_taken_for_not_fitted(
+    def test_a_bug_computing_lognormal_moments_is_not_taken_for_not_fitted(
         self, lognormal_data
     ):
-        """An AttributeError inside ``normal_parameters`` reaches the TeX info.
+        """An AttributeError inside ``lognormal_moments`` reaches the TeX info.
 
         ON FAILURE: the code is wrong.
         """
 
         class Broken(GaussianLn):
             @property
-            def normal_parameters(self):
+            def lognormal_moments(self):
                 raise AttributeError("boom")
 
         x, y, _ = lognormal_data
         obj = Broken(x, y)
-        obj.set_TeX_report_normal_parameters(True)
+        obj.set_TeX_report_lognormal_moments(True)
         with pytest.raises(AttributeError, match="boom"):
             obj._TeX_extra_params()
 

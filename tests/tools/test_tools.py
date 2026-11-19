@@ -1,6 +1,6 @@
 # Spent-When: PERMANENT(solarwindpy stops shipping its tools package)
 # Supersedes: none
-"""Tests for ``solarwindpy.tools``: ``swap_protons``, ``normal_parameters``, loggers.
+"""Tests for ``solarwindpy.tools``: ``swap_protons``, ``lognormal_moments``, loggers.
 
 Expected values come from hand-built frames, ``scipy.stats.lognorm`` and the
 logger names the usage guide's Logging section states.
@@ -23,7 +23,7 @@ from solarwindpy.plotting.spiral import SpiralMesh
 from solarwindpy.plotting.labels.elemental_abundance import ElementalAbundance
 from solarwindpy.plotting.labels.special import ManualLabel
 from solarwindpy.solar_activity.sunspot_number.sidc import SIDC_ID, SSNExtrema
-from solarwindpy.tools import normal_parameters, swap_protons
+from solarwindpy.tools import lognormal_moments, swap_protons
 from tests.tolerances import assert_within_error_bars, exact
 
 # ---------------------------------------------------------------------------
@@ -332,7 +332,7 @@ def test_unrecognized_element_warns_on_its_own_module_logger(caplog):
 
 
 # ---------------------------------------------------------------------------
-# solarwindpy.tools.normal_parameters
+# solarwindpy.tools.lognormal_moments
 # ---------------------------------------------------------------------------
 
 
@@ -346,26 +346,18 @@ class TestNormalParameters:
         """
         m = pd.Series([0.0, 1.0, -0.5, 2.0])
         s = pd.Series([0.25, 0.5, 1.0, 0.1])
-        result = normal_parameters(m, s)
+        result = lognormal_moments(m, s)
         dist = stats.lognorm(s=s.values, scale=np.exp(m.values))
         assert list(result.columns) == ["mu", "sigma"]
         assert result["mu"].to_numpy() == exact(dist.mean())
         assert result["sigma"].to_numpy() == exact(dist.std())
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AttributeError,
-        reason="the log-normal moments are still named normal_parameters (F135); "
-        "remove this marker when tools.lognormal_moments exists",
-    )
     def test_zero_log_width_is_a_point_mass_at_e_to_the_m(self):
         """With s = 0, X = e^m exactly: mu = e^(ln 2) = 2 and sigma = 0.
 
         ON FAILURE: the code is wrong.
         """
-        import solarwindpy.tools as tools
-
-        mu, sigma = tools.lognormal_moments(math.log(2.0), 0.0)
+        mu, sigma = lognormal_moments(math.log(2.0), 0.0)
         assert mu == exact(2.0)  # exp(log(2))
         assert sigma == 0.0
 
@@ -375,7 +367,7 @@ class TestNormalParameters:
         This is the docstring's usage, checked against scipy.
         ON FAILURE: the code is wrong.
         """
-        mu, sigma = normal_parameters(1.0, 0.5)
+        mu, sigma = lognormal_moments(1.0, 0.5)
         dist = stats.lognorm(s=0.5, scale=math.e)
         assert mu == exact(dist.mean())
         assert sigma == exact(dist.std())
@@ -390,7 +382,7 @@ class TestNormalParameters:
         """
         m = pd.Series([0.0, 1.0, -0.5, 0.3])
         s = pd.Series([0.05, 0.2, 0.4, 0.1])
-        result = normal_parameters(m, s, base=base)
+        result = lognormal_moments(m, s, base=base)
         dist = stats.lognorm(s=s.values * np.log(base), scale=base**m.values)
         assert result["mu"].to_numpy() == exact(dist.mean())
         assert result["sigma"].to_numpy() == exact(dist.std())
@@ -402,8 +394,8 @@ class TestNormalParameters:
         """
         m = pd.Series([0.0, 1.0, -0.5])
         s = pd.Series([0.25, 0.5, 1.0])
-        with_base = normal_parameters(m, s, base=np.e)
-        default = normal_parameters(m, s)
+        with_base = lognormal_moments(m, s, base=np.e)
+        default = lognormal_moments(m, s)
         pd.testing.assert_index_equal(with_base.index, default.index)
         pd.testing.assert_index_equal(with_base.columns, default.columns)
         assert with_base.to_numpy() == exact(default.to_numpy())  # ln(e) = 1
@@ -423,7 +415,7 @@ class TestNormalParameters:
         m, s, n = 0.5, 0.2, 200_000
         z = np.random.default_rng(20260930).normal(m, s, n)
         x = base**z
-        mu, sigma = normal_parameters(m, s, base=base)
+        mu, sigma = lognormal_moments(m, s, base=base)
         kappa = stats.lognorm(s=s * np.log(base)).stats(moments="k")
         assert_within_error_bars(x.mean(), sigma / np.sqrt(n), mu)
         assert_within_error_bars(
@@ -437,4 +429,4 @@ class TestNormalParameters:
         ON FAILURE: the code is wrong.
         """
         with pytest.raises(ValueError, match="base"):
-            normal_parameters(0.0, 0.1, base=base)
+            lognormal_moments(0.0, 0.1, base=base)

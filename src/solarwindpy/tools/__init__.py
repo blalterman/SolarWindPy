@@ -9,7 +9,7 @@ Functions
 swap_protons
     Swap beam and core proton labels when the beam density exceeds the
     core density.
-normal_parameters
+lognormal_moments
     Mean and standard deviation of a log-normal variable.
 
 Examples
@@ -26,7 +26,7 @@ True
 
 __all__ = [
     "swap_protons",
-    "normal_parameters",
+    "lognormal_moments",
 ]
 
 import logging
@@ -183,7 +183,7 @@ def swap_protons(data, logger=None):
     return new_data, swap
 
 
-def normal_parameters(m, s, base=np.e):
+def lognormal_moments(m, s, base=np.e):
     r"""Mean and standard deviation of a log-normal variable.
 
     Given :math:`\log_b X \sim \mathcal{N}(m, s^2)`, return the mean and the
@@ -205,7 +205,7 @@ def normal_parameters(m, s, base=np.e):
     pandas.DataFrame or pandas.Series
         ``mu`` (mean of :math:`X`) and ``sigma`` (standard deviation of
         :math:`X`): DataFrame columns for Series input, Series entries for
-        scalar input, so ``mu, sigma = normal_parameters(m, s)`` unpacks.
+        scalar input, so ``mu, sigma = lognormal_moments(m, s)`` unpacks.
 
     Raises
     ------
@@ -239,10 +239,10 @@ def normal_parameters(m, s, base=np.e):
     Examples
     --------
     >>> m, s = 1.0, 0.5  # mean and std of ln(X)
-    >>> mu, sigma = normal_parameters(m, s)
+    >>> mu, sigma = lognormal_moments(m, s)
     >>> bool(mu > np.exp(m))  # the mean exceeds the median e^m
     True
-    >>> mu10, _ = normal_parameters(0.0, 0.1, base=10)  # log10(X) ~ N(0, 0.1)
+    >>> mu10, _ = lognormal_moments(0.0, 0.1, base=10)  # log10(X) ~ N(0, 0.1)
     >>> bool(mu10 > 1.0)
     True
     """
