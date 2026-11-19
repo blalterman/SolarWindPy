@@ -22,7 +22,7 @@ import pandas.testing as pdt
 import pytest
 
 import solarwindpy as swp
-from solarwindpy.core import base, plasma, tensor, vector
+from solarwindpy.core import base, ions, plasma, tensor, vector
 from tests.tolerances import exact
 
 
@@ -119,6 +119,26 @@ def test_an_unknown_label_raises_naming_the_level_and_its_labels():
     v = vector.Vector(_components([[1, 2, 3]]))
     with pytest.raises(KeyError, match=r"component 'par'.*x.*y.*z"):
         v("par")
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Ion.set_data passes pandas' bare KeyError('zz') through since "
+    "Core._select was deleted; expected message \"Unknown species 'zz'. "
+    'Available: [...]"; remove this marker when Ion names the available '
+    "species again",
+)
+def test_an_ion_of_an_absent_species_raises_naming_the_species_present(plasma_data):
+    r"""An Ion of species ``zz``, absent from the data, raises KeyError listing p1.
+
+    The example plasma holds a, e, p1 and p2; the message names ``zz`` and the
+    species present, as a Vector's component call names its components.
+
+    ON FAILURE: the code is wrong.
+    """
+    with pytest.raises(KeyError, match=r"species 'zz'.*Available.*p1"):
+        ions.Ion(plasma_data, "zz")
 
 
 def test_a_flat_index_named_for_another_level_is_refused():
