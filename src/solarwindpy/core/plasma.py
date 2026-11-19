@@ -483,7 +483,7 @@ class Plasma(base.Base):
             data = data.loc[start:stop]
 
         if not species:
-            species = [s for s in data.columns.get_level_values("S").unique() if s]
+            species = cls._species_labels(data.columns)
         s_chk = [isinstance(s, str) for s in species]
         if not np.all(s_chk):
             msg = "Only string species allowed. Default or passed species: {}.".format(
@@ -551,6 +551,24 @@ class Plasma(base.Base):
         species = self._clean_species_for_setting(*species)
         self._species = species
         self.logger.debug("%s init with species %s", self.__class__.__name__, (species))
+
+    @staticmethod
+    def _species_labels(columns):
+        r"""The non-empty species labels of ``columns``, in column order.
+
+        The empty label marks a quantity without a species, such as the
+        magnetic field ``b``, so it names no ion.
+
+        Parameters
+        ----------
+        columns : pd.MultiIndex
+            Columns with a level named ``"S"``.
+
+        Returns
+        -------
+        list of str
+        """
+        return [s for s in columns.get_level_values("S").unique() if s]
 
     def _chk_species(self, *species):
         r"""Internal tool to verify species string formats and availability.

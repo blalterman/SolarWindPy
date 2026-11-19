@@ -81,9 +81,7 @@ def load_plasma():
     from ..core.spacecraft import Spacecraft
 
     data = _read_example("plasma")
-    # `if s` drops the empty species label of spacecraft-frame quantities
-    # (e.g. `b`), so only particle species (a, e, p1, p2) reach Plasma.
-    species = sorted(s for s in data.columns.get_level_values("S").unique() if s)
+    species = sorted(Plasma._species_labels(data.columns))
 
     # The CSV also holds a GSE trajectory (`gse`) that tests build a second
     # spacecraft from; PSP takes the HCI position, velocity and Carrington
