@@ -35,11 +35,12 @@ from solarwindpy.plotting.scatter import Scatter  # noqa: E402
 from solarwindpy.plotting.spiral import SpiralPlot2D  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 
-# 1..10: the 0.01st and 99.99th percentiles are 1.0009 and 9.9991.
+# 1..10: the default cuts, the 0.05th and 99.95th percentiles, are
+# 1 + 9 * 0.0005 = 1.0045 and 10 - 9 * 0.0005 = 9.9955 by hand.
 SERIES = pd.Series(np.arange(1.0, 11.0), name="x")
-LOWER = np.r_[1.0009, np.arange(2.0, 11.0)]
-UPPER = np.r_[np.arange(1.0, 10.0), 9.9991]
-BOTH = np.r_[1.0009, np.arange(2.0, 10.0), 9.9991]
+LOWER = np.r_[1.0045, np.arange(2.0, 11.0)]
+UPPER = np.r_[np.arange(1.0, 10.0), 9.9955]
+BOTH = np.r_[1.0045, np.arange(2.0, 10.0), 9.9955]
 
 ACCEPTED_FORMS = [
     ("l", LOWER),
@@ -58,14 +59,69 @@ ACCEPTED_FORMS = [
 REJECTED_FORMS = ["", "foo", "lo", "lower ", "uppr", "b"]
 ACCEPTED_MESSAGE = "'l', 'lower', 'u', 'upper' or 'both'"
 
+# A pair (lower, upper): True is that tail's default cut, False no clip, a
+# number the quantile itself. Over 1..10 the 1% quantile is 1 + 9 * 0.01 = 1.09.
+PAIR_FORMS = [
+    ((True, True), BOTH),
+    ((True, False), LOWER),
+    ((False, True), UPPER),
+    ((False, False), SERIES.to_numpy()),
+    ((0.01, True), np.r_[1.09, np.arange(2.0, 10.0), 9.9955]),
+    ([0.01, True], np.r_[1.09, np.arange(2.0, 10.0), 9.9955]),
+    ((0.0, 1.0), SERIES.to_numpy()),  # the minimum and maximum move nothing
+]
+# Each breaks 0 <= lower < 0.5 < upper <= 1, or is not a pair.
+REJECTED_PAIRS = [
+    (0.6, 0.9),
+    (0.1, 0.4),
+    (0.5, True),
+    (True, 0.5),
+    (-0.1, True),
+    (True, 1.1),
+    (float("nan"), True),
+    (0.1,),
+    (0.1, 0.5, 0.9),
+]
+PAIR_MESSAGE = r"\(lower, upper\) pair"
+PAIR_BUILDERS = [
+    lambda c: Hist1D(SERIES, clip=c, nbins=3),
+    lambda c: Hist2D(SERIES, SERIES.rename("y"), clip=c, nbins=3),
+    lambda c: Hist2D(SERIES, SERIES.rename("y"), clip={"y": c}, nbins=3),
+    lambda c: Scatter(SERIES, SERIES.rename("y"), clip={"z": c}),
+    lambda c: SpiralPlot2D(SERIES, SERIES.rename("y"), clip=c),
+    lambda c: BinnedData(SERIES.to_frame(), {"x": [0, 5, 11]}, clip={"x": c}),
+]
+PAIR_BUILDER_IDS = [
+    "Hist1D",
+    "Hist2D",
+    "Hist2D-mapping",
+    "Scatter-z",
+    "Spiral",
+    "BinnedData",
+]
+PAIRS_NOT_YET = pytest.mark.xfail(
+    strict=True,
+    reason="clip takes no (lower, upper) pair in plotting.binned._clip_kind; "
+    "expected: each cut True, False or a quantile, 0 <= lower < 0.5 < upper "
+    "<= 1; remove this marker when the pair form lands",
+)
+
 
 class TestClipSetting:
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="the default cuts are 0.01%/99.99% in plotting.binned; expected "
+        "0.05%/99.95%; remove this marker when the default moves",
+    )
     @pytest.mark.parametrize(
         "clip, expected", ACCEPTED_FORMS, ids=[repr(c) for c, _ in ACCEPTED_FORMS]
     )
     def test_clip_data_accepts_each_documented_form(self, clip, expected):
         """Each documented form clips the tail(s) it names, in any case.
 
+        True and each tail string clip at the default cuts, the 0.05th and
+        99.95th percentiles.
         ON FAILURE: the code is wrong.
         """
         result = Base.clip_data(SERIES, clip)
@@ -100,6 +156,78 @@ class TestClipSetting:
         """
         with pytest.raises(ValueError, match=ACCEPTED_MESSAGE):
             build(clip)
+
+    @PAIRS_NOT_YET
+    @pytest.mark.parametrize(
+        "clip, expected", PAIR_FORMS, ids=[repr(c) for c, _ in PAIR_FORMS]
+    )
+    def test_clip_data_clips_a_pair_at_its_cuts(self, clip, expected):
+        """A pair clips each tail at its own cut: True the default, False none.
+
+        ON FAILURE: the code is wrong.
+        """
+        result = Base.clip_data(SERIES, clip)
+        assert result.to_numpy() == exact(expected)
+
+    @PAIRS_NOT_YET
+    @pytest.mark.parametrize(
+        "pair, shorthand", [((True, False), "l"), ((False, True), "u")]
+    )
+    def test_a_one_tail_pair_equals_its_shorthand(self, pair, shorthand):
+        """``"l"`` is ``(True, False)`` and ``"u"`` is ``(False, True)``.
+
+        ON FAILURE: the code is wrong.
+        """
+        pd.testing.assert_series_equal(
+            Base.clip_data(SERIES, pair),
+            Base.clip_data(SERIES, shorthand),
+            check_exact=True,
+        )
+
+    @PAIRS_NOT_YET
+    @pytest.mark.parametrize("clip", REJECTED_PAIRS, ids=repr)
+    def test_clip_data_rejects_a_pair_outside_its_bounds(self, clip):
+        """A pair needs 0 <= lower < 0.5 < upper <= 1, or it raises ValueError.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=PAIR_MESSAGE):
+            Base.clip_data(SERIES, clip)
+
+    @PAIRS_NOT_YET
+    def test_clip_data_rejects_a_cut_of_another_type(self):
+        """A cut that is neither a bool nor a number raises TypeError.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(TypeError, match=PAIR_MESSAGE):
+            Base.clip_data(SERIES, ("l", True))
+
+    @PAIRS_NOT_YET
+    @pytest.mark.parametrize("build", PAIR_BUILDERS, ids=PAIR_BUILDER_IDS)
+    def test_constructors_reject_a_pair_outside_its_bounds(self, build):
+        """A plot or BinnedData given clip=(0.6, 0.9) raises when built.
+
+        ON FAILURE: the code is wrong.
+        """
+        with pytest.raises(ValueError, match=PAIR_MESSAGE):
+            build((0.6, 0.9))
+
+    @PAIRS_NOT_YET
+    def test_constructors_keep_a_pair_as_a_tuple(self):
+        """A pair reads back from ``clip`` as a tuple, a list included.
+
+        ON FAILURE: the code is wrong.
+        """
+        y = SERIES.rename("y")
+        assert Hist1D(SERIES, clip=(0.01, True), nbins=3).clip == ClipAxes(
+            (0.01, True), False, False
+        )
+        assert Hist2D(SERIES, y, clip=[0.01, True], nbins=3).clip == ClipAxes(
+            (0.01, True), (0.01, True), False
+        )
+        b = BinnedData(SERIES.to_frame(), {"x": [0, 5, 11]}, clip={"x": [False, 0.9]})
+        assert b.clip_of("x") == (False, 0.9)
 
     def test_constructors_keep_the_accepted_forms(self):
         """Accepted forms build, and ``clip`` reads back what was passed.
