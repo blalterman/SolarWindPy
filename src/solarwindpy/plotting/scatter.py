@@ -104,11 +104,14 @@ class Scatter(base.ColorPlot):
             A value per point that sets its marker area through
             ``make_plot``'s ``size_scale``. Aligned by label to x and y, as z
             is; a point whose size is NaN or infinite is not plotted. Held
-            in ``data`` as the column ``"size"``.
+            in ``data`` as the column ``"size"``. A scalar raises
+            ``TypeError``: pass a constant marker area to ``make_plot`` as
+            ``s``.
         alpha: pd.Series or array-like, optional
             A value per point that sets its opacity through ``make_plot``'s
             ``alpha_scale``. Aligned and dropped as ``size`` is, and held in
-            ``data`` as the column ``"alpha"``.
+            ``data`` as the column ``"alpha"``. A scalar raises ``TypeError``:
+            pass a constant opacity to ``make_plot`` as ``alpha``.
         logx, logy: bool or None
             If True, draw that axis on a log scale. The data stay linear:
             ``clip`` and ``alim`` read the values as given. None means False;

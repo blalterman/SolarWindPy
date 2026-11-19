@@ -107,6 +107,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking:** `Hist1D(x, y, *, ...)`, `Hist2D(x, y, z, *, ...)`, `SpiralPlot2D(x, y, z, *, ...)`
   and `Scatter(x, y, z, size, alpha, *, ...)` take their data variables positionally and every
   other parameter keyword-only. No parameter is renamed.
+- **Breaking:** a plot's data variables hold one value per point. A scalar `x`, `y` or `z`,
+  or a scalar `size` or `alpha` on `solarwindpy.plotting.scatter.Scatter`, raises `TypeError`
+  naming it instead of being broadcast to every point; `Scatter(x, y, None, True)` no longer
+  draws every point at size True. Pass a constant marker area or opacity to `make_plot` as
+  `s` or `alpha`.
 - `solarwindpy.fitfunctions.plots.FFPlot.set_log(x=None, y=None)` matches
   `solarwindpy.plotting.base.Base.set_log`: None keeps an axis's setting and any other value is
   stored as a bool.

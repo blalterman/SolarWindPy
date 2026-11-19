@@ -710,11 +710,6 @@ _SCALAR_DATA_VARIABLES = [
 ]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="a scalar data variable is broadcast to every point; "
-    "remove this marker when _PlotSource refuses it",
-)
 @pytest.mark.parametrize("build, name", _SCALAR_DATA_VARIABLES)
 def test_a_scalar_data_variable_raises_type_error_naming_it(build, name):
     """A data variable holds one value per point, so a scalar is refused.

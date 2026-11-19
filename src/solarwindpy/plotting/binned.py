@@ -225,6 +225,32 @@ def _ambiguous_alignment(names):
     )
 
 
+# The ``make_plot`` keyword that draws a constant in place of each per-point variable.
+_CONSTANT_KEYWORDS = {"size": "s", "alpha": "alpha"}
+
+
+def _require_per_point(values, name, owner):
+    r"""Refuse a scalar where a plot takes one value per point.
+
+    None means the variable is absent and passes.
+
+    Raises
+    ------
+    TypeError
+        If ``values`` is a scalar. The message names the variable and, for a
+        ``Scatter``'s size or alpha, the ``make_plot`` keyword for a constant.
+    """
+    if values is None or np.ndim(values) > 0:
+        return
+    msg = (
+        f"{owner}: {name} must hold one value per point (a pd.Series or "
+        f"array-like), not the scalar {values!r}."
+    )
+    if name in _CONSTANT_KEYWORDS:
+        msg += f" Pass a constant to make_plot as {_CONSTANT_KEYWORDS[name]}=."
+    raise TypeError(msg)
+
+
 def _align(values, index, name):
     r"""Return ``values`` as a Series on ``index``, aligned by label.
 
@@ -375,7 +401,8 @@ class _PlotSource:
     Raises
     ------
     TypeError
-        If ``mask`` is not a boolean ``pd.Series``.
+        If ``mask`` is not a boolean ``pd.Series``, or a coordinate, the value
+        or an extra column is a scalar rather than one value per point.
     ValueError
         If no row is kept, or ``mask`` lacks a label of the index or holds
         NaN.
@@ -402,6 +429,12 @@ class _PlotSource:
         mask=None,
         within=None,
     ):
+        for k, v in (
+            *dict(coords).items(),
+            (value_name, value),
+            *(extra or {}).items(),
+        ):
+            _require_per_point(v, k, owner)
         frame = _combine({k: _numeric_if_object(v) for k, v in dict(coords).items()})
         index = frame.index
         if extra:
