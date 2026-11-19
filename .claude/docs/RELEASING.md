@@ -13,9 +13,8 @@ SolarWindPy uses a highly automated release pipeline:
 
 **Time Investment**: ~30-60 minutes active work (excluding monitoring periods)
 
-**Related Documentation**:
-- [MAINTENANCE.md](./MAINTENANCE.md) - Conda feedstock scripts, troubleshooting
-- [DEVELOPMENT.md](./DEVELOPMENT.md) - Code quality standards, testing requirements
+**Related Documentation**: `CLAUDE.md` § "Environment", § "Checks" and § "Conventions" hold
+the environment, the checks and the commit conventions this procedure relies on.
 
 ## Semantic Versioning
 
@@ -106,7 +105,7 @@ git commit -m "docs(changelog): prepare vX.Y.Z release notes"
 git push origin master
 ```
 
-**Commit Message Format**: Follow [Conventional Commits](https://www.conventionalcommits.org/) as specified in [DEVELOPMENT.md](./DEVELOPMENT.md#git-workflow-automated-via-hooks).
+**Commit Message Format**: Follow [Conventional Commits](https://www.conventionalcommits.org/), as `CLAUDE.md` § "Conventions" states; the commit-msg hook rejects other subjects.
 
 ### 4. Clean Working Directory
 
@@ -166,7 +165,7 @@ New version: v0.2.0
 ✅ Created tag: v0.2.0
 ```
 
-**Tag Naming**: Tags must follow `vX.Y.Z` format (with 'v' prefix). See [MAINTENANCE.md](./MAINTENANCE.md#git-tag-management) for tag management guidelines.
+**Tag Naming**: Tags must follow `vX.Y.Z` format (with 'v' prefix). setuptools_scm reads only `v*` tags (`tag_regex` in `pyproject.toml` `[tool.setuptools_scm]`).
 
 ### 7. Monitor GitHub Actions Workflow
 
@@ -327,7 +326,20 @@ The tracking issue created during release **automatically includes a dependency 
 2. If dependencies changed: manually update the bot's PR (instructions in tracking issue)
 3. If no changes: proceed to CI monitoring
 
-**Related Scripts**: See [MAINTENANCE.md](./MAINTENANCE.md#conda-feedstock-automation) for `update_conda_feedstock.py` and `wait_for_pypi.py` usage.
+**Related Scripts**: `publish.yml`'s `update-conda-feedstock` job runs both of these after a
+stable tag. Run them by hand to rehearse or repeat that step; each takes the version with or
+without the `v` prefix:
+
+```bash
+# Rehearse the feedstock update: no issue, no changes
+python scripts/update_conda_feedstock.py v0.1.5 --dry-run
+
+# Wait until PyPI lists the release
+python scripts/wait_for_pypi.py v0.1.5 --timeout 300
+
+# Full feedstock update: reads the sdist SHA256 and opens the tracking issue
+python scripts/update_conda_feedstock.py v0.1.5
+```
 
 ### 11. Monitor Conda-forge Bot PR
 
@@ -421,7 +433,7 @@ conda deactivate
 conda env remove -n test-solarwindpy-release
 ```
 
-**Environment Setup**: See [DEVELOPMENT.md](./DEVELOPMENT.md#environment-setup) for detailed environment configuration.
+**Environment Setup**: `CLAUDE.md` § "Environment" holds the development env recipe.
 
 ## Rollback Procedures
 
@@ -466,8 +478,6 @@ git push origin :refs/tags/vX.Y.Z
 sleep 3 && git add <files> && git commit -m "..." && git push origin master
 ```
 
-**Additional Troubleshooting**: See [MAINTENANCE.md](./MAINTENANCE.md#troubleshooting) for more git-related issues.
-
 ### Issue: bump_version.py Fails on Dirty Working Directory
 
 **Symptom**: `Working directory has uncommitted changes`
@@ -494,7 +504,7 @@ git commit -m "chore: add tmp/ to .gitignore"
 
 **Rationale**: Publish workflow runs `ruff check` on `src/solarwindpy/` (not `tests/`)
 
-**Code Quality Standards**: See [DEVELOPMENT.md](./DEVELOPMENT.md#code-quality-standards) for comprehensive linting and formatting requirements.
+**Code Quality Standards**: the ruff rules are `[tool.ruff]` in `pyproject.toml`; `CLAUDE.md` § "Checks" runs them at the versions CI pins.
 
 ### Issue: Conda-forge Bot Not Creating PR
 
@@ -604,10 +614,9 @@ Use this checklist for each release:
 
 For issues or questions about the release process:
 1. Check this document first
-2. Review [MAINTENANCE.md](./MAINTENANCE.md) for script usage and troubleshooting
-3. Consult previous release tracking issues
-4. Review GitHub Actions workflow logs
-5. Ask in conda-forge Gitter channel (for feedstock issues)
+2. Consult previous release tracking issues
+3. Review GitHub Actions workflow logs
+4. Ask in conda-forge Gitter channel (for feedstock issues)
 
 ---
 
