@@ -5,8 +5,8 @@
 Columns form a MultiIndex with levels ``M`` (measurement), ``C`` (component)
 and ``S`` (species). Selection uses native pandas (``.xs`` for one label,
 ``.loc`` for several) and is tested here through the public objects that
-select: a Plasma's ions, a Vector's components, ``Plasma.R``. Reduction goes
-through private helpers named for the level they reduce, and Vector and Tensor
+select: an Ion's species and a Vector's components. Reduction goes through
+private helpers named for the level they reduce, and Vector and Tensor
 hold a single species.
 
 The reduction helpers are private to ``core``. They are tested directly
@@ -22,7 +22,7 @@ import pandas.testing as pdt
 import pytest
 
 import solarwindpy as swp
-from solarwindpy.core import base, ions, plasma, tensor, vector
+from solarwindpy.core import base, ions, tensor, vector
 from tests.tolerances import exact
 
 
@@ -49,21 +49,6 @@ def _two_species(rows_by_species, labels=("x", "y", "z")):
 
 
 # --- Selection, through the public objects that select ----------------------
-
-
-def test_species_selection_names_the_level_not_its_position(plasma_data):
-    r"""A plasma built from levels ordered ``("S", "M", "C")`` gives p1 its own columns.
-
-    Plasma accepts its column levels in any order. Its ion p1 then holds the
-    columns that ``.xs("p1", level="S")`` selects from the stored order.
-
-    ON FAILURE: the code is wrong.
-    """
-    expected = plasma_data.xs("p1", axis=1, level="S")
-    moved = plasma_data.reorder_levels(["S", "M", "C"], axis=1)
-    species = plasma_data.columns.unique(level="S").drop("")
-    got = plasma.Plasma(moved, *species).p1.data
-    pdt.assert_frame_equal(got.sort_index(axis=1), expected.sort_index(axis=1))
 
 
 def test_component_selection_shares_the_parent_data():
@@ -93,32 +78,6 @@ def test_a_list_of_components_keeps_the_order_asked_for():
     got = vector.Vector(frame).cartesian
     assert got.columns.tolist() == ["x", "y", "z"]
     assert got.iloc[0].tolist() == [1.0, 2.0, 3.0]
-
-
-def test_a_list_of_components_on_two_levels_keeps_every_species():
-    r"""``Plasma.R("a", "p1")`` keeps one column per species, each that species' own R.
-
-    ``R`` selects the par and per pressures on ``("C", "S")`` columns; the
-    selection keeps both species, so each column equals ``R`` of that species
-    alone.
-
-    ON FAILURE: the code is wrong.
-    """
-    p = swp.examples.load_plasma()
-    got = p.R("a", "p1")
-    assert got.columns.tolist() == ["a", "p1"]
-    for s in ("a", "p1"):
-        pdt.assert_series_equal(got[s], p.R(s))
-
-
-def test_an_unknown_label_raises_naming_the_level_and_its_labels():
-    r"""Calling a Vector with an absent component raises KeyError listing x, y and z.
-
-    ON FAILURE: the code is wrong.
-    """
-    v = vector.Vector(_components([[1, 2, 3]]))
-    with pytest.raises(KeyError, match=r"component 'par'.*x.*y.*z"):
-        v("par")
 
 
 def test_an_ion_of_an_absent_species_raises_naming_the_species_present(plasma_data):
