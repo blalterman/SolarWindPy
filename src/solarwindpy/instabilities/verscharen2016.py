@@ -304,7 +304,6 @@ class StabilityCondition(object):
         return mpl.colormaps["Paired"].resampled(len(self.stability_map))
 
     @property
-    # TODO: rename to `color_norm` for consistancy w/ plotting code.
     def norm(self):
         """The normalization instance used for plotting the stability bin."""
 

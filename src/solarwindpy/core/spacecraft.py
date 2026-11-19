@@ -11,10 +11,6 @@ __all__ = [
 import pandas as pd
 import numpy as np
 
-# We rely on views via DataFrame.xs to reduce memory size and do not
-# `.copy(deep=True)`, so we want to make sure that this doesn't
-# accidentally cause a problem.
-
 from . import base
 from . import quantities
 from . import vector

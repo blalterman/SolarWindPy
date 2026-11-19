@@ -9,10 +9,6 @@ import numpy as np
 import pandas as pd
 import itertools
 
-# We rely on views via DataFrame.xs to reduce memory size and do not
-# `.copy(deep=True)`, so we want to make sure that this doesn't
-# accidentally cause a problem.
-
 from . import base
 from . import vector
 from . import ions

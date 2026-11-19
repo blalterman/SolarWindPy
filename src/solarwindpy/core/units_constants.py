@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-"""Definitions of common units and physical constants.
+"""Physical constants and unit conversions for SolarWindPy's calculations.
 
-The values are derived from :mod:`scipy.constants`. All quantities stored in
-the :class:`~solarwindpy.core.plasma.Plasma` object have a corresponding entry
-in :class:`Constants` and can be converted using :class:`Units`, which reads
-its factors from :mod:`solarwindpy.core.quantities`.
+:class:`Constants` holds physical constants and per-species values (masses,
+charges and charge states), taken from :mod:`scipy.constants`, and the
+polytropic indices. :class:`Units` holds, for each quantity, the factor that
+converts its display unit to SI, read from :mod:`solarwindpy.core.quantities`.
 """
 
 __all__ = [
@@ -20,10 +20,6 @@ from scipy import constants
 from scipy.constants import physical_constants
 
 from . import quantities
-
-# We rely on views via DataFrame.xs to reduce memory size and do not
-# `.copy(deep=True)`, so we want to make sure that this doesn't
-# accidentally cause a problem.
 
 _misc_constants = {
     "e0": constants.epsilon_0,

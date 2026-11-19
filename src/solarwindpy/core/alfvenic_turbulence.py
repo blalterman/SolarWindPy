@@ -31,10 +31,6 @@ import pandas as pd
 
 from collections import namedtuple
 
-# We rely on views via DataFrame.xs to reduce memory size and do not
-# `.copy(deep=True)`, so we want to make sure that this doesn't
-# accidentally cause a problem.
-
 from . import base
 from . import units_constants
 
