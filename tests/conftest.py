@@ -1,26 +1,17 @@
-"""Consolidated test configuration for SolarWindPy.
+"""Test configuration shared by every test under ``tests/``.
 
-Shared test configuration for every test under tests/. Tests import the
-installed package (``import solarwindpy``), not relative modules.
+``pythonpath = ["src"]`` in ``pyproject.toml`` puts this checkout's ``src/``
+first on ``sys.path``, so ``import solarwindpy`` loads the package from this
+checkout, not from whichever checkout the editable install points at.
 """
 
 import os
 
 import pytest
 
-# Tests in the /tests/ directory should use external package imports
-# (e.g., "import solarwindpy" instead of relative imports)
-# No special module path configuration needed for external imports
-
 
 def pytest_addoption(parser):
     """Add custom command-line options for pytest."""
-    parser.addoption(
-        "--debug-prints",
-        action="store_true",
-        default=False,
-        help="Enable debug print statements in tests",
-    )
     parser.addoption(
         "--run-drift",
         action="store_true",
@@ -54,25 +45,3 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if gated.intersection(mark.name for mark in item.iter_markers()):
             item.add_marker(skip_marker)
-
-
-@pytest.fixture
-def debug_print(request):
-    """Fixture that returns a conditional print function.
-
-    Only prints when --debug-prints flag is passed to pytest.
-
-    Usage
-    -----
-    def test_something(debug_print):
-        debug_print(f"DataFrame shape: {df.shape}")
-
-    Run with: pytest tests/ --debug-prints -s
-    """
-    enabled = request.config.getoption("--debug-prints")
-
-    def _debug_print(*args, **kwargs):
-        if enabled:
-            print(*args, **kwargs)
-
-    return _debug_print

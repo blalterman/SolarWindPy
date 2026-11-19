@@ -15,7 +15,12 @@ import pytest
 
 from solarwindpy.solar_activity import cache
 from solarwindpy.solar_activity.icme import icmecat
-from solarwindpy.solar_activity.icme.icmecat import ICMECAT, ICMECATDownloadError
+from solarwindpy.solar_activity.icme.icmecat import (
+    ICMECAT,
+    ICMECAT_URL,
+    SPACECRAFT_NAMES,
+    ICMECATDownloadError,
+)
 from tests.tolerances import exact
 
 T = pd.Timestamp
@@ -861,3 +866,35 @@ class TestICMECATNamesAndPositions:
         intervals = ICMECAT().estimated_intervals
         for column in ("mo_sc_heliodistance", "mo_sc_lat_heeq", "mo_sc_long_heeq"):
             assert intervals[column].tolist() == catalog[column].tolist()
+
+
+# TestModuleConstants checks the pinned values: ICMECAT_URL is bound here at
+# import, before the autouse ``_no_network`` fixture repoints
+# ``icmecat.ICMECAT_URL`` for each test. The opt-in drift suite
+# (tests/drift/test_drift_icmecat.py) checks these constants against the live
+# catalog.
+class TestModuleConstants:
+    """The pinned catalog source and its spacecraft spellings."""
+
+    def test_url_constant_is_pinned_helio4cast_csv(self):
+        """ICMECAT_URL is the HELIO4CAST ICMECAT CSV over https.
+
+        ON FAILURE: the code is wrong, unless the author moved the pin to another
+        host; update this test with it.
+        """
+        assert ICMECAT_URL.startswith("https://helioforecast.space/")
+        assert "HELIO4CAST_ICMECAT_v" in ICMECAT_URL
+        assert ICMECAT_URL.endswith(".csv")
+
+    def test_spacecraft_names_use_catalog_spellings(self):
+        """SPACECRAFT_NAMES spells names as the v23 catalog's sc_insitu column does.
+
+        The catalog writes "ULYSSES" (all caps) and "SolarOrbiter" (no space),
+        and has no ACE or Cassini events (see the comment above SPACECRAFT_NAMES
+        and tests/drift/test_drift_icmecat.py).
+
+        ON FAILURE: the code is wrong, unless the drift suite shows the catalog
+        changed; then external fact drifted; update SPACECRAFT_NAMES.
+        """
+        assert {"ULYSSES", "SolarOrbiter", "Wind"} <= SPACECRAFT_NAMES
+        assert not {"Ulysses", "Solar Orbiter", "ACE", "Cassini"} & SPACECRAFT_NAMES
