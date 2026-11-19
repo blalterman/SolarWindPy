@@ -20,8 +20,6 @@ import inspect
 import pkgutil
 import re
 
-import pytest
-
 import solarwindpy
 
 # The public classes and functions a user calls directly; each shows its use
@@ -274,13 +272,6 @@ def test_no_public_property_has_a_returns_section():
     assert not listed, listed
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=ModuleNotFoundError,
-    reason="BetaRPlot is still defined in the module ruling Q7 renames to "
-    "solarwindpy.instabilities.plots; No module named 'solarwindpy.instabilities.plots'; "
-    "remove this marker when the rename lands",
-)
 def test_every_entry_point_has_an_examples_section():
     """Every class and function in ENTRY_POINTS has an Examples section.
 

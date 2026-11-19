@@ -22,7 +22,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 
-from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.instabilities.plots import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.scatter import Scatter  # noqa: E402

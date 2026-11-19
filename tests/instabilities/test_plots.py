@@ -1,6 +1,6 @@
-# Spent-When: PERMANENT(solarwindpy.instabilities.beta_ani is removed from the package)
+# Spent-When: PERMANENT(solarwindpy.instabilities.plots is removed from the package)
 # Supersedes: none
-"""Tests for :class:`solarwindpy.instabilities.beta_ani.BetaRPlot`.
+"""Tests for :class:`solarwindpy.instabilities.plots.BetaRPlot`.
 
 BetaRPlot is a Hist2D of anisotropy R against parallel beta, binned in log10 by
 default, hiding cells with fewer than 5 counts. Expected counts come from
@@ -17,7 +17,7 @@ import pandas as pd  # noqa: E402
 import pytest  # noqa: E402
 from matplotlib.collections import QuadMesh  # noqa: E402
 
-from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.instabilities.plots import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.labels.base import TeXlabel  # noqa: E402
 from tests.tolerances import exact  # noqa: E402
 

@@ -46,7 +46,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 import solarwindpy  # noqa: E402
-from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.instabilities.plots import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.base import BinnedPlot, ColorPlot  # noqa: E402
 from solarwindpy.plotting.binned import BinnedData  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402

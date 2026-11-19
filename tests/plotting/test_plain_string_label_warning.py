@@ -29,7 +29,7 @@ import pytest  # noqa: E402
 
 import solarwindpy as swp  # noqa: E402
 from solarwindpy.fitfunctions.lines import Line  # noqa: E402
-from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.instabilities.plots import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
 from solarwindpy.plotting.labels import base as labels_base  # noqa: E402

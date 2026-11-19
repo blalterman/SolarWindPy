@@ -36,7 +36,7 @@ from matplotlib.container import ErrorbarContainer  # noqa: E402
 from matplotlib.contour import ContourSet  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
-from solarwindpy.instabilities.beta_ani import BetaRPlot  # noqa: E402
+from solarwindpy.instabilities.plots import BetaRPlot  # noqa: E402
 from solarwindpy.plotting.base import Guides  # noqa: E402
 from solarwindpy.plotting.hist1d import Hist1D  # noqa: E402
 from solarwindpy.plotting.hist2d import Hist2D  # noqa: E402
