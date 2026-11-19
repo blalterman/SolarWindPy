@@ -220,7 +220,7 @@ print(f\"Classifiers: {', '.join([c for c in data['info']['classifiers'] if 'Pro
 ```
 Version: X.Y.Z
 Python: <4,>=3.12
-Classifiers: Programming Language :: Python :: 3, Programming Language :: Python :: 3.12, Programming Language :: Python :: 3.13, Programming Language :: Python :: 3.14
+Classifiers: Programming Language :: Python :: 3, Programming Language :: Python :: 3.12, Programming Language :: Python :: 3.13, Programming Language :: Python :: 3.14, Programming Language :: Python :: 3.15
 ```
 
 ### 9. Enhance GitHub Release Notes (Optional)
