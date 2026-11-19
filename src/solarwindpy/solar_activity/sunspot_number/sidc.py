@@ -366,9 +366,11 @@ class SIDC(ActivityIndicator):
     def calculate_extrema_kind(self):
         r"""Determine whether an SSN observation belongs to a cycle Minimum or Maximum.
 
-            Min: ssn < cycle mean
-            Max: ssn >= cycle mean
+            Max: ssn >= half the cycle's maximum ssn
+            Min: ssn < half the cycle's maximum ssn
 
+        A Min before the cycle's maximum belongs to that cycle, labelled
+        ``"<k>-Min"``; a Min after it belongs to the next cycle, ``"<k+1>-Min"``.
         Labels for the extremum kind include indicators for which cycle the extremum
         belongs to. These can be easily stripped with string manipulations, but are
         difficult to calculate after the fact.
