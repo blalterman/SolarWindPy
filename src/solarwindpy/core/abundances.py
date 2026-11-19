@@ -83,6 +83,28 @@ class ReferenceAbundances:
         # Convert remaining columns to float64
         self._data = data.astype(np.float64)
 
+    @staticmethod
+    def _key_level(key):
+        """The index level an element ``key`` names: ``"Symbol"`` or ``"Z"``.
+
+        Parameters
+        ----------
+        key : str or int
+            Element symbol ('Fe') or atomic number (26).
+
+        Raises
+        ------
+        ValueError
+            If key is not a string or integer.
+        """
+        if isinstance(key, str):
+            level = "Symbol"
+        elif isinstance(key, int):
+            level = "Z"
+        else:
+            raise ValueError(f"Unrecognized key type ({type(key)})")
+        return level
+
     def get_element(self, key, kind="Photosphere"):
         r"""Get measurements for element stored at `key`.
 
@@ -131,12 +153,7 @@ class ReferenceAbundances:
                 f"(or 'Meteorites' as alias for 'CI_chondrites')"
             )
 
-        if isinstance(key, str):
-            level = "Symbol"
-        elif isinstance(key, int):
-            level = "Z"
-        else:
-            raise ValueError(f"Unrecognized key type ({type(key)})")
+        level = self._key_level(key)
 
         out = self.data.loc[:, kind].xs(key, axis=0, level=level, drop_level=False)
         assert out.shape[0] == 1
@@ -173,12 +190,7 @@ class ReferenceAbundances:
         >>> print(ref.get_comment("Fe"))  # Spectroscopic, no comment
         None
         """
-        if isinstance(key, str):
-            level = "Symbol"
-        elif isinstance(key, int):
-            level = "Z"
-        else:
-            raise ValueError(f"Unrecognized key type ({type(key)})")
+        level = self._key_level(key)
 
         try:
             comment = self._comments.xs(key, axis=0, level=level)
