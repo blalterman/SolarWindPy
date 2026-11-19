@@ -288,12 +288,6 @@ def test_ssn_axis_top_matches_the_colour_bar_scale(tmp_path, monkeypatch, ssn):
     assert ax.get_ylim()[1] == cbar_top
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="ssn_scale_top is SIDC's static method; expected the module function "
-    "solar_activity.plots.ssn_scale_top; remove this marker when it moves",
-)
 @pytest.mark.parametrize(
     "ssn, top",
     [

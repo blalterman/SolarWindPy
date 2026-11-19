@@ -450,27 +450,6 @@ class SIDC(ActivityIndicator):
 
     run_normalization.__doc__ = ActivityIndicator.run_normalization.__doc__
 
-    @staticmethod
-    def ssn_scale_top(ssn):
-        r"""Top of an SSN scale that starts at 0 and holds all of ``ssn``.
-
-        The peak of ``ssn`` rounded up to the next multiple of 100, and never
-        less than 100, so the series always stays inside the scale and a
-        quiet or empty series cannot give a zero-height scale.
-
-        Parameters
-        ----------
-        ssn : pandas.Series
-            Sunspot numbers to fit on the scale.
-
-        Returns
-        -------
-        int
-            The scale top.
-        """
-        # Python's max keeps 100 when the peak is NaN (an empty series).
-        return int(max(100, np.ceil(ssn.max() / 100.0) * 100))
-
 
 class SSNExtrema(IndicatorExtrema):
     r"""Solar-cycle sunspot-number extrema tabulated in ``ssn_extrema.csv``.

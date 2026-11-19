@@ -4,7 +4,10 @@ __all__ = [
     "IndicatorPlot",
     "SSNPlot",
     "plot_on_colorbar",
+    "ssn_scale_top",
 ]
+
+import numpy as np
 
 from matplotlib import dates as mdates
 from matplotlib import ticker
@@ -133,20 +136,39 @@ class SSNPlot(IndicatorPlot):
     def _format_axis(self, ax):
         r"""Format ``ax`` as :class:`IndicatorPlot` does, with SSN from 0 to a top.
 
-        The top is the indicator's
-        :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
-        of :attr:`plot_data`, the same scale :func:`plot_on_colorbar` uses.
+        The top is :func:`ssn_scale_top` of :attr:`plot_data`, the same scale
+        :func:`plot_on_colorbar` uses.
         """
         super(SSNPlot, self)._format_axis(ax)
-        ax.set_ylim(0, self.indicator.ssn_scale_top(self.plot_data))
+        ax.set_ylim(0, ssn_scale_top(self.plot_data))
+
+
+def ssn_scale_top(ssn):
+    r"""Top of an SSN scale that starts at 0 and holds all of ``ssn``.
+
+    The peak of ``ssn`` rounded up to the next multiple of 100, and never
+    less than 100, so the series always stays inside the scale and a
+    quiet or empty series cannot give a zero-height scale.
+
+    Parameters
+    ----------
+    ssn : pandas.Series
+        Sunspot numbers to fit on the scale.
+
+    Returns
+    -------
+    int
+        The scale top.
+    """
+    # Python's max keeps 100 when the peak is NaN (an empty series).
+    return int(max(100, np.ceil(ssn.max() / 100.0) * 100))
 
 
 def plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar=True):
     r"""Plot the sunspot number along a colour bar.
 
     The sunspot numbers between ``t0`` and ``t1`` are scaled onto the colour
-    bar's value axis over ``[0, top]``, where ``top`` is the indicator's
-    :meth:`~solarwindpy.solar_activity.sunspot_number.sidc.SIDC.ssn_scale_top`
+    bar's value axis over ``[0, top]``, where ``top`` is :func:`ssn_scale_top`
     of the window, so the line always stays inside the scale. Major ticks are
     labelled 0, ``top / 2`` and ``top``; minor ticks fall every 25.
 
@@ -185,7 +207,7 @@ def plot_on_colorbar(indicator, cax, t0, t1, vertical_cbar=True):
         ssn_axis, time_axis = cax.yaxis, cax.xaxis
 
     v0, v1 = ssn_axis.get_view_interval()
-    top = indicator.ssn_scale_top(ssn)
+    top = ssn_scale_top(ssn)
     scaled = ((ssn / top) * (v1 - v0)) + v0
     points = (scaled, time) if vertical_cbar else (time, scaled)
 
