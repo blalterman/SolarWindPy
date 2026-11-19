@@ -17,7 +17,7 @@ import matplotlib as mpl
 from pathlib import Path
 from matplotlib import pyplot as plt
 
-from ..plotting.base import AxesLabels, LogAxes
+from ..plotting.base import AxesLabels, LogAxes, _updated_labels
 from ..plotting.labels.base import _warn_if_plain
 
 # The single source of FFPlot's default styles. Each plot method merges the
@@ -764,17 +764,9 @@ class FFPlot(object):
 
     def _set_labels(self, **kwargs):
         r"""Store the labels as ``set_labels`` does, without its plain-str warning."""
-        x = kwargs.pop("x", self.labels.x)
-        y = kwargs.pop("y", self.labels.y)
-        z = kwargs.pop("z", self.labels.z)
+        self._labels = _updated_labels(self.labels, **kwargs)
 
-        if len(kwargs.keys()):
-            extra = "\n".join([f"{k}: {v}" for k, v in kwargs.items()])
-            raise KeyError(f"Unexpected kwarg\n{extra}")
-
-        self._labels = AxesLabels(x, y, z)
-
-    def set_log(self, **kwargs):
+    def set_log(self, x=None, y=None):
         r"""Set :attr:`log`, a :py:class:`~solarwindpy.plotting.base.LogAxes`.
 
         :attr:`log` sets the scale of the x and y axes the plots are drawn
@@ -784,15 +776,15 @@ class FFPlot(object):
 
         Parameters
         ----------
-        **kwargs
-            ``x`` and/or ``y``, each a bool: True for a log-scaled axis.
-            Axes not passed keep their current setting.
+        x, y : bool, optional
+            If True, the axis is logarithmic. None keeps the current value,
+            as for :meth:`solarwindpy.plotting.base.Base.set_log`.
         """
-        log = self._log._asdict()
-        for k, v in kwargs.items():
-            log[k] = v
-
-        self._log = LogAxes(**log)
+        if x is None:
+            x = self.log.x
+        if y is None:
+            y = self.log.y
+        self._log = LogAxes(bool(x), bool(y))
 
     def set_TeX_info(self, new):
         """Assign the annotation source.

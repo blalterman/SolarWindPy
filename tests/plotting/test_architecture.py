@@ -315,13 +315,6 @@ def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
     assert params == expected
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="fitfunctions.plots.FFPlot.set_log takes **kwargs and stores them as "
-    "given; expected Base.set_log's (x=None, y=None), None keeping an axis; "
-    "remove this marker when FFPlot.set_log matches Base.set_log",
-)
 def test_the_fit_plotter_sets_log_as_the_plots_do():
     """``FFPlot.set_log`` is ``Base.set_log``'s: None keeps an axis, a value sets its truth.
 
@@ -340,6 +333,7 @@ def test_the_fit_plotter_sets_log_as_the_plots_do():
     plot.set_log(x=1)
     plot.set_log(y=None)
     assert plot.log == base.LogAxes(True, False)
+    assert plot.log.x is True  # stored as a bool, not the 1 passed
 
 
 def test_scatter_log_flags_set_the_axis_scales_and_keep_the_data_linear():

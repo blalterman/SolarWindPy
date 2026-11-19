@@ -49,6 +49,28 @@ AxesLabels = namedtuple("AxesLabels", "x,y,z", defaults=(None,))
 ScatterLabels = namedtuple(
     "ScatterLabels", "x,y,z,size,alpha", defaults=(None, None, None)
 )
+
+
+def _updated_labels(labels, **kwargs):
+    r"""``AxesLabels`` of the x, y and z of ``labels``, replaced where ``kwargs`` names one.
+
+    The one label update of every plot's ``_set_labels`` and of
+    :class:`~solarwindpy.fitfunctions.plots.FFPlot`.
+
+    Raises
+    ------
+    KeyError
+        If ``kwargs`` names anything other than ``x``, ``y`` and ``z``.
+    """
+    x = kwargs.pop("x", labels.x)
+    y = kwargs.pop("y", labels.y)
+    z = kwargs.pop("z", labels.z)
+    if kwargs:
+        extra = "\n".join(f"{k}: {v}" for k, v in kwargs.items())
+        raise KeyError(f"Unexpected kwarg\n{extra}")
+    return AxesLabels(x, y, z)
+
+
 RangeLimits = namedtuple("RangeLimits", "lower,upper", defaults=(None,))
 #: The guides a draw method drew, the last item it returns: the colorbar of
 #: the colour (``matplotlib.colorbar.Colorbar``), the key of the marker size
@@ -465,15 +487,7 @@ class Base(_WithLogger, ABC):
         The package's own placeholders and its propagation of labels already
         set come through here; subclasses extend this, not ``set_labels``.
         """
-        x = kwargs.pop("x", self.labels.x)
-        y = kwargs.pop("y", self.labels.y)
-        z = kwargs.pop("z", self.labels.z)
-
-        if len(kwargs.keys()):
-            extra = "\n".join(["{}: {}".format(k, v) for k, v in kwargs.items()])
-            raise KeyError("Unexpected kwarg\n{}".format(extra))
-
-        self._labels = AxesLabels(x, y, z)
+        self._labels = _updated_labels(self.labels, **kwargs)
 
     def _add_axis_labels(self, ax, transpose_axes=False):
         xlbl = self.labels.x
