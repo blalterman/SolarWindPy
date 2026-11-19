@@ -125,6 +125,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `solarwindpy.core.plasma.Plasma.save` checks `data_modifier_fcn`, `sc_modifier_fcn` and
+  `aux_modifier_fcn` before writing anything, so a modifier that is not a function raises
+  `TypeError` naming the parameter and the rejected type, and leaves no partly written HDF5
+  file. A non-function `sc_modifier_fcn` is refused even when the plasma has no spacecraft
+  data; before, it was ignored.
 - `solarwindpy.solar_activity.base.IndicatorExtrema.cut_spec_by_interval` raises `ValueError`
   saying the cycle intervals overlap or are out of order, instead of a bare `ValueError`.
 - The usage guide's clip sentence said `clip=True` drops the points beyond the cuts; it moves
