@@ -436,6 +436,7 @@ class Base(_WithLogger, ABC):
 
     _name = None
     _publication_format = None
+    _new_line_for_units = False
 
     def __str__(self):
         return self.with_units
@@ -510,6 +511,21 @@ class Base(_WithLogger, ABC):
             new = bool(new)
         self._publication_format = new
 
+    @property
+    def new_line_for_units(self):
+        r"""If True, units are placed on a new line."""
+        return self._new_line_for_units
+
+    def set_new_line_for_units(self, new):
+        r"""Set whether units are placed on a new line.
+
+        Parameters
+        ----------
+        new : bool
+            If True, units go on a new line; stored as :class:`bool`.
+        """
+        self._new_line_for_units = bool(new)
+
     def _format_with_name(self, label_str):
         """Prepend the name in publication format.
 
@@ -531,7 +547,9 @@ class Base(_WithLogger, ABC):
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
-        result = format_with_units(self.tex, self.units)
+        result = format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -639,11 +657,6 @@ class TeXlabel(Base):
         return self._mcs1
 
     @property
-    def new_line_for_units(self):
-        r"""If True, units are placed on a new line."""
-        return self._new_line_for_units
-
-    @property
     def tex(self):
         r"""TeX of the quantity, set by ``build_label``."""
         return self._tex
@@ -705,16 +718,6 @@ class TeXlabel(Base):
 
         self._mcs0 = mcs0_
         self._mcs1 = mcs1_
-
-    def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line.
-
-        Parameters
-        ----------
-        new : bool
-            If True, units go on a new line; stored as :class:`bool`.
-        """
-        self._new_line_for_units = bool(new)
 
     def set_axnorm(self, new):
         r"""Set the axis normalization.

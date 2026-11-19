@@ -163,7 +163,9 @@ class ManualLabel(ArbitraryLabel):
     def with_units(self):
         r"""Label with units, as a TeX math string; no units bracket if ``units`` is empty."""
         result = base.format_with_units(
-            r"\mathrm{%s}" % self.tex.replace(" ", r" \; "), self.units
+            r"\mathrm{%s}" % self.tex.replace(" ", r" \; "),
+            self.units,
+            new_line=self.new_line_for_units,
         )
         return self._format_with_name(result)
 
@@ -260,7 +262,9 @@ class CarringtonRotation(ArbitraryLabel):
         self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, base._inU["dimless"])
+        result = base.format_with_units(
+            self.tex, base._inU["dimless"], new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -308,7 +312,9 @@ class Count(ArbitraryLabel):
         # In publication format the name line says the words, so the second
         # line is the count's symbol rather than the words again.
         tex = self.symbol if self.publication_format else self.tex
-        result = base.format_with_units(tex, self.units)
+        result = base.format_with_units(
+            tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -402,7 +408,9 @@ class Power(ArbitraryLabel):
         self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -448,7 +456,9 @@ class Probability(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -592,21 +602,6 @@ class CountOther(ArbitraryLabel):
         r"""Comparison string, e.g. ``"> 5"``; empty if none."""
         return self._comparison
 
-    @property
-    def new_line_for_units(self):
-        r"""If True, units are placed on a new line."""
-        return self._new_line_for_units
-
-    def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line.
-
-        Parameters
-        ----------
-        new : bool
-            If True, units go on a new line; stored as :class:`bool`.
-        """
-        self._new_line_for_units = bool(new)
-
     def set_other_label(self, other):
         r"""Store the label of the quantity being compared.
 
@@ -735,21 +730,6 @@ class MathFcn(ArbitraryLabel):
         r"""If True, the result is labelled dimensionless."""
         return self._dimensionless
 
-    @property
-    def new_line_for_units(self):
-        r"""If True, units are placed on a new line."""
-        return self._new_line_for_units
-
-    def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line.
-
-        Parameters
-        ----------
-        new : bool
-            If True, units go on a new line; stored as :class:`bool`.
-        """
-        self._new_line_for_units = bool(new)
-
     def set_other_label(self, other):
         r"""Store the label the function is applied to.
 
@@ -877,21 +857,6 @@ class AbsoluteValue(ArbitraryLabel):
         r"""Label the function is applied to."""
         return self._other_label
 
-    @property
-    def new_line_for_units(self):
-        r"""If True, units are placed on a new line."""
-        return self._new_line_for_units
-
-    def set_new_line_for_units(self, new):
-        r"""Set whether units are placed on a new line.
-
-        Parameters
-        ----------
-        new : bool
-            If True, units go on a new line; stored as :class:`bool`.
-        """
-        self._new_line_for_units = bool(new)
-
     def set_other_label(self, other):
         r"""Store the label the function is applied to.
 
@@ -941,7 +906,9 @@ class Distance2Sun(ArbitraryLabel):
         self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, r"\mathrm{%s}" % self.units)
+        result = base.format_with_units(
+            self.tex, r"\mathrm{%s}" % self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -1004,7 +971,9 @@ class SSN(ArbitraryLabel):
         self.set_publication_format(publication_format)
 
     def __str__(self):
-        result = base.format_with_units(self.tex, base._inU["dimless"])
+        result = base.format_with_units(
+            self.tex, base._inU["dimless"], new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -1088,7 +1057,9 @@ class ComparisonLabel(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
@@ -1268,7 +1239,9 @@ class Xcorr(ArbitraryLabel):
         self.build_label()
 
     def __str__(self):
-        result = base.format_with_units(self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property

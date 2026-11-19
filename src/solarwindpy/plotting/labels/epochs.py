@@ -41,7 +41,9 @@ class Timedelta(special.ArbitraryLabel):
     @property
     def with_units(self):
         r"""Label with units, as a TeX math string."""
-        result = base.format_with_units(self.tex, self.units)
+        result = base.format_with_units(
+            self.tex, self.units, new_line=self.new_line_for_units
+        )
         return self._format_with_name(result)
 
     @property
