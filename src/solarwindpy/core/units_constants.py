@@ -34,6 +34,11 @@ _misc_constants = {
     "gas constant": constants.R,
 }
 
+# Solar rotation rate [rad/s]: 2 pi over the 25.38 d sidereal period of the
+# Carrington system, Thompson (2006), A&A 449, 791, sec. 2.2,
+# doi:10.1051/0004-6361:20054262.
+_SOLAR_ROTATION_RATE = 2.0 * constants.pi / (25.38 * constants.day)
+
 _kBoltzmann = {
     "J": constants.k,
     "eV": physical_constants["Boltzmann constant in eV/K"][0],

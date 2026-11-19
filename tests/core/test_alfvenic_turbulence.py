@@ -637,12 +637,6 @@ def _gse_inputs():
     return v, b, rho, sc
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="AlfvenicTurbulence.set_data uses omega = 2.865e-6 rad/s; remove "
-    "this marker when it uses 2 pi / 25.38 d",
-)
 def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
     """GSE input becomes RTN, v_T loses the solar-rotation speed, b is rectified.
 

@@ -36,6 +36,7 @@ from collections import namedtuple
 # accidentally cause a problem.
 
 from . import base
+from . import units_constants
 
 AlfvenicTurbAveraging = namedtuple("AlfvenicTurbAveraging", "window,min_periods")
 
@@ -81,8 +82,10 @@ class AlfvenicTurbulence(base.Core):
        :math:`(R, T, N) = (-X, -Y, Z)`.
     2. The speed of solar rotation at the spacecraft,
        :math:`\Omega r \cos\lambda`, is subtracted from :math:`v_T`. Here
-       :math:`\Omega = 2.865 \times 10^{-6}` rad/s is the Sun's sidereal
-       rotation rate (:math:`2\pi` per 25.38 days), :math:`r` is the
+       :math:`\Omega = 2\pi / 25.38\,\mathrm{d} = 2.8653 \times 10^{-6}`
+       rad/s is the Sun's rotation rate over the sidereal Carrington period
+       (Thompson 2006, A&A 449, 791, sec. 2.2,
+       doi:10.1051/0004-6361:20054262), :math:`r` is the
        spacecraft's distance to the Sun in km, and :math:`\cos\lambda` is
        :math:`\sqrt{x^2 + y^2} / \sqrt{x^2 + y^2 + z^2}` of its GSE position.
     3. The polarity of each measurement is the sign of
@@ -372,8 +375,10 @@ unexpected.""")
                 pd.Series({"x": -1, "y": -1, "z": 1}), axis=1, level="C"
             )
 
-            # Project along nominal Parker Spiral
-            omega = 2.865e-6  # rad/s
+            # Project along nominal Parker Spiral. The Sun rotates at 2 pi over
+            # the 25.38 d sidereal Carrington period, Thompson (2006), A&A 449,
+            # 791, sec. 2.2, doi:10.1051/0004-6361:20054262.
+            omega = units_constants._SOLAR_ROTATION_RATE  # rad/s
             pos = sc.data.xs("pos", axis=1, level="M")
             r_rtn = self._component_reduce(pos.loc[:, ["x", "y", "z"]].pow(2)).pipe(
                 np.sqrt
