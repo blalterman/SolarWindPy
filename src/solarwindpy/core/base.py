@@ -325,6 +325,23 @@ class Core(_WithLogger, ABC):
             )
 
     @staticmethod
+    def _require_datetimeindex(index: pd.Index, what: str) -> None:
+        r"""Raise :class:`TypeError` unless ``index`` is a :class:`pandas.DatetimeIndex`.
+
+        Parameters
+        ----------
+        index : pd.Index
+            The index to check.
+        what : str
+            Names the indexed data in the error message.
+        """
+        if not isinstance(index, pd.DatetimeIndex):
+            raise TypeError(
+                f"{what} must be indexed by a pandas DatetimeIndex, "
+                f"not {type(index).__name__}"
+            )
+
+    @staticmethod
     def _require_level_names(
         columns: pd.Index, expected: Tuple[str, ...], what: str, any_order=False
     ) -> None:

@@ -3917,13 +3917,6 @@ def test_plasma_data_with_wrong_level_names_raises_value_error(third):
         plasma.Plasma(data, "p1")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Plasma.set_sc and Plasma._set_aux check their input with bare asserts; "
-    "expected TypeError naming the type received; remove this marker when the "
-    "asserts become named errors",
-)
 @pytest.mark.parametrize(
     "setter, new, message",
     [

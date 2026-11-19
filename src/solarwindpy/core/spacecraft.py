@@ -244,43 +244,37 @@ class Spacecraft(base.Base):
         Raises
         ------
         TypeError
-            If ``data`` is not a :class:`pandas.DataFrame`.
+            If ``data`` is not a :class:`pandas.DataFrame`, or is not indexed
+            by a :class:`pandas.DatetimeIndex`.
         ValueError
             If the time index holds missing timestamps (``NaT``), naming how
-            many.
+            many; or a measurement holds a component more than once, so it
+            does not have one column per component (``pos`` and ``v``:
+            ``x``, ``y``, ``z``; ``carr``: ``lat``, ``lon``).
         """
         self._require_dataframe(data, "Spacecraft data")
+        self._require_datetimeindex(data.index, "Spacecraft data")
         # Sorting first means every Vector built from these data later sees
         # them in order, so no accessor repeats the order warning.
         data = self._put_in_time_order(data, "Spacecraft data")
         super(Spacecraft, self).set_data(data)
 
-        p = data.xs("pos", axis=1, level="M")
+        def components(measurement, labels):
+            # `xs` on the column MultiIndex always returns a DataFrame.
+            frame = data.xs(measurement, axis=1, level="M").loc[:, labels]
+            if frame.shape[1] != len(labels):
+                raise ValueError(
+                    f"Spacecraft {measurement} must have one column per "
+                    f"component {labels}, not {frame.columns.tolist()}"
+                )
+            return frame
 
-        p = p.loc[:, ["x", "y", "z"]]
-        assert p.shape[1] == 3
-
-        target = {"pos": p}
-
-        try:
-            v = data.xs("v", axis=1, level="M")
-            assert isinstance(v, pd.DataFrame)
-            v = v.loc[:, ["x", "y", "z"]]
-            assert v.shape[1] == 3
-            target["v"] = v
-        except KeyError:
-            pass
-
-        try:
-            c = data.xs("carr", axis=1, level="M")
-            assert isinstance(c, pd.DataFrame)
-            c = c.loc[:, ["lat", "lon"]]
-            assert c.shape[1] == 2
-            target["carr"] = c
-        except KeyError:
-            pass
+        target = {"pos": components("pos", ["x", "y", "z"])}
+        for measurement, labels in (("v", ["x", "y", "z"]), ("carr", ["lat", "lon"])):
+            try:
+                target[measurement] = components(measurement, labels)
+            except KeyError:
+                pass
 
         target = pd.concat(target, axis=1, names=["M"], sort=False).sort_index(axis=1)
-
-        assert isinstance(target.index, pd.DatetimeIndex)
         self._data = target

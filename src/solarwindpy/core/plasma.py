@@ -652,6 +652,10 @@ class Plasma(base.Base):
 
         Raises
         ------
+        TypeError
+            If ``new`` is neither a
+            :class:`~solarwindpy.core.spacecraft.Spacecraft` nor None, or its
+            data are not indexed by a :class:`pandas.DatetimeIndex`.
         ValueError
             If the spacecraft index holds other times than the plasma data's,
             or its column levels are not named exactly ``("M", "C")``, in that
@@ -680,10 +684,13 @@ class Plasma(base.Base):
         >>> plasma.sc.pos.data.loc[:, "x"].tolist()  # trajectory
         [-42.0, -22.0, -34.0]
         """
-        assert isinstance(new, spacecraft.Spacecraft) or new is None
+        if new is not None and not isinstance(new, spacecraft.Spacecraft):
+            raise TypeError(
+                f"Spacecraft must be a Spacecraft or None, not {type(new).__name__}"
+            )
 
         if new is not None:
-            assert isinstance(new.data.index, pd.DatetimeIndex)
+            self._require_datetimeindex(new.data.index, "Spacecraft data")
             # A Spacecraft sorts itself and refuses NaT when built, so its
             # times either equal the plasma's row for row or differ.
             self._require_plasma_index(new.data.index, "Spacecraft data")
@@ -711,6 +718,9 @@ class Plasma(base.Base):
 
         Raises
         ------
+        TypeError
+            If ``new`` is neither a :class:`pandas.DataFrame` nor None, or is
+            not indexed by a :class:`pandas.DatetimeIndex`.
         ValueError
             If the auxiliary data's index holds missing timestamps (``NaT``) or
             other times than the plasma data's, its column levels are not named
@@ -745,10 +755,9 @@ class Plasma(base.Base):
         Auxiliary data on ``source`` share the plasma data's origin and are put
         in the plasma's order without a warning of their own.
         """
-        assert isinstance(new, pd.DataFrame) or new is None
-
         if new is not None:
-            assert isinstance(new.index, pd.DatetimeIndex)
+            self._require_dataframe(new, "Auxiliary data")
+            self._require_datetimeindex(new.index, "Auxiliary data")
             order = self._plasma_order(new.index, "Auxiliary data", source)
             self._require_level_names(new.columns, base._LEVEL_NAMES, "Auxiliary data")
             if new.columns.isin(self.data.columns).any():

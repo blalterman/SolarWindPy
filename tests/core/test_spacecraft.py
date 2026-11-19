@@ -266,13 +266,6 @@ def test_an_unknown_frame_or_name_raises_naming_it(name, frame, message):
         spacecraft.Spacecraft(data, name, frame)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Spacecraft.set_data checks its index with a bare assert, after sorting; "
-    "expected TypeError 'Spacecraft data must be indexed by a pandas DatetimeIndex'; "
-    "remove this marker when the assert becomes a named error",
-)
 def test_spacecraft_data_not_on_a_datetimeindex_raise_type_error():
     r"""Spacecraft data indexed by row number raise TypeError naming the index type.
 
@@ -289,13 +282,6 @@ def test_spacecraft_data_not_on_a_datetimeindex_raise_type_error():
         spacecraft.Spacecraft(data, "PSP", "HCI")
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Spacecraft.set_data checks each measurement's column count with a bare "
-    "assert; expected ValueError naming the measurement and its columns; remove "
-    "this marker when the asserts become named errors",
-)
 @pytest.mark.parametrize("measurement, component", [("pos", "x"), ("carr", "lat")])
 def test_a_repeated_spacecraft_component_raises_value_error(measurement, component):
     r"""A measurement holding one component twice is refused, naming the measurement.
