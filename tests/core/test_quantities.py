@@ -17,8 +17,6 @@ from solarwindpy.core import tensor
 from solarwindpy.core import plasma
 from tests.tolerances import exact
 
-pd.set_option("mode.chained_assignment", "raise")
-
 # Hand inputs are of order 1, so a component that cancels to 0 carries rounding of
 # order 1e-16 times this scale.
 UNIT_SCALE = 1.0

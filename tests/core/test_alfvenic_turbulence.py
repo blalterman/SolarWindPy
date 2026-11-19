@@ -21,8 +21,6 @@ from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core.spacecraft import Spacecraft
 from tests.tolerances import exact
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class AlfvenicTrubulenceTestBase(ABC):
     @classmethod

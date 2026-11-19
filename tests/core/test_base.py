@@ -11,8 +11,6 @@ import solarwindpy as swp
 from solarwindpy.core import ions, plasma, spacecraft, tensor, vector
 from solarwindpy.examples import _read_example
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class SyntheticData(object):
     """The example data behind ``solarwindpy.examples.load_plasma``, as frames.

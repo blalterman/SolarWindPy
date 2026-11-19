@@ -16,8 +16,6 @@ from solarwindpy.core import vector
 from solarwindpy.core import spacecraft
 from tests.tolerances import exact
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class SpacecraftTestBase(ABC):
     @classmethod

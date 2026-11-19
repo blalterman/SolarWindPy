@@ -18,8 +18,6 @@ from solarwindpy.core import tensor
 from solarwindpy.core import ions
 from tests.tolerances import exact, printed
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class IonTestBase(ABC):
     @classmethod

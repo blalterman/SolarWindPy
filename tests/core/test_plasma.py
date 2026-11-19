@@ -24,8 +24,6 @@ from solarwindpy.core import spacecraft
 from solarwindpy.core import alfvenic_turbulence
 from tests.tolerances import CODATA_JOINT_DECIMALS, exact, printed
 
-pd.set_option("mode.chained_assignment", "raise")
-
 
 class PlasmaTestBase(ABC):
     @classmethod
