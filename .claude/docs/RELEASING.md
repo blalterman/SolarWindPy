@@ -131,11 +131,11 @@ git push origin master
 
 ### 5. Dry-Run the Publish Workflow
 
-The CI workflow runs the Windows suite only on pull requests
-(`continuous-integration.yml`), so a commit pushed straight to master has not run on Windows.
-The publish workflow's `platform-matrix` (Linux, macOS and Windows, each Python version) is the
-first Windows run such a release gets. Run it as a dry run before tagging; a dry run builds the
-package and uploads nothing:
+The publish workflow's `platform-matrix` (Linux, macOS and Windows, each Python version) runs
+on master every Monday, and `ci-master.yml` runs the suite on Linux for every master commit. The
+commit you tag can still be newer than the last Monday run, so the dry run is the only full
+matrix run on that exact commit. Run it before tagging; a dry run builds the package and
+uploads nothing:
 
 ```bash
 gh workflow run publish.yml --ref master -f target=testpypi -f dry_run=true
