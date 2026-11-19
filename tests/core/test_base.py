@@ -5,9 +5,12 @@ import re
 
 import pandas as pd
 import pytest
+from unittest import TestCase
 
 import solarwindpy as swp
 from solarwindpy.core import ions, plasma, spacecraft, tensor, vector
+
+from . import _fixtures as fixtures
 
 
 # Time-index checks shared by every data-backed object (``Core._time_disorder``).
@@ -290,3 +293,135 @@ def test_an_unrelated_type_error_while_sorting_is_not_swallowed():
     _, _, _, b = _example_rows([0, 1, 2])
     with pytest.raises(TypeError, match="unrelated failure inside the sort"):
         _SortFailsVector(b)
+
+
+class TestQuantitySubclassEquality(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        r"""Override `setUpClass` so that it doesn't call `set_object_testing`."""
+        fixture = fixtures.SyntheticData()
+        data = fixture.plasma_data
+        cls.gse = fixture.spacecraft_data.gse
+        coeff = pd.Series({"par": 1.0, "per": 2.0}) / 3.0
+        scalar = data.w.pow(2).multiply(coeff, axis=1, level="C")
+
+        scalar = scalar.T.groupby(level="S").sum().T.pow(0.5)
+
+        cols = pd.MultiIndex.from_tuples(
+            scalar.columns.to_series().apply(lambda x: ("w", "scalar", x)),
+            names=data.columns.names,
+        )
+        scalar.columns = cols
+        scalar.name = "scalar"
+        data = pd.concat([data, scalar], axis=1).sort_index(axis=1)
+        cls.data = data
+
+    def test_v(self):
+        """Two Vectors built from the same alpha velocity are equal.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = self.data.v.xs("a", axis=1, level="S")
+        va0 = vector.Vector(data)
+        va1 = vector.Vector(data)
+        self.assertEqual(va0, va0)
+        self.assertEqual(va0, va1)
+
+    def test_b(self):
+        """Two BFields built from the same field are equal.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = self.data.b.xs("", axis=1, level="S")
+        b0 = vector.BField(data)
+        b1 = vector.BField(data)
+        self.assertEqual(b0, b0)
+        self.assertEqual(b0, b1)
+
+    def test_b_v(self):
+        """A BField never equals a Vector holding a velocity.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
+        v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
+        self.assertNotEqual(b, v)
+
+    def test_b_w(self):
+        """A BField never equals a Tensor.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
+        w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
+        self.assertNotEqual(b, w)
+
+    def test_gse(self):
+        """Vectors from one GSE position are equal; a shifted one is not.
+
+        The shifted position is displaced by 1.0 along GSE x.
+
+        ON FAILURE: the code is wrong.
+        """
+        gse0 = vector.Vector(self.gse)
+        gse1 = vector.Vector(self.gse)
+        shifted = self.gse.copy()
+        shifted["x"] = shifted["x"] + 1.0
+        gse2 = vector.Vector(shifted)
+        self.assertEqual(gse0, gse0)
+        self.assertEqual(gse0, gse1)
+        self.assertNotEqual(gse0, gse2)
+
+    def test_b_gse(self):
+        """A BField never equals a Vector, here the GSE position.
+
+        ON FAILURE: the code is wrong.
+        """
+        b = vector.BField(self.data.b.xs("", axis=1, level="S"))
+        gse = vector.Vector(self.gse)
+        self.assertNotEqual(b, gse)
+
+    def test_gse_v(self):
+        """Vectors holding different data (GSE position, p2 velocity) differ.
+
+        ON FAILURE: the code is wrong.
+        """
+        gse = vector.Vector(self.gse)
+        v = vector.Vector(self.data.v.xs("p2", axis=1, level="S"))
+        self.assertNotEqual(gse, v)
+
+    def test_gse_w(self):
+        """A Vector (GSE position) never equals a Tensor (alpha thermal speed).
+
+        ON FAILURE: the code is wrong.
+        """
+        gse = vector.Vector(self.gse)
+        w = tensor.Tensor(self.data.w.xs("a", axis=1, level="S"))
+        self.assertNotEqual(gse, w)
+
+    def test_va_vp1(self):
+        """Alpha and p1 velocity Vectors differ.
+
+        ON FAILURE: the code is wrong.
+        """
+        va = vector.Vector(self.data.v.xs("a", axis=1, level="S"))
+        vp1 = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
+        self.assertNotEqual(va, vp1)
+
+    def test_v_w(self):
+        """A Vector never equals a Tensor of the same species.
+
+        ON FAILURE: the code is wrong.
+        """
+        v = vector.Vector(self.data.v.xs("p1", axis=1, level="S"))
+        w = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
+        self.assertNotEqual(v, w)
+
+    def test_wp1_wp2(self):
+        """p1 and p2 thermal-speed Tensors differ.
+
+        ON FAILURE: the code is wrong.
+        """
+        wp1 = tensor.Tensor(self.data.w.xs("p1", axis=1, level="S"))
+        wp2 = tensor.Tensor(self.data.w.xs("p2", axis=1, level="S"))
+        self.assertNotEqual(wp1, wp2)

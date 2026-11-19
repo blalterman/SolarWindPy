@@ -6,13 +6,16 @@ The pytest-free classes here build the example data behind
 ``solarwindpy.examples.load_plasma`` (read through the private
 ``_read_example`` loader) and name the species a test class runs on. Test
 modules import this module and mix the classes into their own ``Test*``
-classes; nothing here is collected.
+classes. ``QuantityTestBase`` holds the checks every ``Vector`` and
+``Tensor`` test class inherits. Nothing here is collected.
 """
 
+from abc import ABC
 from unittest import TestCase
 
 import numpy as np
 import pandas as pd
+import pandas.testing as pdt
 
 import solarwindpy as swp
 from solarwindpy.core.plasma import Plasma
@@ -113,3 +116,54 @@ def _species_masked_plasma():
     data.loc[t[2], ("w", "par", "p1")] = np.nan
     data.loc[t[2], ("w", "per", "a")] = np.nan
     return Plasma(data, *base.species, sc=base.sc)
+
+
+class QuantityTestBase(ABC):
+    def test_data(self):
+        """The object's data is the frame it was built from.
+
+        ON FAILURE: the code is wrong.
+        """
+        data = self.data
+        if isinstance(data, pd.Series):
+            pdt.assert_series_equal(data, self.object_testing.data)
+        else:
+            pdt.assert_frame_equal(data, self.object_testing.data)
+
+    def test_eq(self):
+        """An object equals itself and a new object of its class built from its data.
+
+        ON FAILURE: the code is wrong.
+        """
+        object_testing = self.object_testing
+        self.assertEqual(object_testing, object_testing)
+        new_object = object_testing.__class__(object_testing.data)
+        self.assertEqual(object_testing, new_object)
+
+    def test_neq(self):
+        """An object differs from one with scaled data and from non-quantity containers.
+
+        ON FAILURE: the code is wrong.
+        """
+        object_testing = self.object_testing
+        self.assertNotEqual(
+            object_testing, object_testing.__class__(object_testing.data * 4)
+        )
+        for other in (
+            [],
+            tuple(),
+            np.array([]),
+            pd.Series(dtype=np.float64),
+            pd.DataFrame(dtype=np.float64),
+        ):
+            self.assertNotEqual(object_testing, other)
+
+    def test_empty_data_catch(self):
+        """Building an object from an empty frame raises ValueError.
+
+        ON FAILURE: the code is wrong.
+        """
+        with self.assertRaisesRegex(
+            ValueError, "You can't set an object with empty data."
+        ):
+            self.object_testing.__class__(pd.DataFrame())
