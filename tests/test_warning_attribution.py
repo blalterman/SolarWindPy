@@ -61,17 +61,8 @@ class WarnBypassesHelper(AssertionError):
     """A package module calls ``warnings.warn`` instead of the shared helper."""
 
 
-@pytest.fixture(autouse=True)
-def isolated_cache(tmp_path, monkeypatch):
-    """Point the download cache at an empty directory under ``tmp_path``.
-
-    astropy honours ``XDG_CACHE_HOME`` only when it exists, and releases
-    before 8 only when ``<XDG_CACHE_HOME>/solarwindpy`` exists too.
-    """
-    root = tmp_path / "xdg-cache"
-    (root / "solarwindpy").mkdir(parents=True)
-    monkeypatch.setenv("XDG_CACHE_HOME", str(root))
-    return root
+# Every test here downloads into its own empty cache (tests/conftest.py).
+pytestmark = pytest.mark.usefixtures("isolated_cache")
 
 
 def seed(url, text, tmp_path, age_days):

@@ -22,19 +22,12 @@ ONE_DAY = 86400.0
 
 
 @pytest.fixture(autouse=True)
-def isolated_cache(tmp_path, monkeypatch):
-    """Point the download cache at an empty directory under ``tmp_path``.
+def _every_test_uses_the_isolated_cache(isolated_cache):
+    """Give every solar-activity test the private cache ``isolated_cache`` makes.
 
-    Returns the directory that plays the role of ``~/.cache``; SolarWindPy's
-    cache is its ``solarwindpy`` subdirectory. astropy ignores an
-    ``XDG_CACHE_HOME`` that does not exist, so the directory is created, and
-    its ``solarwindpy`` subdirectory too, since astropy releases before 8 honour
-    the variable only when ``<XDG_CACHE_HOME>/<package>`` already exists.
+    ``isolated_cache`` is defined once, in ``tests/conftest.py``.
     """
-    root = tmp_path / "xdg-cache"
-    (root / "solarwindpy").mkdir(parents=True)
-    monkeypatch.setenv("XDG_CACHE_HOME", str(root))
-    return root
+    return isolated_cache
 
 
 @pytest.fixture
