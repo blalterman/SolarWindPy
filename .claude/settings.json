@@ -20,7 +20,6 @@
       "Bash(git add README.rst)",
       "Bash(git add CHANGELOG.md)",
       "Bash(git add CLAUDE.md)",
-      "Bash(git add setup.py)",
       "Bash(git add pyproject.toml)",
       "Bash(git add solarwindpy.yml)",
       "Bash(git add .gitignore)",
