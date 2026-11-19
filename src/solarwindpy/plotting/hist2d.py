@@ -109,6 +109,7 @@ class Hist2D(base._OnFixedGrid, base.ColorPlot, base.BinnedPlot):
         x,
         y,
         z=None,
+        *,
         logx=None,
         logy=None,
         axnorm=None,

@@ -86,6 +86,7 @@ class Scatter(base.ColorPlot):
         z=None,
         size=None,
         alpha=None,
+        *,
         logx=None,
         logy=None,
         clip=None,

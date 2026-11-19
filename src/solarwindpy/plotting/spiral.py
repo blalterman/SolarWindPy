@@ -971,6 +971,7 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         x,
         y,
         z=None,
+        *,
         logx=None,
         logy=None,
         axnorm=None,
@@ -978,7 +979,6 @@ class SpiralPlot2D(base.ColorPlot, base.BinnedPlot):
         initial_bins=5,
         min_per_bin=250,
         mask=None,
-        *,
         progress=False,
     ):
         r"""Store the data and labels, then build the adaptive mesh.

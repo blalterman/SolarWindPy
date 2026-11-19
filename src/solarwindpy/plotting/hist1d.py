@@ -55,6 +55,7 @@ class Hist1D(base._OnFixedGrid, base.BinnedPlot):
         self,
         x,
         y=None,
+        *,
         logx=None,
         axnorm=None,
         clip=None,

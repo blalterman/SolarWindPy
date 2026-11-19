@@ -309,13 +309,6 @@ VARIABLES = {
     ],
     ids=lambda v: v.__name__ if isinstance(v, type) else "",
 )
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the plot constructors take their settings positionally too; "
-    "expected every parameter after the data variables KEYWORD_ONLY; remove "
-    "this marker when the constructors put * after the variables",
-)
 def test_constructors_take_variables_then_log_axes_then_axnorm(cls, expected):
     """Every plot constructor orders its parameters variables, log, axnorm, the rest.
 
