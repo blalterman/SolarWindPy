@@ -21,6 +21,7 @@ import pytest
 from astropy.stats import knuth_bin_width
 from scipy.stats import binned_statistic_2d
 
+from solarwindpy.plotting.base import BinnedPlot
 from solarwindpy.plotting.hist1d import Hist1D
 from solarwindpy.plotting.hist2d import Hist2D
 from tests.tolerances import exact
@@ -789,3 +790,36 @@ class TestAggKeywords:
         h.set_clim(None, 2)
 
         assert h.agg().to_numpy() == exact([1.0, np.nan, 2.0], nan_ok=True)
+
+
+class TestModuleIntegration:
+    """Test integration between different histogram plotters."""
+
+    def test_hist1d_inherits_from_binnedplot(self):
+        """Test that Hist1D properly inherits from BinnedPlot."""
+        assert issubclass(Hist1D, BinnedPlot)
+
+        # Create instance and verify it has BinnedPlot methods
+        np.random.seed(42)
+        x_data = pd.Series(np.random.normal(5, 2, 100))
+        hist = Hist1D(x_data)
+
+        # Should have BinnedPlot methods
+        assert hasattr(hist, "agg")
+        assert hasattr(hist, "edges")
+        assert hasattr(hist, "intervals")
+
+    def test_hist2d_inherits_from_binnedplot(self):
+        """Test that Hist2D properly inherits from BinnedPlot."""
+        assert issubclass(Hist2D, BinnedPlot)
+
+        # Create instance and verify it has BinnedPlot methods
+        np.random.seed(42)
+        x_data = pd.Series(np.random.normal(5, 2, 100))
+        y_data = pd.Series(np.random.normal(10, 3, 100))
+        hist = Hist2D(x_data, y_data)
+
+        # Should have BinnedPlot methods
+        assert hasattr(hist, "agg")
+        assert hasattr(hist, "edges")
+        assert hasattr(hist, "intervals")

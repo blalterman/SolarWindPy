@@ -2471,3 +2471,168 @@ def test_hist2d_figure_renders_to_png():
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
+class TestHist2DBasicFunctionality:
+    """Test basic functionality of Hist2D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+        self.y_data = pd.Series(np.random.normal(10, 3, self.n), name="y")
+        self.z_data = pd.Series(np.random.normal(1, 0.5, self.n), name="z")
+
+    def test_hist2d_instantiation_count_heatmap(self):
+        """Test __init__(x, y) produces 2D count heatmap."""
+        hist = Hist2D(self.x_data, self.y_data)
+
+        # Should have x, y, and z columns (z=1 for counting)
+        assert "x" in hist.data.columns
+        assert "y" in hist.data.columns
+        assert "z" in hist.data.columns
+        assert len(hist.data) == self.n
+
+        # For count heatmap, all z values should be 1
+        assert (hist.data["z"] == 1).all()
+
+    def test_hist2d_instantiation_aggregation_heatmap(self):
+        """Test __init__(x, y, z) aggregates mean of z."""
+        hist = Hist2D(self.x_data, self.y_data, self.z_data)
+
+        assert "x" in hist.data.columns
+        assert "y" in hist.data.columns
+        assert "z" in hist.data.columns
+        assert len(hist.data) == self.n
+
+        # Z values should be the actual z_data, not all 1s
+        assert not (hist.data["z"] == 1).all()
+        assert hist.data["z"].std() > 0  # Should have variation
+
+    def test_hist2d_log_scale_conversion(self):
+        """``logx``/``logy`` store log10 coordinates and set both log flags.
+
+        ON FAILURE: the code is wrong.
+        """
+        # Use positive data for log transform
+        x_positive = pd.Series(np.random.uniform(1, 100, self.n))
+        y_positive = pd.Series(np.random.uniform(1, 100, self.n))
+
+        hist = Hist2D(x_positive, y_positive, logx=True, logy=True)
+
+        assert hist.log.x is True
+        assert hist.log.y is True
+
+        # The stored coordinates are log10 of the inputs, which lie in [1, 100).
+        assert hist.data["x"].between(0, 2).all()
+        assert hist.data["y"].between(0, 2).all()
+
+    def test_hist2d_set_data_with_log_transform(self):
+        """Test set_data(x, y, z, clip) applies log transform."""
+        # Use positive data for log transform
+        x_positive = pd.Series(np.random.uniform(1, 100, self.n))
+        y_positive = pd.Series(np.random.uniform(1, 100, self.n))
+
+        hist = Hist2D(x_positive, y_positive, logx=True, logy=True)
+
+        # Data should be log-transformed
+        assert hist.data["x"].min() >= 0  # log10(1) = 0
+        assert hist.data["x"].max() <= 2  # log10(100) = 2
+        assert hist.data["y"].min() >= 0
+        assert hist.data["y"].max() <= 2
+
+    def test_hist2d_set_labels_z(self):
+        """Test set_labels(z='z') updates z-label."""
+        hist = Hist2D(self.x_data, self.y_data)
+
+        hist.set_labels(z="new_z_label")
+
+        assert hist.labels.z == "new_z_label"
+
+
+class TestHist2DAxisNormalization:
+    """Test axis normalization functionality in Hist2D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+        self.y_data = pd.Series(np.random.normal(10, 3, self.n), name="y")
+
+    def test_set_axnorm_valid_options(self):
+        """Test that set_axnorm('c'), 'r', 't', 'd' work; invalid → ValueError."""
+        hist = Hist2D(self.x_data, self.y_data)
+
+        # Valid options should work
+        valid_options = ["c", "r", "t", "d"]
+        for option in valid_options:
+            hist.set_axnorm(option)
+            assert hist.axnorm == option
+
+        # Invalid option should raise ValueError
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'invalid'"):
+            hist.set_axnorm("invalid")
+
+    @pytest.mark.parametrize(
+        "axnorm, along",
+        [("c", "columns"), ("r", "rows")],
+    )
+    def test_column_and_row_normalization_put_a_one_in_every_line(self, axnorm, along):
+        """Dividing by a maximum leaves exactly that maximum equal to 1.
+
+        "c" divides each column by its own maximum and "r" each row by its own,
+        so every populated column (respectively row) must peak at 1. Naming both
+        cases in one parametrization also catches the two being swapped.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=6, axnorm=axnorm)
+        grid = hist.agg().unstack("x")
+
+        axis = 0 if along == "columns" else 1
+        maxima = grid.max(axis=axis).dropna()
+        assert maxima.size > 0
+        np.testing.assert_allclose(maxima.values, 1.0)
+
+    def test_total_normalization_puts_a_single_one_in_the_grid(self):
+        """Total normalization divides the grid by its maximum, so a bin holds 1.
+
+        ON FAILURE: the code is wrong -- it is normalizing per-axis rather than
+        over the whole grid.
+        """
+        hist = Hist2D(self.x_data, self.y_data, nbins=6, axnorm="t")
+        values = hist.agg().dropna()
+
+        assert np.isclose(values.max(), 1.0)
+        assert (values > 1.0).sum() == 0
+
+    def test_density_normalization_integrates_to_one(self):
+        """Density normalization makes a 2D PDF: sum of value * bin area is 1.
+
+        The bin areas come from the edges the test supplied, so the integral is
+        computed independently of the histogram.
+
+        ON FAILURE: the code is wrong.
+        """
+        edges = np.round(np.linspace(0.0, 20.0, 9), 5)
+        hist = Hist2D(self.x_data, self.y_data, nbins=[edges, edges], axnorm="d")
+        agg = hist.agg()
+
+        # Unpopulated bins are absent from the aggregation, so the areas are
+        # taken per surviving bin rather than from the full outer product.
+        x_bins = pd.IntervalIndex(agg.index.get_level_values("x"))
+        y_bins = pd.IntervalIndex(agg.index.get_level_values("y"))
+        assert np.isin(x_bins.left.values, edges).all()
+        assert np.isin(y_bins.left.values, edges).all()
+
+        integral = np.nansum(agg.values * x_bins.length.values * y_bins.length.values)
+        assert np.isclose(integral, 1.0)
+
+    def test_axis_normalizer_invalid_raises_value_error(self):
+        """Test that _axis_normalizer('bad') raises ValueError."""
+        hist = Hist2D(self.x_data, self.y_data)
+        # Hist2D refuses an unknown key in set_axnorm, before _axis_normalizer.
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'bad'"):
+            hist.set_axnorm("bad")

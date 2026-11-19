@@ -15,6 +15,7 @@ here.
 """
 
 import io
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -1078,3 +1079,353 @@ def test_hist1d_figure_renders_to_png(xy):
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png")
     assert buffer.getvalue().startswith(b"\x89PNG\r\n\x1a\n")  # PNG signature
+
+
+# The classes below pass plain str labels on purpose, to exercise that path;
+# they opt out of PlainStringLabelWarning the deliberate way its message
+# describes.
+_PLAIN_STRING_LABELS = pytest.mark.filterwarnings(
+    "ignore::solarwindpy.plotting.labels.base.PlainStringLabelWarning"
+)
+
+
+# Bins chosen by the test, so every count below is an input rather than a
+# recorded output. The edges are exact at the 5 decimal places at which
+# `FixedGrid` stores interval endpoints.
+KNOWN_EDGES = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+KNOWN_BIN_COUNTS = [3, 5, 2, 4, 6]
+
+
+def _known_1d_sample():
+    """Points placed at bin centers to realise ``KNOWN_BIN_COUNTS``."""
+    centers = 0.5 * (KNOWN_EDGES[:-1] + KNOWN_EDGES[1:])
+    values = []
+    for center, count in zip(centers, KNOWN_BIN_COUNTS):
+        values.extend([center] * count)
+    return pd.Series(values, name="x"), centers
+
+
+@_PLAIN_STRING_LABELS
+class TestHist1DBasicFunctionality:
+    """Test basic functionality of Hist1D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+        self.y_data = pd.Series(np.random.normal(1, 0.5, self.n), name="y")
+
+    def test_hist1d_instantiation_count_histogram(self):
+        """Test __init__(x_series) produces a count histogram."""
+        hist = Hist1D(self.x_data)
+
+        # Should have x and y columns (y=1 for counting)
+        assert "x" in hist.data.columns
+        assert "y" in hist.data.columns
+        assert len(hist.data) == self.n
+
+        # For count histogram, all y values should be 1
+        assert (hist.data["y"] == 1).all()
+
+    def test_hist1d_instantiation_aggregation_histogram(self):
+        """Test __init__(x, y_series) aggregates y values."""
+        hist = Hist1D(self.x_data, self.y_data)
+
+        assert "x" in hist.data.columns
+        assert "y" in hist.data.columns
+        assert len(hist.data) == self.n
+
+        # Y values should be the actual y_data, not all 1s
+        assert not (hist.data["y"] == 1).all()
+        assert hist.data["y"].std() > 0  # Should have variation
+
+    def test_hist1d_logx_transform(self):
+        """Test __init__(..., logx=True) applies log₁₀ transform to x."""
+        # Use positive data for log transform
+        x_positive = pd.Series(np.random.uniform(1, 100, self.n))
+        hist = Hist1D(x_positive, logx=True)
+
+        assert hist.log.x is True
+        assert hist.log.y is False
+
+        # x data should be log-transformed
+        assert hist.data["x"].min() >= 0  # log10(1) = 0
+        assert hist.data["x"].max() <= 2  # log10(100) = 2
+
+    def test_hist1d_path_follows_labels(self):
+        """Test the path is built from the labels set after construction."""
+        hist = Hist1D(self.x_data)
+        hist.set_labels(x="density", y="count")
+
+        # Documented layout: class, x label, y label, scale tag.
+        assert hist.path == Path("Hist1D", "density", "count", "linX-linY")
+
+    def test_hist1d_with_y_and_clipping(self):
+        """Hist1D(x, y, clip=True) stores columns x and y, and clips x."""
+        hist = Hist1D(self.x_data, self.y_data, clip=True)
+
+        assert "x" in hist.data.columns
+        assert "y" in hist.data.columns
+        assert hist.clip.x is True
+
+    def test_hist1d_clip_attribute(self):
+        """Test that .clip attribute equals clip flag."""
+        hist_no_clip = Hist1D(self.x_data, clip=False)
+        hist_with_clip = Hist1D(self.x_data, clip=True)
+
+        assert hist_no_clip.clip.x is False
+        assert hist_with_clip.clip.x is True
+
+
+@_PLAIN_STRING_LABELS
+class TestHist1DAxisNormalization:
+    """Test axis normalization functionality in Hist1D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+
+    def test_set_axnorm_density(self):
+        """Test set_axnorm('d') sets density normalization and updates label."""
+        hist = Hist1D(self.x_data)
+        hist.set_axnorm("d")
+
+        assert hist.axnorm == "d"
+
+        # Labels should be updated for density normalization
+        # The exact label depends on implementation
+        assert hasattr(hist, "labels")
+
+    def test_set_axnorm_invalid_raises_value_error(self):
+        """Test that set_axnorm('x') raises ValueError."""
+        hist = Hist1D(self.x_data)
+
+        with pytest.raises(ValueError, match="Unrecognized axnorm 'x'"):
+            hist.set_axnorm("x")
+
+    def test_axis_normalizer_none(self):
+        """With no normalisation, ``agg()`` is the count in each bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        assert hist.agg().values.tolist() == KNOWN_BIN_COUNTS
+
+    def test_axis_normalizer_density(self):
+        """Density normalization yields a PDF: it integrates to 1.
+
+        The bins are the test's own, so the integral is a plain sum of
+        value * width with no quantity read back from the histogram.
+
+        ON FAILURE: the code is wrong. Normalizing to a PDF and then not
+        integrating to 1 is a contradiction, not a calibration choice.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        hist.set_axnorm("d")
+
+        widths = np.diff(KNOWN_EDGES)
+        integral = (hist.agg().values * widths).sum()
+        assert np.isclose(integral, 1.0)
+
+    def test_density_normalization_is_the_counts_scaled_by_bin_area(self):
+        """Each density equals its count divided by (N * bin width).
+
+        Both the counts and the widths are the test's, so the whole expectation
+        is constructed.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        hist.set_axnorm("d")
+
+        expected = np.asarray(KNOWN_BIN_COUNTS) / (x.size * np.diff(KNOWN_EDGES))
+        np.testing.assert_allclose(hist.agg().values, expected)
+
+    def test_axis_normalizer_total(self):
+        """``set_axnorm("t")`` divides every count by the largest one.
+
+        Hand-computed from ``KNOWN_BIN_COUNTS`` = 3, 5, 2, 4, 6: each over 6.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        hist.set_axnorm("t")
+        assert np.asarray(hist.agg().values) == exact(np.array(KNOWN_BIN_COUNTS) / 6.0)
+
+
+@_PLAIN_STRING_LABELS
+class TestHist1DAggregation:
+    """Test aggregation functionality in Hist1D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+
+    def test_agg_count_with_density_works(self):
+        """Test agg(fcn='count') with axnorm='d' works."""
+        hist = Hist1D(self.x_data)
+        hist.set_axnorm("d")
+
+        # Should not raise an error
+        result = hist.agg(fcn="count")
+        assert isinstance(result, pd.Series)
+
+    def test_agg_sum_with_density_is_each_bins_share(self):
+        """agg(fcn='sum') with axnorm='d' gives each bin's share per unit width.
+
+        Without y every row aggregates the value 1, so a sum is a count and
+        the shares integrate to 1 over the bin widths.
+
+        ON FAILURE: the code is wrong.
+        """
+        hist = Hist1D(self.x_data)
+        hist.set_axnorm("d")
+
+        result = hist.agg(fcn="sum")
+        widths = hist.intervals["x"].length
+        assert np.nansum(result.to_numpy() * widths) == exact(1.0)
+
+    def test_agg_reproduces_the_constructed_bin_counts(self):
+        """Counts equal the population the test placed in each bin.
+
+        ON FAILURE: the code is wrong.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+
+        result = hist.agg()
+        np.testing.assert_array_equal(result.values, KNOWN_BIN_COUNTS)
+        assert result.sum() == x.size
+
+    def test_agg_index_is_the_requested_bins_in_order(self):
+        """The aggregation is indexed by the requested intervals, ascending.
+
+        Positional comparisons elsewhere rest on this, so it is stated once
+        rather than assumed everywhere.
+
+        ON FAILURE: the code is wrong; counts would be attributed to the wrong
+        bins.
+        """
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+
+        intervals = pd.IntervalIndex(hist.agg().index)
+        np.testing.assert_allclose(intervals.left.values, KNOWN_EDGES[:-1])
+        np.testing.assert_allclose(intervals.right.values, KNOWN_EDGES[1:])
+
+
+@_PLAIN_STRING_LABELS
+class TestHist1DLabels:
+    """Test label functionality in Hist1D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+
+    def test_set_labels_y_updates_label(self):
+        """Test set_labels(y='new') updates y-label."""
+        hist = Hist1D(self.x_data)
+
+        hist.set_labels(y="new_label")
+
+        assert hist.labels.y == "new_label"
+
+    def test_set_labels_z_raises_value_error(self):
+        """Test that set_labels(z='z') raises ValueError."""
+        hist = Hist1D(self.x_data)
+
+        with pytest.raises(ValueError, match="doesn't have a z-label"):
+            hist.set_labels(z="some_z_label")
+
+
+@_PLAIN_STRING_LABELS
+class TestHist1DPlotting:
+    """Test plotting functionality in Hist1D."""
+
+    def setup_method(self):
+        """Set up test data for each test."""
+        np.random.seed(42)
+        self.n = 100
+        self.x_data = pd.Series(np.random.normal(5, 2, self.n), name="x")
+
+    def test_make_plot_draws_the_counts_against_the_bin_centers(self):
+        """The plotted series is (bin center, count) for each bin.
+
+        Both coordinates are the test's own, so this checks the numbers handed
+        to matplotlib rather than anything about the figure's appearance.
+
+        ON FAILURE: the code is wrong -- the figure would not show the data.
+        """
+        import matplotlib.pyplot as plt
+
+        x, centers = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+        fig, ax = plt.subplots()
+
+        returned_ax, _, _, _ = hist.make_plot(ax)
+
+        assert returned_ax is ax
+        (line,) = ax.lines
+        np.testing.assert_allclose(np.asarray(line.get_xdata(), float), centers)
+        np.testing.assert_allclose(
+            np.asarray(line.get_ydata(), float), KNOWN_BIN_COUNTS
+        )
+        plt.close(fig)
+
+    def test_make_plot_transpose_axes_swaps_the_two_coordinates(self):
+        """Transposing exchanges the plotted x- and y-data and nothing else.
+
+        The untransposed plot supplies the expectation, so this is a round trip
+        rather than a second recorded set of coordinates.
+
+        ON FAILURE: the code is wrong -- a side panel drawn this way would not
+        line up with the grid it annotates.
+        """
+        import matplotlib.pyplot as plt
+
+        x, _ = _known_1d_sample()
+        hist = Hist1D(x, nbins=KNOWN_EDGES)
+
+        fig, ax = plt.subplots()
+        hist.make_plot(ax)
+        (upright,) = ax.lines
+
+        fig_t, ax_t = plt.subplots()
+        hist.make_plot(ax_t, transpose_axes=True)
+        (transposed,) = ax_t.lines
+
+        np.testing.assert_allclose(
+            np.asarray(transposed.get_xdata(), float),
+            np.asarray(upright.get_ydata(), float),
+        )
+        np.testing.assert_allclose(
+            np.asarray(transposed.get_ydata(), float),
+            np.asarray(upright.get_xdata(), float),
+        )
+        plt.close("all")
+
+    def test_make_plot_invalid_fcn_raises_value_error(self):
+        """Test that make_plot(fcn='bad') raises ValueError."""
+        import matplotlib.pyplot as plt
+
+        hist = Hist1D(self.x_data)
+        fig, ax = plt.subplots()
+
+        # Test with invalid function - this actually raises AttributeError in pandas
+        with pytest.raises(
+            AttributeError, match="'SeriesGroupBy' object has no attribute"
+        ):
+            hist.make_plot(ax, fcn="bad_function_name")
+
+        plt.close(fig)
