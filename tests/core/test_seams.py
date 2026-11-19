@@ -3,14 +3,17 @@
 """Every column operation in core/ names the level it acts on.
 
 Columns form a MultiIndex with levels ``M`` (measurement), ``C`` (component)
-and ``S`` (species). These tests pin the seam that later lets the data model
-change behind one accessor: selection and reduction by level *name*, never by
-level position, and Vector and Tensor holding a single species.
+and ``S`` (species). Selection uses native pandas (``.xs`` for one label,
+``.loc`` for several) and is tested here through the public objects that
+select: a Plasma's ions, a Vector's components, ``Plasma.R``. Reduction goes
+through private helpers named for the level they reduce, and Vector and Tensor
+hold a single species.
 
-The accessor and reduction helpers are private to ``core``. They are tested
-directly because they are the seam itself: every public quantity routes
-through them, so their contract is the contract each public quantity relies
-on. The missing-data rule they carry is docs page ``missing_data``.
+The reduction helpers are private to ``core``. They are tested directly
+because they are the seam itself: every public quantity that reduces over
+components or species routes through them, so their contract is the contract
+each public quantity relies on. The missing-data rule they carry is docs page
+``missing_data``.
 """
 
 import numpy as np
@@ -19,7 +22,7 @@ import pandas.testing as pdt
 import pytest
 
 import solarwindpy as swp
-from solarwindpy.core import base, tensor, vector
+from solarwindpy.core import base, plasma, tensor, vector
 from tests.tolerances import exact
 
 
@@ -45,81 +48,90 @@ def _two_species(rows_by_species, labels=("x", "y", "z")):
     return out.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
 
 
-# --- The accessor -----------------------------------------------------------
+# --- Selection, through the public objects that select ----------------------
 
 
 def test_species_selection_names_the_level_not_its_position(plasma_data):
-    r"""Selecting species p1 by level name ignores where the ``S`` level sits.
+    r"""A plasma built from levels ordered ``("S", "M", "C")`` gives p1 its own columns.
 
-    With the levels reordered to ``("S", "M", "C")``, the accessor still returns
-    the columns that ``.xs("p1", level="S")`` returns from the stored order.
+    Plasma accepts its column levels in any order. Its ion p1 then holds the
+    columns that ``.xs("p1", level="S")`` selects from the stored order.
 
     ON FAILURE: the code is wrong.
     """
     expected = plasma_data.xs("p1", axis=1, level="S")
     moved = plasma_data.reorder_levels(["S", "M", "C"], axis=1)
-    got = base.Core._select(moved, "p1", "S")
-    got = got.reorder_levels(["M", "C"], axis=1).sort_index(axis=1)
-    pdt.assert_frame_equal(got, expected.sort_index(axis=1))
+    species = plasma_data.columns.unique(level="S").drop("")
+    got = plasma.Plasma(moved, *species).p1.data
+    pdt.assert_frame_equal(got.sort_index(axis=1), expected.sort_index(axis=1))
 
 
 def test_component_selection_shares_the_parent_data():
-    r"""A component selected from a flat frame shares the frame's memory.
+    r"""A Vector's component shares the memory of the Vector's data.
 
     The package relies on ``.xs`` views to keep memory down (CLAUDE.md, Data
-    model), so the accessor must not copy.
+    model), so calling a Vector with a component must not copy.
 
-    ON FAILURE: the code is wrong; the accessor copied instead of selecting a view.
+    ON FAILURE: the code is wrong; the component call copied instead of
+    selecting a view.
     """
     frame = _components([[1, 2, 3], [4, 5, 6]])
-    got = base.Core._select(frame, "y", "C")
+    v = vector.Vector(frame)
+    got = v("y")
     pdt.assert_series_equal(got, frame["y"])
-    assert np.shares_memory(got.to_numpy(), frame["y"].to_numpy())
+    assert np.shares_memory(got.to_numpy(), v.data["y"].to_numpy())
 
 
 def test_a_list_of_components_keeps_the_order_asked_for():
-    r"""Selecting ``["z", "x"]`` returns exactly those columns in that order.
+    r"""``Vector.cartesian`` returns x, y and z in that order from columns stored z, x, y.
+
+    The chosen row (z, x, y) = (3, 1, 2) reads (1, 2, 3) in the order asked for.
 
     ON FAILURE: the code is wrong.
     """
-    frame = _components([[1, 2, 3], [4, 5, 6]])
-    got = base.Core._select(frame, ["z", "x"], "C")
-    assert got.columns.tolist() == ["z", "x"]
-    pdt.assert_frame_equal(got, frame.loc[:, ["z", "x"]])
+    frame = _components([[3, 1, 2]], labels=("z", "x", "y"))
+    got = vector.Vector(frame).cartesian
+    assert got.columns.tolist() == ["x", "y", "z"]
+    assert got.iloc[0].tolist() == [1.0, 2.0, 3.0]
 
 
 def test_a_list_of_components_on_two_levels_keeps_every_species():
-    r"""Selecting ``["y", "x"]`` on ``("C", "S")`` columns keeps both species.
+    r"""``Plasma.R("a", "p1")`` keeps one column per species, each that species' own R.
+
+    ``R`` selects the par and per pressures on ``("C", "S")`` columns; the
+    selection keeps both species, so each column equals ``R`` of that species
+    alone.
 
     ON FAILURE: the code is wrong.
     """
-    frame = _two_species({"a": [[1, 2, 3]], "p1": [[4, 5, 6]]})
-    got = base.Core._select(frame, ["y", "x"], "C")
-    expected = [("y", "a"), ("y", "p1"), ("x", "a"), ("x", "p1")]
-    assert got.columns.tolist() == expected
-    assert got.loc[:, ("x", "p1")].tolist() == [4.0]
+    p = swp.examples.load_plasma()
+    got = p.R("a", "p1")
+    assert got.columns.tolist() == ["a", "p1"]
+    for s in ("a", "p1"):
+        pdt.assert_series_equal(got[s], p.R(s))
 
 
 def test_an_unknown_label_raises_naming_the_level_and_its_labels():
-    r"""Selecting a component that is absent raises KeyError listing x, y and z.
+    r"""Calling a Vector with an absent component raises KeyError listing x, y and z.
 
     ON FAILURE: the code is wrong.
     """
-    frame = _components([[1, 2, 3]])
+    v = vector.Vector(_components([[1, 2, 3]]))
     with pytest.raises(KeyError, match=r"component 'par'.*x.*y.*z"):
-        base.Core._select(frame, "par", "C")
+        v("par")
 
 
 def test_a_flat_index_named_for_another_level_is_refused():
-    r"""Selecting a component from flat columns named ``S`` raises ValueError.
+    r"""The magnitude of a Vector on flat columns named ``S`` raises ValueError.
 
-    A flat index carries one level; its name, when set, says which.
+    A flat index carries one level; its name, when set, says which, and a
+    magnitude reduces over components (``C``).
 
     ON FAILURE: the code is wrong.
     """
-    frame = _components([[1, 2]], labels=("a", "p1"), name="S")
+    v = vector.Vector(_components([[1, 2, 3]], name="S"))
     with pytest.raises(ValueError, match=r"level 'C'.*'S'"):
-        base.Core._select(frame, "a", "C")
+        v.mag
 
 
 def test_vector_and_tensor_share_one_component_call():
