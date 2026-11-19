@@ -3,11 +3,12 @@
 """Every Python version the repository declares satisfies ``requires-python``.
 
 ``pyproject.toml`` is the single declaration of what the package supports.
-Classifiers, the tox envlist, Read the Docs, and the GitHub workflows each
-restate a Python version; this module reads each site locally and checks it
-against ``requires-python``, so a floor that moves in one place and not the
-others fails the default suite rather than a later release. The floor itself
-is held to the lowest version actually tested, by tox and by the CI matrix.
+Classifiers, the tox envlist, Read the Docs, the GitHub workflows, and the
+conda env spec ``solarwindpy.yml`` each restate a Python version; this module
+reads each site locally and checks it against ``requires-python``, so a floor
+that moves in one place and not the others fails the default suite rather than
+a later release. The floor itself is held to the lowest version actually
+tested, by tox and by the CI matrix.
 """
 
 import re
@@ -40,6 +41,19 @@ def _floor(requires_python):
     floors = [s.version for s in SpecifierSet(requires_python) if s.operator == ">="]
     assert len(floors) == 1, f"expected one >= bound in {requires_python!r}"
     return Version(floors[0])
+
+
+def _env_spec_python():
+    """Return the ``python`` bound in ``solarwindpy.yml`` as a ``SpecifierSet``."""
+    env = yaml.safe_load((REPO_ROOT / "solarwindpy.yml").read_text(encoding="utf-8"))
+    pins = [
+        d
+        for d in env["dependencies"]
+        if isinstance(d, str) and re.fullmatch(r"python\s*[<>=!~].*", d)
+    ]
+    if len(pins) != 1:
+        raise LookupError(f"expected one python bound in solarwindpy.yml, got {pins}")
+    return SpecifierSet(pins[0].removeprefix("python").strip())
 
 
 def _workflow_versions(node, path, found):
@@ -164,3 +178,31 @@ def test_lowest_classifier_is_requires_python_floor():
         if site == "pyproject.toml: classifiers"
     ]
     assert min(classifiers) == _floor(_requires_python())
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=LookupError,
+    reason="solarwindpy.yml lists no python bound, so conda picks any Python; "
+    "expected 'expected one python bound in solarwindpy.yml, got []'; "
+    "remove this marker when the yml gains python>=3.12,<3.16",
+)
+def test_env_spec_admits_exactly_the_classifier_pythons():
+    """The conda env spec admits exactly the Python minors the classifiers list.
+
+    ``solarwindpy.yml`` is the one recipe for the development env, so its
+    ``python`` bound and the classifiers state one supported range: a
+    classifier the yml excludes, or a Python the yml admits that no
+    classifier lists, fails here.
+
+    ON FAILURE: the code is wrong; move the python bound in solarwindpy.yml or
+    the classifiers in pyproject.toml so they name the same versions.
+    """
+    classifiers = {
+        Version(v)
+        for site, v in declared_python_versions()
+        if site == "pyproject.toml: classifiers"
+    }
+    spec = _env_spec_python()
+    admitted = set(spec.filter(Version(f"3.{minor}") for minor in range(100)))
+    assert admitted == classifiers
