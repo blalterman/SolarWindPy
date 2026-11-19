@@ -200,6 +200,23 @@ class Core(_WithLogger, ABC):
         """
         return cls._reduce_level(frame, "S", "sum", min_count=1)
 
+    # --- Formulas shared by more than one quantity -------------------------
+
+    def _sound_speed(self, pth, rho, gamma):
+        r"""Sound speed :math:`\sqrt{\gamma p / \rho}` in display units.
+
+        Parameters
+        ----------
+        pth : pd.Series or pd.DataFrame
+            Thermal pressure in SI (Pa).
+        rho : pd.Series or pd.DataFrame
+            Mass density in SI (kg m^-3). A Series divides every column of
+            ``pth`` row by row.
+        gamma : float or pd.Series
+            Polytropic index: one value, or one per column of ``pth``.
+        """
+        return pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
+
     @staticmethod
     def _conform_species(*species: str) -> Tuple[str, ...]:
         """Conform the species inputs to a standard form.

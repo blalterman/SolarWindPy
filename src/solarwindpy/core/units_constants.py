@@ -39,6 +39,9 @@ _kBoltzmann = {
     "eV": physical_constants["Boltzmann constant in eV/K"][0],
 }
 
+# par and per are the double-adiabatic (CGL) indices, gamma_par = 3 and
+# gamma_per = 2: Chew, Goldberger & Low (1956), Proc. R. Soc. Lond. A 236, 112,
+# doi:10.1098/rspa.1956.0116. scalar is the isotropic monatomic gamma = 5/3.
 _polytropic_index = dict(par=3.0, per=2.0, scalar=5.0 / 3.0)
 
 _m_in_mp = {

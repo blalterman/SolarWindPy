@@ -238,13 +238,20 @@ class Ion(base.Base):
 
     @property
     def cs(self) -> pd.DataFrame:
-        """Calculate the species' sound speed."""
+        r"""Calculate the species' sound speed per pressure component.
+
+        :math:`c_{s,j} = \sqrt{\gamma_j p_j / \rho}` for each column ``j`` of
+        :attr:`pth`, with the polytropic index of that column from
+        :attr:`~solarwindpy.core.units_constants.Constants.polytropic_index`:
+        the double-adiabatic (CGL) indices :math:`\gamma_\parallel = 3` and
+        :math:`\gamma_\perp = 2` for ``par`` and ``per`` (Chew, Goldberger &
+        Low 1956, Proc. R. Soc. Lond. A 236, 112, doi:10.1098/rspa.1956.0116),
+        and :math:`\gamma = 5/3` for ``scalar``.
+        """
         pth = self.pth * self.units.pth
         rho = self.rho * self.units.rho
-        gamma = self.constants.polytropic_index["scalar"]
-        cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
-        cs.name = "cs"
-        return cs
+        gamma = self.constants.polytropic_index.loc[pth.columns]
+        return self._sound_speed(pth, rho, gamma)
 
     @property
     def Wk(self):

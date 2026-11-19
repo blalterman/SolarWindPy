@@ -127,12 +127,6 @@ class IonTestBase(ABC):
         t = (0.5 * m / kb) * w.pow(2) / 1e5
         pdt.assert_frame_equal(t, self.object_testing.T)
 
-    @pytest.mark.xfail(
-        strict=True,
-        raises=AssertionError,
-        reason="Ion.cs applies gamma = 5/3 to par and per; remove this marker "
-        "when Ion.cs takes the CGL indices from polytropic_index",
-    )
     def test_cs(self):
         """Par, per and scalar sound speeds use the CGL indices 3, 2 and 5/3.
 

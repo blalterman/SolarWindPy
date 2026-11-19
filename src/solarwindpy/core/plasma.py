@@ -1484,17 +1484,27 @@ species: {}
         return pdv
 
     def cs(self, *species):
-        r"""Calculate the sound speed.
+        r"""Calculate the scalar sound speed :math:`\sqrt{\gamma p / \rho}`.
+
+        :math:`\gamma = 5/3`, the ``scalar`` entry of
+        :attr:`~solarwindpy.core.units_constants.Constants.polytropic_index`,
+        and :math:`p` is the scalar thermal pressure. For the par and per
+        sound speeds of one species, see
+        :attr:`~solarwindpy.core.ions.Ion.cs`.
 
         Parameters
         ----------
         species: str
-            TODO: What controls species?
+            Species as :py:meth:`rho` and :py:meth:`pth` take them. One
+            species per string gives that species' sound speed; one string
+            joined by ``"+"`` gives the combined-fluid sound speed
+            :math:`\sqrt{\gamma \sum p / \sum \rho}` from the summed pressure
+            and the summed mass density.
 
         Returns
         -------
         cs : pd.DataFrame or pd.Series
-            Depends on the `species` inputs.
+            A Series for one string, otherwise one column per species.
         """
         slist = self._chk_species(*species)
         rho = self.rho(*species) * self.units.rho
@@ -1502,8 +1512,8 @@ species: {}
 
         pth = pth.xs("scalar", axis=1)
 
-        gamma = self.constants.polytropic_index["scalar"]  # should be 5/3
-        cs = pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
+        gamma = self.constants.polytropic_index["scalar"]
+        cs = self._sound_speed(pth, rho, gamma)
 
         if len(species) == 1:
             cs.name = species[0]
