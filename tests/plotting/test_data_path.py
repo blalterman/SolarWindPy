@@ -25,6 +25,9 @@
   clipped to them like any other value beyond a quantile.
 - Spiral refinement stops with ``ValueError`` when more than ``min_per_bin``
   points share one (x, y), instead of splitting forever.
+- Every data variable (x, y, z, and a ``Scatter``'s size and alpha) holds one
+  value per point. A scalar raises ``TypeError`` naming the variable; a
+  constant marker size or opacity goes to ``make_plot`` as ``s`` or ``alpha``.
 
 Every input is placed by hand. Expected counts, means, rows, codes and
 quantiles are worked out from those inputs in each test's comments. A quantile
@@ -692,3 +695,35 @@ def test_spiral_mesh_separates_two_distinct_points_however_close(a, b, edges):
     ids = mesh.bin_id.id
     assert ids[0] != ids[1]
     assert (ids != mesh.bin_id.fill).all()
+
+
+# Three points by hand; each case replaces one data variable with a scalar.
+_PT = pd.Series([1.0, 2.0, 3.0])
+_SCALAR_DATA_VARIABLES = [
+    pytest.param(lambda: Scatter(_PT, _PT, None, True), "size", id="Scatter-size"),
+    pytest.param(lambda: Scatter(_PT, _PT, alpha=0.5), "alpha", id="Scatter-alpha"),
+    pytest.param(lambda: Scatter(_PT, _PT, 2.0), "z", id="Scatter-z"),
+    pytest.param(lambda: Scatter(_PT, 1.0), "y", id="Scatter-y"),
+    pytest.param(lambda: Hist1D(_PT, 1.0), "y", id="Hist1D-y"),
+    pytest.param(lambda: Hist2D(_PT, _PT, 2.0), "z", id="Hist2D-z"),
+    pytest.param(lambda: SpiralPlot2D(_PT, _PT, 2.0), "z", id="SpiralPlot2D-z"),
+]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="a scalar data variable is broadcast to every point; "
+    "remove this marker when _PlotSource refuses it",
+)
+@pytest.mark.parametrize("build, name", _SCALAR_DATA_VARIABLES)
+def test_a_scalar_data_variable_raises_type_error_naming_it(build, name):
+    """A data variable holds one value per point, so a scalar is refused.
+
+    ``Scatter(x, y, None, True)`` once stored True as every point's size. A
+    constant marker size or opacity has its home in ``make_plot``'s ``s`` and
+    ``alpha`` keywords.
+
+    ON FAILURE: the code is wrong; a plot accepted a scalar as a data variable.
+    """
+    with pytest.raises(TypeError, match=rf"\b{name}\b.*one value per point"):
+        build()
