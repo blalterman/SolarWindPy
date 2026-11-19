@@ -11,9 +11,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Python 3.15 is supported: it joins the classifiers, the tox envlist and the publish
   workflow's Linux, macOS and Windows matrix.
+- `new_line_for_units` and `set_new_line_for_units` work on every plotting label
+  (`solarwindpy.plotting.labels.base.Base`); before, only `TeXlabel`, `CountOther`, `MathFcn`
+  and `AbsoluteValue` had them. The default stays False, so no label prints differently.
 
 ### Changed
 
+- **Physical result:** `solarwindpy.core.ions.Ion.cs` computes the par and per sound speeds
+  with the CGL double-adiabatic indices γ∥ = 3 and γ⊥ = 2 (Chew, Goldberger & Low 1956,
+  doi:10.1098/rspa.1956.0116); the scalar sound speed keeps γ = 5/3. In the first row of the
+  example plasma, `p1` par goes from 9.13 to 12.25 km/s and per from 6.39 to 7.00 km/s, while
+  scalar stays at 7.42 km/s.
+- **Physical result:** `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence` with
+  `raffaella_version=True` subtracts the solar rotation speed using Ω = 2π / 25.38 d
+  = 2.8653×10⁻⁶ rad/s, the sidereal Carrington period (Thompson 2006, A&A 449, 791, §2.2,
+  doi:10.1051/0004-6361:20054262), instead of 2.865×10⁻⁶ rad/s. The hand-computed rotation
+  speed in the tests moves from 257.126 to 257.155 km/s.
+- `solarwindpy.instabilities.verscharen2016.StabilityContours.plot_contours` raises
+  `ValueError` naming the allowed rates when `growth_rate` is not -2, -3 or -4, instead of
+  `AssertionError`.
+- `solarwindpy.instabilities.verscharen2016.StabilityCondition.instability_tests` lists its
+  instabilities in the order AIC, FMW, MM, OFI, the order of the other verscharen2016 tables;
+  it was AIC, MM, FMW, OFI.
 - **Breaking:** `solarwindpy.instabilities.beta_ani` is renamed `solarwindpy.instabilities.plots`,
   with no alias. Import `BetaRPlot` from `solarwindpy.instabilities.plots`.
 - **Breaking:** `solarwindpy.plotting.labels.datetime` is renamed
