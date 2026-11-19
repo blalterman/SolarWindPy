@@ -42,8 +42,8 @@ repos:
     entry: scripts/check_conventional_commits.sh
     language: system
     stages: [commit-msg]
-  - id: solarwindpy-physics
-    name: SolarWindPy Physics Validation
+  - id: test-suite
+    name: Test Suite with Coverage Floor
     entry: .claude/hooks/pre-commit-tests.sh
     language: system
     files: \.py$
