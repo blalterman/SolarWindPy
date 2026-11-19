@@ -52,9 +52,8 @@ def _warn(message, category=UserWarning):
     user sees their own line however deeply the package nested the call; a
     hand-counted ``stacklevel`` breaks whenever the call depth changes.
 
-    It lives in this bottom-layer module so the layers in ``pyproject.toml``
-    let every subpackage but :mod:`solarwindpy.core`, this module's
-    independent sibling, import it.
+    It lives in :mod:`solarwindpy.tools`, the bottom layer in
+    ``pyproject.toml``, so every subpackage can import it.
 
     Parameters
     ----------

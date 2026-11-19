@@ -51,13 +51,14 @@ markers = [
 root_package = "solarwindpy"
 
 [[tool.importlinter.contracts]]
-name = "Subpackage layers: core and tools import nothing above them"
+name = "Subpackage layers, top to bottom: fitfunctions, instabilities and solar_activity; plotting; core; tools"
 type = "layers"
 containers = ["solarwindpy"]
 layers = [
     "fitfunctions | instabilities | solar_activity",
     "plotting",
-    "core | tools",
+    "core",
+    "tools",
 ]
 
 [[tool.importlinter.contracts]]

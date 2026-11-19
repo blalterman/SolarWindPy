@@ -141,8 +141,10 @@ Every new or rebuilt test's docstring says what it asserts and ends with one `ON
 Layering is a contract checked by import-linter (`lint-imports`), declared in
 `pyproject.toml`:
 
-- `core/` and `tools/` import nothing above them.
-- `fitfunctions/`, `instabilities/` and `solar_activity/` may import `plotting/`.
+- The layers, from the bottom: `tools/` imports nothing from the package; `core/` imports
+  only `tools/`; `plotting/` imports `core/` and `tools/`.
+- `fitfunctions/`, `instabilities/` and `solar_activity/` sit on top and may import every
+  layer below them.
 
 The public import paths are one plain parametrized test that imports each promised name.
 
