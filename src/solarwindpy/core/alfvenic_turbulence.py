@@ -33,6 +33,7 @@ from collections import namedtuple
 
 from . import base
 from . import units_constants
+from . import vector
 
 AlfvenicTurbAveraging = namedtuple("AlfvenicTurbAveraging", "window,min_periods")
 
@@ -104,7 +105,7 @@ class AlfvenicTurbulence(base.Core):
     >>> b = pd.DataFrame({"x": 5.0, "y": 0.0, "z": 0.0}, index=t)
     >>> rho = pd.Series(5.0, index=t)
     >>> turb = AlfvenicTurbulence(v, b, rho, "p1", window=2, min_periods=1)
-    >>> turb.v.loc[:, "x"].tolist()
+    >>> turb.v("x").tolist()
     [0.0, 5.0, -5.0, 5.0]
 
     The kinetic energy in the fluctuations is :math:`\frac{1}{2}\delta v^2`:
@@ -158,12 +159,26 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def v(self):
-        r"""Velocity fluctuations (:math:`\delta v`) in Plasma's v-units."""
-        return self.data.loc[:, "v"]
+        r"""Velocity fluctuations (:math:`\delta v`) in Plasma's v-units, as a ``Vector``."""
+        return vector.Vector(self._dv)
 
     @property
     def b(self):
-        r"""B field fluctuations (:math:`\delta b`) in Alfven units."""
+        r"""B field fluctuations (:math:`\delta b`) in Alfven units, as a ``Vector``.
+
+        A plain :class:`~solarwindpy.core.vector.Vector`, not a ``BField``: the
+        values are in Alfven units (km/s), and ``BField.pb`` assumes nT.
+        """
+        return vector.Vector(self._db)
+
+    @property
+    def _dv(self):
+        r"""The :math:`\delta v` components, x, y and z."""
+        return self.data.loc[:, "v"]
+
+    @property
+    def _db(self):
+        r"""The :math:`\delta b` components, rectified by :attr:`polarity` when set."""
         b = self.data.loc[:, "b"]
         polarity = self.polarity
         if polarity is not None:
@@ -187,13 +202,13 @@ class AlfvenicTurbulence(base.Core):
     @property
     def zp(self):
         r""":math:`z^+` Elsasser variable."""
-        zp = self.v.add(self.b, axis=1)
+        zp = self._dv.add(self._db, axis=1)
         return zp
 
     @property
     def zm(self):
         r""":math:`z^-` Elsasser variable."""
-        zm = self.v.subtract(self.b, axis=1)
+        zm = self._dv.subtract(self._db, axis=1)
         return zm
 
     @property
@@ -213,14 +228,14 @@ class AlfvenicTurbulence(base.Core):
     @property
     def ev(self):
         r"""Energy contained in velocity fluctuations :math:`\frac{1}{2}v^2`."""
-        ev = 0.5 * self._component_reduce(self.v.pow(2))
+        ev = 0.5 * self._component_reduce(self._dv.pow(2))
         ev.name = "ev"
         return ev
 
     @property
     def eb(self):
         r"""Energy contained in magnetic field fluctuations :math:`E_b = \frac{1}{2}b^2`."""
-        eb = 0.5 * self._component_reduce(self.b.pow(2))
+        eb = 0.5 * self._component_reduce(self._db.pow(2))
         eb.name = "eb"
         return eb
 
@@ -248,8 +263,8 @@ class AlfvenicTurbulence(base.Core):
     @property
     def cross_helicity(self):
         r"""Cross helicity :math:`\frac{1}{2} \delta v \cdot \delta b`."""
-        v = self.v
-        b = self.b
+        v = self._dv
+        b = self._db
         c = 0.5 * self._component_reduce(v.multiply(b))
         c.name = "cross_helicity"
         return c

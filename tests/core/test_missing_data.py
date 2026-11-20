@@ -17,6 +17,7 @@ import pandas.testing as pdt
 import pytest
 
 import solarwindpy as swp
+from solarwindpy.core.vector import Vector
 from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core import quantities
 from solarwindpy.core.plasma import Plasma
@@ -150,7 +151,9 @@ def test_each_energy_is_half_the_squared_magnitude_of_its_vector(
     ot = _turbulence()
     e = getattr(ot, energy)
     assert e.isna().to_numpy().nonzero()[0].tolist() == missing
-    expected = 0.5 * getattr(ot, vector).pow(2).sum(axis=1, skipna=False)
+    vec = getattr(ot, vector)
+    frame = vec.data if isinstance(vec, Vector) else vec  # zp and zm are DataFrames
+    expected = 0.5 * frame.pow(2).sum(axis=1, skipna=False)
     pdt.assert_series_equal(e, expected, check_names=False)
 
 
@@ -162,7 +165,7 @@ def test_cross_helicity_is_nan_where_a_component_is_missing():
     ot = _turbulence()
     c = ot.cross_helicity
     assert c.isna().tolist() == [False, True, True, False]
-    expected = 0.5 * ot.v.multiply(ot.b).sum(axis=1, skipna=False)
+    expected = 0.5 * ot.v.data.multiply(ot.b.data).sum(axis=1, skipna=False)
     pdt.assert_series_equal(c, expected, check_names=False)
 
 
@@ -210,5 +213,5 @@ def test_raffaella_polarity_and_field_are_nan_where_a_component_is_missing():
     )
     assert ot.polarity.iloc[:4].tolist() == [1.0, -1.0, -1.0, 1.0]
     assert np.isnan(ot.polarity.iloc[4])
-    assert ot.b.iloc[4].isna().all()
-    assert ot.b.iloc[:4].notna().all().all()
+    assert ot.b.data.iloc[4].isna().all()
+    assert ot.b.data.iloc[:4].notna().all().all()

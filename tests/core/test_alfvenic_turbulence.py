@@ -150,13 +150,13 @@ class AlfvenicTrubulenceTestBase(ABC):
         b = self.data.loc[:, "b"]
 
         ot = self.object_testing
-        pdt.assert_frame_equal(b, ot.b)
+        pdt.assert_frame_equal(b, ot.b.data)
 
     def test_velocity(self):
         v = self.data.loc[:, "v"]
 
         ot = self.object_testing
-        pdt.assert_frame_equal(v, ot.v)
+        pdt.assert_frame_equal(v, ot.v.data)
 
     def test_z_plus(self):
         v = self.data.loc[:, "v"]
@@ -533,7 +533,7 @@ def test_min_periods_and_rolling_kwargs_reach_the_background_average():
     rho = pd.Series(1.0, index=t)
 
     trailing = turb.AlfvenicTurbulence(v, b, rho, "p1", window="3h", min_periods=3)
-    dvx = trailing.v.loc[:, "x"].to_numpy()
+    dvx = trailing.v.data.loc[:, "x"].to_numpy()
     assert np.isnan(dvx[:2]).all()
     # Rows 2..5 trail rows i-2..i, mean i-1, so each fluctuation is 1.
     assert dvx[2:] == exact([1.0, 1.0, 1.0, 1.0])
@@ -542,7 +542,7 @@ def test_min_periods_and_rolling_kwargs_reach_the_background_average():
     centered = turb.AlfvenicTurbulence(
         v, b, rho, "p1", window="3h", min_periods=1, center=True
     )
-    assert centered.v.loc[t[2], "x"] == exact(0.0)
+    assert centered.v.data.loc[t[2], "x"] == exact(0.0)
 
 
 def test_measurements_and_fluctuations_carry_their_names():
@@ -564,7 +564,7 @@ def test_set_data_called_directly_replaces_the_data():
     ON FAILURE: the code is wrong.
     """
     ot = _small_turbulence("p1")
-    before = ot.v.copy()
+    before = ot.v.data.copy()
     idx = before.index
     v = pd.DataFrame(
         2 * np.arange(9.0).reshape(3, 3), index=idx, columns=["x", "y", "z"]
@@ -573,15 +573,9 @@ def test_set_data_called_directly_replaces_the_data():
         np.arange(9.0).reshape(3, 3) / 10.0, index=idx, columns=["x", "y", "z"]
     )
     ot.set_data(v, b, pd.Series([1.0, 2.0, 3.0], index=idx), "p1")
-    assert ot.v.to_numpy() == exact(2 * before.to_numpy(), nan_ok=True)
+    assert ot.v.data.to_numpy() == exact(2 * before.to_numpy(), nan_ok=True)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="AlfvenicTurbulence.v and .b return DataFrames (F76); remove this marker "
-    "when they return Vectors",
-)
 def test_velocity_and_field_fluctuations_are_vectors():
     """``v`` and ``b`` are :class:`Vector` objects, as their siblings in ``core`` are.
 
@@ -702,7 +696,7 @@ def test_raffaella_version_converts_gse_to_rtn_with_hand_computed_values():
 
     polarity = np.array([1.0, -1.0, -1.0, 1.0])
     raw_db = ot.data.loc[:, "b"].to_numpy()[:4]
-    assert ot.b.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+    assert ot.b.data.to_numpy()[:4] == exact(raw_db * polarity[:, None])
 
     pdt.assert_frame_equal(v, v_before)
     pdt.assert_frame_equal(b, b_before)
@@ -725,11 +719,11 @@ def test_the_spacecraft_argument_is_named_sc():
     )
     raw_db = ot.data.loc[:, "b"].to_numpy()[:4]
     polarity = np.array([1.0, -1.0, -1.0, 1.0])
-    assert ot.b.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+    assert ot.b.data.to_numpy()[:4] == exact(raw_db * polarity[:, None])
 
     # Without ``sc``, Raffaella's version raises ValueError.
     ot.set_data(v, b, rho, "p1", raffaella_version=True, sc=sc, **kwargs)
-    assert ot.b.to_numpy()[:4] == exact(raw_db * polarity[:, None])
+    assert ot.b.data.to_numpy()[:4] == exact(raw_db * polarity[:, None])
 
     for method in (turb.AlfvenicTurbulence, turb.AlfvenicTurbulence.set_data):
         names = inspect.signature(method).parameters
