@@ -71,7 +71,7 @@ Sources cited below:
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
 | D26 | Creating the conda env | **`pyproject.toml` is the one dependency list; `solarwindpy.yml` is generated from it by `pyproject2conda` (settings in `[tool.pyproject2conda]`) and held by `tests/test_conda_env.py`. Every dependency comes from conda-forge; pip only registers the checkout (`pip install -e . --no-deps --no-build-isolation`)** | waves ruling 18; the author, 2026-11-20 (F196) |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
+| D28 | The next release | **0.7.0 follows the review's remaining items, done on 2026-11-20** (`50b6eed1` to `59b6f7a0`); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
@@ -103,10 +103,6 @@ factor was wrong until then; analyses made earlier need checking.
 | # | item | who decides | recommendation |
 |---|---|---|---|
 | O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O10 | F48: `examples` is missing from the import-layer contract | Claude (GOVERNANCE "each layer builds only on the layers beneath it") | |
-| O11 | F60, F64, F67: the scalar thermal speed written in `Plasma.set_data` and `Tensor.mag`; the Raffaella branch rebuilding a vector magnitude; the species roster in five tables | Claude (one home per idea; no result changes) | |
-| O12 | F186: no drift test checks SILSO's download base `SIDC_ID._url_base` | Claude (one external fact, one drift check, as ICMECAT's URL has) | |
 | O13 | The multi-species `Vector`/`Tensor` design: one species' thermal speed comes back as a `Tensor`, two species' as a DataFrame | the author, by interview; not yet ready to decide (2026-11-19) | |
-| O14 | Leftovers: `SIDC_ID`'s `key.startswith("h")` restates the key table; `pyproject.toml` package-data still globs `core/data/*.csv` for one file | Claude | |
 | O15 | Package J, deferred: strip headers and sidecars at build, inline module headers, the declaration backlog, and a Spent-When member tied to a release tag (session plugin work) | the author (scheduling) | |
 | O16 | The xarray-native spike (`spike/xarray-2026-11`) | the author | parked until the rest of this list is settled (rulings page, 2026-11-04) |

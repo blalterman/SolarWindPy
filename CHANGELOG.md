@@ -144,6 +144,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `solarwindpy.solar_activity.sunspot_number.sidc.SIDC_ID` downloads from SILSO's current base,
+  `https://www.sidc.be/SILSO/INFO/`; the old `http://www.sidc.be/silso/INFO/` only redirected
+  there. Each series downloads once more, because the cache keys files by URL.
 - `solarwindpy.core.plasma.Plasma.save` checks `data_modifier_fcn`, `sc_modifier_fcn` and
   `aux_modifier_fcn` before writing anything, so a modifier that is not a function raises
   `TypeError` naming the parameter and the rejected type, and leaves no partly written HDF5
