@@ -19,7 +19,8 @@ Every choice in this repository derives from its governance, imported here:
   `conda run -n solarwindpy pip install -e . --no-deps --no-build-isolation`. Every dependency
   comes from conda-forge; pip only registers the checkout. `solarwindpy.yml` is generated from
   `pyproject.toml`: after changing a dependency, run `pyproject2conda project -w force` in the env.
-- Install the git hooks once per clone:
+- Install the git hooks once per clone, and again after rebuilding the env (each hook names the
+  env's Python by its version, so a rebuild onto a new Python leaves the hooks pointing at nothing):
   `conda run -n solarwindpy pre-commit install --hook-type pre-commit --hook-type commit-msg`.
 
 ## Checks
