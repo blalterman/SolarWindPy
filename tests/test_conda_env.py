@@ -23,12 +23,6 @@ def _environment(text):
     return env["name"], env["channels"], set(env["dependencies"])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="solarwindpy.yml is still the hand-kept list; remove this marker when "
-    "the generated file is committed",
-)
 def test_solarwindpy_yml_is_generated_from_pyproject():
     """The committed ``solarwindpy.yml`` holds what ``pyproject.toml`` generates.
 

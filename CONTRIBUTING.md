@@ -37,8 +37,10 @@ A declined contribution can be revised and resubmitted.
    ```bash
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
-   pip install -e ".[dev]"
+   pip install -e . --no-deps --no-build-isolation
    ```
+
+   Every dependency comes from conda-forge; pip only registers your checkout.
 
 2. Format code with `ruff format` and lint with `ruff check` (includes the pydocstyle rules).
 3. Ensure all docstrings follow the NumPy style guide.
@@ -143,9 +145,11 @@ dev = [
 
 Set a floor to the oldest version the test suite actually runs on.
 
-`pyproject.toml` is the only dependency declaration; there are no lockfiles
-to regenerate. After editing it, reinstall with `pip install -e ".[dev]"` and
-run the suite.
+`pyproject.toml` is the only dependency declaration; there are no lockfiles.
+The conda environment file `solarwindpy.yml` is generated from it: after
+editing it, run `pyproject2conda project -w force` and commit both files
+(`tests/test_conda_env.py` fails until they agree). Then reinstall with
+`pip install -e ".[dev]"`, or update the conda env, and run the suite.
 
 ### Dependency Guidelines
 

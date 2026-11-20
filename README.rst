@@ -98,7 +98,7 @@ Development
 
       conda env create -f solarwindpy.yml
       conda activate solarwindpy
-      pip install -e ".[dev]"
+      pip install -e . --no-deps --no-build-isolation  # registers the checkout only
 
 3. Run the test suite with ``pytest``:
 

@@ -53,15 +53,16 @@ the ``dev`` extra:
 Conda Environment Setup
 -----------------------
 
-The repository's ``solarwindpy.yml`` creates a conda environment with the
-dependencies and development tools, but not SolarWindPy itself. Install the
-package into the environment afterwards:
+The repository's ``solarwindpy.yml``, generated from ``pyproject.toml``,
+creates a conda environment with every dependency and development tool from
+conda-forge, but not SolarWindPy itself. Register your checkout in the
+environment afterwards; pip installs nothing else:
 
 .. code-block:: bash
 
    conda env create -f solarwindpy.yml
    conda activate solarwindpy
-   pip install -e ".[dev]"
+   pip install -e . --no-deps --no-build-isolation
 
 Verification
 ------------

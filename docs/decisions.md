@@ -69,9 +69,9 @@ Sources cited below:
 |---|---|---|---|
 | D24 | Pointers in live files | **Name code and tests by symbol (`module.symbol`, `file.py::test_name`), never by line number**; `tests/test_no_line_pointers.py` guards it | rulings page, 2026-11-04 |
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
-| D26 | Creating the conda env | **`solarwindpy.yml` is the one home: Python bound and channels** | waves ruling 18 |
+| D26 | Creating the conda env | **`pyproject.toml` is the one dependency list; `solarwindpy.yml` is generated from it by `pyproject2conda` (settings in `[tool.pyproject2conda]`) and held by `tests/test_conda_env.py`. Every dependency comes from conda-forge; pip only registers the checkout (`pip install -e . --no-deps --no-build-isolation`)** | waves ruling 18; the author, 2026-11-20 (F196) |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O7, O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
+| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
@@ -103,7 +103,6 @@ factor was wrong until then; analyses made earlier need checking.
 | # | item | who decides | recommendation |
 |---|---|---|---|
 | O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O7 | F196: whether `solarwindpy.yml` keeps its 89-entry package list or only what conda must provide | the author (env policy) | |
 | O10 | F48: `examples` is missing from the import-layer contract | Claude (GOVERNANCE "each layer builds only on the layers beneath it") | |
 | O11 | F60, F64, F67: the scalar thermal speed written in `Plasma.set_data` and `Tensor.mag`; the Raffaella branch rebuilding a vector magnitude; the species roster in five tables | Claude (one home per idea; no result changes) | |
 | O12 | F186: no drift test checks SILSO's download base `SIDC_ID._url_base` | Claude (one external fact, one drift check, as ICMECAT's URL has) | |

@@ -16,8 +16,9 @@ Every choice in this repository derives from its governance, imported here:
   hook) puts this checkout's `src/` first through `pythonpath` in `pyproject.toml`, but `python -c`
   and `lint-imports` do not: in another worktree, prefix those with `PYTHONPATH=$PWD/src`.
 - Rebuild the env: `conda env create -f solarwindpy.yml`, then
-  `conda run -n solarwindpy pip install -e ".[dev]"`. Plain `pip install -e .` leaves out
-  import-linter and pre-commit.
+  `conda run -n solarwindpy pip install -e . --no-deps --no-build-isolation`. Every dependency
+  comes from conda-forge; pip only registers the checkout. `solarwindpy.yml` is generated from
+  `pyproject.toml`: after changing a dependency, run `pyproject2conda project -w force` in the env.
 - Install the git hooks once per clone:
   `conda run -n solarwindpy pre-commit install --hook-type pre-commit --hook-type commit-msg`.
 
