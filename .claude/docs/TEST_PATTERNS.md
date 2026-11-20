@@ -143,8 +143,8 @@ Layering is a contract checked by import-linter (`lint-imports`), declared in
 
 - The layers, from the bottom: `tools/` imports nothing from the package; `core/` imports
   only `tools/`; `plotting/` imports `core/` and `tools/`.
-- `fitfunctions/`, `instabilities/` and `solar_activity/` sit on top and may import every
-  layer below them.
+- `examples/`, `fitfunctions/`, `instabilities/` and `solar_activity/` sit on top, may import
+  every layer below them, and do not import each other.
 
 The public import paths are one plain parametrized test that imports each promised name.
 
