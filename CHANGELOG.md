@@ -78,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Breaking:** `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v`, `.b`, `.zp` and
   `.zm` return `solarwindpy.core.vector.Vector` objects instead of DataFrames, as every other
   velocity and field accessor in `core` does; the DataFrame is their `.data`. `b` is a plain `Vector`, not
-  a `BField`, because it is in Alfvén units (km/s) and `BField.pb` assumes nT.
+  a `BField`: fluctuations are not a magnetic field, so field quantities such as the magnetic
+  pressure `BField.pb` do not apply.
 - **Breaking:** `solarwindpy.tools.normal_parameters` is `solarwindpy.tools.lognormal_moments`,
   and on `solarwindpy.fitfunctions.gaussians.GaussianLn` the property `normal_parameters`,
   `TeX_report_normal_parameters` and `set_TeX_report_normal_parameters` are

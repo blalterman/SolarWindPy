@@ -45,6 +45,7 @@ Sources cited below:
 | D33 | Units and labels | **One quantity registry, `solarwindpy.core.quantities`**: display unit, SI factor and TeX symbol per canonical name, read by `core` to convert and by `plotting` to label | rulings page, 2026-11-04 |
 | D34 | Trend fits | **Two levels: a 1-D fit in each column of a 2-D histogram, then a fit to one parameter's trend across columns**, which selects x, y and yerr by name from the per-column results | rulings page, 2026-11-04 |
 | D35 | The data model's direction | **Seams first; pint-pandas is rejected** (it drops units on rolling, copies on `.xs` and fails `to_hdf`); xarray waits for O16 | rulings page, 2026-11-04 |
+| D37 | Fluctuation vectors | **`AlfvenicTurbulence.v`, `.b`, `.zp` and `.zm` are plain `Vector`s, never `BField`s: fluctuations are not fields, so field quantities such as magnetic pressure do not apply** | the author, 2026-11-20 (F76; `a22102c7`, `386d3817`) |
 
 ### Physics and data
 

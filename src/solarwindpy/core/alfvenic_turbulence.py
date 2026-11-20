@@ -166,8 +166,9 @@ class AlfvenicTurbulence(base.Core):
     def b(self):
         r"""B field fluctuations (:math:`\delta b`) in Alfven units, as a ``Vector``.
 
-        A plain :class:`~solarwindpy.core.vector.Vector`, not a ``BField``: the
-        values are in Alfven units (km/s), and ``BField.pb`` assumes nT.
+        A plain :class:`~solarwindpy.core.vector.Vector`, not a ``BField``: these
+        are fluctuations, not a magnetic field, so field quantities such as the
+        magnetic pressure ``BField.pb`` do not apply.
         """
         return vector.Vector(self._db)
 
