@@ -109,11 +109,10 @@ class Tensor(base._ComponentFrame):
         .. math::
            w = \sqrt{\frac{w_\parallel^2 + 2 w_\perp^2}{3}}
 
-        This is the combination ``Plasma`` uses for the stored ``scalar`` thermal
-        speed; the ``scalar`` column itself is not read.
+        ``Plasma`` stores the same combination as its ``scalar`` thermal speed
+        (both use ``Core._scalar_thermal_speed``); the ``scalar`` column itself
+        is not read.
         """
-        par = self("par")
-        per = self("per")
-        mag = par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+        mag = self._scalar_thermal_speed(self("par"), self("per"))
         mag.name = "mag"
         return mag

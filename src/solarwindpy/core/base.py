@@ -217,6 +217,21 @@ class Core(_WithLogger, ABC):
         """
         return pth.divide(rho, axis=0).multiply(gamma).pow(0.5) / self.units.cs
 
+    @staticmethod
+    def _scalar_thermal_speed(par, per):
+        r"""Scalar thermal speed :math:`\sqrt{(w_\parallel^2 + 2 w_\perp^2) / 3}`.
+
+        Thermal speeds combine through the temperatures: with
+        :math:`T = (T_\parallel + 2 T_\perp) / 3` and :math:`T \propto w^2`.
+        NaN wherever either part is missing (docs page ``missing_data``).
+
+        Parameters
+        ----------
+        par, per : pd.Series or pd.DataFrame
+            Parallel and perpendicular thermal speeds, aligned by label.
+        """
+        return par.pow(2).add(per.pow(2).multiply(2.0)).divide(3.0).pow(0.5)
+
     def _alfven_coefficient(self):
         r"""Factor turning :math:`B / \sqrt{\rho}` in display units into km/s.
 

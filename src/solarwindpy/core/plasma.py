@@ -965,22 +965,12 @@ class Plasma(base.Base):
         data = data.loc[:, ~data.columns.duplicated()]
         self._mask_invalid_species(data)
 
-        coeff = pd.Series({"per": 2.0, "par": 1.0}) / 3.0
-
-        w = (
-            data.xs("w", axis=1, level="M")
-            .loc[:, ["par", "per"]]
-            .pow(2)
-            .multiply(coeff, axis=1, level="C")
+        # One scalar thermal speed per species, NaN where either part is missing.
+        wd = data.xs("w", axis=1, level="M")
+        w = self._scalar_thermal_speed(
+            wd.xs("par", axis=1, level="C"), wd.xs("per", axis=1, level="C")
         )
-
-        # Within a species, a time missing either part has no scalar thermal
-        # speed (docs page `missing_data`).
-        w = self._component_reduce(w).pow(0.5)
-
-        # TODO: can probably just `w.columns.map(lambda x: ("w", "scalar", x))`
-        w.columns = w.columns.to_series().apply(lambda x: ("w", "scalar", x))
-        w.columns = self.mi_tuples(w.columns)
+        w.columns = self.mi_tuples([("w", "scalar", s) for s in w.columns])
 
         data = pd.concat([data, w], axis=1, sort=False).sort_index(axis=1)
 
