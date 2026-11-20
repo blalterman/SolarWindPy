@@ -253,7 +253,8 @@ class SIDCLoader(DataLoader):
             dt = astropy.time.Time(csv.loc[:, "year"], format="decimalyear")
             ts = pd.DatetimeIndex(dt.datetime)
 
-        if key.startswith("h"):
+        # A hemispheric layout (hd, hm, hm13) carries a std per hemisphere.
+        if "north_std" in series.layout.columns:
             std = csv.loc[:, ["total_std", "north_std", "south_std"]]
             cnt = csv.loc[:, ["n_total", "n_north", "n_south"]]
 
