@@ -45,70 +45,54 @@ _kBoltzmann = {
 # doi:10.1098/rspa.1956.0116. scalar is the isotropic monatomic gamma = 5/3.
 _polytropic_index = dict(par=3.0, per=2.0, scalar=5.0 / 3.0)
 
-_m_in_mp = {
-    "p": 1.0,
-    "p1": 1.0,
-    "p2": 1.0,
-    "pm": 1.0,
-    "p_bimax": 1.0,
-    "a": physical_constants["alpha particle-proton mass ratio"][0],
-    "a1": physical_constants["alpha particle-proton mass ratio"][0],
-    "a2": physical_constants["alpha particle-proton mass ratio"][0],
-    "a_bimax": physical_constants["alpha particle-proton mass ratio"][0],
-    "e": physical_constants["electron-proton mass ratio"][0],
+# The particle each species label names. Every per-species constant below is
+# read from this table and one value per particle.
+_PARTICLE = {
+    "e": "electron",
+    "p": "proton",
+    "p1": "proton",
+    "p2": "proton",
+    "pm": "proton",  # proton moment
+    "p_bimax": "proton",
+    "a": "alpha",
+    "a1": "alpha",
+    "a2": "alpha",
+    "a_bimax": "alpha",
 }
 
-_charges = {
-    "e": -constants.e,
-    "p": constants.e,
-    "p1": constants.e,
-    "p2": constants.e,
-    "pm": constants.e,
-    "p_bimax": constants.e,
-    "a": 2.0 * constants.e,
-    "a1": 2.0 * constants.e,
-    "a2": 2.0 * constants.e,
-    "a_bimax": 2.0 * constants.e,
-}
 
-_charge_states = {
-    "e": -1.0,
-    "p": 1.0,
-    "p1": 1.0,
-    "p2": 1.0,
-    "pm": 1.0,
-    "p_bimax": 1.0,
-    "a": 2.0,
-    "a1": 2.0,
-    "a2": 2.0,
-    "a_bimax": 2.0,
-}
+def _by_species(per_particle):
+    """One value per species label, read from its particle's value."""
+    return {s: per_particle[particle] for s, particle in _PARTICLE.items()}
 
-_masses = {
-    "e": constants.m_e,
-    "p": constants.m_p,
-    "p1": constants.m_p,
-    "p2": constants.m_p,
-    "pm": constants.m_p,  # proton moment
-    "p_bimax": constants.m_p,
-    "a_bimax": physical_constants["alpha particle mass"][0],
-    "a": physical_constants["alpha particle mass"][0],
-    "a1": physical_constants["alpha particle mass"][0],
-    "a2": physical_constants["alpha particle mass"][0],
-}
 
-_m_amu = {
-    "a": physical_constants["alpha particle mass in u"][0],
-    "a1": physical_constants["alpha particle mass in u"][0],
-    "a2": physical_constants["alpha particle mass in u"][0],
-    "a_bimax": physical_constants["alpha particle mass in u"][0],
-    "p": physical_constants["proton mass in u"][0],
-    "p1": physical_constants["proton mass in u"][0],
-    "p2": physical_constants["proton mass in u"][0],
-    "pm": physical_constants["proton mass in u"][0],
-    "p_bimax": physical_constants["proton mass in u"][0],
-    "e": physical_constants["electron mass in u"][0],
-}
+_m_in_mp = _by_species(
+    {
+        "electron": physical_constants["electron-proton mass ratio"][0],
+        "proton": 1.0,
+        "alpha": physical_constants["alpha particle-proton mass ratio"][0],
+    }
+)
+
+_charge_states = _by_species({"electron": -1.0, "proton": 1.0, "alpha": 2.0})
+
+_charges = {s: q * constants.e for s, q in _charge_states.items()}
+
+_masses = _by_species(
+    {
+        "electron": constants.m_e,
+        "proton": constants.m_p,
+        "alpha": physical_constants["alpha particle mass"][0],
+    }
+)
+
+_m_amu = _by_species(
+    {
+        "electron": physical_constants["electron mass in u"][0],
+        "proton": physical_constants["proton mass in u"][0],
+        "alpha": physical_constants["alpha particle mass in u"][0],
+    }
+)
 
 
 @dataclass
