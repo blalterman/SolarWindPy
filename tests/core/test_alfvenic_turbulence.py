@@ -19,6 +19,7 @@ from . import _fixtures as fixtures
 
 from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core.spacecraft import Spacecraft
+from solarwindpy.core.vector import BField, Vector
 from tests.tolerances import exact
 
 
@@ -573,6 +574,31 @@ def test_set_data_called_directly_replaces_the_data():
     )
     ot.set_data(v, b, pd.Series([1.0, 2.0, 3.0], index=idx), "p1")
     assert ot.v.to_numpy() == exact(2 * before.to_numpy(), nan_ok=True)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="AlfvenicTurbulence.v and .b return DataFrames (F76); remove this marker "
+    "when they return Vectors",
+)
+def test_velocity_and_field_fluctuations_are_vectors():
+    """``v`` and ``b`` are :class:`Vector` objects, as their siblings in ``core`` are.
+
+    ``b`` is in Alfven units (km/s), so it is a plain ``Vector``: a ``BField``'s
+    ``pb`` assumes nT. Identity: each magnitude is the root sum of squares of
+    the x, y and z components.
+
+    ON FAILURE: the code is wrong.
+    """
+    ot = _small_turbulence("p1")
+    for fluct in (ot.v, ot.b):
+        xyz = fluct.data.loc[:, ["x", "y", "z"]]
+        assert isinstance(fluct, Vector)
+        assert fluct.mag.to_numpy() == exact(
+            np.sqrt((xyz**2).sum(axis=1, skipna=False)).to_numpy(), nan_ok=True
+        )
+    assert not isinstance(ot.b, BField)
 
 
 # ---------------------------------------------------------------------------
