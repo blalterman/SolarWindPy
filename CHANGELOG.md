@@ -75,9 +75,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `beta` and `R` differ in shape, `solarwindpy.instabilities.verscharen2016.StabilityContours`
     raises `TypeError` for a `beta` that is not a `numpy.ndarray`, and its `plot_contours`
     raises `TypeError` for an `ax` that is not a `matplotlib.axes.Axes`.
-- **Breaking:** `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v` and `.b` return
-  `solarwindpy.core.vector.Vector` objects instead of DataFrames, as every other velocity and
-  field accessor in `core` does; the DataFrame is their `.data`. `b` is a plain `Vector`, not
+- **Breaking:** `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v`, `.b`, `.zp` and
+  `.zm` return `solarwindpy.core.vector.Vector` objects instead of DataFrames, as every other
+  velocity and field accessor in `core` does; the DataFrame is their `.data`. `b` is a plain `Vector`, not
   a `BField`, because it is in Alfvén units (km/s) and `BField.pb` assumes nT.
 - **Breaking:** `solarwindpy.tools.normal_parameters` is `solarwindpy.tools.lognormal_moments`,
   and on `solarwindpy.fitfunctions.gaussians.GaussianLn` the property `normal_parameters`,

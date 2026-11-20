@@ -164,7 +164,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         zp = v.add(b, axis=1)
 
         ot = self.object_testing
-        pdt.assert_frame_equal(zp, ot.zp)
+        pdt.assert_frame_equal(zp, ot.zp.data)
 
     def test_z_minus(self):
         v = self.data.loc[:, "v"]
@@ -172,7 +172,7 @@ class AlfvenicTrubulenceTestBase(ABC):
         zm = v.subtract(b, axis=1)
 
         ot = self.object_testing
-        pdt.assert_frame_equal(zm, ot.zm)
+        pdt.assert_frame_equal(zm, ot.zm.data)
 
     def test_e_plus(self):
         v = self.data.loc[:, "v"]
@@ -595,12 +595,6 @@ def test_velocity_and_field_fluctuations_are_vectors():
     assert not isinstance(ot.b, BField)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="AlfvenicTurbulence.zp and .zm return DataFrames; remove this marker "
-    "when they return Vectors, as v and b do",
-)
 @pytest.mark.parametrize("name", ["zp", "zm"])
 def test_elsasser_variables_are_vectors(name):
     """``zp`` and ``zm`` are :class:`Vector` objects, as ``v`` and ``b`` are.

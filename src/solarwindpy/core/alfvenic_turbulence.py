@@ -201,27 +201,35 @@ class AlfvenicTurbulence(base.Core):
 
     @property
     def zp(self):
-        r""":math:`z^+` Elsasser variable."""
-        zp = self._dv.add(self._db, axis=1)
-        return zp
+        r""":math:`z^+` Elsasser variable, :math:`\delta v + \delta b`, as a ``Vector``."""
+        return vector.Vector(self._zp)
 
     @property
     def zm(self):
-        r""":math:`z^-` Elsasser variable."""
-        zm = self._dv.subtract(self._db, axis=1)
-        return zm
+        r""":math:`z^-` Elsasser variable, :math:`\delta v - \delta b`, as a ``Vector``."""
+        return vector.Vector(self._zm)
+
+    @property
+    def _zp(self):
+        r"""The :math:`z^+` components."""
+        return self._dv.add(self._db, axis=1)
+
+    @property
+    def _zm(self):
+        r"""The :math:`z^-` components."""
+        return self._dv.subtract(self._db, axis=1)
 
     @property
     def ep(self):
         r"""Energy contained in :math:`z^+`."""
-        ep = 0.5 * self._component_reduce(self.zp.pow(2))
+        ep = 0.5 * self._component_reduce(self._zp.pow(2))
         ep.name = "ep"
         return ep
 
     @property
     def em(self):
         r"""Energy contained in :math:`z^-`."""
-        em = 0.5 * self._component_reduce(self.zm.pow(2))
+        em = 0.5 * self._component_reduce(self._zm.pow(2))
         em.name = "em"
         return em
 

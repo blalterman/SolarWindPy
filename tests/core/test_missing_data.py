@@ -17,7 +17,6 @@ import pandas.testing as pdt
 import pytest
 
 import solarwindpy as swp
-from solarwindpy.core.vector import Vector
 from solarwindpy.core import alfvenic_turbulence as turb
 from solarwindpy.core import quantities
 from solarwindpy.core.plasma import Plasma
@@ -151,9 +150,7 @@ def test_each_energy_is_half_the_squared_magnitude_of_its_vector(
     ot = _turbulence()
     e = getattr(ot, energy)
     assert e.isna().to_numpy().nonzero()[0].tolist() == missing
-    vec = getattr(ot, vector)
-    frame = vec.data if isinstance(vec, Vector) else vec  # zp and zm are DataFrames
-    expected = 0.5 * frame.pow(2).sum(axis=1, skipna=False)
+    expected = 0.5 * getattr(ot, vector).data.pow(2).sum(axis=1, skipna=False)
     pdt.assert_series_equal(e, expected, check_names=False)
 
 
