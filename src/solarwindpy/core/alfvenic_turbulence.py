@@ -399,20 +399,12 @@ unexpected.""")
             # the 25.38 d sidereal Carrington period, Thompson (2006), A&A 449,
             # 791, sec. 2.2, doi:10.1051/0004-6361:20054262.
             omega = units_constants._SOLAR_ROTATION_RATE  # rad/s
-            pos = sc.data.xs("pos", axis=1, level="M")
-            r_rtn = self._component_reduce(pos.loc[:, ["x", "y", "z"]].pow(2)).pipe(
-                np.sqrt
-            )
-            rho_rtn = self._component_reduce(pos.loc[:, ["x", "y"]].pow(2)).pipe(
-                np.sqrt
-            )
-            cos_lat = rho_rtn.divide(r_rtn)
+            cos_lat = sc.pos.rho.divide(sc.pos.mag)
 
-            r = sc.distance2sun * sc.units.distance2sun * 1e-3  # [km]
+            r = sc.distance2sun * sc.units.distance2sun  # SI
 
-            correction = r.multiply(cos_lat, axis=0).multiply(
-                omega
-            )  # [arc length speed] = [km/s]
+            # Arc-length speed of the rotating frame, in the display unit of v.
+            correction = r.multiply(cos_lat, axis=0).multiply(omega) / self.units.v
             vt = data.loc[:, ("v", "y")].subtract(correction)
             data.loc[:, ("v", "y")] = vt
 
