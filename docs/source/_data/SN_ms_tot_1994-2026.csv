@@ -1,6 +1,6 @@
 # SILSO 13-month smoothed total sunspot number (version 2.0), the file
 # SolarWindPy's SIDC("m13") loader downloads from
-# http://www.sidc.be/silso/INFO/snmstotcsv.php
+# https://www.sidc.be/SILSO/INFO/snmstotcsv.php
 # Downloaded 2026-11-05; trimmed to 1994-01 through 2026-10. Columns: year;
 # month; decimal year; smoothed SSN (-1 = not yet defined); std; number of
 # observations; definitive (1) or provisional (0).

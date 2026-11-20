@@ -87,13 +87,6 @@ def test_silso_extrema_are_in_ssn_extrema_csv():
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="SILSO moved to https://www.sidc.be/SILSO/INFO/ and the pinned "
-    "http://www.sidc.be/silso/INFO/ redirects there; remove this marker when "
-    "SIDC_ID._url_base pins the new base",
-)
 @pytest.mark.parametrize("key", list(_SERIES))
 def test_each_silso_series_is_served_where_sidc_id_pins_it(head_status, key):
     """Each series' download URL answers 200 with CSV, without a redirect.

@@ -142,14 +142,14 @@ class SIDC_ID(ID):
                Hemispheric
         ====== =================== ================
 
-        URLs replace the wild card in ``http://www.sidc.be/silso/INFO/*``.
+        URLs replace the wild card in ``https://www.sidc.be/SILSO/INFO/*``.
         """
         super(SIDC_ID, self).__init__(key)
 
     @property
     def _url_base(self):
         r"""Base URL of the SILSO data service."""
-        return r"http://www.sidc.be/silso/INFO/"
+        return r"https://www.sidc.be/SILSO/INFO/"
 
     @property
     def _trans_url(self):

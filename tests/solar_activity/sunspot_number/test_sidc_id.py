@@ -10,11 +10,10 @@ it is wrong either way.
 The endpoint names are documented in the class's own docstring table and on
 SILSO's data page, <https://www.sidc.be/SILSO/datafiles>.
 
-KNOWN GAP -- the endpoints are not reached
-------------------------------------------
-Whether ``http://www.sidc.be/silso/INFO/snmtotcsv.php`` still serves the
-monthly series is a question about SILSO, not about this code, and answering
-it needs the network. Nothing here contacts it.
+The endpoints are not reached here: whether SILSO still serves each series
+where ``SIDC_ID`` pins it needs the network, and
+``tests/drift/test_drift_silso.py::test_each_silso_series_is_served_where_sidc_id_pins_it``
+checks it.
 """
 
 import re
@@ -113,7 +112,7 @@ def test_urls_are_absolute_http_urls():
     ON FAILURE: a relative or malformed URL would be handed to read_csv, which
     would try to open it as a local path. The code is wrong.
     """
-    assert DOCUMENTED_BASE.startswith("http://")
+    assert DOCUMENTED_BASE.startswith("https://")
     for key in VALID_KEYS:
         url = SIDC_ID(key).url
         assert url.startswith(DOCUMENTED_BASE)
