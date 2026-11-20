@@ -46,6 +46,7 @@ Sources cited below:
 | D34 | Trend fits | **Two levels: a 1-D fit in each column of a 2-D histogram, then a fit to one parameter's trend across columns**, which selects x, y and yerr by name from the per-column results | rulings page, 2026-11-04 |
 | D35 | The data model's direction | **Seams first; pint-pandas is rejected** (it drops units on rolling, copies on `.xs` and fails `to_hdf`); xarray waits for O16 | rulings page, 2026-11-04 |
 | D37 | Fluctuation vectors | **`AlfvenicTurbulence.v`, `.b`, `.zp` and `.zm` are plain `Vector`s, never `BField`s: fluctuations are not fields, so field quantities such as magnetic pressure do not apply** | the author, 2026-11-20 (F76; `a22102c7`, `386d3817`) |
+| D38 | The two `beta` inputs in verscharen2016 | **`StabilityContours` builds the instability threshold curves on a grid of beta values (a numpy array); `StabilityCondition` classifies measured beta and anisotropy per observation (pandas Series). Different jobs, so different input types** | the author, 2026-11-20 (F112, closed) |
 
 ### Physics and data
 
@@ -70,7 +71,7 @@ Sources cited below:
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
 | D26 | Creating the conda env | **`solarwindpy.yml` is the one home: Python bound and channels** | waves ruling 18 |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O5, O7, O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
+| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O7, O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
@@ -102,7 +103,6 @@ factor was wrong until then; analyses made earlier need checking.
 | # | item | who decides | recommendation |
 |---|---|---|---|
 | O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O5 | F112: whether `StabilityContours.set_beta` accepts a Series | the author (public input type) | |
 | O7 | F196: whether `solarwindpy.yml` keeps its 89-entry package list or only what conda must provide | the author (env policy) | |
 | O10 | F48: `examples` is missing from the import-layer contract | Claude (GOVERNANCE "each layer builds only on the layers beneath it") | |
 | O11 | F60, F64, F67: the scalar thermal speed written in `Plasma.set_data` and `Tensor.mag`; the Raffaella branch rebuilding a vector magnitude; the species roster in five tables | Claude (one home per idea; no result changes) | |
