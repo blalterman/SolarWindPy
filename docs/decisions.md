@@ -69,7 +69,7 @@ Sources cited below:
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
 | D26 | Creating the conda env | **`solarwindpy.yml` is the one home: Python bound and channels** | waves ruling 18 |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O3, O5, O7, O10 to O12, O14); the multi-species design (O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
+| D28 | The next release | **0.7.0 follows once the review's remaining items below are done** (O5, O7, O10 to O12, O14); the multi-species design (O3, O13), package J (O15) and the xarray spike (O16) go to later releases | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
