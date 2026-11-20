@@ -69,6 +69,28 @@ ancestors = ["solarwindpy"]
 requires = ["setuptools>=77", "wheel", "setuptools_scm"]  # 77: SPDX license expressions
 build-backend = "setuptools.build_meta"
 
+[tool.pyproject2conda]
+# solarwindpy.yml is generated from this file: `pyproject2conda project`.
+# tests/test_conda_env.py fails when the committed file differs.
+name = "solarwindpy"
+channels = ["conda-forge", "nodefaults"]
+# The Python versions the classifiers list; tests/test_declared_versions.py holds them together.
+python_include = "python>=3.12,<3.16"
+# pip registers the checkout: pip install -e . --no-deps --no-build-isolation
+conda_deps = ["pip"]
+header = true
+style = "yaml"
+
+# conda-forge names that differ from PyPI's.
+[tool.pyproject2conda.dependencies]
+tables = { skip = true, packages = ["pytables"] }
+build = { skip = true, packages = ["python-build"] }
+astropy = { skip = true, packages = ["astropy-base"] }
+
+[tool.pyproject2conda.envs."solarwindpy"]
+extras_or_groups = ["dev", "build-system.requires"]
+output = "solarwindpy.yml"
+
 [tool.setuptools_scm]
 # Only consider v* tags for versioning (exclude compaction tags)
 tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+.*)$"
@@ -168,6 +190,7 @@ dev = [
     "pre-commit>=3.5",  # Git hook framework
     "build>=1.2",  # python -m build: the release procedure builds the wheel and sdist
     "setuptools_scm>=8",  # reads the version from git tags for the release checks
+    "pyproject2conda>=0.23",  # generates solarwindpy.yml from this file
     # Test-quality review tools
     "griffe>=2.3",  # API inventory
     "mutmut>=3.8",  # mutation testing
