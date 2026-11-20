@@ -5,7 +5,7 @@
       "Bash(conda info *)",
       "Bash(echo $CONDA_DEFAULT_ENV)",
       "Bash(doc8 *)",
-      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:code.claude.com)",
       "Bash(gh run view *)",
       "Bash(gh run list *)",
       "Bash(gh workflow run list *)",
