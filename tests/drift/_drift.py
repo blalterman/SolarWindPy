@@ -110,6 +110,65 @@ def assert_head_ok(
         )
 
 
+def assert_served_at(
+    head_info: Mapping[str, object],
+    *,
+    pinned_url: str,
+    content_type_substr: str = "csv",
+    fact: str = "pinned URL is served where it is pinned",
+    location: str = "",
+    remedy: str = "",
+) -> None:
+    """Assert a HEAD response came from the pinned URL itself, as a CSV.
+
+    A redirect is drift: the source moved, and the pin names an address the
+    source no longer serves from.
+
+    Parameters
+    ----------
+    head_info : Mapping
+        Must supply ``status``, ``url`` (where the request ended) and
+        ``content_type``, the shape the ``head_status`` fixture returns.
+    pinned_url : str
+        The URL the package records.
+    content_type_substr : str
+        Substring that must appear (case-insensitively) in ``Content-Type``.
+    """
+    status = head_info.get("status")
+    if status != 200:
+        raise AssertionError(
+            drift_message(
+                fact=fact,
+                pinned="HTTP 200",
+                observed=f"HTTP {status}",
+                location=location,
+                remedy=remedy or "verify the URL is still valid",
+            )
+        )
+    served = head_info.get("url")
+    if served != pinned_url:
+        raise AssertionError(
+            drift_message(
+                fact=fact,
+                pinned=pinned_url,
+                observed=f"redirected to {served}",
+                location=location,
+                remedy=remedy or "pin the URL the source now serves from",
+            )
+        )
+    content_type = (head_info.get("content_type") or "").lower()
+    if content_type_substr not in content_type:
+        raise AssertionError(
+            drift_message(
+                fact=fact,
+                pinned=f"Content-Type containing {content_type_substr!r}",
+                observed=f"Content-Type={content_type!r}",
+                location=location,
+                remedy=remedy or "verify the URL still serves CSV",
+            )
+        )
+
+
 def assert_status(
     head_info: Mapping[str, object],
     expected_status: int,

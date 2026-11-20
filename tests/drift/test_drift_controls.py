@@ -22,6 +22,7 @@ from ._drift import (
     assert_columns_present,
     assert_extrema_listed,
     assert_head_ok,
+    assert_served_at,
     assert_set_equal,
     assert_skiprows_parses,
     assert_status,
@@ -48,6 +49,32 @@ def test_assert_head_ok_raises_on_short_content_length():
     }
     with pytest.raises(AssertionError):
         assert_head_ok(info, min_content_length=100_000)
+
+
+def test_assert_served_at_raises_on_a_redirect():
+    url = "http://example.org/a.csv"
+    info = {
+        "status": 200,
+        "url": "https://example.org/a.csv",
+        "content_type": "text/csv",
+    }
+    with pytest.raises(AssertionError, match="redirected to https://example.org/a.csv"):
+        assert_served_at(info, pinned_url=url)
+
+
+def test_assert_served_at_raises_on_wrong_content_type():
+    url = "https://example.org/a.csv"
+    info = {"status": 200, "url": url, "content_type": "text/html"}
+    with pytest.raises(AssertionError):
+        assert_served_at(info, pinned_url=url)
+
+
+def test_assert_served_at_passes_a_csv_served_where_pinned():
+    url = "https://example.org/a.csv"
+    assert_served_at(
+        {"status": 200, "url": url, "content_type": "text/csv;charset=UTF-8"},
+        pinned_url=url,
+    )
 
 
 def test_assert_status_raises_on_mismatch():

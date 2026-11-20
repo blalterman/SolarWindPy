@@ -20,8 +20,9 @@ def head_status():
     Returns
     -------
     dict
-        ``{"status": int, "content_type": str or None,
-        "content_length": int or None}``. A network/URL error yields
+        ``{"status": int, "url": str or None, "content_type": str or None,
+        "content_length": int or None}``; ``url`` is where the request ended,
+        after any redirect. A network/URL error yields
         ``status=None``.
     """
 
@@ -33,6 +34,7 @@ def head_status():
                 content_length = headers.get("Content-Length")
                 return {
                     "status": resp.status,
+                    "url": resp.geturl(),
                     "content_type": headers.get("Content-Type"),
                     "content_length": (
                         int(content_length) if content_length is not None else None
@@ -41,11 +43,17 @@ def head_status():
         except urllib.error.HTTPError as exc:
             return {
                 "status": exc.code,
+                "url": None,
                 "content_type": None,
                 "content_length": None,
             }
         except urllib.error.URLError:
-            return {"status": None, "content_type": None, "content_length": None}
+            return {
+                "status": None,
+                "url": None,
+                "content_type": None,
+                "content_length": None,
+            }
 
     return _head_status
 

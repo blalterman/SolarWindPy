@@ -12,9 +12,9 @@ import urllib.request
 
 import pytest
 
-from solarwindpy.solar_activity.sunspot_number.sidc import SSNExtrema
+from solarwindpy.solar_activity.sunspot_number.sidc import _SERIES, SIDC_ID, SSNExtrema
 
-from ._drift import assert_extrema_listed
+from ._drift import assert_extrema_listed, assert_served_at
 
 pytestmark = pytest.mark.drift
 
@@ -84,4 +84,28 @@ def test_silso_extrema_are_in_ssn_extrema_csv():
         fact="SILSO lists an extremum that ssn_extrema.csv lacks or differs on",
         location="src/solarwindpy/solar_activity/sunspot_number/ssn_extrema.csv",
         remedy=f"copy the new or changed extrema from {TABLE_URL}",
+    )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="SILSO moved to https://www.sidc.be/SILSO/INFO/ and the pinned "
+    "http://www.sidc.be/silso/INFO/ redirects there; remove this marker when "
+    "SIDC_ID._url_base pins the new base",
+)
+@pytest.mark.parametrize("key", list(_SERIES))
+def test_each_silso_series_is_served_where_sidc_id_pins_it(head_status, key):
+    """Each series' download URL answers 200 with CSV, without a redirect.
+
+    ON FAILURE: external fact drifted; update SIDC_ID._url_base or the file
+    name in sidc._SERIES to the address SILSO now serves the series from.
+    """
+    url = SIDC_ID(key).url
+    assert_served_at(
+        head_status(url),
+        pinned_url=url,
+        fact=f"SILSO serves the {key!r} series where SIDC_ID pins it",
+        location="src/solarwindpy/solar_activity/sunspot_number/sidc.py::SIDC_ID._url_base",
+        remedy="check the series' address at https://www.sidc.be/SILSO/datafiles",
     )
