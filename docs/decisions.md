@@ -100,9 +100,8 @@ factor was wrong until then; analyses made earlier need checking.
 
 | # | item | who decides | recommendation |
 |---|---|---|---|
-| O1 | Which items the next release bundles (D28) | the author | O3 to O12 and O14, the review items; not the interview (O13), deferred (O15) or parked (O16) items |
+| O1 | Which items the next release bundles (D28) | the author | O3, O5, O7 to O12 and O14, the review items; not the interview (O13), deferred (O15) or parked (O16) items |
 | O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O4 | F76: `AlfvenicTurbulence.v` and `.b` return DataFrames where siblings return a `Vector` or `BField` | the author (public return type) | `Vector` for both: δb is in Alfvén units (km/s), so a `BField`, whose `pb` assumes nT, would give a wrong magnetic pressure |
 | O5 | F112: whether `StabilityContours.set_beta` accepts a Series | the author (public input type) | |
 | O7 | F196: whether `solarwindpy.yml` keeps its 89-entry package list or only what conda must provide | the author (env policy) | |
 | O8 | F7: no allow rule for `code.claude.com` | the author (widens permissions) | |
