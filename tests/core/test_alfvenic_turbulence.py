@@ -595,6 +595,28 @@ def test_velocity_and_field_fluctuations_are_vectors():
     assert not isinstance(ot.b, BField)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="AlfvenicTurbulence.zp and .zm return DataFrames; remove this marker "
+    "when they return Vectors, as v and b do",
+)
+@pytest.mark.parametrize("name", ["zp", "zm"])
+def test_elsasser_variables_are_vectors(name):
+    """``zp`` and ``zm`` are :class:`Vector` objects, as ``v`` and ``b`` are.
+
+    Identity: each magnitude is the root sum of squares of its components.
+
+    ON FAILURE: the code is wrong.
+    """
+    z = getattr(_small_turbulence("p1"), name)
+    xyz = z.data.loc[:, ["x", "y", "z"]]
+    assert isinstance(z, Vector)
+    assert z.mag.to_numpy() == exact(
+        np.sqrt((xyz**2).sum(axis=1, skipna=False)).to_numpy(), nan_ok=True
+    )
+
+
 # ---------------------------------------------------------------------------
 # raffaella_version: GSE input converted to RTN
 # ---------------------------------------------------------------------------
