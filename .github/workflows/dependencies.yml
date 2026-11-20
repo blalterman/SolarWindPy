@@ -57,3 +57,34 @@ jobs:
 
       - name: Run tests
         run: .venv/bin/python -m pytest -q --tb=short
+
+  # The conda path: build the env from solarwindpy.yml (generated from
+  # pyproject.toml, held by tests/test_conda_env.py), register the checkout
+  # with pip and nothing else, and run the suite in it.
+  conda-env:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # setuptools_scm versions the editable install from the tags.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: conda-incubator/setup-miniconda@v4
+        with:
+          miniforge-version: latest
+          environment-file: solarwindpy.yml
+          activate-environment: solarwindpy
+          conda-remove-defaults: "true"
+
+      - name: Register the checkout
+        run: pip install -e . --no-deps --no-build-isolation
+
+      - name: The installed packages meet pyproject.toml
+        run: pip check
+
+      - name: Run tests
+        run: python -m pytest -q --tb=short
