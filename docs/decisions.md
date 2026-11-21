@@ -1,6 +1,6 @@
 <!--
 Spent-When: PERMANENT(the repository is archived or retired)
-Supersedes: docs/dispatches/findings-coherence-and-tooling-review-2026-11-04.md,docs/dispatches/plan-coherence-cleanup-2026-11-04.md
+Supersedes: none
 -->
 
 # Decisions, findings and open items
