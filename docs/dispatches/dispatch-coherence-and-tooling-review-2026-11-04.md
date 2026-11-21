@@ -389,3 +389,15 @@ not served: the property is an end state of the package ("reads as one design"),
 ### Backup location
 
 `tmp/coherence-review/env-before/` (conda explicit list and pip freeze of the pre-rebuild env; a record, not a restorable clone).
+
+### Governing Property (2026-11-21 resumption)
+
+served -- every one of the 206 findings is now fixed, closed by a ruling, or superseded. The
+2026-11-19 sweep against master `ed19fe64` (docs/decisions.md, C1) left 14 open; each closed
+since: F7 `bf68ce25`; F48 `50b6eed1`; F60 `edc5a79d`; F64 `aede61ed`; F67 `537ede7d`; F76
+`a22102c7`; F75 `f32e048b` (ruling D39); F135 `a8e245de`; F186 `fe9551e2`, `2afc51ec`; F196
+`a2a1dfcc`, `0bf9c16e`; F74 by ruling D4; F112 by ruling D38; F147 and F139 recorded as C2 and
+C3. The one deferred thread, the Spent-When declaration backlog (package J, O15 in
+docs/decisions.md), was set aside by the author on 2026-11-21. docs/decisions.md now holds the
+rulings and open items this review's findings file carried.
+## Spent-Mark: executed; the 2026-11-21 resumption records the property served
