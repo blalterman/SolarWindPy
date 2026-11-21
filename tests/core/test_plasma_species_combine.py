@@ -24,6 +24,7 @@ import pandas.testing as pdt
 import pytest
 
 from solarwindpy.core.plasma import Plasma
+from solarwindpy.core.tensor import Tensor
 from tests.core._fixtures import _species_masked_plasma
 
 # The author's ruling, 2026-11-10, with Wk added by S15. "strict_sum": a sum
@@ -54,6 +55,9 @@ def _per_species(result, s):
 
 
 def _assert_same(got, expected):
+    if isinstance(expected, Tensor):
+        # One species of a tensor quantity is a Tensor (D39 in docs/decisions.md).
+        expected = expected.data
     if isinstance(expected, pd.Series):
         pdt.assert_series_equal(got, expected, check_names=False)
     else:

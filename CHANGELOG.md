@@ -75,6 +75,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `beta` and `R` differ in shape, `solarwindpy.instabilities.verscharen2016.StabilityContours`
     raises `TypeError` for a `beta` that is not a `numpy.ndarray`, and its `plot_contours`
     raises `TypeError` for an `ax` that is not a `matplotlib.axes.Axes`.
+- **Breaking:** vectors and tensors hold one species. `solarwindpy.core.plasma.Plasma.v` for
+  several species returns a DataFrame with component (`C`) and species (`S`) column levels
+  instead of a Series of `Vector`s, and `Plasma.w` for one species returns the ion's
+  `solarwindpy.core.tensor.Tensor` instead of a DataFrame (its `.data` is the DataFrame).
+  `Plasma.w` for several species and `Plasma.v` for one species or a species sum are unchanged.
 - **Breaking:** `solarwindpy.core.alfvenic_turbulence.AlfvenicTurbulence.v`, `.b`, `.zp` and
   `.zm` return `solarwindpy.core.vector.Vector` objects instead of DataFrames, as every other
   velocity and field accessor in `core` does; the DataFrame is their `.data`. `b` is a plain `Vector`, not

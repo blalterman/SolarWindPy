@@ -11,6 +11,7 @@ import itertools
 
 from . import base
 from . import vector
+from . import tensor
 from . import ions
 from . import spacecraft
 from . import alfvenic_turbulence
@@ -1162,10 +1163,16 @@ class Plasma(base.Base):
 
         Returns
         -------
-        w: pd.Series or pd.DataFrame
-            See Parameters for more info.
+        w : solarwindpy.core.tensor.Tensor or pandas.DataFrame
+            A :py:class:`~solarwindpy.core.tensor.Tensor` for one species; for
+            several species, a DataFrame with component (``C``) and species
+            (``S``) column levels. A Tensor holds one species by construction.
         """
-        return self._gather("w", *species)
+        w = self._gather("w", *species)
+        if w.columns.nlevels == 1:
+            # One species: a Tensor, which holds one species by construction.
+            w = tensor.Tensor(w, _time_checked=self.data.index)
+        return w
 
     def pth(self, *species):
         r"""Get the thermal pressure.
@@ -1303,10 +1310,11 @@ class Plasma(base.Base):
 
         Returns
         -------
-        velocity : vector.Vector or pd.Series
+        velocity : vector.Vector or pd.DataFrame
             A :py:class:`~solarwindpy.core.vector.Vector` for one species
-            string, or a `pd.Series` of them indexed by species when several
-            species are passed.
+            string, a species sum ("s0+s1") included; for several species, a
+            DataFrame with component (``C``) and species (``S``) column
+            levels. A Vector holds one species by construction.
 
         Notes
         -----
@@ -1333,18 +1341,20 @@ species: {}
             )
 
         else:
-            v = self.ions.loc[list(stuple)].apply(lambda x: x.v)
+            v = pd.concat(
+                {s: self.ions.loc[s].v.cartesian for s in stuple},
+                axis=1,
+                names=["S"],
+                sort=True,
+            )
+            v.columns.names = ["S", "C"]
             if len(species) == 1:
                 rhos = self.rho(*stuple)
-                v = pd.concat(
-                    v.apply(lambda x: x.cartesian).to_dict(),
-                    axis=1,
-                    names=["S"],
-                    sort=True,
-                )
                 v = vector.Vector(
                     self._species_weighted_mean(v, rhos), _time_checked=self.data.index
                 )
+            else:
+                v = v.swaplevel(axis=1).sort_index(axis=1)
 
         return v
 
@@ -1371,7 +1381,8 @@ species: {}
         Parameters
         ----------
         vectors : pd.DataFrame
-            Cartesian components with column levels ``("S", "C")``.
+            Cartesian components with column levels ``S`` and ``C``, in either
+            order.
         weights : pd.DataFrame
             One column per species, e.g. mass or charge density.
 
@@ -2021,9 +2032,7 @@ species: {}
             ne = niqi
             ve = vi.multiply(niqi, axis=0).divide(ne, axis=0)
         else:
-            vi = pd.concat(
-                vi.apply(lambda x: x.cartesian).to_dict(), axis=1, names="S", sort=True
-            )
+            # Several species: a (C, S) frame of the cartesian components.
             niqi = ni.multiply(qi, axis=1, level="S")
             # Both sums run over the species present at each time; species
             # masking in `set_data` keeps a density from outliving its velocity.
@@ -2031,7 +2040,7 @@ species: {}
             ve = self._species_weighted_mean(vi, niqi)
 
         # T_e = T_p with m w^2 = 2 k T gives w_e^2 = (m_p / m_e) w_p^2.
-        wp = self.w(tkw).xs("scalar", axis=1)
+        wp = self.w(tkw)("scalar")
         mpme = self.constants.m_in_mp["e"] ** -1
         we = wp.pow(2).multiply(mpme).pipe(np.sqrt)
         # Isotropic electrons: the scalar thermal speed equals both components.

@@ -47,6 +47,7 @@ Sources cited below:
 | D35 | The data model's direction | **Seams first; pint-pandas is rejected** (it drops units on rolling, copies on `.xs` and fails `to_hdf`). **No xarray experiment: the data model stays on pandas** | rulings page, 2026-11-04; the author, 2026-11-21 |
 | D37 | Fluctuation vectors | **`AlfvenicTurbulence.v`, `.b`, `.zp` and `.zm` are plain `Vector`s, never `BField`s: fluctuations are not fields, so field quantities such as magnetic pressure do not apply** | the author, 2026-11-20 (F76; `a22102c7`, `386d3817`) |
 | D38 | The two `beta` inputs in verscharen2016 | **`StabilityContours` builds the instability threshold curves on a grid of beta values (a numpy array); `StabilityCondition` classifies measured beta and anisotropy per observation (pandas Series). Different jobs, so different input types** | the author, 2026-11-20 (F112, closed) |
+| D39 | Vectors, tensors and species | **A `Vector` or `Tensor` holds one species by construction: it sits below the species layer. `Plasma` returns a `Vector` or `Tensor` for one species (a species sum included, for `v`), and a DataFrame with component (`C`) and species (`S`) column levels for several** | the author, 2026-11-21 (F75; the author's 2019 docstring for `velocity`, `pd.Series or pd.DataFrame`, which `09659a82` had rewritten to match the code) |
 
 ### Physics and data
 
@@ -71,7 +72,7 @@ Sources cited below:
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
 | D26 | Creating the conda env | **`pyproject.toml` is the one dependency list; `solarwindpy.yml` is generated from it by `pyproject2conda` (settings in `[tool.pyproject2conda]`) and held by `tests/test_conda_env.py`. Every dependency comes from conda-forge; pip only registers the checkout (`pip install -e . --no-deps --no-build-isolation`)** | waves ruling 18; the author, 2026-11-20 (F196) |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows the review's remaining items, done on 2026-11-20** (`50b6eed1` to `59b6f7a0`); the multi-species design (O3, O13), and package J (O15) go to later releases | the author, 2026-11-19 |
+| D28 | The next release | **0.7.0 follows the review's remaining items, done on 2026-11-20** (`50b6eed1` to `59b6f7a0`); package J (O15) goes to a later release | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
@@ -102,6 +103,4 @@ factor was wrong until then; analyses made earlier need checking.
 
 | # | item | who decides | recommendation |
 |---|---|---|---|
-| O3 | F75: `Ion.w` returns a `Tensor`, `Plasma.w` a `DataFrame` | the author | settle with O13 |
-| O13 | The multi-species `Vector`/`Tensor` design: one species' thermal speed comes back as a `Tensor`, two species' as a DataFrame | the author, by interview; not yet ready to decide (2026-11-19) | |
 | O15 | Package J, deferred: strip headers and sidecars at build, inline module headers, the declaration backlog, and a Spent-When member tied to a release tag (session plugin work) | the author (scheduling) | |

@@ -318,8 +318,8 @@ class PlasmaTestBase(ABC):
         for s in self.species_combinations:
             if len(s) == 1:
                 this_ion = ions_.xs(s[0], axis=1, level="S")
-                pdt.assert_frame_equal(this_ion, ot.w(*s))
-                pdt.assert_frame_equal(ot.w(s[0]), ot.w(*s))
+                pdt.assert_frame_equal(this_ion, ot.w(*s).data)
+                pdt.assert_frame_equal(ot.w(s[0]).data, ot.w(*s).data)
 
                 # Test that the scalar thermal speed is as expected in plasma.
                 scalar = this_ion.loc[:, "scalar"].pow(2)
@@ -498,10 +498,15 @@ class PlasmaTestBase(ABC):
                 self.assertEqual(vector.Vector(v), ot.v(*s, project_m2q=True))
 
             else:
-                # Test species = (s0, s1, ..., sn)
-                ions_ = ot.ions.loc[list(s)].apply(lambda x: x.v)
-
-                pdt.assert_series_equal(ions_, ot.v(*s))
+                # Test species = (s0, s1, ..., sn): a (C, S) frame of the ions'
+                # cartesian components (D39 in docs/decisions.md).
+                ions_ = pd.concat(
+                    {sp: ot.ions.loc[sp].v.cartesian for sp in s},
+                    axis=1,
+                    names=["S", "C"],
+                )
+                ions_ = ions_.reorder_levels(["C", "S"], axis=1).sort_index(axis=1)
+                pdt.assert_frame_equal(ions_, ot.v(*s))
 
                 # comma-separated species list fails
                 with self.assertRaisesRegex(ValueError, "Invalid species"):
@@ -525,7 +530,7 @@ class PlasmaTestBase(ABC):
                 # Test species = "s0+s1+...+sn"
                 rhos = ot.rho(*s)
                 ions_ = pd.concat(
-                    ions_.apply(lambda x: x.cartesian).to_dict(),
+                    {sp: ot.ions.loc[sp].v.cartesian for sp in s},
                     axis=1,
                     names=["S"],
                     sort=True,
@@ -2475,7 +2480,7 @@ def test_thermal_speed_of_one_species_stays_nan_where_it_is_missing():
         [{"p1": _PROTON_ROW}, {"p1": (5.0, (400.0, 0.0, 0.0), np.nan, np.nan)}],
         "p1",
     )
-    w = p.w("p1")
+    w = p.w("p1").data
 
     assert w.loc[:, ["par", "per", "scalar"]].iloc[0].to_numpy() == exact([30.0] * 3)
     assert w.loc[:, ["par", "per", "scalar"]].iloc[1].isna().all()
@@ -3986,12 +3991,6 @@ def test_plasma_logs_each_optional_input_not_passed(caplog):
     assert not [m for m in caplog.messages if m.startswith("No ")]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Plasma.v returns a Series of Vectors for several species and Plasma.w "
-    "a DataFrame for one; remove this marker when both follow the species rule",
-)
 def test_one_species_is_a_vector_or_tensor_and_several_a_component_by_species_frame():
     """One species gives a Vector or Tensor; several give a (C, S) DataFrame.
 
