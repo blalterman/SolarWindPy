@@ -1,0 +1,9 @@
+<!--
+Spent-When: PERMANENT(the docs stop showing the release in the sidebar)
+Supersedes: none
+-->
+{# The release under the project name, above the search box, where
+   sphinx_rtd_theme 2 showed it by default; 3.x leaves that place to Read the
+   Docs' version switcher. The theme's own search box follows unchanged. #}
+<div class="swp-version">{{ release }}</div>
+{% include "!searchbox.html" %}
