@@ -1685,3 +1685,4 @@ The assembler reran 34 Repro commands, spread over all five reports and weighted
 ### Not assessed
 
 Harmony is the author's judgment. This review does not assess it.
+## Spent-Mark: all 206 findings fixed, ruled or superseded; open rulings carried into docs/decisions.md
