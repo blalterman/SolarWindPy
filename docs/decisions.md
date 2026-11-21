@@ -107,3 +107,4 @@ made with `--no-verify` or from outside a hooked clone reaches master unchecked 
 | # | item | who decides | recommendation |
 |---|---|---|---|
 | O15 | Package J, deferred: strip headers and sidecars at build, inline module headers, the declaration backlog, and a Spent-When member tied to a release tag (session plugin work) | the author (scheduling) | |
+| O16 | Split SolarWindPy into a private dev repo (semver, Spent-When headers and sidecars) and a public deploy repo (date versions, headers and sidecars stripped by the build). Depends on O15. Open: how outside contributions flow back to the dev repo | the author (scheduling and design) | |
