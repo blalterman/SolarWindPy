@@ -596,3 +596,35 @@ review them. Each would become a stage in phase 2.
   `ImportError: cannot load module more than once per process`; `--cov=solarwindpy` passes. Pass
   1 did not cover it. The author decides whether `CLAUDE.md` should name the working form for
   one subpackage's coverage.
+
+---
+
+## Empirical Findings (2026-11-21 trial run)
+
+### End-state metrics
+
+- Stages planned: 40 (S1 to S40). Each stage is done when its findings are; all 206 findings
+  of the review are fixed, closed by a ruling, or superseded (docs/decisions.md C1 for the
+  2026-11-19 sweep at `ed19fe64`; the 14 left open then closed by 2026-11-21, listed in the
+  resumption on `dispatch-coherence-and-tooling-review-2026-11-04.md`, commit `e8469d09`).
+- Released in SolarWindPy 0.7.0 (tag `v0.7.0` on `5f3a012d`, 2026-11-21).
+
+### Open Item dispositions
+
+| Open Item | Disposition |
+|---|---|
+| § "Changes for author confirmation" | RESOLVED -- each item ruled by the author: the rulings page (https://claude.ai/artifact/WgvgiS3Ms4S3T3UCpEK5S4), § Scope "Rulings" of `8cfc8dbd:docs/dispatches/dispatch-coherence-cleanup-waves-2026-11-18.md`, and the 2026-11-19 to 2026-11-21 rulings; those in force are D1 to D39 in docs/decisions.md |
+| Spent-When declaration backlog and build strip | DEFERRED -- package J, O15 in docs/decisions.md (the author, 2026-11-21) |
+| xarray-native spike | SUPERSEDED -- the author ruled no xarray experiment (D35, 2026-11-21); branch `spike/xarray-2026-11` deleted |
+
+### Deviations from plan
+
+- The stages ran in three runs rather than the planned phase order: the cleanup branch
+  `cleanup/coherence-2026-11` (draft PR #524, merged 2026-11-05); the three-wave dispatch of
+  2026-11-18 (packages I to G, findings in `8cfc8dbd`); and follow-ups on 2026-11-19 to
+  2026-11-21 (`ae2e0076` to `f32e048b`, and `50b6eed1` to `59b6f7a0`).
+- Some author rulings replaced the plan's recommendation: `Spacecraft.r` became
+  `Spacecraft.pos` under the label rule (D3); `Vector.rho` stays (D4); one species of `w` is a
+  `Tensor` and several species of `v` a (C, S) DataFrame (D39); the long clip strings were
+  removed (D8).
+## Spent-Mark: executed, findings recorded
