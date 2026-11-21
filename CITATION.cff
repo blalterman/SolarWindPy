@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use SolarWindPy, please cite it using the Zenodo concept DOI below."
 title: SolarWindPy
 type: software
-version: "0.6.0"
-date-released: "2026-11-17"
+version: "0.7.0"
+date-released: "2026-11-21"
 authors:
   - family-names: Alterman
     given-names: B. L.
