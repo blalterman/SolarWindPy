@@ -107,10 +107,11 @@ Thermal speeds, in km/s, have parallel, perpendicular and scalar components.
 The scalar thermal speed is
 :math:`w = \sqrt{(w_\parallel^2 + 2 w_\perp^2) / 3}`, the combination of a
 temperature :math:`T = (T_\parallel + 2 T_\perp) / 3`; at the first time it is
-:math:`\sqrt{(10^2 + 2 \cdot 7^2) / 3} \approx 8.12` km/s. A quantity with
-components is a DataFrame whose columns are the components, ``C``:
+:math:`\sqrt{(10^2 + 2 \cdot 7^2) / 3} \approx 8.12` km/s. One species' thermal
+speed is a ``Tensor``, as its velocity is a ``Vector``; its ``data`` is a
+DataFrame whose columns are the components, ``C``:
 
->>> plasma.w("p1").round(2)
+>>> plasma.w("p1").data.round(2)
 C                            par   per  scalar
 epoch
 1995-01-01 12:35:00.000000  10.0   7.0    8.12
