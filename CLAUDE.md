@@ -34,6 +34,9 @@ Every choice in this repository derives from its governance, imported here:
   `conda run -n solarwindpy pre-commit run ruff-check --files <paths>` and
   `conda run -n solarwindpy pre-commit run ruff-format --files <paths>`.
 - Doctests: `conda run -n solarwindpy pytest --doctest-modules src/solarwindpy -q`
+- Docs examples, which the suite and the source doctests do not run:
+  `conda run -n solarwindpy pytest --doctest-glob='*.rst' docs/source -q` and
+  `conda run -n solarwindpy pytest -p no:doctest -q README.rst docs/source/tutorial/quickstart.rst docs/source/installation.rst`.
 - The pre-commit hook runs the full suite with a coverage floor in
   `.claude/hooks/pre-commit-tests.sh`. The floor is a ratchet below measured coverage, not a
   target; raise it as coverage rises.
