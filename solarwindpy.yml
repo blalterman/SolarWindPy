@@ -33,6 +33,7 @@ dependencies:
   - pytables
   - pytest-cov>=6.0
   - pytest-randomly>=5.0
+  - pytest-xdist>=3.8
   - pytest>=9.0
   - python-build
   - pyyaml>=6.0.1

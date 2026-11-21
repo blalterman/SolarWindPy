@@ -11,7 +11,7 @@ ENV="$(dirname "$0")/project-env.sh"
 
 # Check if pytest is available
 if ! "$ENV" pytest --version &> /dev/null; then
-    echo "❌ pytest not found. Install with: pip install pytest pytest-cov"
+    echo "❌ pytest not found. Rebuild the env from solarwindpy.yml (see CLAUDE.md, Environment)"
     exit 1
 fi
 
@@ -27,15 +27,18 @@ echo "📁 Staged Python files:"
 echo "$staged_files" | sed 's/^/   /'
 
 # Run coverage analysis with required threshold.
-# 96 is a ratchet set two points under the measured baseline (98%, measured
+# FLOOR is a ratchet set two points under the measured baseline (98%, measured
 # with `pytest --cov=solarwindpy -q -p no:randomly` on 2026-11-19), not a
 # target: it blocks regressions without blocking every commit. Raise it as
 # coverage rises. A threshold above measured coverage never passes, so the hook
 # only teaches people to pass --no-verify, which skips ruff along with it.
-echo "📊 Running coverage analysis (≥96% required)..."
-if ! "$ENV" pytest --cov=solarwindpy --cov-fail-under=96 -q --tb=short; then
+# `-n auto` runs the suite on one pytest-xdist worker per CPU; pytest-cov merges
+# the workers' coverage before checking FLOOR.
+FLOOR=96
+echo "📊 Running coverage analysis (≥${FLOOR}% required)..."
+if ! "$ENV" pytest -n auto --cov=solarwindpy --cov-fail-under="$FLOOR" -q --tb=short; then
     echo ""
-    echo "❌ Coverage below 96% threshold or tests failed"
+    echo "❌ Coverage below ${FLOOR}% threshold or tests failed"
     echo "💡 Fix failing tests and improve coverage before committing"
     echo "💡 Run 'pytest --cov=solarwindpy --cov-report=html' for detailed report"
     exit 1

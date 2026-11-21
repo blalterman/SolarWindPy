@@ -98,6 +98,10 @@ wheel for every Python from 3.11; so no workflow installs HDF5 with apt (`e6a7ba
 **C5: specific entropy before `baae8ffc` (2026-09-27) is 9.2 times too small.** The units
 factor was wrong until then; analyses made earlier need checking.
 
+**C6: the coverage floor holds only in the commit hook.** `--cov-fail-under` appears in
+`.claude/hooks/pre-commit-tests.sh` and in no workflow under `.github/workflows/`, so a commit
+made with `--no-verify` or from outside a hooked clone reaches master unchecked for coverage.
+
 ## Open items
 
 | # | item | who decides | recommendation |

@@ -172,6 +172,7 @@ dev = [
     # Testing tools
     "pytest>=9.0",
     "pytest-cov>=6.0",
+    "pytest-xdist>=3.8",  # the commit hook runs the suite in parallel (pytest -n auto)
     "packaging>=25.0",  # astropy 8 requires packaging>=25.0
     "pyyaml>=6.0.1",  # tests/test_declared_versions.py reads YAML; 6.0 has no cp312 wheels
     "requests>=2.31",  # tests/test_update_conda_feedstock.py stubs requests.get
