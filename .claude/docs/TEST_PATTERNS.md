@@ -44,6 +44,11 @@ in both places still fails. A value copied from a previous run of our own code i
 
 Errors are part of the contract: `pytest.raises(ExpectedError, match="...")`.
 
+Warnings a dependency emits, iteration counts and where an optimizer stops are not part of the
+contract unless a docstring promises them: they move with dependency versions, so an assert on
+them fails on the minimum-versions job and nowhere else. A change gets a new test only for the
+property it establishes that no existing guard already covers.
+
 Plots: use the Agg backend and assert the data handed to matplotlib (mesh values, cell
 coordinates, line vertices). Close figures with `plt.close("all")`.
 
