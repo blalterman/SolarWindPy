@@ -3984,3 +3984,37 @@ def test_plasma_logs_each_optional_input_not_passed(caplog):
     with caplog.at_level(logging.INFO, logger="solarwindpy"):
         plasma.Plasma(example.data, "p1", sc=example.sc, aux=flags)
     assert not [m for m in caplog.messages if m.startswith("No ")]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Plasma.v returns a Series of Vectors for several species and Plasma.w "
+    "a DataFrame for one; remove this marker when both follow the species rule",
+)
+def test_one_species_is_a_vector_or_tensor_and_several_a_component_by_species_frame():
+    """One species gives a Vector or Tensor; several give a (C, S) DataFrame.
+
+    Vectors and tensors sit below the species layer, so they hold one species
+    by construction (D39 in docs/decisions.md). The values are the ions' own.
+
+    ON FAILURE: the code is wrong.
+    """
+    p = swp.examples.load_plasma()
+
+    one_w = p.w("p1")
+    assert isinstance(one_w, swp.core.tensor.Tensor)
+    pdt.assert_frame_equal(one_w.data, p.p1.w.data)
+    assert isinstance(p.v("p1"), vector.Vector)
+
+    for name in ("v", "w"):
+        several = getattr(p, name)("p1", "a")
+        assert isinstance(several, pd.DataFrame)
+        assert list(several.columns.names) == ["C", "S"]
+        for s in ("p1", "a"):
+            own = getattr(p.ions.loc[s], name).data
+            pdt.assert_frame_equal(
+                several.xs(s, axis=1, level="S").loc[:, own.columns],
+                own,
+                check_names=False,
+            )
