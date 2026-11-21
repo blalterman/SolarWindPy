@@ -72,7 +72,6 @@ Sources cited below:
 | D25 | Spent-When in the package tree | **Shipped modules carry no inline header; a new module gets a sidecar**; tests and docs carry the inline form | waves ruling 27 |
 | D26 | Creating the conda env | **`pyproject.toml` is the one dependency list; `solarwindpy.yml` is generated from it by `pyproject2conda` (settings in `[tool.pyproject2conda]`) and held by `tests/test_conda_env.py`. Every dependency comes from conda-forge; pip only registers the checkout (`pip install -e . --no-deps --no-build-isolation`)** | waves ruling 18; the author, 2026-11-20 (F196) |
 | D27 | The citation file | **`CITATION.cff` names the current release (`version`, `date-released`), set by the release procedure** | the author, 2026-11-19 |
-| D28 | The next release | **0.7.0 follows the review's remaining items, done on 2026-11-20** (`50b6eed1` to `59b6f7a0`); package J (O15) goes to a later release | the author, 2026-11-19 |
 | D36 | `master` protection | **Minimal: a GitHub ruleset blocks force-push and deletion; no pull-request requirement** | rulings page, 2026-11-04 |
 
 ## Findings
