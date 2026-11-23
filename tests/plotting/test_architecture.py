@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the plotting classes stop sharing the BinnedPlot and ColorPlot bases)
-# Supersedes: none
 """The plot class structure: shared bases and pluggable binning strategies.
 
 ``Base`` is the root. ``BinnedPlot`` aggregates a value in the cells of a

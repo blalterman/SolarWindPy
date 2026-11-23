@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(Hist2D stops offering project_1d and its row selections)
-# Supersedes: none
 """Hist2D's projection and row selections on hand-placed points.
 
 Each expected value is worked out by hand in the test, from the documented

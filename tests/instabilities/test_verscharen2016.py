@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy.instabilities.verscharen2016 is removed from the package)
-# Supersedes: none
 """Tests for :mod:`solarwindpy.instabilities.verscharen2016`.
 
 Every expected threshold comes from the paper the module implements, transcribed

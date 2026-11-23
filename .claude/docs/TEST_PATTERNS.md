@@ -1,7 +1,3 @@
-<!--
-Spent-When: PERMANENT(the repository stops maintaining a test suite)
-Supersedes: none
--->
 # SolarWindPy Test Standard
 
 ## Purpose and intent

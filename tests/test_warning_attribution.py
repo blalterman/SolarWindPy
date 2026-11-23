@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops issuing warnings)
-# Supersedes: none
 """Every warning SolarWindPy issues names the caller's code, not the package's.
 
 A warning's ``filename`` and ``lineno`` tell the user which of their lines

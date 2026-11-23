@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """How a Plasma species quantity combines over a "+" total.
 
 The author's ruling (2026-11-10): "+" means "combine in physically viable

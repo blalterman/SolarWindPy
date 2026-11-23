@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops collecting doctests with pytest)
-# Supersedes: none
 r"""Repository-root pytest configuration for documentation examples.
 
 ``pytest --doctest-modules src/solarwindpy`` collects docstring examples as

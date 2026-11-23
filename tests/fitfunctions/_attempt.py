@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(make_fit stops recording a failed fit as FitFunction.error)
-# Supersedes: none
 """Run a fit and return its recorded failure instead of raising it."""
 
 

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Publication-format labels: a display name over the usual symbol line.
 
 In publication format a label is two lines: the quantity's name in words, from

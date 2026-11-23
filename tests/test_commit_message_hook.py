@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops checking commit messages)
-# Supersedes: none
 """The commit-msg hook accepts every Conventional Commits form the project uses."""
 
 import shutil

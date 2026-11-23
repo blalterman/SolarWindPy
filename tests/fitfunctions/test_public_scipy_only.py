@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(fitfunctions stops depending on SciPy)
-# Supersedes: none
 """The fitting modules use only SciPy's public API.
 
 A private SciPy name (a module or attribute whose dotted path has a component

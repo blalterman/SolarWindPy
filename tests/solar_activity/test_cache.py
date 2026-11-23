@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy.solar_activity.cache is removed)
-# Supersedes: none
 """The shared download cache in ``solarwindpy.solar_activity.cache``.
 
 ``fetch(url, max_age)`` returns a local copy of ``url``: the cached one while

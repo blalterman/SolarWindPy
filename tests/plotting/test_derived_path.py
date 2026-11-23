@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plots stop deriving their save path from their current state)
-# Supersedes: none
 """The save path is derived from the plot's current state, never stored.
 
 ``Base.path`` is ``class / x / y [/ z] / scale``: each axis contributes its

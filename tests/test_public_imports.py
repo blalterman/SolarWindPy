@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy stops promising one import path per public object)
-# Supersedes: none
 """Every public object has exactly one import path: the module that defines it.
 
 An object is public when its name is in exactly one module's ``__all__`` and

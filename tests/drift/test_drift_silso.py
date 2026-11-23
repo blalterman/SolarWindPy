@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(ssn_extrema.csv stops being hand-copied from SILSO)
-# Supersedes: none
 """Drift assertion for the solar-cycle extrema copied into ssn_extrema.csv.
 
 ``SSNExtrema`` reads ``ssn_extrema.csv``, a hand copy of SILSO's cycle table.

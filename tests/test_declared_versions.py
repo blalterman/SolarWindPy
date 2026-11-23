@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(pyproject.toml stops being the single declaration of supported Python versions)
-# Supersedes: none
 """Every Python version the repository declares satisfies ``requires-python``.
 
 ``pyproject.toml`` is the single declaration of what the package supports.

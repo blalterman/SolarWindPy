@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(live files may again cite code by line number)
-# Supersedes: none
 """Live files point to code and tests by name, never by line number.
 
 A pointer such as ``module.py`` followed by a colon and a line number goes

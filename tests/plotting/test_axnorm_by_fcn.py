@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(axnorm stops depending on the aggregation)
-# Supersedes: none
 """Tests for ``axnorm`` applied according to the aggregation.
 
 Notation for one cell i: n_i rows, area A_i on the binned scale (log10 on a

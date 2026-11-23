@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(FitFunction stops raising NotFittedError for a result read before make_fit)
-# Supersedes: none
 """Contract tests for reading a fit result before, and after a failed, make_fit.
 
 Every result raises one error before ``make_fit``: ``NotFittedError``, which

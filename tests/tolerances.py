@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The tolerance rule for SolarWindPy tests.
 
 Every approximate comparison in ``tests/`` that sets a tolerance goes through

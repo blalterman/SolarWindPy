@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy stops shipping its tools package)
-# Supersedes: none
 """Tests for ``solarwindpy.tools``: ``swap_protons``, ``lognormal_moments``, loggers.
 
 Expected values come from hand-built frames, ``scipy.stats.lognorm`` and the

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The missing-data rule (docs/source/missing_data.rst) across core/.
 
 A quantity computed from a fixed set of inputs (a magnitude, a component sum,

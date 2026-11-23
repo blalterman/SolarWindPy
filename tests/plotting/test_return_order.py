@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plot draw methods stop sharing one return order)
-# Supersedes: none
 """Every plot's draw method returns its handles in one fixed order.
 
 The order is the axis first, then the primary artists, then ``guides``, a

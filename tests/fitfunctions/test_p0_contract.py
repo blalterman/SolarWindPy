@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The ``p0`` contract shared by every fit function.
 
 A ``p0`` returns one finite guess per parameter, or None when the data make a

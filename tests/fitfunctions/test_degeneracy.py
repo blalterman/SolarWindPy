@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Degeneracy warnings of ``FitFunction.make_fit``.
 
 A fit whose covariance holds a non-finite entry, or whose parameters are

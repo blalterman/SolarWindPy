@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Contracts every concrete fit function keeps, checked class by class.
 
 The classes are found by importing every module of

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the plotting classes stop offering row selections)
-# Supersedes: none
 """Invariants every plot class keeps, and every row selection it offers.
 
 A plot keeps some of the rows its caller passes and can hand them back, by

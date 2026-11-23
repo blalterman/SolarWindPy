@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(ssn_extrema.csv stops being hand-copied from SILSO)
-# Supersedes: none
 """A reminder, in the default suite, to refresh ssn_extrema.csv from SILSO.
 
 ``ssn_extrema.csv`` is a hand copy of SILSO's solar-cycle extrema. Six years

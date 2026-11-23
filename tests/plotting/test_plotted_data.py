@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(BinnedPlot stops offering get_plotted_data)
-# Supersedes: none
 """Tests for ``BinnedPlot.get_plotted_data``: the rows in the cells a figure shows.
 
 A cell is shown when ``agg(fcn)`` is not NaN there, after ``clim``, ``alim``,

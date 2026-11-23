@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the tests/drift/ suite is retired)
-# Supersedes: none
 """Shared reporting helper and predicate functions for tests/drift/.
 
 Every assertion in tests/drift/ is an importable predicate function taking

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the tests/drift/ suite is retired)
-# Supersedes: none
 """Fixtures shared by tests/drift/."""
 
 import urllib.error

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Supported spacecraft and frames live in one table that every check reads."""
 
 import dataclasses

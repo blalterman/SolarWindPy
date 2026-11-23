@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Every column operation in core/ names the level it acts on.
 
 Columns form a MultiIndex with levels ``M`` (measurement), ``C`` (component)

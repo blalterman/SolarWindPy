@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy.instabilities.plots is removed from the package)
-# Supersedes: none
 """Tests for :class:`solarwindpy.instabilities.plots.BetaRPlot`.
 
 BetaRPlot is a Hist2D of anisotropy R against parallel beta, binned in log10 by

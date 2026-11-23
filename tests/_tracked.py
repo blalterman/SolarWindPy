@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The git-tracked files of this checkout, for tests that scan source text.
 
 A scan that walks the directory tree also reads untracked work, such as a

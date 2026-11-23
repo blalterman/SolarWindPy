@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 r"""The label-with-units form ``$tex <sep> \left[units\right]$`` has one home (F130).
 
 Every label class builds its ``with_units`` string through

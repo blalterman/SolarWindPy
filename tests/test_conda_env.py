@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """``solarwindpy.yml`` is generated from ``pyproject.toml``.
 
 ``pyproject.toml`` is the one list of dependencies. ``pyproject2conda project``

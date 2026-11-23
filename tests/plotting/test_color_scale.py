@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(color plots stop choosing a default colour scale)
-# Supersedes: none
 """Tests for the default colour scale of the colour plots.
 
 When the plotted values hold both signs, a ``Hist2D``, ``SpiralPlot2D`` or

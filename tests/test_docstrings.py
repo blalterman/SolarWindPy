@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy stops following PyHC standard 8 on docstrings)
-# Supersedes: none
 """Public docstrings meet PyHC standard 8: purpose, inputs, outputs, examples.
 
 PyHC standard 8 says docstrings "must describe the code's purpose, describe all

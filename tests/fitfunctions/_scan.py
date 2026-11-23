@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The test suite's own discovery of the concrete fit functions.
 
 ``fit_functions_found_by_scanning_modules`` imports every module under

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plot classes stop sourcing data through BinnedData)
-# Supersedes: none
 """Contract tests for the rulings on the plot data path.
 
 - ``clip`` accepts True/False, the strings ``"l"`` and ``"u"`` in any case,

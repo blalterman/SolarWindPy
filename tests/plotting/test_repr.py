@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the plot classes stop defining a summary repr)
-# Supersedes: none
 """Tests for the summary ``repr`` of the plot classes.
 
 ``repr(plot)``, which ``print`` and Jupyter show, lists on one line each what

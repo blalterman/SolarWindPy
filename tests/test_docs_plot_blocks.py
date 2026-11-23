@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the documentation stops drawing figures with the plot directive)
-# Supersedes: none
 """Every ``.. plot::`` block in the documentation runs on its own.
 
 The guide shows the code that draws each figure, and a reader should be able

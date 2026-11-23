@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops shipping Hist1D)
-# Supersedes: none
 """Contract tests for :class:`solarwindpy.plotting.hist1d.Hist1D`.
 
 Every expected count is re-derived from :func:`numpy.histogram` (or a plain

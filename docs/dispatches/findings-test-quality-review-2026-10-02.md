@@ -1,7 +1,3 @@
-<!--
-Spent-When: MARKED(<self>)
-Supersedes: none
--->
 
 # Findings: holistic test-quality review of SolarWindPy
 

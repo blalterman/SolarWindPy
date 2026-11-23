@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plots stop warning on a plain str axis label)
-# Supersedes: none
 """A plain ``str`` axis label warns and names the structured labels to use.
 
 A plot's axis labels are label objects from :mod:`solarwindpy.plotting.labels`:

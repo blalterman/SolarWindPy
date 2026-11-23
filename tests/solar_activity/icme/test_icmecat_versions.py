@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(ICMECAT stops probing for catalog versions after the pinned one)
-# Supersedes: none
 """ICMECAT's bounded probe for catalog versions after the pinned v23.
 
 HELIO4CAST hosts one ICMECAT version at a time. When the pinned v23 answers

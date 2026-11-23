@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Shipped package modules carry no purge-system header.
 
 ``Spent-When`` and ``Supersedes`` declarations belong to working files, not to

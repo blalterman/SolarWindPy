@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(agg stops counting cells with numpy.bincount)
-# Supersedes: none
 """Tests for the count path of ``BinnedPlot.agg``.
 
 A count needs no groupby: ``numpy.bincount`` of the rows' cell codes gives it.

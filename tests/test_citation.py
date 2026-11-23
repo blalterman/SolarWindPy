@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops publishing citation metadata)
-# Supersedes: none
 """The citation shown in the README matches the citation files.
 
 GitHub cannot render an RST ``include``, so ``README.rst`` carries its own copy

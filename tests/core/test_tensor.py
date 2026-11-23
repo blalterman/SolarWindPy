@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Tests for :mod:`solarwindpy.core.tensor`: ``Tensor``."""
 
 from abc import abstractproperty

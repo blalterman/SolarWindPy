@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops consuming the ICMECAT catalog)
-# Supersedes: none
 """Drift assertions for the pinned HELIO4CAST ICMECAT catalog.
 
 Restates every fact icmecat.ICMECAT_URL depends on

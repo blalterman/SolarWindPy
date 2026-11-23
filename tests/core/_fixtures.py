@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Inputs and reference values shared by the tests in ``tests/core``.
 
 The pytest-free classes here build the example data behind

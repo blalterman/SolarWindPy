@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the sunspot-number tests stop seeding the download cache)
-# Supersedes: none
 """Fixtures that seed the download cache with SILSO sunspot series.
 
 The cache holds what SILSO serves: semicolon-separated, headerless rows. A

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solar-activity plots stop deriving their save path from their current state)
-# Supersedes: none
 """The save path of a solar-activity plot is derived from its current state.
 
 ``IndicatorPlot`` and ``SSNPlot`` take ``Base.path``: ``class / x / y [/ z] /

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 r"""A density's ``Count`` label states the units of the bins it is per.
 
 ``binning.normalize`` divides a density by the bin measure it is taken over:

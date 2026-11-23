@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(Plasma stops offering info)
-# Supersedes: none
 """Tests for :meth:`solarwindpy.core.plasma.Plasma.info`.
 
 ``info()`` is a one-column table, one row per field: the spacecraft and its

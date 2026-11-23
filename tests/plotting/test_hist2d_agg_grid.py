@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(Hist2D stops returning every bin from agg or stops offering id_data_above_contour)
-# Supersedes: none
 """Hist2D's full ``agg`` grid and contour selection on hand-placed points.
 
 Ten points sit on round coordinates. For each bin specification the bins, the

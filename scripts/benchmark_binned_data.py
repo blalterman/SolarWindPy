@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the Usage guide stops quoting BinnedData timings)
-# Supersedes: none
 """Measure what sharing one ``BinnedData`` across plots saves.
 
 Builds and aggregates ten ``Hist2D`` of different ``z`` over one 70 by 50 grid

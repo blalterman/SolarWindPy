@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(Hist2D and SpiralPlot2D stop sharing ColorPlot)
-# Supersedes: none
 r"""Hist2D and SpiralPlot2D draw with the same defaults where both draw the same thing.
 
 Both are ``ColorPlot`` subclasses. The author's rulings: contours default to

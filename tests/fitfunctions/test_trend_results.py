@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(TrendFit stops exposing its per-bin results as one table)
-# Supersedes: none
 """Contract tests for TrendFit's two levels and its per-bin results table.
 
 TrendFit fits one function in each column of a 2-D histogram (the bin level),

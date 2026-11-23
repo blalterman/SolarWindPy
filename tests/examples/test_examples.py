@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops shipping example data)
-# Supersedes: none
 """The example ``Plasma`` that docstring examples load.
 
 Expected values are the example CSVs' own bytes (the chosen input):

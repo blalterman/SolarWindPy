@@ -1,7 +1,3 @@
-<!--
-Spent-When: PERMANENT(the repository is archived or retired)
-Supersedes: none
--->
 
 # Decisions, findings and open items
 

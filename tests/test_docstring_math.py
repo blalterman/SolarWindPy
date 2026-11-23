@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the package stops writing TeX in its docstrings)
-# Supersedes: none
 r"""Docstring math is TeX that MathJax accepts.
 
 The API pages render each ``:math:`` role and ``.. math::`` block with

@@ -1,7 +1,3 @@
-<!--
-Spent-When: PERMANENT(a later governance of SolarWindPy replaces this one)
-Supersedes: none
--->
 
 # Governance of SolarWindPy
 

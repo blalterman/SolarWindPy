@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(CHANGELOG.md stops carrying an Unreleased section)
-# Supersedes: none
 """The newest changelog section names only paths that resolve as it says.
 
 Users read the newest section of ``CHANGELOG.md`` as the migration guide: the

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(FitFunction stops exposing its results as one table)
-# Supersedes: none
 """Contract tests for the one results table every fit exposes.
 
 ``FitFunction.results`` is a one-row DataFrame whose columns are a

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops shipping .claude/settings.json)
-# Supersedes: none
 """Tests of the Claude Code project settings in ``.claude/settings.json``.
 
 These test developer tooling under ``.claude/``, not the solarwindpy package.

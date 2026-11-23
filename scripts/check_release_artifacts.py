@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops publishing wheels and sdists)
-# Supersedes: none
 """Check that a built wheel and sdist ship only what each is meant to ship.
 
 The wheel is what users install: it holds the ``solarwindpy`` package, its

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy stops inheriting fit-function docstrings from FitFunction)
-# Supersedes: none
 """Contract tests for docstring inheritance in the fit functions.
 
 A fit function shows its parent's help text for every section it does not

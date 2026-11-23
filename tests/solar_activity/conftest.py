@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the solar-activity tests stop sharing a download-cache fixture)
-# Supersedes: none
 """Shared fixtures for the solar-activity tests.
 
 The download cache is a filesystem boundary under the user's home directory.

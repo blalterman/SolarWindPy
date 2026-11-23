@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the plot classes stop promising a memory and build-time budget)
-# Supersedes: none
 """Memory and build-time budget of the plot classes.
 
 These tests run in every suite run, CI included: the file takes about 4 s, and a

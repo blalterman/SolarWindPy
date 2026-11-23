@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The tolerance rule lives in ``tests/tolerances.py`` and nowhere else.
 
 A test file that writes its own tolerance keyword (``rel``, ``abs``, ``rtol``

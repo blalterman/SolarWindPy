@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(plotting tests are allowed to read data files)
-# Supersedes: none
 """Plotting tests build their data in the test and never read a data file.
 
 SolarWindPy is public, so a plotting test that loads a research data file

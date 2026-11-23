@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the hinge fit functions are removed from solarwindpy.fitfunctions)
-# Supersedes: none
 r"""Every hinge fit function names the hinge ``(xh, yh)`` the same way.
 
 The author ruled "if we use yh, then we use xh": the hinge x-location is

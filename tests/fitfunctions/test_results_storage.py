@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(FitFunction stops exposing its results as one table)
-# Supersedes: none
 """Contract tests for how a fit stores its outcome and builds ``results``.
 
 ``make_fit`` stores the outcome as plain arrays and builds no table; the

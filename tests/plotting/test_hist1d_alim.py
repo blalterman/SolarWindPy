@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(Hist1D stops offering alim)
-# Supersedes: none
 """Tests for ``alim`` on ``Hist1D``, the same limits every binned plot has.
 
 ``alim`` limits the aggregated value of a bin after ``axnorm`` and ``clim``,

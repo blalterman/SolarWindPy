@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the tests/drift/ suite is retired)
-# Supersedes: none
 """Mutation controls for the tests/drift/ predicates.
 
 Unmarked, so this runs in the default suite every time. Each test calls a

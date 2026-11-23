@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the available() listing functions are removed from solarwindpy)
-# Supersedes: none
 """Contract tests for the ``available()`` listing functions.
 
 ``solarwindpy.fitfunctions.available`` prints every fit function in the

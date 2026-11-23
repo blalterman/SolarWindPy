@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(scripts/update_conda_feedstock.py is deleted)
-# Supersedes: none
 """``scripts/update_conda_feedstock.py`` reads PyPI reliably and fills its issue.
 
 The release workflow runs the script right after the upload, when PyPI may not

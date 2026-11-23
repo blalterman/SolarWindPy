@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The built wheel and sdist ship only what each is meant to ship.
 
 Builds both artifacts once per module with ``python -m build --no-isolation``,

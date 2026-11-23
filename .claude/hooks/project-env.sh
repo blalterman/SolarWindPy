@@ -1,6 +1,4 @@
 #!/bin/bash
-# Spent-When: PERMANENT(the pre-commit hooks stop running Python from the solarwindpy conda env)
-# Supersedes: none
 #
 # Run a command inside the solarwindpy conda env.
 #

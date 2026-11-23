@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the fixed-grid plots stop offering take_data_in_yrange_across_x)
-# Supersedes: none
 """Tests for the one ``take_data_in_yrange_across_x`` that Hist1D and Hist2D share.
 
 The method selects, for each x range, the rows whose y lies in that range's

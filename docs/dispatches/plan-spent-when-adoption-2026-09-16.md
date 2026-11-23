@@ -1,7 +1,3 @@
-<!--
-Spent-When: MARKED(<self>)
-Supersedes: none
--->
 
 # Spent-When adoption for SolarWindPy
 

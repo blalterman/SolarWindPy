@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(BinnedData is removed from solarwindpy.plotting)
-# Supersedes: none
 """Contract tests for ``solarwindpy.plotting.binned.BinnedData``.
 
 Expected bins come from hand-placed values on a fixed grid, from

@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy.plotting stops drawing marker size and alpha through scale objects)
-# Supersedes: none
 """Tests for ``SizeScale`` and ``AlphaScale``, built on their own.
 
 Each holds one marker channel of a ``Scatter``: a norm from the data to

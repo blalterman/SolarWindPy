@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """The quantity registry and the names core methods give their results.
 
 The registry (:mod:`solarwindpy.core.quantities`) holds one entry per quantity,

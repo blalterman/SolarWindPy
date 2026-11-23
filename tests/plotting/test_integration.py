@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(solarwindpy stops handing label objects to matplotlib)
-# Supersedes: none
 """Integration contract between solarwindpy labels and matplotlib.
 
 Every plot class hands its label objects to ``Axes.set_xlabel`` and

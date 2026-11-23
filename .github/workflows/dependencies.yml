@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(SolarWindPy stops following PHEP 3 or stops checking its dependency floors in CI)
-# Supersedes: none
 name: Dependencies
 
 # The dependency policy in CONTRIBUTING.md ("Dependency support"): PHEP 3 with

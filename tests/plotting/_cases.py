@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the plotting migration and invariant suites stop using shared cases)
-# Supersedes: none
 """Seeded synthetic inputs shared by the plotting migration and invariant tests.
 
 Every case is built in memory from ``np.random.default_rng(<seed>)`` with a

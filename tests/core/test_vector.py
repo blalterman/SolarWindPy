@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the repository stops maintaining a test suite)
-# Supersedes: none
 """Tests for :mod:`solarwindpy.core.vector`: ``Vector`` and ``BField``."""
 
 import numpy as np

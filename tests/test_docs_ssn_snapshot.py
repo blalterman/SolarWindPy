@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the documentation stops plotting SILSO's sunspot number)
-# Supersedes: none
 """The docs serve SILSO's 13-month smoothed sunspot number from a snapshot.
 
 ``docs/source/_ssn_snapshot.py`` points SolarWindPy's download cache at a

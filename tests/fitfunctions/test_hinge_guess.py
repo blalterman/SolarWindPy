@@ -1,5 +1,3 @@
-# Spent-When: PERMANENT(the hinge fit functions stop sharing one guess_xh keyword)
-# Supersedes: none
 """Contract tests for the one hinge guess shared by every hinge class.
 
 Every hinge class takes ``guess_xh=None``: the x of the hinge its estimate
