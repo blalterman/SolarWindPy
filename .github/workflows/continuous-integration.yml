@@ -92,7 +92,7 @@ jobs:
         run: |
           files=$(git diff --name-only "$BASE_SHA"...HEAD)
           echo "$files"
-          if printf '%s\n' "$files" | grep -vqE '^(docs/|paper/|\.claude/)|\.(md|rst)$|^(CITATION\.cff|LICENSE)$'; then
+          if printf '%s\n' "$files" | grep -vqE '^(docs/|paper/)|\.(md|rst)$|^(CITATION\.cff|LICENSE)$'; then
             echo "code=true" >> "$GITHUB_OUTPUT"
           else
             echo "code=false" >> "$GITHUB_OUTPUT"

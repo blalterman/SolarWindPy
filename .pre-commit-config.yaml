@@ -7,20 +7,20 @@ repos:
   rev: v4.4.0
   hooks:
   - id: trailing-whitespace
-    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts)/.*\.py$
   - id: check-merge-conflict
-    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts)/.*\.py$
   - id: check-added-large-files
     args: [--maxkb=5000]
-    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts)/.*\.py$
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.17.3
   hooks:
   - id: ruff-check
-    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts)/.*\.py$
   - id: ruff-format
-    files: ^(src/solarwindpy|tests|scripts|\.claude)/.*\.py$
+    files: ^(src/solarwindpy|tests|scripts)/.*\.py$
 
 - repo: https://github.com/PyCQA/doc8
   rev: v1.1.1
