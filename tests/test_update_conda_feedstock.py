@@ -27,7 +27,7 @@ _spec = importlib.util.spec_from_file_location(
 feedstock = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(feedstock)
 
-VERSION = "0.5.0"
+VERSION = "2026.12.3"  # a release tag is the release date (scripts/bump_version.py)
 SHA = "ab" * 32
 JSON_URL = f"https://pypi.org/pypi/solarwindpy/{VERSION}/json"
 SDIST = {
@@ -266,9 +266,9 @@ def test_the_commit_sha_is_the_tagged_commit_not_the_tag_object(tmp_path, monkey
 
     git("init", "-q", "-b", "master")
     git("commit", "-q", "--allow-empty", "-m", "release")
-    git("tag", "-a", f"v{VERSION}", "-m", "the release")
+    git("tag", "-a", VERSION, "-m", "the release")
     head = git("rev-parse", "HEAD")
-    assert git("rev-parse", f"v{VERSION}") != head
+    assert git("rev-parse", VERSION) != head
 
     u = feedstock.CondaFeedstockUpdater(fork_owner="someone")
     u.project_root = tmp_path

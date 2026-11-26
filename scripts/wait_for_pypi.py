@@ -95,7 +95,7 @@ def wait_for_pypi(
     current_interval = check_interval
     attempt = 1
 
-    print(f"Waiting for {package_name} v{version_str} on PyPI...")
+    print(f"Waiting for {package_name} {version_str} on PyPI...")
 
     while time.time() - start_time < max_wait:
         print(f"Attempt {attempt}: Checking PyPI availability...")
@@ -103,7 +103,7 @@ def wait_for_pypi(
         if check_pypi_availability(package_name, version_str):
             elapsed = time.time() - start_time
             print(
-                f"✅ {package_name} v{version_str} is available on PyPI (after {elapsed:.1f}s)"
+                f"✅ {package_name} {version_str} is available on PyPI (after {elapsed:.1f}s)"
             )
             return True
 
@@ -119,7 +119,7 @@ def wait_for_pypi(
         current_interval = min(current_interval * 1.5, 60)
         attempt += 1
 
-    print(f"❌ Timeout: {package_name} v{version_str} not available after {max_wait}s")
+    print(f"❌ Timeout: {package_name} {version_str} not available after {max_wait}s")
     return False
 
 
@@ -200,12 +200,12 @@ def main():
 
     if success:
         print(
-            f"🎉 Ready to proceed with conda feedstock update for {args.package} v{version_str}"
+            f"🎉 Ready to proceed with conda feedstock update for {args.package} {version_str}"
         )
         sys.exit(0)
     else:
         print(
-            f"💥 Failed to confirm PyPI availability for {args.package} v{version_str}"
+            f"💥 Failed to confirm PyPI availability for {args.package} {version_str}"
         )
         print("Manual intervention may be required.")
         sys.exit(1)

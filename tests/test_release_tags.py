@@ -32,16 +32,9 @@ _spec.loader.exec_module(bump)
 
 pytest.importorskip("setuptools_scm")
 
-DATING = pytest.mark.xfail(
-    strict=True,
-    raises=(AssertionError, AttributeError),
-    reason="release tags are semver; remove this marker when they become dates",
-)
-
 DEC_3 = datetime.date(2026, 12, 3)
 
 
-@DATING
 @pytest.mark.parametrize(
     "tag", ["2026.12.3", "2026.1.31", "2026.12.3.1", "2026.12.3rc1", "2026.12.3.1rc2"]
 )
@@ -53,7 +46,6 @@ def test_a_date_tag_is_a_release_tag(tag):
     assert bump.is_release_tag(tag)
 
 
-@DATING
 @pytest.mark.parametrize(
     "tag",
     ["2026.12.03", "2026.13.1", "2026.2.30", "v0.8.0", "v1.0.0", "1.0.0", "internal/x"],
@@ -66,7 +58,6 @@ def test_other_tags_are_not_release_tags(tag):
     assert not bump.is_release_tag(tag)
 
 
-@DATING
 @pytest.mark.parametrize(
     ("existing", "rc", "expected"),
     [
@@ -127,7 +118,6 @@ def _scm_version(tmp_path, monkeypatch, tags_by_commit):
     ).stdout.strip()
 
 
-@DATING
 def test_a_date_tag_sets_the_version(tmp_path, monkeypatch):
     """A commit tagged ``2026.12.3`` builds as version ``2026.12.3``.
 
@@ -137,7 +127,6 @@ def test_a_date_tag_sets_the_version(tmp_path, monkeypatch):
     assert _scm_version(tmp_path, monkeypatch, [["2026.12.3"]]) == "2026.12.3"
 
 
-@DATING
 def test_a_semver_label_does_not_set_the_version(tmp_path, monkeypatch):
     """A semver label on a later commit leaves the version to the date tag.
 
@@ -162,7 +151,6 @@ def test_the_last_semver_release_sets_the_version_until_a_date_release(
     assert version.release[:2] == (0, 7)
 
 
-@DATING
 def test_publish_runs_on_date_tags_and_checks_them_with_the_tag_rule():
     """publish.yml runs on date tags only, and checks each with bump_version.py.
 

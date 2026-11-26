@@ -120,7 +120,7 @@ class CondaFeedstockUpdater:
         tuple[bool, str or None]
             (success, commit_sha) - True if verified, commit SHA if found
         """
-        tag_name = f"v{version_str}"
+        tag_name = version_str
 
         try:
             # Check if git tag exists
@@ -221,7 +221,7 @@ class CondaFeedstockUpdater:
             True if GitHub release SHA256 matches PyPI (or if check unavailable)
         """
         try:
-            tag_name = f"v{version_str}"
+            tag_name = version_str
 
             # Use gh CLI to get release assets
             result = subprocess.run(
@@ -316,7 +316,7 @@ class CondaFeedstockUpdater:
 
             if waited >= max_wait:
                 print(
-                    f"❌ PyPI has no sdist for {self.package_name} v{version_str} "
+                    f"❌ PyPI has no sdist for {self.package_name} {version_str} "
                     f"after {waited:.0f}s ({reason})"
                 )
                 return None
@@ -367,7 +367,7 @@ class CondaFeedstockUpdater:
             )
             return False
 
-        print(f"✅ Validated PyPI release: {self.package_name} v{version_str}")
+        print(f"✅ Validated PyPI release: {self.package_name} {version_str}")
         return True
 
     def get_sdist_sha256(self, version_str: str) -> Optional[str]:
@@ -541,7 +541,7 @@ python scripts/compare_feedstock_deps.py
         if commit_sha:
             body += f"""
 **Git Commit**: `{commit_sha}`
-**GitHub Release**: https://github.com/blalterman/SolarWindPy/releases/tag/v{version_str}
+**GitHub Release**: https://github.com/blalterman/SolarWindPy/releases/tag/{version_str}
 **Source Provenance**: ✅ Verified"""
 
         body += f"""
@@ -602,9 +602,9 @@ When bot PR appears (usually 2-6 hours):
    ```bash
    git checkout -b update-{version_str}
    git add recipe/meta.yaml
-   git commit -m "Update {self.package_name} to v{version_str}"
+   git commit -m "Update {self.package_name} to {version_str}"
    git push origin update-{version_str}
-   gh pr create --title "Update {self.package_name} to v{version_str}" --body "Update to latest PyPI release"
+   gh pr create --title "Update {self.package_name} to {version_str}" --body "Update to latest PyPI release"
    ```
 
 ### Resources
@@ -644,7 +644,7 @@ When bot PR appears (usually 2-6 hours):
         str or None
             Issue URL if created successfully
         """
-        title = f"Conda feedstock update for SolarWindPy v{version_str}"
+        title = f"Conda feedstock update for SolarWindPy {version_str}"
 
         body = self.build_issue_body(
             version_str,
@@ -703,7 +703,7 @@ When bot PR appears (usually 2-6 hours):
         str
             PR description template
         """
-        return f"""Update {self.package_name} to v{version_str}
+        return f"""Update {self.package_name} to {version_str}
 
 This PR updates the {self.package_name} conda-forge recipe to version {version_str}.
 
@@ -741,7 +741,7 @@ This update was prepared using automated tooling from the SolarWindPy repository
             True if update successful or dry run completed
         """
         print(
-            f"🚀 Starting conda feedstock update for {self.package_name} v{version_str}"
+            f"🚀 Starting conda feedstock update for {self.package_name} {version_str}"
         )
 
         # Step 1: Validate PyPI release
@@ -792,7 +792,7 @@ This update was prepared using automated tooling from the SolarWindPy repository
             print(self.generate_pr_template(version_str))
             return True
 
-        print(f"🎉 Feedstock update initiated for {self.package_name} v{version_str}")
+        print(f"🎉 Feedstock update initiated for {self.package_name} {version_str}")
         if issue_url:
             print(f"Tracking issue: {issue_url}")
 
@@ -868,10 +868,10 @@ def main():
         if args.dry_run:
             print("✅ Dry run completed successfully")
         else:
-            print(f"✅ Feedstock update completed for {args.package} v{version_str}")
+            print(f"✅ Feedstock update completed for {args.package} {version_str}")
         sys.exit(0)
     else:
-        print(f"❌ Feedstock update failed for {args.package} v{version_str}")
+        print(f"❌ Feedstock update failed for {args.package} {version_str}")
         sys.exit(1)
 
 

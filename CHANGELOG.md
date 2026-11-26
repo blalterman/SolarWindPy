@@ -2,10 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Releases through 0.7.0 followed [Semantic Versioning](https://semver.org/spec/v2.0.0.html);
+from the next release on, each release is named by its date (`2026.12.3`), and every breaking
+change is marked under its release.
 
 ## [Unreleased]
+
+### Changed
+
+- Releases are named by their date, `YEAR.MONTH.DAY` without leading zeros (`2026.12.3`),
+  instead of by semantic version: the tag, the PyPI and conda-forge version, `CITATION.cff`
+  and the Zenodo record all read the same. A second release on one day adds a serial
+  (`2026.12.3.1`). A date version sorts after every 0.x release, so `pip install -U`
+  moves to it.
 
 ## [0.7.0] - 2026-11-21
 

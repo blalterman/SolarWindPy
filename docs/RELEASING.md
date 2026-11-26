@@ -16,18 +16,20 @@ SolarWindPy uses a highly automated release pipeline:
 **Related Documentation**: `CONTRIBUTING.md` § "Environment", § "Checks" and § "Conventions" hold
 the environment, the checks and the commit conventions this procedure relies on.
 
-## Semantic Versioning
+**Remote**: below, `public` names the git remote of `blalterman/SolarWindPy`, the repository
+every release is published from. In a plain clone of it, that remote is `origin`.
 
-SolarWindPy follows [Semantic Versioning 2.0.0](https://semver.org/):
+## Version Numbers
 
-- **MAJOR** (x.0.0): Breaking changes, incompatible API changes
-- **MINOR** (0.x.0): New functionality, backward-compatible
-- **PATCH** (0.0.x): Bug fixes, backward-compatible
+A release is named by its date: `YYYY.M.D` without leading zeros, such as `2026.12.3`. The
+tag, the PyPI version, `CITATION.cff` and the Zenodo record all read the same. A second
+release on the same day adds a serial (`2026.12.3.1`), and a release candidate adds `rcN`
+(`2026.12.3rc1`). `scripts/bump_version.py` holds the rule, and `pyproject.toml`'s
+`[tool.setuptools_scm]` reads only these tags, so the tag sets the version every build
+reports. The semver releases before the switch (`v0.1.0` through `v0.7.0`) keep their tags.
 
-**Pre-1.0.0 Special Rules**:
-- Breaking changes increment MINOR (e.g., Python version requirement: v0.1.5 → v0.2.0)
-- New features increment MINOR
-- Bug fixes increment PATCH
+A date says nothing about compatibility, so every breaking change is marked **BREAKING** under
+its release in `CHANGELOG.md`.
 
 ## Pre-Release Checklist
 
@@ -61,7 +63,7 @@ Add new version section between `[Unreleased]` and previous version following [K
 ```markdown
 ## [Unreleased]
 
-## [X.Y.Z] - YYYY-MM-DD
+## [YYYY.M.D] - YYYY-MM-DD
 
 ### Added
 - New features or capabilities
@@ -76,7 +78,7 @@ Add new version section between `[Unreleased]` and previous version following [K
 ### Removed
 - Deprecated features removed
 
-[X.Y.Z]: https://github.com/blalterman/SolarWindPy/compare/vX.Y.Z-1...vX.Y.Z
+[YYYY.M.D]: https://github.com/blalterman/SolarWindPy/compare/PREVIOUS...YYYY.M.D
 ```
 
 **Breaking Change Template**:
@@ -106,8 +108,8 @@ that differs from `CITATION.cff`'s version.
 
 ```bash
 git add CHANGELOG.md CITATION.cff
-git commit -m "docs(changelog): prepare vX.Y.Z release notes"
-git push origin master
+git commit -m "docs(changelog): prepare YYYY.M.D release notes"
+git push public master
 ```
 
 **Commit Message Format**: Follow [Conventional Commits](https://www.conventionalcommits.org/), as `CONTRIBUTING.md` § "Conventions" states; the commit-msg hook rejects other subjects.
@@ -129,7 +131,7 @@ git status
 echo "tmp/" >> .gitignore
 git add .gitignore
 git commit -m "chore: add tmp/ to .gitignore"
-git push origin master
+git push public master
 ```
 
 ## Release Execution
@@ -143,10 +145,10 @@ matrix run on that exact commit. Run it before tagging; a dry run builds the pac
 uploads nothing:
 
 ```bash
-gh workflow run publish.yml --ref master -f target=testpypi -f dry_run=true
-RUN_ID=$(gh run list --workflow publish.yml --limit 1 --json databaseId -q '.[0].databaseId')
-gh run watch "$RUN_ID" --exit-status   # non-zero exit when any job fails
-gh run view "$RUN_ID" --json jobs -q '.jobs[] | "\(.name): \(.conclusion)"'
+gh workflow run publish.yml -R blalterman/SolarWindPy --ref master -f target=testpypi -f dry_run=true
+RUN_ID=$(gh run list -R blalterman/SolarWindPy --workflow publish.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID" -R blalterman/SolarWindPy --exit-status   # non-zero exit when any job fails
+gh run view "$RUN_ID" -R blalterman/SolarWindPy --json jobs -q '.jobs[] | "\(.name): \(.conclusion)"'
 ```
 
 Tag only when every `platform-matrix` job and `build-and-publish` report `success`.
@@ -155,22 +157,18 @@ Tag only when every `platform-matrix` job and `build-and-publish` report `succes
 ### 6. Create Version Tag
 
 ```bash
-# Preview version bump (dry run)
-python scripts/bump_version.py [major|minor|patch] --dry-run
+# Preview today's tag (UTC)
+python scripts/bump_version.py --dry-run
 
-# Create and push tag
-python scripts/bump_version.py [major|minor|patch]
-git push origin vX.Y.Z
+# Create and push it
+python scripts/bump_version.py
+git push public YYYY.M.D
 ```
 
-**Example Output**:
-```
-Current version: v0.1.5
-New version: v0.2.0
-✅ Created tag: v0.2.0
-```
+`--rc` tags a release candidate instead, which the publish workflow sends to TestPyPI.
 
-**Tag Naming**: Tags must follow `vX.Y.Z` format (with 'v' prefix). setuptools_scm reads only `v*` tags (`tag_regex` in `pyproject.toml` `[tool.setuptools_scm]`).
+**Tag Naming**: the tag is the release date, `YYYY.M.D` (see "Version Numbers"). The publish
+workflow runs on tags starting `20` and refuses one `scripts/bump_version.py --check` rejects.
 
 ### 7. Monitor GitHub Actions Workflow
 
@@ -223,7 +221,7 @@ print(f\"Classifiers: {', '.join([c for c in data['info']['classifiers'] if 'Pro
 
 **Expected Output**:
 ```
-Version: X.Y.Z
+Version: YYYY.M.D
 Python: <4,>=3.12
 Classifiers: Programming Language :: Python :: 3, Programming Language :: Python :: 3.12, Programming Language :: Python :: 3.13, Programming Language :: Python :: 3.14, Programming Language :: Python :: 3.15
 ```
@@ -234,15 +232,15 @@ For breaking changes, add migration guidance to GitHub Release:
 
 ```bash
 # View current release
-gh release view vX.Y.Z
+gh release view YYYY.M.D
 
 # Edit release notes
-gh release edit vX.Y.Z --notes-file tmp/enhanced-release-notes.md
+gh release edit YYYY.M.D --notes-file tmp/enhanced-release-notes.md
 ```
 
 **Breaking Change Release Template**:
 ```markdown
-## 🚀 SolarWindPy Release vX.Y.Z
+## 🚀 SolarWindPy Release YYYY.M.D
 
 ### ⚠️ BREAKING CHANGE: [Short Description]
 
@@ -265,7 +263,7 @@ pip install --upgrade solarwindpy
 ```
 
 ### Documentation
-https://solarwindpy.readthedocs.io/en/vX.Y.Z/
+https://solarwindpy.readthedocs.io/en/YYYY.M.D/
 ```
 
 ### 10. Monitor Automated Systems
@@ -273,7 +271,7 @@ https://solarwindpy.readthedocs.io/en/vX.Y.Z/
 **ReadTheDocs** (5-10 minutes):
 - Builds triggered automatically by tag push
 - Check: https://readthedocs.org/projects/solarwindpy/builds/
-- Verify: https://solarwindpy.readthedocs.io/en/vX.Y.Z/
+- Verify: https://solarwindpy.readthedocs.io/en/YYYY.M.D/
 
 **Zenodo DOI** (1-24 hours):
 - DOI created automatically via GitHub-Zenodo integration
@@ -305,7 +303,7 @@ SolarWindPy uses the **regro-cf-autotick-bot** for automated conda-forge updates
 **The autotick bot does NOT update runtime dependencies automatically!**
 
 **What the bot updates:**
-- ✅ Version number in `{% set version = "X.Y.Z" %}`
+- ✅ Version number in `{% set version = "YYYY.M.D" %}`
 - ✅ SHA256 checksum from PyPI source distribution
 
 **What the bot IGNORES:**
@@ -337,13 +335,13 @@ without the `v` prefix:
 
 ```bash
 # Rehearse the feedstock update: no issue, no changes
-python scripts/update_conda_feedstock.py v0.1.5 --dry-run
+python scripts/update_conda_feedstock.py 2026.12.3 --dry-run
 
 # Wait until PyPI lists the release
-python scripts/wait_for_pypi.py v0.1.5 --timeout 300
+python scripts/wait_for_pypi.py 2026.12.3 --timeout 300
 
 # Full feedstock update: reads the sdist SHA256 and opens the tracking issue
-python scripts/update_conda_feedstock.py v0.1.5
+python scripts/update_conda_feedstock.py 2026.12.3
 ```
 
 ### 11. Monitor Conda-forge Bot PR
@@ -447,17 +445,17 @@ conda env remove -n test-solarwindpy-release
 **Before GitHub Actions Completes**:
 ```bash
 # Delete local tag
-git tag -d vX.Y.Z
+git tag -d YYYY.M.D
 
 # Delete remote tag
-git push origin :refs/tags/vX.Y.Z
+git push public :refs/tags/YYYY.M.D
 
 # Fix issue, retry
 ```
 
 **After GitHub Actions Completes**:
 - PyPI uploads cannot be deleted, only "yanked"
-- Create new patch release (vX.Y.Z+1) with fixes
+- Release the fix under the next tag: a later date, or `YYYY.M.D.1` the same day
 
 ### If Conda-forge PR Has Issues
 
@@ -480,7 +478,7 @@ git push origin :refs/tags/vX.Y.Z
 **Fix**:
 ```bash
 # Wait briefly, retry
-sleep 3 && git add <files> && git commit -m "..." && git push origin master
+sleep 3 && git add <files> && git commit -m "..." && git push public master
 ```
 
 ### Issue: bump_version.py Fails on Dirty Working Directory
@@ -582,8 +580,8 @@ Use this checklist for each release:
 
 ### Release
 - [ ] Dry-run publish passed every job (`gh workflow run publish.yml --ref master -f target=testpypi -f dry_run=true`)
-- [ ] Version tag created (`python scripts/bump_version.py [major|minor|patch]`)
-- [ ] Tag pushed to remote (`git push origin vX.Y.Z`)
+- [ ] Version tag created (`python scripts/bump_version.py`)
+- [ ] Tag pushed to remote (`git push public YYYY.M.D`)
 - [ ] GitHub Actions workflow completed successfully
 - [ ] PyPI shows new version
 - [ ] GitHub Release created
@@ -613,7 +611,7 @@ Use this checklist for each release:
 - **PyPI**: https://pypi.org/project/solarwindpy/
 - **ReadTheDocs**: https://readthedocs.org/projects/solarwindpy/
 - **Changelog Format**: https://keepachangelog.com/en/1.0.0/
-- **Semantic Versioning**: https://semver.org/spec/v2.0.0.html
+- **Version specifiers (PEP 440)**: https://peps.python.org/pep-0440/
 - **Conda-forge Docs**: https://conda-forge.org/docs/maintainer/updating_pkgs.html
 
 ## Questions?
@@ -626,4 +624,4 @@ For issues or questions about the release process:
 
 ---
 
-**Last Updated**: 2025-11-12 (v0.2.0 release)
+**Last Updated**: 2026-11-26 (releases named by date)

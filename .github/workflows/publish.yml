@@ -3,7 +3,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v1.0.0, v2.1.3, etc.
+      - '20*'  # Release tags are the release date, 2026.12.3 (scripts/bump_version.py)
   workflow_dispatch:  # Allow manual trigger for testing
     inputs:
       target:
@@ -99,18 +99,14 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([a-z]+[0-9]+)?$ ]]; then
-            echo "Error: Tag $TAG does not match version pattern v*.*.* or v*.*.*rc* (e.g., v1.0.0, v1.0.0rc1)"
-            echo "Use format: vX.Y.Z for releases, vX.Y.ZrcN for release candidates (no dash)"
-            exit 1
-          fi
+          python scripts/bump_version.py --check "$TAG"
           
           # Install setuptools_scm to check version consistency
           pip install setuptools_scm
           
           # Get version from setuptools_scm
           DETECTED_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
-          EXPECTED_VERSION=${TAG#v}  # Remove 'v' prefix
+          EXPECTED_VERSION=$TAG
           
           if [ "$DETECTED_VERSION" != "$EXPECTED_VERSION" ]; then
             echo "Error: Version mismatch!"
@@ -205,7 +201,7 @@ jobs:
       
       # Production PyPI deployment (only for non-RC tags)
       - name: Publish to PyPI
-        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi' && github.event.inputs.dry_run != 'true') || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'rc'))
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi' && github.event.inputs.dry_run != 'true') || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc'))
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
@@ -213,7 +209,7 @@ jobs:
         continue-on-error: true  # Don't fail if token not configured yet
       
       - name: PyPI Status Check
-        if: failure() && (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'rc'))
+        if: failure() && (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc'))
         run: |
           echo "⚠️  PyPI publication failed (likely due to missing token)"
           echo ""
@@ -272,7 +268,7 @@ jobs:
     if: |
       github.repository == 'blalterman/SolarWindPy' && (
         github.event_name == 'push' && 
-        startsWith(github.ref, 'refs/tags/v') && 
+        startsWith(github.ref, 'refs/tags/') && 
         !contains(github.ref, 'rc') && 
         !contains(github.ref, 'beta') && 
         !contains(github.ref, 'alpha') && 
@@ -300,15 +296,15 @@ jobs:
       
       - name: Wait for PyPI availability
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Waiting for solarwindpy v$VERSION to be available on PyPI..."
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Waiting for solarwindpy $VERSION to be available on PyPI..."
           python scripts/wait_for_pypi.py "$VERSION" --timeout 600 --interval 30
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Update conda feedstock (create tracking issue)
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=${GITHUB_REF#refs/tags/}
           echo "Starting conda feedstock update for version $VERSION"
           python scripts/update_conda_feedstock.py "$VERSION"
         env:
@@ -318,7 +314,7 @@ jobs:
       - name: Conda feedstock update summary
         if: always()
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=${GITHUB_REF#refs/tags/}
           echo "## 📋 Conda Feedstock Update Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY

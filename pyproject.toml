@@ -92,10 +92,12 @@ extras_or_groups = ["dev", "build-system.requires"]
 output = "solarwindpy.yml"
 
 [tool.setuptools_scm]
-# Only consider v* tags for versioning (exclude compaction tags)
-tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+.*)$"
-# Use git describe with version tags only
-git_describe_command = "git describe --dirty --tags --long --match 'v*'"
+# The version comes from release tags only: the release date, 2026.12.3 (the
+# rule is scripts/bump_version.py). The semver tags public released before the
+# switch, v0.1.0 through v0.7.0, count until the first date release; any other
+# tag, such as a semver milestone label, never sets the version.
+tag_regex = "^v?(?P<version>(?<=v)0\\.[0-6]\\.[0-9]+.*|(?<=v)0\\.7\\.0|(?<!v)20[0-9]{2}\\.[0-9]+\\.[0-9]+(\\.[0-9]+)?(rc[0-9]+)?)$"
+git_describe_command = "git describe --dirty --tags --long --match '20*' --match 'v0.*'"
 
 [project]
 name = "solarwindpy"

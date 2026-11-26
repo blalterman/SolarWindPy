@@ -210,10 +210,8 @@ def print_summary(results: Dict[str, Tuple[bool, str]]):
             f"{Colors.GREEN}All {total} checks passed. You can proceed with release creation.{Colors.END}"
         )
         print(f"\n{Colors.BLUE}Next steps:{Colors.END}")
-        print(
-            "  1. Create release tag: python scripts/bump_version.py [major|minor|patch|rc]"
-        )
-        print("  2. Push tag: git push origin <tag>")
+        print("  1. Create release tag: python scripts/bump_version.py [--rc]")
+        print("  2. Push tag to the public repository: git push <remote> <tag>")
         print("  3. Monitor GitHub Actions workflow")
     else:
         print(f"{Colors.RED}❌ NOT READY FOR RELEASE{Colors.END}")
