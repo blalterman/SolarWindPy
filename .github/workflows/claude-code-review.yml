@@ -72,6 +72,9 @@ jobs:
             - Security concerns
             - Test coverage
             
+            Judge the change against the conventions in CONTRIBUTING.md and the
+            test standard in docs/TEST_PATTERNS.md.
+
             Be constructive and helpful in your feedback.
 
           # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR

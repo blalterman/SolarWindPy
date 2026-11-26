@@ -52,7 +52,7 @@ def _two_species(rows_by_species, labels=("x", "y", "z")):
 def test_component_selection_shares_the_parent_data():
     r"""A Vector's component shares the memory of the Vector's data.
 
-    The package relies on ``.xs`` views to keep memory down (CLAUDE.md, Data
+    The package relies on ``.xs`` views to keep memory down (CONTRIBUTING.md, Data
     model), so calling a Vector with a component must not copy.
 
     ON FAILURE: the code is wrong; the component call copied instead of
@@ -106,7 +106,7 @@ def test_a_flat_index_named_for_another_level_is_refused():
 def test_vector_and_tensor_share_one_component_call():
     r"""Vector and Tensor resolve ``__call__`` to the same function.
 
-    CLAUDE.md: extract shared logic at the second copy.
+    CONTRIBUTING.md: extract shared logic at the second copy.
 
     ON FAILURE: the code is wrong; the component call was copied again.
     """

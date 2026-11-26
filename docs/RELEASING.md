@@ -13,7 +13,7 @@ SolarWindPy uses a highly automated release pipeline:
 
 **Time Investment**: ~30-60 minutes active work (excluding monitoring periods)
 
-**Related Documentation**: `CLAUDE.md` § "Environment", § "Checks" and § "Conventions" hold
+**Related Documentation**: `CONTRIBUTING.md` § "Environment", § "Checks" and § "Conventions" hold
 the environment, the checks and the commit conventions this procedure relies on.
 
 ## Semantic Versioning
@@ -110,7 +110,7 @@ git commit -m "docs(changelog): prepare vX.Y.Z release notes"
 git push origin master
 ```
 
-**Commit Message Format**: Follow [Conventional Commits](https://www.conventionalcommits.org/), as `CLAUDE.md` § "Conventions" states; the commit-msg hook rejects other subjects.
+**Commit Message Format**: Follow [Conventional Commits](https://www.conventionalcommits.org/), as `CONTRIBUTING.md` § "Conventions" states; the commit-msg hook rejects other subjects.
 
 ### 4. Clean Working Directory
 
@@ -438,7 +438,7 @@ conda deactivate
 conda env remove -n test-solarwindpy-release
 ```
 
-**Environment Setup**: `CLAUDE.md` § "Environment" holds the development env recipe.
+**Environment Setup**: `CONTRIBUTING.md` § "Environment" holds the development env recipe.
 
 ## Rollback Procedures
 
@@ -509,7 +509,7 @@ git commit -m "chore: add tmp/ to .gitignore"
 
 **Rationale**: Publish workflow runs `ruff check` on `src/solarwindpy/` (not `tests/`)
 
-**Code Quality Standards**: the ruff rules are `[tool.ruff]` in `pyproject.toml`; `CLAUDE.md` § "Checks" runs them at the versions CI pins.
+**Code Quality Standards**: the ruff rules are `[tool.ruff]` in `pyproject.toml`; `CONTRIBUTING.md` § "Checks" runs them at the versions CI pins.
 
 ### Issue: Conda-forge Bot Not Creating PR
 

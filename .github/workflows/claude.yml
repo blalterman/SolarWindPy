@@ -39,6 +39,8 @@ jobs:
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
+          claude_args: |
+            --append-system-prompt "This project's conventions are in CONTRIBUTING.md and its test standard in docs/TEST_PATTERNS.md. Read both before changing or reviewing code."
           
           # Optional: Override the model. v1 has no `model` input; it is passed
           # through to the CLI. Left unset so we inherit the action's current
@@ -56,8 +58,8 @@ jobs:
           # claude_args: "--allowedTools 'Bash(pytest -q),Bash(ruff check:*),Bash(ruff format:*)'"
 
           # Optional: Add custom instructions for Claude. v1 removed the
-          # `custom_instructions` input; put project guidance in CLAUDE.md
-          # (which this repo already has) or in the `prompt` input.
+          # `custom_instructions` input; project guidance lives in
+          # CONTRIBUTING.md, which claude_args below points to.
 
           # Optional: Custom environment variables. v1 removed the `claude_env`
           # input; use this step's standard `env:` block instead.

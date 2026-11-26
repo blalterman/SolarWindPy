@@ -63,8 +63,8 @@ def test_citation_cff_names_the_newest_changelog_release():
 
     The release commit writes the version section of ``CHANGELOG.md``; this test
     makes the same commit set ``version`` and ``date-released`` in
-    ``CITATION.cff``, so the citation names the current release (GOVERNANCE.md
-    § Objectives). The publish workflow refuses a tag that differs from it.
+    ``CITATION.cff``, so the citation names the current release. The publish
+    workflow refuses a tag that differs from it.
 
     ON FAILURE: the code is wrong; set CITATION.cff's version and date-released
     to the newest ``## [X.Y.Z] - YYYY-MM-DD`` heading in CHANGELOG.md.

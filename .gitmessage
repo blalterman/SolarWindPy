@@ -33,4 +33,4 @@
 # - AI code: Include the Co-Authored-By trailer above in the commit message
 # - External code: Add source comments in code file
 # - Algorithms: Cite papers in docstrings
-# - Uncertain provenance? Reimplement rather than copy (CLAUDE.md, Conventions)
+# - Uncertain provenance? Reimplement rather than copy (CONTRIBUTING.md, Conventions)

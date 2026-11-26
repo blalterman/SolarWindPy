@@ -95,8 +95,8 @@ def _assert_renders_as_math_axis_label(label):
 def test_available_lists_measurements_components_species_and_special_labels():
     """The parser finds each ``available()`` section and its documented names.
 
-    ``n``, ``x`` and ``p1`` are the measurement, component and species examples
-    of the ``M``/``C``/``S`` data model in the repository's CLAUDE.md, and
+    ``n``, ``x`` and ``p1`` are a measurement, a component and a species label
+    of the ``M``/``C``/``S`` data model, and
     ``Count`` is the histogram label every ``Hist1D``/``Hist2D`` uses. Without
     this check a parser that found nothing would let the sweeps below pass
     with no cases.
@@ -231,7 +231,7 @@ def test_every_special_label_class_available_lists_has_a_rendering_case():
 
 
 # Each pair of M/C/S axes crossed in full, the third axis held at the data
-# model's example (n, x, p1 in CLAUDE.md; "v" for C x S, since "n" is a
+# model's example (n, x, p1; "v" for C x S, since "n" is a
 # scalar): the single-axis sweeps above miss strings assembled from two
 # listed entries, such as a component and a species sharing one subscript.
 _PAIRS = {

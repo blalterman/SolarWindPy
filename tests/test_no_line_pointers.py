@@ -11,7 +11,13 @@ from pathlib import Path
 from tests._tracked import tracked_files
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCANNED_PATHS = ["src/solarwindpy", "tests", "docs/source", "README.rst", "CLAUDE.md"]
+SCANNED_PATHS = [
+    "src/solarwindpy",
+    "tests",
+    "docs/source",
+    "README.rst",
+    "CONTRIBUTING.md",
+]
 
 # Assembled from two pieces so this file's own source never matches it.
 LINE_POINTER = re.compile(r"[A-Za-z_/]+\.py" + r":[0-9]+")

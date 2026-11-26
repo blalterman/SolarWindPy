@@ -34,7 +34,7 @@
 - [ ] No code with incompatible licenses (GPL, proprietary, unknown)
 - [ ] Documentation updated (README, CHANGELOG, docstrings)
 
-See the attribution rule in `CLAUDE.md` (Conventions) for details.
+See the external-code rule in `CONTRIBUTING.md` (Conventions) for details.
 
 ## Breaking Changes
 

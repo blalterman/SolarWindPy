@@ -24,45 +24,93 @@ A declined contribution can be revised and resubmitted.
 
 ## Development workflow
 
-1. **Set up development environment**:
+### Environment
+
+1. Clone the repository and build the conda environment. Every dependency comes from
+   conda-forge; pip only registers your checkout:
 
    ```bash
    git clone https://github.com/blalterman/SolarWindPy.git
    cd SolarWindPy
-   pip install -e ".[dev]"  # SolarWindPy plus all dev tools, from pyproject.toml
-   ```
-
-   **Alternative (Conda environment)**:
-
-   ```bash
    conda env create -f solarwindpy.yml
-   conda activate solarwindpy
-   pip install -e . --no-deps --no-build-isolation
+   conda run -n solarwindpy pip install -e . --no-deps --no-build-isolation
    ```
 
-   Every dependency comes from conda-forge; pip only registers your checkout.
+   Without conda, `pip install -e ".[dev]"` installs SolarWindPy plus all dev tools from
+   `pyproject.toml`.
 
-2. Format code with `ruff format` and lint with `ruff check` (includes the pydocstyle rules).
-3. Ensure all docstrings follow the NumPy style guide.
-4. Lint documentation with `doc8` and build docs:
+2. Run every Python tool inside the `solarwindpy` env: `conda run -n solarwindpy <command>`,
+   or activate the env first. Outside it, `python` is the base install and `pytest` and
+   `lint-imports` are not on PATH.
+
+3. Install the git hooks once per clone, and again after rebuilding the env (each hook names
+   the env's Python by its version, so a rebuild onto a new Python leaves the hooks pointing
+   at nothing):
 
    ```bash
-   doc8 README.rst docs
-   cd docs && make html
+   conda run -n solarwindpy pre-commit install --hook-type pre-commit --hook-type commit-msg
    ```
 
-5. Run the test suite:
+   Each commit then runs ruff, doc8, the commit-message check, and the full test suite with a
+   coverage floor (`scripts/pre_commit_tests.sh`). The floor is a ratchet below measured
+   coverage, not a target; raise it as coverage rises.
 
-   ```bash
-   pytest -q
-   ```
+A stale env produces failures that look like code bugs. Before debugging a surprising
+failure, check that the env imports your checkout and a pandas inside the `pyproject.toml`
+range:
 
-6. Validate documentation examples (when adding new documentation):
+```bash
+conda run -n solarwindpy python -c "import solarwindpy, pandas; print(solarwindpy.__file__, pandas.__version__)"
+```
 
-   ```bash
-   pytest --doctest-modules src/solarwindpy -q
-   pytest --doctest-glob='*.rst' docs/source -q
-   ```
+The editable install maps `solarwindpy` to one checkout's `src/`. `pytest` (and so the
+commit hook) puts this checkout's `src/` first through `pythonpath` in `pyproject.toml`, but
+`python -c` and `lint-imports` do not: in another git worktree, prefix those with
+`PYTHONPATH=$PWD/src`.
+
+### Checks
+
+- Full suite: `conda run -n solarwindpy pytest -q` (about one minute).
+- One file: `conda run -n solarwindpy pytest -q tests/core/test_plasma.py`
+- Network and slow tests are skipped unless you pass `--run-drift` or set `SWP_RUN_DRIFT=1`.
+- Import layering: `conda run -n solarwindpy lint-imports`
+- Format and lint at the versions CI pins:
+  `conda run -n solarwindpy pre-commit run ruff-check --files <paths>` and
+  `conda run -n solarwindpy pre-commit run ruff-format --files <paths>`.
+- Doctests: `conda run -n solarwindpy pytest --doctest-modules src/solarwindpy -q`
+- Docs examples, which the suite and the source doctests do not run:
+  `conda run -n solarwindpy pytest --doctest-glob='*.rst' docs/source -q` and
+  `conda run -n solarwindpy pytest -p no:doctest -q README.rst docs/source/tutorial/quickstart.rst docs/source/installation.rst`.
+- Documentation: `doc8 README.rst docs`, then `cd docs && make html`.
+
+## Data model
+
+- Columns are a three-level MultiIndex named `M` (measurement), `C` (component), `S`
+  (species). An empty string means no component or no species.
+- Select columns with `.xs()`, which shares the parent's data instead of copying it; the
+  package relies on this to keep memory down. Load and compute paths do not call
+  `.copy(deep=True)`. Under pandas 3 copy-on-write, writing to an `.xs()` result does not
+  change the parent.
+
+## Conventions
+
+- Format with `ruff format` and lint with `ruff check` (which includes the pydocstyle rules);
+  docstrings follow the NumPy style guide.
+- Extract shared logic at the second copy.
+- Cite scientific sources in docstrings: DOI or arXiv, plus the equation number when you
+  implement a specific published result.
+- External code: record its URL, license, and modifications in a comment. Copy only MIT, BSD,
+  Apache 2.0, or public-domain code. When provenance or license is unclear, reimplement.
+- Commit subjects follow [Conventional Commits](https://www.conventionalcommits.org/)
+  (`fix(core):`, `feat(plotting):`, `chore:`); the commit-msg hook rejects others.
+- A public name, a column label, or a physical result changes only with the maintainer's
+  agreement: propose it in an issue first.
+- Tests follow `docs/TEST_PATTERNS.md`. Read it before writing or reviewing a test.
+- Changes are test-first. Before a stage, list the tests it touches and classify each as guard
+  (passes unchanged before and after), update, delete, or fragile (a pinned number with no
+  source; rewrite it as a relation or a cited reference value). Land the target tests first as
+  `pytest.mark.xfail(strict=True)`, then the code change that removes the marker.
+- Releases follow `docs/RELEASING.md`.
 
 ## Documentation Guidelines
 

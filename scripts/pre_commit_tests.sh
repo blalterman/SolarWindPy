@@ -11,7 +11,7 @@ ENV="$(dirname "$0")/project_env.sh"
 
 # Check if pytest is available
 if ! "$ENV" pytest --version &> /dev/null; then
-    echo "❌ pytest not found. Rebuild the env from solarwindpy.yml (see CLAUDE.md, Environment)"
+    echo "❌ pytest not found. Rebuild the env from solarwindpy.yml (see CONTRIBUTING.md, Environment)"
     exit 1
 fi
 
