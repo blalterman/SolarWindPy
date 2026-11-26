@@ -54,7 +54,7 @@ def _per_species(result, s):
 
 def _assert_same(got, expected):
     if isinstance(expected, Tensor):
-        # One species of a tensor quantity is a Tensor (D39 in docs/decisions.md).
+        # One species of a tensor quantity is a Tensor.
         expected = expected.data
     if isinstance(expected, pd.Series):
         pdt.assert_series_equal(got, expected, check_names=False)

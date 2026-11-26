@@ -108,9 +108,6 @@ Development
 
 **Note**: ``pyproject.toml`` is the only dependency declaration; there are no lockfiles.
 
-The rulings in force, the findings later work builds on, and the open items are in
-``docs/decisions.md``.
-
 4. Optionally install the pre-commit hooks:
 
    .. code-block:: bash

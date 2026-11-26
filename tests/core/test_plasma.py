@@ -499,7 +499,7 @@ class PlasmaTestBase(ABC):
 
             else:
                 # Test species = (s0, s1, ..., sn): a (C, S) frame of the ions'
-                # cartesian components (D39 in docs/decisions.md).
+                # cartesian components.
                 ions_ = pd.concat(
                     {sp: ot.ions.loc[sp].v.cartesian for sp in s},
                     axis=1,
@@ -3995,7 +3995,7 @@ def test_one_species_is_a_vector_or_tensor_and_several_a_component_by_species_fr
     """One species gives a Vector or Tensor; several give a (C, S) DataFrame.
 
     Vectors and tensors sit below the species layer, so they hold one species
-    by construction (D39 in docs/decisions.md). The values are the ions' own.
+    by construction. The values are the ions' own.
 
     ON FAILURE: the code is wrong.
     """
