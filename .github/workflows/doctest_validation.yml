@@ -10,8 +10,11 @@ on:
     - cron: '0 6 * * 0'
   workflow_dispatch:
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   doctest-validation:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
 
     steps:
@@ -42,6 +45,7 @@ jobs:
   # in line order under pytest-randomly; -p no:doctest stops pytest's doctest
   # plugin collecting the named rst files a second time.
   rst-examples:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
 
     steps:
@@ -68,7 +72,7 @@ jobs:
   # and network-dependent, so it only runs on schedule or on demand.
   drift-detection:
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'blalterman/SolarWindPy' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
 
     steps:
     - uses: actions/checkout@v7

@@ -25,10 +25,13 @@ on:
   schedule:
     - cron: '0 6 * * 1'  # Mondays 06:00 UTC
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   # Release gate: the full suite on every declared Python, on Linux, macOS, and Windows.
   # build-and-publish needs it, so nothing is built or uploaded unless every cell passes.
   platform-matrix:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -80,6 +83,7 @@ jobs:
           "
 
   build-and-publish:
+    if: github.repository == 'blalterman/SolarWindPy'
     needs: platform-matrix
     runs-on: ubuntu-latest
     steps:
@@ -266,12 +270,14 @@ jobs:
     runs-on: ubuntu-latest
     # Only run for stable releases (no RC, beta, alpha, dev)
     if: |
-      github.event_name == 'push' && 
-      startsWith(github.ref, 'refs/tags/v') && 
-      !contains(github.ref, 'rc') && 
-      !contains(github.ref, 'beta') && 
-      !contains(github.ref, 'alpha') && 
-      !contains(github.ref, 'dev')
+      github.repository == 'blalterman/SolarWindPy' && (
+        github.event_name == 'push' && 
+        startsWith(github.ref, 'refs/tags/v') && 
+        !contains(github.ref, 'rc') && 
+        !contains(github.ref, 'beta') && 
+        !contains(github.ref, 'alpha') && 
+        !contains(github.ref, 'dev')
+      )
     
     steps:
       - uses: actions/checkout@v7

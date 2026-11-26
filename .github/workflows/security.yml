@@ -8,8 +8,11 @@ on:
   schedule:
     - cron: '0 0 * * 1'  # Weekly on Monday
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   security:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

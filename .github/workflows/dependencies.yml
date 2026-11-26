@@ -14,10 +14,13 @@ on:
 permissions:
   contents: read
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   # The PHEP 3 support window. The ignore list is the documented deviations;
   # remove matplotlib once matplotlib 3.10 leaves the window on 2026-12-14.
   phep3:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -31,6 +34,7 @@ jobs:
   # The declared floors: install the lowest version each direct dependency
   # allows and run the suite on them.
   minimum-versions:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -60,6 +64,7 @@ jobs:
   # pyproject.toml, held by tests/test_conda_env.py), register the checkout
   # with pip and nothing else, and run the suite in it.
   conda-env:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     defaults:
       run:

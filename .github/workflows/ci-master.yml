@@ -4,14 +4,16 @@ name: CI
 # Focused on core functionality testing for repository health indicator
 on:
   push:
-    branches:
-      - master
+    # Every branch, so a private development copy checks each commit; the job
+    # below keeps the public repository to master.
+    branches: ['**']
 
 env:
   PYTHON_VERSION: '3.12'
 
 jobs:
   ci:
+    if: github.ref == 'refs/heads/master' || github.repository != 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     
     steps:

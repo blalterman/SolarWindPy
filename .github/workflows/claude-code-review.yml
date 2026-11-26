@@ -12,6 +12,8 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   claude-review:
     # Optional: Filter by PR author
@@ -22,7 +24,7 @@ jobs:
     
     # Dependabot-triggered runs receive no repository Actions secrets, so the
     # OAuth token is empty and the review step fails without reviewing anything.
-    if: github.actor != 'dependabot[bot]'
+    if: github.repository == 'blalterman/SolarWindPy' && (github.actor != 'dependabot[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: read

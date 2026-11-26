@@ -23,13 +23,6 @@ if not WORKFLOWS.is_dir():
         allow_module_level=True,
     )
 
-GATING = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the workflows run in every copy of the repository; remove this "
-    "marker when each job is gated on the public repository",
-)
-
 
 def _jobs():
     """Return ``(workflow file name, job id, job)`` for every job but ci-master's."""
@@ -50,7 +43,6 @@ def test_the_scan_finds_the_publishing_job():
     assert ("publish.yml", "build-and-publish") in {(w, j) for w, j, _ in _jobs()}
 
 
-@GATING
 @pytest.mark.parametrize(
     ("workflow", "job_id", "job"),
     _jobs(),
@@ -65,7 +57,6 @@ def test_each_job_runs_only_in_the_public_repository(workflow, job_id, job):
     assert PUBLIC in str(job.get("if", "")), f"{workflow}:{job_id} runs in every copy"
 
 
-@GATING
 def test_ci_master_checks_master_in_public_and_every_branch_in_a_copy():
     """ci-master.yml runs on every pushed branch, and in public only on master.
 

@@ -15,9 +15,12 @@ on:
 env:
   PYTHON_VERSION: '3.12'
 
+# Each job runs only in blalterman/SolarWindPy; copies of the repository (a private
+# development copy, forks) run ci-master.yml instead. tests/test_workflow_gates.py checks it.
 jobs:
   # Quick validation for PRs and branch pushes
   validate:
+    if: github.repository == 'blalterman/SolarWindPy'
     runs-on: ubuntu-latest
     
     steps:
@@ -73,7 +76,7 @@ jobs:
   # Decide whether a PR needs the Windows suite: skip it only when every changed
   # file is documentation. Runs on pull requests only, so branch pushes skip Windows.
   changes:
-    if: github.event_name == 'pull_request'
+    if: github.repository == 'blalterman/SolarWindPy' && (github.event_name == 'pull_request')
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.diff.outputs.code }}
@@ -100,7 +103,7 @@ jobs:
   # Pull requests that change code only; the release matrix also tests Windows on tags.
   test-windows:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: github.repository == 'blalterman/SolarWindPy' && (needs.changes.outputs.code == 'true')
     runs-on: windows-latest
     # The suite takes about 2 minutes here; bound a hung test well below
     # GitHub's 6-hour default.
@@ -135,7 +138,7 @@ jobs:
   ci-summary:
     needs: [changes, validate, test-windows]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.repository == 'blalterman/SolarWindPy'
     
     steps:
       - name: CI Summary
