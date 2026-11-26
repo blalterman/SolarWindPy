@@ -131,7 +131,7 @@ def test_no_plotting_test_reads_a_data_file():
 
     ON FAILURE: replace the data file with seeded synthetic data built in the
     test (``np.random.default_rng(<seed>)`` or hand-placed values), per
-    ``.claude/docs/TEST_PATTERNS.md``.
+    ``docs/TEST_PATTERNS.md``.
     """
     found = [
         f"{path.relative_to(PLOTTING.parent.parent)}:{n}: {reason}"

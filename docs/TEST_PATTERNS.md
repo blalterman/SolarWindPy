@@ -160,7 +160,7 @@ of `tests/` imports more than one subpackage, imports no package code, or tests 
 
 Run the suite in the project environment: `conda run -n solarwindpy pytest -q`. Commit with
 plain `git commit`: the pre-commit hooks run the suite in the solarwindpy environment
-themselves, through `.claude/hooks/project-env.sh`, whatever shell the commit starts from.
+themselves, through `scripts/project_env.sh`, whatever shell the commit starts from.
 Stage explicit paths.
 
 ## Checklist for writing or reviewing a test

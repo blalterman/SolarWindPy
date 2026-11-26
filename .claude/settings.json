@@ -9,7 +9,7 @@
       "Bash(gh run view *)",
       "Bash(gh run list *)",
       "Bash(gh workflow run list *)",
-      "Bash(.claude/hooks/pre-commit-tests.sh)",
+      "Bash(scripts/pre_commit_tests.sh)",
       "Bash(pytest *)",
       "Bash(git add src/solarwindpy/**)",
       "Bash(git add tests/**)",

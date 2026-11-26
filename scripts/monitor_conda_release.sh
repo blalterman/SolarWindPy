@@ -7,11 +7,11 @@
 # - CI check results
 # - Package availability
 #
-# Usage: .claude/scripts/monitor-conda-release.sh <issue_number>
+# Usage: scripts/monitor_conda_release.sh <issue_number>
 #
 # Examples:
-#   .claude/scripts/monitor-conda-release.sh 403        # Monitor v0.2.0 release
-#   .claude/scripts/monitor-conda-release.sh 450        # Monitor future release
+#   scripts/monitor_conda_release.sh 403        # Monitor v0.2.0 release
+#   scripts/monitor_conda_release.sh 450        # Monitor future release
 #
 # Exit Codes:
 #   0 - PR merged successfully or package available

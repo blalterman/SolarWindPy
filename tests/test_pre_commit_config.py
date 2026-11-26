@@ -37,20 +37,7 @@ def test_the_config_has_local_hooks():
     assert len(local_hook_entries()) >= 3
 
 
-MOVING = pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the hook script lives in .claude/hooks/; remove this marker when it moves to scripts/",
-)
-
-
-@pytest.mark.parametrize(
-    ("hook", "script"),
-    [
-        pytest.param(*entry, marks=MOVING) if entry[1].startswith(".claude/") else entry
-        for entry in local_hook_entries()
-    ],
-)
+@pytest.mark.parametrize(("hook", "script"), local_hook_entries())
 def test_each_local_hook_runs_a_tracked_executable_script_in_scripts(hook, script):
     """Each local hook's entry is an executable script tracked under ``scripts/``.
 

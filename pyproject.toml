@@ -45,7 +45,7 @@ markers = [
 ]
 
 # Import layering, checked by `lint-imports` (import-linter). The layer rule is
-# stated in .claude/docs/TEST_PATTERNS.md "Structure and layering".
+# stated in docs/TEST_PATTERNS.md "Structure and layering".
 [tool.importlinter]
 root_package = "solarwindpy"
 

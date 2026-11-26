@@ -6,8 +6,8 @@ set -e
 
 echo "🧪 Running pre-commit test validation..."
 
-# Run pytest from the solarwindpy env; see project-env.sh
-ENV="$(dirname "$0")/project-env.sh"
+# Run pytest from the solarwindpy env; see project_env.sh
+ENV="$(dirname "$0")/project_env.sh"
 
 # Check if pytest is available
 if ! "$ENV" pytest --version &> /dev/null; then

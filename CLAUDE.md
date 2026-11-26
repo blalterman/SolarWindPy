@@ -38,7 +38,7 @@ Every choice in this repository derives from its governance, imported here:
   `conda run -n solarwindpy pytest --doctest-glob='*.rst' docs/source -q` and
   `conda run -n solarwindpy pytest -p no:doctest -q README.rst docs/source/tutorial/quickstart.rst docs/source/installation.rst`.
 - The pre-commit hook runs the full suite with a coverage floor in
-  `.claude/hooks/pre-commit-tests.sh`. The floor is a ratchet below measured coverage, not a
+  `scripts/pre_commit_tests.sh`. The floor is a ratchet below measured coverage, not a
   target; raise it as coverage rises.
 
 ## Data model
@@ -61,12 +61,12 @@ Every choice in this repository derives from its governance, imported here:
   commit-msg hook rejects others.
 - Renaming a public name, changing a column label, or changing a physical result is the author's
   decision: propose it, do not make it.
-- Tests follow `.claude/docs/TEST_PATTERNS.md`. Read it before writing or reviewing a test.
+- Tests follow `docs/TEST_PATTERNS.md`. Read it before writing or reviewing a test.
 - Changes are test-first. Before a stage, list the tests it touches and classify each as guard
   (passes unchanged before and after), update, delete, or fragile (a pinned number with no
   source; rewrite it as a relation or a cited reference value). Land the target tests first as
   `pytest.mark.xfail(strict=True)`, then the code change that removes the marker.
-- Release work follows `.claude/docs/RELEASING.md`.
+- Release work follows `docs/RELEASING.md`.
 - Branches: commit to the current branch, including master. Branch only when the work needs
   isolation: a risky migration, a spike, or parallel worktrees.
 

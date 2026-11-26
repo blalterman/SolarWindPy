@@ -52,7 +52,7 @@ ruff format src/solarwindpy/ tests/
 - ✅ No ruff check warnings in `src/solarwindpy/` (production code)
 - ⚠️ Test code warnings acceptable (tracked separately via GitHub Issues)
 - ✅ Coverage at or above the floor the pre-commit hook enforces (`--cov-fail-under` in
-  `.claude/hooks/pre-commit-tests.sh`)
+  `scripts/pre_commit_tests.sh`)
 
 ### 2. Update CHANGELOG.md
 
@@ -356,7 +356,7 @@ Use the monitoring script for real-time status updates:
 
 ```bash
 # Run automated monitor with tracking issue number
-.claude/scripts/monitor-conda-release.sh 403
+scripts/monitor_conda_release.sh 403
 
 # The script provides:
 # - Time elapsed since release
@@ -574,7 +574,7 @@ Use this checklist for each release:
 ### Pre-Release
 - [ ] All tests passing locally (`pytest -v`)
 - [ ] Production code linting clean (`ruff check src/solarwindpy/`)
-- [ ] Coverage at or above the pre-commit hook's floor (`.claude/hooks/pre-commit-tests.sh`)
+- [ ] Coverage at or above the pre-commit hook's floor (`scripts/pre_commit_tests.sh`)
 - [ ] CHANGELOG.md updated with version section
 - [ ] CITATION.cff `version` and `date-released` match it
 - [ ] CHANGELOG committed and pushed
@@ -593,7 +593,7 @@ Use this checklist for each release:
 - [ ] GitHub Release notes enhanced (if breaking change)
 - [ ] ReadTheDocs build successful
 - [ ] Conda-forge tracking issue created
-- [ ] Run monitoring script: `.claude/scripts/monitor-conda-release.sh <issue_number>`
+- [ ] Run monitoring script: `scripts/monitor_conda_release.sh <issue_number>`
 - [ ] Conda-forge bot PR appeared (within 2-6 hours)
 - [ ] Conda-forge CI passed
 - [ ] Conda-forge PR merged
@@ -607,7 +607,7 @@ Use this checklist for each release:
 
 ## Reference
 
-- **Scripts**: `scripts/bump_version.py`, `scripts/check_release_ready.py`, `.claude/scripts/monitor-conda-release.sh`
+- **Scripts**: `scripts/bump_version.py`, `scripts/check_release_ready.py`, `scripts/monitor_conda_release.sh`
 - **Workflows**: `.github/workflows/publish.yml`
 - **Feedstock**: https://github.com/conda-forge/solarwindpy-feedstock
 - **PyPI**: https://pypi.org/project/solarwindpy/

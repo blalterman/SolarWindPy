@@ -44,13 +44,13 @@ repos:
     stages: [commit-msg]
   - id: test-suite
     name: Test Suite with Coverage Floor
-    entry: .claude/hooks/pre-commit-tests.sh
+    entry: scripts/pre_commit_tests.sh
     language: system
     files: \.py$
     pass_filenames: false
   - id: import-test
     name: Import Testing
-    entry: .claude/hooks/project-env.sh python -c
+    entry: scripts/project_env.sh python -c
     args: ["import solarwindpy; print('✓ Import successful')"]
     language: system
     files: ^src/solarwindpy/.*\.py$
