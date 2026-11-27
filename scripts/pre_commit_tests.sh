@@ -33,10 +33,13 @@ echo "$staged_files" | sed 's/^/   /'
 # coverage rises. A threshold above measured coverage never passes, so the hook
 # only teaches people to pass --no-verify, which skips ruff along with it.
 # `-n auto` runs the suite on one pytest-xdist worker per CPU; pytest-cov merges
-# the workers' coverage before checking FLOOR.
+# the workers' coverage before checking FLOOR. `--dist loadfile` keeps each test
+# file on one worker, so a module fixture runs once: tests/test_release_artifacts.py
+# builds the package in the repository root, and two workers building at once
+# delete each other's staging directory.
 FLOOR=96
 echo "📊 Running coverage analysis (≥${FLOOR}% required)..."
-if ! "$ENV" pytest -n auto --cov=solarwindpy --cov-fail-under="$FLOOR" -q --tb=short; then
+if ! "$ENV" pytest -n auto --dist loadfile --cov=solarwindpy --cov-fail-under="$FLOOR" -q --tb=short; then
     echo ""
     echo "❌ Coverage below ${FLOOR}% threshold or tests failed"
     echo "💡 Fix failing tests and improve coverage before committing"
