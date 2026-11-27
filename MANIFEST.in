@@ -10,8 +10,3 @@ prune .github
 prune docs/dispatches
 prune tmp
 prune spike
-
-# Purge-system sidecars declare when a working file is spent; they belong to
-# the repository, not to the installed package, so they stay out of the sdist
-# and therefore out of the wheel built from it.
-recursive-exclude src *.spent-when
